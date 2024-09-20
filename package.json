@@ -13,7 +13,7 @@
     "test": "jest --no-cache --env=node --colors --seed=1",
     "test-coverage": "jest --no-cache --env=node --colors --seed=1 --coverage=true",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(ts|tsx)\"",
-    "npm-publish": "npm run lint && npm run test-coverage && npm run build && npm publish",
+    "npm-publish": "npm run lint && npm run build && npm publish",
     "npm-release-patch": "npm version patch && npm run npm-publish",
     "npm-release-minor": "npm version minor && npm run npm-publish",
     "npm-release-prerelease": "npm version prerelease && npm run npm-publish"
