@@ -17,11 +17,12 @@
   "author": "Marçal",
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "^2.1691.0",
-    "@types/node": "^22.5.5"
+    "@types/node": "^22.5.5",
+    "aws-sdk": "^2.1691.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.13",
+    "esbuild": "^0.23.1",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
