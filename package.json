@@ -4,12 +4,12 @@
   "main": "index.js",
   "description": "A CLI tool to generate .env files from AWS SSM parameters",
   "bin": {
-    "envilder": "./src/envilder.ts"
+    "envilder": "./dist/envilder.ts"
   },
   "scripts": {
     "build": "tsc",
-    "envilder": "ts-node src/envilder.ts",
     "package": "pkg dist/envilder.js --out-path dist",
+    "publish": "build && npm run package && npm version patch && npm publish",
     "test": "jest --no-cache --env=node --colors --seed=1 --coverage=true",
     "lint": "next lint",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(ts|tsx)\""
