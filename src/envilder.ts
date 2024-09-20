@@ -1,5 +1,5 @@
 import { SSM } from "aws-sdk";
-import * as fs from "fs";
+import * as fs from "node:fs";
 
 export async function fetchSSMParameter(
   ssmPath: string
@@ -51,14 +51,14 @@ if (require.main === module) {
   let paramMapPath = "";
   let envFilePath = "";
 
-  args.forEach((arg) => {
+  for (const arg of args) {
     if (arg.startsWith("--map=")) {
       paramMapPath = arg.split("=")[1];
     }
     if (arg.startsWith("--envfile=")) {
       envFilePath = arg.split("=")[1];
     }
-  });
+  }
 
   if (!paramMapPath || !envFilePath) {
     console.error(
