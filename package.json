@@ -4,7 +4,7 @@
   "main": "index.js",
   "description": "A CLI tool to generate .env files from AWS SSM parameters",
   "bin": {
-    "envilder": "./dist/envilder.ts"
+    "envilder": "./dist/envilder.js"
   },
   "scripts": {
     "build": "tsc",
