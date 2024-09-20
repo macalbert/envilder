@@ -1,6 +1,6 @@
 {
   "name": "envilder-alpha",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "main": "index.js",
   "description": "A CLI tool to generate .env files from AWS SSM parameters",
   "bin": {
