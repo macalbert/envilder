@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
 import { fetchSSMParameter, generateEnvFile } from "../src/envilder";
-import { SSM } from "aws-sdk";
 
 jest.mock("aws-sdk", () => ({
   SSM: jest.fn(() => ({
