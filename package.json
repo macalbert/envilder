@@ -1,6 +1,6 @@
 {
   "name": "envilder-alpha",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "main": "index.js",
   "description": "A CLI tool to generate .env files from AWS SSM parameters",
   "bin": {
@@ -8,14 +8,14 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "build": "npm run clean && tsc -p tsconfig.build.json --sourceMap --declaration",    
+    "build": "npm run clean && tsc -p tsconfig.build.json --sourceMap --declaration",
     "test": "jest --no-cache --env=node --colors --seed=1 --coverage=true",
     "lint": "next lint",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(ts|tsx)\"",
     "npm-publish": "npm run lint && npm run test-coverage && npm run build && npm publish",
     "npm-release-patch": "npm version patch && npm run npm-publish",
     "npm-release-minor": "npm version minor && npm run npm-publish",
-    "npm-release-prerelease": "npm version prerelease && npm run npm-publish"    
+    "npm-release-prerelease": "npm version prerelease && npm run npm-publish"
   },
   "keywords": [],
   "author": "Marçal",
