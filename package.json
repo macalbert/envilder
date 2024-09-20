@@ -9,7 +9,7 @@
   "scripts": {
     "build": "tsc",
     "package": "pkg dist/envilder.js --out-path dist",
-    "publish": "npm run build && npm run package && npm version patch && npm publish",
+    "prepublish": "npm run build && npm run package && npm version patch",
     "test": "jest --no-cache --env=node --colors --seed=1 --coverage=true",
     "lint": "next lint",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(ts|tsx)\""
