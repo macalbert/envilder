@@ -1,0 +1,5 @@
+{
+  "NEXT_PUBLIC_CREDENTIAL_EMAIL": "/M47.Claims.Apps.Minimal.Api/Production/Auth/CredentialEmail",
+  "NEXT_PUBLIC_CREDENTIAL_PASSWORD": "/M47.Claims.Apps.Minimal.Api/Production/Auth/CredentialPassword",
+  "NEXT_PUBLIC_JWT_SECRET": "/M47.Claims.Apps.Minimal.Api/Production/Auth/JwtSecret"
+}

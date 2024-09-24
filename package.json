@@ -1,48 +1,59 @@
 {
   "name": "envilder-alpha",
   "version": "0.1.14",
-  "main": "index.js",
   "description": "A CLI tool to generate .env files from AWS SSM parameters",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts"
+    }
+  },
+  "main": "lib/index.js",
   "bin": {
-    "envilder": "./dist/envilder.js"
+    "envilder": "./lib/cliRunner.js"
   },
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rimraf lib",
     "build": "npm run clean && tsc -p tsconfig.build.json --sourceMap --declaration",
     "lint": "biome lint --write && biome format --write && biome check --write && tsc --noEmit && secretlint **/*",
-    "test": "jest --no-cache --env=node --colors --seed=1",
-    "test-coverage": "jest --no-cache --env=node --colors --seed=1 --coverage=true",
-    "format": "prettier --ignore-path .gitignore --write \"**/*.+(ts|tsx)\"",
+    "test": "vitest",
+    "test-coverage": "vitest run --coverage",
+    "cli-run": "npm run build && node --trace-warnings bin/repopack",
     "npm-publish": "npm run lint && npm run build && npm publish",
     "npm-release-patch": "npm version patch && npm run npm-publish",
     "npm-release-minor": "npm version minor && npm run npm-publish",
     "npm-release-prerelease": "npm version prerelease && npm run npm-publish"
   },
   "keywords": [],
-  "author": "Marçal",
-  "license": "MIT",
-  "dependencies": {
-    "@types/node": "^22.5.5",
-    "@secretlint/core": "^8.2.4",
-    "@secretlint/secretlint-rule-preset-recommend": "^8.2.4",
-    "aws-sdk": "^2.1691.0"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^1.9.1",
-    "@types/jest": "^29.5.13",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.2.5",
-    "rimraf": "^6.0.1",
-    "ts-node": "^10.9.2",
-    "secretlint": "^8.2.4",
-    "typescript": "^5.6.2"
-  },
   "repository": {
     "type": "git",
     "url": "git://github.com/macalbert/envilder"
   },
   "bugs": {
     "url": "https://github.com/macalbert/envilder/issues"
+  },
+  "author": "Marçal Albert <mac.albert@gmail.com>",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-ssm": "^3.654.0",
+    "@secretlint/core": "^8.2.4",
+    "@secretlint/secretlint-rule-preset-recommend": "^8.2.4",
+    "@types/node": "^22.5.5",
+    "aws-sdk": "^2.1691.0",
+    "picocolors": "^1.1.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.1",
+    "@vitest/coverage-v8": "^2.1.1",
+    "commander": "^12.1.0",
+    "rimraf": "^6.0.1",
+    "secretlint": "^8.2.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.1"
   },
   "engines": {
     "node": ">=18.0.0",
