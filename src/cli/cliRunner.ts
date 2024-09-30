@@ -31,5 +31,4 @@ export async function cliRunner() {
 
 cliRunner().catch((error) => {
   console.error("Error in CLI Runner:", error);
-  process.exit(1);
 });

@@ -12,6 +12,7 @@
   },
   "scripts": {
     "clean": "rimraf lib",
+    "test-run": "npm run build && node lib/cli/cliRunner.js --map=tests/sample/param_map.json --envfile=.env",
     "build": "npm run clean && tsc -p tsconfig.build.json --sourceMap --declaration",
     "lint": "biome lint --write && biome format --write && biome check --write && tsc --noEmit && secretlint **/*",
     "test": "npx vitest run --reporter verbose --coverage",

@@ -1,15 +1,15 @@
-import * as fs from "node:fs";
-import { GetParameterCommand, SSM } from "@aws-sdk/client-ssm";
+import * as fs from 'node:fs';
+import { GetParameterCommand, SSM } from '@aws-sdk/client-ssm';
 
 const ssm = new SSM({});
 
 export async function run(mapPath: string, envFilePath: string) {
-  const content = fs.readFileSync(mapPath, "utf-8");
+  const content = fs.readFileSync(mapPath, 'utf-8');
   const paramMap: Record<string, string> = JSON.parse(content);
 
   const envContent: string[] = [];
 
-  console.log("Fetching parameters...");
+  console.log('Fetching parameters...');
   for (const [envVar, ssmName] of Object.entries(paramMap)) {
     try {
       const command = new GetParameterCommand({
@@ -31,6 +31,6 @@ export async function run(mapPath: string, envFilePath: string) {
     }
   }
 
-  fs.writeFileSync(envFilePath, envContent.join("\n"));
+  fs.writeFileSync(envFilePath, envContent.join('\n'));
   console.log(`.env file generated at ${envFilePath}`);
 }
