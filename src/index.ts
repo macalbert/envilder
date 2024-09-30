@@ -8,7 +8,7 @@ export async function run(mapPath: string, envFilePath: string) {
   const content = fs.readFileSync(mapPath, "utf-8");
   console.log(content);
 
-  console.log(`Parsing JSON`);
+  console.log("Parsing JSON");
   const paramMap: Record<string, string> = JSON.parse(content);
   console.log(`Parsed JSON: ${JSON.stringify(paramMap)}`);
 
