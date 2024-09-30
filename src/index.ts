@@ -1,52 +1,36 @@
-import * as fs from "fs/promises";
-import * as path from "path";
-import { SSM } from "aws-sdk";
+import { SSM, GetParameterCommand } from "@aws-sdk/client-ssm";
+import * as fs from "fs";
 
-interface ParamMap {
-  [envVar: string]: string;
-}
+// Initialize SSM client
+const ssm = new SSM({});
 
-async function fetchSSMParams(
-  ssmMap: ParamMap
-): Promise<Record<string, string>> {
-  const ssm = new SSM();
-  const envVars: Record<string, string> = {};
+export async function run(mapPath: string, envFilePath: string) {
+  const paramMap = JSON.parse(fs.readFileSync(mapPath, "utf-8")) as Record<
+    string,
+    string
+  >;
+  const envContent: string[] = [];
 
-  const promises = Object.entries(ssmMap).map(async ([envVar, ssmName]) => {
-    const param = await ssm
-      .getParameter({ Name: ssmName, WithDecryption: true })
-      .promise();
-    envVars[envVar] = param.Parameter?.Value || "";
-  });
+  for (const [envVar, ssmName] of Object.entries(paramMap)) {
+    try {
+      const command = new GetParameterCommand({
+        Name: ssmName,
+        WithDecryption: true,
+      });
+      const { Parameter } = await ssm.send(command);
+      const value = Parameter?.Value;
 
-  await Promise.all(promises);
-  return envVars;
-}
-
-async function generateEnvFile(
-  envVars: Record<string, string>,
-  outputFilePath: string
-): Promise<void> {
-  const envFileContent = Object.entries(envVars)
-    .map(([key, value]) => `${key}=${value}`)
-    .join("\n");
-
-  await fs.writeFile(outputFilePath, envFileContent);
-  console.log(`.env file generated at ${outputFilePath}`);
-}
-
-export async function run(
-  mapFilePath: string,
-  envFilePath: string
-): Promise<void> {
-  try {
-    const paramMap: ParamMap = JSON.parse(
-      await fs.readFile(path.resolve(mapFilePath), "utf-8")
-    );
-    const envVars = await fetchSSMParams(paramMap);
-    await generateEnvFile(envVars, path.resolve(envFilePath));
-  } catch (error) {
-    console.error("Error generating .env file:", error);
-    process.exit(1);
+      if (value) {
+        envContent.push(`${envVar}=${value}`);
+      } else {
+        console.error(`Warning: No value found for ${ssmName}`);
+      }
+    } catch (error) {
+      console.error(`Error fetching parameter ${ssmName}: ${error}`);
+      throw new Error(`ParameterNotFound: ${ssmName}`);
+    }
   }
+
+  fs.writeFileSync(envFilePath, envContent.join("\n"));
+  console.log(`.env file generated at ${envFilePath}`);
 }

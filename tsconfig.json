@@ -1,8 +1,8 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",   // Standard Node.js resolution, which works fine with TypeScript imports
     "target": "es2016",
     "outDir": "./lib",
     "rootDir": ".",

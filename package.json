@@ -15,8 +15,7 @@
     "clean": "rimraf lib",
     "build": "npm run clean && tsc -p tsconfig.build.json --sourceMap --declaration",
     "lint": "biome lint --write && biome format --write && biome check --write && tsc --noEmit && secretlint **/*",
-    "test": "vitest",
-    "test-coverage": "vitest run --coverage",
+    "test": "npx vitest run --reporter verbose --coverage",
     "cli-run": "npm run build && node --trace-warnings bin/repopack",
     "npm-publish": "npm run lint && npm run build && npm publish",
     "npm-release-patch": "npm version patch && npm run npm-publish",
@@ -42,7 +41,6 @@
     "@secretlint/core": "^8.2.4",
     "@secretlint/secretlint-rule-preset-recommend": "^8.2.4",
     "@types/node": "^22.5.5",
-    "aws-sdk": "^2.1691.0",
     "picocolors": "^1.1.0"
   },
   "devDependencies": {

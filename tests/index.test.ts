@@ -1,35 +1,79 @@
-import { describe, it, expect, vi } from "vitest";
-import * as fs from "fs/promises";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { run } from "../src/index";
+import * as fs from "fs";
 
-vi.mock("fs/promises");
-vi.mock("aws-sdk", () => ({
-  SSM: vi.fn(() => ({
-    getParameter: vi.fn(({ Name }) => ({
-      promise: vi.fn(() =>
-        Promise.resolve({ Parameter: { Value: "mock_value" } })
-      ),
+vi.mock("@aws-sdk/client-ssm", () => {
+  return {
+    SSM: vi.fn().mockImplementation(() => ({
+      send: vi.fn((command) => {
+        if (command.input.Name === "/path/to/ssm/email") {
+          return Promise.resolve({
+            Parameter: { Value: "mockedEmail@example.com" },
+          });
+        } else if (command.input.Name === "/path/to/ssm/password") {
+          return Promise.resolve({
+            Parameter: { Value: "mockedPassword" },
+          });
+        } else {
+          return Promise.reject(
+            new Error(`ParameterNotFound: ${command.input.Name}`)
+          );
+        }
+      }),
     })),
-  })),
-}));
+    GetParameterCommand: vi.fn().mockImplementation((input) => ({
+      input,
+    })),
+  };
+});
 
 describe("Envilder CLI", () => {
-  it("Should_generateEnvFileFromSsm_When_", async () => {
-    // Arrange
-    const mockMap = {
-      NEXT_PUBLIC_CREDENTIAL_EMAIL: "/path/to/ssm/email",
-    };
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
 
-    vi.spyOn(fs, "readFile").mockResolvedValueOnce(JSON.stringify(mockMap));
-    vi.spyOn(fs, "writeFile").mockResolvedValueOnce();
+  it("Should_GenerateEnvFileFromSSMParameters_When_ValidSSMParametersAreProvided", async () => {
+    // Arrange
+    const mockMapPath = "./tests/param_map.json";
+    const mockEnvFilePath = "./tests/.env.test";
+    const paramMapContent = {
+      NEXT_PUBLIC_CREDENTIAL_EMAIL: "/path/to/ssm/email",
+      NEXT_PUBLIC_CREDENTIAL_PASSWORD: "/path/to/ssm/password",
+    };
+    fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
 
     // Act
-    await run("param_map.json", ".env");
+    await run(mockMapPath, mockEnvFilePath);
 
     // Assert
-    expect(fs.writeFile).toHaveBeenCalledWith(
-      expect.any(String),
-      "NEXT_PUBLIC_CREDENTIAL_EMAIL=mock_value"
+    const envFileContent = fs.readFileSync(mockEnvFilePath, "utf-8");
+    expect(envFileContent).toContain(
+      "NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com"
     );
+    expect(envFileContent).toContain(
+      "NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword"
+    );
+
+    // Cleanup
+    fs.unlinkSync(mockEnvFilePath);
+    fs.unlinkSync(mockMapPath);
+  });
+
+  it("Should_ThrowError_When_SSMParameterIsNotFound", async () => {
+    // Arrange
+    const mockMapPath = "./tests/param_map.json";
+    const mockEnvFilePath = "./tests/.env.test";
+    const paramMapContent = {
+      NEXT_PUBLIC_CREDENTIAL_EMAIL: "/path/to/ssm/unknown-email", // Non-existent parameter
+    };
+    fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+
+    // Act & Assert
+    await expect(run(mockMapPath, mockEnvFilePath)).rejects.toThrow(
+      "ParameterNotFound: /path/to/ssm/unknown-email"
+    );
+
+    // Cleanup
+    fs.unlinkSync(mockMapPath);
   });
 });

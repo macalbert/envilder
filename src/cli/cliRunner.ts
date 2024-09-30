@@ -1,16 +1,28 @@
-import { program } from "commander";
-import { run } from "../index.js";
+import { Command } from "commander";
+import { run } from "../index";
 
 export async function cliRunner() {
+  const program = new Command();
+
   program
     .name("envilder")
     .description("A CLI tool to generate .env files from AWS SSM parameters")
-    .option(
-      "--map <mapFile>",
-      "Path to the JSON file containing SSM parameter map"
+    .version("0.1.0")
+    .requiredOption(
+      "--map <path>",
+      "Path to the JSON file with environment variable mapping"
     )
-    .option("--envfile <envFile>", "Path to the .env file to generate")
-    .action((options) => run(options.map, options.envfile));
+    .requiredOption(
+      "--envfile <path>",
+      "Path to the .env file to be generated"
+    );
 
   await program.parseAsync(process.argv);
+  const options = program.opts();
+
+  if (!options.map || !options.envfile) {
+    throw new Error("Missing required arguments: --map and --envfile");
+  }
+
+  await run(options.map, options.envfile);
 }
