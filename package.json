@@ -41,12 +41,12 @@
     "@secretlint/core": "^8.2.4",
     "@secretlint/secretlint-rule-preset-recommend": "^8.2.4",
     "@types/node": "^22.5.5",
+    "commander": "^12.1.0",
     "picocolors": "^1.1.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.1",
     "@vitest/coverage-v8": "^2.1.1",
-    "commander": "^12.1.0",
     "rimraf": "^6.0.1",
     "secretlint": "^8.2.4",
     "ts-node": "^10.9.2",
