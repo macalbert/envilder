@@ -17,12 +17,6 @@ You can install **envilder** globally or locally using npm:
 npm install -g envilder
 ```
 
-Or add it as a dependency in your project:
-
-```bash
-npm install envilder
-```
-
 ## Usage
 
 Envilder requires two arguments:
