@@ -7,7 +7,6 @@
       "types": "./lib/index.d.ts"
     }
   },
-  "main": "lib/index.js",
   "bin": {
     "envilder": "./lib/cli/cliRunner.js"
   },
