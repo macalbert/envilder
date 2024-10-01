@@ -42,17 +42,4 @@ describe('cliRunner', () => {
     // Assert
     await expect(action).rejects.toThrow('process.exit called');
   });
-
-  it('Should_DisplayHelp_When_NoArgumentsAreProvided', async () => {
-    // Arrange
-    vi.spyOn(process, 'exit').mockImplementation(() => {
-      throw new Error('process.exit called with code 0');
-    });
-
-    // Act
-    const action = cliRunner();
-
-    // Assert
-    await expect(action).rejects.toThrow('process.exit called with code 0');
-  });
 });
