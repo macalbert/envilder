@@ -1,15 +1,15 @@
-# Envilder
+# 🌱 Envilder
 
 **Envilder** is a CLI tool designed to generate `.env` files from AWS SSM parameters. This is useful for managing environment variables securely in your projects without exposing sensitive information in your codebase.
 
-## Features
+## ✨ Features
 
-- Fetch parameters securely from AWS SSM Parameter Store.
-- Automatically generates a `.env` file with specified parameters.
-- Handles both encrypted and unencrypted SSM parameters.
-- Lightweight and simple to use.
+- 🔒 Fetch parameters securely from AWS SSM Parameter Store.
+- ⚡ Automatically generates a `.env` file with specified parameters.
+- 🛡️ Handles both encrypted and unencrypted SSM parameters.
+- 🪶 Lightweight and simple to use.
 
-## Installation
+## 📦 Installation
 
 You can install **envilder** globally or locally using npm:
 
@@ -17,14 +17,14 @@ You can install **envilder** globally or locally using npm:
 npm install -g envilder
 ```
 
-## Usage
+## 🚀 Usage
 
 Envilder requires two arguments:
 
 - `--map <path>`: Path to a JSON file mapping environment variable names to SSM parameters.
 - `--envfile <path>`: Path where the generated .env file will be saved.
 
-## Example
+## 🔧 Example
 
 1. Create a mapping file `param_map.json`:
 
@@ -38,19 +38,19 @@ Envilder requires two arguments:
 2. Run envilder to generate your `.env` file:
 
     ```bash
-    envilder --map=path/to/param_map.json --envfile=.env
+    envilder --map=param_map.json --envfile=.env
     ```
 
 3. The `.env` file will be generated in the specified location.
 
-## Sample `.env` Output:
+## 📂 Sample `.env` Output
 
 ```makefile
 NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com
 NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword
 ```
 
-## Running Tests
+## 🧪 Running Tests
 
 To run the tests with coverage:
 
@@ -58,12 +58,10 @@ To run the tests with coverage:
 yarn test
 ```
 
-## License
+## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
 
-## Contributing
+## 🙌 Contributing
 
 Contributions are welcome! Feel free to submit issues and pull requests.
-
-Created by [Marçal Albert](https://github.com/macalbert).
