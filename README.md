@@ -33,7 +33,7 @@ You can install `Envilder` globally using yarn. This will allow you to use the `
 
 ```bash
 yarn global add envilder
-
+```
 
 ## 📦 Installation
 
