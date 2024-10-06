@@ -49,21 +49,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "18.x"
-          cache: "npm" # or 'yarn' if you're using Yarn
+          cache: "yarn"
 
       - name: 📦 Install dependencies
-        run: npm ci
+        run: yarn install
 
       - name: 🔥 Run tests and collect coverage
-        run: npm test -- --coverage
-
-      - name: 🌍 Generate code coverage report
-        run: npx nyc report --reporter=html --report-dir=./public
+        run: yarn test
 
       - name: Upload artifact for deployment
         uses: actions/upload-pages-artifact@v1
         with:
-          path: "./public"
+          path: "./coverage"
 
   deploy:
     runs-on: ubuntu-latest
