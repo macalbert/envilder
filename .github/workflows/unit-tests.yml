@@ -29,11 +29,11 @@ jobs:
       - name: 🚀 ♂️ Checkout
         uses: actions/checkout@v4
 
-      - name: 🤸‍♀️ Setup Node.js with Yarn Cache
+      - name: 🛠️ Setup Node.js with Cache
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "yarn"
+          node-version: '20.x'
+          cache: 'yarn'
 
       - name: 📦 Install packages
         run: yarn install
