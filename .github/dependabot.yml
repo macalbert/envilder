@@ -8,19 +8,19 @@ updates:
 - package-ecosystem: npm
   directory: "/"
   pull-request-branch-name:
-      separator: "/"
+    separator: "/"
   schedule:
     interval: monthly
     day: monday
     time: "10:00"
     timezone: Europe/Madrid
   labels:
-    - "npm"
-    - "dependencies"
+  - "npm"
+  - "dependencies"
   reviewers:
-    - macalbert
+  - macalbert
   assignees:
-    - macalbert
+  - macalbert
     
 - package-ecosystem: github-actions
   directory: "/"
@@ -32,9 +32,9 @@ updates:
     time: "10:00"
     timezone: Europe/Madrid
   labels:
-    - "github-actions"
-    - "dependencies"
+  - "github-actions"
+  - "dependencies"
   reviewers:
-    - macalbert
+  - macalbert
   assignees:
-    - macalbert
+  - macalbert

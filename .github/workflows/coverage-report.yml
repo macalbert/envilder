@@ -32,10 +32,10 @@ jobs:
       - name: Check if PR is created by Dependabot
         id: dependabot-check
         run: |
-          if [[ "${{ github.actor }}" == *"dependabot"* ]]; then
-            echo "is_dependabot=true" >> $GITHUB_OUTPUT
+          if [[ "${{ github.actor }}" == *dependabot* ]]; then
+            echo "is_dependabot=true" >> "$GITHUB_OUTPUT"
           else
-            echo "is_dependabot=false" >> $GITHUB_OUTPUT
+            echo "is_dependabot=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Check if the workflow should run

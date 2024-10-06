@@ -56,7 +56,7 @@
   "resolutions": {
     "string-width": "4.2.3",
     "strip-ansi": "6.0.1"
-  },  
+  },
   "engines": {
     "node": ">=20.0.0",
     "yarn": ">=1.22"
