@@ -54,6 +54,7 @@
     "vitest": "^2.1.1"
   },
   "resolutions": {
+    "string-width": "4.2.3",
     "strip-ansi": "6.0.1"
   },
   "engines": {
