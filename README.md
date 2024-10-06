@@ -1,5 +1,8 @@
 # 🌱 Envilder
 
+[![Coverage Status](https://macalbert.github.io/envilder/badge.svg?branch=main)](https://macalbert.github.io/envilder/)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
+
 `Envilder` is a CLI tool to manage AWS SSM Parameter Store parameters and automatically generate the required `.env` file. This tool simplifies environment variable management for projects, avoiding manual updates and ensuring consistency across environments.
 
 ## ✨ Features
@@ -10,9 +13,11 @@
 - 🪶 Lightweight and simple to use.
 
 ## Prerequisites
+
 Before using `Envilder`, ensure that you have the AWS CLI installed and properly configured on your local machine. This configuration is required for `Envilder` to access and manage parameters in AWS SSM.
 
 ### AWS CLI Installation & Configuration
+
 1. Install the AWS CLI by following the instructions [here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 2. After installation, configure the AWS CLI using the following command:
 
@@ -29,6 +34,7 @@ Before using `Envilder`, ensure that you have the AWS CLI installed and properly
    Make sure that the AWS credentials you're using have the appropriate permissions to access the SSM Parameter Store in your AWS account.
 
 ## Installation
+
 You can install `Envilder` globally using yarn. This will allow you to use the `envilder` command from any directory on your system.
 
 ```bash
