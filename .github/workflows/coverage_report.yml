@@ -1,0 +1,82 @@
+name: 🔦 Code Coverage Node.js
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+    paths:
+      - ".github/workflows/coverage-report.yml"
+
+  push:
+    branches:
+      - "main"
+    paths:
+      - ".github/workflows/coverage-report.yml"
+      - "src/**"
+      - "test/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.draft }}
+    steps:
+      - name: Check if PR is created by Dependabot
+        id: dependabot-check
+        run: |
+          if [[ "${{ github.actor }}" == *"dependabot"* ]]; then
+            echo "is_dependabot=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_dependabot=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check if the workflow should run
+        if: ${{ steps.dependabot-check.outputs.is_dependabot == 'false' }}
+        run: echo "The workflow is allowed to run for this PR"
+
+      - name: 🧲 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Setup Node.js with Cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18.x"
+          cache: "npm" # or 'yarn' if you're using Yarn
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔥 Run tests and collect coverage
+        run: npm test -- --coverage
+
+      - name: 🌍 Generate code coverage report
+        run: npx nyc report --reporter=html --report-dir=./public
+
+      - name: Upload artifact for deployment
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: "./public"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: ${{ github.ref == 'refs/heads/main' }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
