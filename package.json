@@ -15,7 +15,7 @@
     "test-run": "npm run build && node lib/cli/cliRunner.js --map=tests/sample/param_map.json --envfile=.env",
     "build": "npm run clean && tsc -p tsconfig.build.json --sourceMap --declaration",
     "lint": "biome lint --write && biome format --write && biome check --write && tsc --noEmit && secretlint **/*",
-    "test": "npx vitest run --reporter verbose --coverage",
+    "test": "vitest run --reporter verbose --coverage",
     "cli-run": "npm run build && node --trace-warnings lib",
     "npm-publish": "npm run lint && npm run build && npm publish",
     "npm-release-patch": "npm version patch && npm run npm-publish",
@@ -51,10 +51,14 @@
     "secretlint": "^8.2.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2",
-    "vitest": "^2.1.1"
+    "vitest": "^2.1.2"
+  },
+  "resolutions": {
+    "string-width": "4.2.3",
+    "strip-ansi": "6.0.1"
   },
   "engines": {
-    "node": ">=18.0.0",
+    "node": ">=20.0.0",
     "yarn": ">=1.22"
   }
 }

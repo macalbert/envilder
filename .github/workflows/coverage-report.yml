@@ -1,0 +1,73 @@
+name: 🔦 code-coverage
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+    paths:
+      - ".github/workflows/coverage-report.yml"
+
+  push:
+    branches:
+      - "main"
+    paths:
+      - ".github/workflows/coverage-report.yml"
+      - "src/**"
+      - "test/**"
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-coverage:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.draft }}
+    steps:
+      - name: Check if PR is created by Dependabot
+        id: dependabot-check
+        run: |
+          if [[ "${{ github.actor }}" == *dependabot* ]]; then
+            echo "is_dependabot=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_dependabot=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check if the workflow should run
+        if: ${{ steps.dependabot-check.outputs.is_dependabot == 'false' }}
+        run: echo "The workflow is allowed to run for this PR"
+
+      - name: 🧲 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Setup Node.js with Cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "yarn"
+
+      - name: 📦 Install dependencies
+        run: yarn install
+
+      - name: 🔥 Run tests and collect coverage
+        run: yarn test
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "./coverage"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,48 @@
+name: 🌱 unit-tests
+
+on:
+  workflow_dispatch: {}
+
+  pull_request:
+    branches:
+      - "*"
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - ".github/workflows/unit-tests.yml"
+      - "src/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  envilder-test:
+    runs-on: ubuntu-24.04
+    if: ${{ !github.event.pull_request.draft }}
+    timeout-minutes: 30
+
+    steps:
+      - name: 🚀 ♂️ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Setup Node.js with Cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'yarn'
+
+      - name: 📦 Install packages
+        run: yarn install
+
+      - name: 🔍 Run code quality checker
+        run: yarn lint
+
+      - name: 🚧 Build
+        run: yarn build
+
+      - name: 🚴‍♀️ Run unit tests
+        run: yarn test

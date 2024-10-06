@@ -360,7 +360,6 @@ MigrationBackup/
 pnpm-lock.yaml
 package-lock.json
 aws_credentials.env
-yarn.lock
 coverage
 coveragereport
 *.cobertura.xml
