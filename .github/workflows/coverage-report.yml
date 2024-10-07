@@ -30,7 +30,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    if: !github.event.pull_request.draft && github.base_ref == 'refs/heads/main'
+    if: ${{ !github.event.pull_request.draft && github.base_ref == 'refs/heads/main' }}
     steps:
       - name: Check if PR is created by Dependabot
         id: dependabot-check
@@ -42,39 +42,39 @@ jobs:
           fi
 
       - name: Check if the workflow should run
-        if: steps.dependabot-check.outputs.is_dependabot == 'false' && github.base_ref == 'refs/heads/main'
+        if: ${{ steps.dependabot-check.outputs.is_dependabot == 'false' }} && ${{ github.base_ref == 'refs/heads/main' }}
         run: echo "The workflow is allowed to run for this PR"
 
       - name: 🧲 Checkout
-        if: steps.dependabot-check.outputs.is_dependabot == 'false' && github.base_ref == 'refs/heads/main'
+        if: ${{ steps.dependabot-check.outputs.is_dependabot == 'false' }} && ${{ github.base_ref == 'refs/heads/main' }}
         uses: actions/checkout@v4
 
       - name: 🛠️ Setup Node.js with Cache
-        if: steps.dependabot-check.outputs.is_dependabot == 'false' && github.base_ref == 'refs/heads/main'
+        if: ${{ steps.dependabot-check.outputs.is_dependabot == 'false' }} && ${{ github.base_ref == 'refs/heads/main' }}
         uses: actions/setup-node@v4
         with:
           node-version: "20.x"
           cache: "yarn"
 
       - name: 📦 Install dependencies
-        if: steps.dependabot-check.outputs.is_dependabot == 'false' && github.base_ref == 'refs/heads/main'
+        if: ${{ steps.dependabot-check.outputs.is_dependabot == 'false' }} && ${{ github.base_ref == 'refs/heads/main' }}
         run: yarn install
 
       - name: 🔥 Run tests and collect coverage
-        if: steps.dependabot-check.outputs.is_dependabot == 'false' && github.base_ref == 'refs/heads/main'
+        if: ${{ steps.dependabot-check.outputs.is_dependabot == 'false' }} && ${{ github.base_ref == 'refs/heads/main' }}
         run: yarn test
 
       - name: Setup Pages
-        if: steps.dependabot-check.outputs.is_dependabot == 'false' && github.base_ref == 'refs/heads/main'
+        if: ${{ steps.dependabot-check.outputs.is_dependabot == 'false' }} && ${{ github.base_ref == 'refs/heads/main' }}
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
-        if: steps.dependabot-check.outputs.is_dependabot == 'false' && github.base_ref == 'refs/heads/main'
+        if: ${{ steps.dependabot-check.outputs.is_dependabot == 'false' }} && ${{ github.base_ref == 'refs/heads/main' }}
         uses: actions/upload-pages-artifact@v3
         with:
           path: "./coverage"
 
       - name: Deploy to GitHub Pages
-        if: steps.dependabot-check.outputs.is_dependabot == 'false' && github.base_ref == 'refs/heads/main'
+        if: ${{ steps.dependabot-check.outputs.is_dependabot == 'false' }} && ${{ github.base_ref == 'refs/heads/main' }}
         id: deployment
         uses: actions/deploy-pages@v4
