@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [csharp]
+        language: ["javascript"]
 
     permissions:
       security-events: write
