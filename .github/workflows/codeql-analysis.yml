@@ -1,0 +1,49 @@
+name: CodeQL
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+    branches: [ main ]
+    paths:
+      - ".github/workflows/coverage-report.yml"
+
+  push:
+    branches: [ main ]
+    paths:
+      - ".github/workflows/coverage-report.yml"
+      - "src/**"
+      - "test/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ csharp ]
+
+    permissions:
+      security-events: write
+
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
