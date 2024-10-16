@@ -1,5 +1,6 @@
 import * as fs from 'node:fs';
 import { GetParameterCommand, SSM } from '@aws-sdk/client-ssm';
+import * as dotenv from 'dotenv';
 
 const ssm = new SSM({});
 
@@ -10,26 +11,27 @@ export async function run(mapPath: string, envFilePath: string) {
   const updatedEnvVariables = await fetchAndUpdateEnvVariables(paramMap, existingEnvVariables);
 
   writeEnvFile(envFilePath, updatedEnvVariables);
-  console.log(`.env file generated at ${envFilePath}`);
+  console.log(`Environment File generated at '${envFilePath}'`);
 }
 
 function loadParamMap(mapPath: string): Record<string, string> {
   const content = fs.readFileSync(mapPath, 'utf-8');
-  return JSON.parse(content);
+  try {
+    return JSON.parse(content);
+  } catch (error) {
+    console.error(`Error parsing JSON from ${mapPath}`);
+    throw new Error(`Invalid JSON in parameter map file: ${mapPath}`);
+  }
 }
 
 function loadExistingEnvVariables(envFilePath: string): Record<string, string> {
   const envVariables: Record<string, string> = {};
+
   if (!fs.existsSync(envFilePath)) return envVariables;
 
   const existingEnvContent = fs.readFileSync(envFilePath, 'utf-8');
-  const lines = existingEnvContent.split('\n');
-  for (const line of lines) {
-    const [key, value] = line.split('=');
-    if (key && value) {
-      envVariables[key] = value;
-    }
-  }
+  const parsedEnv = dotenv.parse(existingEnvContent);
+  Object.assign(envVariables, parsedEnv);
 
   return envVariables;
 }
@@ -39,6 +41,7 @@ async function fetchAndUpdateEnvVariables(
   existingEnvVariables: Record<string, string>,
 ): Promise<Record<string, string>> {
   console.log('Fetching parameters...');
+  const errors: string[] = [];
 
   for (const [envVar, ssmName] of Object.entries(paramMap)) {
     try {
@@ -47,12 +50,16 @@ async function fetchAndUpdateEnvVariables(
         existingEnvVariables[envVar] = value;
         console.log(`${envVar}=${value}`);
       } else {
-        console.error(`Warning: No value found for ${ssmName}`);
+        console.error(`Warning: No value found for: '${ssmName}'`);
       }
     } catch (error) {
-      console.error(`Error fetching parameter ${ssmName}: ${error}`);
-      throw new Error(`ParameterNotFound: ${ssmName}`);
+      console.error(`Error fetching parameter: '${ssmName}'`);
+      errors.push(`ParameterNotFound: ${ssmName}`);
     }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(`Some parameters could not be fetched:\n${errors.join('\n')}`);
   }
 
   return existingEnvVariables;

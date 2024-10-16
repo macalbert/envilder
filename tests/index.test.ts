@@ -79,9 +79,7 @@ describe('Envilder CLI', () => {
     const mockMapPath = './tests/param_map.json';
     const mockEnvFilePath = './tests/.env.test';
 
-    const existingEnvContent = `
-      EXISTING_VAR=existingValue
-    `;
+    const existingEnvContent = 'EXISTING_VAR=existingValue';
     fs.writeFileSync(mockEnvFilePath, existingEnvContent);
     const paramMapContent = {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
@@ -105,9 +103,7 @@ describe('Envilder CLI', () => {
     // Arrange
     const mockMapPath = './tests/param_map.json';
     const mockEnvFilePath = './tests/.env.test';
-    const existingEnvContent = `
-      NEXT_PUBLIC_CREDENTIAL_EMAIL=oldEmail@example.com
-    `;
+    const existingEnvContent = 'NEXT_PUBLIC_CREDENTIAL_EMAIL=oldEmail@example.com';
     fs.writeFileSync(mockEnvFilePath, existingEnvContent);
     const paramMapContent = {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
