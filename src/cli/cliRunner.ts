@@ -24,5 +24,5 @@ export async function cliRunner() {
 }
 
 cliRunner().catch((error) => {
-  console.error('Error in CLI Runner:', error);
+  console.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
 });
