@@ -11,10 +11,15 @@ vi.mock('@aws-sdk/client-ssm', () => {
             Parameter: { Value: 'mockedEmail@example.com' },
           });
         }
+
         if (command.input.Name === '/path/to/ssm/password') {
           return Promise.resolve({
             Parameter: { Value: 'mockedPassword' },
           });
+        }
+
+        if (command.input.Name === '/path/to/ssm/password_no_value') {
+          return Promise.resolve({ Parameter: { Value: '' } });
         }
 
         return Promise.reject(new Error(`ParameterNotFound: ${command.input.Name}`));
@@ -57,7 +62,7 @@ describe('Envilder CLI', () => {
     const mockMapPath = './tests/param_map.json';
     const mockEnvFilePath = './tests/.env.test';
     const paramMapContent = {
-      NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/unknown-email', // Non-existent parameter
+      NEXT_PUBLIC_CREDENTIAL_EMAIL: 'non-existent parameter',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
 
@@ -65,7 +70,74 @@ describe('Envilder CLI', () => {
     const action = run(mockMapPath, mockEnvFilePath);
 
     // Assert
-    await expect(action).rejects.toThrow('ParameterNotFound: /path/to/ssm/unknown-email');
+    await expect(action).rejects.toThrow('ParameterNotFound: non-existent parameter');
+    fs.unlinkSync(mockMapPath);
+  });
+
+  it('Should_AppendNewSSMParameters_When_EnvFileContainsExistingVariables', async () => {
+    // Arrange
+    const mockMapPath = './tests/param_map.json';
+    const mockEnvFilePath = './tests/.env.test';
+
+    const existingEnvContent = 'EXISTING_VAR=existingValue';
+    fs.writeFileSync(mockEnvFilePath, existingEnvContent);
+    const paramMapContent = {
+      NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
+      NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password',
+    };
+    fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+
+    // Act
+    await run(mockMapPath, mockEnvFilePath);
+
+    // Assert
+    const updatedEnvFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');
+    expect(updatedEnvFileContent).toContain('EXISTING_VAR=existingValue');
+    expect(updatedEnvFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com');
+    expect(updatedEnvFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword');
+    fs.unlinkSync(mockEnvFilePath);
+    fs.unlinkSync(mockMapPath);
+  });
+
+  it('Should_OverwriteSSMParameters_When_EnvFileContainsSameVariables', async () => {
+    // Arrange
+    const mockMapPath = './tests/param_map.json';
+    const mockEnvFilePath = './tests/.env.test';
+    const existingEnvContent = 'NEXT_PUBLIC_CREDENTIAL_EMAIL=oldEmail@example.com';
+    fs.writeFileSync(mockEnvFilePath, existingEnvContent);
+    const paramMapContent = {
+      NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
+      NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password',
+    };
+    fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+
+    // Act
+    await run(mockMapPath, mockEnvFilePath);
+
+    // Assert
+    const updatedEnvFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');
+    expect(updatedEnvFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com');
+    expect(updatedEnvFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword');
+    fs.unlinkSync(mockEnvFilePath);
+    fs.unlinkSync(mockMapPath);
+  });
+
+  it('Should_LogWarning_When_SSMParameterHasNoValue', async () => {
+    // Arrange
+    const mockMapPath = './tests/param_map.json';
+    const mockEnvFilePath = './tests/.env.test';
+    const paramMapContent = {
+      NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password_no_value',
+    };
+    fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+    const consoleSpy = vi.spyOn(console, 'error');
+
+    // Act
+    await run(mockMapPath, mockEnvFilePath);
+
+    // Assert
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Warning: No value found for'));
+    fs.unlinkSync(mockEnvFilePath);
     fs.unlinkSync(mockMapPath);
   });
 });
