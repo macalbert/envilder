@@ -1,23 +1,25 @@
-import * as fs from 'node:fs';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { run } from '../src/index';
+import * as fs from "node:fs";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { run } from "../src/index";
 
-vi.mock('@aws-sdk/client-ssm', () => {
+vi.mock("@aws-sdk/client-ssm", () => {
   return {
     SSM: vi.fn().mockImplementation(() => ({
       send: vi.fn((command) => {
-        if (command.input.Name === '/path/to/ssm/email') {
+        if (command.input.Name === "/path/to/ssm/email") {
           return Promise.resolve({
-            Parameter: { Value: 'mockedEmail@example.com' },
+            Parameter: { Value: "mockedEmail@example.com" },
           });
         }
-        if (command.input.Name === '/path/to/ssm/password') {
+        if (command.input.Name === "/path/to/ssm/password") {
           return Promise.resolve({
-            Parameter: { Value: 'mockedPassword' },
+            Parameter: { Value: "mockedPassword" },
           });
         }
 
-        return Promise.reject(new Error(`ParameterNotFound: ${command.input.Name}`));
+        return Promise.reject(
+          new Error(`ParameterNotFound: ${command.input.Name}`)
+        );
       }),
     })),
     GetParameterCommand: vi.fn().mockImplementation((input) => ({
@@ -26,18 +28,18 @@ vi.mock('@aws-sdk/client-ssm', () => {
   };
 });
 
-describe('Envilder CLI', () => {
+describe("Envilder CLI", () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it('Should_GenerateEnvFileFromSSMParameters_When_ValidSSMParametersAreProvided', async () => {
+  it("Should_GenerateEnvFileFromSSMParameters_When_ValidSSMParametersAreProvided", async () => {
     // Arrange
-    const mockMapPath = './tests/param_map.json';
-    const mockEnvFilePath = './tests/.env.test';
+    const mockMapPath = "./tests/param_map.json";
+    const mockEnvFilePath = "./tests/.env.test";
     const paramMapContent = {
-      NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
-      NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password',
+      NEXT_PUBLIC_CREDENTIAL_EMAIL: "/path/to/ssm/email",
+      NEXT_PUBLIC_CREDENTIAL_PASSWORD: "/path/to/ssm/password",
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
 
@@ -45,19 +47,23 @@ describe('Envilder CLI', () => {
     await run(mockMapPath, mockEnvFilePath);
 
     // Assert
-    const envFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');
-    expect(envFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com');
-    expect(envFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword');
+    const envFileContent = fs.readFileSync(mockEnvFilePath, "utf-8");
+    expect(envFileContent).toContain(
+      "NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com"
+    );
+    expect(envFileContent).toContain(
+      "NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword"
+    );
     fs.unlinkSync(mockEnvFilePath);
     fs.unlinkSync(mockMapPath);
   });
 
-  it('Should_ThrowError_When_SSMParameterIsNotFound', async () => {
+  it("Should_ThrowError_When_SSMParameterIsNotFound", async () => {
     // Arrange
-    const mockMapPath = './tests/param_map.json';
-    const mockEnvFilePath = './tests/.env.test';
+    const mockMapPath = "./tests/param_map.json";
+    const mockEnvFilePath = "./tests/.env.test";
     const paramMapContent = {
-      NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/unknown-email', // Non-existent parameter
+      NEXT_PUBLIC_CREDENTIAL_EMAIL: "non-existent parameter",
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
 
@@ -65,7 +71,69 @@ describe('Envilder CLI', () => {
     const action = run(mockMapPath, mockEnvFilePath);
 
     // Assert
-    await expect(action).rejects.toThrow('ParameterNotFound: /path/to/ssm/unknown-email');
+    await expect(action).rejects.toThrow(
+      "ParameterNotFound: non-existent parameter"
+    );
+    fs.unlinkSync(mockMapPath);
+  });
+
+  it("Should_AppendNewSSMParameters_When_EnvFileContainsExistingVariables", async () => {
+    // Arrange
+    const mockMapPath = "./tests/param_map.json";
+    const mockEnvFilePath = "./tests/.env.test";
+
+    const existingEnvContent = `
+      EXISTING_VAR=existingValue
+    `;
+    fs.writeFileSync(mockEnvFilePath, existingEnvContent);
+    const paramMapContent = {
+      NEXT_PUBLIC_CREDENTIAL_EMAIL: "/path/to/ssm/email",
+      NEXT_PUBLIC_CREDENTIAL_PASSWORD: "/path/to/ssm/password",
+    };
+    fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+
+    // Act
+    await run(mockMapPath, mockEnvFilePath);
+
+    // Assert
+    const updatedEnvFileContent = fs.readFileSync(mockEnvFilePath, "utf-8");
+    expect(updatedEnvFileContent).toContain("EXISTING_VAR=existingValue");
+    expect(updatedEnvFileContent).toContain(
+      "NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com"
+    );
+    expect(updatedEnvFileContent).toContain(
+      "NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword"
+    );
+    fs.unlinkSync(mockEnvFilePath);
+    fs.unlinkSync(mockMapPath);
+  });
+
+  it("Should_OverwriteSSMParameters_When_EnvFileContainsSameVariables", async () => {
+    // Arrange
+    const mockMapPath = "./tests/param_map.json";
+    const mockEnvFilePath = "./tests/.env.test";
+    const existingEnvContent = `
+      NEXT_PUBLIC_CREDENTIAL_EMAIL=oldEmail@example.com
+    `;
+    fs.writeFileSync(mockEnvFilePath, existingEnvContent);
+    const paramMapContent = {
+      NEXT_PUBLIC_CREDENTIAL_EMAIL: "/path/to/ssm/email",
+      NEXT_PUBLIC_CREDENTIAL_PASSWORD: "/path/to/ssm/password",
+    };
+    fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+
+    // Act
+    await run(mockMapPath, mockEnvFilePath);
+
+    // Assert
+    const updatedEnvFileContent = fs.readFileSync(mockEnvFilePath, "utf-8");
+    expect(updatedEnvFileContent).toContain(
+      "NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com"
+    );
+    expect(updatedEnvFileContent).toContain(
+      "NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword"
+    );
+    fs.unlinkSync(mockEnvFilePath);
     fs.unlinkSync(mockMapPath);
   });
 });
