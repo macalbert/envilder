@@ -6,7 +6,7 @@
 
 - 🔒 Fetch parameters securely from AWS SSM Parameter Store.
 - ⚡ Automatically generates a `.env` file with specified parameters.
-- 🛡️ Handles both encrypted and unencrypted SSM parameters.
+- 🛡️ Handles encrypted (currently only supported) SSM parameters.
 - 🪶 Lightweight and simple to use.
 
 ## Prerequisites
@@ -78,11 +78,13 @@ NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword
 
 ## 🧪 Running Tests
 
-To run the tests with coverage:
+To run the tests with coverage: 
 
 ```bash
 yarn test
 ```
+
+Here you can see the current coverage report: https://macalbert.github.io/envilder/
 
 ## 📝 License
 
