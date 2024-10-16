@@ -40,7 +40,6 @@ async function fetchAndUpdateEnvVariables(
   paramMap: Record<string, string>,
   existingEnvVariables: Record<string, string>,
 ): Promise<Record<string, string>> {
-  console.log('Fetching parameters...');
   const errors: string[] = [];
 
   for (const [envVar, ssmName] of Object.entries(paramMap)) {
@@ -48,7 +47,9 @@ async function fetchAndUpdateEnvVariables(
       const value = await fetchSSMParameter(ssmName);
       if (value) {
         existingEnvVariables[envVar] = value;
-        console.log(`${envVar}=${value}`);
+        console.log(
+          `${envVar}=${value.length > 3 ? '*'.repeat(value.length - 3) + value.slice(-3) : '*'.repeat(value.length)}`,
+        );
       } else {
         console.error(`Warning: No value found for: '${ssmName}'`);
       }
@@ -77,7 +78,10 @@ async function fetchSSMParameter(ssmName: string): Promise<string | undefined> {
 
 function writeEnvFile(envFilePath: string, envVariables: Record<string, string>): void {
   const envContent = Object.entries(envVariables)
-    .map(([key, value]) => `${key}=${value}`)
+    .map(([key, value]) => {
+      const escapedValue = value.replace(/(\n|\r|\n\r)/g, '\\n').replace(/"/g, '\\"');
+      return `${key}=${escapedValue}`;
+    })
     .join('\n');
 
   fs.writeFileSync(envFilePath, envContent);
