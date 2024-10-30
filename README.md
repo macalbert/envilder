@@ -56,8 +56,8 @@ Envilder requires two arguments:
 
     ```json
     {
-      "NEXT_PUBLIC_CREDENTIAL_EMAIL": "/path/to/ssm/email",
-      "NEXT_PUBLIC_CREDENTIAL_PASSWORD": "/path/to/ssm/password"
+      "SECRET_TOKEN": "/path/to/ssm/token",
+      "SECRET_KEY": "/path/to/ssm/password"
     }
     ```
 
@@ -72,8 +72,8 @@ Envilder requires two arguments:
 # 📂 Sample `.env` Output
 
 ```makefile
-NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com
-NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword
+SECRET_TOKEN=mockedEmail@example.com
+SECRET_KEY=mockedPassword
 ```
 
 # 🧪 Running Tests
