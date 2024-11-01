@@ -39,7 +39,7 @@
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.654.0",
     "@secretlint/core": "^8.2.4",
-    "@secretlint/secretlint-rule-preset-recommend": "^8.2.4",
+    "@secretlint/secretlint-rule-preset-recommend": "^9.0.0",
     "@types/node": "^22.5.5",
     "commander": "^12.1.0",
     "dotenv": "^16.4.5",
