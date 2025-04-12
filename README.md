@@ -1,6 +1,6 @@
-![image](https://github.com/user-attachments/assets/6f962001-911a-41be-8ebf-80f66bf6582f)
+![Envilder](https://github.com/user-attachments/assets/f646a3e7-6ae2-4f3b-8f51-3807067fc99c)
 
-`Envilder` is a CLI tool to manage AWS SSM Parameter Store parameters and automatically generate the required `.env` file. This tool simplifies environment variable management for projects, avoiding manual updates and ensuring consistency across environments.
+Envilder is a CLI tool for managing AWS SSM Parameter Store parameters and automatically generating the required `.env` file. This tool simplifies project environment variable management, avoiding manual updates and ensuring consistency across environments.
 
 # ✨ Features
 
