@@ -6,7 +6,7 @@ Envilder is a CLI tool for managing AWS SSM Parameter Store parameters and autom
 
 - 🔒 Fetch parameters securely from AWS SSM Parameter Store.
 - ⚡ Automatically generates a `.env` file with specified parameters.
-- 🛡️ Handles encrypted (currently only supported) SSM parameters.
+- 🛡️ Handles encrypted SSM parameters.
 - 🪶 Lightweight and simple to use.
 
 # Prerequisites
