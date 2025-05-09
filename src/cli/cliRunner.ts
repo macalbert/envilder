@@ -11,7 +11,8 @@ export async function cliRunner() {
     .description('A CLI tool to generate .env files from AWS SSM parameters')
     .version('0.1.0')
     .requiredOption('--map <path>', 'Path to the JSON file with environment variable mapping')
-    .requiredOption('--envfile <path>', 'Path to the .env file to be generated');
+    .requiredOption('--envfile <path>', 'Path to the .env file to be generated')
+    .option('--profile <name>', 'AWS CLI profile to use');
 
   await program.parseAsync(process.argv);
   const options = program.opts();
@@ -20,7 +21,7 @@ export async function cliRunner() {
     throw new Error('Missing required arguments: --map and --envfile');
   }
 
-  await run(options.map, options.envfile);
+  await run(options.map, options.envfile, options.profile);
 }
 
 cliRunner().catch((error) => {

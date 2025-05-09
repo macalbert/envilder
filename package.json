@@ -38,6 +38,7 @@
   "type": "module",
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.654.0",
+    "@aws-sdk/credential-providers": "^3.806.0",
     "@secretlint/core": "^9.2.1",
     "@secretlint/secretlint-rule-preset-recommend": "^9.0.0",
     "@types/node": "^22.5.5",

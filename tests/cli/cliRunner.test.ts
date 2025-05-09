@@ -27,7 +27,7 @@ describe('cliRunner', () => {
     await cliRunner();
 
     // Assert
-    expect(run).toHaveBeenCalledWith(mockMapPath, mockEnvFilePath);
+    expect(run).toHaveBeenCalledWith(mockMapPath, mockEnvFilePath, undefined);
   });
 
   it('Should_ThrowError_When_RequiredArgumentsAreMissing', async () => {
@@ -41,5 +41,19 @@ describe('cliRunner', () => {
 
     // Assert
     await expect(action).rejects.toThrow('process.exit called');
+  });
+
+  it('Should_CallRunWithCorrectArgumentsIncludingProfile_When_ProfileIsProvided', async () => {
+    // Arrange
+    const mockMapPath = 'path/to/mockMap.json';
+    const mockEnvFilePath = 'path/to/.env';
+    const mockProfile = 'test-profile';
+    process.argv.push('--map', mockMapPath, '--envfile', mockEnvFilePath, '--profile', mockProfile);
+
+    // Act
+    await cliRunner();
+
+    // Assert
+    expect(run).toHaveBeenCalledWith(mockMapPath, mockEnvFilePath, mockProfile);
   });
 });

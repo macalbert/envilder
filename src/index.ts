@@ -1,14 +1,14 @@
 import * as fs from 'node:fs';
 import { GetParameterCommand, SSM } from '@aws-sdk/client-ssm';
+import { fromIni } from '@aws-sdk/credential-providers';
 import * as dotenv from 'dotenv';
 
-const ssm = new SSM({});
-
-export async function run(mapPath: string, envFilePath: string) {
+export async function run(mapPath: string, envFilePath: string, profile?: string) {
+  const ssm = new SSM(profile ? { credentials: fromIni({ profile }) } : {});
   const paramMap = loadParamMap(mapPath);
   const existingEnvVariables = loadExistingEnvVariables(envFilePath);
 
-  const updatedEnvVariables = await fetchAndUpdateEnvVariables(paramMap, existingEnvVariables);
+  const updatedEnvVariables = await fetchAndUpdateEnvVariables(paramMap, existingEnvVariables, ssm);
 
   writeEnvFile(envFilePath, updatedEnvVariables);
   console.log(`Environment File generated at '${envFilePath}'`);
@@ -39,12 +39,13 @@ function loadExistingEnvVariables(envFilePath: string): Record<string, string> {
 async function fetchAndUpdateEnvVariables(
   paramMap: Record<string, string>,
   existingEnvVariables: Record<string, string>,
+  ssm: SSM,
 ): Promise<Record<string, string>> {
   const errors: string[] = [];
 
   for (const [envVar, ssmName] of Object.entries(paramMap)) {
     try {
-      const value = await fetchSSMParameter(ssmName);
+      const value = await fetchSSMParameter(ssmName, ssm);
       if (value) {
         existingEnvVariables[envVar] = value;
         console.log(
@@ -66,7 +67,7 @@ async function fetchAndUpdateEnvVariables(
   return existingEnvVariables;
 }
 
-async function fetchSSMParameter(ssmName: string): Promise<string | undefined> {
+async function fetchSSMParameter(ssmName: string, ssm: SSM): Promise<string | undefined> {
   const command = new GetParameterCommand({
     Name: ssmName,
     WithDecryption: true,
