@@ -4,7 +4,10 @@ import { fromIni } from '@aws-sdk/credential-providers';
 import * as dotenv from 'dotenv';
 
 export async function run(mapPath: string, envFilePath: string, profile?: string) {
-  const ssm = new SSM(profile ? { credentials: fromIni({ profile }) } : {});
+  const defaultAwsConfig = {};
+  const ssmClientConfig = profile ? { credentials: fromIni({ profile }) } : defaultAwsConfig;
+  const ssm = new SSM(ssmClientConfig);
+
   const paramMap = loadParamMap(mapPath);
   const existingEnvVariables = loadExistingEnvVariables(envFilePath);
 

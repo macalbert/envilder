@@ -12,9 +12,9 @@ describe('cliRunner', () => {
   beforeEach(() => {
     process.argv = [...originalArgv.slice(0, 2)];
   });
-
   afterEach(() => {
     vi.clearAllMocks();
+    process.argv = originalArgv;
   });
 
   it('Should_CallRunWithCorrectArguments_When_ValidArgumentsAreProvided', async () => {

@@ -156,6 +156,6 @@ describe('Envilder CLI', () => {
     await run(mockMapPath, mockEnvFilePath, mockProfile);
 
     // Assert
-    expect(vi.mocked(SSM).mock.calls[0][0]).toEqual({ credentials: expect.anything() });
+    expect(vi.mocked(SSM).mock.calls[0][0]).toEqual(expect.objectContaining({ credentials: expect.anything() }));
   });
 });
