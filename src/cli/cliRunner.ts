@@ -3,6 +3,13 @@
 import { Command } from 'commander';
 import { run } from '../index.js';
 
+/**
+ * Parses CLI arguments and runs the environment file generator.
+ *
+ * Expects `--map` and `--envfile` options to be provided, with an optional `--profile` for AWS CLI profile selection. Invokes the main process to generate a `.env` file from AWS SSM parameters based on the provided mapping.
+ *
+ * @throws {Error} If either `--map` or `--envfile` arguments are missing.
+ */
 export async function cliRunner() {
   const program = new Command();
 
