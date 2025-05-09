@@ -1,7 +1,7 @@
 import * as fs from 'node:fs';
+import { SSM } from '@aws-sdk/client-ssm';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { run } from '../src/index';
-import { SSM } from '@aws-sdk/client-ssm';
 
 vi.mock('@aws-sdk/client-ssm', () => {
   return {
