@@ -1,14 +1,26 @@
 import * as fs from 'node:fs';
 import { GetParameterCommand, SSM } from '@aws-sdk/client-ssm';
+import { fromIni } from '@aws-sdk/credential-providers';
 import * as dotenv from 'dotenv';
 
-const ssm = new SSM({});
+/**
+ * Orchestrates the process of fetching environment variable values from AWS SSM Parameter Store and writing them to a local environment file.
+ *
+ * Loads a parameter mapping from a JSON file, retrieves existing environment variables, fetches updated values from SSM (optionally using a specified AWS profile), merges them, and writes the result to the specified environment file.
+ *
+ * @param mapPath - Path to the JSON file mapping environment variable names to SSM parameter names.
+ * @param envFilePath - Path to the local environment file to read and update.
+ * @param profile - Optional AWS profile name to use for credentials.
+ */
+export async function run(mapPath: string, envFilePath: string, profile?: string) {
+  const defaultAwsConfig = {};
+  const ssmClientConfig = profile ? { credentials: fromIni({ profile }) } : defaultAwsConfig;
+  const ssm = new SSM(ssmClientConfig);
 
-export async function run(mapPath: string, envFilePath: string) {
   const paramMap = loadParamMap(mapPath);
   const existingEnvVariables = loadExistingEnvVariables(envFilePath);
 
-  const updatedEnvVariables = await fetchAndUpdateEnvVariables(paramMap, existingEnvVariables);
+  const updatedEnvVariables = await fetchAndUpdateEnvVariables(paramMap, existingEnvVariables, ssm);
 
   writeEnvFile(envFilePath, updatedEnvVariables);
   console.log(`Environment File generated at '${envFilePath}'`);
@@ -36,15 +48,28 @@ function loadExistingEnvVariables(envFilePath: string): Record<string, string> {
   return envVariables;
 }
 
+/**
+ * Fetches parameter values from AWS SSM for each environment variable in the map and updates the existing environment variables record.
+ *
+ * For each mapping, retrieves the corresponding SSM parameter value and updates the environment variable if found. Logs masked values and warnings for missing parameters. Throws an error if any parameters fail to fetch.
+ *
+ * @param paramMap - Mapping of environment variable names to SSM parameter names.
+ * @param existingEnvVariables - Current environment variables to be updated.
+ * @param ssm - AWS SSM client instance used for fetching parameters.
+ * @returns The updated environment variables record.
+ *
+ * @throws {Error} If any SSM parameters cannot be fetched.
+ */
 async function fetchAndUpdateEnvVariables(
   paramMap: Record<string, string>,
   existingEnvVariables: Record<string, string>,
+  ssm: SSM,
 ): Promise<Record<string, string>> {
   const errors: string[] = [];
 
   for (const [envVar, ssmName] of Object.entries(paramMap)) {
     try {
-      const value = await fetchSSMParameter(ssmName);
+      const value = await fetchSSMParameter(ssmName, ssm);
       if (value) {
         existingEnvVariables[envVar] = value;
         console.log(
@@ -66,7 +91,13 @@ async function fetchAndUpdateEnvVariables(
   return existingEnvVariables;
 }
 
-async function fetchSSMParameter(ssmName: string): Promise<string | undefined> {
+/**
+ * Retrieves the value of a parameter from AWS SSM Parameter Store with decryption enabled.
+ *
+ * @param ssmName - The name of the SSM parameter to retrieve.
+ * @returns The decrypted parameter value if found, or undefined if the parameter does not exist.
+ */
+async function fetchSSMParameter(ssmName: string, ssm: SSM): Promise<string | undefined> {
   const command = new GetParameterCommand({
     Name: ssmName,
     WithDecryption: true,

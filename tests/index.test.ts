@@ -1,4 +1,5 @@
 import * as fs from 'node:fs';
+import { SSM } from '@aws-sdk/client-ssm';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { run } from '../src/index';
 
@@ -139,5 +140,22 @@ describe('Envilder CLI', () => {
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Warning: No value found for'));
     fs.unlinkSync(mockEnvFilePath);
     fs.unlinkSync(mockMapPath);
+  });
+
+  it('Should_ConfigureSSMClientWithProfile_When_ProfileIsProvided', async () => {
+    // Arrange
+    const mockMapPath = './tests/param_map.json';
+    const mockEnvFilePath = './tests/.env.test';
+    const mockProfile = 'test-profile';
+    const paramMapContent = {
+      NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
+    };
+    fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+
+    // Act
+    await run(mockMapPath, mockEnvFilePath, mockProfile);
+
+    // Assert
+    expect(vi.mocked(SSM).mock.calls[0][0]).toEqual(expect.objectContaining({ credentials: expect.anything() }));
   });
 });
