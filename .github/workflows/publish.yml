@@ -1,4 +1,4 @@
-name: Publish to npm
+name: 🍄 Power-Up Publisher
 
 on:
   push:
@@ -18,28 +18,28 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: 🧱 Checkout repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: 🔧 Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
           cache: 'yarn'
 
-      - name: Install dependencies
+      - name: 🌟 Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Lint
+      - name: 🔥 Lint
         run: yarn lint        
           
-      - name: Run tests
+      - name: 🍄 Run tests
         run: yarn test
 
-      - name: Detect version bump
+      - name: 👑 Detect version bump
         id: version-check
         run: |
           CURRENT_VERSION=$(node -p "require('./package.json').version")
@@ -58,22 +58,22 @@ jobs:
             echo "version_changed=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Build package
+      - name: 🔨 Build package
         if: steps.version-check.outputs.version_changed == 'true'
         run: yarn build
 
-      - name: Publish to npm
+      - name: 🚩 Publish to npm
         if: steps.version-check.outputs.version_changed == 'true'
         run: yarn publish --non-interactive
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Create GitHub Release
+      - name: 🏰 Create GitHub Release
         if: steps.version-check.outputs.version_changed == 'true'
         uses: ncipollo/release-action@v1
         with:
           tag: "v${{ steps.version-check.outputs.current_version }}"
-          name: "Release v${{ steps.version-check.outputs.current_version }}"
+          name: "🍄 Level Up Release v${{ steps.version-check.outputs.current_version }}"
           generateReleaseNotes: true
           token: ${{ secrets.GITHUB_TOKEN }}
           makeLatest: legacy
