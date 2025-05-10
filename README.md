@@ -65,7 +65,7 @@ Optional arguments:
 
 # 🔧 Example
 
-1. Create a mapping file `param_map.json`:
+1. Create a mapping file `param-map.json`:
 
     ```json
     {
@@ -77,13 +77,13 @@ Optional arguments:
 2. Run envilder to generate your `.env` file:
 
     ```bash
-    envilder --map=param_map.json --envfile=.env
+    envilder --map=param-map.json --envfile=.env
     ```
 
 3. To use a specific AWS profile:
 
     ```bash
-    envilder --map=param_map.json --envfile=.env --profile=dev-account
+    envilder --map=param-map.json --envfile=.env --profile=dev-account
     ```
 
 4. The `.env` file will be generated in the specified location.
@@ -112,10 +112,10 @@ If you work with multiple AWS accounts or environments, you can configure differ
 
     ```bash
     # For development environment
-    envilder --map=param_map.json --envfile=.env.development --profile=dev-account
+    envilder --map=param-map.json --envfile=.env.development --profile=dev-account
 
     # For production environment
-    envilder --map=param_map.json --envfile=.env.production --profile=prod-account
+    envilder --map=param-map.json --envfile=.env.production --profile=prod-account
     ```
 
 # 📂 Sample `.env` Output

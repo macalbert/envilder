@@ -1,17 +1,8 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
   "files": {
-    "include": [
-      "./src/**",
-      "./tests/**",
-      "package.json",
-      "biome.json",
-      ".secretlintrc.json",
-      "tsconfig.json",
-      "tsconfig.build.json",
-      "vite.config.ts",
-      "repopack.config.json"
-    ]
+    "include": ["./src/**", "./tests/**"],
+    "ignore": ["**/node_modules/**", "**/lib/**", "**/dist/**", "**/coverage/**", "**/.lock", "**/.md"]
   },
   "organizeImports": {
     "enabled": true

@@ -33,14 +33,23 @@ vi.mock('@aws-sdk/client-ssm', () => {
 });
 
 describe('Envilder CLI', () => {
+  const mockMapPath = './tests/param-map.json';
+  const mockEnvFilePath = './tests/.env.test';
+
   afterEach(() => {
     vi.clearAllMocks();
+
+    if (fs.existsSync(mockEnvFilePath)) {
+      fs.unlinkSync(mockEnvFilePath);
+    }
+
+    if (fs.existsSync(mockMapPath)) {
+      fs.unlinkSync(mockMapPath);
+    }
   });
 
   it('Should_GenerateEnvFileFromSSMParameters_When_ValidSSMParametersAreProvided', async () => {
     // Arrange
-    const mockMapPath = './tests/param_map.json';
-    const mockEnvFilePath = './tests/.env.test';
     const paramMapContent = {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
       NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password',
@@ -54,14 +63,10 @@ describe('Envilder CLI', () => {
     const envFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');
     expect(envFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com');
     expect(envFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword');
-    fs.unlinkSync(mockEnvFilePath);
-    fs.unlinkSync(mockMapPath);
   });
 
   it('Should_ThrowError_When_SSMParameterIsNotFound', async () => {
     // Arrange
-    const mockMapPath = './tests/param_map.json';
-    const mockEnvFilePath = './tests/.env.test';
     const paramMapContent = {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: 'non-existent parameter',
     };
@@ -72,14 +77,10 @@ describe('Envilder CLI', () => {
 
     // Assert
     await expect(action).rejects.toThrow('ParameterNotFound: non-existent parameter');
-    fs.unlinkSync(mockMapPath);
   });
 
   it('Should_AppendNewSSMParameters_When_EnvFileContainsExistingVariables', async () => {
     // Arrange
-    const mockMapPath = './tests/param_map.json';
-    const mockEnvFilePath = './tests/.env.test';
-
     const existingEnvContent = 'EXISTING_VAR=existingValue';
     fs.writeFileSync(mockEnvFilePath, existingEnvContent);
     const paramMapContent = {
@@ -96,14 +97,10 @@ describe('Envilder CLI', () => {
     expect(updatedEnvFileContent).toContain('EXISTING_VAR=existingValue');
     expect(updatedEnvFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com');
     expect(updatedEnvFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword');
-    fs.unlinkSync(mockEnvFilePath);
-    fs.unlinkSync(mockMapPath);
   });
 
   it('Should_OverwriteSSMParameters_When_EnvFileContainsSameVariables', async () => {
     // Arrange
-    const mockMapPath = './tests/param_map.json';
-    const mockEnvFilePath = './tests/.env.test';
     const existingEnvContent = 'NEXT_PUBLIC_CREDENTIAL_EMAIL=oldEmail@example.com';
     fs.writeFileSync(mockEnvFilePath, existingEnvContent);
     const paramMapContent = {
@@ -119,14 +116,10 @@ describe('Envilder CLI', () => {
     const updatedEnvFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');
     expect(updatedEnvFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com');
     expect(updatedEnvFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword');
-    fs.unlinkSync(mockEnvFilePath);
-    fs.unlinkSync(mockMapPath);
   });
 
   it('Should_LogWarning_When_SSMParameterHasNoValue', async () => {
     // Arrange
-    const mockMapPath = './tests/param_map.json';
-    const mockEnvFilePath = './tests/.env.test';
     const paramMapContent = {
       NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password_no_value',
     };
@@ -138,14 +131,10 @@ describe('Envilder CLI', () => {
 
     // Assert
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Warning: No value found for'));
-    fs.unlinkSync(mockEnvFilePath);
-    fs.unlinkSync(mockMapPath);
   });
 
   it('Should_ConfigureSSMClientWithProfile_When_ProfileIsProvided', async () => {
     // Arrange
-    const mockMapPath = './tests/param_map.json';
-    const mockEnvFilePath = './tests/.env.test';
     const mockProfile = 'test-profile';
     const paramMapContent = {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
