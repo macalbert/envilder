@@ -33,7 +33,7 @@ vi.mock('@aws-sdk/client-ssm', () => {
 });
 
 describe('Envilder CLI', () => {
-  const mockMapPath = './tests/param_map.json';
+  const mockMapPath = './tests/param-map.json';
   const mockEnvFilePath = './tests/.env.test';
 
   afterEach(() => {
