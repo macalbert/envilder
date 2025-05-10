@@ -36,7 +36,10 @@ jobs:
           cache: 'yarn'
 
       - name: 📦 Install packages
-        run: yarn install
+        run: yarn install --frozen-lockfile
+
+      - name: 🔍 Run formatting checker
+        run: yarn format
 
       - name: 🔍 Run code quality checker
         run: yarn lint
