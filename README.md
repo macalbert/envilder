@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img src="https://github.com/user-attachments/assets/96bf1efa-7d21-440a-a414-3a20e7f9a1f1" alt="Envilder" width="200">
+  <img src="https://github.com/user-attachments/assets/96bf1efa-7d21-440a-a414-3a20e7f9a1f1" alt="Envilder">
   <br>
   Envilder
   <br>
