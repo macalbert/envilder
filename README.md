@@ -1,26 +1,119 @@
-![Envilder](https://github.com/user-attachments/assets/f646a3e7-6ae2-4f3b-8f51-3807067fc99c)
+<h1 align="center">
+  <br>
+  <img src="https://github.com/user-attachments/assets/96bf1efa-7d21-440a-a414-3a20e7f9a1f1" alt="Envilder" width="200">
+  <br>
+  Envilder
+  <br>
+</h1>
 
-Envilder is a CLI tool for managing AWS SSM Parameter Store parameters and automatically generating the required
-`.env` file. This tool simplifies project environment variable management, avoiding manual updates and ensuring
-consistency across environments.
+<h4 align="center">Secure Your Environment Variables with AWS SSM Parameter Store</h4>
 
-# ✨ Features
+<p align="center">
+  <a href="https://www.npmjs.com/package/envilder">
+    <img src="https://img.shields.io/npm/v/envilder.svg" alt="npm version">
+  </a>
+  <a href="./LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
+  </a>
+  <a href="https://macalbert.github.io/envilder/">
+    <img src="https://img.shields.io/badge/coverage-report-green.svg" alt="Coverage Report">
+  </a>
+</p>
 
-- 🔒 Fetch parameters securely from AWS SSM Parameter Store.
-- ⚡ Automatically generates a `.env` file with specified parameters.
-- 🛡️ Handles encrypted SSM parameters.
-- 🪶 Lightweight and simple to use.
-- 🔄 Support for multiple AWS profiles.
+<p align="center">
+  <b>Stop committing secrets to your repo! Start using AWS SSM Parameter Store to secure your credentials.</b>
+</p>
 
-# Prerequisites
+## ⚡ Quick Start
 
-Before using `Envilder`, ensure that you have the AWS CLI installed and properly configured on your local
-machine. This configuration is required for `Envilder` to access and manage parameters in AWS SSM.
+```bash
+# Install globally
+npm install -g envilder
 
-## AWS CLI Installation & Configuration
+# Create a simple mapping file
+echo '{"DB_PASSWORD": "/my-app/db/password"}' > param-map.json
 
-1. Install the AWS CLI by following the instructions [here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
-2. After installation, configure the AWS CLI using the following command:
+# Generate your .env file
+envilder --map=param-map.json --envfile=.env
+```
+
+## 🤔 What Problem Does Envilder Solve?
+
+<table>
+<tr>
+<th>❌ Without Envilder</th>
+<th>✅ With Envilder</th>
+</tr>
+<tr>
+<td>
+
+```plaintext
+- Secrets committed to repos
+- Manual .env file updates
+- Inconsistent environments
+- Password sharing via chat/email
+- CI/CD secrets management pain
+```
+
+</td>
+<td>
+
+```plaintext
+- Secrets stored securely in AWS SSM
+- Automated .env file generation
+- Consistent environments
+- No need to share raw credentials
+- Simple CI/CD integration
+```
+
+</td>
+</tr>
+</table>
+
+## 💡 Why Envilder?
+
+- 🔐 **No More Secrets in Git** - Store credentials in AWS SSM Parameter Store instead of version control
+- 🤖 **Automate Everything** - One command to generate your `.env` files across all environments
+- 🔄 **Always in Sync** - Keep your local, dev, and production environments consistent
+- 🏎️ **Fast to Set Up** - Configure once, then generate `.env` files with a single command
+- 🪶 **Simple but Powerful** - Easy interface with support for encrypted parameters and multiple AWS profiles
+
+## 🎯 Perfect for Teams
+
+Envilder is the tool you need if you:
+
+- 👥 **Work in a Development Team** - Ensure everyone has the same environment without sharing raw secrets
+- 🔑 **Deal with API Keys & Tokens** - Securely store and retrieve sensitive credentials
+- ⚙️ **Run CI/CD Pipelines** - Automatically generate environment files during deployments
+- ☁️ **Use AWS Already** - Leverage your existing AWS infrastructure more effectively
+- 🌐 **Manage Multiple Environments** - Switch easily between dev, staging, and production
+
+## 🔍 How It Works (Simple!)
+
+```mermaid
+graph LR
+    A[Mapping File] --> B[Envilder]
+    C[AWS Credentials] --> B
+    B --> D[.env File]
+    E[SSM Parameters] --> B
+```
+
+1. 📖 **Define Your Mapping** - Simple JSON mapping env vars to SSM paths
+2. 🚀 **Run Envilder** - One command with your mapping file
+3. 🔄 **Auto-Fetch from AWS** - Retrieves values using your AWS credentials
+4. 💾 **Get Your .env File** - Ready to use in your project
+
+## ⚙️ Prerequisites
+
+You'll need:
+
+- ✅ **AWS CLI** - Installed and configured with proper permissions to access SSM Parameter Store
+- ✅ **Node.js** - Version 14 or higher
+
+### AWS CLI Setup
+
+1. Install the AWS CLI by following the [official instructions](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
+2. After installation, configure the AWS CLI:
 
     ```bash
     aws configure
@@ -32,38 +125,31 @@ machine. This configuration is required for `Envilder` to access and manage para
     - Default region name (e.g., `us-east-1`)
     - Default output format (e.g., `json`)
 
-   Make sure that the AWS credentials you're using have the appropriate permissions to access the SSM Parameter
-   Store in your AWS account.
+   Make sure your AWS credentials have the appropriate permissions to access the SSM Parameter Store.
 
-# Installation
-
-You can install `Envilder` globally using yarn. This will allow you to use the `envilder` command from any
-directory on your system.
+## 📦 Installation
 
 ```bash
+# Using npm
+npm install -g envilder
+
+# Using yarn
 yarn global add envilder
 ```
 
-# 📦 Installation
-
-You can install **envilder** globally or locally using npm:
+## 🚀 Usage
 
 ```bash
-npm install -g envilder
+envilder --map=<mapping-file> --envfile=<output-file> [--profile=<aws-profile>]
 ```
 
-# 🚀 Usage
+| Option | Description |
+|--------|-------------|
+| `--map` | Path to JSON mapping file (required) |
+| `--envfile` | Path to output .env file (required) |
+| `--profile` | AWS CLI profile to use (optional) |
 
-Envilder requires two arguments:
-
-- `--map <path>`: Path to a JSON file mapping environment variable names to SSM parameters.
-- `--envfile <path>`: Path where the generated .env file will be saved.
-
-Optional arguments:
-
-- `--profile <name>`: AWS CLI profile to use for credentials (if not using the default profile).
-
-# 🔧 Example
+## 🔧 Quick Example
 
 1. Create a mapping file `param-map.json`:
 
@@ -74,25 +160,24 @@ Optional arguments:
     }
     ```
 
-2. Run envilder to generate your `.env` file:
+2. Generate your `.env` file:
 
     ```bash
     envilder --map=param-map.json --envfile=.env
     ```
 
-3. To use a specific AWS profile:
+3. Use a specific AWS profile:
 
     ```bash
     envilder --map=param-map.json --envfile=.env --profile=dev-account
     ```
 
-4. The `.env` file will be generated in the specified location.
-
 ## 🌐 Working with Multiple AWS Profiles
 
-If you work with multiple AWS accounts or environments, you can configure different profiles in your AWS credentials file:
+For multiple AWS accounts or environments, configure different profiles in your AWS credentials file:
 
-1. Edit your AWS credentials file (usually at `~/.aws/credentials` on Linux/Mac or `%USERPROFILE%\.aws\credentials` on Windows):
+1. Edit your AWS credentials file (typically located at `~/.aws/credentials` on Linux/Mac
+or `%USERPROFILE%\.aws\credentials` on Windows):
 
     ```ini
     [default]
@@ -108,37 +193,35 @@ If you work with multiple AWS accounts or environments, you can configure differ
     aws_secret_access_key=YOUR_PROD_SECRET_KEY
     ```
 
-2. When running Envilder, specify which profile to use with the `--profile` option:
+2. Specify which profile to use:
 
     ```bash
-    # For development environment
+    # Development environment
     envilder --map=param-map.json --envfile=.env.development --profile=dev-account
 
-    # For production environment
+    # Production environment
     envilder --map=param-map.json --envfile=.env.production --profile=prod-account
     ```
 
-# 📂 Sample `.env` Output
+## 📂 Sample `.env` Output
 
-```makefile
+```ini
 SECRET_TOKEN=mockedEmail@example.com
 SECRET_KEY=mockedPassword
 ```
 
-# 🧪 Running Tests
-
-To run the tests with coverage:
+## 🧪 Running Tests
 
 ```bash
 yarn test
 ```
 
-Here you can see the current coverage report: <https://macalbert.github.io/envilder/>
+Check the current coverage report: [Coverage Report](https://macalbert.github.io/envilder/)
 
-# 📝 License
+## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
 
-# 🙌 Contributing
+## 🙌 Contributing
 
 Contributions are welcome! Feel free to submit issues and pull requests.
