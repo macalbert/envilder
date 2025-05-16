@@ -41,5 +41,4 @@ export async function main() {
 main().catch((error) => {
   console.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
   console.error(error);
-  process.exit(1);
 });
