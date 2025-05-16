@@ -14,6 +14,7 @@ on:
     paths:
       - ".github/workflows/unit-tests.yml"
       - "src/**"
+      - "tests/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}

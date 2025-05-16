@@ -1,14 +1,46 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { run } from '../index.js';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+/**
+ * Find the package.json file by traversing up directories
+ * @param startDir The directory to start searching from
+ * @param maxDepth Maximum number of parent directories to check
+ * @returns Path to package.json if found, or null if not found
+ */
+function findPackageJson(startDir: string, maxDepth = 5): string | null {
+  let currentDir = startDir;
+  let depth = 0;
+
+  while (depth < maxDepth) {
+    const packagePath = join(currentDir, 'package.json');
+    if (existsSync(packagePath)) {
+      return packagePath;
+    }
+
+    // Go up one directory
+    const parentDir = dirname(currentDir);
+    if (parentDir === currentDir) {
+      // We've reached the root
+      break;
+    }
+
+    currentDir = parentDir;
+    depth++;
+  }
+
+  return null;
+}
+
 // Get package.json path by searching up from current file
-const packageJson = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf8'));
+const packageJsonPath = findPackageJson(__dirname) || join(__dirname, '..', '..', 'package.json');
+const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
 
 /**
  * Parses CLI arguments and runs the environment file generator.
