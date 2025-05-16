@@ -1,27 +1,10 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { run } from '../index.js';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 
 // Get package.json path by searching up from current file
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-function findPackageJson(startDir: string): string {
-  let currentDir = startDir;
-  while (currentDir !== dirname(currentDir)) {
-    const packagePath = join(currentDir, 'package.json');
-    if (existsSync(packagePath)) {
-      return packagePath;
-    }
-    currentDir = dirname(currentDir);
-  }
-  throw new Error('package.json not found in parent directories');
-}
-
-const packageJson = JSON.parse(readFileSync(findPackageJson(__dirname), 'utf8'));
+const packageJson = JSON.parse(readFileSync(require.resolve('../../package.json'), 'utf8'));
 
 /**
  * Parses CLI arguments and runs the environment file generator.
