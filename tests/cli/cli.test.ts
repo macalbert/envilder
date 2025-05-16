@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cliRunner } from '../../src/cli/cliRunner';
+import { main } from '../../src/cli/cli';
 import { run } from '../../src/index';
 
 vi.mock('../../src/index', () => ({
   run: vi.fn(),
 }));
 
-describe('cliRunner', () => {
+describe('CLI', () => {
   const originalArgv = process.argv;
 
   beforeEach(() => {
@@ -24,7 +24,7 @@ describe('cliRunner', () => {
     process.argv.push('--map', mockMapPath, '--envfile', mockEnvFilePath);
 
     // Act
-    await cliRunner();
+    await main();
 
     // Assert
     expect(run).toHaveBeenCalledWith(mockMapPath, mockEnvFilePath, undefined);
@@ -37,7 +37,7 @@ describe('cliRunner', () => {
     });
 
     // Act
-    const action = cliRunner();
+    const action = main();
 
     // Assert
     await expect(action).rejects.toThrow('process.exit called');
@@ -51,7 +51,7 @@ describe('cliRunner', () => {
     process.argv.push('--map', mockMapPath, '--envfile', mockEnvFilePath, '--profile', mockProfile);
 
     // Act
-    await cliRunner();
+    await main();
 
     // Assert
     expect(run).toHaveBeenCalledWith(mockMapPath, mockEnvFilePath, mockProfile);

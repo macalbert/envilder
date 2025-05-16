@@ -11,7 +11,7 @@ export default defineConfig({
       reportsDirectory: './coverage',
       all: true,
       include: ['src/**/*.ts'],
-      exclude: ['node_modules', 'test', 'coverage', 'dist'],
+      exclude: ['node_modules', 'test', 'coverage', 'dist', 'scripts'],
     },
   },
 });

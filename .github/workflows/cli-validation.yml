@@ -1,0 +1,58 @@
+name: 🍄 Test CLI
+
+on:
+  workflow_dispatch: {}
+
+  pull_request:
+    branches:
+      - "*"
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - ".github/workflows/cli-validation.yml"
+      - "src/**"
+      - "scripts/**"
+      - "tests/**"
+      
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    if: ${{ !github.event.pull_request.draft }}
+    timeout-minutes: 30
+
+    steps:
+      - name: 🚀 ♂️ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Setup Node.js with Cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'yarn'
+
+      - name: 💉 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "eu-west-1"
+
+      - name: 🪙 Collect dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: 🏗️ Build the castle
+        run: yarn build      
+
+      - name: 🧩 Ensure executable permissions
+        run: |
+          chmod +x ./lib/cli/cli.js
+
+      - name: 🌈 Install envilder globally (with npm)
+        run: |
+          sudo npm install -g .
+        
+      - name: 🎮 Test cli envilder
+        run: yarn validate-cli
