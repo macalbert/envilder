@@ -1,11 +1,19 @@
-name: 🍄 CLI Power-Up
+name: 🍄 Test CLI
 
 on:
-  push:
-    branches: [ main ]
+  workflow_dispatch: {}
+
   pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+    branches:
+      - "*"
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - ".github/workflows/unit-tests.yml"
+      - "src/**"
 
 jobs:
   validate:
@@ -25,11 +33,12 @@ jobs:
         
     - name: 🪙 Collect dependencies
       run: yarn install --frozen-lockfile
-        - name: 🏗️ Build the castle
+
+    - name: 🏗️ Build the castle
       run: yarn build
       
     - name: 🌈 Install envilder globally
       run: yarn global add file:.
       
-    - name: 🎮 Test envilder
+    - name: 🎮 Test cli envilder
       run: yarn validate-cli
