@@ -45,25 +45,20 @@
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.806.0",
     "@aws-sdk/credential-providers": "^3.806.0",
-    "@secretlint/core": "^9.2.1",
-    "@secretlint/secretlint-rule-preset-recommend": "^9.0.0",
     "@types/node": "^22.5.5",
-    "commander": "^12.1.0",
+    "commander": "^13.1.0",
     "dotenv": "^16.4.5",
     "picocolors": "^1.1.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.1",
+    "@secretlint/secretlint-rule-preset-recommend": "^9.3.2",
     "@vitest/coverage-v8": "^3.1.1",
     "rimraf": "^6.0.1",
-    "secretlint": "^9.0.0",
+    "secretlint": "^9.3.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2",
     "vitest": "^3.1.1"
-  },
-  "resolutions": {
-    "string-width": "4.2.3",
-    "strip-ansi": "6.0.1"
   },
   "engines": {
     "node": ">=20.0.0",
