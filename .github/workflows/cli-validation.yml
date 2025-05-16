@@ -36,9 +36,13 @@ jobs:
 
     - name: 🏗️ Build the castle
       run: yarn build
-      
     - name: 🌈 Install envilder globally
-      run: yarn global add file:.
+      run: |
+        yarn global bin
+        export PATH="$(yarn global bin):$PATH"
+        yarn global add file:.
       
     - name: 🎮 Test cli envilder
+      env:
+        PATH: "$(yarn global bin):$PATH"
       run: yarn validate-cli

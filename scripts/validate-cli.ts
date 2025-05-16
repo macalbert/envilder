@@ -30,11 +30,14 @@ function runCommand(command: string, args: string[]): Promise<{ code: number; ou
 
 async function validateCLI() {
   console.log(`🔍 Validating envilder CLI installation ${isGithubAction ? 'in GitHub Actions' : 'locally'}...`);
+    // Test 1: Check if envilder is accessible
+  const whichEnvilder = await runCommand('where', ['envilder']);
+  console.log('Looking for envilder in:', process.env.PATH);
+  console.log('Envilder location:', whichEnvilder.output);
   
-  // Test 1: Check if envilder is accessible
-  const versionCheck = await runCommand('envilder', ['--version']);
+  const versionCheck = await runCommand('node', ['./lib/cli/cli.js', '--version']);
   if (versionCheck.code !== 0) {
-    throw new Error('❌ envilder command not found. Make sure it is properly installed.');
+    throw new Error('❌ envilder command not working. Make sure it is properly installed.');
   }
   console.log('✅ envilder command is accessible');
   
