@@ -1,6 +1,6 @@
 {
   "name": "envilder",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A CLI tool to generate .env files from AWS SSM parameters",
   "exports": {
     ".": {
@@ -23,7 +23,7 @@
     "lint:fix": "npx biome lint --fix",
     "test": "vitest run --reporter verbose --coverage",
     "cli-run": "yarn build && node --trace-warnings lib",
-    "npm-publish": "yarn lint && yarn build && yarn publish",
+    "npm-publish": "yarn lint && yarn build && yarn test && npm pack --dry-run && yarn publish",
     "npm-release-patch": "yarn version --new-version patch",
     "npm-release-minor": "yarn version --new-version minor",
     "npm-release-prerelease": "yarn version --new-version prerelease"
@@ -41,6 +41,12 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "lib/**/*",
+    "README.md",
+    "LICENSE",
+    "ROADMAP.md"
+  ],
   "type": "module",
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.806.0",
