@@ -44,17 +44,17 @@ jobs:
           chmod +x ./lib/cli/cli.js
           ls -la ./lib/cli/
 
-      - name: 🌈 Install envilder globally
+      - name: 🌈 Install envilder globally (with npm)
         run: |
-          yarn global add file:.
-          echo "$(yarn global bin)" >> $GITHUB_PATH
+          sudo npm install -g .
+          which envilder || echo "envilder not found in PATH"
           
       - name: 🔍 Debug PATH and global installation
         run: |
           echo "PATH: $PATH"
-          yarn global dir
-          yarn global bin
-          which envilder || echo "envilder not found in PATH"
+          echo "Node executable location: $(which node)"
+          echo "NPM global prefix: $(npm config get prefix)"
+          npm list -g envilder || echo "envilder not found in global npm packages"
         
       - name: 🎮 Test cli envilder
         run: yarn validate-cli
