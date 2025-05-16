@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import { Command } from 'commander';
-import { run } from '../index.js';
-import { readFileSync, existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { Command } from 'commander';
+import { run } from '../index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

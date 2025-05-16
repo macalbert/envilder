@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { existsSync } from 'node:fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -124,7 +124,7 @@ async function validateCLI() {
     }
     console.log('✅ envilder properly handles missing required options');
 
-    console.log(`🎉 All CLI validation tests passed!`);
+    console.log('🎉 All CLI validation tests passed!');
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);
