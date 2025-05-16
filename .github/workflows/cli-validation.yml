@@ -44,24 +44,15 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: 🏗️ Build the castle
-        run: yarn build
+        run: yarn build      
 
       - name: 🧩 Ensure executable permissions
         run: |
           chmod +x ./lib/cli/cli.js
-          ls -la ./lib/cli/
 
       - name: 🌈 Install envilder globally (with npm)
         run: |
           sudo npm install -g .
-          which envilder || echo "envilder not found in PATH"
-          
-      - name: 🔍 Debug PATH and global installation
-        run: |
-          echo "PATH: $PATH"
-          echo "Node executable location: $(which node)"
-          echo "NPM global prefix: $(npm config get prefix)"
-          npm list -g envilder || echo "envilder not found in global npm packages"
         
       - name: 🎮 Test cli envilder
         run: yarn validate-cli
