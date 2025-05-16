@@ -13,9 +13,9 @@ const cliFilePath = join(rootDir, 'lib', 'cli', 'cli.js');
 
 // Only run on non-Windows platforms
 if (process.platform !== 'win32') {
-  chmod(cliFilePath, 0o755)  // rwxr-xr-x permissions
+  chmod(cliFilePath, 0o755) // rwxr-xr-x permissions
     .then(() => console.log(`✅ Set executable permissions for: ${cliFilePath}`))
-    .catch(error => {
+    .catch((error) => {
       console.error(`❌ Error setting permissions: ${error.message}`);
       process.exit(1);
     });
