@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 // Get package.json path
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const packageJson = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf8'));
+const packageJson = JSON.parse(readFileSync(require.resolve('../../package.json'), 'utf8'));
 
 /**
  * Parses CLI arguments and runs the environment file generator.
