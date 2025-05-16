@@ -49,7 +49,7 @@ async function validateCLI() {
     console.log('Testing envilder by executing the built JavaScript file directly...');
     const versionCheck = await runCommand('node', ['./lib/cli/cli.js', '--version']);
     if (versionCheck.code !== 0) {
-      throw new Error('❌ envilder command not working. Make sure it is properly built:\n' + versionCheck.output);
+      throw new Error(`❌ envilder command not working. Make sure it is properly built:\n${versionCheck.output}`);
     }
     console.log('✅ envilder CLI file is executable');
 
@@ -58,7 +58,7 @@ async function validateCLI() {
     const helpCheck = await runCommand('envilder', ['--help']);
     if (helpCheck.code !== 0) {
       console.error('Command output:', helpCheck.output);
-      throw new Error('❌ envilder help command failed with exit code: ' + helpCheck.code);
+      throw new Error(`❌ envilder help command failed with exit code: ${helpCheck.code}`);
     }
 
     if (!helpCheck.output.includes('--map') || !helpCheck.output.includes('--envfile')) {
@@ -79,7 +79,7 @@ async function validateCLI() {
 
     if (sampleTest.code !== 0) {
       console.error('Command output:', sampleTest.output);
-      throw new Error('❌ envilder failed to generate environment file with exit code: ' + sampleTest.code);
+      throw new Error(`❌ envilder failed to generate environment file with exit code: ${sampleTest.code}`);
     }
 
     if (!sampleTest.output.includes('Environment File generated')) {
@@ -141,9 +141,9 @@ async function validateCLI() {
 
       // Rethrow the original error
       throw error;
-    } else {
-      throw new Error('Unknown error occurred during CLI validation');
     }
+
+    throw new Error('Unknown error occurred during CLI validation');
   }
 }
 

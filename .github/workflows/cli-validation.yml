@@ -39,9 +39,22 @@ jobs:
       - name: 🏗️ Build the castle
         run: yarn build
 
+      - name: 🧩 Ensure executable permissions
+        run: |
+          chmod +x ./lib/cli/cli.js
+          ls -la ./lib/cli/
+
       - name: 🌈 Install envilder globally
         run: |
           yarn global add file:.
+          echo "$(yarn global bin)" >> $GITHUB_PATH
+          
+      - name: 🔍 Debug PATH and global installation
+        run: |
+          echo "PATH: $PATH"
+          yarn global dir
+          yarn global bin
+          which envilder || echo "envilder not found in PATH"
         
       - name: 🎮 Test cli envilder
         run: yarn validate-cli

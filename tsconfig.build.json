@@ -4,7 +4,9 @@
     "rootDir": "./src",
     "outDir": "./lib",
     "module": "ESNext",
-    "moduleResolution": "Node"
+    "moduleResolution": "Node",
+    "preserveConstEnums": true,
+    "sourceMap": true
   },
   "include": [
     "./src/**/*"
