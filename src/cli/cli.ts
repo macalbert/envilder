@@ -1,6 +1,14 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { run } from '../index.js';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+import { readFileSync } from 'node:fs';
+
+// Get package.json path
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf8'));
 
 /**
  * Parses CLI arguments and runs the environment file generator.
@@ -9,13 +17,12 @@ import { run } from '../index.js';
  *
  * @throws {Error} If either `--map` or `--envfile` arguments are missing.
  */
-export async function cliRunner() {
+async function main() {
   const program = new Command();
-
   program
     .name('envilder')
     .description('A CLI tool to generate .env files from AWS SSM parameters')
-    .version('0.1.0')
+    .version(packageJson.version)
     .requiredOption('--map <path>', 'Path to the JSON file with environment variable mapping')
     .requiredOption('--envfile <path>', 'Path to the .env file to be generated')
     .option('--profile <name>', 'AWS CLI profile to use');
@@ -30,6 +37,9 @@ export async function cliRunner() {
   await run(options.map, options.envfile, options.profile);
 }
 
-cliRunner().catch((error) => {
+// Execute the CLI
+main().catch((error) => {
   console.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
+  console.error(error);
+  process.exit(1);
 });
