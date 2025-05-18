@@ -1,11 +1,13 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./lib",
     "module": "ESNext",
     "moduleResolution": "Node",
+    "preserveConstEnums": true,
+    "sourceMap": true,
     "target": "es2016",
-    "outDir": "./lib",
-    "rootDir": ".",
     "strict": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
@@ -15,7 +17,6 @@
     ],
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "types": [
@@ -24,7 +25,6 @@
     ]
   },
   "include": [
-    "src/**/*",
-    "scripts/**/*"
+    "src/**/*"
   ]
 }

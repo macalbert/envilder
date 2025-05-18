@@ -1,13 +1,12 @@
-import { spawn, execSync } from 'node:child_process';
-import { existsSync, readFileSync, unlinkSync } from 'node:fs';
+import { execSync, spawn } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '../..');
-const pkg = JSON.parse(readFileSync(join(rootDir, 'package.json'), 'utf8'));
 
 describe('envilder CLI (E2E)', () => {
   beforeAll(() => {
@@ -19,7 +18,6 @@ describe('envilder CLI (E2E)', () => {
   }, 120_000);
 
   const envilder = 'envilder';
-  const expectedVersion = pkg.version;
   const testEnvFile = join(rootDir, 'tests', 'sample', 'cli-validation.env');
   const paramMapPath = join(rootDir, 'tests', 'sample', 'param-map.json');
 
@@ -30,6 +28,8 @@ describe('envilder CLI (E2E)', () => {
   it('Should_PrintCorrectVersion_When_VersionFlagIsProvided', async () => {
     // Arrange
     const argument = '--version';
+    const pkg = JSON.parse(readFileSync(join(rootDir, 'package.json'), 'utf8'));
+    const expectedVersion = pkg.version;
 
     // Act
     const actual = await runCommand(envilder, [argument]);
