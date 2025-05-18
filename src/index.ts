@@ -39,7 +39,9 @@ function loadParamMap(mapPath: string): Record<string, string> {
 function loadExistingEnvVariables(envFilePath: string): Record<string, string> {
   const envVariables: Record<string, string> = {};
 
-  if (!fs.existsSync(envFilePath)) return envVariables;
+  if (!fs.existsSync(envFilePath)) {
+    return envVariables;
+  }
 
   const existingEnvContent = fs.readFileSync(envFilePath, 'utf-8');
   const parsedEnv = dotenv.parse(existingEnvContent);
@@ -70,14 +72,16 @@ async function fetchAndUpdateEnvVariables(
   for (const [envVar, ssmName] of Object.entries(paramMap)) {
     try {
       const value = await fetchSSMParameter(ssmName, ssm);
-      if (value) {
-        existingEnvVariables[envVar] = value;
-        console.log(
-          `${envVar}=${value.length > 3 ? '*'.repeat(value.length - 3) + value.slice(-3) : '*'.repeat(value.length)}`,
-        );
-      } else {
+      if (!value) {
         console.error(`Warning: No value found for: '${ssmName}'`);
+        continue;
       }
+
+      existingEnvVariables[envVar] = value;
+      console.log(
+        `${envVar}=${value.length > 3 ? '*'.repeat(value.length - 3) + value.slice(-3) : '*'.repeat(value.length)}`,
+      );
+      
     } catch (error) {
       console.error(`Error fetching parameter: '${ssmName}'`);
       errors.push(`ParameterNotFound: ${ssmName}`);
