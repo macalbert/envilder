@@ -99,6 +99,7 @@ function installPackage(env, packageFile) {
       console.log(`✅ Package installed globally at: ${envPath}`);
     } catch (err) {
       console.warn('⚠️ Could not determine global install path for envilder.');
+      process.exit(1);
     }
   } catch (err) {
     console.error(`❌ Failed to install package: ${err.message}`);
