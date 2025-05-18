@@ -6,12 +6,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chmod } from 'node:fs/promises';
 
-
-const env = await initializeEnvironment();  
+const env = await initializeEnvironment();
 const packageFile = createPackage(env);
 
 installPackage(env, packageFile);
-
 
 /**
  * Initialize script and set up OS-specific commands and configurations
@@ -19,27 +17,23 @@ installPackage(env, packageFile);
  */
 async function initializeEnvironment() {
   const isWindows = process.platform === 'win32';
-  
+
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   const rootDir = path.join(__dirname, '..');
-    
+
   const commands = {
-    listTgzFiles: isWindows 
-      ? 'dir /b /o:-d *.tgz' 
-      : 'ls -t *.tgz | head -n 1',
-    
-    verifyInstall: isWindows
-      ? 'where envilder'
-      : 'which envilder',
+    listTgzFiles: isWindows ? 'dir /b /o:-d *.tgz' : 'ls -t *.tgz | head -n 1',
+
+    verifyInstall: isWindows ? 'where envilder' : 'which envilder',
   };
-  
+
   await makeExecutable(isWindows);
 
   return {
     isWindows,
     rootDir,
-    commands
+    commands,
   };
 }
 
@@ -54,7 +48,7 @@ function createPackage(env) {
     // Capture the output of npm pack to get the filename
     const output = execSync('npm pack', {
       cwd: env.rootDir,
-      encoding: 'utf8'
+      encoding: 'utf8',
     });
     // The last non-empty line is the filename
     const lines = output.trim().split(/\r?\n/);
