@@ -1,12 +1,9 @@
 <h1 align="center">
   <br>
   <img src="https://github.com/user-attachments/assets/96bf1efa-7d21-440a-a414-3a20e7f9a1f1" alt="Envilder">
-  <br>
-  Envilder
-  <br>
 </h1>
 
-<h4 align="center">Secure Your Environment Variables with AWS SSM Parameter Store</h4>
+<h4 align="center">One source of truth for all your environment variables</h4>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/envilder">
@@ -20,11 +17,16 @@
   </a>
 </p>
 
-<p align="center">
-  <b>Stop committing secrets to your repo! Start using AWS SSM Parameter Store to secure your credentials.</b>
-</p>
+## 🌟 Key benefits
 
-## ⚡ Quick Start
+- **🔒 Strict access control** - AWS IAM policies control who accesses which secrets (dev vs prod)
+- **📊 Full audit trail** - All parameter access is logged in CloudTrail for compliance requirements
+- **🧩 Single source of truth** - No more copying .env files from Notion or emails - SSM is your only source
+- **🔁 Idempotent operations** - Won't overwrite your local values - safe for automation
+- **⚙️ Environment-aware** - Use templates like `/project/${ENV}/DB_PASSWORD` to dynamically fetch the right secrets
+- **🧱 No extra infrastructure** - Uses AWS SSM's existing reliability instead of additional secret managers
+
+## ⚡ Quick start
 
 ```bash
 # Install globally
@@ -37,7 +39,7 @@ echo '{"DB_PASSWORD": "/my-app/db/password"}' > param-map.json
 envilder --map=param-map.json --envfile=.env
 ```
 
-## 🤔 What Problem Does Envilder Solve?
+## 🤔 What problem does Envilder solve?
 
 <table>
 <tr>
@@ -72,23 +74,23 @@ envilder --map=param-map.json --envfile=.env
 
 ## 💡 Why Envilder?
 
-- 🔐 **No More Secrets in Git** - Store credentials in AWS SSM Parameter Store instead of version control
-- 🤖 **Automate Everything** - One command to generate your `.env` files across all environments
-- 🔄 **Always in Sync** - Keep your local, dev, and production environments consistent
-- 🏎️ **Fast to Set Up** - Configure once, then generate `.env` files with a single command
-- 🪶 **Simple but Powerful** - Easy interface with support for encrypted parameters and multiple AWS profiles
+- 🔐 **No more secrets in git** - Store credentials in AWS SSM Parameter Store instead of version control
+- 🤖 **Automate everything** - One command to generate your `.env` files across all environments
+- 🔄 **Always in sync** - Keep your local, dev, and production environments consistent
+- 🏎️ **Fast to set up** - Configure once, then generate `.env` files with a single command
+- 🪶 **Simple but powerful** - Easy interface with support for encrypted parameters and multiple AWS profiles
 
-## 🎯 Perfect for Teams
+## 🎯 Perfect for teams
 
 Envilder is the tool you need if you:
 
-- 👥 **Work in a Development Team** - Ensure everyone has the same environment without sharing raw secrets
-- 🔑 **Deal with API Keys & Tokens** - Securely store and retrieve sensitive credentials
-- ⚙️ **Run CI/CD Pipelines** - Automatically generate environment files during deployments
-- ☁️ **Use AWS Already** - Leverage your existing AWS infrastructure more effectively
-- 🌐 **Manage Multiple Environments** - Switch easily between dev, staging, and production
+- 👥 **Work in a development team** - Ensure everyone has the same environment without sharing raw secrets
+- 🔑 **Deal with API keys & tokens** - Securely store and retrieve sensitive credentials
+- ⚙️ **Run CI/CD pipelines** - Automatically generate environment files during deployments
+- ☁️ **Use AWS already** - Leverage your existing AWS infrastructure more effectively
+- 🌐 **Manage multiple environments** - Switch easily between dev, staging, and production
 
-## 🔍 How It Works (Simple!)
+## 🔍 How it works (simple!)
 
 ```mermaid
 graph LR
@@ -98,10 +100,10 @@ graph LR
     E[SSM Parameters] --> B
 ```
 
-1. 📖 **Define Your Mapping** - Simple JSON mapping env vars to SSM paths
+1. 📖 **Define your mapping** - Simple JSON mapping env vars to SSM paths
 2. 🚀 **Run Envilder** - One command with your mapping file
-3. 🔄 **Auto-Fetch from AWS** - Retrieves values using your AWS credentials
-4. 💾 **Get Your .env File** - Ready to use in your project
+3. 🔄 **Auto-fetch from AWS** - Retrieves values using your AWS credentials
+4. 💾 **Get your .env file** - Ready to use in your project
 
 ## ⚙️ Prerequisites
 
@@ -110,7 +112,7 @@ You'll need:
 - ✅ **AWS CLI** - Installed and configured with proper permissions to access SSM Parameter Store
 - ✅ **Node.js** - Version 14 or higher
 
-### AWS CLI Setup
+### AWS CLI setup
 
 1. Install the AWS CLI by following the [official instructions](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 2. After installation, configure the AWS CLI:
@@ -149,7 +151,7 @@ envilder --map=<mapping-file> --envfile=<output-file> [--profile=<aws-profile>]
 | `--envfile` | Path to output .env file (required) |
 | `--profile` | AWS CLI profile to use (optional) |
 
-## 🔧 Quick Example
+## 🔧 Quick example
 
 1. Create a mapping file `param-map.json`:
 
@@ -172,7 +174,7 @@ envilder --map=<mapping-file> --envfile=<output-file> [--profile=<aws-profile>]
     envilder --map=param-map.json --envfile=.env --profile=dev-account
     ```
 
-## 🌐 Working with Multiple AWS Profiles
+## 🌐 Working with multiple AWS profiles
 
 For multiple AWS accounts or environments, configure different profiles in your AWS credentials file:
 
@@ -203,14 +205,63 @@ or `%USERPROFILE%\.aws\credentials` on Windows):
     envilder --map=param-map.json --envfile=.env.production --profile=prod-account
     ```
 
-## 📂 Sample `.env` Output
+## 🛠️ Advanced usage: environment-specific parameters
+
+Envilder works brilliantly with environment variables for dynamic parameter paths:
+
+1. Set up your SSM parameters with environment-specific paths:
+
+   ```text
+   /project/dev/DB_PASSWORD
+   /project/stage/DB_PASSWORD
+   /project/prod/DB_PASSWORD
+   ```
+
+2. Create a template-based mapping file `env-map.json`:
+
+   ```json
+   {
+     "DB_PASSWORD": "/project/${ENV}/DB_PASSWORD"
+   }
+   ```
+
+3. Generate environment-specific .env files:
+
+   ```powershell
+   # Development
+   $env:ENV = "dev"
+   envilder --map=env-map.json --envfile=.env.dev
+
+   # Staging 
+   $env:ENV = "stage"
+   envilder --map=env-map.json --envfile=.env.stage
+   
+   # Production
+   $env:ENV = "prod" 
+   envilder --map=env-map.json --envfile=.env.prod --profile=prod-account
+   ```
+
+This approach ensures the right variables are pulled for each environment with minimal configuration.
+
+## 📂 Sample `.env` output
 
 ```ini
 SECRET_TOKEN=mockedEmail@example.com
 SECRET_KEY=mockedPassword
 ```
 
-## 🧪 Running Tests
+## 🎯 Why use Envilder in practice?
+
+Envilder eliminates common problems in development teams:
+
+- **🛑 No more "it works on my machine"** - Everyone uses the exact same environment variables from the same source
+- **🔄 Always fresh credentials** - Update a secret in SSM and everyone gets it automatically on next run
+- **🛡️ Access control built-in** - Developers only see dev secrets, CI/CD systems see what they need
+- **🧠 Zero mental overhead** - No need to remember which variables are needed - the mapping defines everything
+- **🚫 No more sharing secrets** - Stop pasting credentials in Slack, email, or Notion documents
+- **📋 Compliance ready** - All accesses are logged in AWS CloudTrail for auditing
+
+## 🧪 Running tests
 
 ```bash
 yarn test
