@@ -74,7 +74,7 @@ describe('envilder CLI (E2E)', () => {
 
     // Assert
     expect(actual.code).not.toBe(0);
-    expect(actual.output).toContain("error");
+    expect(actual.output).toContain('error');
   });
 
   it('Should_Fail_When_RequiredOptionsAreMissing', async () => {
@@ -86,7 +86,7 @@ describe('envilder CLI (E2E)', () => {
 
     // Assert
     expect(actual.code).not.toBe(0);
-    expect(actual.output).toContain("error:");
+    expect(actual.output).toContain('error:');
   });
 });
 
