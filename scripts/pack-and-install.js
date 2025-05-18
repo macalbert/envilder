@@ -60,7 +60,7 @@ function createPackage(env) {
     const packageFile = execSync(env.commands.listTgzFiles, {
       cwd: env.rootDir,
       encoding: 'utf8'
-    }).trim().split('\r\n')[0]; // Split and take first line
+    }).trim().split(/\r?\n/)[0]; // Handle both Windows and Unix line endings
     
     if (!packageFile) {
       throw new Error('No package file found after yarn pack');
