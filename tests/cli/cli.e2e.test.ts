@@ -91,7 +91,7 @@ describe('envilder CLI (E2E)', () => {
     const params = [];
 
     // Act
-    console.log(pc.cyan(`\n[CLI TEST] Running: ${envilder}`));
+    console.log(pc.cyan(`[CLI TEST] Running: ${envilder}`));
     const actual = await runCommand(envilder, params);
     console.log(pc.yellow(`[CLI TEST] Output:\n${actual.output}`));
 
