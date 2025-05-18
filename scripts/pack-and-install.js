@@ -16,7 +16,7 @@ async function main() {
 
 /**
  * Create a package file using npm pack
- * @param {Object} env Environment object with OS commands and paths
+ * @param {string} rootDir The root directory of the project, used to run npm pack.
  * @returns {string} Path to the created package file
  */
 function createPackage(rootDir) {
@@ -43,6 +43,11 @@ function createPackage(rootDir) {
   }
 }
 
+/**
+ * Installs the packaged .tgz file globally using npm.
+ * @param {string} rootDir The root directory of the project, used to resolve the package path.
+ * @param {string} packageFile The filename of the .tgz package to install.
+ */
 function installPackageFile(rootDir, packageFile) {
   console.log('🔧 Installing package globally...');
   const packagePath = path.join(rootDir, packageFile);
