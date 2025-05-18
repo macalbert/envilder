@@ -62,7 +62,7 @@ describe('envilder CLI (E2E)', () => {
     const params = ['--map', paramMapPath, '--envfile', testEnvFile];
 
     // Act
-    console.log(pc.cyan(`\n[CLI TEST] Running: ${envilder} ${params.join(' ')}`));
+    console.log(pc.cyan(`[CLI TEST] Running: ${envilder} ${params.join(' ')}`));
     const actual = await runCommand(envilder, params);
     console.log(pc.yellow(`[CLI TEST] Output:\n${actual.output}`));
 
