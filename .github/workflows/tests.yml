@@ -1,4 +1,4 @@
-name: 🍄 Test CLI
+name: 🌱 unit-tests
 
 on:
   workflow_dispatch: {}
@@ -12,13 +12,16 @@ on:
       - synchronize
       - ready_for_review
     paths:
-      - ".github/workflows/cli-validation.yml"
+      - ".github/workflows/unit-tests.yml"
       - "src/**"
-      - "scripts/**"
       - "tests/**"
-      
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
 jobs:
-  validate:
+  envilder-test:
     runs-on: ubuntu-24.04
     if: ${{ !github.event.pull_request.draft }}
     timeout-minutes: 30
@@ -40,19 +43,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "eu-west-1"
 
-      - name: 🪙 Collect dependencies
+      - name: 📦 Install packages
         run: yarn install --frozen-lockfile
 
-      - name: 🏗️ Build the castle
-        run: yarn build      
+      - name: 🔍 Run formatting checker
+        run: yarn format
 
-      - name: 🧩 Ensure executable permissions
-        run: |
-          chmod +x ./lib/cli/cli.js
+      - name: 🔍 Run code quality checker
+        run: yarn lint
 
-      - name: 🌈 Install envilder globally (with npm)
-        run: |
-          sudo npm install -g .
-        
-      - name: 🎮 Test cli envilder
-        run: yarn validate-cli
+      - name: 🚧 Build
+        run: yarn build
+
+      - name: 🚴‍♀️ Run unit tests
+        run: yarn test
