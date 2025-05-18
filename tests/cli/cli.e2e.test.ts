@@ -14,7 +14,6 @@ describe('envilder CLI (E2E)', () => {
     uninstallGlobalEnvilder();
 
     // Install dependencies, build, and pack/install CLI globally
-    execSync('npm install', { cwd: rootDir, stdio: 'inherit' });
     execSync('npm run build', { cwd: rootDir, stdio: 'inherit' });
     execSync('node scripts/pack-and-install.js', { cwd: rootDir, stdio: 'inherit' });
   }, 120_000);
