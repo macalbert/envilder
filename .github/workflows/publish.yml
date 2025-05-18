@@ -30,22 +30,6 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: 'yarn'
 
-      - name: 💉 Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: "eu-west-1"
-
-      - name: 🌟 Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: 🔥 Lint
-        run: yarn lint
-          
-      - name: 🍄 Run tests
-        run: yarn test
-
       - name: 👑 Detect version bump
         id: version-check
         run: |
@@ -65,6 +49,26 @@ jobs:
             echo "version_changed=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: 💉 Configure AWS credentials
+        if: steps.version-check.outputs.version_changed == 'true'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "eu-west-1"
+
+      - name: 🌟 Install dependencies
+        if: steps.version-check.outputs.version_changed == 'true'
+        run: yarn install --frozen-lockfile
+
+      - name: 🔥 Lint
+        if: steps.version-check.outputs.version_changed == 'true'
+        run: yarn lint
+          
+      - name: 🍄 Run tests
+        if: steps.version-check.outputs.version_changed == 'true'
+        run: yarn test
+
       - name: 🔨 Build package
         if: steps.version-check.outputs.version_changed == 'true'
         run: yarn build
@@ -75,12 +79,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: 🏰 Create GitHub Release
+      - name: 🏰 Create release
         if: steps.version-check.outputs.version_changed == 'true'
         uses: ncipollo/release-action@v1
         with:
           tag: "v${{ steps.version-check.outputs.current_version }}"
-          name: "🍄 Level Up Release v${{ steps.version-check.outputs.current_version }}"
+          name: "🍄 Envilder level up v${{ steps.version-check.outputs.current_version }}"
           generateReleaseNotes: true
           token: ${{ secrets.GITHUB_TOKEN }}
           makeLatest: legacy
