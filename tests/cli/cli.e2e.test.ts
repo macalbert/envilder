@@ -33,7 +33,7 @@ describe('envilder CLI (E2E)', () => {
     const expectedVersion = pkg.version;
 
     // Act
-    console.log(pc.cyan(`\n[CLI TEST] Running: ${envilder} ${params}`));
+    console.log(pc.cyan(`[CLI TEST] Running: ${envilder} ${params}`));
     const actual = await runCommand(envilder, [params]);
     console.log(pc.yellow(`[CLI TEST] Output:\n${actual.output}`));
 
