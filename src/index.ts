@@ -81,7 +81,6 @@ async function fetchAndUpdateEnvVariables(
       console.log(
         `${envVar}=${value.length > 3 ? '*'.repeat(value.length - 3) + value.slice(-3) : '*'.repeat(value.length)}`,
       );
-      
     } catch (error) {
       console.error(`Error fetching parameter: '${ssmName}'`);
       errors.push(`ParameterNotFound: ${ssmName}`);

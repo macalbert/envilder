@@ -5,13 +5,12 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-
 async function main() {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   const rootDir = path.join(__dirname, '..');
-  
-  const packageFile = createPackage(rootDir);  
+
+  const packageFile = createPackage(rootDir);
   installPackageFile(rootDir, packageFile);
 }
 
@@ -38,7 +37,6 @@ function createPackage(rootDir) {
     console.log(`✅ Package created as ${packageFile}`);
 
     return packageFile;
-
   } catch (err) {
     console.error(`❌ Failed to create package: ${err.message}`);
     process.exit(1);
@@ -48,12 +46,12 @@ function createPackage(rootDir) {
 function installPackageFile(rootDir, packageFile) {
   console.log('🔧 Installing package globally...');
   const packagePath = path.join(rootDir, packageFile);
-  
+
   if (!existsSync(packagePath)) {
     console.error(`Error: Package file ${packagePath} does not exist!`);
     process.exit(1);
   }
-  
+
   console.log(`Installing from package: ${packagePath}`);
   execSync(`npm install -g "${packagePath}"`, { stdio: 'inherit' });
 }
