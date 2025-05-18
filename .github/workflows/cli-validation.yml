@@ -44,15 +44,10 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: 🏗️ Build the castle
-        run: yarn build      
+        run: yarn build
 
-      - name: 🧩 Ensure executable permissions
-        run: |
-          chmod +x ./lib/cli/cli.js
+      - name: 📦 Package and deploy envilder
+        run: yarn local-deploy
 
-      - name: 🌈 Install envilder globally (with npm)
-        run: |
-          sudo npm install -g .
-        
       - name: 🎮 Test cli envilder
         run: yarn validate-cli

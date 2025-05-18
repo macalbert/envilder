@@ -8,8 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '..');
 const isGithubAction = process.env.GITHUB_ACTIONS === 'true';
-const isWindows = process.platform === 'win32';
-const findCommand = isWindows ? 'where' : 'which';
+
 
 /**
  * Run a command with the given arguments
