@@ -44,31 +44,26 @@ async function initializeEnvironment() {
 }
 
 /**
- * Create a package file using yarn pack
+ * Create a package file using npm pack
  * @param {Object} env Environment object with OS commands and paths
  * @returns {string} Path to the created package file
  */
 function createPackage(env) {
   console.log('📦 Creating package...');
-  
   try {
-    execSync('yarn pack', { 
-      cwd: env.rootDir, 
-      stdio: 'inherit'
-    });
-    
-    const packageFile = execSync(env.commands.listTgzFiles, {
+    // Capture the output of npm pack to get the filename
+    const output = execSync('npm pack', {
       cwd: env.rootDir,
       encoding: 'utf8'
-    }).trim().split(/\r?\n/)[0]; // Handle both Windows and Unix line endings
-    
-    if (!packageFile) {
-      throw new Error('No package file found after yarn pack');
+    });
+    // The last non-empty line is the filename
+    const lines = output.trim().split(/\r?\n/);
+    const packageFile = lines[lines.length - 1];
+    if (!packageFile.endsWith('.tgz')) {
+      throw new Error('Could not determine package file from npm pack output');
     }
-    
     console.log(`✅ Package created as ${packageFile}`);
     return packageFile;
-    
   } catch (err) {
     console.error(`❌ Failed to create package: ${err.message}`);
     process.exit(1);
@@ -76,28 +71,35 @@ function createPackage(env) {
 }
 
 /**
- * Install the package globally using yarn
+ * Install the package globally using npm
  * @param {Object} env Environment object with OS commands and paths
  * @param {string} packageFile Name of the package file to install
  */
 function installPackage(env, packageFile) {
   console.log('🔧 Installing package globally...');
-
   try {
     const packagePath = path.join(env.rootDir, packageFile);
-    console.log(`Installing from package: ${packageFile}`);
-    
+    console.log(`Installing from package: ${packagePath}`);
     if (!existsSync(packagePath)) {
-      console.error(`Error: Package file ${packageFile} does not exist!`);
+      console.error(`Error: Package file ${packagePath} does not exist!`);
       process.exit(1);
     }
-    
-    execSync(`yarn global add "${packagePath}"`, { 
-      stdio: 'inherit'
-    });
-    
-    const envPath = execSync(env.commands.verifyInstall, { encoding: 'utf8' }).trim();
-    console.log(`✅ Package installed globally at: ${envPath}`);
+    execSync(`npm install -g "${packagePath}"`, { stdio: 'inherit' });
+    // Verify CLI is globally available and working
+    try {
+      const versionOutput = execSync('envilder --version', { encoding: 'utf8' }).trim();
+      console.log(`✅ envilder CLI is globally available: ${versionOutput}`);
+    } catch (err) {
+      console.error('❌ envilder CLI is not available globally after install!');
+      process.exit(1);
+    }
+    // Show where the binary is
+    try {
+      const envPath = execSync(env.commands.verifyInstall, { encoding: 'utf8' }).trim();
+      console.log(`✅ Package installed globally at: ${envPath}`);
+    } catch (err) {
+      console.warn('⚠️ Could not determine global install path for envilder.');
+    }
   } catch (err) {
     console.error(`❌ Failed to install package: ${err.message}`);
     process.exit(1);
