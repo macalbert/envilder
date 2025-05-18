@@ -1,7 +1,7 @@
 {
   "name": "envilder",
-  "version": "0.5.1",
-  "description": "A CLI tool to generate .env files from AWS SSM parameters",
+  "version": "0.5.2",
+  "description": "A CLI that securely centralizes your environment variables from AWS SSM as a single source of truth",
   "exports": {
     ".": {
       "import": "./lib/index.js",
@@ -29,7 +29,23 @@
     "npm-release-minor": "yarn version --new-version minor",
     "npm-release-prerelease": "yarn version --new-version prerelease"
   },
-  "keywords": [],
+  "keywords": [
+    "env",
+    "dotenv",
+    "aws",
+    "ssm",
+    "parameter-store",
+    "cli",
+    "environment",
+    "secrets",
+    "automation",
+    "config",
+    "aws-cli",
+    "devops",
+    "ci-cd",
+    "secure",
+    "envfile"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/macalbert/envilder.git"

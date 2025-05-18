@@ -3,7 +3,7 @@
   <img src="https://github.com/user-attachments/assets/96bf1efa-7d21-440a-a414-3a20e7f9a1f1" alt="Envilder">
 </h1>
 
-<h4 align="center">One source of truth for all your environment variables</h4>
+<h4 align="center">A CLI that securely centralizes your environment variables from AWS SSM as a single source of truth</h4>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/envilder">
