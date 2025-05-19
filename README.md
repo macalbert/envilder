@@ -95,7 +95,7 @@ Envilder is the tool you need if you:
 ```mermaid
 graph LR
     A[Mapping File] --> B[Envilder]
-    C[AWS Credentials] --> B
+    C[AWS CLI] --> B
     B --> D[.env File]
     E[SSM Parameters] --> B
 ```
@@ -110,7 +110,7 @@ graph LR
 You'll need:
 
 - ✅ **AWS CLI** - Installed and configured with proper permissions to access SSM Parameter Store
-- ✅ **Node.js** - Version 14 or higher
+- ✅ **Node.js** - Version 20 or higher
 
 ### AWS CLI setup
 
