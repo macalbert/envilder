@@ -22,7 +22,7 @@
 - **🔒 Strict access control** - AWS IAM policies control who accesses which secrets (dev vs prod)
 - **📊 Full audit trail** - All parameter access is logged in CloudTrail for compliance requirements
 - **🧩 Single source of truth** - No more copying .env files from Notion or emails - SSM is your only source
-- **🔁 Idempotent operations** - Won't overwrite your local values - safe for automation
+- **🔁 Idempotent operations** - Overwrites values in your `.env` file *only* for variables defined in your mapping file, using the latest from SSM. Variables not in the mapping file are preserved. Safe for automation.
 - **⚙️ Environment-aware** - Use templates like `/project/${ENV}/DB_PASSWORD` to dynamically fetch the right secrets
 - **🧱 No extra infrastructure** - Uses AWS SSM's existing reliability instead of additional secret managers
 
@@ -110,7 +110,7 @@ graph LR
 You'll need:
 
 - ✅ **AWS CLI** - Installed and configured with proper permissions to access SSM Parameter Store
-- ✅ **Node.js** - Version 14 or higher
+- ✅ **Node.js** - Version 20.0.0 or higher (as specified in `package.json`)
 
 ### AWS CLI setup
 
