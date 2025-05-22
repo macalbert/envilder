@@ -87,9 +87,7 @@ describe('Envilder CLI', () => {
     const action = run(mockMapPath, mockEnvFilePath);
 
     // Assert
-    await expect(action).rejects.toThrow(
-      `Invalid JSON in parameter map file: ${mockMapPath}`,
-    );
+    await expect(action).rejects.toThrow(`Invalid JSON in parameter map file: ${mockMapPath}`);
   });
 
   it('Should_AppendNewSSMParameters_When_EnvFileContainsExistingVariables', async () => {

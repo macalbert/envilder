@@ -110,9 +110,7 @@ async function fetchSSMParameter(ssmName: string, ssm: SSM): Promise<string | un
 function writeEnvFile(envFilePath: string, envVariables: Record<string, string>): void {
   const envContent = Object.entries(envVariables)
     .map(([key, value]) => {
-      const escapedValue = value
-        .replace(/(\r\n|\n|\r)/g, '\\n')
-        .replace(/"/g, '\\"');
+      const escapedValue = value.replace(/(\r\n|\n|\r)/g, '\\n').replace(/"/g, '\\"');
       return `${key}=${escapedValue}`;
     })
     .join('\n');
