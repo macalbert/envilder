@@ -3,12 +3,13 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import pc from 'picocolors';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '../..');
 
-describe('envilder CLI (E2E)', () => {
+describe('Envilder CLI (E2E)', () => {
   beforeAll(() => {
     uninstallGlobalEnvilder();
 
@@ -27,12 +28,12 @@ describe('envilder CLI (E2E)', () => {
 
   it('Should_PrintCorrectVersion_When_VersionFlagIsProvided', async () => {
     // Arrange
-    const argument = '--version';
+    const params = ['--version'];
     const pkg = JSON.parse(readFileSync(join(rootDir, 'package.json'), 'utf8'));
     const expectedVersion = pkg.version;
 
     // Act
-    const actual = await runCommand(envilder, [argument]);
+    const actual = await runCommand(envilder, params);
 
     // Assert
     expect(actual.code).toBe(0);
@@ -41,10 +42,10 @@ describe('envilder CLI (E2E)', () => {
 
   it('Should_PrintHelpWithExpectedOptions_When_HelpFlagIsProvided', async () => {
     // Arrange
-    const argument = '--help';
+    const params = ['--help'];
 
     // Act
-    const actual = await runCommand(envilder, [argument]);
+    const actual = await runCommand(envilder, params);
 
     // Assert
     expect(actual.code).toBe(0);
@@ -54,10 +55,10 @@ describe('envilder CLI (E2E)', () => {
 
   it('Should_GenerateEnvironmentFile_When_ValidArgumentsAreProvided', async () => {
     // Arrange
-    const arguments_ = ['--map', paramMapPath, '--envfile', testEnvFile];
+    const params = ['--map', paramMapPath, '--envfile', testEnvFile];
 
     // Act
-    const actual = await runCommand(envilder, arguments_);
+    const actual = await runCommand(envilder, params);
 
     // Assert
     expect(actual.code).toBe(0);
@@ -67,10 +68,10 @@ describe('envilder CLI (E2E)', () => {
 
   it('Should_FailWithInvalidArguments_When_InvalidArgumentsAreProvided', async () => {
     // Arrange
-    const arguments_ = ['--invalid'];
+    const params = ['--invalid'];
 
     // Act
-    const actual = await runCommand(envilder, arguments_);
+    const actual = await runCommand(envilder, params);
 
     // Assert
     expect(actual.code).not.toBe(0);
@@ -79,10 +80,10 @@ describe('envilder CLI (E2E)', () => {
 
   it('Should_Fail_When_RequiredOptionsAreMissing', async () => {
     // Arrange
-    const arguments_ = [];
+    const params = [];
 
     // Act
-    const actual = await runCommand(envilder, arguments_);
+    const actual = await runCommand(envilder, params);
 
     // Assert
     expect(actual.code).not.toBe(0);
@@ -91,6 +92,7 @@ describe('envilder CLI (E2E)', () => {
 });
 
 function runCommand(command: string, args: string[]): Promise<{ code: number; output: string }> {
+  console.log(`${pc.bold(pc.bgCyan(pc.black(' [CLI TEST] INPUT ')))} ${pc.cyan(`${command} ${args.join(' ')}`)}`);
   return new Promise((resolve) => {
     const proc = spawn(command, args, { shell: true });
     let output = '';
@@ -101,6 +103,9 @@ function runCommand(command: string, args: string[]): Promise<{ code: number; ou
       output += data.toString();
     });
     proc.on('close', (code) => {
+      console.log(
+        `${pc.bold(pc.bgYellow(pc.black(' [CLI TEST] OUTPUT ')))} [exit code: ${code}]\n${pc.yellow(output.trim() ? output : '[no output]')}`,
+      );
       resolve({ code: code ?? 0, output });
     });
   });
