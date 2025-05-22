@@ -79,6 +79,17 @@ describe('Envilder CLI', () => {
     await expect(action).rejects.toThrow('ParameterNotFound: non-existent parameter');
   });
 
+  it('Should_ThrowError_When_ParameterMapIsInvalidJSON', async () => {
+    // Arrange
+    fs.writeFileSync(mockMapPath, '{ invalid json');
+
+    // Act
+    const action = run(mockMapPath, mockEnvFilePath);
+
+    // Assert
+    await expect(action).rejects.toThrow(`Invalid JSON in parameter map file: ${mockMapPath}`);
+  });
+
   it('Should_AppendNewSSMParameters_When_EnvFileContainsExistingVariables', async () => {
     // Arrange
     const existingEnvContent = 'EXISTING_VAR=existingValue';
