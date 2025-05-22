@@ -96,7 +96,7 @@ Envilder is the tool you need if you:
 ```mermaid
 graph LR
     A[Mapping File] --> B[Envilder]
-    C[AWS CLI] --> B
+    C[AWS Credentials] --> B
     B --> D[.env File]
     E[SSM Parameters] --> B
 ```
