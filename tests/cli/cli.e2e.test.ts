@@ -15,7 +15,7 @@ describe('Envilder CLI (E2E)', () => {
 
     // Install dependencies, build, and pack/install CLI globally
     execSync('npm run build', { cwd: rootDir, stdio: 'inherit' });
-    execSync('node scripts/pack-and-install.js', { cwd: rootDir, stdio: 'inherit' });
+    execSync('ts-node-esm scripts/pack-and-install.ts', { cwd: rootDir, stdio: 'inherit' });
   }, 120_000);
 
   const envilder = 'envilder';
