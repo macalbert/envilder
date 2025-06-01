@@ -15,6 +15,7 @@ on:
       - ".github/workflows/tests.yml"
       - "src/**"
       - "tests/**"
+      - 'package.json'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
