@@ -11,11 +11,12 @@ const rootDir = join(__dirname, '../..');
 
 describe('Envilder CLI (E2E)', () => {
   beforeAll(() => {
-    uninstallGlobalEnvilder();
-
-    // Install dependencies, build, and pack/install CLI globally
+    uninstallGlobalEnvilder(); // Install dependencies, build, and pack/install CLI globally
     execSync('npm run build', { cwd: rootDir, stdio: 'inherit' });
-    execSync('ts-node-esm scripts/pack-and-install.ts', { cwd: rootDir, stdio: 'inherit' });
+    execSync('node --loader ts-node/esm scripts/pack-and-install.ts', {
+      cwd: rootDir,
+      stdio: 'inherit',
+    });
   }, 120_000);
 
   const envilder = 'envilder';
@@ -80,7 +81,7 @@ describe('Envilder CLI (E2E)', () => {
 
   it('Should_Fail_When_RequiredOptionsAreMissing', async () => {
     // Arrange
-    const params = [];
+    const params: string[] = [];
 
     // Act
     const actual = await runCommand(envilder, params);

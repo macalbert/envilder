@@ -16,4 +16,10 @@ You can run this script using the following yarn command defined in `package.jso
 yarn local:install
 ```
 
-This command will first build the project (`yarn build`) and then execute `pack-and-install.ts` using `ts-node-esm`.
+This command will first build the project (`yarn build`) and then execute `pack-and-install.ts` using `ts-node` with the appropriate flags to handle ES modules. Behind the scenes, it runs:
+
+```bash
+npx ts-node --esm --project scripts/tsconfig.json scripts/pack-and-install.ts
+```
+
+You can also run this command directly if you prefer.

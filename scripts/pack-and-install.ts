@@ -19,7 +19,7 @@ async function main() {
  * @param {string} rootDir The root directory of the project, used to run npm pack.
  * @returns {string} Path to the created package file
  */
-function createPackage(rootDir) {
+function createPackage(rootDir: string): string {
   console.log('📦 Creating package...');
   try {
     // Capture the output of npm pack to get the filename
@@ -38,7 +38,8 @@ function createPackage(rootDir) {
 
     return packageFile;
   } catch (err) {
-    console.error(`❌ Failed to create package: ${err.message}`);
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error(`❌ Failed to create package: ${errorMessage}`);
     process.exit(1);
   }
 }
@@ -48,7 +49,7 @@ function createPackage(rootDir) {
  * @param {string} rootDir The root directory of the project, used to resolve the package path.
  * @param {string} packageFile The filename of the .tgz package to install.
  */
-function installPackageFile(rootDir, packageFile) {
+function installPackageFile(rootDir: string, packageFile: string) {
   console.log('🔧 Installing package globally...');
   const packagePath = path.join(rootDir, packageFile);
 
