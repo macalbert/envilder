@@ -1,4 +1,4 @@
-name: 🔦 code-coverage
+name: 🏰 Star Castle Coverage
 
 on:
   workflow_dispatch:
@@ -25,14 +25,14 @@ permissions:
   id-token: write
 
 jobs:
-  build-coverage:
+  shine-sprite-coverage:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     if: ${{ !github.event.pull_request.draft }}
     steps:
-      - name: Check if PR is created by Dependabot
+      - name: 👾 Check if PR is created by a Goomba (Dependabot)
         id: dependabot-check
         run: |
           if [[ "${{ github.actor }}" == *dependabot* ]]; then
@@ -41,7 +41,7 @@ jobs:
             echo "is_dependabot=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: 💉 Configure AWS credentials
+      - name: 🪙 Collect Coins (Configure AWS credentials)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}

@@ -1,4 +1,4 @@
-name: 🌱 unit-tests
+name: 🍄 1-Up Test Run
 
 on:
   workflow_dispatch: {}
@@ -22,39 +22,39 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  envilder-test:
+  powerup-test:
     runs-on: ubuntu-24.04
     if: ${{ !github.event.pull_request.draft }}
     timeout-minutes: 30
 
     steps:
-      - name: 🚀 ♂️ Checkout
+      - name: 🧱 Enter the Pipe (Checkout)
         uses: actions/checkout@v4
 
-      - name: 🛠️ Setup Node.js with Cache
+      - name: 🍄 Grab a Mushroom (Setup Node.js with Cache)
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'yarn'
 
-      - name: 💉 Configure AWS credentials
+      - name: 🪙 Collect Coins (Configure AWS credentials)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "eu-west-1"
 
-      - name: 📦 Install packages
+      - name: 📦 Open the ? Block (Install packages)
         run: yarn install --frozen-lockfile
 
-      - name: 🔍 Run formatting checker
+      - name: 🌟 Shine Sprite (Run formatting checker)
         run: yarn format
 
-      - name: 🔍 Run code quality checker
+      - name: 🏁 Flagpole (Run code quality checker)
         run: yarn lint
 
-      - name: 🚧 Build
+      - name: 🏗️ Build the Castle
         run: yarn build
 
-      - name: 🚴‍♀️ Run unit tests
+      - name: 🏆 Defeat the Boss (Run unit tests)
         run: yarn test
