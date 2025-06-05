@@ -125,9 +125,9 @@ function writeEnvFile(envFilePath: string, envVariables: Record<string, string>)
   const envContent = Object.entries(envVariables)
     .map(([key, value]) => {
       const escapedValue = value
-        .replace(/\\/g, '\\\\') // Escape backslashes first (\ becomes \\)
-        .replace(/(\r\n|\n|\r)/g, '\\n') // Normalize and escape newlines
-        .replace(/"/g, '\\"'); // Escape double quotes
+        .replace(/\\/g, '\\\\')
+        .replace(/(\r\n|\n|\r)/g, '\\n')
+        .replace(/"/g, '\\"');
       return `${key}=${escapedValue}`;
     })
     .join('\n');
