@@ -110,10 +110,24 @@ async function fetchSSMParameter(ssmName: string, ssm: SSM): Promise<string | un
   return Parameter?.Value;
 }
 
+/**
+ * Writes environment variables to a .env file with proper escaping.
+ *
+ * Properly escapes special characters in the environment variable values:
+ * - Backslashes are escaped first to avoid interfering with other escape sequences
+ * - Newlines (CR, LF, CRLF) are converted to '\n' in the output file
+ * - Double quotes are escaped to avoid issues when the .env file is parsed
+ *
+ * @param envFilePath - Path to the .env file to write
+ * @param envVariables - Record of environment variable names and values
+ */
 function writeEnvFile(envFilePath: string, envVariables: Record<string, string>): void {
   const envContent = Object.entries(envVariables)
     .map(([key, value]) => {
-      const escapedValue = value.replace(/(\r\n|\n|\r)/g, '\\n').replace(/"/g, '\\"');
+      const escapedValue = value
+        .replace(/\\/g, '\\\\') // Escape backslashes first (\ becomes \\)
+        .replace(/(\r\n|\n|\r)/g, '\\n') // Normalize and escape newlines
+        .replace(/"/g, '\\"'); // Escape double quotes
       return `${key}=${escapedValue}`;
     })
     .join('\n');
