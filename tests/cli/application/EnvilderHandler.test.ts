@@ -2,10 +2,7 @@ import * as fs from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EnvilderBuilder } from '../../../src/cli/domain/EnvilderBuilder';
 import type { ISecretProvider } from '../../../src/cli/domain/ports/ISecretProvider';
-import type { IEnvFileManager } from '../../../src/cli/domain/ports/IEnvFileManager';
-import { EnvFileManager } from '../../../src/cli/infrastructure/EnvFileManager';
 
-// Mock ISecretProvider
 const testValues: Record<string, string> = {
   '/path/to/ssm/email': 'mockedEmail@example.com',
   '/path/to/ssm/password': 'mockedPassword',
@@ -148,6 +145,23 @@ describe('Envilder CLI', () => {
     // Assert
     expect(actual).toHaveBeenCalledWith(
       expect.stringContaining('Warning: No value found for'),
+    );
+  });
+
+  it('Should_LogMaskedValue_When_SecretIsSet', async () => {
+    // Arrange
+    const paramMapContent = {
+      NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password',
+    };
+    fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+    const logSpy = vi.spyOn(console, 'log');
+
+    // Act
+    await sut.run(mockMapPath, mockEnvFilePath);
+
+    // Assert
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining('NEXT_PUBLIC_CREDENTIAL_PASSWORD=***********ord'),
     );
   });
 });
