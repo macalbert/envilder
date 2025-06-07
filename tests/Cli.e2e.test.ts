@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const rootDir = join(__dirname, '../..');
+const rootDir = join(__dirname, '..');
 
 describe('Envilder CLI (E2E)', () => {
   beforeAll(() => {
@@ -20,20 +20,8 @@ describe('Envilder CLI (E2E)', () => {
   }, 120_000);
 
   const envilder = 'envilder';
-  const testEnvFile = join(
-    rootDir,
-    'tests',
-    'cli',
-    'sample',
-    'cli-validation.env',
-  );
-  const paramMapPath = join(
-    rootDir,
-    'tests',
-    'cli',
-    'sample',
-    'param-map.json',
-  );
+  const testEnvFile = join(rootDir, 'tests', 'sample', 'cli-validation.env');
+  const paramMapPath = join(rootDir, 'tests', 'sample', 'param-map.json');
 
   afterAll(() => {
     cleanUpSystem();

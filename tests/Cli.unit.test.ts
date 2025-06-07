@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { main } from '../../src/Cli.ts';
-import { Envilder } from '../../src/cli/application/EnvilderHandler.ts';
-import { EnvilderBuilder } from '../../src/cli/domain/EnvilderBuilder.ts';
-import type { IEnvFileManager } from '../../src/cli/domain/ports/IEnvFileManager.ts';
-import type { ISecretProvider } from '../../src/cli/domain/ports/ISecretProvider.ts';
+import { main } from '../src/Cli.ts';
+import { Envilder } from '../src/cli/application/EnvilderHandler.ts';
+import { EnvilderBuilder } from '../src/cli/domain/EnvilderBuilder.ts';
+import type { IEnvFileManager } from '../src/cli/domain/ports/IEnvFileManager.ts';
+import type { ISecretProvider } from '../src/cli/domain/ports/ISecretProvider.ts';
 
 function patchBuilderWithMocks(
   mockFileManager: IEnvFileManager,
