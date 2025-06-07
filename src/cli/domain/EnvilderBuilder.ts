@@ -4,8 +4,8 @@ import { fromIni } from '@aws-sdk/credential-providers';
 import { Envilder } from '../application/EnvilderHandler.js';
 import { AwsSsmSecretProvider } from '../infrastructure/AwsSsmStoreSecrets.js';
 import { EnvFileManager } from '../infrastructure/EnvFileManager.js';
-import type { ISecretProvider } from './ports/ISecretProvider.js';
 import type { IEnvFileManager } from './ports/IEnvFileManager.js';
+import type { ISecretProvider } from './ports/ISecretProvider.js';
 
 export class EnvilderBuilder {
   private provider?: ISecretProvider;

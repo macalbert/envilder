@@ -1,6 +1,5 @@
-import * as dotenv from 'dotenv';
-import type { ISecretProvider } from '../domain/ports/ISecretProvider';
 import type { IEnvFileManager } from '../domain/ports/IEnvFileManager';
+import type { ISecretProvider } from '../domain/ports/ISecretProvider';
 
 export class Envilder {
   private keyVault: ISecretProvider;
@@ -35,28 +34,36 @@ export class Envilder {
     paramMap: Record<string, string>,
     existingEnvVariables: Record<string, string>,
   ): Promise<Record<string, string>> {
-    const errors: string[] = [];
-    for (const [envVar, secretName] of Object.entries(paramMap)) {
-      try {
-        const value = await this.keyVault.getSecret(secretName);
-        if (!value) {
-          console.error(`Warning: No value found for: '${secretName}'`);
-          continue;
+    try {
+      const errors: string[] = [];
+      for (const [envVar, secretName] of Object.entries(paramMap)) {
+        try {
+          const value = await this.keyVault.getSecret(secretName);
+          if (!value) {
+            console.error(`Warning: No value found for: '${secretName}'`);
+            continue;
+          }
+          existingEnvVariables[envVar] = value;
+          console.log(
+            `${envVar}=${value.length > 10 ? '*'.repeat(value.length - 3) + value.slice(-3) : '*'.repeat(value.length)}`,
+          );
+        } catch (error) {
+          console.error(`Error fetching parameter: '${secretName}'`);
+          errors.push(`ParameterNotFound: ${secretName}`);
         }
-        existingEnvVariables[envVar] = value;
-        console.log(
-          `${envVar}=${value.length > 3 ? '*'.repeat(value.length - 3) + value.slice(-3) : '*'.repeat(value.length)}`,
-        );
-      } catch (error) {
-        console.error(`Error fetching parameter: '${secretName}'`);
-        errors.push(`ParameterNotFound: ${secretName}`);
       }
+      if (errors.length > 0) {
+        throw new Error(
+          `Some parameters could not be fetched:\n${errors.join('\n')}`,
+        );
+      }
+
+      return existingEnvVariables;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      console.error(`Failed to generate environment file: ${errorMessage}`);
+      throw error;
     }
-    if (errors.length > 0) {
-      throw new Error(
-        `Some parameters could not be fetched:\n${errors.join('\n')}`,
-      );
-    }
-    return existingEnvVariables;
   }
 }

@@ -1,6 +1,6 @@
-import type { IEnvFileManager } from '../domain/ports/IEnvFileManager';
 import * as fs from 'node:fs';
 import * as dotenv from 'dotenv';
+import type { IEnvFileManager } from '../domain/ports/IEnvFileManager';
 
 export class EnvFileManager implements IEnvFileManager {
   loadParamMap(mapPath: string): Record<string, string> {
