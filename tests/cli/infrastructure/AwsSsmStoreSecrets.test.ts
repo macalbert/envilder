@@ -1,5 +1,5 @@
 // ...existing code...
-import { describe, it, expect } from 'vitest';
+import { describe, it } from 'vitest';
 
 describe('AwsSsmStoreSecrets', () => {
   it('', () => {
