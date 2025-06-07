@@ -1,38 +1,27 @@
 import * as fs from 'node:fs';
-import { SSM } from '@aws-sdk/client-ssm';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EnvilderBuilder } from '../../../src/cli/domain/EnvilderBuilder';
+import type { ISecretProvider } from '../../../src/cli/domain/ports/ISecretProvider';
 
-vi.mock('@aws-sdk/client-ssm', () => {
-  return {
-    SSM: vi.fn().mockImplementation(() => ({
-      send: vi.fn((command) => {
-        if (command.input.Name === '/path/to/ssm/email') {
-          return Promise.resolve({
-            Parameter: { Value: 'mockedEmail@example.com' },
-          });
-        }
+// Mock ISecretProvider
+const testValues: Record<string, string> = {
+  '/path/to/ssm/email': 'mockedEmail@example.com',
+  '/path/to/ssm/password': 'mockedPassword',
+  '/path/to/ssm/password_no_value': '',
+};
 
-        if (command.input.Name === '/path/to/ssm/password') {
-          return Promise.resolve({
-            Parameter: { Value: 'mockedPassword' },
-          });
-        }
-
-        if (command.input.Name === '/path/to/ssm/password_no_value') {
-          return Promise.resolve({ Parameter: { Value: '' } });
-        }
-
-        return Promise.reject(new Error(`ParameterNotFound: ${command.input.Name}`));
-      }),
-    })),
-    GetParameterCommand: vi.fn().mockImplementation((input) => ({
-      input,
-    })),
-  };
-});
+const mockSecretProvider: ISecretProvider = {
+  getSecret: vi.fn(async (name: string) => {
+    if (Object.prototype.hasOwnProperty.call(testValues, name)) {
+      return testValues[name];
+    }
+    throw new Error(`ParameterNotFound: ${name}`);
+  }),
+};
 
 describe('Envilder CLI', () => {
+  const sut = EnvilderBuilder.build().withProvider(mockSecretProvider).create();
+
   const mockMapPath = './tests/param-map.json';
   const mockEnvFilePath = './tests/.env.test';
 
@@ -55,7 +44,6 @@ describe('Envilder CLI', () => {
       NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = EnvilderBuilder.build().withAwsProvider().create();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
@@ -72,7 +60,6 @@ describe('Envilder CLI', () => {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: 'non-existent parameter',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = EnvilderBuilder.build().withAwsProvider().create();
 
     // Act
     const action = sut.run(mockMapPath, mockEnvFilePath);
@@ -84,7 +71,6 @@ describe('Envilder CLI', () => {
   it('Should_ThrowError_When_ParameterMapIsInvalidJSON', async () => {
     // Arrange
     fs.writeFileSync(mockMapPath, '{ invalid json');
-    const sut = EnvilderBuilder.build().withAwsProvider().create();
 
     // Act
     const action = sut.run(mockMapPath, mockEnvFilePath);
@@ -102,7 +88,6 @@ describe('Envilder CLI', () => {
       NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = EnvilderBuilder.build().withAwsProvider().create();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
@@ -123,7 +108,6 @@ describe('Envilder CLI', () => {
       NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = EnvilderBuilder.build().withAwsProvider().create();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
@@ -141,29 +125,11 @@ describe('Envilder CLI', () => {
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
     const actual = vi.spyOn(console, 'error');
-    const sut = EnvilderBuilder.build().withAwsProvider().create();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
 
     // Assert
     expect(actual).toHaveBeenCalledWith(expect.stringContaining('Warning: No value found for'));
-  });
-
-  it('Should_ConfigureSSMClientWithProfile_When_ProfileIsProvided', async () => {
-    // Arrange
-    const mockProfile = 'test-profile';
-    const paramMapContent = {
-      NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
-    };
-    fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = EnvilderBuilder.build().withAwsProvider(mockProfile).create();
-
-    // Act
-    await sut.run(mockMapPath, mockEnvFilePath);
-
-    // Assert
-    const actual = vi.mocked(SSM).mock.calls[0][0];
-    expect(actual).toEqual(expect.objectContaining({ credentials: expect.anything() }));
   });
 });

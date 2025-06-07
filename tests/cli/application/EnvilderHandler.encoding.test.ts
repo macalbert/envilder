@@ -2,37 +2,23 @@ import * as fs from 'node:fs';
 import * as dotenv from 'dotenv';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EnvilderBuilder } from '../../../src/cli/domain/EnvilderBuilder';
+import type { ISecretProvider } from '../../../src/cli/domain/ports/ISecretProvider';
 
-// Mock the SSM client
-vi.mock('@aws-sdk/client-ssm', () => {
-  return {
-    SSM: vi.fn().mockImplementation(() => ({
-      send: vi.fn((command) => {
-        const testValues: Record<string, string> = {
-          '/test/backslash': 'value\\with\\backslashes',
-          '/test/newlines': 'value\nwith\nnewlines',
-          '/test/quotes': 'value"with"quotes',
-          '/test/combined': 'value\\"with\\"\neverything\\combined',
-          '/test/already-escaped': 'value\\\\already\\\\escaped',
-        };
+const testValues: Record<string, string> = {
+  '/test/backslash': 'value\\with\\backslashes',
+  '/test/newlines': 'value\nwith\nnewlines',
+  '/test/quotes': 'value"with"quotes',
+  '/test/combined': 'value\\"with\\"\neverything\\combined',
+  '/test/already-escaped': 'value\\\\already\\\\escaped',
+};
 
-        const paramName = command.input.Name;
-        if (testValues[paramName]) {
-          return Promise.resolve({
-            Parameter: { Value: testValues[paramName] },
-          });
-        }
-
-        return Promise.reject(new Error(`ParameterNotFound: ${paramName}`));
-      }),
-    })),
-    GetParameterCommand: vi.fn().mockImplementation((input) => ({
-      input,
-    })),
-  };
-});
+const mockSecretProvider: ISecretProvider = {
+  getSecret: vi.fn(async (name: string) => testValues[name]),
+};
 
 describe('String Escaping in Environment File Generation', () => {
+  const sut = EnvilderBuilder.build().withProvider(mockSecretProvider).create();
+
   const mockMapPath = './tests/escaping-map.json';
   const mockEnvFilePath = './tests/.env.escaping.test';
 
@@ -54,7 +40,6 @@ describe('String Escaping in Environment File Generation', () => {
       BACKSLASH_VAR: '/test/backslash',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = EnvilderBuilder.build().withAwsProvider().create();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
@@ -72,7 +57,6 @@ describe('String Escaping in Environment File Generation', () => {
       NEWLINE_VAR: '/test/newlines',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = EnvilderBuilder.build().withAwsProvider().create();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
@@ -90,7 +74,6 @@ describe('String Escaping in Environment File Generation', () => {
       QUOTE_VAR: '/test/quotes',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = EnvilderBuilder.build().withAwsProvider().create();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
@@ -108,7 +91,6 @@ describe('String Escaping in Environment File Generation', () => {
       COMBINED_VAR: '/test/combined',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = EnvilderBuilder.build().withAwsProvider().create();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
@@ -133,7 +115,6 @@ describe('String Escaping in Environment File Generation', () => {
       ESCAPED_VAR: '/test/already-escaped',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = EnvilderBuilder.build().withAwsProvider().create();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
