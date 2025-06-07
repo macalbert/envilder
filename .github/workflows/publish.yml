@@ -23,12 +23,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 🔧 Setup Node.js
+      - name: 🛠️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
-          cache: 'yarn'
+          cache: 'npm'
 
       - name: 👑 Detect version bump
         id: version-check
@@ -59,23 +59,23 @@ jobs:
 
       - name: 🌟 Install dependencies
         if: steps.version-check.outputs.version_changed == 'true'
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: 🔥 Lint
         if: steps.version-check.outputs.version_changed == 'true'
-        run: yarn lint
+        run: npm run lint
           
       - name: 🍄 Run tests
         if: steps.version-check.outputs.version_changed == 'true'
-        run: yarn test
+        run: npm test
 
-      - name: 🔨 Build package
+      - name: 🏗️ Build package
         if: steps.version-check.outputs.version_changed == 'true'
-        run: yarn build
+        run: npm run build
 
       - name: 🚩 Publish to npm
         if: steps.version-check.outputs.version_changed == 'true'
-        run: yarn publish --non-interactive
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

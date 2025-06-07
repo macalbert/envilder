@@ -2,8 +2,8 @@ import { execSync, spawn } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import pc from 'picocolors';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -11,19 +11,32 @@ const rootDir = join(__dirname, '../..');
 
 describe('Envilder CLI (E2E)', () => {
   beforeAll(() => {
-    uninstallGlobalEnvilder();
-
-    // Install dependencies, build, and pack/install CLI globally
+    cleanUpSystem();
     execSync('npm run build', { cwd: rootDir, stdio: 'inherit' });
-    execSync('node scripts/pack-and-install.js', { cwd: rootDir, stdio: 'inherit' });
+    execSync('node --loader ts-node/esm scripts/pack-and-install.ts', {
+      cwd: rootDir,
+      stdio: 'inherit',
+    });
   }, 120_000);
 
   const envilder = 'envilder';
-  const testEnvFile = join(rootDir, 'tests', 'sample', 'cli-validation.env');
-  const paramMapPath = join(rootDir, 'tests', 'sample', 'param-map.json');
+  const testEnvFile = join(
+    rootDir,
+    'tests',
+    'cli',
+    'sample',
+    'cli-validation.env',
+  );
+  const paramMapPath = join(
+    rootDir,
+    'tests',
+    'cli',
+    'sample',
+    'param-map.json',
+  );
 
   afterAll(() => {
-    uninstallGlobalEnvilder();
+    cleanUpSystem();
   });
 
   it('Should_PrintCorrectVersion_When_VersionFlagIsProvided', async () => {
@@ -80,7 +93,7 @@ describe('Envilder CLI (E2E)', () => {
 
   it('Should_Fail_When_RequiredOptionsAreMissing', async () => {
     // Arrange
-    const params = [];
+    const params: string[] = [];
 
     // Act
     const actual = await runCommand(envilder, params);
@@ -91,8 +104,13 @@ describe('Envilder CLI (E2E)', () => {
   });
 });
 
-function runCommand(command: string, args: string[]): Promise<{ code: number; output: string }> {
-  console.log(`${pc.bold(pc.bgCyan(pc.black(' [CLI TEST] INPUT ')))} ${pc.cyan(`${command} ${args.join(' ')}`)}`);
+function runCommand(
+  command: string,
+  args: string[],
+): Promise<{ code: number; output: string }> {
+  console.log(
+    `${pc.bold(pc.bgCyan(pc.black(' [CLI TEST] INPUT ')))} ${pc.cyan(`${command} ${args.join(' ')}`)}`,
+  );
   return new Promise((resolve) => {
     const proc = spawn(command, args, { shell: true });
     let output = '';
@@ -111,10 +129,20 @@ function runCommand(command: string, args: string[]): Promise<{ code: number; ou
   });
 }
 
-function uninstallGlobalEnvilder() {
+function cleanUpSystem() {
   try {
+    const libPath = join(rootDir, 'lib');
+
+    if (existsSync(libPath)) {
+      if (process.platform === 'win32') {
+        execSync(`rd /s /q "${libPath}"`, { stdio: 'inherit' });
+      } else {
+        execSync(`rm -rf "${libPath}"`, { stdio: 'inherit' });
+      }
+    }
+
     execSync('npm uninstall -g envilder', { stdio: 'inherit' });
-  } catch (e) {
+  } catch {
     // Ignore errors if not installed
   }
 }

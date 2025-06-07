@@ -172,6 +172,8 @@ DocProject/Help/html
 # Click-Once directory
 publish/
 lib/
+dit/
+envilder-*.tgz
 
 # Publish Web Output
 *.[Pp]ublish.xml
@@ -358,7 +360,7 @@ MigrationBackup/
 
 
 pnpm-lock.yaml
-package-lock.json
+yarn.lock
 aws_credentials.env
 coverage
 coveragereport

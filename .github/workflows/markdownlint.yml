@@ -1,4 +1,4 @@
-name: Markdownlint
+name: 🏁 Rainbow Road Lint
 
 permissions:
   contents: read
@@ -33,11 +33,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js
+      - name: 🍬 Use Node.js (Eat a Candy)
         uses: actions/setup-node@v4
         with:
           node-version: "22.x"
-      - name: Run Markdownlint
+      - name: 🌈 Run Rainbow Road Markdownlint
         run: |
           echo "::add-matcher::.github/workflows/markdownlint-problem-matcher.json"
           npm i -g markdownlint-cli

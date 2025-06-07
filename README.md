@@ -135,9 +135,6 @@ You'll need:
 ```bash
 # Using npm
 npm install -g envilder
-
-# Using yarn
-yarn global add envilder
 ```
 
 ## 🚀 Usage
@@ -265,7 +262,7 @@ Envilder eliminates common problems in development teams:
 ## 🧪 Running tests
 
 ```bash
-yarn test
+npm test
 ```
 
 Check the current coverage report: [Coverage Report](https://macalbert.github.io/envilder/)

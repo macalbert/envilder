@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
-import { run } from '../index.js';
+import { EnvilderBuilder } from './cli/domain/EnvilderBuilder.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -39,7 +39,8 @@ function findPackageJson(startDir: string, maxDepth = 5): string | null {
 }
 
 // Get package.json path by searching up from current file
-const packageJsonPath = findPackageJson(__dirname) || join(__dirname, '..', '..', 'package.json');
+const packageJsonPath =
+  findPackageJson(__dirname) || join(__dirname, '..', '..', 'package.json');
 const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
 
 /**
@@ -55,7 +56,10 @@ export async function main() {
     .name('envilder')
     .description('A CLI tool to generate .env files from AWS SSM parameters')
     .version(packageJson.version)
-    .requiredOption('--map <path>', 'Path to the JSON file with environment variable mapping')
+    .requiredOption(
+      '--map <path>',
+      'Path to the JSON file with environment variable mapping',
+    )
     .requiredOption('--envfile <path>', 'Path to the .env file to be generated')
     .option('--profile <name>', 'AWS CLI profile to use');
 
@@ -66,7 +70,12 @@ export async function main() {
     throw new Error('Missing required arguments: --map and --envfile');
   }
 
-  await run(options.map, options.envfile, options.profile);
+  const envilder = EnvilderBuilder.build()
+    .withDefaultFileManager()
+    .withAwsProvider(options.profile)
+    .create();
+
+  await envilder.run(options.map, options.envfile);
 }
 
 // Execute the CLI

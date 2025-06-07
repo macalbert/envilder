@@ -5,7 +5,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-async function main() {
+async function main(): Promise<void> {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   const rootDir = path.join(__dirname, '..');
@@ -14,41 +14,31 @@ async function main() {
   installPackageFile(rootDir, packageFile);
 }
 
-/**
- * Create a package file using npm pack
- * @param {string} rootDir The root directory of the project, used to run npm pack.
- * @returns {string} Path to the created package file
- */
-function createPackage(rootDir) {
+function createPackage(rootDir: string): string {
   console.log('📦 Creating package...');
   try {
-    // Capture the output of npm pack to get the filename
     const output = execSync('npm pack', {
       cwd: rootDir,
       encoding: 'utf8',
     });
 
-    // The last non-empty line is the filename
     const lines = output.trim().split(/\r?\n/);
     const packageFile = lines[lines.length - 1];
+
     if (!packageFile.endsWith('.tgz')) {
       throw new Error('Could not determine package file from npm pack output');
     }
-    console.log(`✅ Package created as ${packageFile}`);
 
+    console.log(`✅ Package created as ${packageFile}`);
     return packageFile;
   } catch (err) {
-    console.error(`❌ Failed to create package: ${err.message}`);
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error(`❌ Failed to create package: ${errorMessage}`);
     process.exit(1);
   }
 }
 
-/**
- * Installs the packaged .tgz file globally using npm.
- * @param {string} rootDir The root directory of the project, used to resolve the package path.
- * @param {string} packageFile The filename of the .tgz package to install.
- */
-function installPackageFile(rootDir, packageFile) {
+function installPackageFile(rootDir: string, packageFile: string): void {
   console.log('🔧 Installing package globally...');
   const packagePath = path.join(rootDir, packageFile);
 
@@ -61,8 +51,8 @@ function installPackageFile(rootDir, packageFile) {
   execSync(`npm install -g "${packagePath}"`, { stdio: 'inherit' });
 }
 
-main().catch((error) => {
+main().catch((error: unknown) => {
   console.error('🚨 Game over - installation failed! 🍄💥');
-  console.error(error);
+  console.error(error instanceof Error ? error.message : String(error));
   process.exit(1);
 });
