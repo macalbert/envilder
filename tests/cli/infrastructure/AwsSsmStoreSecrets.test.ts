@@ -1,7 +1,7 @@
-import { SSM, PutParameterCommand } from '@aws-sdk/client-ssm';
-import { AwsSsmSecretProvider } from '../../../src/cli/infrastructure/AwsSsmStoreSecrets';
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { PutParameterCommand, SSM } from '@aws-sdk/client-ssm';
 import { LocalstackContainer, type StartedLocalStackContainer } from '@testcontainers/localstack';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { AwsSsmSecretProvider } from '../../../src/cli/infrastructure/AwsSsmStoreSecrets';
 
 const LOCALSTACK_IMAGE = 'localstack/localstack:stable';
 const PARAM_NAME = '/test/secret';
