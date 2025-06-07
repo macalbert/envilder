@@ -1,9 +1,7 @@
 import * as fs from 'node:fs';
 import * as dotenv from 'dotenv';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { Envilder } from '../src/cli/application/EnvilderHandler';
-import { AwsSsmStoreSecrets } from '../src/cli/infrastructure/AwsSsmStoreSecrets';
-import { SSM } from '@aws-sdk/client-ssm';
+import { createEnvilder } from '../../../src/cli/domain/EnvilderFactory';
 
 // Mock the SSM client
 vi.mock('@aws-sdk/client-ssm', () => {
@@ -56,17 +54,15 @@ describe('String Escaping in Environment File Generation', () => {
       BACKSLASH_VAR: '/test/backslash',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+    const sut = createEnvilder();
 
     // Act
-    const ssm = new SSM();
-    const keyVault = new AwsSsmStoreSecrets(ssm);
-    const envilder = new Envilder(keyVault);
-    await envilder.run(mockMapPath, mockEnvFilePath);
+    await sut.run(mockMapPath, mockEnvFilePath);
 
     // Assert
-    const envFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');
-    expect(envFileContent).toBe('BACKSLASH_VAR=value\\\\with\\\\backslashes');
-    const parsed = dotenv.parse(envFileContent);
+    const actual = fs.readFileSync(mockEnvFilePath, 'utf-8');
+    expect(actual).toBe('BACKSLASH_VAR=value\\\\with\\\\backslashes');
+    const parsed = dotenv.parse(actual);
     expect(parsed.BACKSLASH_VAR).toBe('value\\\\with\\\\backslashes');
   });
 
@@ -76,17 +72,15 @@ describe('String Escaping in Environment File Generation', () => {
       NEWLINE_VAR: '/test/newlines',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+    const sut = createEnvilder();
 
     // Act
-    const ssm = new SSM();
-    const keyVault = new AwsSsmStoreSecrets(ssm);
-    const envilder = new Envilder(keyVault);
-    await envilder.run(mockMapPath, mockEnvFilePath);
+    await sut.run(mockMapPath, mockEnvFilePath);
 
     // Assert
-    const envFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');
-    expect(envFileContent).toBe('NEWLINE_VAR=value\\nwith\\nnewlines');
-    const parsed = dotenv.parse(envFileContent);
+    const actual = fs.readFileSync(mockEnvFilePath, 'utf-8');
+    expect(actual).toBe('NEWLINE_VAR=value\\nwith\\nnewlines');
+    const parsed = dotenv.parse(actual);
     expect(parsed.NEWLINE_VAR).toBe('value\\nwith\\nnewlines');
   });
 
@@ -96,17 +90,15 @@ describe('String Escaping in Environment File Generation', () => {
       QUOTE_VAR: '/test/quotes',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+    const sut = createEnvilder();
 
     // Act
-    const ssm = new SSM();
-    const keyVault = new AwsSsmStoreSecrets(ssm);
-    const envilder = new Envilder(keyVault);
-    await envilder.run(mockMapPath, mockEnvFilePath);
+    await sut.run(mockMapPath, mockEnvFilePath);
 
     // Assert
-    const envFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');
-    expect(envFileContent).toBe('QUOTE_VAR=value\\"with\\"quotes');
-    const parsed = dotenv.parse(envFileContent);
+    const actual = fs.readFileSync(mockEnvFilePath, 'utf-8');
+    expect(actual).toBe('QUOTE_VAR=value\\"with\\"quotes');
+    const parsed = dotenv.parse(actual);
     expect(parsed.QUOTE_VAR).toBe('value\\"with\\"quotes');
   });
 
@@ -116,24 +108,22 @@ describe('String Escaping in Environment File Generation', () => {
       COMBINED_VAR: '/test/combined',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+    const sut = createEnvilder();
 
     // Act
-    const ssm = new SSM();
-    const keyVault = new AwsSsmStoreSecrets(ssm);
-    const envilder = new Envilder(keyVault);
-    await envilder.run(mockMapPath, mockEnvFilePath);
+    await sut.run(mockMapPath, mockEnvFilePath);
 
     // Assert
-    const envFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');
+    const actual = fs.readFileSync(mockEnvFilePath, 'utf-8');
 
     // Rather than check the exact escaped string (which is complex),
     // just ensure it contains the expected escaping patterns
-    expect(envFileContent).toContain('\\\\\\"'); // Escaped backslash followed by escaped quote
-    expect(envFileContent).toContain('\\n'); // Escaped newline
-    expect(envFileContent).toContain('\\\\combined'); // Escaped backslash before "combined"
+    expect(actual).toContain('\\\\\\"'); // Escaped backslash followed by escaped quote
+    expect(actual).toContain('\\n'); // Escaped newline
+    expect(actual).toContain('\\\\combined'); // Escaped backslash before "combined"
 
     // Verify that dotenv can parse it and keep the properly escaped content
-    const parsed = dotenv.parse(envFileContent);
+    const parsed = dotenv.parse(actual);
     // Use string inspection to debug
     console.log('Combined var parsed:', JSON.stringify(parsed.COMBINED_VAR));
 
@@ -147,19 +137,17 @@ describe('String Escaping in Environment File Generation', () => {
       ESCAPED_VAR: '/test/already-escaped',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+    const sut = createEnvilder();
 
     // Act
-    const ssm = new SSM();
-    const keyVault = new AwsSsmStoreSecrets(ssm);
-    const envilder = new Envilder(keyVault);
-    await envilder.run(mockMapPath, mockEnvFilePath);
+    await sut.run(mockMapPath, mockEnvFilePath);
 
     // Assert
-    const envFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');
-    expect(envFileContent).toContain('\\\\\\\\'); // Four backslashes (each original \\ becomes \\\\)
+    const actual = fs.readFileSync(mockEnvFilePath, 'utf-8');
+    expect(actual).toContain('\\\\\\\\'); // Four backslashes (each original \\ becomes \\\\)
 
     // Verify that dotenv can parse it back correctly
-    const parsed = dotenv.parse(envFileContent);
+    const parsed = dotenv.parse(actual);
     console.log('Escaped var parsed:', JSON.stringify(parsed.ESCAPED_VAR));
     expect(parsed.ESCAPED_VAR).toContain('\\\\\\\\'); // Should contain escaped backslashes
   });
