@@ -1,7 +1,7 @@
 import { GetParameterCommand, type SSM } from '@aws-sdk/client-ssm';
-import type { IStoreSecrets } from '../domain/ports/IStoreSecrets';
+import type { ISecretProvider } from '../domain/ports/ISecretProvider';
 
-export class AwsSsmStoreSecrets implements IStoreSecrets {
+export class AwsSsmSecretProvider implements ISecretProvider {
   private ssm: SSM;
 
   constructor(ssm: SSM) {

@@ -1,6 +1,6 @@
 import * as fs from 'node:fs';
 import * as dotenv from 'dotenv';
-import type { ISecretProvider } from '../domain/ports/ISecretProvider';
+import type { ISecretProvider } from './cli/domain/ports/ISecretProvider';
 
 export class Envilder {
   private keyVault: ISecretProvider;
