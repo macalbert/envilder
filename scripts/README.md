@@ -10,13 +10,13 @@ installed from npm, ensuring that packaging and global installation work correct
 
 ### Usage
 
-You can run this script using the following yarn command defined in `package.json`:
+You can run this script using the following npm command defined in `package.json`:
 
 ```bash
-yarn local:install
+npm run local:install
 ```
 
-This command will first build the project (`yarn build`) and then execute `pack-and-install.ts` using `ts-node`
+This command will first build the project (`npm run build`) and then execute `pack-and-install.ts` using `ts-node`
 with the appropriate flags to handle ES modules. Behind the scenes, it runs:
 
 ```bash

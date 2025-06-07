@@ -35,7 +35,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'yarn'
+          cache: 'npm'
 
       - name: 🪙 Collect Coins (Configure AWS credentials)
         uses: aws-actions/configure-aws-credentials@v4
@@ -45,16 +45,16 @@ jobs:
           aws-region: "eu-west-1"
 
       - name: 📦 Open the ? Block (Install packages)
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: 🌟 Shine Sprite (Run formatting checker)
-        run: yarn format
+        run: npm run format
 
       - name: 🏁 Flagpole (Run code quality checker)
-        run: yarn lint
+        run: npm run lint
 
       - name: 🏗️ Build the Castle
-        run: yarn build
+        run: npm run build
 
       - name: 🏆 Defeat the Boss (Run unit tests)
-        run: yarn test
+        run: npm test
