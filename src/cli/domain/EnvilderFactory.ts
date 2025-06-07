@@ -5,9 +5,8 @@ import type { SSMClientConfig } from '@aws-sdk/client-ssm';
 import type { IStoreSecrets } from './ports/IStoreSecrets.js';
 import { fromIni } from '@aws-sdk/credential-providers';
 
-export function createEnvilder(profile?: string): Envilder {
-  const config: SSMClientConfig = { credentials: fromIni({ profile: profile }) };
-  const ssm = new SSM(config);
+export function createEnvilderWithAwsSsm(profile?: string): Envilder {
+  const ssm = profile == null ? new SSM() : new SSM({ credentials: fromIni({ profile: profile }) } as SSMClientConfig);
 
   const keyVault: IStoreSecrets = new AwsSsmStoreSecrets(ssm);
 

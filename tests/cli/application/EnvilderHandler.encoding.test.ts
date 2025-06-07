@@ -1,7 +1,7 @@
 import * as fs from 'node:fs';
 import * as dotenv from 'dotenv';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createEnvilder } from '../../../src/cli/domain/EnvilderFactory';
+import { createEnvilderWithAwsSsm } from '../../../src/cli/domain/EnvilderFactory';
 
 // Mock the SSM client
 vi.mock('@aws-sdk/client-ssm', () => {
@@ -54,7 +54,7 @@ describe('String Escaping in Environment File Generation', () => {
       BACKSLASH_VAR: '/test/backslash',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = createEnvilder();
+    const sut = createEnvilderWithAwsSsm();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
@@ -72,7 +72,7 @@ describe('String Escaping in Environment File Generation', () => {
       NEWLINE_VAR: '/test/newlines',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = createEnvilder();
+    const sut = createEnvilderWithAwsSsm();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
@@ -90,7 +90,7 @@ describe('String Escaping in Environment File Generation', () => {
       QUOTE_VAR: '/test/quotes',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = createEnvilder();
+    const sut = createEnvilderWithAwsSsm();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
@@ -108,7 +108,7 @@ describe('String Escaping in Environment File Generation', () => {
       COMBINED_VAR: '/test/combined',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = createEnvilder();
+    const sut = createEnvilderWithAwsSsm();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
@@ -137,7 +137,7 @@ describe('String Escaping in Environment File Generation', () => {
       ESCAPED_VAR: '/test/already-escaped',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = createEnvilder();
+    const sut = createEnvilderWithAwsSsm();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);

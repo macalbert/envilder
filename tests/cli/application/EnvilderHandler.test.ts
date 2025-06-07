@@ -1,7 +1,7 @@
 import * as fs from 'node:fs';
 import { SSM } from '@aws-sdk/client-ssm';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createEnvilder } from '../../../src/cli/domain/EnvilderFactory';
+import { createEnvilderWithAwsSsm } from '../../../src/cli/domain/EnvilderFactory';
 
 vi.mock('@aws-sdk/client-ssm', () => {
   return {
@@ -55,7 +55,7 @@ describe('Envilder CLI', () => {
       NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = createEnvilder();
+    const sut = createEnvilderWithAwsSsm();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
@@ -72,7 +72,7 @@ describe('Envilder CLI', () => {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: 'non-existent parameter',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = createEnvilder();
+    const sut = createEnvilderWithAwsSsm();
 
     // Act
     const action = sut.run(mockMapPath, mockEnvFilePath);
@@ -84,7 +84,7 @@ describe('Envilder CLI', () => {
   it('Should_ThrowError_When_ParameterMapIsInvalidJSON', async () => {
     // Arrange
     fs.writeFileSync(mockMapPath, '{ invalid json');
-    const sut = createEnvilder();
+    const sut = createEnvilderWithAwsSsm();
 
     // Act
     const action = sut.run(mockMapPath, mockEnvFilePath);
@@ -102,7 +102,7 @@ describe('Envilder CLI', () => {
       NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = createEnvilder();
+    const sut = createEnvilderWithAwsSsm();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
@@ -123,7 +123,7 @@ describe('Envilder CLI', () => {
       NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = createEnvilder();
+    const sut = createEnvilderWithAwsSsm();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
@@ -141,7 +141,7 @@ describe('Envilder CLI', () => {
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
     const actual = vi.spyOn(console, 'error');
-    const sut = createEnvilder();
+    const sut = createEnvilderWithAwsSsm();
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
@@ -157,7 +157,7 @@ describe('Envilder CLI', () => {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const sut = createEnvilder(mockProfile);
+    const sut = createEnvilderWithAwsSsm(mockProfile);
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);

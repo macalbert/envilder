@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { createEnvilder } from '../../../src/cli/domain/EnvilderFactory';
+import { createEnvilderWithAwsSsm } from '../../../src/cli/domain/EnvilderFactory';
 
 describe('EnvilderFactory', () => {
   it('Should_ReturnInstance_When_NoProfileAreProvided', () => {
     // Act
-    const sut = createEnvilder();
+    const sut = createEnvilderWithAwsSsm();
 
     // Assert
     expect(sut).toBeDefined();
@@ -16,7 +16,7 @@ describe('EnvilderFactory', () => {
     const profile = 'default';
 
     // Act
-    const actual = createEnvilder(profile);
+    const actual = createEnvilderWithAwsSsm(profile);
 
     // Assert
     expect(actual).toBeDefined();
