@@ -4,7 +4,7 @@
   "description": "A CLI that securely centralizes your environment variables from AWS SSM as a single source of truth",
   "main": "./lib/Cli.js",
   "bin": {
-    "envilder": "lib/cli.js"
+    "envilder": "lib/Cli.js"
   },
   "scripts": {
     "clean": "jest --clearCache && npm cache clean --force && rimraf lib && rimraf coverage && rimraf node_modules",
