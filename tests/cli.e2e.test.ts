@@ -2,16 +2,16 @@ import { execSync, spawn } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import pc from 'picocolors';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const rootDir = join(__dirname, '../..');
+const rootDir = join(__dirname, '..');
 
 describe('Envilder CLI (E2E)', () => {
   beforeAll(() => {
-    uninstallGlobalEnvilder(); // Install dependencies, build, and pack/install CLI globally
+    cleanUpSystem();
     execSync('npm run build', { cwd: rootDir, stdio: 'inherit' });
     execSync('node --loader ts-node/esm scripts/pack-and-install.ts', {
       cwd: rootDir,
@@ -24,7 +24,7 @@ describe('Envilder CLI (E2E)', () => {
   const paramMapPath = join(rootDir, 'tests', 'sample', 'param-map.json');
 
   afterAll(() => {
-    uninstallGlobalEnvilder();
+    cleanUpSystem();
   });
 
   it('Should_PrintCorrectVersion_When_VersionFlagIsProvided', async () => {
@@ -112,10 +112,20 @@ function runCommand(command: string, args: string[]): Promise<{ code: number; ou
   });
 }
 
-function uninstallGlobalEnvilder() {
+function cleanUpSystem() {
   try {
+    const libPath = join(rootDir, 'lib');
+
+    if (existsSync(libPath)) {
+      if (process.platform === 'win32') {
+        execSync(`rd /s /q "${libPath}"`, { stdio: 'inherit' });
+      } else {
+        execSync(`rm -rf "${libPath}"`, { stdio: 'inherit' });
+      }
+    }
+
     execSync('npm uninstall -g envilder', { stdio: 'inherit' });
-  } catch (e) {
+  } catch {
     // Ignore errors if not installed
   }
 }

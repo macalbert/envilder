@@ -1,14 +1,15 @@
 import * as fs from 'node:fs';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { run } from '../src/index';
 import * as dotenv from 'dotenv';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { Envilder } from '../src/cli/application/EnvilderHandler';
+import { AwsSsmStoreSecrets } from '../src/cli/infrastructure/AwsSsmStoreSecrets';
+import { SSM } from '@aws-sdk/client-ssm';
 
 // Mock the SSM client
 vi.mock('@aws-sdk/client-ssm', () => {
   return {
     SSM: vi.fn().mockImplementation(() => ({
       send: vi.fn((command) => {
-
         const testValues: Record<string, string> = {
           '/test/backslash': 'value\\with\\backslashes',
           '/test/newlines': 'value\nwith\nnewlines',
@@ -57,7 +58,10 @@ describe('String Escaping in Environment File Generation', () => {
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
 
     // Act
-    await run(mockMapPath, mockEnvFilePath);
+    const ssm = new SSM();
+    const keyVault = new AwsSsmStoreSecrets(ssm);
+    const envilder = new Envilder(keyVault);
+    await envilder.run(mockMapPath, mockEnvFilePath);
 
     // Assert
     const envFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');
@@ -74,7 +78,10 @@ describe('String Escaping in Environment File Generation', () => {
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
 
     // Act
-    await run(mockMapPath, mockEnvFilePath);
+    const ssm = new SSM();
+    const keyVault = new AwsSsmStoreSecrets(ssm);
+    const envilder = new Envilder(keyVault);
+    await envilder.run(mockMapPath, mockEnvFilePath);
 
     // Assert
     const envFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');
@@ -91,7 +98,10 @@ describe('String Escaping in Environment File Generation', () => {
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
 
     // Act
-    await run(mockMapPath, mockEnvFilePath);
+    const ssm = new SSM();
+    const keyVault = new AwsSsmStoreSecrets(ssm);
+    const envilder = new Envilder(keyVault);
+    await envilder.run(mockMapPath, mockEnvFilePath);
 
     // Assert
     const envFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');
@@ -108,7 +118,10 @@ describe('String Escaping in Environment File Generation', () => {
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
 
     // Act
-    await run(mockMapPath, mockEnvFilePath);
+    const ssm = new SSM();
+    const keyVault = new AwsSsmStoreSecrets(ssm);
+    const envilder = new Envilder(keyVault);
+    await envilder.run(mockMapPath, mockEnvFilePath);
 
     // Assert
     const envFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');
@@ -136,7 +149,10 @@ describe('String Escaping in Environment File Generation', () => {
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
 
     // Act
-    await run(mockMapPath, mockEnvFilePath);
+    const ssm = new SSM();
+    const keyVault = new AwsSsmStoreSecrets(ssm);
+    const envilder = new Envilder(keyVault);
+    await envilder.run(mockMapPath, mockEnvFilePath);
 
     // Assert
     const envFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');

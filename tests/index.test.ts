@@ -1,7 +1,7 @@
 import * as fs from 'node:fs';
 import { SSM } from '@aws-sdk/client-ssm';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { run } from '../src/index';
+import { createEnvilder } from '../src/cli/domain/EnvilderFactory';
 
 vi.mock('@aws-sdk/client-ssm', () => {
   return {
@@ -55,14 +55,15 @@ describe('Envilder CLI', () => {
       NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+    const sut = createEnvilder();
 
     // Act
-    await run(mockMapPath, mockEnvFilePath);
+    await sut.run(mockMapPath, mockEnvFilePath);
 
     // Assert
-    const envFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');
-    expect(envFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com');
-    expect(envFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword');
+    const actual = fs.readFileSync(mockEnvFilePath, 'utf-8');
+    expect(actual).toContain('NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com');
+    expect(actual).toContain('NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword');
   });
 
   it('Should_ThrowError_When_SSMParameterIsNotFound', async () => {
@@ -71,9 +72,10 @@ describe('Envilder CLI', () => {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: 'non-existent parameter',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+    const sut = createEnvilder();
 
     // Act
-    const action = run(mockMapPath, mockEnvFilePath);
+    const action = sut.run(mockMapPath, mockEnvFilePath);
 
     // Assert
     await expect(action).rejects.toThrow('ParameterNotFound: non-existent parameter');
@@ -82,9 +84,10 @@ describe('Envilder CLI', () => {
   it('Should_ThrowError_When_ParameterMapIsInvalidJSON', async () => {
     // Arrange
     fs.writeFileSync(mockMapPath, '{ invalid json');
+    const sut = createEnvilder();
 
     // Act
-    const action = run(mockMapPath, mockEnvFilePath);
+    const action = sut.run(mockMapPath, mockEnvFilePath);
 
     // Assert
     await expect(action).rejects.toThrow(`Invalid JSON in parameter map file: ${mockMapPath}`);
@@ -99,15 +102,16 @@ describe('Envilder CLI', () => {
       NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+    const sut = createEnvilder();
 
     // Act
-    await run(mockMapPath, mockEnvFilePath);
+    await sut.run(mockMapPath, mockEnvFilePath);
 
     // Assert
-    const updatedEnvFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');
-    expect(updatedEnvFileContent).toContain('EXISTING_VAR=existingValue');
-    expect(updatedEnvFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com');
-    expect(updatedEnvFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword');
+    const actual = fs.readFileSync(mockEnvFilePath, 'utf-8');
+    expect(actual).toContain('EXISTING_VAR=existingValue');
+    expect(actual).toContain('NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com');
+    expect(actual).toContain('NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword');
   });
 
   it('Should_OverwriteSSMParameters_When_EnvFileContainsSameVariables', async () => {
@@ -119,14 +123,15 @@ describe('Envilder CLI', () => {
       NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+    const sut = createEnvilder();
 
     // Act
-    await run(mockMapPath, mockEnvFilePath);
+    await sut.run(mockMapPath, mockEnvFilePath);
 
     // Assert
-    const updatedEnvFileContent = fs.readFileSync(mockEnvFilePath, 'utf-8');
-    expect(updatedEnvFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com');
-    expect(updatedEnvFileContent).toContain('NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword');
+    const actual = fs.readFileSync(mockEnvFilePath, 'utf-8');
+    expect(actual).toContain('NEXT_PUBLIC_CREDENTIAL_EMAIL=mockedEmail@example.com');
+    expect(actual).toContain('NEXT_PUBLIC_CREDENTIAL_PASSWORD=mockedPassword');
   });
 
   it('Should_LogWarning_When_SSMParameterHasNoValue', async () => {
@@ -135,13 +140,14 @@ describe('Envilder CLI', () => {
       NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password_no_value',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const consoleSpy = vi.spyOn(console, 'error');
+    const actual = vi.spyOn(console, 'error');
+    const sut = createEnvilder();
 
     // Act
-    await run(mockMapPath, mockEnvFilePath);
+    await sut.run(mockMapPath, mockEnvFilePath);
 
     // Assert
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Warning: No value found for'));
+    expect(actual).toHaveBeenCalledWith(expect.stringContaining('Warning: No value found for'));
   });
 
   it('Should_ConfigureSSMClientWithProfile_When_ProfileIsProvided', async () => {
@@ -151,11 +157,13 @@ describe('Envilder CLI', () => {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+    const sut = createEnvilder(mockProfile);
 
     // Act
-    await run(mockMapPath, mockEnvFilePath, mockProfile);
+    await sut.run(mockMapPath, mockEnvFilePath);
 
     // Assert
-    expect(vi.mocked(SSM).mock.calls[0][0]).toEqual(expect.objectContaining({ credentials: expect.anything() }));
+    const actual = vi.mocked(SSM).mock.calls[0][0];
+    expect(actual).toEqual(expect.objectContaining({ credentials: expect.anything() }));
   });
 });

@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
-import { run } from '../index.js';
+import { createEnvilder } from './cli/domain/EnvilderFactory.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -66,7 +66,9 @@ export async function main() {
     throw new Error('Missing required arguments: --map and --envfile');
   }
 
-  await run(options.map, options.envfile, options.profile);
+  const envilder = createEnvilder(options.profile);
+
+  await envilder.run(options.map, options.envfile);
 }
 
 // Execute the CLI

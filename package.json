@@ -1,6 +1,6 @@
 {
   "name": "envilder",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "A CLI that securely centralizes your environment variables from AWS SSM as a single source of truth",
   "exports": {
     ".": {
@@ -10,7 +10,7 @@
   },
   "main": "./lib/index.js",
   "bin": {
-    "envilder": "lib/cli/cli.js"
+    "envilder": "lib/cli.js"
   },
   "scripts": {
     "clean": "jest --clearCache && yarn cache clean --force && rimraf lib && rimraf coverage && rimraf node_modules",
