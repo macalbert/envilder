@@ -20,8 +20,20 @@ describe('Envilder CLI (E2E)', () => {
   }, 120_000);
 
   const envilder = 'envilder';
-  const testEnvFile = join(rootDir, 'tests', 'cli', 'sample', 'cli-validation.env');
-  const paramMapPath = join(rootDir, 'tests', 'cli', 'sample', 'param-map.json');
+  const testEnvFile = join(
+    rootDir,
+    'tests',
+    'cli',
+    'sample',
+    'cli-validation.env',
+  );
+  const paramMapPath = join(
+    rootDir,
+    'tests',
+    'cli',
+    'sample',
+    'param-map.json',
+  );
 
   afterAll(() => {
     cleanUpSystem();
@@ -92,8 +104,13 @@ describe('Envilder CLI (E2E)', () => {
   });
 });
 
-function runCommand(command: string, args: string[]): Promise<{ code: number; output: string }> {
-  console.log(`${pc.bold(pc.bgCyan(pc.black(' [CLI TEST] INPUT ')))} ${pc.cyan(`${command} ${args.join(' ')}`)}`);
+function runCommand(
+  command: string,
+  args: string[],
+): Promise<{ code: number; output: string }> {
+  console.log(
+    `${pc.bold(pc.bgCyan(pc.black(' [CLI TEST] INPUT ')))} ${pc.cyan(`${command} ${args.join(' ')}`)}`,
+  );
   return new Promise((resolve) => {
     const proc = spawn(command, args, { shell: true });
     let output = '';

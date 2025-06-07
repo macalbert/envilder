@@ -2,7 +2,14 @@
   "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
   "files": {
     "include": ["./src/**", "./tests/**", "./scripts/**"],
-    "ignore": ["**/node_modules/**", "**/lib/**", "**/dist/**", "**/coverage/**", "**/.lock", "**/.md"]
+    "ignore": [
+      "**/node_modules/**",
+      "**/lib/**",
+      "**/dist/**",
+      "**/coverage/**",
+      "**/.lock",
+      "**/.md"
+    ]
   },
   "organizeImports": {
     "enabled": true
@@ -18,7 +25,7 @@
     "formatWithErrors": false,
     "indentStyle": "space",
     "indentWidth": 2,
-    "lineWidth": 120
+    "lineWidth": 80
   },
   "javascript": {
     "formatter": {

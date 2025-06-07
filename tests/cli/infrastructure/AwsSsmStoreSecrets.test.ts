@@ -1,5 +1,8 @@
 import { PutParameterCommand, SSM } from '@aws-sdk/client-ssm';
-import { LocalstackContainer, type StartedLocalStackContainer } from '@testcontainers/localstack';
+import {
+  LocalstackContainer,
+  type StartedLocalStackContainer,
+} from '@testcontainers/localstack';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AwsSsmSecretProvider } from '../../../src/cli/infrastructure/AwsSsmStoreSecrets';
 

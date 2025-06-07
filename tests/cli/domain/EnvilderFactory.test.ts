@@ -4,7 +4,10 @@ import { EnvilderBuilder } from '../../../src/cli/domain/EnvilderBuilder';
 describe('EnvilderBuilder', () => {
   it('Should_ReturnInstance_When_NoProfileAreProvided', () => {
     // Act
-    const sut = EnvilderBuilder.build().withAwsProvider().create();
+    const sut = EnvilderBuilder.build()
+      .withDefaultFileManager()
+      .withAwsProvider()
+      .create();
 
     // Assert
     expect(sut).toBeDefined();
@@ -16,7 +19,10 @@ describe('EnvilderBuilder', () => {
     const profile = 'default';
 
     // Act
-    const actual = EnvilderBuilder.build().withAwsProvider(profile).create();
+    const actual = EnvilderBuilder.build()
+      .withDefaultFileManager()
+      .withAwsProvider(profile)
+      .create();
 
     // Assert
     expect(actual).toBeDefined();
@@ -28,7 +34,9 @@ describe('EnvilderBuilder', () => {
     const invalidProfile = 'non-existent-profile';
 
     // Act
-    const action = EnvilderBuilder.build().withAwsProvider(invalidProfile);
+    const action = EnvilderBuilder.build()
+      .withDefaultFileManager()
+      .withAwsProvider(invalidProfile);
 
     // Assert
     expect(() => action.create()).not.toThrow();
