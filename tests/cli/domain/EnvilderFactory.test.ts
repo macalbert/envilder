@@ -34,11 +34,54 @@ describe('EnvilderBuilder', () => {
     const invalidProfile = 'non-existent-profile';
 
     // Act
-    const action = EnvilderBuilder.build()
-      .withDefaultFileManager()
-      .withAwsProvider(invalidProfile);
+    const action = () =>
+      EnvilderBuilder.build()
+        .withDefaultFileManager()
+        .withAwsProvider(invalidProfile)
+        .create();
 
     // Assert
-    expect(() => action.create()).not.toThrow();
+    expect(action).not.toThrow();
+  });
+
+  it('Should_ThrowError_When_ProviderIsMissing', () => {
+    // Act
+    const action = () =>
+      EnvilderBuilder.build().withDefaultFileManager().create();
+
+    // Assert
+    expect(action).toThrow('Secret provider must be specified');
+  });
+
+  it('Should_ThrowError_When_FileManagerIsMissing', () => {
+    // Arrange
+    const mockProvider = { getSecret: async () => 'value' };
+
+    // Act
+    const action = () =>
+      EnvilderBuilder.build().withProvider(mockProvider).create();
+
+    // Assert
+    expect(action).toThrow('Env file manager must be specified');
+  });
+
+  it('Should_UseCustomEnvFileManager_When_WithEnvFileManagerIsCalled', () => {
+    // Arrange
+    const mockFileManager = {
+      loadParamMap: () => ({}),
+      loadExistingEnvVariables: () => ({}),
+      writeEnvFile: () => {},
+    };
+    const mockProvider = { getSecret: async () => 'value' };
+
+    // Act
+    const sut = EnvilderBuilder.build()
+      .withEnvFileManager(mockFileManager)
+      .withProvider(mockProvider)
+      .create();
+
+    // Assert
+    expect(sut).toBeDefined();
+    expect(typeof sut.run).toBe('function');
   });
 });
