@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { EnvilderBuilder } from '../../../src/cli/domain/EnvilderFactory';
+import { EnvilderBuilder } from '../../../src/cli/domain/EnvilderBuilder';
 
-describe('EnvilderFactory', () => {
+describe('EnvilderBuilder', () => {
   it('Should_ReturnInstance_When_NoProfileAreProvided', () => {
     // Act
     const sut = EnvilderBuilder.build().withAwsProvider().create();

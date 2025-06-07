@@ -5,10 +5,6 @@ import { Envilder } from '../application/EnvilderHandler.js';
 import { AwsSsmSecretProvider } from '../infrastructure/AwsSsmStoreSecrets.js';
 import type { ISecretProvider } from './ports/ISecretProvider.js';
 
-export function createEnvilderWithAwsSsm(profile?: string): Envilder {
-  return EnvilderBuilder.build().withAwsProvider(profile).create();
-}
-
 export class EnvilderBuilder {
   private provider?: ISecretProvider;
 

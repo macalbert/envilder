@@ -1,7 +1,7 @@
 import * as fs from 'node:fs';
 import { SSM } from '@aws-sdk/client-ssm';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { EnvilderBuilder } from '../../../src/cli/domain/EnvilderFactory';
+import { EnvilderBuilder } from '../../../src/cli/domain/EnvilderBuilder';
 
 vi.mock('@aws-sdk/client-ssm', () => {
   return {

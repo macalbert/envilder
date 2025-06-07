@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
-import { EnvilderBuilder } from './cli/domain/EnvilderFactory.js';
+import { EnvilderBuilder } from './cli/domain/EnvilderBuilder.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
