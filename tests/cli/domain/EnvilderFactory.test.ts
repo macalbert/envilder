@@ -11,7 +11,7 @@ describe('EnvilderBuilder', () => {
     expect(typeof sut.run).toBe('function');
   });
 
-  it('Should_ReturnInstance_When_NoProfileAreProvided', () => {
+  it('Should_ReturnInstance_When_DefaultProfileIsProvided', () => {
     // Arrange
     const profile = 'default';
 
@@ -21,5 +21,16 @@ describe('EnvilderBuilder', () => {
     // Assert
     expect(actual).toBeDefined();
     expect(typeof actual.run).toBe('function');
+  });
+
+  it('Should_NotThrowError_When_InvalidCustomProfileIsProvided', () => {
+    // Arrange
+    const invalidProfile = 'non-existent-profile';
+
+    // Act
+    const action = EnvilderBuilder.build().withAwsProvider(invalidProfile);
+
+    // Assert
+    expect(() => action.create()).not.toThrow();
   });
 });
