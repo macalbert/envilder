@@ -129,6 +129,24 @@ function cleanUpSystem() {
       }
     }
 
+    // Delete envilder-*.tgz files
+    const glob = require('glob');
+    const tgzFiles = glob.sync(join(rootDir, 'envilder-*.tgz'));
+    for (const file of tgzFiles) {
+      try {
+        if (process.platform === 'win32') {
+          execSync(`del /f /q ${file.replace(/\//g, '\\')}`, {
+            stdio: 'inherit',
+            cwd: rootDir,
+          });
+        } else {
+          execSync(`rm -f "${file}"`, { stdio: 'inherit' });
+        }
+      } catch {
+        // Ignore errors for individual file deletions
+      }
+    }
+
     execSync('npm uninstall -g envilder', { stdio: 'inherit' });
   } catch {
     // Ignore errors if not installed
