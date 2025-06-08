@@ -3,19 +3,17 @@ import * as dotenv from 'dotenv';
 import type { IEnvFileManager } from '../domain/ports/IEnvFileManager';
 
 export class EnvFileManager implements IEnvFileManager {
-  async loadParamMap(mapPath: string): Promise<Record<string, string>> {
+  async loadMapFile(mapPath: string): Promise<Record<string, string>> {
     const content = await fs.readFile(mapPath, 'utf-8');
     try {
       return JSON.parse(content);
-    } catch (error) {
+    } catch (err: unknown) {
       console.error(`Error parsing JSON from ${mapPath}`);
       throw new Error(`Invalid JSON in parameter map file: ${mapPath}`);
     }
   }
 
-  async loadExistingEnvVariables(
-    envFilePath: string,
-  ): Promise<Record<string, string>> {
+  async loadEnvFile(envFilePath: string): Promise<Record<string, string>> {
     const envVariables: Record<string, string> = {};
     try {
       await fs.access(envFilePath);
@@ -28,19 +26,20 @@ export class EnvFileManager implements IEnvFileManager {
     return envVariables;
   }
 
-  async writeEnvFile(
+  async saveEnvFile(
     envFilePath: string,
     envVariables: Record<string, string>,
   ): Promise<void> {
     const envContent = Object.entries(envVariables)
-      .map(([key, value]) => {
-        const escapedValue = value
-          .replace(/\\/g, '\\\\')
-          .replace(/(\r\n|\n|\r)/g, '\\n')
-          .replace(/"/g, '\\"');
-        return `${key}=${escapedValue}`;
-      })
+      .map(([key, value]) => `${key}=${this.escapeEnvValue(value)}`)
       .join('\n');
     await fs.writeFile(envFilePath, envContent);
+  }
+
+  private escapeEnvValue(value: string): string {
+    return value
+      .replace(/\\/g, '\\\\')
+      .replace(/(\r\n|\n|\r)/g, '\\n')
+      .replace(/"/g, '\\"');
   }
 }

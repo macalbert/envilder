@@ -32,7 +32,7 @@ describe('String Escaping in Environment File Generation', () => {
     const envVars = { BACKSLASH_VAR: expected };
 
     // Act
-    await sut.writeEnvFile(mockEnvFilePath, envVars);
+    await sut.saveEnvFile(mockEnvFilePath, envVars);
 
     // Assert
     const actual = await fs.readFile(mockEnvFilePath, 'utf-8');
@@ -47,7 +47,7 @@ describe('String Escaping in Environment File Generation', () => {
     const envVars = { NEWLINE_VAR: expected };
 
     // Act
-    await sut.writeEnvFile(mockEnvFilePath, envVars);
+    await sut.saveEnvFile(mockEnvFilePath, envVars);
 
     // Assert
     const actual = await fs.readFile(mockEnvFilePath, 'utf-8');
@@ -62,7 +62,7 @@ describe('String Escaping in Environment File Generation', () => {
     const envVars = { QUOTE_VAR: expected };
 
     // Act
-    await sut.writeEnvFile(mockEnvFilePath, envVars);
+    await sut.saveEnvFile(mockEnvFilePath, envVars);
 
     // Assert
     const actual = await fs.readFile(mockEnvFilePath, 'utf-8');
@@ -77,7 +77,7 @@ describe('String Escaping in Environment File Generation', () => {
     const envVars = { COMBINED_VAR: expected };
 
     // Act
-    await sut.writeEnvFile(mockEnvFilePath, envVars);
+    await sut.saveEnvFile(mockEnvFilePath, envVars);
 
     // Assert
     const actual = await fs.readFile(mockEnvFilePath, 'utf-8');
@@ -92,7 +92,7 @@ describe('String Escaping in Environment File Generation', () => {
     const envVars = { ESCAPED_VAR: input };
 
     // Act
-    await sut.writeEnvFile(mockEnvFilePath, envVars);
+    await sut.saveEnvFile(mockEnvFilePath, envVars);
 
     // Assert
     const actual = await fs.readFile(mockEnvFilePath, 'utf-8');
@@ -110,7 +110,7 @@ describe('String Escaping in Environment File Generation', () => {
     await fs.writeFile(mockMapPath, JSON.stringify(expected));
 
     // Act
-    const paramMap = await sut.loadParamMap(mockMapPath);
+    const paramMap = await sut.loadMapFile(mockMapPath);
 
     // Assert
     expect(paramMap).toEqual(expected);
