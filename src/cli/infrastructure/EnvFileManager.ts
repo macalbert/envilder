@@ -1,10 +1,10 @@
-import * as fs from 'node:fs';
+import * as fs from 'node:fs/promises';
 import * as dotenv from 'dotenv';
 import type { IEnvFileManager } from '../domain/ports/IEnvFileManager';
 
 export class EnvFileManager implements IEnvFileManager {
-  loadParamMap(mapPath: string): Record<string, string> {
-    const content = fs.readFileSync(mapPath, 'utf-8');
+  async loadParamMap(mapPath: string): Promise<Record<string, string>> {
+    const content = await fs.readFile(mapPath, 'utf-8');
     try {
       return JSON.parse(content);
     } catch (error) {
@@ -13,21 +13,25 @@ export class EnvFileManager implements IEnvFileManager {
     }
   }
 
-  loadExistingEnvVariables(envFilePath: string): Record<string, string> {
+  async loadExistingEnvVariables(
+    envFilePath: string,
+  ): Promise<Record<string, string>> {
     const envVariables: Record<string, string> = {};
-    if (!fs.existsSync(envFilePath)) {
+    try {
+      await fs.access(envFilePath);
+    } catch {
       return envVariables;
     }
-    const existingEnvContent = fs.readFileSync(envFilePath, 'utf-8');
+    const existingEnvContent = await fs.readFile(envFilePath, 'utf-8');
     const parsedEnv = dotenv.parse(existingEnvContent);
     Object.assign(envVariables, parsedEnv);
     return envVariables;
   }
 
-  writeEnvFile(
+  async writeEnvFile(
     envFilePath: string,
     envVariables: Record<string, string>,
-  ): void {
+  ): Promise<void> {
     const envContent = Object.entries(envVariables)
       .map(([key, value]) => {
         const escapedValue = value
@@ -37,6 +41,6 @@ export class EnvFileManager implements IEnvFileManager {
         return `${key}=${escapedValue}`;
       })
       .join('\n');
-    fs.writeFileSync(envFilePath, envContent);
+    await fs.writeFile(envFilePath, envContent);
   }
 }

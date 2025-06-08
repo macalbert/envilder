@@ -19,14 +19,14 @@ export class Envilder {
    * @param envFilePath - Path to the local environment file to read and update.
    */
   async run(mapPath: string, envFilePath: string) {
-    const paramMap = this.envFileManager.loadParamMap(mapPath);
+    const paramMap = await this.envFileManager.loadParamMap(mapPath);
     const existingEnvVariables =
-      this.envFileManager.loadExistingEnvVariables(envFilePath);
+      await this.envFileManager.loadExistingEnvVariables(envFilePath);
     const updatedEnvVariables = await this.fetchAndUpdateEnvVariables(
       paramMap,
       existingEnvVariables,
     );
-    this.envFileManager.writeEnvFile(envFilePath, updatedEnvVariables);
+    await this.envFileManager.writeEnvFile(envFilePath, updatedEnvVariables);
     console.log(`Environment File generated at '${envFilePath}'`);
   }
 

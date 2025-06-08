@@ -1,7 +1,7 @@
-import * as fs from 'node:fs';
-import * as dotenv from 'dotenv';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EnvFileManager } from '../../../src/cli/infrastructure/EnvFileManager';
+import * as fs from 'node:fs/promises';
+import * as dotenv from 'dotenv';
 
 describe('String Escaping in Environment File Generation', () => {
   const sut = new EnvFileManager();
@@ -9,16 +9,14 @@ describe('String Escaping in Environment File Generation', () => {
   const mockMapPath = './tests/escaping-map.json';
   const mockEnvFilePath = './tests/.env.escaping.test';
 
-  afterEach(() => {
+  afterEach(async () => {
     vi.clearAllMocks();
-
-    if (fs.existsSync(mockEnvFilePath)) {
-      fs.unlinkSync(mockEnvFilePath);
-    }
-
-    if (fs.existsSync(mockMapPath)) {
-      fs.unlinkSync(mockMapPath);
-    }
+    try {
+      await fs.unlink(mockEnvFilePath);
+    } catch {}
+    try {
+      await fs.unlink(mockMapPath);
+    } catch {}
   });
 
   function escapeForEnvFile(value: string): string {
@@ -28,91 +26,91 @@ describe('String Escaping in Environment File Generation', () => {
       .replace(/"/g, '\\"');
   }
 
-  it('Should_EscapeBackslashes_When_WritingEnvFile', () => {
+  it('Should_EscapeBackslashes_When_WritingEnvFile', async () => {
     // Arrange
     const expected = 'value\\with\\backslashes';
     const envVars = { BACKSLASH_VAR: expected };
 
     // Act
-    sut.writeEnvFile(mockEnvFilePath, envVars);
+    await sut.writeEnvFile(mockEnvFilePath, envVars);
 
     // Assert
-    const actual = fs.readFileSync(mockEnvFilePath, 'utf-8');
+    const actual = await fs.readFile(mockEnvFilePath, 'utf-8');
     expect(actual).toBe(`BACKSLASH_VAR=${escapeForEnvFile(expected)}`);
     const parsed = dotenv.parse(actual);
     expect(parsed.BACKSLASH_VAR).toBe(escapeForEnvFile(expected));
   });
 
-  it('Should_EscapeNewlines_When_WritingEnvFile', () => {
+  it('Should_EscapeNewlines_When_WritingEnvFile', async () => {
     // Arrange
     const expected = 'value\nwith\nnewlines';
     const envVars = { NEWLINE_VAR: expected };
 
     // Act
-    sut.writeEnvFile(mockEnvFilePath, envVars);
+    await sut.writeEnvFile(mockEnvFilePath, envVars);
 
     // Assert
-    const actual = fs.readFileSync(mockEnvFilePath, 'utf-8');
+    const actual = await fs.readFile(mockEnvFilePath, 'utf-8');
     expect(actual).toBe(`NEWLINE_VAR=${escapeForEnvFile(expected)}`);
     const parsed = dotenv.parse(actual);
     expect(parsed.NEWLINE_VAR).toBe(escapeForEnvFile(expected));
   });
 
-  it('Should_EscapeQuotes_When_WritingEnvFile', () => {
+  it('Should_EscapeQuotes_When_WritingEnvFile', async () => {
     // Arrange
     const expected = 'value"with"quotes';
     const envVars = { QUOTE_VAR: expected };
 
     // Act
-    sut.writeEnvFile(mockEnvFilePath, envVars);
+    await sut.writeEnvFile(mockEnvFilePath, envVars);
 
     // Assert
-    const actual = fs.readFileSync(mockEnvFilePath, 'utf-8');
+    const actual = await fs.readFile(mockEnvFilePath, 'utf-8');
     expect(actual).toBe(`QUOTE_VAR=${escapeForEnvFile(expected)}`);
     const parsed = dotenv.parse(actual);
     expect(parsed.QUOTE_VAR).toBe(escapeForEnvFile(expected));
   });
 
-  it('Should_HandleCombinationOfSpecialCharacters_When_WritingEnvFile', () => {
+  it('Should_HandleCombinationOfSpecialCharacters_When_WritingEnvFile', async () => {
     // Arrange
     const expected = 'value"with"\neverything\\combined';
     const envVars = { COMBINED_VAR: expected };
 
     // Act
-    sut.writeEnvFile(mockEnvFilePath, envVars);
+    await sut.writeEnvFile(mockEnvFilePath, envVars);
 
     // Assert
-    const actual = fs.readFileSync(mockEnvFilePath, 'utf-8');
+    const actual = await fs.readFile(mockEnvFilePath, 'utf-8');
     expect(actual).toBe(`COMBINED_VAR=${escapeForEnvFile(expected)}`);
     const parsed = dotenv.parse(actual);
     expect(parsed.COMBINED_VAR).toBe(escapeForEnvFile(expected));
   });
 
-  it('Should_HandleAlreadyEscapedStrings_When_WritingEnvFile', () => {
+  it('Should_HandleAlreadyEscapedStrings_When_WritingEnvFile', async () => {
     // Arrange
     const input = 'value\\already\\escaped';
     const envVars = { ESCAPED_VAR: input };
 
     // Act
-    sut.writeEnvFile(mockEnvFilePath, envVars);
+    await sut.writeEnvFile(mockEnvFilePath, envVars);
 
     // Assert
-    const actual = fs.readFileSync(mockEnvFilePath, 'utf-8');
+    const actual = await fs.readFile(mockEnvFilePath, 'utf-8');
     expect(actual).toBe(`ESCAPED_VAR=${escapeForEnvFile(input)}`);
     const parsed = dotenv.parse(actual);
     expect(parsed.ESCAPED_VAR).toBe(escapeForEnvFile(input));
   });
 
-  it('Should_LoadParamMap_When_FileIsValid', () => {
+  it('Should_LoadParamMap_When_FileIsValid', async () => {
     // Arrange
     const expected = {
       TEST_VAR1: '/test/backslash',
       TEST_VAR2: '/test/newlines',
     };
-    fs.writeFileSync(mockMapPath, JSON.stringify(expected));
+    await fs.writeFile(mockMapPath, JSON.stringify(expected));
 
     // Act
-    const paramMap = sut.loadParamMap(mockMapPath);
+    const paramMap = await sut.loadParamMap(mockMapPath);
 
     // Assert
     expect(paramMap).toEqual(expected);
