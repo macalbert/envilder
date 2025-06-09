@@ -16,6 +16,7 @@
     "lint": "secretlint \"**/*\" && biome check --write && tsc --noEmit",
     "lint:fix": "biome lint --fix",
     "test": "vitest run --reporter verbose --coverage",
+    "test:ci": "vitest run --reporter=junit --coverage --outputFile=coverage/junit/test-results.xml",
     "npm-publish": "npm run lint && npm run build && npm run test && npm pack --dry-run && npm publish",
     "npm-release-patch": "npm version patch",
     "npm-release-minor": "npm version minor",

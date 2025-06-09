@@ -57,7 +57,7 @@ jobs:
         run: npm run build
 
       - name: 🏎️ Race Through the Track (Run unit-test)
-        run: npm test -- --reporter=junit --outputFile=coverage/junit/test-results.xml
+        run: npm run test:ci
 
       - name: 🍄 Reveal the Power-Up (Test core results)
         uses: dorny/test-reporter@v1
@@ -65,4 +65,4 @@ jobs:
         with:
           name: ✅ Test Core Unit Tests
           path: ./coverage/junit/test-results.xml
-          reporter: jest-junit
+          reporter: vitest
