@@ -65,4 +65,4 @@ jobs:
         with:
           name: ✅ Test Core Unit Tests
           path: ./coverage/junit/test-results.xml
-          reporter: vitest
+          reporter: jest-junit
