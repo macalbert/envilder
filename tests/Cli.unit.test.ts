@@ -71,4 +71,32 @@ describe('Cli main (unit, inject mocks via builder)', () => {
     expect(withAwsProviderSpy).toHaveBeenCalledWith('test-profile');
     withAwsProviderSpy.mockRestore();
   });
+
+  it('Should_ThrowError_When_ArgumentsAreInvalids', async () => {
+    // Arrange
+    process.argv = [
+      'node',
+      'cli.js',
+      '--map',
+      // missing map file argument
+      '--envfile',
+      // missing envfile argument
+    ];
+    const envilderSpy = vi.spyOn(Envilder.prototype, 'run');
+    const withAwsProviderSpy = vi.spyOn(
+      EnvilderBuilder.prototype,
+      'withAwsProvider',
+    );
+
+    // Act
+    const action = main();
+
+    // Assert
+    await expect(action).rejects.toThrow(
+      /required option|process\.exit called|CommanderError/i,
+    );
+    expect(envilderSpy).not.toHaveBeenCalled();
+    expect(withAwsProviderSpy).not.toHaveBeenCalled();
+    withAwsProviderSpy.mockRestore();
+  });
 });
