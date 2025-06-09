@@ -5,6 +5,13 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { PackageJsonFinder } from './cli/infrastructure/PackageJsonFinder.js';
 
+/**
+ * Parses CLI arguments and runs the environment file generator.
+ *
+ * Expects `--map` and `--envfile` options to be provided, with an optional `--profile` for AWS CLI profile selection. Invokes the main process to generate a `.env` file from AWS SSM parameters based on the provided mapping.
+ *
+ * @throws {Error} If either `--map` or `--envfile` arguments are missing.
+ */
 export async function main() {
   const program = new Command();
   const version = await getVersion();

@@ -10,6 +10,14 @@ export class Envilder {
     this.envFileManager = envFileManager;
   }
 
+  /**
+   * Orchestrates the process of fetching environment variable values from a key vault and writing them to a local environment file.
+   *
+   * Loads a parameter mapping from a JSON file, retrieves existing environment variables, fetches updated values from the key vault, merges them, and writes the result to the specified environment file.
+   *
+   * @param mapPath - Path to the JSON file mapping environment variable names to key vault parameter names.
+   * @param envFilePath - Path to the local environment file to read and update.
+   */
   async run(mapPath: string, envFilePath: string) {
     try {
       const requestVariables = await this.envFileManager.loadMapFile(mapPath);

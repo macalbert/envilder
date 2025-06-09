@@ -4,14 +4,16 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pc from 'picocolors';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { rm, unlink } from 'node:fs/promises';
+import { glob } from 'glob';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '..');
 
 describe('Envilder CLI (E2E)', () => {
-  beforeAll(() => {
-    cleanUpSystem();
+  beforeAll(async () => {
+    await cleanUpSystem();
     execSync('npm run build', { cwd: rootDir, stdio: 'inherit' });
     execSync('node --loader ts-node/esm scripts/pack-and-install.ts', {
       cwd: rootDir,
@@ -23,8 +25,8 @@ describe('Envilder CLI (E2E)', () => {
   const testEnvFile = join(rootDir, 'tests', 'sample', 'cli-validation.env');
   const paramMapPath = join(rootDir, 'tests', 'sample', 'param-map.json');
 
-  afterAll(() => {
-    cleanUpSystem();
+  afterAll(async () => {
+    await cleanUpSystem();
   });
 
   it('Should_PrintCorrectVersion_When_VersionFlagIsProvided', async () => {
@@ -117,36 +119,34 @@ function runCommand(
   });
 }
 
-function cleanUpSystem() {
+async function cleanUpSystem() {
   try {
     const libPath = join(rootDir, 'lib');
-
-    if (existsSync(libPath)) {
-      if (process.platform === 'win32') {
-        execSync(`rd /s /q "${libPath}"`, { stdio: 'inherit' });
-      } else {
-        execSync(`rm -rf "${libPath}"`, { stdio: 'inherit' });
-      }
+    try {
+      await rm(libPath, { recursive: true, force: true });
+    } catch {
+      // Ignore errors for individual file deletions
     }
 
     // Delete envilder-*.tgz files
-    const glob = require('glob');
-    const tgzFiles = glob.sync(join(rootDir, 'envilder-*.tgz'));
+    const tgzFiles = await new Promise<string[]>((resolve, reject) => {
+      glob(join(rootDir, 'envilder-*.tgz'), (err, matches) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(matches);
+      });
+    });
+
     for (const file of tgzFiles) {
       try {
-        if (process.platform === 'win32') {
-          execSync(`del /f /q ${file.replace(/\//g, '\\')}`, {
-            stdio: 'inherit',
-            cwd: rootDir,
-          });
-        } else {
-          execSync(`rm -f "${file}"`, { stdio: 'inherit' });
-        }
+        await unlink(file);
       } catch {
         // Ignore errors for individual file deletions
       }
     }
 
+    // Uninstall global package (still sync, as npm API is not available async)
     execSync('npm uninstall -g envilder', { stdio: 'inherit' });
   } catch {
     // Ignore errors if not installed
