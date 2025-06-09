@@ -37,9 +37,6 @@ export class EnvFileManager implements IEnvFileManager {
   }
 
   private escapeEnvValue(value: string): string {
-    return value
-      .replace(/\\/g, '\\\\')
-      .replace(/(\r\n|\n|\r)/g, '\\n')
-      .replace(/"/g, '\\"');
+    return value.replace(/(\r\n|\n|\r)/g, '\\n');
   }
 }
