@@ -26,9 +26,9 @@ describe('Cli main (unit, inject mocks via builder)', () => {
 
   beforeEach(() => {
     mockFileManager = {
-      loadParamMap: vi.fn(async () => ({ FOO: 'BAR' })),
-      loadExistingEnvVariables: vi.fn(async () => ({})),
-      writeEnvFile: vi.fn(async () => {}),
+      loadMapFile: vi.fn(async () => ({ FOO: 'BAR' })),
+      loadEnvFile: vi.fn(async () => ({})),
+      saveEnvFile: vi.fn(async () => {}),
     };
     mockProvider = {
       getSecret: vi.fn(async () => 'secret-value'),
