@@ -18,7 +18,7 @@ const mockSecretProvider: ISecretProvider = {
   }),
 };
 
-describe('Envilder CLI', () => {
+describe('EnvilderBuilder', () => {
   const sut = EnvilderBuilder.build()
     .withDefaultFileManager()
     .withProvider(mockSecretProvider)

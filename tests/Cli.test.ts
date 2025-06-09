@@ -19,7 +19,7 @@ function patchBuilderWithMocks(
   });
 }
 
-describe('Cli main (unit, inject mocks via builder)', () => {
+describe('Envilder', () => {
   let mockFileManager: IEnvFileManager;
   let mockProvider: ISecretProvider;
   const testProfile = 'test-profile';

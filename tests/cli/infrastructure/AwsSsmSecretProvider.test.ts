@@ -4,13 +4,13 @@ import {
   type StartedLocalStackContainer,
 } from '@testcontainers/localstack';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { AwsSsmSecretProvider } from '../../../src/cli/infrastructure/AwsSsmStoreSecrets';
+import { AwsSsmSecretProvider } from '../../../src/cli/infrastructure/AwsSsmSecretProvider';
 
 const LOCALSTACK_IMAGE = 'localstack/localstack:stable';
 const PARAM_NAME = '/test/secret';
 const PARAM_VALUE = 'super-secret-value';
 
-describe('AwsSsmStoreSecrets (integration with LocalStack)', () => {
+describe('AwsSsmSecretProvider (integration with LocalStack)', () => {
   let container: StartedLocalStackContainer;
   let endpoint: string;
   let ssmClient: SSM;

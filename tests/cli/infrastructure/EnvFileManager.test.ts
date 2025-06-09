@@ -3,7 +3,7 @@ import { EnvFileManager } from '../../../src/cli/infrastructure/EnvFileManager';
 import * as fs from 'node:fs/promises';
 import * as dotenv from 'dotenv';
 
-describe('String Escaping in Environment File Generation', () => {
+describe('EnvFileManager', () => {
   const sut = new EnvFileManager();
 
   const mockMapPath = './tests/escaping-map.json';
@@ -25,7 +25,7 @@ describe('String Escaping in Environment File Generation', () => {
 
   it('Should_EscapeBackslashes_When_WritingEnvFile', async () => {
     // Arrange
-    const expected = 'value\\with\\backslashes'; // value\with\backslashes at runtime
+    const expected = 'value\\with\\backslashes';
     const envVars = { BACKSLASH_VAR: expected };
 
     // Act

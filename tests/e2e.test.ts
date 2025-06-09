@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '..');
 
-describe('Envilder CLI (E2E)', () => {
+describe('Envilder (E2E)', () => {
   beforeAll(async () => {
     await cleanUpSystem();
     execSync('npm run build', { cwd: rootDir, stdio: 'inherit' });
