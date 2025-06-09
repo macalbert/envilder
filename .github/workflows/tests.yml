@@ -56,5 +56,13 @@ jobs:
       - name: 🏗️ Build the Castle
         run: npm run build
 
-      - name: 🏆 Defeat the Boss (Run unit tests)
-        run: npm test
+      - name: 🏎️ Race Through the Track (Run unit-test)
+        run: npm test -- --reporter=junit --outputFile=coverage/junit/test-results.xml
+
+      - name: 🍄 Reveal the Power-Up (Test core results)
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: ✅ Test Core Unit Tests
+          path: ./coverage/junit/test-results.xml
+          reporter: jest-junit
