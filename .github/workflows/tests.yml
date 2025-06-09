@@ -1,5 +1,10 @@
 name: 🍄 1-Up Test Run
 
+permissions:
+  checks: write
+  pull-requests: write
+  contents: read
+
 on:
   workflow_dispatch: {}
 
@@ -16,11 +21,6 @@ on:
       - "src/**"
       - "tests/**"
       - 'package.json'
-
-permissions:
-  checks: write
-  pull-requests: write
-  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
