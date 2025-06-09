@@ -69,7 +69,7 @@ export class Envilder {
       const value = await this.keyVault.getSecret(secretName);
       if (!value) {
         console.error(`Warning: No value found for: '${secretName}'`);
-        return null;
+        return `ParameterNotFound: ${secretName}`;
       }
       existingEnvVariables[envVar] = value;
       console.log(
