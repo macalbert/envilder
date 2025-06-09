@@ -17,6 +17,11 @@ on:
       - "tests/**"
       - 'package.json'
 
+permissions:
+  checks: write
+  pull-requests: write
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
   cancel-in-progress: true
