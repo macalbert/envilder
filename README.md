@@ -24,8 +24,24 @@
 - **🧩 Single source of truth** - No more copying .env files from Notion or emails - SSM is your only source
 - **🔁 Idempotent operations** - Overwrites values in your `.env` file *only* for variables defined in your mapping
 file, using the latest from SSM. Variables not in the mapping file are preserved. Safe for automation.
-- **⚙️ Environment-aware** - Use templates like `/project/${ENV}/DB_PASSWORD` to dynamically fetch the right secrets
 - **🧱 No extra infrastructure** - Uses AWS SSM's existing reliability instead of additional secret managers
+
+## 🚦 Feature Status & Limitations
+
+> **Important:** Some features described in the roadmap or previously in this README are **not yet implemented**. Please
+> review the table below and the Limitations section for details.
+
+| Feature                        | Status         | Notes |
+|--------------------------------|---------------|-------|
+| Mapping-based secret resolution| ✅ Implemented | |
+| .env file generation           | ✅ Implemented | |
+| AWS profile support            | ✅ Implemented | |
+| Auto-discovery mode (`--auto`) | ❌ Not implemented | Planned in roadmap |
+| Check/sync mode (`--check`)    | ❌ Not implemented | Planned in roadmap |
+| Import/push mode (`--import`)  | ❌ Not implemented | Planned in roadmap |
+| Webhook/Slack notification     | ❌ Not implemented | Planned in roadmap |
+| Hierarchical mapping           | ❌ Not implemented | Only flat JSON mapping supported |
+| Plugin system                  | ❌ Not implemented | Only AWS SSM supported |
 
 ## ⚡ Quick start
 
@@ -202,44 +218,9 @@ or `%USERPROFILE%\.aws\credentials` on Windows):
     # Production environment
     envilder --map=param-map.json --envfile=.env.production --profile=prod-account
     ```
+## 🛣️ Roadmap
 
-## 🛠️ Advanced usage: environment-specific parameters
-
-Envilder works brilliantly with environment variables for dynamic parameter paths:
-
-1. Set up your SSM parameters with environment-specific paths:
-
-   ```text
-   /project/dev/DB_PASSWORD
-   /project/stage/DB_PASSWORD
-   /project/prod/DB_PASSWORD
-   ```
-
-2. Create a template-based mapping file `env-map.json`:
-
-   ```json
-   {
-     "DB_PASSWORD": "/project/${ENV}/DB_PASSWORD"
-   }
-   ```
-
-3. Generate environment-specific .env files:
-
-   ```powershell
-   # Development
-   $env:ENV = "dev"
-   envilder --map=env-map.json --envfile=.env.dev
-
-   # Staging 
-   $env:ENV = "stage"
-   envilder --map=env-map.json --envfile=.env.stage
-   
-   # Production
-   $env:ENV = "prod" 
-   envilder --map=env-map.json --envfile=.env.prod --profile=prod-account
-   ```
-
-This approach ensures the right variables are pulled for each environment with minimal configuration.
+See [ROADMAP.md](./ROADMAP.md) for planned features and ideas.
 
 ## 📂 Sample `.env` output
 

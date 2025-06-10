@@ -129,12 +129,13 @@ async function cleanUpSystem() {
     }
 
     // Delete envilder-*.tgz files
-    const tgzFiles = await glob(join(rootDir, 'envilder-*.tgz'));
+    const tgzFiles = await glob('envilder-*.tgz', { cwd: rootDir });
+    const tgzPaths = tgzFiles.map((f) => join(rootDir, f));
 
-    for (const file of tgzFiles) {
+    for (const file of tgzPaths) {
       try {
         await unlink(file);
-      } catch {
+      } catch (err) {
         // Ignore errors for individual file deletions
       }
     }
