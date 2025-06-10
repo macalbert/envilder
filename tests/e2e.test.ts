@@ -19,7 +19,7 @@ describe('Envilder (E2E)', () => {
       cwd: rootDir,
       stdio: 'inherit',
     });
-  }, 120_000);
+  }, 30_000);
 
   const envilder = 'envilder';
   const testEnvFile = join(rootDir, 'tests', 'sample', 'cli-validation.env');
@@ -129,14 +129,7 @@ async function cleanUpSystem() {
     }
 
     // Delete envilder-*.tgz files
-    const tgzFiles = await new Promise<string[]>((resolve, reject) => {
-      glob(join(rootDir, 'envilder-*.tgz'), (err, matches) => {
-        if (err) {
-          return reject(err);
-        }
-        return resolve(matches);
-      });
-    });
+    const tgzFiles = await glob(join(rootDir, 'envilder-*.tgz'));
 
     for (const file of tgzFiles) {
       try {
