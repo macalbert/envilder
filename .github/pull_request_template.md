@@ -1,20 +1,24 @@
-# Description
+# Pull Request
 
-_Describe the problem or feature in addition to a link to the issues._
+## What does this PR do?
+<!-- Briefly describe the change or feature. -->
 
-## Approach
+## Related issues
+<!-- List related issues or close them. Example: Closes #123 -->
 
-_How does this change address the problem?_
+## Type of change
 
-## Open Questions and Pre-Merge TODOs
+- [ ] Feature
+- [ ] Bugfix
+- [ ] Refactor
+- [ ] Documentation
+- [ ] Other
 
-- [ ] Use github checklists. When solved, check the box and explain the answer.
+## Checklist
 
-## Learning
+- [ ] Tests added/updated (if needed)
+- [ ] Docs updated (if needed)
+- [ ] Lint/format pass
 
-_Describe the research stage_
-_Links to blog posts, patterns, libraries or addons used to solve this problem_
-
-## Blog Posts
-
-- [How to Pull Request](https://github.com/flexyford/pull-request) Github Repo with Learning focused Pull Request Template.
+## Notes for reviewer
+<!-- Anything special for reviewers to know? -->
