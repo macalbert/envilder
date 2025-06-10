@@ -1,5 +1,8 @@
 export interface IEnvFileManager {
-  loadParamMap(mapPath: string): Record<string, string>;
-  loadExistingEnvVariables(envFilePath: string): Record<string, string>;
-  writeEnvFile(envFilePath: string, envVariables: Record<string, string>): void;
+  loadMapFile(mapPath: string): Promise<Record<string, string>>;
+  loadEnvFile(envFilePath: string): Promise<Record<string, string>>;
+  saveEnvFile(
+    envFilePath: string,
+    envVariables: Record<string, string>,
+  ): Promise<void>;
 }

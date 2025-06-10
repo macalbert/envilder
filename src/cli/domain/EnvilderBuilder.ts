@@ -2,7 +2,7 @@ import { SSM } from '@aws-sdk/client-ssm';
 import type { SSMClientConfig } from '@aws-sdk/client-ssm';
 import { fromIni } from '@aws-sdk/credential-providers';
 import { Envilder } from '../application/EnvilderHandler.js';
-import { AwsSsmSecretProvider } from '../infrastructure/AwsSsmStoreSecrets.js';
+import { AwsSsmSecretProvider } from '../infrastructure/AwsSsmSecretProvider.js';
 import { EnvFileManager } from '../infrastructure/EnvFileManager.js';
 import type { IEnvFileManager } from './ports/IEnvFileManager.js';
 import type { ISecretProvider } from './ports/ISecretProvider.js';

@@ -1,47 +1,9 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import { EnvilderBuilder } from './cli/domain/EnvilderBuilder.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-/**
- * Find the package.json file by traversing up directories
- * @param startDir The directory to start searching from
- * @param maxDepth Maximum number of parent directories to check
- * @returns Path to package.json if found, or null if not found
- */
-function findPackageJson(startDir: string, maxDepth = 5): string | null {
-  let currentDir = startDir;
-  let depth = 0;
-
-  while (depth < maxDepth) {
-    const packagePath = join(currentDir, 'package.json');
-    if (existsSync(packagePath)) {
-      return packagePath;
-    }
-
-    // Go up one directory
-    const parentDir = dirname(currentDir);
-    if (parentDir === currentDir) {
-      // We've reached the root
-      break;
-    }
-
-    currentDir = parentDir;
-    depth++;
-  }
-
-  return null;
-}
-
-// Get package.json path by searching up from current file
-const packageJsonPath =
-  findPackageJson(__dirname) || join(__dirname, '..', '..', 'package.json');
-const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+import { PackageJsonFinder } from './cli/infrastructure/PackageJsonFinder.js';
 
 /**
  * Parses CLI arguments and runs the environment file generator.
@@ -52,10 +14,12 @@ const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
  */
 export async function main() {
   const program = new Command();
+  const version = await getVersion();
+
   program
     .name('envilder')
     .description('A CLI tool to generate .env files from AWS SSM parameters')
-    .version(packageJson.version)
+    .version(version)
     .requiredOption(
       '--map <path>',
       'Path to the JSON file with environment variable mapping',
@@ -78,7 +42,15 @@ export async function main() {
   await envilder.run(options.map, options.envfile);
 }
 
-// Execute the CLI
+function getVersion(): Promise<string> {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+
+  return new PackageJsonFinder().readPackageJsonVersion(
+    join(__dirname, '../package.json'),
+  );
+}
+
 main().catch((error) => {
   console.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
   console.error(error);
