@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { EnvilderBuilder } from '../../../src/cli/domain/EnvilderBuilder';
+import { EnvilderBuilder } from '../../../../src/cli/application/builders/EnvilderBuilder';
+import type { IEnvFileManager } from '../../../../src/cli/domain/ports/IEnvFileManager';
 
 describe('EnvilderBuilder', () => {
   it('Should_ReturnInstance_When_NoProfileAreProvided', () => {
@@ -67,10 +68,10 @@ describe('EnvilderBuilder', () => {
 
   it('Should_UseCustomEnvFileManager_When_WithEnvFileManagerIsCalled', () => {
     // Arrange
-    const mockFileManager = {
-      loadParamMap: () => ({}),
-      loadExistingEnvVariables: () => ({}),
-      writeEnvFile: () => {},
+    const mockFileManager: IEnvFileManager = {
+      loadMapFile: async () => ({}),
+      loadEnvFile: async () => ({}),
+      saveEnvFile: async () => {},
     };
     const mockProvider = { getSecret: async () => 'value' };
 
