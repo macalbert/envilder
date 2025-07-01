@@ -67,7 +67,7 @@
     "picocolors": "^1.1.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.1",
+    "@biomejs/biome": "^2.0.6",
     "@secretlint/secretlint-rule-preset-recommend": "^9.3.2",
     "@testcontainers/localstack": "^11.0.1",
     "@types/glob": "^8.1.0",
