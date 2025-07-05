@@ -55,7 +55,7 @@ describe('EnvilderBuilder', () => {
       EnvilderBuilder.build().withDefaultFileManager().create();
 
     // Assert
-    expect(action).toThrow('Secret provider must be specified');
+    expect(action).toThrow('Logger must be specified');
   });
 
   it('Should_ThrowError_When_FileManagerIsMissing', () => {
