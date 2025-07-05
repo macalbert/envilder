@@ -6,6 +6,7 @@ describe('EnvilderBuilder', () => {
   it('Should_ReturnInstance_When_NoProfileAreProvided', () => {
     // Act
     const sut = EnvilderBuilder.build()
+      .withConsoleLogger()
       .withDefaultFileManager()
       .withAwsProvider()
       .create();
@@ -21,6 +22,7 @@ describe('EnvilderBuilder', () => {
 
     // Act
     const actual = EnvilderBuilder.build()
+      .withConsoleLogger()
       .withDefaultFileManager()
       .withAwsProvider(profile)
       .create();
@@ -37,6 +39,7 @@ describe('EnvilderBuilder', () => {
     // Act
     const action = () =>
       EnvilderBuilder.build()
+        .withConsoleLogger()
         .withDefaultFileManager()
         .withAwsProvider(invalidProfile)
         .create();
@@ -51,7 +54,7 @@ describe('EnvilderBuilder', () => {
       EnvilderBuilder.build().withDefaultFileManager().create();
 
     // Assert
-    expect(action).toThrow('Secret provider must be specified');
+    expect(action).toThrow('Logger must be specified');
   });
 
   it('Should_ThrowError_When_FileManagerIsMissing', () => {
@@ -78,6 +81,7 @@ describe('EnvilderBuilder', () => {
     // Act
     const sut = EnvilderBuilder.build()
       .withEnvFileManager(mockFileManager)
+      .withConsoleLogger()
       .withProvider(mockProvider)
       .create();
 

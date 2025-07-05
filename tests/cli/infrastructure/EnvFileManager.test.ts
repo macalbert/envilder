@@ -2,9 +2,10 @@ import * as fs from 'node:fs/promises';
 import * as dotenv from 'dotenv';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EnvFileManager } from '../../../src/cli/infrastructure/EnvFileManager';
+import { ConsoleLogger } from '../../../src/cli/infrastructure/ConsoleLogger.js';
 
 describe('EnvFileManager', () => {
-  const sut = new EnvFileManager();
+  const sut = new EnvFileManager(new ConsoleLogger());
 
   const mockMapPath = './tests/escaping-map.json';
   const mockEnvFilePath = './tests/.env.escaping.test';

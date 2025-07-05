@@ -1,13 +1,21 @@
 import type { IEnvFileManager } from '../domain/ports/IEnvFileManager';
 import type { ISecretProvider } from '../domain/ports/ISecretProvider';
+import type { ILogger } from '../domain/ports/ILogger';
+import { ConsoleLogger } from '../infrastructure/ConsoleLogger.js';
 
 export class Envilder {
   private keyVault: ISecretProvider;
   private envFileManager: IEnvFileManager;
+  private logger: ILogger;
 
-  constructor(keyVault: ISecretProvider, envFileManager: IEnvFileManager) {
+  constructor(
+    keyVault: ISecretProvider,
+    envFileManager: IEnvFileManager,
+    logger: ILogger,
+  ) {
     this.keyVault = keyVault;
     this.envFileManager = envFileManager;
+    this.logger = logger;
   }
 
   /**
@@ -28,11 +36,11 @@ export class Envilder {
 
       await this.envFileManager.saveEnvFile(envFilePath, envilded);
 
-      console.log(`Environment File generated at '${envFilePath}'`);
+      this.logger.info(`Environment File generated at '${envFilePath}'`);
     } catch (_error) {
       const errorMessage =
         _error instanceof Error ? _error.message : String(_error);
-      console.error(`Failed to generate environment file: ${errorMessage}`);
+      this.logger.error(`Failed to generate environment file: ${errorMessage}`);
       throw _error;
     }
   }
@@ -68,16 +76,16 @@ export class Envilder {
     try {
       const value = await this.keyVault.getSecret(secretName);
       if (!value) {
-        console.error(`Warning: No value found for: '${secretName}'`);
+        this.logger.warn(`Warning: No value found for: '${secretName}'`);
         return null;
       }
       existingEnvVariables[envVar] = value;
-      console.log(
+      this.logger.info(
         `${envVar}=${value.length > 10 ? '*'.repeat(value.length - 3) + value.slice(-3) : '*'.repeat(value.length)}`,
       );
       return null;
     } catch (_error) {
-      console.error(`Error fetching parameter: '${secretName}'`);
+      this.logger.error(`Error fetching parameter: '${secretName}'`);
       return `ParameterNotFound: ${secretName}`;
     }
   }

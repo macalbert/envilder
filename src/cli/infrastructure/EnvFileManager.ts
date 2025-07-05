@@ -1,14 +1,23 @@
 import * as fs from 'node:fs/promises';
 import * as dotenv from 'dotenv';
 import type { IEnvFileManager } from '../domain/ports/IEnvFileManager';
+import type { ILogger } from '../domain/ports/ILogger';
 
 export class EnvFileManager implements IEnvFileManager {
+  private logger: ILogger;
+  constructor(logger: ILogger) {
+    if (!logger) {
+      throw new Error('Logger must be specified');
+    }
+    this.logger = logger;
+  }
+
   async loadMapFile(mapPath: string): Promise<Record<string, string>> {
     const content = await fs.readFile(mapPath, 'utf-8');
     try {
       return JSON.parse(content);
     } catch (_err: unknown) {
-      console.error(`Error parsing JSON from ${mapPath}`);
+      this.logger.error(`Error parsing JSON from ${mapPath}`);
       throw new Error(`Invalid JSON in parameter map file: ${mapPath}`);
     }
   }
