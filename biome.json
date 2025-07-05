@@ -1,7 +1,11 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.0.6/schema.json",
   "files": {
-    "include": ["./src/**", "./tests/**", "./scripts/**"],
+    "include": [
+      "./src/**",
+      "./tests/**",
+      "./scripts/**"
+    ],
     "ignore": [
       "**/node_modules/**",
       "**/lib/**",
