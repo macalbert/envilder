@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { EnvilderBuilder } from '../../../../src/cli/application/builders/EnvilderBuilder';
-import { ConsoleLogger } from '../../../../src/cli/infrastructure/ConsoleLogger.js';
 import type { IEnvFileManager } from '../../../../src/cli/domain/ports/IEnvFileManager';
 
 describe('EnvilderBuilder', () => {
