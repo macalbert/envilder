@@ -12,13 +12,13 @@ export class PackageJsonFinder {
       }
 
       return pkg.version;
-    } catch (err) {
-      if (this.isEnoentError(err)) {
+    } catch (_err) {
+      if (this.isEnoentError(_err)) {
         throw new Error('package.json not found');
       }
 
       throw new Error(
-        `Failed to read or parse package.json: ${err instanceof Error ? err.message : String(err)}`,
+        `Failed to read or parse package.json: ${_err instanceof Error ? _err.message : String(_err)}`,
       );
     }
   }

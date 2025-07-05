@@ -1,5 +1,5 @@
-import { SSM } from '@aws-sdk/client-ssm';
 import type { SSMClientConfig } from '@aws-sdk/client-ssm';
+import { SSM } from '@aws-sdk/client-ssm';
 import { fromIni } from '@aws-sdk/credential-providers';
 import { Envilder } from '../EnvilderHandler.js';
 import { AwsSsmSecretProvider } from '../../infrastructure/AwsSsmSecretProvider.js';

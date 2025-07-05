@@ -37,11 +37,11 @@ export class Envilder {
       await this.envFileManager.saveEnvFile(envFilePath, envilded);
 
       this.logger.info(`Environment File generated at '${envFilePath}'`);
-    } catch (error) {
+    } catch (_error) {
       const errorMessage =
-        error instanceof Error ? error.message : String(error);
+        _error instanceof Error ? _error.message : String(_error);
       this.logger.error(`Failed to generate environment file: ${errorMessage}`);
-      throw error;
+      throw _error;
     }
   }
 
@@ -84,7 +84,7 @@ export class Envilder {
         `${envVar}=${value.length > 10 ? '*'.repeat(value.length - 3) + value.slice(-3) : '*'.repeat(value.length)}`,
       );
       return null;
-    } catch (error) {
+    } catch (_error) {
       this.logger.error(`Error fetching parameter: '${secretName}'`);
       return `ParameterNotFound: ${secretName}`;
     }

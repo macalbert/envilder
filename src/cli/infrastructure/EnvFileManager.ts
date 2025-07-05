@@ -16,7 +16,7 @@ export class EnvFileManager implements IEnvFileManager {
     const content = await fs.readFile(mapPath, 'utf-8');
     try {
       return JSON.parse(content);
-    } catch (err: unknown) {
+    } catch (_err: unknown) {
       this.logger.error(`Error parsing JSON from ${mapPath}`);
       throw new Error(`Invalid JSON in parameter map file: ${mapPath}`);
     }
