@@ -1,6 +1,6 @@
 {
   "name": "envilder",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "A CLI that securely centralizes your environment variables from AWS SSM as a single source of truth",
   "main": "./lib/Cli.js",
   "bin": {
@@ -67,13 +67,13 @@
     "picocolors": "^1.1.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.1",
-    "@secretlint/secretlint-rule-preset-recommend": "^9.3.2",
+    "@biomejs/biome": "^2.0.6",
+    "@secretlint/secretlint-rule-preset-recommend": "^10.1.1",
     "@testcontainers/localstack": "^11.0.1",
     "@types/glob": "^8.1.0",
     "@vitest/coverage-v8": "^3.1.1",
     "glob": "^11.0.2",
-    "secretlint": "^9.3.2",
+    "secretlint": "^10.1.1",
     "testcontainers": "^11.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2",

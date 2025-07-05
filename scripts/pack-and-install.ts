@@ -2,8 +2,11 @@
 
 import { execSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
+import { register } from 'node:module';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+register('ts-node/esm', pathToFileURL('./scripts/pack-and-install.ts'));
 
 async function main(): Promise<void> {
   const __filename = fileURLToPath(import.meta.url);
@@ -31,8 +34,8 @@ function createPackage(rootDir: string): string {
 
     console.log(`✅ Package created as ${packageFile}`);
     return packageFile;
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
+  } catch (_err) {
+    const errorMessage = _err instanceof Error ? _err.message : String(_err);
     console.error(`❌ Failed to create package: ${errorMessage}`);
     process.exit(1);
   }
@@ -48,7 +51,14 @@ function installPackageFile(rootDir: string, packageFile: string): void {
   }
 
   console.log(`Installing from package: ${packagePath}`);
-  execSync(`npm install -g "${packagePath}"`, { stdio: 'inherit' });
+  try {
+    execSync(`npm install -g "${packagePath}"`, { stdio: 'inherit' });
+    console.log('✅ Package installed globally');
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error(`❌ Failed to install package globally: ${errorMessage}`);
+    process.exit(1);
+  }
 }
 
 main().catch((error: unknown) => {
