@@ -11,7 +11,7 @@ export class Envilder {
   constructor(
     keyVault: ISecretProvider,
     envFileManager: IEnvFileManager,
-    logger: ILogger = new ConsoleLogger(),
+    logger: ILogger,
   ) {
     this.keyVault = keyVault;
     this.envFileManager = envFileManager;
