@@ -31,7 +31,7 @@ function createPackage(rootDir: string): string {
 
     console.log(`✅ Package created as ${packageFile}`);
     return packageFile;
-  } catch (err) {
+  } catch (_err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
     console.error(`❌ Failed to create package: ${errorMessage}`);
     process.exit(1);

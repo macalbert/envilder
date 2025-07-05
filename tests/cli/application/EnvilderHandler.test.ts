@@ -11,7 +11,7 @@ const testValues: Record<string, string> = {
 
 const mockSecretProvider: ISecretProvider = {
   getSecret: vi.fn(async (name: string) => {
-    if (Object.prototype.hasOwnProperty.call(testValues, name)) {
+    if (Object.hasOwn(testValues, name)) {
       return testValues[name];
     }
     throw new Error(`ParameterNotFound: ${name}`);
