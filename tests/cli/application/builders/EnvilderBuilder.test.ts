@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { EnvilderBuilder } from '../../../../src/cli/application/builders/EnvilderBuilder';
+import { ConsoleLogger } from '../../../../src/cli/infrastructure/ConsoleLogger.js';
 import type { IEnvFileManager } from '../../../../src/cli/domain/ports/IEnvFileManager';
 
 describe('EnvilderBuilder', () => {
   it('Should_ReturnInstance_When_NoProfileAreProvided', () => {
     // Act
     const sut = EnvilderBuilder.build()
+      .withConsoleLogger()
       .withDefaultFileManager()
       .withAwsProvider()
       .create();
@@ -21,6 +23,7 @@ describe('EnvilderBuilder', () => {
 
     // Act
     const actual = EnvilderBuilder.build()
+      .withConsoleLogger()
       .withDefaultFileManager()
       .withAwsProvider(profile)
       .create();
@@ -37,6 +40,7 @@ describe('EnvilderBuilder', () => {
     // Act
     const action = () =>
       EnvilderBuilder.build()
+        .withConsoleLogger()
         .withDefaultFileManager()
         .withAwsProvider(invalidProfile)
         .create();
@@ -78,6 +82,7 @@ describe('EnvilderBuilder', () => {
     // Act
     const sut = EnvilderBuilder.build()
       .withEnvFileManager(mockFileManager)
+      .withConsoleLogger()
       .withProvider(mockProvider)
       .create();
 

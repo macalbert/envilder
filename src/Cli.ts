@@ -4,6 +4,7 @@ import { EnvilderBuilder } from './cli/application/builders/EnvilderBuilder.js';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { PackageJsonFinder } from './cli/infrastructure/PackageJsonFinder.js';
+import { ConsoleLogger } from './cli/infrastructure/ConsoleLogger.js';
 
 /**
  * Parses CLI arguments and runs the environment file generator.
@@ -35,6 +36,7 @@ export async function main() {
   }
 
   const envilder = EnvilderBuilder.build()
+    .withConsoleLogger()
     .withDefaultFileManager()
     .withAwsProvider(options.profile)
     .create();
@@ -52,6 +54,7 @@ function getVersion(): Promise<string> {
 }
 
 main().catch((error) => {
-  console.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
-  console.error(error);
+  const logger = new ConsoleLogger();
+  logger.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
+  logger.error(error instanceof Error ? error.message : String(error));
 });

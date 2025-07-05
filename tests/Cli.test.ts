@@ -15,6 +15,7 @@ function patchBuilderWithMocks(
     builder.withEnvFileManager(mockFileManager);
     builder.withAwsProvider(profile);
     builder.withProvider(mockProvider);
+    builder.withLogger({ info: vi.fn(), warn: vi.fn(), error: vi.fn() });
     return builder;
   });
 }
