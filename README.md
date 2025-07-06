@@ -26,10 +26,7 @@
 
 Check out this video to learn how to use Envilder:
 
-<video width="640" height="360" controls>
-  <source src="https://github.com/user-attachments/assets/3c4985e6-49e9-4f29-bf1c-130747df0ca6" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+https://github.com/user-attachments/assets/3c4985e6-49e9-4f29-bf1c-130747df0ca6
 
 ---
 
