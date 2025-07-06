@@ -1,11 +1,11 @@
 import { execSync, spawn } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
+import { rm, unlink } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { glob } from 'glob';
 import pc from 'picocolors';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { rm, unlink } from 'node:fs/promises';
-import { glob } from 'glob';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -135,7 +135,7 @@ async function cleanUpSystem() {
     for (const file of tgzPaths) {
       try {
         await unlink(file);
-      } catch (err) {
+      } catch (_err) {
         // Ignore errors for individual file deletions
       }
     }

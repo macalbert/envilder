@@ -1,18 +1,17 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.0.6/schema.json",
   "files": {
-    "include": ["./src/**", "./tests/**", "./scripts/**"],
-    "ignore": [
-      "**/node_modules/**",
-      "**/lib/**",
-      "**/dist/**",
-      "**/coverage/**",
-      "**/.lock",
-      "**/.md"
-    ]
-  },
-  "organizeImports": {
-    "enabled": true
+    "experimentalScannerIgnores": [
+      "node_modules",
+      "lib",
+      "dist",
+      "coverage",
+      ".lock",
+      "*.lock",
+      "*-lock.*",
+      "*.md"
+    ],
+    "ignoreUnknown": true
   },
   "linter": {
     "enabled": true,
@@ -33,5 +32,14 @@
       "trailingCommas": "all",
       "semicolons": "always"
     }
+  },
+  "overrides": [],
+  "plugins": null,
+  "root": true,
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "defaultBranch": "main",
+    "useIgnoreFile": true
   }
 }

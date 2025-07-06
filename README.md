@@ -22,9 +22,21 @@
 
 ---
 
+## Video Demonstration 🎥
+
+Check out this video to learn how to use Envilder:
+
+<video width="640" height="360" controls>
+  <source src="https://github.com/user-attachments/assets/3c4985e6-49e9-4f29-bf1c-130747df0ca6" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+---
+
 ## Table of contents
 
 - [Envilder](#envilder)
+  - [Video Demonstration 🎥](#video-demonstration-)
   - [Table of contents](#table-of-contents)
   - [Features](#features)
     - [Feature status](#feature-status)
@@ -69,6 +81,9 @@
 
 ```bash
 npm install -g envilder
+
+# Watch the video demonstration for detailed guidance
+# https://github.com/user-attachments/assets/3c4985e6-49e9-4f29-bf1c-130747df0ca6
 
 echo '{"DB_PASSWORD": "/my-app/db/password"}' > param-map.json
 
@@ -149,10 +164,10 @@ envilder --map=<mapping-file> --envfile=<output-file> [--profile=<aws-profile>]
     envilder --map=param-map.json --envfile=.env
     ```
 
-4. Use a specific AWS profile:
+4. Watch the video demonstration for detailed guidance:
 
-    ```bash
-    envilder --map=param-map.json --envfile=.env --profile=dev-account
+    ```plaintext
+    https://github.com/user-attachments/assets/3c4985e6-49e9-4f29-bf1c-130747df0ca6
     ```
 
 ---
@@ -219,3 +234,5 @@ Feel free to open issues or pull requests.
 MIT © [Marçal Albert](https://github.com/macalbert).
 
 See [LICENSE](./LICENSE) for details.
+
+---

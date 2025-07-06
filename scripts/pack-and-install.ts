@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --loader=ts-node/esm
 
 import { execSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
@@ -31,8 +31,8 @@ function createPackage(rootDir: string): string {
 
     console.log(`✅ Package created as ${packageFile}`);
     return packageFile;
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
+  } catch (_err) {
+    const errorMessage = _err instanceof Error ? _err.message : String(_err);
     console.error(`❌ Failed to create package: ${errorMessage}`);
     process.exit(1);
   }
@@ -48,7 +48,14 @@ function installPackageFile(rootDir: string, packageFile: string): void {
   }
 
   console.log(`Installing from package: ${packagePath}`);
-  execSync(`npm install -g "${packagePath}"`, { stdio: 'inherit' });
+  try {
+    execSync(`npm install -g "${packagePath}"`, { stdio: 'inherit' });
+    console.log('✅ Package installed globally');
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error(`❌ Failed to install package globally: ${errorMessage}`);
+    process.exit(1);
+  }
 }
 
 main().catch((error: unknown) => {

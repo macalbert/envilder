@@ -1,6 +1,7 @@
 import * as fs from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EnvilderBuilder } from '../../../src/cli/application/builders/EnvilderBuilder';
+import type { ILogger } from '../../../src/cli/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../src/cli/domain/ports/ISecretProvider';
 
 const testValues: Record<string, string> = {
@@ -11,7 +12,7 @@ const testValues: Record<string, string> = {
 
 const mockSecretProvider: ISecretProvider = {
   getSecret: vi.fn(async (name: string) => {
-    if (Object.prototype.hasOwnProperty.call(testValues, name)) {
+    if (Object.hasOwn(testValues, name)) {
       return testValues[name];
     }
     throw new Error(`ParameterNotFound: ${name}`);
@@ -19,10 +20,21 @@ const mockSecretProvider: ISecretProvider = {
 };
 
 describe('EnvilderHandler', () => {
-  const sut = EnvilderBuilder.build()
-    .withDefaultFileManager()
-    .withProvider(mockSecretProvider)
-    .create();
+  let sut: ReturnType<EnvilderBuilder['create']>;
+  let mockLogger: ILogger;
+
+  beforeEach(() => {
+    mockLogger = {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    };
+    sut = EnvilderBuilder.build()
+      .withLogger(mockLogger)
+      .withDefaultFileManager()
+      .withProvider(mockSecretProvider)
+      .create();
+  });
 
   const mockMapPath = './tests/param-map.json';
   const mockEnvFilePath = './tests/.env.test';
@@ -137,13 +149,12 @@ describe('EnvilderHandler', () => {
       NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password_no_value',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const actual = vi.spyOn(console, 'error');
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
 
     // Assert
-    expect(actual).toHaveBeenCalledWith(
+    expect(mockLogger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Warning: No value found for'),
     );
   });
@@ -154,13 +165,12 @@ describe('EnvilderHandler', () => {
       NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password',
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
-    const logSpy = vi.spyOn(console, 'log');
 
     // Act
     await sut.run(mockMapPath, mockEnvFilePath);
 
     // Assert
-    expect(logSpy).toHaveBeenCalledWith(
+    expect(mockLogger.info).toHaveBeenCalledWith(
       expect.stringContaining('NEXT_PUBLIC_CREDENTIAL_PASSWORD=***********ord'),
     );
   });
