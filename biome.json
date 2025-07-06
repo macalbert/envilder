@@ -6,9 +6,9 @@
       "lib",
       "dist",
       "coverage",
--      ".lock",
-+      "*.lock",
-+      "*-lock.*",
+      ".lock",
+      "*.lock",
+      "*-lock.*",
       "*.md"
     ],
     "ignoreUnknown": true
