@@ -3,8 +3,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import { EnvilderBuilder } from './cli/application/builders/EnvilderBuilder.js';
-import { PackageJsonFinder } from './cli/infrastructure/PackageJsonFinder.js';
 import { ConsoleLogger } from './cli/infrastructure/ConsoleLogger.js';
+import { PackageJsonFinder } from './cli/infrastructure/PackageJsonFinder.js';
 
 /**
  * Parses CLI arguments and runs the environment file generator.

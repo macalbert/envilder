@@ -1,8 +1,8 @@
 import * as fs from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EnvilderBuilder } from '../../../src/cli/application/builders/EnvilderBuilder';
-import type { ISecretProvider } from '../../../src/cli/domain/ports/ISecretProvider';
 import type { ILogger } from '../../../src/cli/domain/ports/ILogger';
+import type { ISecretProvider } from '../../../src/cli/domain/ports/ISecretProvider';
 
 const testValues: Record<string, string> = {
   '/path/to/ssm/email': 'mockedEmail@example.com',

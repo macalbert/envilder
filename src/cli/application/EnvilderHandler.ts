@@ -1,7 +1,6 @@
 import type { IEnvFileManager } from '../domain/ports/IEnvFileManager';
-import type { ISecretProvider } from '../domain/ports/ISecretProvider';
 import type { ILogger } from '../domain/ports/ILogger';
-import { ConsoleLogger } from '../infrastructure/ConsoleLogger.js';
+import type { ISecretProvider } from '../domain/ports/ISecretProvider';
 
 export class Envilder {
   private keyVault: ISecretProvider;
