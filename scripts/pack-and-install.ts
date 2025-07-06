@@ -1,12 +1,9 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --loader=ts-node/esm
 
 import { execSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { register } from 'node:module';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-
-register('ts-node/esm', pathToFileURL('./scripts/pack-and-install.ts'));
+import { fileURLToPath } from 'node:url';
 
 async function main(): Promise<void> {
   const __filename = fileURLToPath(import.meta.url);
