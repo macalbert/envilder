@@ -82,6 +82,9 @@ Check out this video to learn how to use Envilder:
 ```bash
 npm install -g envilder
 
+# Watch the video demonstration for detailed guidance
+# https://github.com/user-attachments/assets/3c4985e6-49e9-4f29-bf1c-130747df0ca6
+
 echo '{"DB_PASSWORD": "/my-app/db/password"}' > param-map.json
 
 envilder --map=param-map.json --envfile=.env
@@ -161,10 +164,10 @@ envilder --map=<mapping-file> --envfile=<output-file> [--profile=<aws-profile>]
     envilder --map=param-map.json --envfile=.env
     ```
 
-4. Use a specific AWS profile:
+4. Watch the video demonstration for detailed guidance:
 
-    ```bash
-    envilder --map=param-map.json --envfile=.env --profile=dev-account
+    ```plaintext
+    https://github.com/user-attachments/assets/3c4985e6-49e9-4f29-bf1c-130747df0ca6
     ```
 
 ---
