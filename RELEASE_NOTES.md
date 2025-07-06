@@ -1,27 +1,28 @@
-# Release Notes for Version 0.5.6
+# 📝 What’s Changed
 
-## Highlights
+- 🔧 **Code Enhancements**:
+  - Introduced a new logger interface to facilitate seamless integration of custom logging implementations.
+  - Simplified the process of switching or extending logging mechanisms within the project.
 
-### New Features
-- **Logger Interface**: A new logger interface has been introduced, enabling seamless integration of custom logging implementations. This enhancement simplifies the process of switching or extending logging mechanisms within the project.
+- 📝 **Documentation Improvements**:
+  - Added a video guide to the README.md, demonstrating how to use the Envilder CLI effectively.
+  - Enhanced user onboarding and understanding of the tool's capabilities.
 
-### Documentation
-- **Video Guide**: A comprehensive video guide has been added to the README.md, demonstrating how to use the Envilder CLI effectively. This visual aid aims to improve user onboarding and understanding of the tool's capabilities.
+- 📦 **Dependency Updates**:
+  - Updated several packages to their latest versions for improved security, performance, and compatibility.
 
-### Dependency Updates
-- **Package Updates**: Several dependencies have been updated to their latest versions, ensuring improved security, performance, and compatibility.
+## Security
 
-## Changes
-- Added a logger interface to facilitate custom logging implementations.
-- Embedded a video guide in the README.md for better user experience.
-- Updated dependencies in `package.json` and `package-lock.json`.
+- 🔒 **Security Maintenance**:
+  - Ensured all dependencies are up-to-date to mitigate potential vulnerabilities.
 
-## Contributors
-- Marçal Albert
+## Behind the Scenes
 
-## Commit Details
-- [View Commit History](https://github.com/macalbert/envilder/commits/main)
+- ✅ **Continued Quality Focus**:
+  - Maintained high test coverage.
+  - Streamlined test environment setup and teardown.
+  - Improved test organization and file structure.
 
 ---
 
-Thank you for using Envilder! If you encounter any issues, please report them on our [GitHub Issues](https://github.com/macalbert/envilder/issues).
+**Full Changelog**: https://github.com/macalbert/envilder/compare/v0.5.5...v0.5.6
