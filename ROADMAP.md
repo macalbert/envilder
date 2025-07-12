@@ -10,28 +10,27 @@ Envilder aims to be the simplest, most reliable way to generate `.env` files fro
 - Supports AWS profiles (`AWS_PROFILE`)
 - Compatible with SecureString and plain parameters
 - CLI-first, lightweight
-
+- 📸 **Demo GIF/video** showing the tool in action (terminal + env + app)
 ---
 
 ## 🚧 Planned Improvements
 
 ### 🔹 Usability & Visibility
 
-- [ ] 🔍 **Auto-discovery mode** (`--auto`) for fetching all parameters with a given prefix  
-- [ ] 📸 **Demo GIF/video** showing the tool in action (terminal + env + app)  
-- [ ] ✍️ **Tutorial repo** showing full example with GitHub Actions  
+- [ ] 🔍 **Auto-discovery mode** (`--auto`) for fetching all parameters with a given prefix
+- [ ] ✍️ **Tutorial repo** showing full example with GitHub Actions
 - [ ] 🛍️ **Official GitHub Action** (in Marketplace)
 
 ### 🔹 Dev Experience & Adoption
 
-- [ ] ✅ **Check mode** (`--check`) to validate SSM vs existing `.env` and fail CI if out-of-sync  
+- [ ] ✅ **Check mode** (`--check`) to validate SSM vs existing `.env` and fail CI if out-of-sync
 - [ ] 📝 **Onboarding doc** for new teams (how to set up param-map, profiles, best practices)
 
 ### 🔹 Advanced Features
 
-- [ ] ↩️ **Import mode** (`--import`) to push local `.env` back to AWS SSM  
-- [ ] 🔔 **Optional webhook/Slack notifier** on secret sync (for audit/logging)  
-- [ ] 🌐 **Web-based interactive demo** (optional) to test mappings live  
+- [ ] ↩️ **Import mode** (`--import`) to push local `.env` back to AWS SSM
+- [ ] 🔔 **Optional webhook/Slack notifier** on secret sync (for audit/logging) 
+- [ ] 🌐 **Web-based interactive demo** (optional) to test mappings live
 - [ ] 🧠 **Awesome list submissions** and community templates
 
 ---
@@ -39,7 +38,7 @@ Envilder aims to be the simplest, most reliable way to generate `.env` files fro
 ## 🧪 Long-term Ideas (Open to Feedback)
 
 - [ ] 📁 Support hierarchical `param-map.json` per environment
-- [ ] 🧬 Plugin system for custom resolvers (e.g. secrets from other providers)
+- [ ] 🧬 Plugin system for custom resolvers (e.g., secrets from other providers)
 
 ---
 
