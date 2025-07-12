@@ -46,7 +46,9 @@
   "bugs": {
     "url": "https://github.com/macalbert/envilder/issues"
   },
-  "author": "Marçal Albert <mac.albert@gmail.com>",
+  "author": "Marçal Albert Castellví",
+  "email": "mac.albert@gmail.com",
+  "url": "https://github.com/macalbert/envilder",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
