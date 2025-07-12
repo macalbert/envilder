@@ -81,7 +81,7 @@ describe('Envilder (E2E)', () => {
     expect(actual.output).toContain('error');
   });
 
-  it('Should_Fail_When_RequiredOptionsAreMissing', async () => {
+  it('Should_ShowErrorMessage_When_RequiredOptionsAreMissing', async () => {
     // Arrange
     const params: string[] = [];
 
@@ -89,8 +89,9 @@ describe('Envilder (E2E)', () => {
     const actual = await runCommand(envilder, params);
 
     // Assert
-    expect(actual.code).not.toBe(0);
-    expect(actual.output).toContain('error:');
+    expect(actual.output).toContain(
+      'Missing required arguments: --map and --envfile',
+    );
   });
 
   it('Should_PushEnvFileToSSM_When_ImportFlagIsUsed', async () => {
@@ -104,8 +105,24 @@ describe('Envilder (E2E)', () => {
 
     // Assert
     expect(actual.code).toBe(0);
+    expect(actual.output).toContain('Pushed');
+    expect(actual.output).toContain('Successfully pushed');
+  });
+
+  it('Should_PushSingleVariable_When_KeyValueAndSsmPathProvided', async () => {
+    // Arrange
+    const key = 'SINGLE_VARIABLE';
+    const value = 'single-value-test';
+    const ssmPath = '/Test/SingleVariable';
+    const params = ['--key', key, '--value', value, '--ssm-path', ssmPath];
+
+    // Act
+    const actual = await runCommand(envilder, params);
+
+    // Assert
+    expect(actual.code).toBe(0);
     expect(actual.output).toContain(
-      'Successfully pushed environment variables',
+      `Pushed ${key} to AWS SSM at path ${ssmPath}`,
     );
   });
 });

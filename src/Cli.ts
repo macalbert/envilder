@@ -21,11 +21,11 @@ export async function main() {
     .name('envilder')
     .description('A CLI tool to manage environment variables with AWS SSM')
     .version(version)
-    .requiredOption(
+    .option(
       '--map <path>',
       'Path to the JSON file with environment variable mapping',
     )
-    .requiredOption(
+    .option(
       '--envfile <path>',
       'Path to the .env file to be generated or imported',
     )
@@ -88,19 +88,8 @@ export async function main() {
     });
 
   await program.parseAsync(process.argv);
-  const options = program.opts();
-
-  if (!options.map || !options.envfile) {
-    throw new Error('Missing required arguments: --map and --envfile');
-  }
-
-  const envilder = EnvilderBuilder.build()
-    .withConsoleLogger()
-    .withDefaultFileManager()
-    .withAwsProvider(options.profile)
-    .create();
-
-  await envilder.run(options.map, options.envfile);
+  // The action handler will be executed automatically
+  // We don't need additional code here as all logic is now in the action handler
 }
 
 function getVersion(): Promise<string> {

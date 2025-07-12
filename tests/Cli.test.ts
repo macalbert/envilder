@@ -95,7 +95,7 @@ describe('Cli', () => {
 
     // Assert
     await expect(action).rejects.toThrow(
-      /required option|process\.exit called|CommanderError/i,
+      /Missing required arguments: --map and --envfile/i,
     );
     expect(envilderSpy).not.toHaveBeenCalled();
     expect(withAwsProviderSpy).not.toHaveBeenCalled();

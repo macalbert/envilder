@@ -223,4 +223,41 @@ describe('EnvilderHandler', () => {
       ),
     );
   });
+
+  it('Should_SetSecret_When_PushingSingleVariable', async () => {
+    // Arrange
+    const key = 'API_KEY';
+    const value = 'api-secret-value-123';
+    const ssmPath = '/path/to/ssm/api-key';
+
+    // Act
+    await sut.pushSingleVariableToSSM(key, value, ssmPath);
+
+    // Assert
+    expect(mockSecretProvider.setSecret).toHaveBeenCalledWith(ssmPath, value);
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining(`Pushed ${key} to AWS SSM at path ${ssmPath}`),
+    );
+  });
+
+  it('Should_ThrowError_When_PushingSingleVariableFails', async () => {
+    // Arrange
+    const key = 'FAILING_KEY';
+    const value = 'will-fail';
+    const ssmPath = '/invalid/path';
+    const errorMessage = 'Permission denied';
+
+    mockSecretProvider.setSecret = vi
+      .fn()
+      .mockRejectedValueOnce(new Error(errorMessage));
+
+    // Act
+    const action = () => sut.pushSingleVariableToSSM(key, value, ssmPath);
+
+    // Assert
+    await expect(action()).rejects.toThrow(errorMessage);
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to push variable to SSM'),
+    );
+  });
 });
