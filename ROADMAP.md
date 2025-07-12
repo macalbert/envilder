@@ -11,6 +11,7 @@ Envilder aims to be the simplest, most reliable way to generate `.env` files fro
 - Compatible with SecureString and plain parameters
 - CLI-first, lightweight
 - 📸 **Demo GIF/video** showing the tool in action (terminal + env + app)
+
 ---
 
 ## 🚧 Planned Improvements
@@ -29,7 +30,7 @@ Envilder aims to be the simplest, most reliable way to generate `.env` files fro
 ### 🔹 Advanced Features
 
 - [ ] ↩️ **Import mode** (`--import`) to push local `.env` back to AWS SSM
-- [ ] 🔔 **Optional webhook/Slack notifier** on secret sync (for audit/logging) 
+- [ ] 🔔 **Optional webhook/Slack notifier** on secret sync (for audit/logging)
 - [ ] 🌐 **Web-based interactive demo** (optional) to test mappings live
 - [ ] 🧠 **Awesome list submissions** and community templates
 
