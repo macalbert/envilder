@@ -1,4 +1,5 @@
-import { EnvilderBuilder } from './builders/EnvilderBuilder.js';
+// Import the Envilder type
+import type { Envilder } from './EnvilderHandler.js';
 
 export interface CliOptions {
   map?: string;
@@ -17,6 +18,8 @@ export enum OperationMode {
 }
 
 export class DispatchActionCommandHandler {
+  constructor(private readonly envilder: Envilder) {}
+
   async handleCommand(options: CliOptions, mode: OperationMode): Promise<void> {
     switch (mode) {
       case OperationMode.PUSH_SINGLE_VARIABLE:
@@ -32,9 +35,7 @@ export class DispatchActionCommandHandler {
   }
 
   private async handlePushSingleVariable(options: CliOptions): Promise<void> {
-    const envilder = this.createEnvilder(options);
-
-    await envilder.pushSingleVariableToSSM(
+    await this.envilder.pushSingleVariableToSSM(
       options.key as string,
       options.value as string,
       options.ssmPath as string,
@@ -43,9 +44,8 @@ export class DispatchActionCommandHandler {
 
   private async handleImportEnvToSsm(options: CliOptions): Promise<void> {
     this.validateMapAndEnvFileOptions(options);
-    const envilder = this.createEnvilder(options);
 
-    await envilder.importEnvFile(
+    await this.envilder.importEnvFile(
       options.map as string,
       options.envfile as string,
     );
@@ -53,17 +53,8 @@ export class DispatchActionCommandHandler {
 
   private async handleExportSsmToEnv(options: CliOptions): Promise<void> {
     this.validateMapAndEnvFileOptions(options);
-    const envilder = this.createEnvilder(options);
 
-    await envilder.run(options.map as string, options.envfile as string);
-  }
-
-  private createEnvilder(options: CliOptions) {
-    return EnvilderBuilder.build()
-      .withConsoleLogger()
-      .withDefaultFileManager()
-      .withAwsProvider(options.profile)
-      .create();
+    await this.envilder.run(options.map as string, options.envfile as string);
   }
 
   private validateMapAndEnvFileOptions(options: CliOptions): void {

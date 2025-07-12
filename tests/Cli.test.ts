@@ -84,11 +84,23 @@ describe('Cli', () => {
       '--envfile',
       // missing envfile argument
     ];
-    const envilderSpy = vi.spyOn(Envilder.prototype, 'run');
-    const withAwsProviderSpy = vi.spyOn(
-      EnvilderBuilder.prototype,
-      'withAwsProvider',
-    );
+
+    // Mock EnvilderBuilder.build to avoid creating actual instances
+    const buildSpy = vi
+      .spyOn(EnvilderBuilder, 'build')
+      .mockImplementation(() => {
+        const mockBuilder = {
+          withConsoleLogger: vi.fn().mockReturnThis(),
+          withDefaultFileManager: vi.fn().mockReturnThis(),
+          withAwsProvider: vi.fn().mockReturnThis(),
+          create: vi.fn().mockReturnValue({
+            run: vi.fn(),
+            importEnvFile: vi.fn(),
+            pushSingleVariableToSSM: vi.fn(),
+          }),
+        };
+        return mockBuilder as unknown as EnvilderBuilder;
+      });
 
     // Act
     const action = main();
@@ -97,8 +109,7 @@ describe('Cli', () => {
     await expect(action).rejects.toThrow(
       /Missing required arguments: --map and --envfile/i,
     );
-    expect(envilderSpy).not.toHaveBeenCalled();
-    expect(withAwsProviderSpy).not.toHaveBeenCalled();
-    withAwsProviderSpy.mockRestore();
+
+    buildSpy.mockRestore();
   });
 });

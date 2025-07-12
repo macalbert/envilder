@@ -1,29 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { EnvilderBuilder } from '../../../src/cli/application/builders/EnvilderBuilder.js';
 import {
   type CliOptions,
   DispatchActionCommandHandler,
   OperationMode,
 } from '../../../src/cli/application/DispatchActionCommandHandler.js';
+import type { Envilder } from '../../../src/cli/application/EnvilderHandler.js';
 
-vi.mock('../../../src/cli/application/builders/EnvilderBuilder.js', () => {
-  const mockEnvilder = {
-    run: vi.fn(),
-    importEnvFile: vi.fn(),
-    pushSingleVariableToSSM: vi.fn(),
-  };
-
-  return {
-    EnvilderBuilder: {
-      build: vi.fn().mockReturnValue({
-        withConsoleLogger: vi.fn().mockReturnThis(),
-        withDefaultFileManager: vi.fn().mockReturnThis(),
-        withAwsProvider: vi.fn().mockReturnThis(),
-        create: vi.fn().mockReturnValue(mockEnvilder),
-      }),
-    },
-  };
-});
+// Create mock Envilder object as a partial implementation
+const mockEnvilder = {
+  run: vi.fn(),
+  importEnvFile: vi.fn(),
+  pushSingleVariableToSSM: vi.fn(),
+  keyVault: {},
+  envFileManager: {},
+  logger: {},
+  envild: vi.fn(),
+  processSecret: vi.fn(),
+} as unknown as Envilder;
 
 describe('DispatchActionCommandHandler', () => {
   // Reset mocks before each test
@@ -33,18 +26,16 @@ describe('DispatchActionCommandHandler', () => {
 
   it('Should_CallExportSsmToEnv_When_ExportSsmToEnvModeIsProvided', async () => {
     // Arrange
-    const handler = new DispatchActionCommandHandler();
+    const handler = new DispatchActionCommandHandler(mockEnvilder);
     const options: CliOptions = {
       map: 'path/to/map.json',
       envfile: 'path/to/.env',
     };
-    const mockEnvilder = EnvilderBuilder.build().create();
 
     // Act
     await handler.handleCommand(options, OperationMode.EXPORT_SSM_TO_ENV);
 
     // Assert
-    expect(EnvilderBuilder.build).toHaveBeenCalled();
     expect(mockEnvilder.run).toHaveBeenCalledWith(
       'path/to/map.json',
       'path/to/.env',
@@ -53,19 +44,17 @@ describe('DispatchActionCommandHandler', () => {
 
   it('Should_CallImportEnvToSsm_When_ImportEnvToSsmModeIsProvided', async () => {
     // Arrange
-    const handler = new DispatchActionCommandHandler();
+    const handler = new DispatchActionCommandHandler(mockEnvilder);
     const options: CliOptions = {
       map: 'path/to/map.json',
       envfile: 'path/to/.env',
       import: true,
     };
-    const mockEnvilder = EnvilderBuilder.build().create();
 
     // Act
     await handler.handleCommand(options, OperationMode.IMPORT_ENV_TO_SSM);
 
     // Assert
-    expect(EnvilderBuilder.build).toHaveBeenCalled();
     expect(mockEnvilder.importEnvFile).toHaveBeenCalledWith(
       'path/to/map.json',
       'path/to/.env',
@@ -74,19 +63,17 @@ describe('DispatchActionCommandHandler', () => {
 
   it('Should_CallPushSingleVariableToSSM_When_PushSingleVariableModeIsProvided', async () => {
     // Arrange
-    const handler = new DispatchActionCommandHandler();
+    const handler = new DispatchActionCommandHandler(mockEnvilder);
     const options: CliOptions = {
       key: 'TEST_KEY',
       value: 'test-value',
       ssmPath: '/test/path',
     };
-    const mockEnvilder = EnvilderBuilder.build().create();
 
     // Act
     await handler.handleCommand(options, OperationMode.PUSH_SINGLE_VARIABLE);
 
     // Assert
-    expect(EnvilderBuilder.build).toHaveBeenCalled();
     expect(mockEnvilder.pushSingleVariableToSSM).toHaveBeenCalledWith(
       'TEST_KEY',
       'test-value',
@@ -96,7 +83,7 @@ describe('DispatchActionCommandHandler', () => {
 
   it('Should_ThrowError_When_MapAndEnvfileAreMissingForExportMode', async () => {
     // Arrange
-    const handler = new DispatchActionCommandHandler();
+    const handler = new DispatchActionCommandHandler(mockEnvilder);
     const options: CliOptions = {};
 
     // Act
@@ -111,7 +98,7 @@ describe('DispatchActionCommandHandler', () => {
 
   it('Should_ThrowError_When_MapAndEnvfileAreMissingForImportMode', async () => {
     // Arrange
-    const handler = new DispatchActionCommandHandler();
+    const handler = new DispatchActionCommandHandler(mockEnvilder);
     const options: CliOptions = { import: true };
 
     // Act

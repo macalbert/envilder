@@ -2,6 +2,7 @@
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
+import { EnvilderBuilder } from './cli/application/builders/EnvilderBuilder.js';
 import {
   type CliOptions,
   DispatchActionCommandHandler,
@@ -10,29 +11,28 @@ import {
 import { ConsoleLogger } from './cli/infrastructure/ConsoleLogger.js';
 import { PackageJsonFinder } from './cli/infrastructure/PackageJsonFinder.js';
 
-class EnvilderCommand {
-  private readonly commandHandler: DispatchActionCommandHandler;
-
-  constructor(private readonly options: CliOptions) {
-    this.commandHandler = new DispatchActionCommandHandler();
+function determineOperationMode(options: CliOptions): OperationMode {
+  if (options.key && options.value && options.ssmPath) {
+    return OperationMode.PUSH_SINGLE_VARIABLE;
   }
 
-  determineOperationMode(): OperationMode {
-    if (this.options.key && this.options.value && this.options.ssmPath) {
-      return OperationMode.PUSH_SINGLE_VARIABLE;
-    }
-
-    if (this.options.import) {
-      return OperationMode.IMPORT_ENV_TO_SSM;
-    }
-
-    return OperationMode.EXPORT_SSM_TO_ENV;
+  if (options.import) {
+    return OperationMode.IMPORT_ENV_TO_SSM;
   }
 
-  async execute(): Promise<void> {
-    const mode = this.determineOperationMode();
-    await this.commandHandler.handleCommand(this.options, mode);
-  }
+  return OperationMode.EXPORT_SSM_TO_ENV;
+}
+
+async function executeCommand(options: CliOptions): Promise<void> {
+  const envilder = EnvilderBuilder.build()
+    .withConsoleLogger()
+    .withDefaultFileManager()
+    .withAwsProvider(options.profile)
+    .create();
+
+  const commandHandler = new DispatchActionCommandHandler(envilder);
+  const mode = determineOperationMode(options);
+  await commandHandler.handleCommand(options, mode);
 }
 
 export async function main() {
@@ -60,8 +60,7 @@ export async function main() {
     .option('--profile <name>', 'AWS CLI profile to use')
     .option('--import', 'Push local .env file back to AWS SSM')
     .action(async (options: CliOptions) => {
-      const command = new EnvilderCommand(options);
-      await command.execute();
+      await executeCommand(options);
     });
 
   await program.parseAsync(process.argv);
