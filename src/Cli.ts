@@ -69,7 +69,7 @@ export async function main() {
           .withAwsProvider(options.profile)
           .create();
 
-        await envilder.importEnvFile(options.envfile);
+        await envilder.importEnvFile(options.map, options.envfile);
         return;
       }
 

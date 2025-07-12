@@ -1,5 +1,5 @@
 import * as fs from 'node:fs';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { EnvilderBuilder } from '../../../src/cli/application/builders/EnvilderBuilder';
 import type { ILogger } from '../../../src/cli/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../src/cli/domain/ports/ISecretProvider';
@@ -11,12 +11,13 @@ const testValues: Record<string, string> = {
 };
 
 const mockSecretProvider: ISecretProvider = {
-  getSecret: vi.fn(async (name: string) => {
+  getSecret: vi.fn(async (name: string): Promise<string | undefined> => {
     if (Object.hasOwn(testValues, name)) {
       return testValues[name];
     }
     throw new Error(`ParameterNotFound: ${name}`);
   }),
+  setSecret: vi.fn(async (_name: string, _value: string): Promise<void> => {}),
 };
 
 describe('EnvilderHandler', () => {
@@ -172,6 +173,54 @@ describe('EnvilderHandler', () => {
     // Assert
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.stringContaining('NEXT_PUBLIC_CREDENTIAL_PASSWORD=***********ord'),
+    );
+  });
+
+  it('Should_SetSecret_When_SecretProviderIsUsed', async () => {
+    // Arrange
+    const expectedPath = '/path/to/ssm/email';
+    const expectedValue = 'test-email-value';
+
+    const paramMapContent = {
+      EMAIL_KEY: expectedPath,
+    };
+    fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+
+    const envContent = `EMAIL_KEY=${expectedValue}`;
+    fs.writeFileSync(mockEnvFilePath, envContent);
+
+    // Act
+    await sut.importEnvFile(mockMapPath, mockEnvFilePath);
+
+    // Assert
+    expect(mockSecretProvider.setSecret).toHaveBeenCalledWith(
+      expectedPath,
+      expectedValue,
+    );
+  });
+
+  it('Should_Warning_When_ImportsNotMatchesKey', async () => {
+    // Arrange
+    const expectedPath = '/path/to/ssm/secret';
+    const expectedValue = 'the_super_secret_value';
+
+    const paramMapContent = {
+      SECRET_KEY: expectedPath,
+    };
+    fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
+
+    const envContent = `OTHER_SECRET_KEY=${expectedValue}`;
+    fs.writeFileSync(mockEnvFilePath, envContent);
+
+    // Act
+    await sut.importEnvFile(mockMapPath, mockEnvFilePath);
+
+    // Assert
+    expect(mockSecretProvider.setSecret).not.toHaveBeenCalled();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Warning: Environment variable SECRET_KEY not found',
+      ),
     );
   });
 });

@@ -44,6 +44,63 @@ export class Envilder {
     }
   }
 
+  /**
+   * Imports environment variables from a local file and pushes them to AWS SSM.
+   * Uses a map file to determine the SSM parameter path for each environment variable.
+   *
+   * @param mapPath - Path to the JSON file mapping environment variable names to SSM parameter paths.
+   * @param envFilePath - Path to the local environment file to import.
+   */
+  async importEnvFile(mapPath: string, envFilePath: string): Promise<void> {
+    try {
+      const paramMap = await this.envFileManager.loadMapFile(mapPath);
+      const envVariables = await this.envFileManager.loadEnvFile(envFilePath);
+
+      for (const [envKey, ssmPath] of Object.entries(paramMap)) {
+        if (envVariables[envKey]) {
+          await this.keyVault.setSecret(ssmPath, envVariables[envKey]);
+          this.logger.info(`Pushed ${envKey} to AWS SSM at path ${ssmPath}`);
+        } else {
+          this.logger.warn(
+            `Warning: Environment variable ${envKey} not found in ${envFilePath}`,
+          );
+        }
+      }
+
+      this.logger.info(
+        `Successfully pushed environment variables from '${envFilePath}' to AWS SSM.`,
+      );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to push environment file: ${errorMessage}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Pushes a single environment variable to AWS SSM.
+   *
+   * @param key - The name of the environment variable.
+   * @param value - The value of the environment variable.
+   * @param ssmPath - The SSM path where the variable should be stored.
+   */
+  async pushSingleVariableToSSM(
+    key: string,
+    value: string,
+    ssmPath: string,
+  ): Promise<void> {
+    try {
+      await this.keyVault.setSecret(ssmPath, value);
+      this.logger.info(`Pushed ${key} to AWS SSM at path ${ssmPath}`);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to push variable to SSM: ${errorMessage}`);
+      throw error;
+    }
+  }
+
   private async envild(
     paramMap: Record<string, string>,
     existingEnvVariables: Record<string, string>,
@@ -86,54 +143,6 @@ export class Envilder {
     } catch (_error) {
       this.logger.error(`Error fetching parameter: '${secretName}'`);
       return `ParameterNotFound: ${secretName}`;
-    }
-  }
-
-  /**
-   * Imports environment variables from a local file and pushes them to AWS SSM.
-   *
-   * @param envFilePath - Path to the local environment file to import.
-   */
-  async importEnvFile(envFilePath: string): Promise<void> {
-    try {
-      const envVariables = await this.envFileManager.loadEnvFile(envFilePath);
-
-      for (const [key, value] of Object.entries(envVariables)) {
-        await this.keyVault.setSecret(key, value);
-        this.logger.info(`Pushed ${key} to AWS SSM`);
-      }
-
-      this.logger.info(
-        `Successfully pushed environment variables from '${envFilePath}' to AWS SSM.`,
-      );
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      this.logger.error(`Failed to push environment file: ${errorMessage}`);
-      throw error;
-    }
-  }
-
-  /**
-   * Pushes a single environment variable to AWS SSM.
-   *
-   * @param key - The name of the environment variable.
-   * @param value - The value of the environment variable.
-   * @param ssmPath - The SSM path where the variable should be stored.
-   */
-  async pushSingleVariableToSSM(
-    key: string,
-    value: string,
-    ssmPath: string,
-  ): Promise<void> {
-    try {
-      await this.keyVault.setSecret(ssmPath, value);
-      this.logger.info(`Pushed ${key} to AWS SSM at path ${ssmPath}`);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      this.logger.error(`Failed to push variable to SSM: ${errorMessage}`);
-      throw error;
     }
   }
 }
