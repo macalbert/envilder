@@ -30,8 +30,9 @@ export class EnvFileManager implements IEnvFileManager {
       return envVariables;
     }
     const existingEnvContent = await fs.readFile(envFilePath, 'utf-8');
-    const parsedEnv = dotenv.parse(existingEnvContent);
+    const parsedEnv = dotenv.parse(existingEnvContent) || {};
     Object.assign(envVariables, parsedEnv);
+
     return envVariables;
   }
 
@@ -42,7 +43,15 @@ export class EnvFileManager implements IEnvFileManager {
     const envContent = Object.entries(envVariables)
       .map(([key, value]) => `${key}=${this.escapeEnvValue(value)}`)
       .join('\n');
-    await fs.writeFile(envFilePath, envContent);
+
+    try {
+      await fs.writeFile(envFilePath, envContent);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to write environment file: ${errorMessage}`);
+      throw error;
+    }
   }
 
   private escapeEnvValue(value: string): string {
