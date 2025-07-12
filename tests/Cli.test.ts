@@ -33,6 +33,7 @@ describe('Cli', () => {
     };
     mockProvider = {
       getSecret: vi.fn(async () => 'secret-value'),
+      setSecret: vi.fn(async () => {}),
     };
     patchBuilderWithMocks(mockFileManager, mockProvider, testProfile);
     vi.spyOn(process, 'exit').mockImplementation(() => {

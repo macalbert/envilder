@@ -1,4 +1,8 @@
-import { GetParameterCommand, type SSM } from '@aws-sdk/client-ssm';
+import {
+  GetParameterCommand,
+  PutParameterCommand,
+  type SSM,
+} from '@aws-sdk/client-ssm';
 import type { ISecretProvider } from '../domain/ports/ISecretProvider';
 
 export class AwsSsmSecretProvider implements ISecretProvider {
@@ -15,5 +19,15 @@ export class AwsSsmSecretProvider implements ISecretProvider {
     });
     const { Parameter } = await this.ssm.send(command);
     return Parameter?.Value;
+  }
+
+  async setSecret(name: string, value: string): Promise<void> {
+    const command = new PutParameterCommand({
+      Name: name,
+      Value: value,
+      Type: 'SecureString',
+      Overwrite: true,
+    });
+    await this.ssm.send(command);
   }
 }

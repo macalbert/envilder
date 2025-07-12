@@ -19,14 +19,73 @@ export async function main() {
 
   program
     .name('envilder')
-    .description('A CLI tool to generate .env files from AWS SSM parameters')
+    .description('A CLI tool to manage environment variables with AWS SSM')
     .version(version)
     .requiredOption(
       '--map <path>',
       'Path to the JSON file with environment variable mapping',
     )
-    .requiredOption('--envfile <path>', 'Path to the .env file to be generated')
-    .option('--profile <name>', 'AWS CLI profile to use');
+    .requiredOption(
+      '--envfile <path>',
+      'Path to the .env file to be generated or imported',
+    )
+    .option('--key <name>', 'Single environment variable name to push')
+    .option(
+      '--value <value>',
+      'Value of the single environment variable to push',
+    )
+    .option('--ssm-path <path>', 'SSM path for the single environment variable')
+    .option('--profile <name>', 'AWS CLI profile to use')
+    .option('--import', 'Push local .env file back to AWS SSM')
+    .action(async (options) => {
+      if (options.key && options.value && options.ssmPath) {
+        // Single-variable operation
+        const envilder = EnvilderBuilder.build()
+          .withConsoleLogger()
+          .withDefaultFileManager()
+          .withAwsProvider(options.profile)
+          .create();
+
+        await envilder.pushSingleVariableToSSM(
+          options.key,
+          options.value,
+          options.ssmPath,
+        );
+        return;
+      }
+
+      if (options.import) {
+        // Validate required options for import
+        if (!options.map || !options.envfile) {
+          throw new Error(
+            'Missing required arguments: --map and --envfile for import',
+          );
+        }
+
+        // Batch operation for import
+        const envilder = EnvilderBuilder.build()
+          .withConsoleLogger()
+          .withDefaultFileManager()
+          .withAwsProvider(options.profile)
+          .create();
+
+        await envilder.importEnvFile(options.envfile);
+        return;
+      }
+
+      // Default batch operation
+      if (!options.map || !options.envfile) {
+        throw new Error('Missing required arguments: --map and --envfile');
+      }
+
+      const envilder = EnvilderBuilder.build()
+        .withConsoleLogger()
+        .withDefaultFileManager()
+        .withAwsProvider(options.profile)
+        .create();
+
+      await envilder.run(options.map, options.envfile);
+    });
 
   await program.parseAsync(process.argv);
   const options = program.opts();

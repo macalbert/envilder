@@ -92,6 +92,22 @@ describe('Envilder (E2E)', () => {
     expect(actual.code).not.toBe(0);
     expect(actual.output).toContain('error:');
   });
+
+  it('Should_PushEnvFileToSSM_When_ImportFlagIsUsed', async () => {
+    // Arrange
+    const envFilePath = join(rootDir, 'tests', 'sample', 'cli-validation.env');
+    const mapFilePath = join(rootDir, 'tests', 'sample', 'param-map.json');
+    const params = ['--import', '--envfile', envFilePath, '--map', mapFilePath];
+
+    // Act
+    const actual = await runCommand(envilder, params);
+
+    // Assert
+    expect(actual.code).toBe(0);
+    expect(actual.output).toContain(
+      'Successfully pushed environment variables',
+    );
+  });
 });
 
 function runCommand(

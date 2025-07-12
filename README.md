@@ -26,7 +26,7 @@
 
 Check out this video to learn how to use Envilder:
 
-https://github.com/user-attachments/assets/3c4985e6-49e9-4f29-bf1c-130747df0ca6
+<https://github.com/user-attachments/assets/3c4985e6-49e9-4f29-bf1c-130747df0ca6>
 
 ---
 
@@ -47,6 +47,9 @@ https://github.com/user-attachments/assets/3c4985e6-49e9-4f29-bf1c-130747df0ca6
   - [Roadmap 🗺️](#roadmap-️)
   - [Contributing 🤝](#contributing-)
   - [License 📄](#license-)
+    - [Import Mode (`--import`)](#import-mode---import)
+      - [Import Mode Usage](#import-mode-usage)
+      - [Import Mode Example](#import-mode-example)
 
 ---
 
@@ -67,7 +70,7 @@ https://github.com/user-attachments/assets/3c4985e6-49e9-4f29-bf1c-130747df0ca6
 | AWS profile support            | ✅ Implemented | |
 | Auto-discovery mode (`--auto`) | ❌ Not implemented | Planned |
 | Check/sync mode (`--check`)    | ❌ Not implemented | Planned |
-| Import/push mode (`--import`)  | ❌ Not implemented | Planned |
+| Import/push mode (`--import`)  | ✅ Implemented | |
 | Webhook/Slack notification     | ❌ Not implemented | Planned |
 | Hierarchical mapping           | ❌ Not implemented | Only flat JSON mapping supported |
 | Plugin system                  | ❌ Not implemented | Only AWS SSM supported |
@@ -233,3 +236,51 @@ MIT © [Marçal Albert](https://github.com/macalbert).
 See [LICENSE](./LICENSE) for details.
 
 ---
+
+### Import Mode (`--import`)
+
+Push local `.env` files back to AWS SSM Parameter Store. This is useful for syncing local environment variables with AWS.
+
+#### Import Mode Usage
+
+```bash
+envilder --import --envfile=<path-to-env-file> --map=<path-to-mapping-file> [--profile=<aws-profile>]
+```
+
+| Option      | Description                                 |
+|-------------|---------------------------------------------|
+| `--import`  | Enables import mode                         |
+| `--envfile` | Path to the local `.env` file (required)    |
+| `--map`     | Path to JSON mapping file (required)        |
+| `--profile` | AWS CLI profile to use (optional)           |
+
+#### Import Mode Example
+
+1. Create a local `.env` file:
+
+    ```env
+    SECRET_TOKEN=my-secret-token-value
+    SECRET_KEY=my-secret-password-value
+    ```
+
+2. Create a mapping file `param-map.json`:
+
+    ```json
+    {
+      "SECRET_TOKEN": "/path/to/ssm/token",
+      "SECRET_KEY": "/path/to/ssm/password"
+    }
+    ```
+
+3. Push the `.env` file to AWS SSM:
+
+    ```bash
+    envilder --import --envfile=.env --map=param-map.json
+    ```
+
+4. Verify the parameters in AWS SSM Parameter Store:
+
+    ```bash
+    aws ssm get-parameter --name "/path/to/ssm/token"
+    aws ssm get-parameter --name "/path/to/ssm/password"
+    ```

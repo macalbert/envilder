@@ -88,4 +88,52 @@ export class Envilder {
       return `ParameterNotFound: ${secretName}`;
     }
   }
+
+  /**
+   * Imports environment variables from a local file and pushes them to AWS SSM.
+   *
+   * @param envFilePath - Path to the local environment file to import.
+   */
+  async importEnvFile(envFilePath: string): Promise<void> {
+    try {
+      const envVariables = await this.envFileManager.loadEnvFile(envFilePath);
+
+      for (const [key, value] of Object.entries(envVariables)) {
+        await this.keyVault.setSecret(key, value);
+        this.logger.info(`Pushed ${key} to AWS SSM`);
+      }
+
+      this.logger.info(
+        `Successfully pushed environment variables from '${envFilePath}' to AWS SSM.`,
+      );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to push environment file: ${errorMessage}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Pushes a single environment variable to AWS SSM.
+   *
+   * @param key - The name of the environment variable.
+   * @param value - The value of the environment variable.
+   * @param ssmPath - The SSM path where the variable should be stored.
+   */
+  async pushSingleVariableToSSM(
+    key: string,
+    value: string,
+    ssmPath: string,
+  ): Promise<void> {
+    try {
+      await this.keyVault.setSecret(ssmPath, value);
+      this.logger.info(`Pushed ${key} to AWS SSM at path ${ssmPath}`);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to push variable to SSM: ${errorMessage}`);
+      throw error;
+    }
+  }
 }
