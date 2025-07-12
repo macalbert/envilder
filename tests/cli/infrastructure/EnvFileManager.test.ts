@@ -9,6 +9,7 @@ describe('EnvFileManager', () => {
 
   const mockMapPath = './tests/escaping-map.json';
   const mockEnvFilePath = './tests/.env.escaping.test';
+  const invalidJsonPath = './tests/invalid-map.json';
 
   afterEach(async () => {
     vi.clearAllMocks();
@@ -17,6 +18,9 @@ describe('EnvFileManager', () => {
     } catch {}
     try {
       await fs.unlink(mockMapPath);
+    } catch {}
+    try {
+      await fs.unlink(invalidJsonPath);
     } catch {}
   });
 
@@ -112,5 +116,18 @@ describe('EnvFileManager', () => {
 
     // Assert
     expect(paramMap).toEqual(expected);
+  });
+
+  it('Should_ThrowError_When_MapFileContainsInvalidJSON', async () => {
+    // Arrange
+    await fs.writeFile(invalidJsonPath, 'invalid-json');
+
+    // Act
+    const action = () => sut.loadMapFile(invalidJsonPath);
+
+    // Assert
+    await expect(action).rejects.toThrow(
+      'Invalid JSON in parameter map file: ./tests/invalid-map.json',
+    );
   });
 });
