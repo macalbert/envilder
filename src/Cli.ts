@@ -2,20 +2,42 @@
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
-import { EnvilderBuilder } from './cli/application/builders/EnvilderBuilder.js';
+import {
+  type CliOptions,
+  DispatchActionCommandHandler,
+  OperationMode,
+} from './cli/application/DispatchActionCommandHandler.js';
 import { ConsoleLogger } from './cli/infrastructure/ConsoleLogger.js';
 import { PackageJsonFinder } from './cli/infrastructure/PackageJsonFinder.js';
 
-/**
- * Parses CLI arguments and runs the environment file generator.
- *
- * Expects `--map` and `--envfile` options to be provided, with an optional `--profile` for AWS CLI profile selection. Invokes the main process to generate a `.env` file from AWS SSM parameters based on the provided mapping.
- *
- * @throws {Error} If either `--map` or `--envfile` arguments are missing.
- */
+class EnvilderCommand {
+  private readonly commandHandler: DispatchActionCommandHandler;
+
+  constructor(private readonly options: CliOptions) {
+    this.commandHandler = new DispatchActionCommandHandler();
+  }
+
+  determineOperationMode(): OperationMode {
+    if (this.options.key && this.options.value && this.options.ssmPath) {
+      return OperationMode.PUSH_SINGLE_VARIABLE;
+    }
+
+    if (this.options.import) {
+      return OperationMode.IMPORT_ENV_TO_SSM;
+    }
+
+    return OperationMode.EXPORT_SSM_TO_ENV;
+  }
+
+  async execute(): Promise<void> {
+    const mode = this.determineOperationMode();
+    await this.commandHandler.handleCommand(this.options, mode);
+  }
+}
+
 export async function main() {
   const program = new Command();
-  const version = await getVersion();
+  const version = await readPackageVersion();
 
   program
     .name('envilder')
@@ -37,68 +59,20 @@ export async function main() {
     .option('--ssm-path <path>', 'SSM path for the single environment variable')
     .option('--profile <name>', 'AWS CLI profile to use')
     .option('--import', 'Push local .env file back to AWS SSM')
-    .action(async (options) => {
-      if (options.key && options.value && options.ssmPath) {
-        // Single-variable operation
-        const envilder = EnvilderBuilder.build()
-          .withConsoleLogger()
-          .withDefaultFileManager()
-          .withAwsProvider(options.profile)
-          .create();
-
-        await envilder.pushSingleVariableToSSM(
-          options.key,
-          options.value,
-          options.ssmPath,
-        );
-        return;
-      }
-
-      if (options.import) {
-        // Validate required options for import
-        if (!options.map || !options.envfile) {
-          throw new Error(
-            'Missing required arguments: --map and --envfile for import',
-          );
-        }
-
-        // Batch operation for import
-        const envilder = EnvilderBuilder.build()
-          .withConsoleLogger()
-          .withDefaultFileManager()
-          .withAwsProvider(options.profile)
-          .create();
-
-        await envilder.importEnvFile(options.map, options.envfile);
-        return;
-      }
-
-      // Default batch operation
-      if (!options.map || !options.envfile) {
-        throw new Error('Missing required arguments: --map and --envfile');
-      }
-
-      const envilder = EnvilderBuilder.build()
-        .withConsoleLogger()
-        .withDefaultFileManager()
-        .withAwsProvider(options.profile)
-        .create();
-
-      await envilder.run(options.map, options.envfile);
+    .action(async (options: CliOptions) => {
+      const command = new EnvilderCommand(options);
+      await command.execute();
     });
 
   await program.parseAsync(process.argv);
-  // The action handler will be executed automatically
-  // We don't need additional code here as all logic is now in the action handler
 }
 
-function getVersion(): Promise<string> {
+function readPackageVersion(): Promise<string> {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
+  const packageJsonPath = join(__dirname, '../package.json');
 
-  return new PackageJsonFinder().readPackageJsonVersion(
-    join(__dirname, '../package.json'),
-  );
+  return new PackageJsonFinder().readPackageJsonVersion(packageJsonPath);
 }
 
 main().catch((error) => {
