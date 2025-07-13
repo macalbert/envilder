@@ -189,10 +189,13 @@ Push Mode uploads environment variables to AWS SSM Parameter Store. It has two d
 
 ```mermaid
 graph LR
-  A[.env File] --> |Variables & Values| B[Envilder]
+  A[.env File] --> |Variables & Values| B[Envilder]:::core
   C[Mapping File] --> |SSM Paths| B
-  D[AWS Profile] --> B
-  B --> E[AWS SSM Parameter Store]
+  D[AWS Profile]:::aws --> B
+  B --> E[AWS SSM Parameter Store]:::aws
+
+  classDef aws fill:#ffcc66,color:#000000,stroke:#333,stroke-width:1.5px;
+  classDef core fill:#1f3b57,color:#fff,stroke:#ccc,stroke-width:2px;
 ```
 
 **Example:**
@@ -243,9 +246,12 @@ Uploads a single environment variable directly to AWS SSM Parameter Store withou
 
 ```mermaid
 graph LR
-  A[Command Line Arguments] --> B[Envilder]
-  C[AWS Profile] --> B
-  B --> D[AWS SSM Parameter Store]
+  A[Command Line Arguments] --> B[Envilder]:::core
+  C[AWS Profile]:::aws --> B
+  B --> D[AWS SSM Parameter Store]:::aws
+
+  classDef aws fill:#ffcc66,color:#000000,stroke:#333,stroke-width:1.5px;
+  classDef core fill:#1f3b57,color:#fff,stroke:#ccc,stroke-width:2px;  
 ```
 
 **Example:**
