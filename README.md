@@ -48,6 +48,8 @@ Check out this video to learn how to use Envilder:
       - [Options](#options-1)
       - [Examples](#examples-1)
   - [Working with multiple AWS profiles](#working-with-multiple-aws-profiles)
+    - [Pull Mode Example](#pull-mode-example)
+    - [Push Mode Example](#push-mode-example)
   - [Sample output 📄](#sample-output-)
   - [Roadmap 🗺️](#roadmap-️)
   - [Contributing 🤝](#contributing-)
@@ -72,7 +74,7 @@ Check out this video to learn how to use Envilder:
 | AWS profile support            | ✅ Implemented | |
 | Auto-discovery mode (`--auto`) | ❌ Not implemented | Planned |
 | Check/sync mode (`--check`)    | ❌ Not implemented | Planned |
-| Import/push mode (`--import`)  | ✅ Implemented | |
+| Import/push mode (`--push`)  | ✅ Implemented | |
 | Webhook/Slack notification     | ❌ Not implemented | Planned |
 | Hierarchical mapping           | ❌ Not implemented | Only flat JSON mapping supported |
 | Plugin system                  | ❌ Not implemented | Only AWS SSM supported |
@@ -218,14 +220,28 @@ aws_secret_access_key=YOUR_PROD_SECRET_KEY
 
 Specify which profile to use:
 
+### Pull Mode Example
+
+Generate a `.env` file using a specific AWS profile:
+
 ```bash
 # Development
-
 envilder --map=param-map.json --envfile=.env.development --profile=dev-account
 
 # Production
-
 envilder --map=param-map.json --envfile=.env.production --profile=prod-account
+```
+
+### Push Mode Example
+
+Push a single environment variable using a specific AWS profile:
+
+```bash
+# Development
+envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path --profile=dev-account
+
+# Production
+envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path --profile=prod-account
 ```
 
 ---
