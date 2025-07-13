@@ -1,4 +1,4 @@
-import { OperationMode } from '../OperationMode.js';
+import { OperationMode } from '../../domain/OperationMode.js';
 
 export class DispatchActionCommand {
   constructor(

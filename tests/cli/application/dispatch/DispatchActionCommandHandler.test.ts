@@ -1,10 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { DispatchActionCommandHandler } from '../../../src/cli/application/DispatchActionCommandHandler.js';
-import type { Envilder } from '../../../src/cli/application/EnvilderHandler.js';
-import { DispatchActionCommand } from '../../../src/cli/domain/commands/DispatchActionCommand.js';
-import { OperationMode } from '../../../src/cli/domain/OperationMode.js';
+import { DispatchActionCommand } from '../../../../src/cli/application/dispatch/DispatchActionCommand.js';
+import { DispatchActionCommandHandler } from '../../../../src/cli/application/dispatch/DispatchActionCommandHandler.js';
+import type { Envilder } from '../../../../src/cli/application/EnvilderHandler.js';
+import { OperationMode } from '../../../../src/cli/domain/OperationMode.js';
 
-// Create mock Envilder object as a partial implementation
 const mockEnvilder = {
   run: vi.fn(),
   importEnvFile: vi.fn(),
@@ -17,14 +16,14 @@ const mockEnvilder = {
 } as unknown as Envilder;
 
 describe('DispatchActionCommandHandler', () => {
-  // Reset mocks before each test
+  const sut = new DispatchActionCommandHandler(mockEnvilder);
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('Should_CallExportSsmToEnv_When_ExportSsmToEnvModeIsProvided', async () => {
     // Arrange
-    const handler = new DispatchActionCommandHandler(mockEnvilder);
     const command = new DispatchActionCommand(
       'path/to/map.json',
       'path/to/.env',
@@ -37,7 +36,7 @@ describe('DispatchActionCommandHandler', () => {
     );
 
     // Act
-    await handler.handleCommand(command);
+    await sut.handleCommand(command);
 
     // Assert
     expect(mockEnvilder.run).toHaveBeenCalledWith(
@@ -48,7 +47,6 @@ describe('DispatchActionCommandHandler', () => {
 
   it('Should_CallImportEnvToSsm_When_ImportEnvToSsmModeIsProvided', async () => {
     // Arrange
-    const handler = new DispatchActionCommandHandler(mockEnvilder);
     const command = new DispatchActionCommand(
       'path/to/map.json',
       'path/to/.env',
@@ -61,7 +59,7 @@ describe('DispatchActionCommandHandler', () => {
     );
 
     // Act
-    await handler.handleCommand(command);
+    await sut.handleCommand(command);
 
     // Assert
     expect(mockEnvilder.importEnvFile).toHaveBeenCalledWith(
@@ -72,7 +70,6 @@ describe('DispatchActionCommandHandler', () => {
 
   it('Should_CallPushSingleVariableToSSM_When_PushSingleVariableModeIsProvided', async () => {
     // Arrange
-    const handler = new DispatchActionCommandHandler(mockEnvilder);
     const command = new DispatchActionCommand(
       undefined,
       undefined,
@@ -85,7 +82,7 @@ describe('DispatchActionCommandHandler', () => {
     );
 
     // Act
-    await handler.handleCommand(command);
+    await sut.handleCommand(command);
 
     // Assert
     expect(mockEnvilder.pushSingleVariableToSSM).toHaveBeenCalledWith(
@@ -97,7 +94,6 @@ describe('DispatchActionCommandHandler', () => {
 
   it('Should_ThrowError_When_MapAndEnvfileAreMissingForExportMode', async () => {
     // Arrange
-    const handler = new DispatchActionCommandHandler(mockEnvilder);
     const command = new DispatchActionCommand(
       undefined,
       undefined,
@@ -110,7 +106,7 @@ describe('DispatchActionCommandHandler', () => {
     );
 
     // Act
-    const action = () => handler.handleCommand(command);
+    const action = () => sut.handleCommand(command);
 
     // Assert
     await expect(action).rejects.toThrow(
@@ -120,7 +116,6 @@ describe('DispatchActionCommandHandler', () => {
 
   it('Should_ThrowError_When_MapAndEnvfileAreMissingForImportMode', async () => {
     // Arrange
-    const handler = new DispatchActionCommandHandler(mockEnvilder);
     const command = new DispatchActionCommand(
       undefined,
       undefined,
@@ -133,7 +128,7 @@ describe('DispatchActionCommandHandler', () => {
     );
 
     // Act
-    const action = () => handler.handleCommand(command);
+    const action = () => sut.handleCommand(command);
 
     // Assert
     await expect(action).rejects.toThrow(

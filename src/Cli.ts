@@ -3,8 +3,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import { EnvilderBuilder } from './cli/application/builders/EnvilderBuilder.js';
-import { DispatchActionCommandHandler } from './cli/application/DispatchActionCommandHandler.js';
-import { DispatchActionCommand } from './cli/domain/commands/DispatchActionCommand.js';
+import { DispatchActionCommand } from './cli/application/dispatch/DispatchActionCommand.js';
+import { DispatchActionCommandHandler } from './cli/application/dispatch/DispatchActionCommandHandler.js';
 import { ConsoleLogger } from './cli/infrastructure/ConsoleLogger.js';
 import { PackageJsonFinder } from './cli/infrastructure/PackageJsonFinder.js';
 

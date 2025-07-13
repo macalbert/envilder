@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { main } from '../src/Cli.ts';
 import { EnvilderBuilder } from '../src/cli/application/builders/EnvilderBuilder';
-import { DispatchActionCommandHandler } from '../src/cli/application/DispatchActionCommandHandler.js';
+import { DispatchActionCommand } from '../src/cli/application/dispatch/DispatchActionCommand.js';
+import { DispatchActionCommandHandler } from '../src/cli/application/dispatch/DispatchActionCommandHandler.js';
 import { Envilder } from '../src/cli/application/EnvilderHandler.ts';
-import { DispatchActionCommand } from '../src/cli/domain/commands/DispatchActionCommand.js';
 import { OperationMode } from '../src/cli/domain/OperationMode.js';
 import type { IEnvFileManager } from '../src/cli/domain/ports/IEnvFileManager.ts';
 import type { ISecretProvider } from '../src/cli/domain/ports/ISecretProvider.ts';
