@@ -5,8 +5,8 @@ import { Command } from 'commander';
 import { EnvilderBuilder } from './cli/application/builders/EnvilderBuilder.js';
 import { DispatchActionCommand } from './cli/application/dispatch/DispatchActionCommand.js';
 import { DispatchActionCommandHandler } from './cli/application/dispatch/DispatchActionCommandHandler.js';
-import { ConsoleLogger } from './cli/infrastructure/ConsoleLogger.js';
-import { PackageJsonFinder } from './cli/infrastructure/PackageJsonFinder.js';
+import { ConsoleLogger } from './cli/infrastructure/Logger/ConsoleLogger.js';
+import { PackageJsonFinder } from './cli/infrastructure/VersionFinder/PackageJsonFinder.js';
 
 type CliOptions = {
   map?: string;

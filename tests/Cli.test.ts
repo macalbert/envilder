@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { main } from '../src/Cli.ts';
+import { main } from '../src/Cli';
 import { EnvilderBuilder } from '../src/cli/application/builders/EnvilderBuilder';
-import { DispatchActionCommand } from '../src/cli/application/dispatch/DispatchActionCommand.js';
-import { DispatchActionCommandHandler } from '../src/cli/application/dispatch/DispatchActionCommandHandler.js';
-import { Envilder } from '../src/cli/application/EnvilderHandler.ts';
-import { OperationMode } from '../src/cli/domain/OperationMode.js';
-import type { IEnvFileManager } from '../src/cli/domain/ports/IEnvFileManager.ts';
-import type { ISecretProvider } from '../src/cli/domain/ports/ISecretProvider.ts';
+import { DispatchActionCommand } from '../src/cli/application/dispatch/DispatchActionCommand';
+import { DispatchActionCommandHandler } from '../src/cli/application/dispatch/DispatchActionCommandHandler';
+import { Envilder } from '../src/cli/application/EnvilderHandler';
+import { OperationMode } from '../src/cli/domain/OperationMode';
+import type { IEnvFileManager } from '../src/cli/domain/ports/IEnvFileManager';
+import type { ISecretProvider } from '../src/cli/domain/ports/ISecretProvider';
 
 function patchBuilderWithMocks(
   mockFileManager: IEnvFileManager,

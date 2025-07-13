@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { DispatchActionCommand } from '../../../../src/cli/application/dispatch/DispatchActionCommand.js';
-import { DispatchActionCommandHandler } from '../../../../src/cli/application/dispatch/DispatchActionCommandHandler.js';
-import type { Envilder } from '../../../../src/cli/application/EnvilderHandler.js';
-import { OperationMode } from '../../../../src/cli/domain/OperationMode.js';
+import { DispatchActionCommand } from '../../../../src/cli/application/dispatch/DispatchActionCommand';
+import { DispatchActionCommandHandler } from '../../../../src/cli/application/dispatch/DispatchActionCommandHandler';
+import type { Envilder } from '../../../../src/cli/application/EnvilderHandler';
+import { OperationMode } from '../../../../src/cli/domain/OperationMode';
 
 const mockEnvilder = {
   run: vi.fn(),

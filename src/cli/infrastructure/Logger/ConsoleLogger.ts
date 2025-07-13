@@ -1,4 +1,4 @@
-import type { ILogger } from '../domain/ports/ILogger';
+import type { ILogger } from '../../domain/ports/ILogger';
 
 export class ConsoleLogger implements ILogger {
   info(message: string): void {

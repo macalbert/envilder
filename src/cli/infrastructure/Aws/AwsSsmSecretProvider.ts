@@ -3,7 +3,7 @@ import {
   PutParameterCommand,
   type SSM,
 } from '@aws-sdk/client-ssm';
-import type { ISecretProvider } from '../domain/ports/ISecretProvider';
+import type { ISecretProvider } from '../../domain/ports/ISecretProvider';
 
 export class AwsSsmSecretProvider implements ISecretProvider {
   private ssm: SSM;

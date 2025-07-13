@@ -1,12 +1,12 @@
 import type { SSMClientConfig } from '@aws-sdk/client-ssm';
 import { SSM } from '@aws-sdk/client-ssm';
 import { fromIni } from '@aws-sdk/credential-providers';
-import type { IEnvFileManager } from '../../domain/ports/IEnvFileManager.js';
+import type { IEnvFileManager } from '../../domain/ports/IEnvFileManager';
 import type { ILogger } from '../../domain/ports/ILogger';
-import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
-import { AwsSsmSecretProvider } from '../../infrastructure/AwsSsmSecretProvider.js';
-import { ConsoleLogger } from '../../infrastructure/ConsoleLogger.js';
-import { EnvFileManager } from '../../infrastructure/EnvFileManager.js';
+import type { ISecretProvider } from '../../domain/ports/ISecretProvider';
+import { AwsSsmSecretProvider } from '../../infrastructure/Aws/AwsSsmSecretProvider.js';
+import { EnvFileManager } from '../../infrastructure/EnvManager/EnvFileManager.js';
+import { ConsoleLogger } from '../../infrastructure/Logger/ConsoleLogger.js';
 import { Envilder } from '../EnvilderHandler.js';
 
 export class EnvilderBuilder {

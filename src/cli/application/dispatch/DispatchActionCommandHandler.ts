@@ -1,8 +1,8 @@
 // Import the Envilder type and OperationMode from domain
 
 import { OperationMode } from '../../domain/OperationMode.js';
+import type { Envilder } from '../EnvilderHandler.js';
 import type { DispatchActionCommand } from './DispatchActionCommand.js';
-import type { Envilder } from './../EnvilderHandler.js';
 
 export class DispatchActionCommandHandler {
   constructor(private readonly envilder: Envilder) {}

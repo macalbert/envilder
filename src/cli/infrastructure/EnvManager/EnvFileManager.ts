@@ -1,7 +1,7 @@
 import * as fs from 'node:fs/promises';
 import * as dotenv from 'dotenv';
-import type { IEnvFileManager } from '../domain/ports/IEnvFileManager';
-import type { ILogger } from '../domain/ports/ILogger';
+import type { IEnvFileManager } from '../../domain/ports/IEnvFileManager';
+import type { ILogger } from '../../domain/ports/ILogger';
 
 export class EnvFileManager implements IEnvFileManager {
   private logger: ILogger;
