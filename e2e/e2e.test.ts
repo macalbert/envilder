@@ -6,11 +6,20 @@ import { fileURLToPath } from 'node:url';
 import {
   DeleteParameterCommand,
   GetParameterCommand,
+  PutParameterCommand,
   SSMClient,
 } from '@aws-sdk/client-ssm';
 import { glob } from 'glob';
 import pc from 'picocolors';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vitest';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -30,6 +39,15 @@ describe('Envilder (E2E)', () => {
   const envilder = 'envilder';
   const envFilePath = join(rootDir, 'e2e', 'sample', 'cli-validation.env');
   const mapFilePath = join(rootDir, 'e2e', 'sample', 'param-map.json');
+  let singleSsmPath: string | undefined;
+
+  beforeEach(async () => {
+    await cleanUpSsm(mapFilePath, singleSsmPath);
+  });
+
+  afterEach(async () => {
+    await cleanUpSsm(mapFilePath, singleSsmPath);
+  });
 
   afterAll(async () => {
     await cleanUpSystem();
@@ -66,13 +84,32 @@ describe('Envilder (E2E)', () => {
     // Arrange
     const params = ['--map', mapFilePath, '--envfile', envFilePath];
 
+    const ssmParams = JSON.parse(readFileSync(mapFilePath, 'utf8')) as Record<
+      string,
+      string
+    >;
+
+    for (const [key, ssmPath] of Object.entries(ssmParams)) {
+      const testValue = `test-value-for-${key}`;
+      await SetParameterSsm(ssmPath, testValue);
+    }
+
+    if (existsSync(envFilePath)) {
+      await unlink(envFilePath);
+    }
+
     // Act
     const actual = await runCommand(envilder, params);
 
     // Assert
     expect(actual.code).toBe(0);
-    expect(actual.output).toContain('Environment File generated');
     expect(existsSync(envFilePath)).toBe(true);
+
+    for (const [key, ssmPath] of Object.entries(ssmParams)) {
+      const envFileValue = GetSecretFromKey(envFilePath, key);
+      const ssmValue = await GetParameterSsm(ssmPath);
+      expect(envFileValue).toBe(ssmValue);
+    }
   });
 
   it('Should_FailWithInvalidArguments_When_InvalidArgumentsAreProvided', async () => {
@@ -109,19 +146,11 @@ describe('Envilder (E2E)', () => {
       string
     >;
 
-    for (const [, ssmPath] of Object.entries(ssmParams)) {
-      await DeleteParameterSsm(ssmPath);
-    }
-
     // Act
     const actual = await runCommand(envilder, params);
 
     // Assert
     expect(actual.code).toBe(0);
-    expect(actual.output).toContain('Pushed');
-    expect(actual.output).toContain('Successfully pushed');
-
-    // Validate in AWS SSM
     for (const [key, ssmPath] of Object.entries(ssmParams)) {
       const expectedValue = GetSecretFromKey(envFilePath, key);
       const ssmValue = await GetParameterSsm(ssmPath);
@@ -133,22 +162,22 @@ describe('Envilder (E2E)', () => {
     // Arrange
     const key = 'SINGLE_VARIABLE';
     const value = 'single-value-test';
-    const ssmPath = '/Test/SingleVariable';
-    const params = ['--key', key, '--value', value, '--ssm-path', ssmPath];
-
-    // Ensure SSM parameter doesn't exist before the test
-    await DeleteParameterSsm(ssmPath);
+    singleSsmPath = '/Test/SingleVariable';
+    const params = [
+      '--key',
+      key,
+      '--value',
+      value,
+      '--ssm-path',
+      singleSsmPath,
+    ];
 
     // Act
     const actual = await runCommand(envilder, params);
 
     // Assert
     expect(actual.code).toBe(0);
-    expect(actual.output).toContain(key);
-    expect(actual.output).toContain(ssmPath);
-
-    // Validate in AWS SSM
-    const ssmValue = await GetParameterSsm(ssmPath);
+    const ssmValue = await GetParameterSsm(singleSsmPath);
     expect(ssmValue).toBe(value);
   });
 });
@@ -198,6 +227,30 @@ async function cleanUpSystem() {
   }
 }
 
+async function cleanUpSsm(
+  mapFilePath: string,
+  singleSsmPath: string | undefined,
+): Promise<void> {
+  // Clean up all parameters from the map file
+  try {
+    const ssmParams = JSON.parse(readFileSync(mapFilePath, 'utf8')) as Record<
+      string,
+      string
+    >;
+    for (const [, ssmPath] of Object.entries(ssmParams)) {
+      await DeleteParameterSsm(ssmPath);
+    }
+  } catch (_) {
+    console.log('No parameter map file found or it was invalid JSON');
+  }
+
+  // Clean up single SSM path if it was set during a test
+  if (singleSsmPath) {
+    await DeleteParameterSsm(singleSsmPath);
+    singleSsmPath = undefined;
+  }
+}
+
 async function GetParameterSsm(ssmPath: string): Promise<string> {
   const command = new GetParameterCommand({
     Name: ssmPath,
@@ -222,6 +275,22 @@ async function DeleteParameterSsm(ssmPath: string): Promise<void> {
     } else {
       console.error(`Error deleting SSM parameter at path ${ssmPath}:`, error);
     }
+  }
+}
+
+async function SetParameterSsm(ssmPath: string, value: string): Promise<void> {
+  try {
+    const command = new PutParameterCommand({
+      Name: ssmPath,
+      Value: value,
+      Type: 'SecureString',
+      Overwrite: true,
+    });
+    await ssmClient.send(command);
+    console.log(`Set SSM parameter at path ${ssmPath} with value: ${value}`);
+  } catch (error) {
+    console.error(`Error setting SSM parameter at path ${ssmPath}:`, error);
+    throw error;
   }
 }
 
