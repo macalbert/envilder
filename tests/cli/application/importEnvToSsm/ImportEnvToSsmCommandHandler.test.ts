@@ -13,7 +13,7 @@ describe('ImportEnvToSsmCommandHandler', () => {
     saveEnvFile: Mock;
   };
   let mockLogger: ILogger;
-  let handler: ImportEnvToSsmCommandHandler;
+  let sut: ImportEnvToSsmCommandHandler;
 
   const mockMapPath = 'map-path.json';
   const mockEnvFilePath = 'env-file.env';
@@ -36,7 +36,7 @@ describe('ImportEnvToSsmCommandHandler', () => {
       error: vi.fn(),
     };
 
-    handler = new ImportEnvToSsmCommandHandler(
+    sut = new ImportEnvToSsmCommandHandler(
       mockSecretProvider,
       mockEnvFileManager,
       mockLogger,
@@ -57,7 +57,7 @@ describe('ImportEnvToSsmCommandHandler', () => {
     const command = ImportEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
 
     // Act
-    await handler.handle(command);
+    await sut.handle(command);
 
     // Assert
     expect(mockEnvFileManager.loadMapFile).toHaveBeenCalledWith(mockMapPath);
@@ -93,7 +93,7 @@ describe('ImportEnvToSsmCommandHandler', () => {
     const command = ImportEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
 
     // Act
-    await handler.handle(command);
+    await sut.handle(command);
 
     // Assert
     expect(mockSecretProvider.setSecret).toHaveBeenCalledTimes(1);
@@ -122,7 +122,7 @@ describe('ImportEnvToSsmCommandHandler', () => {
     const command = ImportEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
 
     // Act
-    const action = () => handler.handle(command);
+    const action = () => sut.handle(command);
 
     // Assert
     await expect(action).rejects.toThrow(mockError);
