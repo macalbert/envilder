@@ -7,7 +7,7 @@ import { PushSingleVariableCommandHandler } from '../../pushSingleVariable/PushS
 import { DispatchActionCommandHandler } from '../DispatchActionCommandHandler.js';
 
 export class DispatchActionCommandHandlerBuilder {
-  private keyVault?: ISecretProvider;
+  private secretProvider?: ISecretProvider;
   private envFileManager?: IEnvFileManager;
   private logger?: ILogger;
 
@@ -16,7 +16,7 @@ export class DispatchActionCommandHandlerBuilder {
   }
 
   withProvider(provider: ISecretProvider): DispatchActionCommandHandlerBuilder {
-    this.keyVault = provider;
+    this.secretProvider = provider;
     return this;
   }
 
@@ -33,7 +33,7 @@ export class DispatchActionCommandHandlerBuilder {
   }
 
   create(): DispatchActionCommandHandler {
-    if (!this.keyVault) {
+    if (!this.secretProvider) {
       throw new Error('Provider is required');
     }
 
@@ -46,19 +46,19 @@ export class DispatchActionCommandHandlerBuilder {
     }
 
     const exportSsmToEnvCommandHandler = new ExportSsmToEnvCommandHandler(
-      this.keyVault,
+      this.secretProvider,
       this.envFileManager,
       this.logger,
     );
 
     const importEnvToSsmCommandHandler = new ImportEnvToSsmCommandHandler(
-      this.keyVault,
+      this.secretProvider,
       this.envFileManager,
       this.logger,
     );
 
     const pushSingleVariableCommandHandler =
-      new PushSingleVariableCommandHandler(this.keyVault, this.logger);
+      new PushSingleVariableCommandHandler(this.secretProvider, this.logger);
 
     return new DispatchActionCommandHandler(
       exportSsmToEnvCommandHandler,
