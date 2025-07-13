@@ -105,10 +105,8 @@ export class PullSsmToEnvCommandHandler {
         return null;
       }
 
-      // Store the actual value in the variables collection
       existingEnvVariables[envVar] = value;
 
-      // Create an EnvironmentVariable instance for proper logging
       const envVariable = new EnvironmentVariable(envVar, value, true);
       this.logger.info(`${envVariable.name}=${envVariable.maskedValue}`);
 

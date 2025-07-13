@@ -107,7 +107,6 @@ describe('PushEnvToSsmCommandHandler', () => {
     // Arrange
     const mockError = new Error('Failed to import');
 
-    // Override the default mock behavior for this test
     mockSecretProvider.setSecret = vi.fn(async (): Promise<void> => {
       throw mockError;
     });

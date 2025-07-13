@@ -20,7 +20,6 @@ export class PushSingleCommandHandler {
         `Starting push operation for key '${command.key}' to path '${command.ssmPath}'`,
       );
 
-      // Create environment variable instance for proper value masking
       const envVariable = new EnvironmentVariable(
         command.key,
         command.value,

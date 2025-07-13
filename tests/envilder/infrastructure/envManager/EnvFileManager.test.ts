@@ -75,7 +75,7 @@ describe('EnvFileManager', () => {
 
   it('Should_HandleCombinationOfSpecialCharacters_When_WritingEnvFile', async () => {
     // Arrange
-    const expected = 'value"with"\\neverything\\combined'; // literal backslash-n and double backslash
+    const expected = 'value"with"\\neverything\\combined';
     const envVars = { COMBINED_VAR: expected };
 
     // Act
