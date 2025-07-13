@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
-import { ImportEnvToSsmCommand } from '../../../../src/envilder/application/pushEnvToSsm/ImportEnvToSsmCommand';
+import { PushEnvToSsmCommand } from '../../../../src/envilder/application/pushEnvToSsm/PushEnvToSsmCommand';
 import { PushEnvToSsmCommandHandler } from '../../../../src/envilder/application/pushEnvToSsm/PushEnvToSsmCommandHandler';
 import type { IEnvFileManager } from '../../../../src/envilder/domain/ports/IEnvFileManager';
 import type { ILogger } from '../../../../src/envilder/domain/ports/ILogger';
@@ -55,7 +55,7 @@ describe('PushEnvToSsmCommandHandler', () => {
       ANOTHER_VAR: 'another-value',
     });
 
-    const command = ImportEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
 
     // Act
     await sut.handle(command);
@@ -91,7 +91,7 @@ describe('PushEnvToSsmCommandHandler', () => {
       // MISSING_VAR is not present
     });
 
-    const command = ImportEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
 
     // Act
     await sut.handle(command);
@@ -120,7 +120,7 @@ describe('PushEnvToSsmCommandHandler', () => {
       TEST_ENV_VAR: 'test-value',
     });
 
-    const command = ImportEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
 
     // Act
     const action = () => sut.handle(command);

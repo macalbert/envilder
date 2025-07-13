@@ -11,11 +11,11 @@ export class PushEnvToSsmCommandHandler {
   ) {}
 
   /**
-   * Handles the ImportEnvToSsmCommand which imports environment variables
+   * Handles the PushEnvToSsmCommand which imports environment variables
    * from a local file and pushes them to AWS SSM.
    * Uses a map file to determine the SSM parameter path for each environment variable.
    *
-   * @param command - The ImportEnvToSsmCommand containing mapPath and envFilePath
+   * @param command - The PushEnvToSsmCommand containing mapPath and envFilePath
    */
   async handle(command: PushEnvToSsmCommand): Promise<void> {
     try {

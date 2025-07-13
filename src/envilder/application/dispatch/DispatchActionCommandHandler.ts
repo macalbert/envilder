@@ -54,12 +54,12 @@ export class DispatchActionCommandHandler {
   ): Promise<void> {
     this.validateMapAndEnvFileOptions(command);
 
-    const importEnvToSsmCommand = PushEnvToSsmCommand.create(
+    const pushEnvToSsmCommand = PushEnvToSsmCommand.create(
       command.map as string,
       command.envfile as string,
     );
 
-    await this.pushEnvToSsmCommandHandler.handle(importEnvToSsmCommand);
+    await this.pushEnvToSsmCommandHandler.handle(pushEnvToSsmCommand);
   }
 
   private async handleExportSsmToEnv(
