@@ -1,4 +1,8 @@
-import { PutParameterCommand, SSM } from '@aws-sdk/client-ssm';
+import {
+  GetParameterCommand,
+  PutParameterCommand,
+  SSM,
+} from '@aws-sdk/client-ssm';
 import {
   LocalstackContainer,
   type StartedLocalStackContainer,
@@ -43,5 +47,23 @@ describe('AwsSsmSecretProvider (integration with LocalStack)', () => {
 
     // Assert
     expect(actual).toBe(PARAM_VALUE);
+  });
+
+  it('Should_StoreSecretValue_When_SetSecretIsCalled', async () => {
+    // Arrange
+    const sut = new AwsSsmSecretProvider(ssmClient);
+    const paramName = '/test/new-secret';
+    const paramValue = 'new-secret-value';
+
+    // Act
+    await sut.setSecret(paramName, paramValue);
+
+    // Assert
+    const command = new GetParameterCommand({
+      Name: paramName,
+      WithDecryption: true,
+    });
+    const response = await ssmClient.send(command);
+    expect(response.Parameter?.Value).toBe(paramValue);
   });
 });
