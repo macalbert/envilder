@@ -3,7 +3,6 @@ import { join } from 'node:path';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { PackageJsonFinder } from '../../../../src/envilder/infrastructure/VersionFinder/PackageJsonFinder';
 
-
 describe('PackageJsonFinder', () => {
   const tempDir = join(__dirname, 'temp-pkgjson-test');
   const packageJsonPath = join(tempDir, 'package.json');

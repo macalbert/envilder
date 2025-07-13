@@ -10,7 +10,6 @@ import {
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AwsSsmSecretProvider } from '../../../../src/envilder/infrastructure/Aws/AwsSsmSecretProvider';
 
-
 const LOCALSTACK_IMAGE = 'localstack/localstack:stable';
 const PARAM_NAME = '/test/secret';
 const PARAM_VALUE = 'super-secret-value';

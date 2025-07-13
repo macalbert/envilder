@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ConsoleLogger } from '../../../../src/envilder/infrastructure/Logger/ConsoleLogger';
 
-
 describe('ConsoleLogger', () => {
   const sut = new ConsoleLogger();
 

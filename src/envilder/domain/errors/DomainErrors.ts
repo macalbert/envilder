@@ -12,38 +12,22 @@ export class DomainError extends Error {
 /**
  * Error thrown when required arguments are missing or invalid.
  */
-export class InvalidArgumentError extends DomainError {
-  constructor(message: string) {
-    super(message);
-  }
-}
+export class InvalidArgumentError extends DomainError {}
 
 /**
  * Error thrown when a required dependency is missing.
  */
-export class DependencyMissingError extends DomainError {
-  constructor(message: string) {
-    super(message);
-  }
-}
+export class DependencyMissingError extends DomainError {}
 
 /**
  * Error thrown when a secret operation fails.
  */
-export class SecretOperationError extends DomainError {
-  constructor(message: string) {
-    super(message);
-  }
-}
+export class SecretOperationError extends DomainError {}
 
 /**
  * Error thrown when an environment file operation fails.
  */
-export class EnvironmentFileError extends DomainError {
-  constructor(message: string) {
-    super(message);
-  }
-}
+export class EnvironmentFileError extends DomainError {}
 
 /**
  * Error thrown when a parameter cannot be found.
