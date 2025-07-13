@@ -21,10 +21,11 @@ export class AwsSsmSecretProvider implements ISecretProvider {
       const { Parameter } = await this.ssm.send(command);
       return Parameter?.Value;
     } catch (error) {
-      if (error.name === 'ParameterNotFound') {
+      if (typeof error === 'object' && error !== null && 'name' in error && error.name === 'ParameterNotFound') {
         return undefined;
       }
-      throw new Error(`Failed to get secret ${name}: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to get secret ${name}: ${errorMessage}`);
     }
   }
 
