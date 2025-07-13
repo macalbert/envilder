@@ -23,6 +23,9 @@ export class DispatchActionCommandHandler {
       case OperationMode.PUSH_ENV_TO_SSM:
         await this.handlePush(command);
         break;
+      case OperationMode.PULL_SSM_TO_ENV:
+        await this.handlePull(command);
+        break;
       default:
         await this.handlePull(command);
         break;
@@ -47,9 +50,7 @@ export class DispatchActionCommandHandler {
     await this.pushSingleHandler.handle(pushSingleCommand);
   }
 
-  private async handlePush(
-    command: DispatchActionCommand,
-  ): Promise<void> {
+  private async handlePush(command: DispatchActionCommand): Promise<void> {
     this.validateMapAndEnvFileOptions(command);
 
     const pushEnvToSsmCommand = PushEnvToSsmCommand.create(
@@ -60,9 +61,7 @@ export class DispatchActionCommandHandler {
     await this.pushHandler.handle(pushEnvToSsmCommand);
   }
 
-  private async handlePull(
-    command: DispatchActionCommand,
-  ): Promise<void> {
+  private async handlePull(command: DispatchActionCommand): Promise<void> {
     this.validateMapAndEnvFileOptions(command);
 
     const pullSsmToEnvCommand = PullSsmToEnvCommand.create(

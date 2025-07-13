@@ -116,7 +116,7 @@ describe('Cli', () => {
     const options = {
       map: 'map.json',
       envfile: '.env',
-      mode: 'PUSH_ENV_TO_SSM',
+      push: true,
     };
 
     // Act
