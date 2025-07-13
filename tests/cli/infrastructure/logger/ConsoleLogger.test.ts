@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ConsoleLogger } from '../../../src/cli/infrastructure/Logger/ConsoleLogger';
+import { ConsoleLogger } from '../../../../src/cli/infrastructure/logger/ConsoleLogger';
 
 describe('ConsoleLogger', () => {
   const sut = new ConsoleLogger();
