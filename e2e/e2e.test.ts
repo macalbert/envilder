@@ -39,7 +39,7 @@ describe('Envilder (E2E)', () => {
   const envilder = 'envilder';
   const envFilePath = join(rootDir, 'e2e', 'sample', 'cli-validation.env');
   const mapFilePath = join(rootDir, 'e2e', 'sample', 'param-map.json');
-  let singleSsmPath: string | undefined;
+  const singleSsmPath = '/Test/SingleVariable';
 
   beforeEach(async () => {
     await cleanUpSsm(mapFilePath, singleSsmPath);
@@ -162,7 +162,7 @@ describe('Envilder (E2E)', () => {
     // Arrange
     const key = 'SINGLE_VARIABLE';
     const value = 'single-value-test';
-    singleSsmPath = '/Test/SingleVariable';
+
     const params = [
       '--key',
       key,
@@ -229,7 +229,7 @@ async function cleanUpSystem() {
 
 async function cleanUpSsm(
   mapFilePath: string,
-  singleSsmPath: string | undefined,
+  singleSsmPath: string,
 ): Promise<void> {
   // Clean up all parameters from the map file
   try {
@@ -244,11 +244,7 @@ async function cleanUpSsm(
     console.log('No parameter map file found or it was invalid JSON');
   }
 
-  // Clean up single SSM path if it was set during a test
-  if (singleSsmPath) {
-    await DeleteParameterSsm(singleSsmPath);
-    singleSsmPath = undefined;
-  }
+  await DeleteParameterSsm(singleSsmPath);  
 }
 
 async function GetParameterSsm(ssmPath: string): Promise<string> {
