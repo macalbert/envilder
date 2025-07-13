@@ -282,7 +282,7 @@ describe('EnvFileManager', () => {
       const action = () => sut.loadEnvFile(mockEnvFilePath);
 
       // Assert
-      await expect(action()).rejects.toBeTruthy();
+      await expect(action()).rejects.toThrow();
     });
   });
 });
