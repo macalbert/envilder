@@ -97,8 +97,7 @@ export class PushEnvToSsmCommandHandler {
     envVariables: Record<string, string>,
     envFilePath: string,
   ): Promise<void> {
-    if (envVariables[envKey]) {
-      // Create environment variable instance for proper value masking
+    if (Object.hasOwn(envVariables, envKey)) {
       const envVariable = new EnvironmentVariable(
         envKey,
         envVariables[envKey],
