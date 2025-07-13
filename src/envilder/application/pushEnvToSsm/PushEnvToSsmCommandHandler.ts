@@ -51,7 +51,6 @@ export class PushEnvToSsmCommandHandler {
       command.envFilePath,
     );
 
-    // Log the number of variables found in each file
     this.logger.info(
       `Found ${Object.keys(paramMap).length} parameter mappings in map file`,
     );
@@ -71,7 +70,6 @@ export class PushEnvToSsmCommandHandler {
   ): Promise<void> {
     const { paramMap, envVariables } = config;
 
-    // Log the keys that are about to be processed
     const keysToProcess = Object.keys(paramMap);
     this.logger.info(
       `Processing ${keysToProcess.length} environment variables to push to AWS SSM`,
