@@ -25,7 +25,6 @@ describe('Envilder (E2E)', () => {
   const envFilePath = join(rootDir, 'e2e', 'sample', 'cli-validation.env');
   const mapFilePath = join(rootDir, 'e2e', 'sample', 'param-map.json');
 
-
   afterAll(async () => {
     await cleanUpSystem();
   });
