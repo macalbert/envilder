@@ -5,7 +5,7 @@ import type { ImportEnvToSsmCommand } from './ImportEnvToSsmCommand.js';
 
 export class ImportEnvToSsmCommandHandler {
   constructor(
-    private readonly keyVault: ISecretProvider,
+    private readonly secretProvider: ISecretProvider,
     private readonly envFileManager: IEnvFileManager,
     private readonly logger: ILogger,
   ) {}
@@ -26,7 +26,7 @@ export class ImportEnvToSsmCommandHandler {
 
       for (const [envKey, ssmPath] of Object.entries(paramMap)) {
         if (envVariables[envKey]) {
-          await this.keyVault.setSecret(ssmPath, envVariables[envKey]);
+          await this.secretProvider.setSecret(ssmPath, envVariables[envKey]);
           this.logger.info(`Pushed ${envKey} to AWS SSM at path ${ssmPath}`);
         } else {
           this.logger.warn(
