@@ -132,7 +132,6 @@ describe('Cli', () => {
       key: 'API_KEY',
       value: 'secret123',
       ssmPath: '/my/path',
-      mode: 'PUSH_SINGLE',
     };
 
     // Act
