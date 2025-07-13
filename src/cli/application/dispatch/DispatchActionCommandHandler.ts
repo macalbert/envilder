@@ -1,3 +1,4 @@
+import { InvalidArgumentError } from '../../domain/errors/DomainErrors.js';
 import { OperationMode } from '../../domain/OperationMode.js';
 import { ExportSsmToEnvCommand } from '../exportSsmToEnv/ExportSsmToEnvCommand.js';
 import type { ExportSsmToEnvCommandHandler } from '../exportSsmToEnv/ExportSsmToEnvCommandHandler.js';
@@ -32,7 +33,7 @@ export class DispatchActionCommandHandler {
     command: DispatchActionCommand,
   ): Promise<void> {
     if (!command.key || !command.value || !command.ssmPath) {
-      throw new Error(
+      throw new InvalidArgumentError(
         'Missing required arguments: --key, --value, and --ssm-path',
       );
     }
@@ -76,7 +77,9 @@ export class DispatchActionCommandHandler {
 
   private validateMapAndEnvFileOptions(command: DispatchActionCommand): void {
     if (!command.map || !command.envfile) {
-      throw new Error('Missing required arguments: --map and --envfile');
+      throw new InvalidArgumentError(
+        'Missing required arguments: --map and --envfile',
+      );
     }
   }
 }

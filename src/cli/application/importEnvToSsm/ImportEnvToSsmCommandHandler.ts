@@ -19,21 +19,8 @@ export class ImportEnvToSsmCommandHandler {
    */
   async handle(command: ImportEnvToSsmCommand): Promise<void> {
     try {
-      const paramMap = await this.envFileManager.loadMapFile(command.mapPath);
-      const envVariables = await this.envFileManager.loadEnvFile(
-        command.envFilePath,
-      );
-
-      for (const [envKey, ssmPath] of Object.entries(paramMap)) {
-        if (envVariables[envKey]) {
-          await this.secretProvider.setSecret(ssmPath, envVariables[envKey]);
-          this.logger.info(`Pushed ${envKey} to AWS SSM at path ${ssmPath}`);
-        } else {
-          this.logger.warn(
-            `Warning: Environment variable ${envKey} not found in ${command.envFilePath}`,
-          );
-        }
-      }
+      const paramMap = await this.loadConfiguration(command);
+      await this.pushVariablesToSSM(paramMap, command);
 
       this.logger.info(
         `Successfully pushed environment variables from '${command.envFilePath}' to AWS SSM.`,
@@ -43,6 +30,54 @@ export class ImportEnvToSsmCommandHandler {
         error instanceof Error ? error.message : String(error);
       this.logger.error(`Failed to push environment file: ${errorMessage}`);
       throw error;
+    }
+  }
+
+  private async loadConfiguration(command: ImportEnvToSsmCommand): Promise<{
+    paramMap: Record<string, string>;
+    envVariables: Record<string, string>;
+  }> {
+    const paramMap = await this.envFileManager.loadMapFile(command.mapPath);
+    const envVariables = await this.envFileManager.loadEnvFile(
+      command.envFilePath,
+    );
+
+    return { paramMap, envVariables };
+  }
+
+  private async pushVariablesToSSM(
+    config: {
+      paramMap: Record<string, string>;
+      envVariables: Record<string, string>;
+    },
+    command: ImportEnvToSsmCommand,
+  ): Promise<void> {
+    const { paramMap, envVariables } = config;
+
+    // For large parameter sets, consider using controlled parallel processing
+    for (const [envKey, ssmPath] of Object.entries(paramMap)) {
+      await this.processVariable(
+        envKey,
+        ssmPath,
+        envVariables,
+        command.envFilePath,
+      );
+    }
+  }
+
+  private async processVariable(
+    envKey: string,
+    ssmPath: string,
+    envVariables: Record<string, string>,
+    envFilePath: string,
+  ): Promise<void> {
+    if (envVariables[envKey]) {
+      await this.secretProvider.setSecret(ssmPath, envVariables[envKey]);
+      this.logger.info(`Pushed ${envKey} to AWS SSM at path ${ssmPath}`);
+    } else {
+      this.logger.warn(
+        `Warning: Environment variable ${envKey} not found in ${envFilePath}`,
+      );
     }
   }
 }

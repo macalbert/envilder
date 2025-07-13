@@ -42,6 +42,7 @@ describe('ImportEnvToSsmCommandHandler', () => {
       mockLogger,
     );
   });
+  
   it('Should_PushEnvFileToSSM_When_ValidEnvironmentVariablesAreProvided', async () => {
     // Arrange
     mockEnvFileManager.loadMapFile.mockResolvedValue({

@@ -46,7 +46,7 @@ describe('DispatchActionCommandHandlerBuilder', () => {
     const action = () => sut.create();
 
     // Assert
-    expect(action).toThrow('Provider is required');
+    expect(action).toThrow('Secret provider is required');
   });
 
   it('Should_ThrowError_When_EnvFileManagerIsMissing', () => {
@@ -59,7 +59,7 @@ describe('DispatchActionCommandHandlerBuilder', () => {
     const action = () => sut.create();
 
     // Assert
-    expect(action).toThrow('EnvFileManager is required');
+    expect(action).toThrow('Environment file manager is required');
   });
 
   it('Should_ThrowError_When_LoggerIsMissing', () => {

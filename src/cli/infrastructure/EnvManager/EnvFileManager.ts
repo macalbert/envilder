@@ -1,5 +1,9 @@
 import * as fs from 'node:fs/promises';
 import * as dotenv from 'dotenv';
+import {
+  DependencyMissingError,
+  EnvironmentFileError,
+} from '../../domain/errors/DomainErrors.js';
 import type { IEnvFileManager } from '../../domain/ports/IEnvFileManager';
 import type { ILogger } from '../../domain/ports/ILogger';
 
@@ -7,18 +11,27 @@ export class EnvFileManager implements IEnvFileManager {
   private logger: ILogger;
   constructor(logger: ILogger) {
     if (!logger) {
-      throw new Error('Logger must be specified');
+      throw new DependencyMissingError('Logger must be specified');
     }
     this.logger = logger;
   }
 
   async loadMapFile(mapPath: string): Promise<Record<string, string>> {
-    const content = await fs.readFile(mapPath, 'utf-8');
     try {
-      return JSON.parse(content);
-    } catch (_err: unknown) {
-      this.logger.error(`Error parsing JSON from ${mapPath}`);
-      throw new Error(`Invalid JSON in parameter map file: ${mapPath}`);
+      const content = await fs.readFile(mapPath, 'utf-8');
+      try {
+        return JSON.parse(content);
+      } catch (_err: unknown) {
+        this.logger.error(`Error parsing JSON from ${mapPath}`);
+        throw new EnvironmentFileError(
+          `Invalid JSON in parameter map file: ${mapPath}`,
+        );
+      }
+    } catch (error) {
+      if (error instanceof EnvironmentFileError) {
+        throw error;
+      }
+      throw new EnvironmentFileError(`Failed to read map file: ${mapPath}`);
     }
   }
 
@@ -50,7 +63,9 @@ export class EnvFileManager implements IEnvFileManager {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       this.logger.error(`Failed to write environment file: ${errorMessage}`);
-      throw error;
+      throw new EnvironmentFileError(
+        `Failed to write environment file: ${errorMessage}`,
+      );
     }
   }
 

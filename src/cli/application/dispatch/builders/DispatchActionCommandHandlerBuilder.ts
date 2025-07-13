@@ -1,3 +1,4 @@
+import { DependencyMissingError } from '../../../domain/errors/DomainErrors.js';
 import type { IEnvFileManager } from '../../../domain/ports/IEnvFileManager.js';
 import type { ILogger } from '../../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../../domain/ports/ISecretProvider.js';
@@ -34,15 +35,15 @@ export class DispatchActionCommandHandlerBuilder {
 
   create(): DispatchActionCommandHandler {
     if (!this.secretProvider) {
-      throw new Error('Provider is required');
+      throw new DependencyMissingError('Secret provider is required');
     }
 
     if (!this.envFileManager) {
-      throw new Error('EnvFileManager is required');
+      throw new DependencyMissingError('Environment file manager is required');
     }
 
     if (!this.logger) {
-      throw new Error('Logger is required');
+      throw new DependencyMissingError('Logger is required');
     }
 
     const exportSsmToEnvCommandHandler = new ExportSsmToEnvCommandHandler(
