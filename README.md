@@ -21,7 +21,7 @@
   </a>
 </p>
 
-## Why Centralize Environment Variables?
+## Why centralize environment variables?
 
 Environment variables are crucial for configuring applications across different environments
 (development, production) or even projects. Without proper management, they become:
@@ -39,25 +39,25 @@ in your codebase.
 ## 📚 Table of Contents
 
 - [🗝️ Envilder ☁️](#️-envilder-️)
-  - [Why Centralize Environment Variables?](#why-centralize-environment-variables)
+  - [Why centralize environment variables?](#why-centralize-environment-variables)
   - [📚 Table of Contents](#-table-of-contents)
   - [⚙️ Features](#️-features)
     - [🧱 Feature Status](#-feature-status)
   - [💾 Installation](#-installation)
   - [🚀 Quick Start](#-quick-start)
   - [🎥 Video Demonstration](#-video-demonstration)
-  - [🛠️ How It Works](#️-how-it-works)
+  - [🛠️ How it works](#️-how-it-works)
   - [🎮 Usage](#-usage)
     - [🚀 Push Mode (`--push`)](#-push-mode---push)
-      - [🍄 Method 1: Push from .env File](#-method-1-push-from-env-file)
-    - [⭐ Method 2: Push a Single Variable](#-method-2-push-a-single-variable)
-    - [🧰 Push Mode Options Summary](#-push-mode-options-summary)
+      - [🍄 Method 1: Push from .env file](#-method-1-push-from-env-file)
+    - [⭐ Method 2: Push a single variable](#-method-2-push-a-single-variable)
+    - [🧰 Push Mode options summary](#-push-mode-options-summary)
     - [🧪 Push Mode Examples](#-push-mode-examples)
     - [⬇️ Pull Mode (`--map` and `--envfile`)](#️-pull-mode---map-and---envfile)
       - [⚙️ Pull Mode Options](#️-pull-mode-options)
       - [🧪 Pull Mode Examples](#-pull-mode-examples)
       - [📜 Sample Output](#-sample-output)
-  - [👥 Working with Multiple AWS Profiles](#-working-with-multiple-aws-profiles)
+  - [👥 Working with multiple AWS profiles](#-working-with-multiple-aws-profiles)
     - [⬇️ Pull Mode Example](#️-pull-mode-example)
     - [🚀 Push Mode Example](#-push-mode-example)
   - [🏁 Roadmap](#-roadmap)
@@ -102,7 +102,7 @@ in your codebase.
 npm install -g envilder
 ```
 
-> **New to AWS SSM?** AWS Systems Manager Parameter Store provides secure storage for configuration data and secrets:
+> 💡 **New to AWS SSM?** AWS Systems Manager Parameter Store provides secure storage for configuration data and secrets:
 >
 > - [AWS SSM Parameter Store Overview](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html)
 > - [Setting up AWS CLI credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
@@ -145,7 +145,7 @@ Watch how Envilder works in less than 1 minute:
 
 ---
 
-## 🛠️ How It Works
+## 🛠️ How it works
 
 ```mermaid
 graph LR
@@ -169,7 +169,7 @@ graph LR
 
 Push Mode uploads environment variables to AWS SSM Parameter Store. It has two distinct operation methods:
 
-#### 🍄 Method 1: Push from .env File
+#### 🍄 Method 1: Push from .env file
 
 **Requirements:**
 
@@ -220,7 +220,7 @@ Will push:
 - Value `abc123` to SSM path `/myapp/api/key`
 - Value `secret456` to SSM path `/myapp/db/password`
 
-### ⭐ Method 2: Push a Single Variable
+### ⭐ Method 2: Push a single variable
 
 **What it does:**
 Uploads a single environment variable directly to AWS SSM Parameter Store without using any files.
@@ -255,7 +255,7 @@ Will push:
 
 - Value `abc123` to SSM path `/myapp/api/key`
 
-### 🧰 Push Mode Options Summary
+### 🧰 Push Mode options summary
 
 **Common Options:**
 
@@ -352,7 +352,7 @@ This keeps your sensitive values secure in AWS SSM while providing local access 
 
 ---
 
-## 👥 Working with Multiple AWS Profiles
+## 👥 Working with multiple AWS profiles
 
 Edit your `~/.aws/credentials`:
 
