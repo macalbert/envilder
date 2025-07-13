@@ -21,25 +21,31 @@
   </a>
 </p>
 
----
+## Why Centralize Environment Variables?
 
-## 🎥 Video Demonstration
+Environment variables are crucial for configuring applications across different environments
+(development, production) or even projects. Without proper management, they become:
 
-Watch how Envilder works in less than 1 minute:  
+- 🔐 **Security risks** when stored in code repositories
+- 🔄 **Out of sync** across team members and deployment environments
+- 🧩 **Scattered** across various documentation, chat messages, and emails
 
-![Watch the video](https://github.com/user-attachments/assets/2de7cac3-0c13-4706-96f6-bf2ef12b661a)
+**Envilder** solves these problems by using AWS SSM Parameter Store as a secure, centralized location for all your
+environment variables, ensuring everyone on your team works with the same configuration and no secrets are exposed
+in your codebase.
 
 ---
 
 ## 📚 Table of Contents
 
 - [🗝️ Envilder ☁️](#️-envilder-️)
-  - [🎥 Video Demonstration](#-video-demonstration)
+  - [Why Centralize Environment Variables?](#why-centralize-environment-variables)
   - [📚 Table of Contents](#-table-of-contents)
   - [⚙️ Features](#️-features)
     - [🧱 Feature Status](#-feature-status)
   - [💾 Installation](#-installation)
   - [🚀 Quick Start](#-quick-start)
+  - [🎥 Video Demonstration](#-video-demonstration)
   - [🛠️ How It Works](#️-how-it-works)
   - [🎮 Usage](#-usage)
     - [🚀 Push Mode (`--push`)](#-push-mode---push)
@@ -96,6 +102,12 @@ Watch how Envilder works in less than 1 minute:
 npm install -g envilder
 ```
 
+> **New to AWS SSM?** AWS Systems Manager Parameter Store provides secure storage for configuration data and secrets:
+>
+> - [AWS SSM Parameter Store Overview](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html)
+> - [Setting up AWS CLI credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
+> - [IAM permissions for SSM](https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html)
+
 ---
 
 ## 🚀 Quick Start
@@ -122,6 +134,14 @@ envilder --map=param-map.json --envfile=.env
 ```
 
 🎯 That’s it — your secrets are now managed and versioned from AWS SSM.
+
+---
+
+## 🎥 Video Demonstration
+
+Watch how Envilder works in less than 1 minute:  
+
+![Watch the video](https://github.com/user-attachments/assets/2de7cac3-0c13-4706-96f6-bf2ef12b661a)
 
 ---
 
