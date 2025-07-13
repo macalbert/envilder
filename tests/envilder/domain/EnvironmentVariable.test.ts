@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { EnvironmentVariable } from '../../../src/cli/domain/EnvironmentVariable';
+import { EnvironmentVariable } from '../../../src/envilder/domain/EnvironmentVariable';
 
 describe('EnvironmentVariable', () => {
   it('Should_CreateEnvironmentVariable_When_ValidInputsProvided', () => {

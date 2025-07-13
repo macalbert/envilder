@@ -5,13 +5,13 @@ import type { SSMClientConfig } from '@aws-sdk/client-ssm';
 import { SSM } from '@aws-sdk/client-ssm';
 import { fromIni } from '@aws-sdk/credential-providers';
 import { Command } from 'commander';
-import { DispatchActionCommandHandlerBuilder } from './cli/application/dispatch/builders/DispatchActionCommandHandlerBuilder.js';
-import { DispatchActionCommand } from './cli/application/dispatch/DispatchActionCommand.js';
-import type { CliOptions } from './cli/domain/CliOptions.js';
-import { AwsSsmSecretProvider } from './cli/infrastructure/aws/AwsSsmSecretProvider.js';
-import { EnvFileManager } from './cli/infrastructure/envManager/EnvFileManager.js';
-import { ConsoleLogger } from './cli/infrastructure/logger/ConsoleLogger.js';
-import { PackageJsonFinder } from './cli/infrastructure/versionFinder/PackageJsonFinder.js';
+import { DispatchActionCommandHandlerBuilder } from '../../envilder/application/dispatch/builders/DispatchActionCommandHandlerBuilder.js';
+import { DispatchActionCommand } from '../../envilder/application/dispatch/DispatchActionCommand.js';
+import type { CliOptions } from '../../envilder/domain/CliOptions.js';
+import { AwsSsmSecretProvider } from '../../envilder/infrastructure/Aws/AwsSsmSecretProvider.js';
+import { EnvFileManager } from '../../envilder/infrastructure/EnvManager/EnvFileManager.js';
+import { ConsoleLogger } from '../../envilder/infrastructure/Logger/ConsoleLogger.js';
+import { PackageJsonFinder } from '../../envilder/infrastructure/VersionFinder/PackageJsonFinder.js';
 
 async function executeCommand(options: CliOptions): Promise<void> {
   const logger = new ConsoleLogger();
@@ -69,7 +69,7 @@ export async function main() {
 function readPackageVersion(): Promise<string> {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
-  const packageJsonPath = join(__dirname, '../package.json');
+  const packageJsonPath = join(__dirname, '../../../package.json');
 
   return new PackageJsonFinder().readPackageJsonVersion(packageJsonPath);
 }

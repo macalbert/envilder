@@ -1,9 +1,9 @@
 import { Command } from 'commander';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { main } from '../src/Cli';
-import { DispatchActionCommandHandlerBuilder } from '../src/cli/application/dispatch/builders/DispatchActionCommandHandlerBuilder';
-import { DispatchActionCommand } from '../src/cli/application/dispatch/DispatchActionCommand';
-import { OperationMode } from '../src/cli/domain/OperationMode';
+import { main } from '../../../src/apps/cli/Cli';
+import { DispatchActionCommandHandlerBuilder } from '../../../src/envilder/application/dispatch/builders/DispatchActionCommandHandlerBuilder';
+import { DispatchActionCommand } from '../../../src/envilder/application/dispatch/DispatchActionCommand';
+import { OperationMode } from '../../../src/envilder/domain/OperationMode';
 
 function patchBuilderWithMocks() {
   const mockCommandHandler = {

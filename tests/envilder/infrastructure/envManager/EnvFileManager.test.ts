@@ -1,8 +1,8 @@
 import * as fs from 'node:fs/promises';
 import * as dotenv from 'dotenv';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { EnvFileManager } from '../../../../src/cli/infrastructure/envManager/EnvFileManager';
-import { ConsoleLogger } from '../../../../src/cli/infrastructure/logger/ConsoleLogger';
+import { EnvFileManager } from '../../../../src/envilder/infrastructure/EnvManager/EnvFileManager';
+import { ConsoleLogger } from '../../../../src/envilder/infrastructure/Logger/ConsoleLogger';
 
 describe('EnvFileManager', () => {
   const sut = new EnvFileManager(new ConsoleLogger());

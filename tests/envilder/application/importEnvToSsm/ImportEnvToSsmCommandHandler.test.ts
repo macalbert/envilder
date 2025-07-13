@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
-import { ImportEnvToSsmCommand } from '../../../../src/cli/application/importEnvToSsm/ImportEnvToSsmCommand';
-import { ImportEnvToSsmCommandHandler } from '../../../../src/cli/application/importEnvToSsm/ImportEnvToSsmCommandHandler';
-import type { IEnvFileManager } from '../../../../src/cli/domain/ports/IEnvFileManager';
-import type { ILogger } from '../../../../src/cli/domain/ports/ILogger';
-import type { ISecretProvider } from '../../../../src/cli/domain/ports/ISecretProvider';
+import { ImportEnvToSsmCommand } from '../../../../src/envilder/application/importEnvToSsm/ImportEnvToSsmCommand';
+import { ImportEnvToSsmCommandHandler } from '../../../../src/envilder/application/importEnvToSsm/ImportEnvToSsmCommandHandler';
+import type { IEnvFileManager } from '../../../../src/envilder/domain/ports/IEnvFileManager';
+import type { ILogger } from '../../../../src/envilder/domain/ports/ILogger';
+import type { ISecretProvider } from '../../../../src/envilder/domain/ports/ISecretProvider';
 
 describe('ImportEnvToSsmCommandHandler', () => {
   let mockSecretProvider: ISecretProvider;
@@ -42,7 +42,7 @@ describe('ImportEnvToSsmCommandHandler', () => {
       mockLogger,
     );
   });
-  
+
   it('Should_PushEnvFileToSSM_When_ValidEnvironmentVariablesAreProvided', async () => {
     // Arrange
     mockEnvFileManager.loadMapFile.mockResolvedValue({

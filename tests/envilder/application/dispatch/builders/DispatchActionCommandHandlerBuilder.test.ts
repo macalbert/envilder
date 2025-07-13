@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import { DispatchActionCommandHandlerBuilder } from '../../../../../src/cli/application/dispatch/builders/DispatchActionCommandHandlerBuilder';
-import type { IEnvFileManager } from '../../../../../src/cli/domain/ports/IEnvFileManager';
-import type { ILogger } from '../../../../../src/cli/domain/ports/ILogger';
-import type { ISecretProvider } from '../../../../../src/cli/domain/ports/ISecretProvider';
+import { DispatchActionCommandHandlerBuilder } from '../../../../../src/envilder/application/dispatch/builders/DispatchActionCommandHandlerBuilder';
+import type { IEnvFileManager } from '../../../../../src/envilder/domain/ports/IEnvFileManager';
+import type { ILogger } from '../../../../../src/envilder/domain/ports/ILogger';
+import type { ISecretProvider } from '../../../../../src/envilder/domain/ports/ISecretProvider';
 
 describe('DispatchActionCommandHandlerBuilder', () => {
   const mockSecretProvider: ISecretProvider = {

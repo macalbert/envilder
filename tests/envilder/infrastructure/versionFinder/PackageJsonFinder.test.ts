@@ -1,7 +1,8 @@
 import { access, mkdir, rmdir, unlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { PackageJsonFinder } from '../../../../src/cli/infrastructure/versionFinder/PackageJsonFinder';
+import { PackageJsonFinder } from '../../../../src/envilder/infrastructure/VersionFinder/PackageJsonFinder';
+
 
 describe('PackageJsonFinder', () => {
   const tempDir = join(__dirname, 'temp-pkgjson-test');

@@ -8,7 +8,8 @@ import {
   type StartedLocalStackContainer,
 } from '@testcontainers/localstack';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { AwsSsmSecretProvider } from '../../../../src/cli/infrastructure/aws/AwsSsmSecretProvider';
+import { AwsSsmSecretProvider } from '../../../../src/envilder/infrastructure/Aws/AwsSsmSecretProvider';
+
 
 const LOCALSTACK_IMAGE = 'localstack/localstack:stable';
 const PARAM_NAME = '/test/secret';

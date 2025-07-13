@@ -4,8 +4,8 @@ import {
   DependencyMissingError,
   EnvironmentFileError,
 } from '../../domain/errors/DomainErrors.js';
-import type { IEnvFileManager } from '../../domain/ports/IEnvFileManager';
-import type { ILogger } from '../../domain/ports/ILogger';
+import type { IEnvFileManager } from '../../domain/ports/IEnvFileManager.js';
+import type { ILogger } from '../../domain/ports/ILogger.js';
 
 export class EnvFileManager implements IEnvFileManager {
   private logger: ILogger;

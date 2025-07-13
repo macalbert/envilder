@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PushSingleVariableCommand } from '../../../../src/cli/application/pushSingleVariable/PushSingleVariableCommand';
-import { PushSingleVariableCommandHandler } from '../../../../src/cli/application/pushSingleVariable/PushSingleVariableCommandHandler';
-import type { ILogger } from '../../../../src/cli/domain/ports/ILogger';
-import type { ISecretProvider } from '../../../../src/cli/domain/ports/ISecretProvider';
+import { PushSingleVariableCommand } from '../../../../src/envilder/application/pushSingleVariable/PushSingleVariableCommand';
+import { PushSingleVariableCommandHandler } from '../../../../src/envilder/application/pushSingleVariable/PushSingleVariableCommandHandler';
+import type { ILogger } from '../../../../src/envilder/domain/ports/ILogger';
+import type { ISecretProvider } from '../../../../src/envilder/domain/ports/ISecretProvider';
 
 function createMocks(throwError = false) {
   const mockError = new Error('Failed to push variable');
