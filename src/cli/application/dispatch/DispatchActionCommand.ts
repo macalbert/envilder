@@ -1,3 +1,4 @@
+import type { CliOptions } from '../../domain/CliOptions.js';
 import { OperationMode } from '../../domain/OperationMode.js';
 
 export class DispatchActionCommand {
@@ -12,15 +13,7 @@ export class DispatchActionCommand {
     public readonly mode: OperationMode = OperationMode.EXPORT_SSM_TO_ENV,
   ) {}
 
-  static fromCliOptions(options: {
-    map?: string;
-    envfile?: string;
-    key?: string;
-    value?: string;
-    ssmPath?: string;
-    profile?: string;
-    import?: boolean;
-  }): DispatchActionCommand {
+  static fromCliOptions(options: CliOptions): DispatchActionCommand {
     const mode = DispatchActionCommand.determineOperationMode(options);
     return new DispatchActionCommand(
       options.map,
@@ -34,12 +27,7 @@ export class DispatchActionCommand {
     );
   }
 
-  private static determineOperationMode(options: {
-    key?: string;
-    value?: string;
-    ssmPath?: string;
-    import?: boolean;
-  }): OperationMode {
+  private static determineOperationMode(options: CliOptions): OperationMode {
     if (options.key && options.value && options.ssmPath) {
       return OperationMode.PUSH_SINGLE_VARIABLE;
     }

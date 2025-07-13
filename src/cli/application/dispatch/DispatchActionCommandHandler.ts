@@ -1,11 +1,18 @@
-// Import the Envilder type and OperationMode from domain
-
 import { OperationMode } from '../../domain/OperationMode.js';
-import type { Envilder } from '../EnvilderHandler.js';
+import { ExportSsmToEnvCommand } from '../exportSsmToEnv/ExportSsmToEnvCommand.js';
+import type { ExportSsmToEnvCommandHandler } from '../exportSsmToEnv/ExportSsmToEnvCommandHandler.js';
+import { ImportEnvToSsmCommand } from '../importEnvToSsm/ImportEnvToSsmCommand.js';
+import type { ImportEnvToSsmCommandHandler } from '../importEnvToSsm/ImportEnvToSsmCommandHandler.js';
+import { PushSingleVariableCommand } from '../pushSingleVariable/PushSingleVariableCommand.js';
+import type { PushSingleVariableCommandHandler } from '../pushSingleVariable/PushSingleVariableCommandHandler.js';
 import type { DispatchActionCommand } from './DispatchActionCommand.js';
 
 export class DispatchActionCommandHandler {
-  constructor(private readonly envilder: Envilder) {}
+  constructor(
+    private readonly exportSsmToEnvCommandHandler: ExportSsmToEnvCommandHandler,
+    private readonly importEnvToSsmCommandHandler: ImportEnvToSsmCommandHandler,
+    private readonly pushSingleVariableCommandHandler: PushSingleVariableCommandHandler,
+  ) {}
 
   async handleCommand(command: DispatchActionCommand): Promise<void> {
     switch (command.mode) {
@@ -24,10 +31,20 @@ export class DispatchActionCommandHandler {
   private async handlePushSingleVariable(
     command: DispatchActionCommand,
   ): Promise<void> {
-    await this.envilder.pushSingleVariableToSSM(
-      command.key as string,
-      command.value as string,
-      command.ssmPath as string,
+    if (!command.key || !command.value || !command.ssmPath) {
+      throw new Error(
+        'Missing required arguments: --key, --value, and --ssm-path',
+      );
+    }
+
+    const pushSingleVariableCommand = PushSingleVariableCommand.create(
+      command.key,
+      command.value,
+      command.ssmPath,
+    );
+
+    await this.pushSingleVariableCommandHandler.handle(
+      pushSingleVariableCommand,
     );
   }
 
@@ -36,10 +53,12 @@ export class DispatchActionCommandHandler {
   ): Promise<void> {
     this.validateMapAndEnvFileOptions(command);
 
-    await this.envilder.importEnvFile(
+    const importEnvToSsmCommand = ImportEnvToSsmCommand.create(
       command.map as string,
       command.envfile as string,
     );
+
+    await this.importEnvToSsmCommandHandler.handle(importEnvToSsmCommand);
   }
 
   private async handleExportSsmToEnv(
@@ -47,7 +66,12 @@ export class DispatchActionCommandHandler {
   ): Promise<void> {
     this.validateMapAndEnvFileOptions(command);
 
-    await this.envilder.run(command.map as string, command.envfile as string);
+    const exportSsmToEnvCommand = ExportSsmToEnvCommand.create(
+      command.map as string,
+      command.envfile as string,
+    );
+
+    await this.exportSsmToEnvCommandHandler.handle(exportSsmToEnvCommand);
   }
 
   private validateMapAndEnvFileOptions(command: DispatchActionCommand): void {

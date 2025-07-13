@@ -1,32 +1,38 @@
 #!/usr/bin/env node
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type { SSMClientConfig } from '@aws-sdk/client-ssm';
+import { SSM } from '@aws-sdk/client-ssm';
+import { fromIni } from '@aws-sdk/credential-providers';
 import { Command } from 'commander';
-import { EnvilderBuilder } from './cli/application/builders/EnvilderBuilder.js';
+import { DispatchActionCommandHandlerBuilder } from './cli/application/dispatch/builders/DispatchActionCommandHandlerBuilder.js';
 import { DispatchActionCommand } from './cli/application/dispatch/DispatchActionCommand.js';
-import { DispatchActionCommandHandler } from './cli/application/dispatch/DispatchActionCommandHandler.js';
+import type { CliOptions } from './cli/domain/CliOptions.js';
+import { AwsSsmSecretProvider } from './cli/infrastructure/aws/AwsSsmSecretProvider.js';
+import { EnvFileManager } from './cli/infrastructure/envManager/EnvFileManager.js';
 import { ConsoleLogger } from './cli/infrastructure/logger/ConsoleLogger.js';
 import { PackageJsonFinder } from './cli/infrastructure/versionFinder/PackageJsonFinder.js';
 
-type CliOptions = {
-  map?: string;
-  envfile?: string;
-  key?: string;
-  value?: string;
-  ssmPath?: string;
-  profile?: string;
-  import?: boolean;
-};
-
 async function executeCommand(options: CliOptions): Promise<void> {
-  const envilder = EnvilderBuilder.build()
-    .withConsoleLogger()
-    .withDefaultFileManager()
-    .withAwsProvider(options.profile)
+  const logger = new ConsoleLogger();
+  const fileManager = new EnvFileManager(logger);
+
+  // Create SSM client with optional profile
+  const ssm = options.profile
+    ? new SSM({
+        credentials: fromIni({ profile: options.profile }),
+      } as SSMClientConfig)
+    : new SSM();
+
+  const secretProvider = new AwsSsmSecretProvider(ssm);
+
+  const commandHandler = DispatchActionCommandHandlerBuilder.build()
+    .withLogger(logger)
+    .withEnvFileManager(fileManager)
+    .withProvider(secretProvider)
     .create();
 
   const command = DispatchActionCommand.fromCliOptions(options);
-  const commandHandler = new DispatchActionCommandHandler(envilder);
   await commandHandler.handleCommand(command);
 }
 

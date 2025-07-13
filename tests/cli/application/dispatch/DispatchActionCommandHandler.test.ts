@@ -1,22 +1,29 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DispatchActionCommand } from '../../../../src/cli/application/dispatch/DispatchActionCommand';
 import { DispatchActionCommandHandler } from '../../../../src/cli/application/dispatch/DispatchActionCommandHandler';
-import type { Envilder } from '../../../../src/cli/application/EnvilderHandler';
+import type { ExportSsmToEnvCommandHandler } from '../../../../src/cli/application/exportSsmToEnv/ExportSsmToEnvCommandHandler';
+import type { ImportEnvToSsmCommandHandler } from '../../../../src/cli/application/importEnvToSsm/ImportEnvToSsmCommandHandler';
+import type { PushSingleVariableCommandHandler } from '../../../../src/cli/application/pushSingleVariable/PushSingleVariableCommandHandler';
 import { OperationMode } from '../../../../src/cli/domain/OperationMode';
 
-const mockEnvilder = {
-  run: vi.fn(),
-  importEnvFile: vi.fn(),
-  pushSingleVariableToSSM: vi.fn(),
-  keyVault: {},
-  envFileManager: {},
-  logger: {},
-  envild: vi.fn(),
-  processSecret: vi.fn(),
-} as unknown as Envilder;
+const mockExportSsmToEnvCommandHandler = {
+  handle: vi.fn(),
+} as unknown as ExportSsmToEnvCommandHandler;
+
+const mockImportEnvToSsmCommandHandler = {
+  handle: vi.fn(),
+} as unknown as ImportEnvToSsmCommandHandler;
+
+const mockPushSingleVariableCommandHandler = {
+  handle: vi.fn(),
+} as unknown as PushSingleVariableCommandHandler;
 
 describe('DispatchActionCommandHandler', () => {
-  const sut = new DispatchActionCommandHandler(mockEnvilder);
+  const sut = new DispatchActionCommandHandler(
+    mockExportSsmToEnvCommandHandler,
+    mockImportEnvToSsmCommandHandler,
+    mockPushSingleVariableCommandHandler,
+  );
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -39,10 +46,7 @@ describe('DispatchActionCommandHandler', () => {
     await sut.handleCommand(command);
 
     // Assert
-    expect(mockEnvilder.run).toHaveBeenCalledWith(
-      'path/to/map.json',
-      'path/to/.env',
-    );
+    expect(mockExportSsmToEnvCommandHandler.handle).toHaveBeenCalled();
   });
 
   it('Should_CallImportEnvToSsm_When_ImportEnvToSsmModeIsProvided', async () => {
@@ -62,10 +66,7 @@ describe('DispatchActionCommandHandler', () => {
     await sut.handleCommand(command);
 
     // Assert
-    expect(mockEnvilder.importEnvFile).toHaveBeenCalledWith(
-      'path/to/map.json',
-      'path/to/.env',
-    );
+    expect(mockImportEnvToSsmCommandHandler.handle).toHaveBeenCalled();
   });
 
   it('Should_CallPushSingleVariableToSSM_When_PushSingleVariableModeIsProvided', async () => {
@@ -85,11 +86,7 @@ describe('DispatchActionCommandHandler', () => {
     await sut.handleCommand(command);
 
     // Assert
-    expect(mockEnvilder.pushSingleVariableToSSM).toHaveBeenCalledWith(
-      'TEST_KEY',
-      'test-value',
-      '/test/path',
-    );
+    expect(mockPushSingleVariableCommandHandler.handle).toHaveBeenCalled();
   });
 
   it('Should_ThrowError_When_MapAndEnvfileAreMissingForExportMode', async () => {

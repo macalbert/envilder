@@ -3,7 +3,6 @@ import { main } from '../src/Cli';
 import { EnvilderBuilder } from '../src/cli/application/builders/EnvilderBuilder';
 import { DispatchActionCommand } from '../src/cli/application/dispatch/DispatchActionCommand';
 import { DispatchActionCommandHandler } from '../src/cli/application/dispatch/DispatchActionCommandHandler';
-import { Envilder } from '../src/cli/application/EnvilderHandler';
 import { OperationMode } from '../src/cli/domain/OperationMode';
 import type { IEnvFileManager } from '../src/cli/domain/ports/IEnvFileManager';
 import type { ISecretProvider } from '../src/cli/domain/ports/ISecretProvider';
@@ -60,7 +59,6 @@ describe('Cli', () => {
       '--profile',
       testProfile,
     ];
-    // We still mock the run method even though we're testing the command handler
     vi.spyOn(Envilder.prototype, 'run').mockResolvedValue(undefined);
     const withAwsProviderSpy = vi.spyOn(
       EnvilderBuilder.prototype,
@@ -130,31 +128,50 @@ describe('Cli', () => {
     fromCliOptionsSpy.mockRestore();
   });
 
-  it('Should_CreateCorrectCommand_When_DifferentCliOptionsAreProvided', () => {
-    // Test export mode (default)
-    const exportCommand = DispatchActionCommand.fromCliOptions({
+  it('Should_CreateExportToEnvCommand_When_OptionsAreProvided', () => {
+    // Arrange
+    const options = {
       map: 'map.json',
       envfile: '.env',
       profile: 'default',
-    });
+    };
+
+    // Act
+    const exportCommand = DispatchActionCommand.fromCliOptions(options);
+
+    // Assert
     expect(exportCommand.mode).toBe(OperationMode.EXPORT_SSM_TO_ENV);
     expect(exportCommand.map).toBe('map.json');
     expect(exportCommand.envfile).toBe('.env');
+  });
 
-    // Test import mode
-    const importCommand = DispatchActionCommand.fromCliOptions({
+  it('Should_CreateImportEnvCommand_When_OptionsAreProvided', () => {
+    // Arrange
+    const options = {
       map: 'map.json',
       envfile: '.env',
       import: true,
-    });
-    expect(importCommand.mode).toBe(OperationMode.IMPORT_ENV_TO_SSM);
+    };
 
-    // Test push single variable mode
-    const pushCommand = DispatchActionCommand.fromCliOptions({
+    // Act
+    const importCommand = DispatchActionCommand.fromCliOptions(options);
+
+    // Assert
+    expect(importCommand.mode).toBe(OperationMode.IMPORT_ENV_TO_SSM);
+  });
+
+  it('Should_CreateSinglePushCommand_When_OptionsAreProvided', () => {
+    // Arrange
+    const options = {
       key: 'API_KEY',
       value: 'secret123',
       ssmPath: '/my/path',
-    });
+    };
+
+    // Act
+    const pushCommand = DispatchActionCommand.fromCliOptions(options);
+
+    // Assert
     expect(pushCommand.mode).toBe(OperationMode.PUSH_SINGLE_VARIABLE);
     expect(pushCommand.key).toBe('API_KEY');
     expect(pushCommand.value).toBe('secret123');
