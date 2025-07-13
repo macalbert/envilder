@@ -359,9 +359,6 @@ MigrationBackup/
 .vs
 
 
-pnpm-lock.yaml
-yarn.lock
-aws_credentials.env
 coverage
 coveragereport
 *.cobertura.xml
