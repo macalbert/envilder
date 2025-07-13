@@ -1,7 +1,8 @@
-# Envilder
+# 🍄 Envilder
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/96bf1efa-7d21-440a-a414-3a20e7f9a1f1" alt="Envilder">
+</p>
 </p>
 
 <p align="center">
@@ -22,261 +23,372 @@
 
 ---
 
-## Video Demonstration 🎥
+## 🎥 Video Demonstration
 
-Check out this video to learn how to use Envilder:
-
+Watch how Envilder works in less than 1 minute:  
 <https://github.com/user-attachments/assets/3c4985e6-49e9-4f29-bf1c-130747df0ca6>
 
 ---
 
-## Table of contents
+## 📚 Table of Contents
 
-- [Envilder](#envilder)
-  - [Video Demonstration 🎥](#video-demonstration-)
-  - [Table of contents](#table-of-contents)
-  - [Features](#features)
-    - [Feature status](#feature-status)
-  - [Quick start 🚀](#quick-start-)
-  - [How it works 🛠️](#how-it-works-️)
-  - [Installation 💾](#installation-)
-  - [Usage](#usage)
-    - [Push Mode (`--push`)](#push-mode---push)
-      - [Push Mode Options](#push-mode-options)
-      - [Pull Mode Examples](#pull-mode-examples)
-    - [Pull Mode (`--map` and `--envfile`)](#pull-mode---map-and---envfile)
-      - [Pull Mode Options](#pull-mode-options)
-      - [Examples](#examples)
-  - [Working with multiple AWS profiles](#working-with-multiple-aws-profiles)
-    - [Pull Mode Example](#pull-mode-example)
-    - [Push Mode Example](#push-mode-example)
-  - [Sample output 📄](#sample-output-)
-  - [Roadmap 🗺️](#roadmap-️)
-  - [Contributing 🤝](#contributing-)
-  - [License 📄](#license-)
-
----
-
-## Features
-
-- **🔒 Strict access control** — AWS IAM policies control who accesses which secrets (dev vs prod)
-- **📊 Full audit trail** — All parameter access is logged in CloudTrail for compliance
-- **🧩 Single source of truth** — No more copying .env files from Notion or emails
-- **🔁 Idempotent operations** — Only variables in your mapping file are overwritten; others are preserved
-- **🧱 No extra infrastructure** — Uses AWS SSM's reliability, no new services needed
-
-### Feature status
-
-| Feature                        | Status         | Notes |
-|--------------------------------|---------------|-------|
-| Mapping-based secret resolution| ✅ Implemented | |
-| .env file generation           | ✅ Implemented | |
-| AWS profile support            | ✅ Implemented | |
-| Auto-discovery mode (`--auto`) | ❌ Not implemented | Planned |
-| Check/sync mode (`--check`)    | ❌ Not implemented | Planned |
-| Import/push mode (`--push`)  | ✅ Implemented | |
-| Webhook/Slack notification     | ❌ Not implemented | Planned |
-| Hierarchical mapping           | ❌ Not implemented | Only flat JSON mapping supported |
-| Plugin system                  | ❌ Not implemented | Only AWS SSM supported |
+- [🍄 Envilder](#-envilder)
+  - [🎥 Video Demonstration](#-video-demonstration)
+  - [📚 Table of Contents](#-table-of-contents)
+  - [⚙️ Features](#️-features)
+    - [🧱 Feature Status](#-feature-status)
+  - [💾 Installation](#-installation)
+  - [🚀 Quick Start](#-quick-start)
+  - [🛠️ How It Works](#️-how-it-works)
+  - [🕹️ Usage](#️-usage)
+    - [🚀 Push Mode (`--push`)](#-push-mode---push)
+      - [� Method 1: Push from .env File](#-method-1-push-from-env-file)
+    - [🎯 Method 2: Push a Single Variable](#-method-2-push-a-single-variable)
+    - [⚙️ Push Mode Options Summary](#️-push-mode-options-summary)
+    - [🧪 Push Mode Examples](#-push-mode-examples)
+    - [⬇️ Pull Mode (`--map` and `--envfile`)](#️-pull-mode---map-and---envfile)
+      - [⚙️ Pull Mode Options](#️-pull-mode-options)
+      - [🧪 Examples](#-examples)
+  - [👥 Working with Multiple AWS Profiles](#-working-with-multiple-aws-profiles)
+    - [⬇️ Pull Mode Example](#️-pull-mode-example)
+    - [🚀 Push Mode Example](#-push-mode-example)
+  - [📄 Sample Output](#-sample-output)
+  - [🗺️ Roadmap](#️-roadmap)
+  - [🤝 Contributing](#-contributing)
+  - [📜 License](#-license)
 
 ---
 
-## Quick start 🚀
+## ⚙️ Features
+
+- 🔒 **Strict access control** — IAM policies define access to secrets across stages (dev, staging, prod)
+- 📊 **Auditable** — All reads/writes are logged in AWS CloudTrail
+- 🧩 **Single source of truth** — No more Notion, emails or copy/paste of envs
+- 🔁 **Idempotent sync** — Only what’s in your map gets updated. Nothing else is touched
+- 🧱 **Zero infrastructure** — Fully based on native AWS SSM. No Lambdas, no servers, no fuss
+
+### 🧱 Feature Status
+
+| Feature | Status | Notes |
+|--|--|--|
+| Mapping-based resolution | ✅ Implemented | |
+| `.env` file generation | ✅ Implemented | |
+| AWS profile support | ✅ Implemented | `--profile` flag |
+| Import/push mode (`--push`) | ✅ Implemented | |
+| Auto-discovery (`--auto`) | ❌ Planned | Detect keys based on env |
+| Check/sync mode (`--check`) | ❌ Planned | Diff local vs remote |
+| Webhook/Slack notification | ❌ Planned | On push/pull events |
+| Hierarchical mapping | ❌ Not yet | Flat mapping only |
+| Plugin system | ❌ Not yet | SSM is the only backend (for now) |
+
+---
+
+## 💾 Installation
+
+🛠 Requirements:
+
+- Node.js **v20+**
+- AWS CLI installed and configured
+- IAM user/role with `ssm:GetParameter`, `ssm:PutParameter`
 
 ```bash
 npm install -g envilder
+```
 
-# Watch the video demonstration for detailed guidance
-# https://github.com/user-attachments/assets/3c4985e6-49e9-4f29-bf1c-130747df0ca6
+---
 
-echo '{"DB_PASSWORD": "/my-app/db/password"}' > param-map.json
+## 🚀 Quick Start
 
+Get started with **Envilder** in 3 simple steps. Remember to add `.env` to your `.gitignore` file for security.
+
+Initial Setup
+
+```bash
+# Step 1: Create a parameter mapping file
+echo '{
+  "DB_PASSWORD": "/my-app/db/password"
+}' > param-map.json
+
+# Step 2: Push a secret to AWS SSM Parameter Store
+envilder --push --key=DB_PASSWORD --value=12345 --ssm-path=/my-app/db/password
+```
+
+Ongoing Usage
+
+```bash
+# Step 3: Generate your .env file from AWS SSM
+envilder --map=param-map.json --envfile=.env
+````
+
+🎯 That’s it — your secrets are now managed and versioned from AWS SSM.
+
+---
+
+## 🛠️ How It Works
+
+```mermaid
+graph LR
+    A[Mapping File (param-map.json)] --> B[Envilder]
+    C[.env File or --key] --> B
+    D[AWS Credentials] --> B
+    E[AWS SSM] --> B
+    B --> F[Pull/Push Secrets 💾]
+```
+
+1. Define mappings in JSON: `{"ENV_VAR": "ssm/path"}`
+2. Run Envilder: `--push` to upload, or `--map` + `--envfile` to generate
+3. It talks to SSM using your AWS credentials
+4. Result: your secrets synced ✅
+
+---
+
+## 🕹️ Usage
+
+### 🚀 Push Mode (`--push`)
+
+Push Mode uploads environment variables to AWS SSM Parameter Store. It has two distinct operation methods:
+
+#### � Method 1: Push from .env File
+
+**Requirements:**
+
+- `--push` flag to enable Push Mode
+- `--envfile` pointing to your local .env file
+- `--map` pointing to your parameter mapping JSON file
+
+**How File-Based Push Works:**
+
+1. Envilder reads your local `.env` file to get variable names and values
+2. Envilder reads your `map` file to find the corresponding SSM paths
+3. For each variable found in both files, Envilder pushes the value to AWS SSM
+4. No modifications are made to your local files
+
+```mermaid
+graph LR
+  A[.env File] --> |Variables & Values| B[Envilder]
+  C[Mapping File] --> |SSM Paths| B
+  D[AWS Profile] --> B
+  B --> E[AWS SSM Parameter Store]
+```
+
+**Example:**
+If your `.env` file contains:
+
+```text
+API_KEY=abc123
+DB_PASSWORD=secret456
+```
+
+And your `param-map.json` file contains:
+
+```json
+{
+  "API_KEY": "/myapp/api/key",
+  "DB_PASSWORD": "/myapp/db/password"
+}
+```
+
+Running this command:
+
+```bash
+envilder --push --envfile=.env --map=param-map.json
+```
+
+Will push:
+
+- Value `abc123` to SSM path `/myapp/api/key`
+- Value `secret456` to SSM path `/myapp/db/password`
+
+### 🎯 Method 2: Push a Single Variable
+
+**What it does:**
+Uploads a single environment variable directly to AWS SSM Parameter Store without using any files.
+
+**Required parameters:**
+
+- `--push`: Activates Push Mode
+- `--key=VAR_NAME`: The name of the environment variable
+- `--value=secret123`: The value to store in AWS SSM
+- `--ssm-path=/your/path`: The full AWS SSM parameter path
+
+**Important notes:**
+
+- NO files are read or modified
+- This is a direct command-to-SSM operation
+- Useful for quick updates or CI/CD pipelines
+
+```mermaid
+graph LR
+  A[Command Line Arguments] --> B[Envilder]
+  C[AWS Profile] --> B
+  B --> D[AWS SSM Parameter Store]
+```
+
+**Example:**
+
+```bash
+envilder --push --key=API_KEY --value=abc123 --ssm-path=/myapp/api/key
+```
+
+Will push:
+
+- Value `abc123` to SSM path `/myapp/api/key`
+
+### ⚙️ Push Mode Options Summary
+
+**Common Options:**
+
+| Option       | Description                        |
+|------------- | ---------------------------------- |
+| `--push`     | Required: Enables push mode        |
+| `--profile`  | Optional: AWS CLI profile to use   |
+
+**Method 1: File-Based Push Options:**
+
+| Option       | Description                                        |
+|------------- | -------------------------------------------------- |
+| `--envfile`  | Required: Path to your local .env file             |
+| `--map`      | Required: Path to your parameter mapping JSON file |
+
+**Method 2: Single-Variable Push Options:**
+
+| Option       | Description                                 |
+|------------- | ------------------------------------------- |
+| `--key`      | Required: Environment variable name         |
+| `--value`    | Required: Value to store in AWS SSM         |
+| `--ssm-path` | Required: Full SSM parameter path           |
+
+### 🧪 Push Mode Examples
+
+**Method 1: Push from .env file (multiple variables at once):**
+
+```bash
+# Basic usage - pushes all variables found in both .env and map files
+envilder --push --envfile=.env --map=param-map.json
+
+# With AWS profile - for different environments
+envilder --push --envfile=.env.prod --map=param-map.json --profile=prod-account
+```
+
+**Method 2: Push a single variable (no files needed):**
+
+```bash
+# Basic usage - pushes one variable directly to SSM
+envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path
+
+# With AWS profile
+envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path --profile=dev
+```
+
+---
+
+### ⬇️ Pull Mode (`--map` and `--envfile`)
+
+Downloads secrets from SSM and writes to `.env`.
+
+#### ⚙️ Pull Mode Options
+
+| Option      | Description                         |
+| ----------- | ----------------------------------- |
+| `--map`     | JSON mapping of env var to SSM path |
+| `--envfile` | Path to write `.env`                |
+| `--profile` | AWS profile to use                  |
+
+#### 🧪 Examples
+
+```bash
 envilder --map=param-map.json --envfile=.env
 ```
 
----
-
-## How it works 🛠️
-
-```mermaid
-
-graph LR
-    A[Mapping File] --> B[Envilder]
-    C[AWS Credentials] --> B
-    B --> D[.env File]
-    E[SSM Parameters] --> B
-
-```
-
-1. **Define your mapping** — Simple JSON mapping env vars to SSM paths
-2. **Run Envilder** — One command with your mapping file
-3. **Auto-fetch from AWS** — Retrieves values using your AWS credentials
-4. **Get your .env file** — Ready to use in your project
-
----
-
-## Installation 💾
-
-**Requires:** Node.js >= 20.0.0, AWS CLI configured with SSM access
+With profile:
 
 ```bash
-npm install -g envilder
+envilder --map=param-map.json --envfile=.env --profile=dev-account
 ```
 
 ---
 
-## Usage
+## 👥 Working with Multiple AWS Profiles
 
-### Push Mode (`--push`)
-
-Push local `.env` files or single variables back to AWS SSM Parameter Store.
-This is useful for syncing local environment variables with AWS.
-
-#### Push Mode Options
-
-**General Options:**
-
-| Option      | Description                                 |
-|-------------|---------------------------------------------|
-| `--map`     | Path to JSON mapping file (required)         |
-| `--envfile` | Path to output .env file (required)          |
-| `--profile` | AWS CLI profile to use (optional)            |
-
-**Push-Specific Options:**
-
-| Option      | Description                                 |
-|-------------|---------------------------------------------|
-| `--push`    | Enables push mode                           |
-| `--key`     | Single environment variable name to push    |
-| `--value`   | Value of the single environment variable    |
-| `--ssm-path`| SSM path for the single environment variable|
-
-#### Pull Mode Examples
-
-1. **Push a local `.env` file to AWS SSM:**
-
-    ```bash
-    envilder --push --envfile=.env --map=param-map.json
-    ```
-
-2. **Push a single environment variable to AWS SSM:**
-
-    ```bash
-    envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path
-    ```
-
-3. **Push a single variable using a specific AWS profile:**
-
-    ```bash
-    envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path --profile=dev-account
-    ```
-
----
-
-### Pull Mode (`--map` and `--envfile`)
-
-Generate a `.env` file by pulling environment variables from AWS SSM Parameter Store.
-This is useful for creating local environment files for development or CI/CD pipelines.
-
-#### Pull Mode Options
-
-| Option      | Description                                 |
-|-------------|---------------------------------------------|
-| `--map`     | Path to JSON mapping file (required)         |
-| `--envfile` | Path to output .env file (required)          |
-| `--profile` | AWS CLI profile to use (optional)            |
-
-#### Examples
-
-1. **Generate a `.env` file from AWS SSM:**
-
-    ```bash
-    envilder --map=param-map.json --envfile=.env
-    ```
-
-2. **Generate a `.env` file using a specific AWS profile:**
-
-    ```bash
-    envilder --map=param-map.json --envfile=.env --profile=dev-account
-    ```
-
----
-
-## Working with multiple AWS profiles
-
-Configure different profiles in your AWS credentials file (usually at `~/.aws/credentials` or `%USERPROFILE%\.aws\credentials`):
+Edit your `~/.aws/credentials`:
 
 ```ini
 [default]
-aws_access_key_id=YOUR_DEFAULT_ACCESS_KEY
-aws_secret_access_key=YOUR_DEFAULT_SECRET_KEY
+aws_access_key_id=DEFAULT_KEY
+aws_secret_access_key=DEFAULT_SECRET
 
 [dev-account]
-aws_access_key_id=YOUR_DEV_ACCESS_KEY
-aws_secret_access_key=YOUR_DEV_SECRET_KEY
+aws_access_key_id=DEV_KEY
+aws_secret_access_key=DEV_SECRET
 
 [prod-account]
-aws_access_key_id=YOUR_PROD_ACCESS_KEY
-aws_secret_access_key=YOUR_PROD_SECRET_KEY
-```
-
-Specify which profile to use:
-
-### Pull Mode Example
-
-Generate a `.env` file using a specific AWS profile:
-
-```bash
-# Development
-envilder --map=param-map.json --envfile=.env.development --profile=dev-account
-
-# Production
-envilder --map=param-map.json --envfile=.env.production --profile=prod-account
-```
-
-### Push Mode Example
-
-Push a single environment variable using a specific AWS profile:
-
-```bash
-# Development
-envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path --profile=dev-account
-
-# Production
-envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path --profile=prod-account
+aws_access_key_id=PROD_KEY
+aws_secret_access_key=PROD_SECRET
 ```
 
 ---
 
-## Sample output 📄
+### ⬇️ Pull Mode Example
 
-Example `.env` file generated:
+```bash
+# Development
+envilder --map=param-map.json --envfile=.env.dev --profile=dev-account
 
-```ini
+# Production
+envilder --map=param-map.json --envfile=.env.prod --profile=prod-account
+```
+
+---
+
+### 🚀 Push Mode Example
+
+```bash
+# Development
+envilder --push --key=API_KEY --value=secret123 --ssm-path=/dev/api/key --profile=dev-account
+
+# Production
+envilder --push --key=API_KEY --value=secret123 --ssm-path=/prod/api/key --profile=prod-account
+```
+
+---
+
+## 📄 Sample Output
+
+Example `.env` file after pull:
+
+```dotenv
 SECRET_TOKEN=mockedEmail@example.com
 SECRET_KEY=mockedPassword
 ```
 
 ---
 
-## Roadmap 🗺️
+## 🗺️ Roadmap
 
-See [ROADMAP.md](./ROADMAP.md) for planned features and ideas.
+🧭 Planned features:
+
+- 🔍 Drift detection (`--check`)
+- 🧠 Auto-discovery (`--auto`)
+- 📨 Slack/Webhook notifications
+- 🔌 Plugin system (Vault, Secrets Manager, etc.)
+
+👉 See full [ROADMAP.md](./ROADMAP.md)
 
 ---
 
-## Contributing 🤝
+## 🤝 Contributing
 
-Contributions are welcome! Please see the [contributing guidelines](https://github.com/macalbert/envilder/blob/main/.github/pull_request_template.md).
+All help is welcome — PRs, issues, ideas!
 
-Feel free to open issues or pull requests.
+- 🔧 Use our [Pull Request Template](.github/pull_request_template.md)
+- 🧪 Add tests where possible
+- 💬 Feedback and discussion welcome
 
 ---
 
-## License 📄
+## 📜 License
 
-MIT © [Marçal Albert](https://github.com/macalbert).
-
-See [LICENSE](./LICENSE) for details.
+MIT © [Marçal Albert](https://github.com/macalbert)
+See [LICENSE](./LICENSE)
 
 ---
