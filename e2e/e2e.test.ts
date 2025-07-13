@@ -95,9 +95,9 @@ describe('Envilder (E2E)', () => {
     );
   });
 
-  it('Should_PushEnvFileToSSM_When_ImportFlagIsUsed', async () => {
+  it('Should_PushEnvFileToSSM_When_PushFlagIsUsed', async () => {
     // Arrange
-    const params = ['--import', '--envfile', envFilePath, '--map', mapFilePath];
+    const params = ['--push', '--envfile', envFilePath, '--map', mapFilePath];
 
     // Act
     const actual = await runCommand(envilder, params);

@@ -29,7 +29,7 @@ Envilder aims to be the simplest, most reliable way to generate `.env` files fro
 
 ### 🔹 Advanced Features
 
-- [ ] ↩️ **Import mode** (`--import`) to push local `.env` back to AWS SSM
+- [ ] ↩️ **Push mode** (`--push`) to push local `.env` back to AWS SSM
 - [ ] 🔔 **Optional webhook/Slack notifier** on secret sync (for audit/logging)
 - [ ] 🌐 **Web-based interactive demo** (optional) to test mappings live
 - [ ] 🧠 **Awesome list submissions** and community templates
@@ -48,3 +48,19 @@ Envilder aims to be the simplest, most reliable way to generate `.env` files fro
 If you’ve faced similar problems or want to help improve this tool, feel free to open an issue, submit a PR
 or reach out.  
 Every bit of feedback helps make this tool better for the community.
+
+---
+
+## Feature Status
+
+| Feature                        | Status         | Notes |
+|--------------------------------|---------------|-------|
+| Push mode (`--push`)           | ✅ Implemented | |
+| Mapping-based secret resolution| ✅ Implemented | |
+| .env file generation           | ✅ Implemented | |
+| AWS profile support            | ✅ Implemented | |
+| Auto-discovery mode (`--auto`) | ❌ Not implemented | Planned |
+| Check/sync mode (`--check`)    | ❌ Not implemented | Planned |
+| Webhook/Slack notification     | ❌ Not implemented | Planned |
+| Hierarchical mapping           | ❌ Not implemented | Only flat JSON mapping supported |
+| Plugin system                  | ❌ Not implemented | Only AWS SSM supported |

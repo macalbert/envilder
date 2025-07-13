@@ -41,15 +41,17 @@ Check out this video to learn how to use Envilder:
   - [How it works 🛠️](#how-it-works-️)
   - [Installation 💾](#installation-)
   - [Usage](#usage)
-    - [Example](#example)
+    - [Push Mode (`--push`)](#push-mode---push)
+      - [Options](#options)
+      - [Examples](#examples)
+    - [Pull Mode (`--map` and `--envfile`)](#pull-mode---map-and---envfile)
+      - [Options](#options-1)
+      - [Examples](#examples-1)
   - [Working with multiple AWS profiles](#working-with-multiple-aws-profiles)
   - [Sample output 📄](#sample-output-)
   - [Roadmap 🗺️](#roadmap-️)
   - [Contributing 🤝](#contributing-)
   - [License 📄](#license-)
-    - [Import Mode (`--import`)](#import-mode---import)
-      - [Import Mode Usage](#import-mode-usage)
-      - [Import Mode Example](#import-mode-example)
 
 ---
 
@@ -123,9 +125,13 @@ npm install -g envilder
 
 ## Usage
 
-```bash
-envilder --map=<mapping-file> --envfile=<output-file> [--profile=<aws-profile>]
-```
+### Push Mode (`--push`)
+
+Push local `.env` files or single variables back to AWS SSM Parameter Store. This is useful for syncing local environment variables with AWS.
+
+#### Options
+
+**General Options:**
 
 | Option      | Description                                 |
 |-------------|---------------------------------------------|
@@ -133,41 +139,61 @@ envilder --map=<mapping-file> --envfile=<output-file> [--profile=<aws-profile>]
 | `--envfile` | Path to output .env file (required)          |
 | `--profile` | AWS CLI profile to use (optional)            |
 
-### Example
+**Push-Specific Options:**
 
-1. **Create a parameter in AWS SSM Parameter Store using AWS CLI:**
+| Option      | Description                                 |
+|-------------|---------------------------------------------|
+| `--push`    | Enables push mode                           |
+| `--key`     | Single environment variable name to push    |
+| `--value`   | Value of the single environment variable    |
+| `--ssm-path`| SSM path for the single environment variable|
+
+#### Examples
+
+1. **Push a local `.env` file to AWS SSM:**
 
     ```bash
-    aws ssm put-parameter --name "/path/to/ssm/token" --value "my-secret-token-value" --type "SecureString"
-    aws ssm put-parameter --name "/path/to/ssm/password" --value "my-secret-password-value" --type "SecureString"
+    envilder --push --envfile=.env --map=param-map.json
     ```
 
-    You can also create the parameter in a specific profile (for example, `dev-account`):
+2. **Push a single environment variable to AWS SSM:**
 
     ```bash
-    aws ssm put-parameter --name "/path/to/ssm/token" --value "my-secret-token-value" --type "SecureString" --profile dev-account
-    aws ssm put-parameter --name "/path/to/ssm/password" --value "my-secret-password-value" --type "SecureString" --profile dev-account
+    envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path
     ```
 
-2. Create a mapping file `param-map.json`:
+3. **Push a single variable using a specific AWS profile:**
 
-    ```json
-    {
-      "SECRET_TOKEN": "/path/to/ssm/token",
-      "SECRET_KEY": "/path/to/ssm/password"
-    }
+    ```bash
+    envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path --profile=dev-account
     ```
 
-3. Generate your `.env` file:
+---
+
+### Pull Mode (`--map` and `--envfile`)
+
+Generate a `.env` file by pulling environment variables from AWS SSM Parameter Store. This is useful for creating local environment files for development or CI/CD pipelines.
+
+#### Options
+
+| Option      | Description                                 |
+|-------------|---------------------------------------------|
+| `--map`     | Path to JSON mapping file (required)         |
+| `--envfile` | Path to output .env file (required)          |
+| `--profile` | AWS CLI profile to use (optional)            |
+
+#### Examples
+
+1. **Generate a `.env` file from AWS SSM:**
 
     ```bash
     envilder --map=param-map.json --envfile=.env
     ```
 
-4. Watch the video demonstration for detailed guidance:
+2. **Generate a `.env` file using a specific AWS profile:**
 
-    ```plaintext
-    https://github.com/user-attachments/assets/3c4985e6-49e9-4f29-bf1c-130747df0ca6
+    ```bash
+    envilder --map=param-map.json --envfile=.env --profile=dev-account
     ```
 
 ---
@@ -236,51 +262,3 @@ MIT © [Marçal Albert](https://github.com/macalbert).
 See [LICENSE](./LICENSE) for details.
 
 ---
-
-### Import Mode (`--import`)
-
-Push local `.env` files back to AWS SSM Parameter Store. This is useful for syncing local environment variables with AWS.
-
-#### Import Mode Usage
-
-```bash
-envilder --import --envfile=<path-to-env-file> --map=<path-to-mapping-file> [--profile=<aws-profile>]
-```
-
-| Option      | Description                                 |
-|-------------|---------------------------------------------|
-| `--import`  | Enables import mode                         |
-| `--envfile` | Path to the local `.env` file (required)    |
-| `--map`     | Path to JSON mapping file (required)        |
-| `--profile` | AWS CLI profile to use (optional)           |
-
-#### Import Mode Example
-
-1. Create a local `.env` file:
-
-    ```env
-    SECRET_TOKEN=my-secret-token-value
-    SECRET_KEY=my-secret-password-value
-    ```
-
-2. Create a mapping file `param-map.json`:
-
-    ```json
-    {
-      "SECRET_TOKEN": "/path/to/ssm/token",
-      "SECRET_KEY": "/path/to/ssm/password"
-    }
-    ```
-
-3. Push the `.env` file to AWS SSM:
-
-    ```bash
-    envilder --import --envfile=.env --map=param-map.json
-    ```
-
-4. Verify the parameters in AWS SSM Parameter Store:
-
-    ```bash
-    aws ssm get-parameter --name "/path/to/ssm/token"
-    aws ssm get-parameter --name "/path/to/ssm/password"
-    ```
