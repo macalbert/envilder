@@ -42,11 +42,11 @@ Check out this video to learn how to use Envilder:
   - [Installation 💾](#installation-)
   - [Usage](#usage)
     - [Push Mode (`--push`)](#push-mode---push)
-      - [Options](#options)
-      - [Examples](#examples)
+      - [Push Mode Options](#push-mode-options)
+      - [Pull Mode Examples](#pull-mode-examples)
     - [Pull Mode (`--map` and `--envfile`)](#pull-mode---map-and---envfile)
-      - [Options](#options-1)
-      - [Examples](#examples-1)
+      - [Pull Mode Options](#pull-mode-options)
+      - [Examples](#examples)
   - [Working with multiple AWS profiles](#working-with-multiple-aws-profiles)
     - [Pull Mode Example](#pull-mode-example)
     - [Push Mode Example](#push-mode-example)
@@ -129,9 +129,10 @@ npm install -g envilder
 
 ### Push Mode (`--push`)
 
-Push local `.env` files or single variables back to AWS SSM Parameter Store. This is useful for syncing local environment variables with AWS.
+Push local `.env` files or single variables back to AWS SSM Parameter Store.
+This is useful for syncing local environment variables with AWS.
 
-#### Options
+#### Push Mode Options
 
 **General Options:**
 
@@ -150,7 +151,7 @@ Push local `.env` files or single variables back to AWS SSM Parameter Store. Thi
 | `--value`   | Value of the single environment variable    |
 | `--ssm-path`| SSM path for the single environment variable|
 
-#### Examples
+#### Pull Mode Examples
 
 1. **Push a local `.env` file to AWS SSM:**
 
@@ -174,9 +175,10 @@ Push local `.env` files or single variables back to AWS SSM Parameter Store. Thi
 
 ### Pull Mode (`--map` and `--envfile`)
 
-Generate a `.env` file by pulling environment variables from AWS SSM Parameter Store. This is useful for creating local environment files for development or CI/CD pipelines.
+Generate a `.env` file by pulling environment variables from AWS SSM Parameter Store.
+This is useful for creating local environment files for development or CI/CD pipelines.
 
-#### Options
+#### Pull Mode Options
 
 | Option      | Description                                 |
 |-------------|---------------------------------------------|
