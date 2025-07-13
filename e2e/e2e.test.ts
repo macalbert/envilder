@@ -108,7 +108,7 @@ describe('Envilder (E2E)', () => {
       string,
       string
     >;
-    
+
     for (const [, ssmPath] of Object.entries(ssmParams)) {
       await DeleteParameterSsm(ssmPath);
     }
