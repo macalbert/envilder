@@ -54,15 +54,18 @@ export class PushEnvToSsmCommandHandler {
   ): Promise<void> {
     const { paramMap, envVariables } = config;
 
-    // For large parameter sets, consider using controlled parallel processing
-    for (const [envKey, ssmPath] of Object.entries(paramMap)) {
-      await this.processVariable(
-        envKey,
-        ssmPath,
-        envVariables,
-        command.envFilePath,
-      );
-    }
+    const variableProcessingPromises = Object.entries(paramMap).map(
+      ([envKey, ssmPath]) => {
+        return this.processVariable(
+          envKey,
+          ssmPath,
+          envVariables,
+          command.envFilePath,
+        );
+      },
+    );
+
+    await Promise.all(variableProcessingPromises);
   }
 
   private async processVariable(

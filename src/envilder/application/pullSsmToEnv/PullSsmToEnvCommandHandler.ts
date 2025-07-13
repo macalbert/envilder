@@ -73,17 +73,16 @@ export class PullSsmToEnvCommandHandler {
     paramMap: Record<string, string>,
     existingEnvVariables: Record<string, string>,
   ): Promise<Record<string, string>> {
-    const errors: string[] = [];
-    for (const [envVar, secretName] of Object.entries(paramMap)) {
-      const error = await this.processSecret(
-        envVar,
-        secretName,
-        existingEnvVariables,
-      );
-      if (error) {
-        errors.push(error);
-      }
-    }
+    const secretProcessingPromises = Object.entries(paramMap).map(
+      async ([envVar, secretName]) => {
+        return this.processSecret(envVar, secretName, existingEnvVariables);
+      },
+    );
+
+    const results = await Promise.all(secretProcessingPromises);
+
+    const errors = results.filter((error) => error !== null) as string[];
+
     if (errors.length > 0) {
       throw new Error(
         `${PullSsmToEnvCommandHandler.ERROR_MESSAGES.PARAM_NOT_FOUND}${errors.join('\n')}`,
