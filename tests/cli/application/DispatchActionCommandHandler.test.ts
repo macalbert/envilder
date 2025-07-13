@@ -1,10 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  type CliOptions,
-  DispatchActionCommandHandler,
-  OperationMode,
-} from '../../../src/cli/application/DispatchActionCommandHandler.js';
+import { DispatchActionCommandHandler } from '../../../src/cli/application/DispatchActionCommandHandler.js';
 import type { Envilder } from '../../../src/cli/application/EnvilderHandler.js';
+import { DispatchActionCommand } from '../../../src/cli/domain/commands/DispatchActionCommand.js';
+import { OperationMode } from '../../../src/cli/domain/OperationMode.js';
 
 // Create mock Envilder object as a partial implementation
 const mockEnvilder = {
@@ -27,13 +25,19 @@ describe('DispatchActionCommandHandler', () => {
   it('Should_CallExportSsmToEnv_When_ExportSsmToEnvModeIsProvided', async () => {
     // Arrange
     const handler = new DispatchActionCommandHandler(mockEnvilder);
-    const options: CliOptions = {
-      map: 'path/to/map.json',
-      envfile: 'path/to/.env',
-    };
+    const command = new DispatchActionCommand(
+      'path/to/map.json',
+      'path/to/.env',
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      false,
+      OperationMode.EXPORT_SSM_TO_ENV,
+    );
 
     // Act
-    await handler.handleCommand(options, OperationMode.EXPORT_SSM_TO_ENV);
+    await handler.handleCommand(command);
 
     // Assert
     expect(mockEnvilder.run).toHaveBeenCalledWith(
@@ -45,14 +49,19 @@ describe('DispatchActionCommandHandler', () => {
   it('Should_CallImportEnvToSsm_When_ImportEnvToSsmModeIsProvided', async () => {
     // Arrange
     const handler = new DispatchActionCommandHandler(mockEnvilder);
-    const options: CliOptions = {
-      map: 'path/to/map.json',
-      envfile: 'path/to/.env',
-      import: true,
-    };
+    const command = new DispatchActionCommand(
+      'path/to/map.json',
+      'path/to/.env',
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      true,
+      OperationMode.IMPORT_ENV_TO_SSM,
+    );
 
     // Act
-    await handler.handleCommand(options, OperationMode.IMPORT_ENV_TO_SSM);
+    await handler.handleCommand(command);
 
     // Assert
     expect(mockEnvilder.importEnvFile).toHaveBeenCalledWith(
@@ -64,14 +73,19 @@ describe('DispatchActionCommandHandler', () => {
   it('Should_CallPushSingleVariableToSSM_When_PushSingleVariableModeIsProvided', async () => {
     // Arrange
     const handler = new DispatchActionCommandHandler(mockEnvilder);
-    const options: CliOptions = {
-      key: 'TEST_KEY',
-      value: 'test-value',
-      ssmPath: '/test/path',
-    };
+    const command = new DispatchActionCommand(
+      undefined,
+      undefined,
+      'TEST_KEY',
+      'test-value',
+      '/test/path',
+      undefined,
+      undefined,
+      OperationMode.PUSH_SINGLE_VARIABLE,
+    );
 
     // Act
-    await handler.handleCommand(options, OperationMode.PUSH_SINGLE_VARIABLE);
+    await handler.handleCommand(command);
 
     // Assert
     expect(mockEnvilder.pushSingleVariableToSSM).toHaveBeenCalledWith(
@@ -84,11 +98,19 @@ describe('DispatchActionCommandHandler', () => {
   it('Should_ThrowError_When_MapAndEnvfileAreMissingForExportMode', async () => {
     // Arrange
     const handler = new DispatchActionCommandHandler(mockEnvilder);
-    const options: CliOptions = {};
+    const command = new DispatchActionCommand(
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      OperationMode.IMPORT_ENV_TO_SSM,
+    );
 
     // Act
-    const action = () =>
-      handler.handleCommand(options, OperationMode.IMPORT_ENV_TO_SSM);
+    const action = () => handler.handleCommand(command);
 
     // Assert
     await expect(action).rejects.toThrow(
@@ -99,11 +121,19 @@ describe('DispatchActionCommandHandler', () => {
   it('Should_ThrowError_When_MapAndEnvfileAreMissingForImportMode', async () => {
     // Arrange
     const handler = new DispatchActionCommandHandler(mockEnvilder);
-    const options: CliOptions = { import: true };
+    const command = new DispatchActionCommand(
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      true,
+      OperationMode.IMPORT_ENV_TO_SSM,
+    );
 
     // Act
-    const action = () =>
-      handler.handleCommand(options, OperationMode.IMPORT_ENV_TO_SSM);
+    const action = () => handler.handleCommand(command);
 
     // Assert
     await expect(action).rejects.toThrow(

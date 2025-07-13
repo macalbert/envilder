@@ -1,64 +1,57 @@
-// Import the Envilder type
+// Import the Envilder type and OperationMode from domain
+
+import type { DispatchActionCommand } from '../domain/commands/DispatchActionCommand.js';
+import { OperationMode } from '../domain/OperationMode.js';
 import type { Envilder } from './EnvilderHandler.js';
-
-export interface CliOptions {
-  map?: string;
-  envfile?: string;
-  key?: string;
-  value?: string;
-  ssmPath?: string;
-  profile?: string;
-  import?: boolean;
-}
-
-export enum OperationMode {
-  PUSH_SINGLE_VARIABLE = 'PUSH_SINGLE_VARIABLE',
-  IMPORT_ENV_TO_SSM = 'IMPORT_ENV_TO_SSM',
-  EXPORT_SSM_TO_ENV = 'EXPORT_SSM_TO_ENV',
-}
 
 export class DispatchActionCommandHandler {
   constructor(private readonly envilder: Envilder) {}
 
-  async handleCommand(options: CliOptions, mode: OperationMode): Promise<void> {
-    switch (mode) {
+  async handleCommand(command: DispatchActionCommand): Promise<void> {
+    switch (command.mode) {
       case OperationMode.PUSH_SINGLE_VARIABLE:
-        await this.handlePushSingleVariable(options);
+        await this.handlePushSingleVariable(command);
         break;
       case OperationMode.IMPORT_ENV_TO_SSM:
-        await this.handleImportEnvToSsm(options);
+        await this.handleImportEnvToSsm(command);
         break;
       case OperationMode.EXPORT_SSM_TO_ENV:
-        await this.handleExportSsmToEnv(options);
+        await this.handleExportSsmToEnv(command);
         break;
     }
   }
 
-  private async handlePushSingleVariable(options: CliOptions): Promise<void> {
+  private async handlePushSingleVariable(
+    command: DispatchActionCommand,
+  ): Promise<void> {
     await this.envilder.pushSingleVariableToSSM(
-      options.key as string,
-      options.value as string,
-      options.ssmPath as string,
+      command.key as string,
+      command.value as string,
+      command.ssmPath as string,
     );
   }
 
-  private async handleImportEnvToSsm(options: CliOptions): Promise<void> {
-    this.validateMapAndEnvFileOptions(options);
+  private async handleImportEnvToSsm(
+    command: DispatchActionCommand,
+  ): Promise<void> {
+    this.validateMapAndEnvFileOptions(command);
 
     await this.envilder.importEnvFile(
-      options.map as string,
-      options.envfile as string,
+      command.map as string,
+      command.envfile as string,
     );
   }
 
-  private async handleExportSsmToEnv(options: CliOptions): Promise<void> {
-    this.validateMapAndEnvFileOptions(options);
+  private async handleExportSsmToEnv(
+    command: DispatchActionCommand,
+  ): Promise<void> {
+    this.validateMapAndEnvFileOptions(command);
 
-    await this.envilder.run(options.map as string, options.envfile as string);
+    await this.envilder.run(command.map as string, command.envfile as string);
   }
 
-  private validateMapAndEnvFileOptions(options: CliOptions): void {
-    if (!options.map || !options.envfile) {
+  private validateMapAndEnvFileOptions(command: DispatchActionCommand): void {
+    if (!command.map || !command.envfile) {
       throw new Error('Missing required arguments: --map and --envfile');
     }
   }

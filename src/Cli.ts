@@ -3,25 +3,20 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import { EnvilderBuilder } from './cli/application/builders/EnvilderBuilder.js';
-import {
-  type CliOptions,
-  DispatchActionCommandHandler,
-  OperationMode,
-} from './cli/application/DispatchActionCommandHandler.js';
+import { DispatchActionCommandHandler } from './cli/application/DispatchActionCommandHandler.js';
+import { DispatchActionCommand } from './cli/domain/commands/DispatchActionCommand.js';
 import { ConsoleLogger } from './cli/infrastructure/ConsoleLogger.js';
 import { PackageJsonFinder } from './cli/infrastructure/PackageJsonFinder.js';
 
-function determineOperationMode(options: CliOptions): OperationMode {
-  if (options.key && options.value && options.ssmPath) {
-    return OperationMode.PUSH_SINGLE_VARIABLE;
-  }
-
-  if (options.import) {
-    return OperationMode.IMPORT_ENV_TO_SSM;
-  }
-
-  return OperationMode.EXPORT_SSM_TO_ENV;
-}
+type CliOptions = {
+  map?: string;
+  envfile?: string;
+  key?: string;
+  value?: string;
+  ssmPath?: string;
+  profile?: string;
+  import?: boolean;
+};
 
 async function executeCommand(options: CliOptions): Promise<void> {
   const envilder = EnvilderBuilder.build()
@@ -30,9 +25,9 @@ async function executeCommand(options: CliOptions): Promise<void> {
     .withAwsProvider(options.profile)
     .create();
 
+  const command = DispatchActionCommand.fromCliOptions(options);
   const commandHandler = new DispatchActionCommandHandler(envilder);
-  const mode = determineOperationMode(options);
-  await commandHandler.handleCommand(options, mode);
+  await commandHandler.handleCommand(command);
 }
 
 export async function main() {
