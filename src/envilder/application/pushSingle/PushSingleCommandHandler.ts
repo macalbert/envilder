@@ -1,19 +1,19 @@
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
-import type { PushSingleVariableCommand } from './PushSingleVariableCommand.js';
+import type { PushSingleCommand } from './PushSingleCommand.js';
 
-export class PushSingleVariableCommandHandler {
+export class PushSingleCommandHandler {
   constructor(
     private readonly secretProvider: ISecretProvider,
     private readonly logger: ILogger,
   ) {}
 
   /**
-   * Handles the PushSingleVariableCommand which pushes a single environment variable to AWS SSM.
+   * Handles the PushSingleCommand which pushes a single environment variable to AWS SSM.
    *
-   * @param command - The PushSingleVariableCommand containing key, value and ssmPath
+   * @param command - The PushSingleCommand containing key, value and ssmPath
    */
-  async handle(command: PushSingleVariableCommand): Promise<void> {
+  async handle(command: PushSingleCommand): Promise<void> {
     try {
       await this.secretProvider.setSecret(command.ssmPath, command.value);
       this.logger.info(

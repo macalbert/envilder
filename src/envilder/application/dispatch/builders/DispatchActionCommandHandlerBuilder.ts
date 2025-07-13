@@ -2,9 +2,9 @@ import { DependencyMissingError } from '../../../domain/errors/DomainErrors.js';
 import type { IEnvFileManager } from '../../../domain/ports/IEnvFileManager.js';
 import type { ILogger } from '../../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../../domain/ports/ISecretProvider.js';
-import { ExportSsmToEnvCommandHandler } from '../../exportSsmToEnv/ExportSsmToEnvCommandHandler.js';
+import { PullSsmToEnvCommandHandler } from '../../pullSsmToEnv/PullSsmToEnvCommandHandler.js';
 import { PushEnvToSsmCommandHandler } from '../../pushEnvToSsm/PushEnvToSsmCommandHandler.js';
-import { PushSingleVariableCommandHandler } from '../../pushSingleVariable/PushSingleVariableCommandHandler.js';
+import { PushSingleCommandHandler } from '../../pushSingle/PushSingleCommandHandler.js';
 import { DispatchActionCommandHandler } from '../DispatchActionCommandHandler.js';
 
 export class DispatchActionCommandHandlerBuilder {
@@ -46,7 +46,7 @@ export class DispatchActionCommandHandlerBuilder {
       throw new DependencyMissingError('Logger is required');
     }
 
-    const exportSsmToEnvCommandHandler = new ExportSsmToEnvCommandHandler(
+    const pullSsmToEnvCommandHandler = new PullSsmToEnvCommandHandler(
       this.secretProvider,
       this.envFileManager,
       this.logger,
@@ -58,13 +58,15 @@ export class DispatchActionCommandHandlerBuilder {
       this.logger,
     );
 
-    const pushSingleVariableCommandHandler =
-      new PushSingleVariableCommandHandler(this.secretProvider, this.logger);
+    const pushSingleCommandHandler = new PushSingleCommandHandler(
+      this.secretProvider,
+      this.logger,
+    );
 
     return new DispatchActionCommandHandler(
-      exportSsmToEnvCommandHandler,
+      pullSsmToEnvCommandHandler,
       pushEnvToSsmCommandHandler,
-      pushSingleVariableCommandHandler,
+      pushSingleCommandHandler,
     );
   }
 }

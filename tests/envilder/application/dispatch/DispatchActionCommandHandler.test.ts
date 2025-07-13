@@ -1,35 +1,35 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DispatchActionCommand } from '../../../../src/envilder/application/dispatch/DispatchActionCommand';
 import { DispatchActionCommandHandler } from '../../../../src/envilder/application/dispatch/DispatchActionCommandHandler';
-import type { ExportSsmToEnvCommandHandler } from '../../../../src/envilder/application/exportSsmToEnv/ExportSsmToEnvCommandHandler';
+import type { PullSsmToEnvCommandHandler } from '../../../../src/envilder/application/pullSsmToEnv/PullSsmToEnvCommandHandler';
 import type { PushEnvToSsmCommandHandler } from '../../../../src/envilder/application/pushEnvToSsm/PushEnvToSsmCommandHandler';
-import type { PushSingleVariableCommandHandler } from '../../../../src/envilder/application/pushSingleVariable/PushSingleVariableCommandHandler';
+import type { PushSingleCommandHandler } from '../../../../src/envilder/application/pushSingle/PushSingleCommandHandler';
 import { OperationMode } from '../../../../src/envilder/domain/OperationMode';
 
-const mockExportSsmToEnvCommandHandler = {
+const mockPullSsmToEnvCommandHandler = {
   handle: vi.fn(),
-} as unknown as ExportSsmToEnvCommandHandler;
+} as unknown as PullSsmToEnvCommandHandler;
 
 const mockPushEnvToSsmCommandHandler = {
   handle: vi.fn(),
 } as unknown as PushEnvToSsmCommandHandler;
 
-const mockPushSingleVariableCommandHandler = {
+const mockPushSingleCommandHandler = {
   handle: vi.fn(),
-} as unknown as PushSingleVariableCommandHandler;
+} as unknown as PushSingleCommandHandler;
 
 describe('DispatchActionCommandHandler', () => {
   const sut = new DispatchActionCommandHandler(
-    mockExportSsmToEnvCommandHandler,
+    mockPullSsmToEnvCommandHandler,
     mockPushEnvToSsmCommandHandler,
-    mockPushSingleVariableCommandHandler,
+    mockPushSingleCommandHandler,
   );
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('Should_CallExportSsmToEnv_When_ExportSsmToEnvModeIsProvided', async () => {
+  it('Should_CallPullSsmToEnv_When_PullSsmToEnvModeIsProvided', async () => {
     // Arrange
     const command = new DispatchActionCommand(
       'path/to/map.json',
@@ -38,18 +38,17 @@ describe('DispatchActionCommandHandler', () => {
       undefined,
       undefined,
       undefined,
-      false,
-      OperationMode.EXPORT_SSM_TO_ENV,
+      OperationMode.PULL_SSM_TO_ENV,
     );
 
     // Act
     await sut.handleCommand(command);
 
     // Assert
-    expect(mockExportSsmToEnvCommandHandler.handle).toHaveBeenCalled();
+    expect(mockPullSsmToEnvCommandHandler.handle).toHaveBeenCalled();
   });
 
-  it('Should_CallImportEnvToSsm_When_ImportEnvToSsmModeIsProvided', async () => {
+  it('Should_CallPushEnvToSsm_When_PushEnvToSsmModeIsProvided', async () => {
     // Arrange
     const command = new DispatchActionCommand(
       'path/to/map.json',
@@ -57,9 +56,7 @@ describe('DispatchActionCommandHandler', () => {
       undefined,
       undefined,
       undefined,
-      undefined,
-      true,
-      OperationMode.IMPORT_ENV_TO_SSM,
+      OperationMode.PUSH_ENV_TO_SSM,
     );
 
     // Act
@@ -69,7 +66,7 @@ describe('DispatchActionCommandHandler', () => {
     expect(mockPushEnvToSsmCommandHandler.handle).toHaveBeenCalled();
   });
 
-  it('Should_CallPushSingleVariableToSSM_When_PushSingleVariableModeIsProvided', async () => {
+  it('Should_CallPushSingleToSSM_When_PushSingleModeIsProvided', async () => {
     // Arrange
     const command = new DispatchActionCommand(
       undefined,
@@ -77,16 +74,14 @@ describe('DispatchActionCommandHandler', () => {
       'TEST_KEY',
       'test-value',
       '/test/path',
-      undefined,
-      undefined,
-      OperationMode.PUSH_SINGLE_VARIABLE,
+      OperationMode.PUSH_SINGLE,
     );
 
     // Act
     await sut.handleCommand(command);
 
     // Assert
-    expect(mockPushSingleVariableCommandHandler.handle).toHaveBeenCalled();
+    expect(mockPushSingleCommandHandler.handle).toHaveBeenCalled();
   });
 
   it('Should_ThrowError_When_MapAndEnvfileAreMissingForExportMode', async () => {
@@ -97,9 +92,7 @@ describe('DispatchActionCommandHandler', () => {
       undefined,
       undefined,
       undefined,
-      undefined,
-      undefined,
-      OperationMode.IMPORT_ENV_TO_SSM,
+      OperationMode.PUSH_ENV_TO_SSM,
     );
 
     // Act
@@ -119,9 +112,7 @@ describe('DispatchActionCommandHandler', () => {
       undefined,
       undefined,
       undefined,
-      undefined,
-      true,
-      OperationMode.IMPORT_ENV_TO_SSM,
+      OperationMode.PUSH_ENV_TO_SSM,
     );
 
     // Act
@@ -131,5 +122,23 @@ describe('DispatchActionCommandHandler', () => {
     await expect(action).rejects.toThrow(
       'Missing required arguments: --map and --envfile',
     );
+  });
+
+  it('Should_CallPushEnvToSsm_When_PushFlagIsProvided', async () => {
+    // Arrange
+    const command = new DispatchActionCommand(
+      'path/to/map.json',
+      'path/to/.env',
+      undefined,
+      undefined,
+      undefined,
+      OperationMode.PUSH_ENV_TO_SSM,
+    );
+
+    // Act
+    await sut.handleCommand(command);
+
+    // Assert
+    expect(mockPushEnvToSsmCommandHandler.handle).toHaveBeenCalledWith(command);
   });
 });

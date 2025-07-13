@@ -33,7 +33,7 @@ export type CliOptions = {
   profile?: string;
 
   /**
-   * Flag to push local .env file back to AWS SSM
+   * Flag to push local .env file back to AWS SSM (renamed from import)
    */
-  import?: boolean;
+  push?: boolean;
 };

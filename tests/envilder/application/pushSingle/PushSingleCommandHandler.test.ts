@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PushSingleVariableCommand } from '../../../../src/envilder/application/pushSingleVariable/PushSingleVariableCommand';
-import { PushSingleVariableCommandHandler } from '../../../../src/envilder/application/pushSingleVariable/PushSingleVariableCommandHandler';
+import { PushSingleCommand } from '../../../../src/envilder/application/pushSingle/PushSingleCommand';
+import { PushSingleCommandHandler } from '../../../../src/envilder/application/pushSingle/PushSingleCommandHandler';
 import type { ILogger } from '../../../../src/envilder/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../../src/envilder/domain/ports/ISecretProvider';
 
@@ -25,7 +25,7 @@ function createMocks(throwError = false) {
   return { mockSecretProvider, mockLogger, mockError };
 }
 
-describe('PushSingleVariableCommandHandler', () => {
+describe('PushSingleCommandHandler', () => {
   let mocks: ReturnType<typeof createMocks>;
 
   beforeEach(() => {
@@ -34,7 +34,7 @@ describe('PushSingleVariableCommandHandler', () => {
 
   it('Should_SetSecret_When_PushingSingleVariable', async () => {
     // Arrange
-    const sut = new PushSingleVariableCommandHandler(
+    const sut = new PushSingleCommandHandler(
       mocks.mockSecretProvider,
       mocks.mockLogger,
     );
@@ -42,7 +42,7 @@ describe('PushSingleVariableCommandHandler', () => {
     const key = 'TEST_VAR';
     const value = 'test-value';
     const ssmPath = '/path/to/ssm/test';
-    const command = PushSingleVariableCommand.create(key, value, ssmPath);
+    const command = PushSingleCommand.create(key, value, ssmPath);
 
     // Act
     await sut.handle(command);
@@ -61,7 +61,7 @@ describe('PushSingleVariableCommandHandler', () => {
     // Arrange
     const errorMocks = createMocks(true);
 
-    const sut = new PushSingleVariableCommandHandler(
+    const sut = new PushSingleCommandHandler(
       errorMocks.mockSecretProvider,
       errorMocks.mockLogger,
     );
@@ -69,7 +69,7 @@ describe('PushSingleVariableCommandHandler', () => {
     const key = 'TEST_VAR';
     const value = 'test-value';
     const ssmPath = '/path/to/ssm/test';
-    const command = PushSingleVariableCommand.create(key, value, ssmPath);
+    const command = PushSingleCommand.create(key, value, ssmPath);
 
     // Act
     const action = () => sut.handle(command);

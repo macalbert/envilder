@@ -9,8 +9,7 @@ export class DispatchActionCommand {
     public readonly value?: string,
     public readonly ssmPath?: string,
     public readonly profile?: string,
-    public readonly importEnv?: boolean,
-    public readonly mode: OperationMode = OperationMode.EXPORT_SSM_TO_ENV,
+    public readonly mode: OperationMode = OperationMode.PULL_SSM_TO_ENV,
   ) {}
 
   static fromCliOptions(options: CliOptions): DispatchActionCommand {
@@ -22,20 +21,19 @@ export class DispatchActionCommand {
       options.value,
       options.ssmPath,
       options.profile,
-      options.import,
       mode,
     );
   }
 
   private static determineOperationMode(options: CliOptions): OperationMode {
     if (options.key && options.value && options.ssmPath) {
-      return OperationMode.PUSH_SINGLE_VARIABLE;
+      return OperationMode.PUSH_SINGLE;
     }
 
-    if (options.import) {
-      return OperationMode.IMPORT_ENV_TO_SSM;
+    if (options.push) {
+      return OperationMode.PUSH_ENV_TO_SSM;
     }
 
-    return OperationMode.EXPORT_SSM_TO_ENV;
+    return OperationMode.PULL_SSM_TO_ENV;
   }
 }

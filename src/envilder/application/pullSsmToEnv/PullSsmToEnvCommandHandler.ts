@@ -2,9 +2,9 @@ import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
 import type { IEnvFileManager } from '../../domain/ports/IEnvFileManager.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
-import type { ExportSsmToEnvCommand } from './ExportSsmToEnvCommand.js';
+import type { PullSsmToEnvCommand } from './PullSsmToEnvCommand.js';
 
-export class ExportSsmToEnvCommandHandler {
+export class PullSsmToEnvCommandHandler {
   private static readonly ERROR_MESSAGES = {
     FETCH_FAILED: 'Failed to generate environment file: ',
     PARAM_NOT_FOUND: 'Some parameters could not be fetched:\n',
@@ -23,12 +23,12 @@ export class ExportSsmToEnvCommandHandler {
   ) {}
 
   /**
-   * Handles the ExportSsmToEnvCommand which orchestrates the process of fetching
+   * Handles the PullSsmToEnvCommand which orchestrates the process of fetching
    * environment variable values from a key vault and writing them to a local environment file.
    *
-   * @param command - The ExportSsmToEnvCommand containing mapPath and envFilePath
+   * @param command - The PullSsmToEnvCommand containing mapPath and envFilePath
    */
-  async handle(command: ExportSsmToEnvCommand): Promise<void> {
+  async handle(command: PullSsmToEnvCommand): Promise<void> {
     try {
       const { requestVariables, currentVariables } =
         await this.loadVariables(command);
@@ -36,19 +36,19 @@ export class ExportSsmToEnvCommandHandler {
       await this.saveEnvFile(command.envFilePath, envilded);
 
       this.logger.info(
-        `${ExportSsmToEnvCommandHandler.SUCCESS_MESSAGES.ENV_GENERATED}'${command.envFilePath}'`,
+        `${PullSsmToEnvCommandHandler.SUCCESS_MESSAGES.ENV_GENERATED}'${command.envFilePath}'`,
       );
     } catch (_error) {
       const errorMessage =
         _error instanceof Error ? _error.message : String(_error);
       this.logger.error(
-        `${ExportSsmToEnvCommandHandler.ERROR_MESSAGES.FETCH_FAILED}${errorMessage}`,
+        `${PullSsmToEnvCommandHandler.ERROR_MESSAGES.FETCH_FAILED}${errorMessage}`,
       );
       throw _error;
     }
   }
 
-  private async loadVariables(command: ExportSsmToEnvCommand): Promise<{
+  private async loadVariables(command: PullSsmToEnvCommand): Promise<{
     requestVariables: Record<string, string>;
     currentVariables: Record<string, string>;
   }> {
@@ -86,7 +86,7 @@ export class ExportSsmToEnvCommandHandler {
     }
     if (errors.length > 0) {
       throw new Error(
-        `${ExportSsmToEnvCommandHandler.ERROR_MESSAGES.PARAM_NOT_FOUND}${errors.join('\n')}`,
+        `${PullSsmToEnvCommandHandler.ERROR_MESSAGES.PARAM_NOT_FOUND}${errors.join('\n')}`,
       );
     }
     return existingEnvVariables;
@@ -101,7 +101,7 @@ export class ExportSsmToEnvCommandHandler {
       const value = await this.secretProvider.getSecret(secretName);
       if (!value) {
         this.logger.warn(
-          `${ExportSsmToEnvCommandHandler.ERROR_MESSAGES.NO_VALUE_FOUND}'${secretName}'`,
+          `${PullSsmToEnvCommandHandler.ERROR_MESSAGES.NO_VALUE_FOUND}'${secretName}'`,
         );
         return null;
       }
@@ -116,7 +116,7 @@ export class ExportSsmToEnvCommandHandler {
       return null;
     } catch (_error) {
       this.logger.error(
-        `${ExportSsmToEnvCommandHandler.ERROR_MESSAGES.ERROR_FETCHING}'${secretName}'`,
+        `${PullSsmToEnvCommandHandler.ERROR_MESSAGES.ERROR_FETCHING}'${secretName}'`,
       );
       return `ParameterNotFound: ${secretName}`;
     }

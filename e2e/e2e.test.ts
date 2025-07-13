@@ -120,7 +120,7 @@ describe('Envilder (E2E)', () => {
     }
   });
 
-  it('Should_PushSingleVariable_When_KeyValueAndSsmPathProvided', async () => {
+  it('Should_PushSingle_When_KeyValueAndSsmPathProvided', async () => {
     // Arrange
     const key = 'SINGLE_VARIABLE';
     const value = 'single-value-test';

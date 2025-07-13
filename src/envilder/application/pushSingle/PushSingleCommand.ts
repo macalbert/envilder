@@ -1,4 +1,4 @@
-export class PushSingleVariableCommand {
+export class PushSingleCommand {
   constructor(
     public readonly key: string,
     public readonly value: string,
@@ -9,7 +9,7 @@ export class PushSingleVariableCommand {
     key: string,
     value: string,
     ssmPath: string,
-  ): PushSingleVariableCommand {
-    return new PushSingleVariableCommand(key, value, ssmPath);
+  ): PushSingleCommand {
+    return new PushSingleCommand(key, value, ssmPath);
   }
 }

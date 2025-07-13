@@ -8,8 +8,8 @@ import {
   type Mock,
   vi,
 } from 'vitest';
-import { ExportSsmToEnvCommand } from '../../../../src/envilder/application/exportSsmToEnv/ExportSsmToEnvCommand';
-import { ExportSsmToEnvCommandHandler } from '../../../../src/envilder/application/exportSsmToEnv/ExportSsmToEnvCommandHandler';
+import { PullSsmToEnvCommand } from '../../../../src/envilder/application/pullSsmToEnv/PullSsmToEnvCommand';
+import { PullSsmToEnvCommandHandler } from '../../../../src/envilder/application/pullSsmToEnv/PullSsmToEnvCommandHandler';
 import type { IEnvFileManager } from '../../../../src/envilder/domain/ports/IEnvFileManager';
 import type { ILogger } from '../../../../src/envilder/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../../src/envilder/domain/ports/ISecretProvider';
@@ -20,7 +20,7 @@ const testValues: Record<string, string> = {
   '/path/to/ssm/password_no_value': '',
 };
 
-describe('ExportSsmToEnvCommandHandler', () => {
+describe('PullSsmToEnvCommandHandler', () => {
   let mockSecretProvider: ISecretProvider;
   let mockEnvFileManager: IEnvFileManager & {
     loadMapFile: Mock;
@@ -28,7 +28,7 @@ describe('ExportSsmToEnvCommandHandler', () => {
     saveEnvFile: Mock;
   };
   let mockLogger: ILogger;
-  let sut: ExportSsmToEnvCommandHandler;
+  let sut: PullSsmToEnvCommandHandler;
 
   const mockMapPath = './tests/param-map.json';
   const mockEnvFilePath = './tests/env-file.env';
@@ -56,7 +56,7 @@ describe('ExportSsmToEnvCommandHandler', () => {
       error: vi.fn(),
     };
 
-    sut = new ExportSsmToEnvCommandHandler(
+    sut = new PullSsmToEnvCommandHandler(
       mockSecretProvider,
       mockEnvFileManager,
       mockLogger,
@@ -86,7 +86,7 @@ describe('ExportSsmToEnvCommandHandler', () => {
     mockEnvFileManager.loadMapFile.mockResolvedValue(paramMapContent);
     mockEnvFileManager.loadEnvFile.mockResolvedValue({});
 
-    const command = ExportSsmToEnvCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PullSsmToEnvCommand.create(mockMapPath, mockEnvFilePath);
 
     // Act
     await sut.handle(command);
@@ -125,7 +125,7 @@ describe('ExportSsmToEnvCommandHandler', () => {
     mockEnvFileManager.loadMapFile.mockResolvedValue(paramMapContent);
     mockEnvFileManager.loadEnvFile.mockResolvedValue({});
 
-    const command = ExportSsmToEnvCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PullSsmToEnvCommand.create(mockMapPath, mockEnvFilePath);
 
     // Act
     const action = () => sut.handle(command);
@@ -149,7 +149,7 @@ describe('ExportSsmToEnvCommandHandler', () => {
     mockEnvFileManager.loadMapFile.mockResolvedValue(paramMapContent);
     mockEnvFileManager.loadEnvFile.mockResolvedValue({});
 
-    const command = ExportSsmToEnvCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PullSsmToEnvCommand.create(mockMapPath, mockEnvFilePath);
 
     // Act
     await sut.handle(command);
@@ -170,7 +170,7 @@ describe('ExportSsmToEnvCommandHandler', () => {
     mockEnvFileManager.loadMapFile.mockResolvedValue(paramMapContent);
     mockEnvFileManager.loadEnvFile.mockResolvedValue({});
 
-    const command = ExportSsmToEnvCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PullSsmToEnvCommand.create(mockMapPath, mockEnvFilePath);
 
     // Act
     await sut.handle(command);
