@@ -5,7 +5,7 @@ import type { ExportSsmToEnvCommand } from './ExportSsmToEnvCommand.js';
 
 export class ExportSsmToEnvCommandHandler {
   constructor(
-    private readonly keyVault: ISecretProvider,
+    private readonly secretProvider: ISecretProvider,
     private readonly envFileManager: IEnvFileManager,
     private readonly logger: ILogger,
   ) {}
@@ -69,7 +69,7 @@ export class ExportSsmToEnvCommandHandler {
     existingEnvVariables: Record<string, string>,
   ): Promise<string | null> {
     try {
-      const value = await this.keyVault.getSecret(secretName);
+      const value = await this.secretProvider.getSecret(secretName);
       if (!value) {
         this.logger.warn(`Warning: No value found for: '${secretName}'`);
         return null;

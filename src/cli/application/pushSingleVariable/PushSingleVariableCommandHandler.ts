@@ -4,7 +4,7 @@ import type { PushSingleVariableCommand } from './PushSingleVariableCommand.js';
 
 export class PushSingleVariableCommandHandler {
   constructor(
-    private readonly keyVault: ISecretProvider,
+    private readonly secretProvider: ISecretProvider,
     private readonly logger: ILogger,
   ) {}
 
@@ -15,7 +15,7 @@ export class PushSingleVariableCommandHandler {
    */
   async handle(command: PushSingleVariableCommand): Promise<void> {
     try {
-      await this.keyVault.setSecret(command.ssmPath, command.value);
+      await this.secretProvider.setSecret(command.ssmPath, command.value);
       this.logger.info(
         `Pushed ${command.key} to AWS SSM at path ${command.ssmPath}`,
       );
