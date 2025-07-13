@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import { ImportEnvToSsmCommand } from '../../../../src/envilder/application/importEnvToSsm/ImportEnvToSsmCommand';
-import { ImportEnvToSsmCommandHandler } from '../../../../src/envilder/application/importEnvToSsm/ImportEnvToSsmCommandHandler';
+import { PushEnvToSsmCommandHandler } from '../../../../src/envilder/application/importEnvToSsm/PushEnvToSsmCommandHandler';
 import type { IEnvFileManager } from '../../../../src/envilder/domain/ports/IEnvFileManager';
 import type { ILogger } from '../../../../src/envilder/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../../src/envilder/domain/ports/ISecretProvider';
 
-describe('ImportEnvToSsmCommandHandler', () => {
+describe('PushEnvToSsmCommandHandler', () => {
   let mockSecretProvider: ISecretProvider;
   let mockEnvFileManager: IEnvFileManager & {
     loadMapFile: Mock;
@@ -13,7 +13,7 @@ describe('ImportEnvToSsmCommandHandler', () => {
     saveEnvFile: Mock;
   };
   let mockLogger: ILogger;
-  let sut: ImportEnvToSsmCommandHandler;
+  let sut: PushEnvToSsmCommandHandler;
 
   const mockMapPath = 'map-path.json';
   const mockEnvFilePath = 'env-file.env';
@@ -36,7 +36,7 @@ describe('ImportEnvToSsmCommandHandler', () => {
       error: vi.fn(),
     };
 
-    sut = new ImportEnvToSsmCommandHandler(
+    sut = new PushEnvToSsmCommandHandler(
       mockSecretProvider,
       mockEnvFileManager,
       mockLogger,

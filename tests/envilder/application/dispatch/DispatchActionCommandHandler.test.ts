@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DispatchActionCommand } from '../../../../src/envilder/application/dispatch/DispatchActionCommand';
 import { DispatchActionCommandHandler } from '../../../../src/envilder/application/dispatch/DispatchActionCommandHandler';
 import type { ExportSsmToEnvCommandHandler } from '../../../../src/envilder/application/exportSsmToEnv/ExportSsmToEnvCommandHandler';
-import type { ImportEnvToSsmCommandHandler } from '../../../../src/envilder/application/importEnvToSsm/ImportEnvToSsmCommandHandler';
+import type { PushEnvToSsmCommandHandler } from '../../../../src/envilder/application/importEnvToSsm/PushEnvToSsmCommandHandler';
 import type { PushSingleVariableCommandHandler } from '../../../../src/envilder/application/pushSingleVariable/PushSingleVariableCommandHandler';
 import { OperationMode } from '../../../../src/envilder/domain/OperationMode';
 
@@ -10,9 +10,9 @@ const mockExportSsmToEnvCommandHandler = {
   handle: vi.fn(),
 } as unknown as ExportSsmToEnvCommandHandler;
 
-const mockImportEnvToSsmCommandHandler = {
+const mockPushEnvToSsmCommandHandler = {
   handle: vi.fn(),
-} as unknown as ImportEnvToSsmCommandHandler;
+} as unknown as PushEnvToSsmCommandHandler;
 
 const mockPushSingleVariableCommandHandler = {
   handle: vi.fn(),
@@ -21,7 +21,7 @@ const mockPushSingleVariableCommandHandler = {
 describe('DispatchActionCommandHandler', () => {
   const sut = new DispatchActionCommandHandler(
     mockExportSsmToEnvCommandHandler,
-    mockImportEnvToSsmCommandHandler,
+    mockPushEnvToSsmCommandHandler,
     mockPushSingleVariableCommandHandler,
   );
 
@@ -66,7 +66,7 @@ describe('DispatchActionCommandHandler', () => {
     await sut.handleCommand(command);
 
     // Assert
-    expect(mockImportEnvToSsmCommandHandler.handle).toHaveBeenCalled();
+    expect(mockPushEnvToSsmCommandHandler.handle).toHaveBeenCalled();
   });
 
   it('Should_CallPushSingleVariableToSSM_When_PushSingleVariableModeIsProvided', async () => {

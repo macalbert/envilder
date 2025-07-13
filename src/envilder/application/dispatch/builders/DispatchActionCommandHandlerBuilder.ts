@@ -3,7 +3,7 @@ import type { IEnvFileManager } from '../../../domain/ports/IEnvFileManager.js';
 import type { ILogger } from '../../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../../domain/ports/ISecretProvider.js';
 import { ExportSsmToEnvCommandHandler } from '../../exportSsmToEnv/ExportSsmToEnvCommandHandler.js';
-import { ImportEnvToSsmCommandHandler } from '../../importEnvToSsm/ImportEnvToSsmCommandHandler.js';
+import { PushEnvToSsmCommandHandler } from '../../pushEnvToSsm/PushEnvToSsmCommandHandler.js';
 import { PushSingleVariableCommandHandler } from '../../pushSingleVariable/PushSingleVariableCommandHandler.js';
 import { DispatchActionCommandHandler } from '../DispatchActionCommandHandler.js';
 
@@ -52,7 +52,7 @@ export class DispatchActionCommandHandlerBuilder {
       this.logger,
     );
 
-    const importEnvToSsmCommandHandler = new ImportEnvToSsmCommandHandler(
+    const pushEnvToSsmCommandHandler = new PushEnvToSsmCommandHandler(
       this.secretProvider,
       this.envFileManager,
       this.logger,
@@ -63,7 +63,7 @@ export class DispatchActionCommandHandlerBuilder {
 
     return new DispatchActionCommandHandler(
       exportSsmToEnvCommandHandler,
-      importEnvToSsmCommandHandler,
+      pushEnvToSsmCommandHandler,
       pushSingleVariableCommandHandler,
     );
   }

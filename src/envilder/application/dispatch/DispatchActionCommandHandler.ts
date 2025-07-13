@@ -2,8 +2,8 @@ import { InvalidArgumentError } from '../../domain/errors/DomainErrors.js';
 import { OperationMode } from '../../domain/OperationMode.js';
 import { ExportSsmToEnvCommand } from '../exportSsmToEnv/ExportSsmToEnvCommand.js';
 import type { ExportSsmToEnvCommandHandler } from '../exportSsmToEnv/ExportSsmToEnvCommandHandler.js';
-import { ImportEnvToSsmCommand } from '../importEnvToSsm/ImportEnvToSsmCommand.js';
-import type { ImportEnvToSsmCommandHandler } from '../importEnvToSsm/ImportEnvToSsmCommandHandler.js';
+import { PushEnvToSsmCommand } from '../pushEnvToSsm/PushEnvToSsmCommand.js';
+import type { PushEnvToSsmCommandHandler } from '../pushEnvToSsm/PushEnvToSsmCommandHandler.js';
 import { PushSingleVariableCommand } from '../pushSingleVariable/PushSingleVariableCommand.js';
 import type { PushSingleVariableCommandHandler } from '../pushSingleVariable/PushSingleVariableCommandHandler.js';
 import type { DispatchActionCommand } from './DispatchActionCommand.js';
@@ -11,7 +11,7 @@ import type { DispatchActionCommand } from './DispatchActionCommand.js';
 export class DispatchActionCommandHandler {
   constructor(
     private readonly exportSsmToEnvCommandHandler: ExportSsmToEnvCommandHandler,
-    private readonly importEnvToSsmCommandHandler: ImportEnvToSsmCommandHandler,
+    private readonly pushEnvToSsmCommandHandler: PushEnvToSsmCommandHandler,
     private readonly pushSingleVariableCommandHandler: PushSingleVariableCommandHandler,
   ) {}
 
@@ -21,7 +21,7 @@ export class DispatchActionCommandHandler {
         await this.handlePushSingleVariable(command);
         break;
       case OperationMode.IMPORT_ENV_TO_SSM:
-        await this.handleImportEnvToSsm(command);
+        await this.handlePushEnvToSsm(command);
         break;
       case OperationMode.EXPORT_SSM_TO_ENV:
         await this.handleExportSsmToEnv(command);
@@ -49,17 +49,17 @@ export class DispatchActionCommandHandler {
     );
   }
 
-  private async handleImportEnvToSsm(
+  private async handlePushEnvToSsm(
     command: DispatchActionCommand,
   ): Promise<void> {
     this.validateMapAndEnvFileOptions(command);
 
-    const importEnvToSsmCommand = ImportEnvToSsmCommand.create(
+    const importEnvToSsmCommand = PushEnvToSsmCommand.create(
       command.map as string,
       command.envfile as string,
     );
 
-    await this.importEnvToSsmCommandHandler.handle(importEnvToSsmCommand);
+    await this.pushEnvToSsmCommandHandler.handle(importEnvToSsmCommand);
   }
 
   private async handleExportSsmToEnv(

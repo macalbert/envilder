@@ -1,9 +1,9 @@
 import type { IEnvFileManager } from '../../domain/ports/IEnvFileManager.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
-import type { ImportEnvToSsmCommand } from './ImportEnvToSsmCommand.js';
+import type { PushEnvToSsmCommand } from './PushEnvToSsmCommand.js';
 
-export class ImportEnvToSsmCommandHandler {
+export class PushEnvToSsmCommandHandler {
   constructor(
     private readonly secretProvider: ISecretProvider,
     private readonly envFileManager: IEnvFileManager,
@@ -17,7 +17,7 @@ export class ImportEnvToSsmCommandHandler {
    *
    * @param command - The ImportEnvToSsmCommand containing mapPath and envFilePath
    */
-  async handle(command: ImportEnvToSsmCommand): Promise<void> {
+  async handle(command: PushEnvToSsmCommand): Promise<void> {
     try {
       const paramMap = await this.loadConfiguration(command);
       await this.pushVariablesToSSM(paramMap, command);
@@ -33,7 +33,7 @@ export class ImportEnvToSsmCommandHandler {
     }
   }
 
-  private async loadConfiguration(command: ImportEnvToSsmCommand): Promise<{
+  private async loadConfiguration(command: PushEnvToSsmCommand): Promise<{
     paramMap: Record<string, string>;
     envVariables: Record<string, string>;
   }> {
@@ -50,7 +50,7 @@ export class ImportEnvToSsmCommandHandler {
       paramMap: Record<string, string>;
       envVariables: Record<string, string>;
     },
-    command: ImportEnvToSsmCommand,
+    command: PushEnvToSsmCommand,
   ): Promise<void> {
     const { paramMap, envVariables } = config;
 
