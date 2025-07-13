@@ -201,7 +201,7 @@ function GetSecretFromKey(envFilePath: string, key: string): string {
   const envLine = readFileSync(envFilePath, 'utf8')
     .split('\n')
     .find((line) => line.startsWith(`${key}=`));
-  const value = envLine ? envLine.split('=')[1] : '';
+  const value = envLine ? envLine.substring(key.length + 1) : '';
   console.log(`Env File Value for key ${key}: ${value}`);
   return value;
 }
