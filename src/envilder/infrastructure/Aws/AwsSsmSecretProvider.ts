@@ -13,12 +13,19 @@ export class AwsSsmSecretProvider implements ISecretProvider {
   }
 
   async getSecret(name: string): Promise<string | undefined> {
-    const command = new GetParameterCommand({
-      Name: name,
-      WithDecryption: true,
-    });
-    const { Parameter } = await this.ssm.send(command);
-    return Parameter?.Value;
+    try {
+      const command = new GetParameterCommand({
+        Name: name,
+        WithDecryption: true,
+      });
+      const { Parameter } = await this.ssm.send(command);
+      return Parameter?.Value;
+    } catch (error) {
+      if (error.name === 'ParameterNotFound') {
+        return undefined;
+      }
+      throw new Error(`Failed to get secret ${name}: ${error.message}`);
+    }
   }
 
   async setSecret(name: string, value: string): Promise<void> {
