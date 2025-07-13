@@ -25,14 +25,11 @@
 
 ## 🎥 Video Demonstration
 
+## 🎥 Video Demonstration
+
 Watch how Envilder works in less than 1 minute:  
 
-<p align="center">
-  <video autoplay loop muted playsinline controls width="100%">
-    <source src="https://github.com/user-attachments/assets/3c4985e6-49e9-4f29-bf1c-130747df0ca6" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-</p>
+![Watch the video](https://github.com/user-attachments/assets/2de7cac3-0c13-4706-96f6-bf2ef12b661a)
 
 ---
 
