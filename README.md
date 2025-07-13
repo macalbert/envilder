@@ -149,11 +149,14 @@ Watch how Envilder works in less than 1 minute:
 
 ```mermaid
 graph LR
-    A[Mapping File (param-map.json)] --> B[Envilder]
-    C[.env File or --key] --> B
-    D[AWS Credentials] --> B
-    E[AWS SSM] --> B
-    B --> F[Pull/Push Secrets 💾]
+    A["Mapping File<br/>(param-map.json)"] --> B[Envilder]:::core
+    C["Environment File<br/> '.env' or --key"] --> B
+    D["AWS Credentials"]:::aws --> B
+    E["AWS SSM"]:::aws --> B
+    B --> F["Pull/Push Secrets 💾"]
+
+    classDef aws fill:#ffcc66,color:#000000,stroke:#333,stroke-width:1.5px;
+    classDef core fill:#1f3b57,color:#fff,stroke:#ccc,stroke-width:2px;
 ```
 
 1. Define mappings in JSON: `{"ENV_VAR": "ssm/path"}`
