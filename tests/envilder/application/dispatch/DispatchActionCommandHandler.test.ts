@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DispatchActionCommand } from '../../../../src/envilder/application/dispatch/DispatchActionCommand';
 import { DispatchActionCommandHandler } from '../../../../src/envilder/application/dispatch/DispatchActionCommandHandler';
 import type { ExportSsmToEnvCommandHandler } from '../../../../src/envilder/application/exportSsmToEnv/ExportSsmToEnvCommandHandler';
-import type { PushEnvToSsmCommandHandler } from '../../../../src/envilder/application/importEnvToSsm/PushEnvToSsmCommandHandler';
+import type { PushEnvToSsmCommandHandler } from '../../../../src/envilder/application/pushEnvToSsm/PushEnvToSsmCommandHandler';
 import type { PushSingleVariableCommandHandler } from '../../../../src/envilder/application/pushSingleVariable/PushSingleVariableCommandHandler';
 import { OperationMode } from '../../../../src/envilder/domain/OperationMode';
 

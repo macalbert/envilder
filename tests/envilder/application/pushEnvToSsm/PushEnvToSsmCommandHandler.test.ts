@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
-import { ImportEnvToSsmCommand } from '../../../../src/envilder/application/importEnvToSsm/ImportEnvToSsmCommand';
-import { PushEnvToSsmCommandHandler } from '../../../../src/envilder/application/importEnvToSsm/PushEnvToSsmCommandHandler';
+import { ImportEnvToSsmCommand } from '../../../../src/envilder/application/pushEnvToSsm/ImportEnvToSsmCommand';
+import { PushEnvToSsmCommandHandler } from '../../../../src/envilder/application/pushEnvToSsm/PushEnvToSsmCommandHandler';
 import type { IEnvFileManager } from '../../../../src/envilder/domain/ports/IEnvFileManager';
 import type { ILogger } from '../../../../src/envilder/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../../src/envilder/domain/ports/ISecretProvider';
