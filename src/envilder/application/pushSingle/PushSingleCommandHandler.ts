@@ -1,3 +1,4 @@
+import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import type { PushSingleCommand } from './PushSingleCommand.js';
@@ -15,9 +16,20 @@ export class PushSingleCommandHandler {
    */
   async handle(command: PushSingleCommand): Promise<void> {
     try {
+      this.logger.info(
+        `Starting push operation for key '${command.key}' to path '${command.ssmPath}'`,
+      );
+
+      // Create environment variable instance for proper value masking
+      const envVariable = new EnvironmentVariable(
+        command.key,
+        command.value,
+        true,
+      );
+
       await this.secretProvider.setSecret(command.ssmPath, command.value);
       this.logger.info(
-        `Pushed ${command.key} to AWS SSM at path ${command.ssmPath}`,
+        `Pushed ${command.key}=${envVariable.maskedValue} to AWS SSM at path ${command.ssmPath}`,
       );
     } catch (error) {
       const errorMessage =

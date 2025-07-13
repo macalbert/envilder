@@ -126,7 +126,7 @@ describe('EnvFileManager', () => {
     const action = () => sut.loadMapFile(invalidJsonPath);
 
     // Assert
-    await expect(action).rejects.toThrow(
+    await expect(action()).rejects.toThrow(
       'Invalid JSON in parameter map file: ./tests/invalid-map.json',
     );
   });

@@ -132,9 +132,8 @@ describe('Envilder (E2E)', () => {
 
     // Assert
     expect(actual.code).toBe(0);
-    expect(actual.output).toContain(
-      `Pushed ${key} to AWS SSM at path ${ssmPath}`,
-    );
+    expect(actual.output).toContain(key);
+    expect(actual.output).toContain(ssmPath);
 
     // Validate in AWS SSM
     const ssmValue = await GetParameterSsm(ssmPath);

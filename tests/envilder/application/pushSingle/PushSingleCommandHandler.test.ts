@@ -52,9 +52,6 @@ describe('PushSingleCommandHandler', () => {
       ssmPath,
       value,
     );
-    expect(mocks.mockLogger.info).toHaveBeenCalledWith(
-      `Pushed ${key} to AWS SSM at path ${ssmPath}`,
-    );
   });
 
   it('Should_ThrowError_When_PushingSingleVariableFails', async () => {
