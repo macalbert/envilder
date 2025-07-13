@@ -6,26 +6,30 @@ import { DispatchActionCommand } from '../src/cli/application/dispatch/DispatchA
 import { OperationMode } from '../src/cli/domain/OperationMode';
 
 function patchBuilderWithMocks() {
+  const mockCommandHandler = {
+    handleCommand: vi.fn().mockResolvedValue(undefined),
+  };
+
+  const mockBuilder = {
+    withEnvFileManager: vi.fn().mockReturnThis(),
+    withProvider: vi.fn().mockReturnThis(),
+    withLogger: vi.fn().mockReturnThis(),
+    create: vi.fn().mockReturnValue(mockCommandHandler),
+  };
+
   vi.spyOn(DispatchActionCommandHandlerBuilder, 'build').mockImplementation(
-    () => {
-      const builder = {
-        withEnvFileManager: vi.fn().mockReturnThis(),
-        withProvider: vi.fn().mockReturnThis(),
-        withLogger: vi.fn().mockReturnThis(),
-        create: vi.fn().mockReturnValue({
-          handleCommand: vi.fn().mockResolvedValue(undefined),
-        }),
-      };
-      return builder;
-    },
+    () => mockBuilder,
   );
+
+  return { mockBuilder, mockCommandHandler };
 }
 
 describe('Cli', () => {
   const testProfile = 'test-profile';
+  let mocks: ReturnType<typeof patchBuilderWithMocks>;
 
   beforeEach(() => {
-    patchBuilderWithMocks();
+    mocks = patchBuilderWithMocks();
     vi.spyOn(process, 'exit').mockImplementation(() => {
       throw new Error('process.exit called');
     });
@@ -48,23 +52,6 @@ describe('Cli', () => {
       testProfile,
     ];
 
-    // Create mock instances for each dependency
-    const mockCommandHandler = {
-      handleCommand: vi.fn().mockResolvedValue(undefined),
-    };
-
-    // Mock the builder chain
-    const mockBuilder = {
-      withLogger: vi.fn().mockReturnThis(),
-      withEnvFileManager: vi.fn().mockReturnThis(),
-      withProvider: vi.fn().mockReturnThis(),
-      create: vi.fn().mockReturnValue(mockCommandHandler),
-    };
-
-    vi.spyOn(DispatchActionCommandHandlerBuilder, 'build').mockReturnValue(
-      mockBuilder,
-    );
-
     // Mock command creation
     const mockCommand = {
       map: 'map.json',
@@ -79,8 +66,10 @@ describe('Cli', () => {
     await main();
 
     // Assert
-    expect(mockBuilder.withProvider).toHaveBeenCalled();
-    expect(mockCommandHandler.handleCommand).toHaveBeenCalledWith(mockCommand);
+    expect(mocks.mockBuilder.withProvider).toHaveBeenCalled();
+    expect(mocks.mockCommandHandler.handleCommand).toHaveBeenCalledWith(
+      mockCommand,
+    );
   });
 
   it('Should_ThrowError_When_ArgumentsAreInvalids', async () => {
