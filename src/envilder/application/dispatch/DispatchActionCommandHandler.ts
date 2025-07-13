@@ -10,9 +10,9 @@ import type { DispatchActionCommand } from './DispatchActionCommand.js';
 
 export class DispatchActionCommandHandler {
   constructor(
-    private readonly pullSsmToEnvCommandHandler: PullSsmToEnvCommandHandler,
-    private readonly pushEnvToSsmCommandHandler: PushEnvToSsmCommandHandler,
-    private readonly pushSingleCommandHandler: PushSingleCommandHandler,
+    private readonly pullHandler: PullSsmToEnvCommandHandler,
+    private readonly pushHandler: PushEnvToSsmCommandHandler,
+    private readonly pushSingleHandler: PushSingleCommandHandler,
   ) {}
 
   async handleCommand(command: DispatchActionCommand): Promise<void> {
@@ -21,10 +21,10 @@ export class DispatchActionCommandHandler {
         await this.handlePushSingle(command);
         break;
       case OperationMode.PUSH_ENV_TO_SSM:
-        await this.handlePushEnvToSsm(command);
+        await this.handlePush(command);
         break;
       default:
-        await this.handlePullSsmToEnv(command);
+        await this.handlePull(command);
         break;
     }
   }
@@ -44,10 +44,10 @@ export class DispatchActionCommandHandler {
       command.ssmPath,
     );
 
-    await this.pushSingleCommandHandler.handle(pushSingleCommand);
+    await this.pushSingleHandler.handle(pushSingleCommand);
   }
 
-  private async handlePushEnvToSsm(
+  private async handlePush(
     command: DispatchActionCommand,
   ): Promise<void> {
     this.validateMapAndEnvFileOptions(command);
@@ -57,10 +57,10 @@ export class DispatchActionCommandHandler {
       command.envfile as string,
     );
 
-    await this.pushEnvToSsmCommandHandler.handle(pushEnvToSsmCommand);
+    await this.pushHandler.handle(pushEnvToSsmCommand);
   }
 
-  private async handlePullSsmToEnv(
+  private async handlePull(
     command: DispatchActionCommand,
   ): Promise<void> {
     this.validateMapAndEnvFileOptions(command);
@@ -70,7 +70,7 @@ export class DispatchActionCommandHandler {
       command.envfile as string,
     );
 
-    await this.pullSsmToEnvCommandHandler.handle(pullSsmToEnvCommand);
+    await this.pullHandler.handle(pullSsmToEnvCommand);
   }
 
   private validateMapAndEnvFileOptions(command: DispatchActionCommand): void {
