@@ -17,7 +17,6 @@ async function executeCommand(options: CliOptions): Promise<void> {
   const logger = new ConsoleLogger();
   const fileManager = new EnvFileManager(logger);
 
-  // Create SSM client with optional profile
   const ssm = options.profile
     ? new SSM({
         credentials: fromIni({ profile: options.profile }),

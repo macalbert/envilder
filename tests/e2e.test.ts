@@ -155,22 +155,14 @@ function runCommand(
 async function cleanUpSystem() {
   try {
     const libPath = join(rootDir, 'lib');
-    try {
-      await rm(libPath, { recursive: true, force: true });
-    } catch {
-      // Ignore errors for individual file deletions
-    }
+    await rm(libPath, { recursive: true, force: true });
 
     // Delete envilder-*.tgz files
     const tgzFiles = await glob('envilder-*.tgz', { cwd: rootDir });
     const tgzPaths = tgzFiles.map((f) => join(rootDir, f));
 
     for (const file of tgzPaths) {
-      try {
-        await unlink(file);
-      } catch (_err) {
-        // Ignore errors for individual file deletions
-      }
+      await unlink(file);
     }
 
     // Uninstall global package (still sync, as npm API is not available async)

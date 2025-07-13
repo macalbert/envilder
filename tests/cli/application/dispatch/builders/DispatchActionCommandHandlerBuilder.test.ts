@@ -23,47 +23,55 @@ describe('DispatchActionCommandHandlerBuilder', () => {
   };
 
   it('Should_CreateDispatchActionCommandHandler_When_AllDependenciesAreProvided', () => {
-    // Act
-    const actual = DispatchActionCommandHandlerBuilder.build()
+    // Arrange
+    const sut = DispatchActionCommandHandlerBuilder.build()
       .withProvider(mockSecretProvider)
       .withEnvFileManager(mockEnvFileManager)
-      .withLogger(mockLogger)
-      .create();
+      .withLogger(mockLogger);
+
+    // Act
+    const actual = sut.create();
 
     // Assert
     expect(actual).toBeDefined();
   });
 
   it('Should_ThrowError_When_ProviderIsMissing', () => {
-    // Act
-    const actual = DispatchActionCommandHandlerBuilder.build()
+    // Arrange
+    const sut = DispatchActionCommandHandlerBuilder.build()
       .withEnvFileManager(mockEnvFileManager)
-      .withLogger(mockLogger)
-      .create();
+      .withLogger(mockLogger);
+
+    // Act
+    const action = () => sut.create();
 
     // Assert
-    expect(actual).toThrow('Provider is required');
+    expect(action).toThrow('Provider is required');
   });
 
   it('Should_ThrowError_When_EnvFileManagerIsMissing', () => {
-    // Act
-    const actual = DispatchActionCommandHandlerBuilder.build()
+    // Arrange
+    const sut = DispatchActionCommandHandlerBuilder.build()
       .withProvider(mockSecretProvider)
-      .withLogger(mockLogger)
-      .create();
+      .withLogger(mockLogger);
+
+    // Act
+    const action = () => sut.create();
 
     // Assert
-    expect(actual).toThrow('EnvFileManager is required');
+    expect(action).toThrow('EnvFileManager is required');
   });
 
   it('Should_ThrowError_When_LoggerIsMissing', () => {
-    // Act
-    const actual = DispatchActionCommandHandlerBuilder.build()
+    // Arrange
+    const sut = DispatchActionCommandHandlerBuilder.build()
       .withProvider(mockSecretProvider)
-      .withEnvFileManager(mockEnvFileManager)
-      .create();
+      .withEnvFileManager(mockEnvFileManager);
+
+    // Act
+    const action = () => sut.create();
 
     // Assert
-    expect(actual).toThrow('Logger is required');
+    expect(action).toThrow('Logger is required');
   });
 });

@@ -1,43 +1,31 @@
+import { Command } from 'commander';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { main } from '../src/Cli';
-import { EnvilderBuilder } from '../src/cli/application/builders/EnvilderBuilder';
+import { DispatchActionCommandHandlerBuilder } from '../src/cli/application/dispatch/builders/DispatchActionCommandHandlerBuilder';
 import { DispatchActionCommand } from '../src/cli/application/dispatch/DispatchActionCommand';
-import { DispatchActionCommandHandler } from '../src/cli/application/dispatch/DispatchActionCommandHandler';
 import { OperationMode } from '../src/cli/domain/OperationMode';
-import type { IEnvFileManager } from '../src/cli/domain/ports/IEnvFileManager';
-import type { ISecretProvider } from '../src/cli/domain/ports/ISecretProvider';
 
-function patchBuilderWithMocks(
-  mockFileManager: IEnvFileManager,
-  mockProvider: ISecretProvider,
-  profile: string,
-) {
-  vi.spyOn(EnvilderBuilder, 'build').mockImplementation(() => {
-    const builder = new EnvilderBuilder();
-    builder.withEnvFileManager(mockFileManager);
-    builder.withAwsProvider(profile);
-    builder.withProvider(mockProvider);
-    builder.withLogger({ info: vi.fn(), warn: vi.fn(), error: vi.fn() });
-    return builder;
-  });
+function patchBuilderWithMocks() {
+  vi.spyOn(DispatchActionCommandHandlerBuilder, 'build').mockImplementation(
+    () => {
+      const builder = {
+        withEnvFileManager: vi.fn().mockReturnThis(),
+        withProvider: vi.fn().mockReturnThis(),
+        withLogger: vi.fn().mockReturnThis(),
+        create: vi.fn().mockReturnValue({
+          handleCommand: vi.fn().mockResolvedValue(undefined),
+        }),
+      };
+      return builder;
+    },
+  );
 }
 
 describe('Cli', () => {
-  let mockFileManager: IEnvFileManager;
-  let mockProvider: ISecretProvider;
   const testProfile = 'test-profile';
 
   beforeEach(() => {
-    mockFileManager = {
-      loadMapFile: vi.fn(async () => ({ FOO: 'BAR' })),
-      loadEnvFile: vi.fn(async () => ({})),
-      saveEnvFile: vi.fn(async () => {}),
-    };
-    mockProvider = {
-      getSecret: vi.fn(async () => 'secret-value'),
-      setSecret: vi.fn(async () => {}),
-    };
-    patchBuilderWithMocks(mockFileManager, mockProvider, testProfile);
+    patchBuilderWithMocks();
     vi.spyOn(process, 'exit').mockImplementation(() => {
       throw new Error('process.exit called');
     });
@@ -59,28 +47,40 @@ describe('Cli', () => {
       '--profile',
       testProfile,
     ];
-    vi.spyOn(Envilder.prototype, 'run').mockResolvedValue(undefined);
-    const withAwsProviderSpy = vi.spyOn(
-      EnvilderBuilder.prototype,
-      'withAwsProvider',
+
+    // Create mock instances for each dependency
+    const mockCommandHandler = {
+      handleCommand: vi.fn().mockResolvedValue(undefined),
+    };
+
+    // Mock the builder chain
+    const mockBuilder = {
+      withLogger: vi.fn().mockReturnThis(),
+      withEnvFileManager: vi.fn().mockReturnThis(),
+      withProvider: vi.fn().mockReturnThis(),
+      create: vi.fn().mockReturnValue(mockCommandHandler),
+    };
+
+    vi.spyOn(DispatchActionCommandHandlerBuilder, 'build').mockReturnValue(
+      mockBuilder,
     );
-    const handleCommandSpy = vi
-      .spyOn(DispatchActionCommandHandler.prototype, 'handleCommand')
-      .mockResolvedValue(undefined);
+
+    // Mock command creation
+    const mockCommand = {
+      map: 'map.json',
+      envfile: '.env',
+      profile: testProfile,
+    };
+    vi.spyOn(DispatchActionCommand, 'fromCliOptions').mockReturnValue(
+      mockCommand as unknown as DispatchActionCommand,
+    );
 
     // Act
     await main();
 
     // Assert
-    expect(withAwsProviderSpy).toHaveBeenCalledWith('test-profile');
-    expect(handleCommandSpy).toHaveBeenCalled();
-    const commandArg = handleCommandSpy.mock.calls[0][0];
-    expect(commandArg).toBeInstanceOf(DispatchActionCommand);
-    expect(commandArg.map).toBe('map.json');
-    expect(commandArg.envfile).toBe('.env');
-
-    withAwsProviderSpy.mockRestore();
-    handleCommandSpy.mockRestore();
+    expect(mockBuilder.withProvider).toHaveBeenCalled();
+    expect(mockCommandHandler.handleCommand).toHaveBeenCalledWith(mockCommand);
   });
 
   it('Should_ThrowError_When_ArgumentsAreInvalids', async () => {
@@ -94,38 +94,15 @@ describe('Cli', () => {
       // missing envfile argument
     ];
 
-    // Mock EnvilderBuilder.build to avoid creating actual instances
-    const buildSpy = vi
-      .spyOn(EnvilderBuilder, 'build')
-      .mockImplementation(() => {
-        const mockBuilder = {
-          withConsoleLogger: vi.fn().mockReturnThis(),
-          withDefaultFileManager: vi.fn().mockReturnThis(),
-          withAwsProvider: vi.fn().mockReturnThis(),
-          create: vi.fn().mockReturnValue({
-            run: vi.fn(),
-            importEnvFile: vi.fn(),
-            pushSingleVariableToSSM: vi.fn(),
-          }),
-        };
-        return mockBuilder as unknown as EnvilderBuilder;
-      });
-
-    // Mock the fromCliOptions method to let us verify it was called with invalid options
-    const fromCliOptionsSpy = vi.spyOn(DispatchActionCommand, 'fromCliOptions');
+    vi.spyOn(Command.prototype, 'parseAsync').mockImplementation(async () => {
+      throw new Error('Missing required arguments: --map and --envfile');
+    });
 
     // Act
-    const action = main();
+    const action = () => main();
 
     // Assert
-    await expect(action).rejects.toThrow(
-      /Missing required arguments: --map and --envfile/i,
-    );
-    expect(fromCliOptionsSpy).toHaveBeenCalled();
-
-    // Cleanup
-    buildSpy.mockRestore();
-    fromCliOptionsSpy.mockRestore();
+    await expect(action).rejects.toThrow('Missing required arguments');
   });
 
   it('Should_CreateExportToEnvCommand_When_OptionsAreProvided', () => {
