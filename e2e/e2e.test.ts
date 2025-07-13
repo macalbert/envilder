@@ -240,11 +240,17 @@ async function cleanUpSsm(
     for (const [, ssmPath] of Object.entries(ssmParams)) {
       await DeleteParameterSsm(ssmPath);
     }
-  } catch (_) {
-    console.log('No parameter map file found or it was invalid JSON');
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      console.log('Parameter map file not found:', mapFilePath);
+    } else if (error instanceof SyntaxError) {
+      console.error('Invalid JSON in parameter map file:', error.message);
+    } else {
+      console.error('Error reading parameter map file:', error);
+    }
   }
 
-  await DeleteParameterSsm(singleSsmPath);  
+  await DeleteParameterSsm(singleSsmPath);
 }
 
 async function GetParameterSsm(ssmPath: string): Promise<string> {
