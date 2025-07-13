@@ -34,7 +34,7 @@ describe('PushSingleVariableCommandHandler', () => {
 
   it('Should_SetSecret_When_PushingSingleVariable', async () => {
     // Arrange
-    const handler = new PushSingleVariableCommandHandler(
+    const sut = new PushSingleVariableCommandHandler(
       mocks.mockSecretProvider,
       mocks.mockLogger,
     );
@@ -45,7 +45,7 @@ describe('PushSingleVariableCommandHandler', () => {
     const command = PushSingleVariableCommand.create(key, value, ssmPath);
 
     // Act
-    await handler.handle(command);
+    await sut.handle(command);
 
     // Assert
     expect(mocks.mockSecretProvider.setSecret).toHaveBeenCalledWith(
@@ -61,7 +61,7 @@ describe('PushSingleVariableCommandHandler', () => {
     // Arrange
     const errorMocks = createMocks(true);
 
-    const handler = new PushSingleVariableCommandHandler(
+    const sut = new PushSingleVariableCommandHandler(
       errorMocks.mockSecretProvider,
       errorMocks.mockLogger,
     );
@@ -71,8 +71,11 @@ describe('PushSingleVariableCommandHandler', () => {
     const ssmPath = '/path/to/ssm/test';
     const command = PushSingleVariableCommand.create(key, value, ssmPath);
 
-    // Act & Assert
-    await expect(handler.handle(command)).rejects.toThrow(errorMocks.mockError);
+    // Act
+    const action = () => sut.handle(command);
+
+    // Assert
+    await expect(action()).rejects.toThrow(errorMocks.mockError);
     expect(errorMocks.mockLogger.error).toHaveBeenCalledWith(
       'Failed to push variable to SSM: Failed to push variable',
     );
