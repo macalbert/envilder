@@ -22,8 +22,8 @@ describe('Envilder (E2E)', () => {
   }, 30_000);
 
   const envilder = 'envilder';
-  const testEnvFile = join(rootDir, 'tests', 'sample', 'cli-validation.env');
-  const paramMapPath = join(rootDir, 'tests', 'sample', 'param-map.json');
+  const testEnvFile = join(rootDir, 'e2e', 'sample', 'cli-validation.env');
+  const paramMapPath = join(rootDir, 'e2e', 'sample', 'param-map.json');
 
   afterAll(async () => {
     await cleanUpSystem();
@@ -96,8 +96,8 @@ describe('Envilder (E2E)', () => {
 
   it('Should_PushEnvFileToSSM_When_ImportFlagIsUsed', async () => {
     // Arrange
-    const envFilePath = join(rootDir, 'tests', 'sample', 'cli-validation.env');
-    const mapFilePath = join(rootDir, 'tests', 'sample', 'param-map.json');
+    const envFilePath = join(rootDir, 'e2e', 'sample', 'cli-validation.env');
+    const mapFilePath = join(rootDir, 'e2e', 'sample', 'param-map.json');
     const params = ['--import', '--envfile', envFilePath, '--map', mapFilePath];
 
     // Act
