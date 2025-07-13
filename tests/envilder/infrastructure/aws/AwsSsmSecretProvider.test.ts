@@ -132,9 +132,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       const action = () => sut.setSecret('test-param', 'test-value');
 
       // Assert
-      await expect(action()).rejects.toThrow(
-        'Access denied',
-      );
+      await expect(action()).rejects.toThrow('Access denied');
     });
   });
 });
