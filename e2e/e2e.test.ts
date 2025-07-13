@@ -3,7 +3,11 @@ import { existsSync, readFileSync } from 'node:fs';
 import { rm, unlink } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
+import {
+  DeleteParameterCommand,
+  GetParameterCommand,
+  SSMClient,
+} from '@aws-sdk/client-ssm';
 import { glob } from 'glob';
 import pc from 'picocolors';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -100,6 +104,15 @@ describe('Envilder (E2E)', () => {
     // Arrange
     const params = ['--push', '--envfile', envFilePath, '--map', mapFilePath];
 
+    const ssmParams = JSON.parse(readFileSync(mapFilePath, 'utf8')) as Record<
+      string,
+      string
+    >;
+    
+    for (const [, ssmPath] of Object.entries(ssmParams)) {
+      await DeleteParameterSsm(ssmPath);
+    }
+
     // Act
     const actual = await runCommand(envilder, params);
 
@@ -109,10 +122,6 @@ describe('Envilder (E2E)', () => {
     expect(actual.output).toContain('Successfully pushed');
 
     // Validate in AWS SSM
-    const ssmParams = JSON.parse(readFileSync(mapFilePath, 'utf8')) as Record<
-      string,
-      string
-    >;
     for (const [key, ssmPath] of Object.entries(ssmParams)) {
       const expectedValue = GetSecretFromKey(envFilePath, key);
       const ssmValue = await GetParameterSsm(ssmPath);
@@ -126,6 +135,9 @@ describe('Envilder (E2E)', () => {
     const value = 'single-value-test';
     const ssmPath = '/Test/SingleVariable';
     const params = ['--key', key, '--value', value, '--ssm-path', ssmPath];
+
+    // Ensure SSM parameter doesn't exist before the test
+    await DeleteParameterSsm(ssmPath);
 
     // Act
     const actual = await runCommand(envilder, params);
@@ -195,6 +207,22 @@ async function GetParameterSsm(ssmPath: string): Promise<string> {
   const value = response.Parameter?.Value || '';
   console.log(`SSM Value for path ${ssmPath}: ${value}`);
   return value;
+}
+
+async function DeleteParameterSsm(ssmPath: string): Promise<void> {
+  try {
+    const command = new DeleteParameterCommand({
+      Name: ssmPath,
+    });
+    await ssmClient.send(command);
+    console.log(`Deleted SSM parameter at path ${ssmPath}`);
+  } catch (error) {
+    if (error.name === 'ParameterNotFound') {
+      console.log(`SSM parameter ${ssmPath} does not exist, nothing to delete`);
+    } else {
+      console.error(`Error deleting SSM parameter at path ${ssmPath}:`, error);
+    }
+  }
 }
 
 function GetSecretFromKey(envFilePath: string, key: string): string {
