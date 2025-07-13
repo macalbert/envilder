@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { rm, unlink } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { glob } from 'glob';
 import pc from 'picocolors';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -10,6 +11,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '..');
+const ssmClient = new SSMClient({});
 
 describe('Envilder (E2E)', () => {
   beforeAll(async () => {
@@ -105,6 +107,17 @@ describe('Envilder (E2E)', () => {
     expect(actual.code).toBe(0);
     expect(actual.output).toContain('Pushed');
     expect(actual.output).toContain('Successfully pushed');
+
+    // Validate in AWS SSM
+    const ssmParams = JSON.parse(readFileSync(mapFilePath, 'utf8')) as Record<
+      string,
+      string
+    >;
+    for (const [key, ssmPath] of Object.entries(ssmParams)) {
+      const expectedValue = GetSecretFromKey(envFilePath, key);
+      const ssmValue = await GetParameterSsm(ssmPath);
+      expect(ssmValue).toBe(expectedValue);
+    }
   });
 
   it('Should_PushSingleVariable_When_KeyValueAndSsmPathProvided', async () => {
@@ -122,6 +135,10 @@ describe('Envilder (E2E)', () => {
     expect(actual.output).toContain(
       `Pushed ${key} to AWS SSM at path ${ssmPath}`,
     );
+
+    // Validate in AWS SSM
+    const ssmValue = await GetParameterSsm(ssmPath);
+    expect(ssmValue).toBe(value);
   });
 });
 
@@ -168,4 +185,24 @@ async function cleanUpSystem() {
   } catch {
     // Ignore errors if not installed
   }
+}
+
+async function GetParameterSsm(ssmPath: string): Promise<string> {
+  const command = new GetParameterCommand({
+    Name: ssmPath,
+    WithDecryption: true,
+  });
+  const response = await ssmClient.send(command);
+  const value = response.Parameter?.Value || '';
+  console.log(`SSM Value for path ${ssmPath}: ${value}`);
+  return value;
+}
+
+function GetSecretFromKey(envFilePath: string, key: string): string {
+  const envLine = readFileSync(envFilePath, 'utf8')
+    .split('\n')
+    .find((line) => line.startsWith(`${key}=`));
+  const value = envLine ? envLine.split('=')[1] : '';
+  console.log(`Env File Value for key ${key}: ${value}`);
+  return value;
 }
