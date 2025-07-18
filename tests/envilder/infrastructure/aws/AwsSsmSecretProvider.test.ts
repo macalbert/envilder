@@ -16,7 +16,7 @@ import {
   it,
   vi,
 } from 'vitest';
-import { AwsSsmSecretProvider } from '../../../../src/envilder/infrastructure/Aws/AwsSsmSecretProvider';
+import { AwsSsmSecretProvider } from '../../../../src/envilder/infrastructure/aws/AwsSsmSecretProvider';
 
 // Constants for integration tests
 const LOCALSTACK_IMAGE = 'localstack/localstack:stable';
