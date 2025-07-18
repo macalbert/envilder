@@ -1,7 +1,7 @@
 import { promises as fs } from 'node:fs';
 
-export class PackageJsonFinder {
-  async readPackageJsonVersion(packageJsonPath: string): Promise<string> {
+export class PackageVersionReader {
+  async getVersion(packageJsonPath: string): Promise<string> {
     try {
       await fs.access(packageJsonPath);
       const content = await fs.readFile(packageJsonPath, 'utf8');

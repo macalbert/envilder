@@ -10,9 +10,9 @@ import {
 } from 'vitest';
 import { PullSsmToEnvCommand } from '../../../../src/envilder/application/pullSsmToEnv/PullSsmToEnvCommand';
 import { PullSsmToEnvCommandHandler } from '../../../../src/envilder/application/pullSsmToEnv/PullSsmToEnvCommandHandler';
-import type { IVariableStore } from '../../../../src/envilder/domain/ports/IVariableStore';
 import type { ILogger } from '../../../../src/envilder/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../../src/envilder/domain/ports/ISecretProvider';
+import type { IVariableStore } from '../../../../src/envilder/domain/ports/IVariableStore';
 
 const testValues: Record<string, string> = {
   '/path/to/ssm/email': 'mockedEmail@example.com',

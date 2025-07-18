@@ -1,12 +1,12 @@
 import { access, mkdir, rmdir, unlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { PackageJsonFinder } from '../../../../src/envilder/infrastructure/versionFinder/PackageJsonFinder';
+import { PackageVersionReader } from '../../../../src/envilder/infrastructure/package/PackageVersionReader';
 
-describe('PackageJsonFinder', () => {
+describe('PackageVersionReader', () => {
   const tempDir = join(__dirname, 'temp-pkgjson-test');
   const packageJsonPath = join(tempDir, 'package.json');
-  const sut = new PackageJsonFinder();
+  const sut = new PackageVersionReader();
 
   beforeEach(async () => {
     try {
@@ -30,7 +30,7 @@ describe('PackageJsonFinder', () => {
     await writeFile(packageJsonPath, JSON.stringify({ version: '1.2.3' }));
 
     // Act
-    const actual = await sut.readPackageJsonVersion(packageJsonPath);
+    const actual = await sut.getVersion(packageJsonPath);
 
     // Assert
     expect(actual).toBe('1.2.3');
@@ -41,8 +41,7 @@ describe('PackageJsonFinder', () => {
     const nonExistentPath = join(tempDir, 'non-existent-package.json');
 
     // Act
-    const action = async () =>
-      await sut.readPackageJsonVersion(nonExistentPath);
+    const action = async () => await sut.getVersion(nonExistentPath);
 
     //  Assert
     await expect(action()).rejects.toThrow('package.json not found');
@@ -53,8 +52,7 @@ describe('PackageJsonFinder', () => {
     await writeFile(packageJsonPath, JSON.stringify({ name: 'test' }));
 
     // Act
-    const action = async () =>
-      await sut.readPackageJsonVersion(packageJsonPath);
+    const action = async () => await sut.getVersion(packageJsonPath);
 
     // Assert
     await expect(action()).rejects.toThrow(
@@ -67,8 +65,7 @@ describe('PackageJsonFinder', () => {
     await writeFile(packageJsonPath, '{ version"=: }');
 
     // Act
-    const action = async () =>
-      await sut.readPackageJsonVersion(packageJsonPath);
+    const action = async () => await sut.getVersion(packageJsonPath);
 
     // Assert
     await expect(action()).rejects.toThrow(
