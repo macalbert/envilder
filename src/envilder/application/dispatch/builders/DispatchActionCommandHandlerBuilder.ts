@@ -1,5 +1,5 @@
 import { DependencyMissingError } from '../../../domain/errors/DomainErrors.js';
-import type { IEnvFileManager } from '../../../domain/ports/IEnvFileManager.js';
+import type { IVariableStore } from '../../../domain/ports/IEnvFileManager.js';
 import type { ILogger } from '../../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../../domain/ports/ISecretProvider.js';
 import { PullSsmToEnvCommandHandler } from '../../pullSsmToEnv/PullSsmToEnvCommandHandler.js';
@@ -9,7 +9,7 @@ import { DispatchActionCommandHandler } from '../DispatchActionCommandHandler.js
 
 export class DispatchActionCommandHandlerBuilder {
   private secretProvider?: ISecretProvider;
-  private envFileManager?: IEnvFileManager;
+  private envFileManager?: IVariableStore;
   private logger?: ILogger;
 
   static build(): DispatchActionCommandHandlerBuilder {
@@ -22,7 +22,7 @@ export class DispatchActionCommandHandlerBuilder {
   }
 
   withEnvFileManager(
-    fileManager: IEnvFileManager,
+    fileManager: IVariableStore,
   ): DispatchActionCommandHandlerBuilder {
     this.envFileManager = fileManager;
     return this;

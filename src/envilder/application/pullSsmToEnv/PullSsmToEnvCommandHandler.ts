@@ -1,5 +1,5 @@
 import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
-import type { IEnvFileManager } from '../../domain/ports/IEnvFileManager.js';
+import type { IVariableStore } from '../../domain/ports/IEnvFileManager.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import type { PullSsmToEnvCommand } from './PullSsmToEnvCommand.js';
@@ -18,7 +18,7 @@ export class PullSsmToEnvCommandHandler {
 
   constructor(
     private readonly secretProvider: ISecretProvider,
-    private readonly envFileManager: IEnvFileManager,
+    private readonly envFileManager: IVariableStore,
     private readonly logger: ILogger,
   ) {}
 
@@ -52,10 +52,10 @@ export class PullSsmToEnvCommandHandler {
     requestVariables: Record<string, string>;
     currentVariables: Record<string, string>;
   }> {
-    const requestVariables = await this.envFileManager.loadMapFile(
+    const requestVariables = await this.envFileManager.getMapping(
       command.mapPath,
     );
-    const currentVariables = await this.envFileManager.loadEnvFile(
+    const currentVariables = await this.envFileManager.getEnvironment(
       command.envFilePath,
     );
 
@@ -66,7 +66,7 @@ export class PullSsmToEnvCommandHandler {
     envFilePath: string,
     variables: Record<string, string>,
   ): Promise<void> {
-    await this.envFileManager.saveEnvFile(envFilePath, variables);
+    await this.envFileManager.saveEnvironment(envFilePath, variables);
   }
 
   private async envild(

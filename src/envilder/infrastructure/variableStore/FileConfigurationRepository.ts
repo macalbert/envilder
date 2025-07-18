@@ -4,10 +4,10 @@ import {
   DependencyMissingError,
   EnvironmentFileError,
 } from '../../domain/errors/DomainErrors.js';
-import type { IEnvFileManager } from '../../domain/ports/IEnvFileManager.js';
+import type { IVariableStore } from '../../domain/ports/IEnvFileManager.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 
-export class EnvFileManager implements IEnvFileManager {
+export class FileVariableStore implements IVariableStore {
   private logger: ILogger;
   constructor(logger: ILogger) {
     if (!logger) {
@@ -16,41 +16,41 @@ export class EnvFileManager implements IEnvFileManager {
     this.logger = logger;
   }
 
-  async loadMapFile(mapPath: string): Promise<Record<string, string>> {
+  async getMapping(source: string): Promise<Record<string, string>> {
     try {
-      const content = await fs.readFile(mapPath, 'utf-8');
+      const content = await fs.readFile(source, 'utf-8');
       try {
         return JSON.parse(content);
       } catch (_err: unknown) {
-        this.logger.error(`Error parsing JSON from ${mapPath}`);
+        this.logger.error(`Error parsing JSON from ${source}`);
         throw new EnvironmentFileError(
-          `Invalid JSON in parameter map file: ${mapPath}`,
+          `Invalid JSON in parameter map file: ${source}`,
         );
       }
     } catch (error) {
       if (error instanceof EnvironmentFileError) {
         throw error;
       }
-      throw new EnvironmentFileError(`Failed to read map file: ${mapPath}`);
+      throw new EnvironmentFileError(`Failed to read map file: ${source}`);
     }
   }
 
-  async loadEnvFile(envFilePath: string): Promise<Record<string, string>> {
+  async getEnvironment(source: string): Promise<Record<string, string>> {
     const envVariables: Record<string, string> = {};
     try {
-      await fs.access(envFilePath);
+      await fs.access(source);
     } catch {
       return envVariables;
     }
-    const existingEnvContent = await fs.readFile(envFilePath, 'utf-8');
+    const existingEnvContent = await fs.readFile(source, 'utf-8');
     const parsedEnv = dotenv.parse(existingEnvContent) || {};
     Object.assign(envVariables, parsedEnv);
 
     return envVariables;
   }
 
-  async saveEnvFile(
-    envFilePath: string,
+  async saveEnvironment(
+    destination: string,
     envVariables: Record<string, string>,
   ): Promise<void> {
     const envContent = Object.entries(envVariables)
@@ -58,7 +58,7 @@ export class EnvFileManager implements IEnvFileManager {
       .join('\n');
 
     try {
-      await fs.writeFile(envFilePath, envContent);
+      await fs.writeFile(destination, envContent);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);

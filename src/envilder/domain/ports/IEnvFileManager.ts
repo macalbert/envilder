@@ -1,8 +1,8 @@
-export interface IEnvFileManager {
-  loadMapFile(mapPath: string): Promise<Record<string, string>>;
-  loadEnvFile(envFilePath: string): Promise<Record<string, string>>;
-  saveEnvFile(
-    envFilePath: string,
+export interface IVariableStore {
+  getMapping(source: string): Promise<Record<string, string>>;
+  getEnvironment(source: string): Promise<Record<string, string>>;
+  saveEnvironment(
+    destination: string,
     envVariables: Record<string, string>,
   ): Promise<void>;
 }

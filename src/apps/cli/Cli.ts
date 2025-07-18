@@ -8,14 +8,14 @@ import { Command } from 'commander';
 import { DispatchActionCommandHandlerBuilder } from '../../envilder/application/dispatch/builders/DispatchActionCommandHandlerBuilder.js';
 import { DispatchActionCommand } from '../../envilder/application/dispatch/DispatchActionCommand.js';
 import type { CliOptions } from '../../envilder/domain/CliOptions.js';
-import { AwsSsmSecretProvider } from '../../envilder/infrastructure/Aws/AwsSsmSecretProvider.js';
-import { EnvFileManager } from '../../envilder/infrastructure/EnvManager/EnvFileManager.js';
-import { ConsoleLogger } from '../../envilder/infrastructure/Logger/ConsoleLogger.js';
-import { PackageJsonFinder } from '../../envilder/infrastructure/VersionFinder/PackageJsonFinder.js';
+import { AwsSsmSecretProvider } from '../../envilder/infrastructure/aws/AwsSsmSecretProvider.js';
+import { ConsoleLogger } from '../../envilder/infrastructure/logger/ConsoleLogger.js';
+import { PackageJsonFinder } from '../../envilder/infrastructure/versionFinder/PackageJsonFinder.js';
+import { FileVariableStore } from '../../envilder/infrastructure/variableStore/FileConfigurationRepository.js';
 
 async function executeCommand(options: CliOptions): Promise<void> {
   const logger = new ConsoleLogger();
-  const fileManager = new EnvFileManager(logger);
+  const fileManager = new FileVariableStore(logger);
 
   const ssm = options.profile
     ? new SSM({

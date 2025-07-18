@@ -1,8 +1,8 @@
 import * as fs from 'node:fs/promises';
 import * as dotenv from 'dotenv';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { EnvFileManager } from '../../../../src/envilder/infrastructure/EnvManager/EnvFileManager';
-import { ConsoleLogger } from '../../../../src/envilder/infrastructure/Logger/ConsoleLogger';
+import { ConsoleLogger } from '../../../../src/envilder/infrastructure/logger/ConsoleLogger';
+import { FileVariableStore } from '../../../../src/envilder/infrastructure/variableStore/FileConfigurationRepository';
 
 vi.mock('node:fs/promises', async () => {
   const actual = await vi.importActual('node:fs/promises');
@@ -39,15 +39,15 @@ vi.mock('node:fs/promises', async () => {
 
 const mockInMemoryFiles = new Map<string, string>();
 
-describe('EnvFileManager', () => {
-  let sut: EnvFileManager;
+describe('FileVariableStore', () => {
+  let sut: FileVariableStore;
 
   const mockMapPath = './tests/escaping-map.json';
   const mockEnvFilePath = './tests/.env.escaping.test';
   const invalidJsonPath = './tests/invalid-map.json';
 
   beforeEach(() => {
-    sut = new EnvFileManager(new ConsoleLogger());
+    sut = new FileVariableStore(new ConsoleLogger());
   });
 
   afterEach(async () => {
@@ -63,7 +63,7 @@ describe('EnvFileManager', () => {
     it('Should_ThrowError_When_LoggerIsMissing', () => {
       // Act
       const action = () =>
-        new EnvFileManager(undefined as unknown as ConsoleLogger);
+        new FileVariableStore(undefined as unknown as ConsoleLogger);
 
       // Assert
       expect(action).toThrow('Logger must be specified');
@@ -77,7 +77,7 @@ describe('EnvFileManager', () => {
       const envVars = { BACKSLASH_VAR: expected };
 
       // Act
-      await sut.saveEnvFile(mockEnvFilePath, envVars);
+      await sut.saveEnvironment(mockEnvFilePath, envVars);
 
       // Assert
       const actual = mockInMemoryFiles.get(mockEnvFilePath);
@@ -92,7 +92,7 @@ describe('EnvFileManager', () => {
       const envVars = { NEWLINE_VAR: expected };
 
       // Act
-      await sut.saveEnvFile(mockEnvFilePath, envVars);
+      await sut.saveEnvironment(mockEnvFilePath, envVars);
 
       // Assert
       const actual = mockInMemoryFiles.get(mockEnvFilePath);
@@ -107,7 +107,7 @@ describe('EnvFileManager', () => {
       const envVars = { QUOTE_VAR: expected };
 
       // Act
-      await sut.saveEnvFile(mockEnvFilePath, envVars);
+      await sut.saveEnvironment(mockEnvFilePath, envVars);
 
       // Assert
       const actual = mockInMemoryFiles.get(mockEnvFilePath);
@@ -122,7 +122,7 @@ describe('EnvFileManager', () => {
       const envVars = { COMBINED_VAR: expected };
 
       // Act
-      await sut.saveEnvFile(mockEnvFilePath, envVars);
+      await sut.saveEnvironment(mockEnvFilePath, envVars);
 
       // Assert
       const actual = mockInMemoryFiles.get(mockEnvFilePath);
@@ -137,7 +137,7 @@ describe('EnvFileManager', () => {
       const envVars = { ESCAPED_VAR: input };
 
       // Act
-      await sut.saveEnvFile(mockEnvFilePath, envVars);
+      await sut.saveEnvironment(mockEnvFilePath, envVars);
 
       // Assert
       const actual = mockInMemoryFiles.get(mockEnvFilePath);
@@ -152,7 +152,8 @@ describe('EnvFileManager', () => {
       vi.mocked(fs.writeFile).mockRejectedValueOnce(new Error(errorMessage));
 
       // Act
-      const action = () => sut.saveEnvFile(mockEnvFilePath, { TEST: 'value' });
+      const action = () =>
+        sut.saveEnvironment(mockEnvFilePath, { TEST: 'value' });
 
       // Assert
       await expect(action()).rejects.toThrow(
@@ -165,7 +166,8 @@ describe('EnvFileManager', () => {
       vi.mocked(fs.writeFile).mockRejectedValueOnce('String error');
 
       // Act
-      const action = () => sut.saveEnvFile(mockEnvFilePath, { TEST: 'value' });
+      const action = () =>
+        sut.saveEnvironment(mockEnvFilePath, { TEST: 'value' });
 
       // Assert
       await expect(action()).rejects.toThrow(
@@ -184,7 +186,7 @@ describe('EnvFileManager', () => {
       mockInMemoryFiles.set(mockMapPath, JSON.stringify(expected));
 
       // Act
-      const paramMap = await sut.loadMapFile(mockMapPath);
+      const paramMap = await sut.getMapping(mockMapPath);
 
       // Assert
       expect(paramMap).toEqual(expected);
@@ -195,7 +197,7 @@ describe('EnvFileManager', () => {
       mockInMemoryFiles.set(invalidJsonPath, 'invalid-json');
 
       // Act
-      const action = () => sut.loadMapFile(invalidJsonPath);
+      const action = () => sut.getMapping(invalidJsonPath);
 
       // Assert
       await expect(action()).rejects.toThrow(
@@ -208,7 +210,7 @@ describe('EnvFileManager', () => {
       const nonExistentPath = './tests/non-existent-map.json';
 
       // Act
-      const action = () => sut.loadMapFile(nonExistentPath);
+      const action = () => sut.getMapping(nonExistentPath);
 
       // Assert
       await expect(action()).rejects.toThrow(
@@ -221,7 +223,7 @@ describe('EnvFileManager', () => {
       vi.mocked(fs.readFile).mockRejectedValueOnce('String error');
 
       // Act
-      const action = () => sut.loadMapFile(mockMapPath);
+      const action = () => sut.getMapping(mockMapPath);
 
       // Assert
       await expect(action()).rejects.toThrow(
@@ -243,7 +245,7 @@ describe('EnvFileManager', () => {
       mockInMemoryFiles.set(mockEnvFilePath, envContent);
 
       // Act
-      const result = await sut.loadEnvFile(mockEnvFilePath);
+      const result = await sut.getEnvironment(mockEnvFilePath);
 
       // Assert
       expect(result).toEqual(expectedVars);
@@ -254,7 +256,7 @@ describe('EnvFileManager', () => {
       const nonExistentPath = './tests/non-existent.env';
 
       // Act
-      const result = await sut.loadEnvFile(nonExistentPath);
+      const result = await sut.getEnvironment(nonExistentPath);
 
       // Assert
       expect(result).toEqual({});
@@ -267,7 +269,7 @@ describe('EnvFileManager', () => {
       vi.mocked(fs.readFile).mockRejectedValueOnce(new Error(errorMessage));
 
       // Act
-      const action = () => sut.loadEnvFile(mockEnvFilePath);
+      const action = () => sut.getEnvironment(mockEnvFilePath);
 
       // Assert
       await expect(action()).rejects.toThrow();
@@ -279,7 +281,7 @@ describe('EnvFileManager', () => {
       vi.mocked(fs.readFile).mockRejectedValueOnce('String error');
 
       // Act
-      const action = () => sut.loadEnvFile(mockEnvFilePath);
+      const action = () => sut.getEnvironment(mockEnvFilePath);
 
       // Assert
       await expect(action()).rejects.toThrow();

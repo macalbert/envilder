@@ -1,5 +1,5 @@
 import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
-import type { IEnvFileManager } from '../../domain/ports/IEnvFileManager.js';
+import type { IVariableStore } from '../../domain/ports/IEnvFileManager.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import type { PushEnvToSsmCommand } from './PushEnvToSsmCommand.js';
@@ -7,7 +7,7 @@ import type { PushEnvToSsmCommand } from './PushEnvToSsmCommand.js';
 export class PushEnvToSsmCommandHandler {
   constructor(
     private readonly secretProvider: ISecretProvider,
-    private readonly envFileManager: IEnvFileManager,
+    private readonly envFileManager: IVariableStore,
     private readonly logger: ILogger,
   ) {}
 
@@ -42,12 +42,12 @@ export class PushEnvToSsmCommandHandler {
     envVariables: Record<string, string>;
   }> {
     this.logger.info(`Loading parameter map from '${command.mapPath}'`);
-    const paramMap = await this.envFileManager.loadMapFile(command.mapPath);
+    const paramMap = await this.envFileManager.getMapping(command.mapPath);
 
     this.logger.info(
       `Loading environment variables from '${command.envFilePath}'`,
     );
-    const envVariables = await this.envFileManager.loadEnvFile(
+    const envVariables = await this.envFileManager.getEnvironment(
       command.envFilePath,
     );
 
