@@ -144,6 +144,167 @@ logger.info(`${envVar.name}=${envVar.maskedValue}`);
 - Use `.js` imports in TypeScript for ESM compatibility
 - Build output goes to `lib/` directory
 
+## Testing Guidelines
+
+### Test Structure: AAA Pattern
+
+All tests must follow the **Arrange-Act-Assert (AAA)** pattern with clear comment blocks:
+
+```typescript
+it('Should_DoSomething_When_ConditionIsMet', () => {
+  // Arrange
+  const sut = new MyClass();
+  const expected = 'expectedValue';
+
+  // Act
+  const actual = sut.doSomething();
+
+  // Assert
+  expect(actual).toBe(expected);
+});
+```
+
+### Naming Conventions
+
+#### Test Method Names
+
+Use descriptive names following this pattern:
+
+- `Should_[ExpectedBehavior]_When_[StateUnderTest]`
+- Examples: `Should_ReturnContainer_When_CreateIsCalled`, `Should_ThrowError_When_ServicesAreNotConfigured`
+
+#### Variable Names
+
+**Always use these standard names:**
+
+- `sut` = Subject Under Test (the object being tested)
+- `expected` = Expected result/value
+- `actual` = Actual result from the operation
+- For multiple instances: `actual1`, `actual2`, etc.
+
+```typescript
+// ✅ Good
+const sut = startup.configureServices().configureInfrastructure();
+const expected = sut.create();
+const actual = sut.getServiceProvider();
+expect(actual).toBe(expected);
+
+// ❌ Bad
+const configuredStartup = startup.configureServices().configureInfrastructure();
+const container1 = configuredStartup.create();
+const container2 = configuredStartup.getServiceProvider();
+expect(container2).toBe(container1);
+```
+
+### Test Categories
+
+#### Unit Tests (Behavior-Focused)
+
+- **Focus**: Test behavior, not implementation details
+- **Scope**: Single class/method in isolation
+- **Dependencies**: Mock all external dependencies using `vi.fn()`
+- **Location**: Mirror source structure in `tests/` directory
+
+#### Smoke Tests (Integration Points)
+
+- **Purpose**: Verify main integration points work
+- **Pattern**: Test 1-2 representative services, not exhaustive lists
+- **Example**: Test main entry point resolution, not every service
+
+```typescript
+// ✅ Good - Smoke test
+expect(() => 
+  container.get<DispatchActionCommandHandler>(TYPES.DispatchActionCommandHandler)
+).not.toThrow();
+
+// ❌ Bad - Exhaustive testing
+expect(() => container.get<Service1>(TYPES.Service1)).not.toThrow();
+expect(() => container.get<Service2>(TYPES.Service2)).not.toThrow();
+expect(() => container.get<Service3>(TYPES.Service3)).not.toThrow();
+// ... (testing every service)
+```
+
+#### Integration Tests (Full Workflows)
+
+- **Purpose**: Test complete workflows with real dependencies
+- **Location**: `tests/envilder/infrastructure/aws/` for AWS integration
+- **Tools**: Use TestContainers with LocalStack for AWS services
+
+### Anti-Patterns to Avoid
+
+#### ❌ Don't Test Implementation Details
+
+```typescript
+// Bad - testing internal DI configuration
+expect(() => container.get<EveryService>(TYPES.EveryService)).not.toThrow();
+```
+
+#### ❌ Don't Test Third-Party Code
+
+```typescript
+// Bad - testing Inversify's binding mechanism
+expect(container.bind(TYPES.Service).to(Service)).not.toThrow();
+```
+
+#### ❌ Don't Create Brittle Tests
+
+```typescript
+// Bad - breaks when adding new services
+const allServices = [Service1, Service2, Service3];
+allServices.forEach(service => {
+  expect(() => container.get(service)).not.toThrow();
+});
+```
+
+### Test Maintainability
+
+#### ✅ Test Behavior, Not Structure
+
+- Focus on what the code should do, not how it's implemented
+- Tests should rarely need updates when refactoring internals
+
+#### ✅ Use Descriptive Assertions
+
+```typescript
+// Good
+expect(actual).toBeDefined();
+expect(actual).toBeInstanceOf(Container);
+
+// Better with context
+expect(actual).toBeDefined(); // Main entry point should be resolvable
+```
+
+#### ✅ Keep Tests Simple and Focused
+
+- One concept per test
+- Clear setup in Arrange section
+- Single action in Act section
+- Focused verification in Assert section
+
+### Mocking Strategy
+
+#### In-Memory Mocking for File Operations
+
+```typescript
+const mockInMemoryFiles = new Map<string, string>();
+// Mock file system operations with Map-based storage
+```
+
+#### Service Mocking with Vitest
+
+```typescript
+const mockLogger = {
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn()
+} as jest.Mocked<ILogger>;
+```
+
+## File Extensions and Build
+
+- Use `.js` imports in TypeScript for ESM compatibility
+- Build output goes to `lib/` directory
+
 ## Key Files to Reference
 
 - `src/apps/cli/Cli.ts` - CLI entry point and DI container setup
