@@ -23,20 +23,29 @@ export class Startup {
     this.container = new Container();
   }
 
-  configureServices(): void {
-    this.configureDomainServices();
-    this.configureApplicationServices();
+  static build(): Startup {
+    return new Startup();
   }
 
-  configureInfrastructure(awsProfile?: string): void {
-    this.configureAwsServices(awsProfile);
+  configureServices(): this {
+    this.configureApplicationServices();
+    return this;
+  }
+
+  configureInfrastructure(awsProfile?: string): this {
+    this.configureInfrastructureServices(awsProfile);
+    return this;
+  }
+
+  create(): Container {
+    return this.container;
   }
 
   getServiceProvider(): Container {
     return this.container;
   }
 
-  private configureDomainServices(): void {
+  private configureInfrastructureServices(awsProfile?: string): void {
     this.container
       .bind<ILogger>(TYPES.ILogger)
       .to(ConsoleLogger)
@@ -46,6 +55,16 @@ export class Startup {
       .bind<IVariableStore>(TYPES.IVariableStore)
       .to(FileVariableStore)
       .inSingletonScope();
+
+    const ssm = awsProfile
+      ? new SSM({ credentials: fromIni({ profile: awsProfile }) })
+      : new SSM();
+
+    const secretProvider = new AwsSsmSecretProvider(ssm);
+
+    this.container
+      .bind<ISecretProvider>(TYPES.ISecretProvider)
+      .toConstantValue(secretProvider);
   }
 
   private configureApplicationServices(): void {
@@ -68,17 +87,5 @@ export class Startup {
       .bind<DispatchActionCommandHandler>(TYPES.DispatchActionCommandHandler)
       .to(DispatchActionCommandHandler)
       .inTransientScope();
-  }
-
-  private configureAwsServices(awsProfile?: string): void {
-    const ssm = awsProfile
-      ? new SSM({ credentials: fromIni({ profile: awsProfile }) })
-      : new SSM();
-
-    const secretProvider = new AwsSsmSecretProvider(ssm);
-
-    this.container
-      .bind<ISecretProvider>(TYPES.ISecretProvider)
-      .toConstantValue(secretProvider);
   }
 }

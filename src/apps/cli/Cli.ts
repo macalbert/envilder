@@ -12,10 +12,10 @@ import { TYPES } from '../../envilder/types.js';
 import { Startup } from './Startup.js';
 
 async function executeCommand(options: CliOptions): Promise<void> {
-  const startup = new Startup();
-  startup.configureServices();
-  startup.configureInfrastructure(options.profile);
-  const serviceProvider = startup.getServiceProvider();
+  const serviceProvider = Startup.build()
+    .configureServices()
+    .configureInfrastructure(options.profile)
+    .create();
 
   const commandHandler = serviceProvider.get<DispatchActionCommandHandler>(
     TYPES.DispatchActionCommandHandler,
@@ -79,9 +79,10 @@ function readPackageVersion(): Promise<string> {
 }
 
 main().catch((error) => {
-  const startup = new Startup();
-  startup.configureServices();
-  const serviceProvider = startup.getServiceProvider();
+  const serviceProvider = Startup.build()
+    .configureServices()
+    .configureInfrastructure()
+    .create();
 
   const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
   logger.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
