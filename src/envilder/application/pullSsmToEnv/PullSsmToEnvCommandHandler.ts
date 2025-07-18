@@ -20,8 +20,10 @@ export class PullSsmToEnvCommandHandler {
   };
 
   constructor(
-    @inject(TYPES.ISecretProvider) private readonly secretProvider: ISecretProvider,
-    @inject(TYPES.IVariableStore) private readonly envFileManager: IVariableStore,
+    @inject(TYPES.ISecretProvider)
+    private readonly secretProvider: ISecretProvider,
+    @inject(TYPES.IVariableStore)
+    private readonly envFileManager: IVariableStore,
     @inject(TYPES.ILogger) private readonly logger: ILogger,
   ) {}
 

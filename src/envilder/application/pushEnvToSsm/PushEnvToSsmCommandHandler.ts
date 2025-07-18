@@ -9,8 +9,10 @@ import type { PushEnvToSsmCommand } from './PushEnvToSsmCommand.js';
 @injectable()
 export class PushEnvToSsmCommandHandler {
   constructor(
-    @inject(TYPES.ISecretProvider) private readonly secretProvider: ISecretProvider,
-    @inject(TYPES.IVariableStore) private readonly envFileManager: IVariableStore,
+    @inject(TYPES.ISecretProvider)
+    private readonly secretProvider: ISecretProvider,
+    @inject(TYPES.IVariableStore)
+    private readonly envFileManager: IVariableStore,
     @inject(TYPES.ILogger) private readonly logger: ILogger,
   ) {}
 

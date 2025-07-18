@@ -13,9 +13,12 @@ import type { DispatchActionCommand } from './DispatchActionCommand.js';
 @injectable()
 export class DispatchActionCommandHandler {
   constructor(
-    @inject(TYPES.PullSsmToEnvCommandHandler) private readonly pullHandler: PullSsmToEnvCommandHandler,
-    @inject(TYPES.PushEnvToSsmCommandHandler) private readonly pushHandler: PushEnvToSsmCommandHandler,
-    @inject(TYPES.PushSingleCommandHandler) private readonly pushSingleHandler: PushSingleCommandHandler,
+    @inject(TYPES.PullSsmToEnvCommandHandler)
+    private readonly pullHandler: PullSsmToEnvCommandHandler,
+    @inject(TYPES.PushEnvToSsmCommandHandler)
+    private readonly pushHandler: PushEnvToSsmCommandHandler,
+    @inject(TYPES.PushSingleCommandHandler)
+    private readonly pushSingleHandler: PushSingleCommandHandler,
   ) {}
 
   async handleCommand(command: DispatchActionCommand): Promise<void> {

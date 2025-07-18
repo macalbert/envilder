@@ -8,7 +8,8 @@ import type { PushSingleCommand } from './PushSingleCommand.js';
 @injectable()
 export class PushSingleCommandHandler {
   constructor(
-    @inject(TYPES.ISecretProvider) private readonly secretProvider: ISecretProvider,
+    @inject(TYPES.ISecretProvider)
+    private readonly secretProvider: ISecretProvider,
     @inject(TYPES.ILogger) private readonly logger: ILogger,
   ) {}
 
