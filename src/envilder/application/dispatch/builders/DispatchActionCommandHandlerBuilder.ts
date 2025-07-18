@@ -1,7 +1,7 @@
 import { DependencyMissingError } from '../../../domain/errors/DomainErrors.js';
-import type { IVariableStore } from '../../../domain/ports/IEnvFileManager.js';
 import type { ILogger } from '../../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../../domain/ports/ISecretProvider.js';
+import type { IVariableStore } from '../../../domain/ports/IVariableStore.js';
 import { PullSsmToEnvCommandHandler } from '../../pullSsmToEnv/PullSsmToEnvCommandHandler.js';
 import { PushEnvToSsmCommandHandler } from '../../pushEnvToSsm/PushEnvToSsmCommandHandler.js';
 import { PushSingleCommandHandler } from '../../pushSingle/PushSingleCommandHandler.js';

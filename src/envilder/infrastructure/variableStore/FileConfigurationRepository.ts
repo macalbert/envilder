@@ -4,8 +4,8 @@ import {
   DependencyMissingError,
   EnvironmentFileError,
 } from '../../domain/errors/DomainErrors.js';
-import type { IVariableStore } from '../../domain/ports/IEnvFileManager.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
+import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
 
 export class FileVariableStore implements IVariableStore {
   private logger: ILogger;

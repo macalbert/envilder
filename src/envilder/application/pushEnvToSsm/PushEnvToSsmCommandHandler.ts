@@ -1,7 +1,7 @@
 import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
-import type { IVariableStore } from '../../domain/ports/IEnvFileManager.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
+import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
 import type { PushEnvToSsmCommand } from './PushEnvToSsmCommand.js';
 
 export class PushEnvToSsmCommandHandler {
