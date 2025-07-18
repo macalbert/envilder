@@ -1,14 +1,17 @@
+import { inject, injectable } from 'inversify';
 import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
+import { TYPES } from '../../infrastructure/di/types.js';
 import type { PushEnvToSsmCommand } from './PushEnvToSsmCommand.js';
 
+@injectable()
 export class PushEnvToSsmCommandHandler {
   constructor(
-    private readonly secretProvider: ISecretProvider,
-    private readonly envFileManager: IVariableStore,
-    private readonly logger: ILogger,
+    @inject(TYPES.ISecretProvider) private readonly secretProvider: ISecretProvider,
+    @inject(TYPES.IVariableStore) private readonly envFileManager: IVariableStore,
+    @inject(TYPES.ILogger) private readonly logger: ILogger,
   ) {}
 
   /**

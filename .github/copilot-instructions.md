@@ -27,19 +27,28 @@ Three main command handlers coordinate operations:
 - `PushEnvToSsmCommandHandler`: Reads .env + mapping → pushes to SSM
 - `PushSingleCommandHandler`: Direct key/value → SSM push
 
-## Builder Pattern for Dependency Injection
+## Dependency Injection with Inversify
 
-Use `DispatchActionCommandHandlerBuilder` to wire dependencies:
+Uses Inversify for dependency injection with clean separation of concerns:
 
 ```typescript
-const commandHandler = DispatchActionCommandHandlerBuilder.build()
-  .withLogger(logger)
-  .withEnvFileManager(fileManager)
-  .withProvider(secretProvider)
-  .create();
+// Container setup
+const container = createContainer();
+const secretProvider = new AwsSsmSecretProvider(ssm);
+bindSecretProvider(container, secretProvider);
+
+const commandHandler = container.get<DispatchActionCommandHandler>(TYPES.DispatchActionCommandHandler);
 ```
 
+All services use `@injectable` decorators and constructor injection with `@inject(TYPES.Symbol)`.
+
 ## Core Workflows
+
+### DI Container Configuration
+
+- Container bindings in `src/envilder/infrastructure/di/container.ts`
+- Type symbols in `src/envilder/infrastructure/di/types.ts`
+- Runtime binding for `ISecretProvider` due to AWS SSM instance dependency
 
 ### Mapping File Pattern
 
@@ -131,7 +140,9 @@ logger.info(`${envVar.name}=${envVar.maskedValue}`);
 
 ## Key Files to Reference
 
-- `src/apps/cli/Cli.ts` - CLI entry point and command parsing
+- `src/apps/cli/Cli.ts` - CLI entry point and DI container setup
+- `src/envilder/infrastructure/di/container.ts` - Inversify container configuration
+- `src/envilder/infrastructure/di/types.ts` - DI type symbols
 - `src/envilder/application/dispatch/DispatchActionCommandHandler.ts` - Main orchestrator
 - `src/envilder/domain/EnvironmentVariable.ts` - Core domain entity
 - `src/envilder/infrastructure/aws/AwsSsmSecretProvider.ts` - AWS integration
@@ -139,6 +150,7 @@ logger.info(`${envVar.name}=${envVar.maskedValue}`);
 
 ## Integration Points
 
+- Inversify for dependency injection with decorators
 - AWS SDK v3 for SSM operations (`@aws-sdk/client-ssm`)
 - Commander.js for CLI parsing
 - dotenv for .env file parsing

@@ -1,21 +1,25 @@
 #!/usr/bin/env node
+import 'reflect-metadata';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { SSMClientConfig } from '@aws-sdk/client-ssm';
 import { SSM } from '@aws-sdk/client-ssm';
 import { fromIni } from '@aws-sdk/credential-providers';
 import { Command } from 'commander';
-import { DispatchActionCommandHandlerBuilder } from '../../envilder/application/dispatch/builders/DispatchActionCommandHandlerBuilder.js';
 import { DispatchActionCommand } from '../../envilder/application/dispatch/DispatchActionCommand.js';
+import type { DispatchActionCommandHandler } from '../../envilder/application/dispatch/DispatchActionCommandHandler.js';
 import type { CliOptions } from '../../envilder/domain/CliOptions.js';
+import type { ILogger } from '../../envilder/domain/ports/ILogger.js';
 import { AwsSsmSecretProvider } from '../../envilder/infrastructure/aws/AwsSsmSecretProvider.js';
-import { ConsoleLogger } from '../../envilder/infrastructure/logger/ConsoleLogger.js';
+import {
+  bindSecretProvider,
+  createContainer,
+} from '../../envilder/infrastructure/di/container.js';
+import { TYPES } from '../../envilder/infrastructure/di/types.js';
 import { PackageVersionReader } from '../../envilder/infrastructure/package/PackageVersionReader.js';
-import { FileVariableStore } from '../../envilder/infrastructure/variableStore/FileConfigurationRepository.js';
 
 async function executeCommand(options: CliOptions): Promise<void> {
-  const logger = new ConsoleLogger();
-  const fileManager = new FileVariableStore(logger);
+  const container = createContainer();
 
   const ssm = options.profile
     ? new SSM({
@@ -24,12 +28,11 @@ async function executeCommand(options: CliOptions): Promise<void> {
     : new SSM();
 
   const secretProvider = new AwsSsmSecretProvider(ssm);
+  bindSecretProvider(container, secretProvider);
 
-  const commandHandler = DispatchActionCommandHandlerBuilder.build()
-    .withLogger(logger)
-    .withEnvFileManager(fileManager)
-    .withProvider(secretProvider)
-    .create();
+  const commandHandler = container.get<DispatchActionCommandHandler>(
+    TYPES.DispatchActionCommandHandler,
+  );
 
   const command = DispatchActionCommand.fromCliOptions(options);
   await commandHandler.handleCommand(command);
@@ -89,7 +92,8 @@ function readPackageVersion(): Promise<string> {
 }
 
 main().catch((error) => {
-  const logger = new ConsoleLogger();
+  const container = createContainer();
+  const logger = container.get<ILogger>(TYPES.ILogger);
   logger.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
   logger.error(error instanceof Error ? error.message : String(error));
 });

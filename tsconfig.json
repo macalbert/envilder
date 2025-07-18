@@ -12,12 +12,21 @@
     "esModuleInterop": true,
     "noImplicitAny": true,
     "skipLibCheck": true,
-    "lib": ["es2022"],
+    "lib": [
+      "es2022"
+    ],
     "declaration": true,
     "declarationMap": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "types": ["node", "picocolors"]
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "types": [
+      "node",
+      "picocolors"
+    ]
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*"
+  ]
 }

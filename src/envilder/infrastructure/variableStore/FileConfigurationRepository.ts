@@ -1,15 +1,19 @@
 import * as fs from 'node:fs/promises';
 import * as dotenv from 'dotenv';
+import { inject, injectable } from 'inversify';
 import {
   DependencyMissingError,
   EnvironmentFileError,
 } from '../../domain/errors/DomainErrors.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
+import { TYPES } from '../di/types.js';
 
+@injectable()
 export class FileVariableStore implements IVariableStore {
   private logger: ILogger;
-  constructor(logger: ILogger) {
+
+  constructor(@inject(TYPES.ILogger) logger: ILogger) {
     if (!logger) {
       throw new DependencyMissingError('Logger must be specified');
     }
