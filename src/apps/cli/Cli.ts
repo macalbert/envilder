@@ -10,8 +10,8 @@ import { DispatchActionCommand } from '../../envilder/application/dispatch/Dispa
 import type { CliOptions } from '../../envilder/domain/CliOptions.js';
 import { AwsSsmSecretProvider } from '../../envilder/infrastructure/aws/AwsSsmSecretProvider.js';
 import { ConsoleLogger } from '../../envilder/infrastructure/logger/ConsoleLogger.js';
-import { PackageJsonFinder } from '../../envilder/infrastructure/versionFinder/PackageJsonFinder.js';
 import { FileVariableStore } from '../../envilder/infrastructure/variableStore/FileConfigurationRepository.js';
+import { PackageJsonFinder } from '../../envilder/infrastructure/versionFinder/PackageJsonFinder.js';
 
 async function executeCommand(options: CliOptions): Promise<void> {
   const logger = new ConsoleLogger();
