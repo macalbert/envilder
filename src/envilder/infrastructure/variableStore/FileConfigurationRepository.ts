@@ -7,7 +7,7 @@ import {
 } from '../../domain/errors/DomainErrors.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
-import { TYPES } from '../di/types.js';
+import { TYPES } from '../../types.js';
 
 @injectable()
 export class FileVariableStore implements IVariableStore {

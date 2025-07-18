@@ -27,27 +27,33 @@ Three main command handlers coordinate operations:
 - `PushEnvToSsmCommandHandler`: Reads .env + mapping → pushes to SSM
 - `PushSingleCommandHandler`: Direct key/value → SSM push
 
-## Dependency Injection with Inversify
+## Dependency Injection with Inversify (.NET-Style Startup)
 
-Uses Inversify for dependency injection with clean separation of concerns:
+Uses Inversify for dependency injection with .NET-style startup pattern for organized service configuration:
 
 ```typescript
-// Container setup
-const container = createContainer();
-const secretProvider = new AwsSsmSecretProvider(ssm);
-bindSecretProvider(container, secretProvider);
+// .NET-style startup pattern (src/apps/cli/Startup.ts)
+const startup = new Startup();
+startup.configureServices();           // Configure domain/application services
+startup.configureInfrastructure(profile); // Configure infrastructure with runtime params
+const serviceProvider = startup.getServiceProvider();
 
-const commandHandler = container.get<DispatchActionCommandHandler>(TYPES.DispatchActionCommandHandler);
+const commandHandler = serviceProvider.get<DispatchActionCommandHandler>(TYPES.DispatchActionCommandHandler);
 ```
 
 All services use `@injectable` decorators and constructor injection with `@inject(TYPES.Symbol)`.
 
+DI types are defined in `src/envilder/types.ts` for shared access across layers.
+
 ## Core Workflows
 
-### DI Container Configuration
+### .NET-Style Startup Configuration
 
-- Container bindings in `src/envilder/infrastructure/di/container.ts`
-- Type symbols in `src/envilder/infrastructure/di/types.ts`
+- `Startup` class in `src/apps/cli/Startup.ts` - Main DI configuration (equivalent to .NET's Startup.cs)
+- `configureServices()` - Configure domain and application services (equivalent to ConfigureServices)
+- `configureInfrastructure()` - Configure infrastructure with runtime parameters (equivalent to Configure)  
+- `getServiceProvider()` - Get configured container (equivalent to built service provider)
+- Type symbols in `src/envilder/types.ts`
 - Runtime binding for `ISecretProvider` due to AWS SSM instance dependency
 
 ### Mapping File Pattern
@@ -141,8 +147,8 @@ logger.info(`${envVar.name}=${envVar.maskedValue}`);
 ## Key Files to Reference
 
 - `src/apps/cli/Cli.ts` - CLI entry point and DI container setup
-- `src/envilder/infrastructure/di/container.ts` - Inversify container configuration
-- `src/envilder/infrastructure/di/types.ts` - DI type symbols
+- `src/apps/cli/Startup.ts` - .NET-style startup class for DI configuration
+- `src/envilder/types.ts` - DI type symbols for shared access across layers
 - `src/envilder/application/dispatch/DispatchActionCommandHandler.ts` - Main orchestrator
 - `src/envilder/domain/EnvironmentVariable.ts` - Core domain entity
 - `src/envilder/infrastructure/aws/AwsSsmSecretProvider.ts` - AWS integration

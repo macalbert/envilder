@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { InvalidArgumentError } from '../../domain/errors/DomainErrors.js';
 import { OperationMode } from '../../domain/OperationMode.js';
-import { TYPES } from '../../infrastructure/di/types.js';
+import { TYPES } from '../../types.js';
 import { PullSsmToEnvCommand } from '../pullSsmToEnv/PullSsmToEnvCommand.js';
 import type { PullSsmToEnvCommandHandler } from '../pullSsmToEnv/PullSsmToEnvCommandHandler.js';
 import { PushEnvToSsmCommand } from '../pushEnvToSsm/PushEnvToSsmCommand.js';

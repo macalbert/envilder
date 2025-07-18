@@ -3,7 +3,7 @@ import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
-import { TYPES } from '../../infrastructure/di/types.js';
+import { TYPES } from '../../types.js';
 import type { PullSsmToEnvCommand } from './PullSsmToEnvCommand.js';
 
 @injectable()

@@ -2,7 +2,7 @@ import { inject, injectable } from 'inversify';
 import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
-import { TYPES } from '../../infrastructure/di/types.js';
+import { TYPES } from '../../types.js';
 import type { PushSingleCommand } from './PushSingleCommand.js';
 
 @injectable()

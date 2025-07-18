@@ -2,35 +2,22 @@
 import 'reflect-metadata';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { SSMClientConfig } from '@aws-sdk/client-ssm';
-import { SSM } from '@aws-sdk/client-ssm';
-import { fromIni } from '@aws-sdk/credential-providers';
 import { Command } from 'commander';
 import { DispatchActionCommand } from '../../envilder/application/dispatch/DispatchActionCommand.js';
 import type { DispatchActionCommandHandler } from '../../envilder/application/dispatch/DispatchActionCommandHandler.js';
 import type { CliOptions } from '../../envilder/domain/CliOptions.js';
 import type { ILogger } from '../../envilder/domain/ports/ILogger.js';
-import { AwsSsmSecretProvider } from '../../envilder/infrastructure/aws/AwsSsmSecretProvider.js';
-import {
-  bindSecretProvider,
-  createContainer,
-} from '../../envilder/infrastructure/di/container.js';
-import { TYPES } from '../../envilder/infrastructure/di/types.js';
 import { PackageVersionReader } from '../../envilder/infrastructure/package/PackageVersionReader.js';
+import { TYPES } from '../../envilder/types.js';
+import { Startup } from './Startup.js';
 
 async function executeCommand(options: CliOptions): Promise<void> {
-  const container = createContainer();
+  const startup = new Startup();
+  startup.configureServices();
+  startup.configureInfrastructure(options.profile);
+  const serviceProvider = startup.getServiceProvider();
 
-  const ssm = options.profile
-    ? new SSM({
-        credentials: fromIni({ profile: options.profile }),
-      } as SSMClientConfig)
-    : new SSM();
-
-  const secretProvider = new AwsSsmSecretProvider(ssm);
-  bindSecretProvider(container, secretProvider);
-
-  const commandHandler = container.get<DispatchActionCommandHandler>(
+  const commandHandler = serviceProvider.get<DispatchActionCommandHandler>(
     TYPES.DispatchActionCommandHandler,
   );
 
@@ -92,8 +79,11 @@ function readPackageVersion(): Promise<string> {
 }
 
 main().catch((error) => {
-  const container = createContainer();
-  const logger = container.get<ILogger>(TYPES.ILogger);
+  const startup = new Startup();
+  startup.configureServices();
+  const serviceProvider = startup.getServiceProvider();
+
+  const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
   logger.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
   logger.error(error instanceof Error ? error.message : String(error));
 });
