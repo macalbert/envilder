@@ -1,7 +1,6 @@
 import 'reflect-metadata';
 import { Container } from 'inversify';
 import { beforeEach, describe, expect, it } from 'vitest';
-
 import { Startup } from '../../../src/apps/cli/Startup.js';
 import type { DispatchActionCommandHandler } from '../../../src/envilder/application/dispatch/DispatchActionCommandHandler.js';
 import type { ILogger } from '../../../src/envilder/domain/ports/ILogger.js';
@@ -190,10 +189,10 @@ describe('Startup', () => {
     it('Should_SupportGetServiceProvider_When_LegacyCodeIsUsed', () => {
       // Arrange
       const sut = startup.configureServices().configureInfrastructure();
-      
+
       // Act
       const actual = sut.getServiceProvider();
-      
+
       // Assert
       const logger = actual.get<ILogger>(TYPES.ILogger);
       expect(actual).toBeInstanceOf(Container);
