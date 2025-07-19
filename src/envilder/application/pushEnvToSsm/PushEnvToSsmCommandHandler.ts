@@ -12,7 +12,7 @@ export class PushEnvToSsmCommandHandler {
     @inject(TYPES.ISecretProvider)
     private readonly secretProvider: ISecretProvider,
     @inject(TYPES.IVariableStore)
-    private readonly envFileManager: IVariableStore,
+    private readonly variableStore: IVariableStore,
     @inject(TYPES.ILogger) private readonly logger: ILogger,
   ) {}
 
@@ -47,12 +47,12 @@ export class PushEnvToSsmCommandHandler {
     envVariables: Record<string, string>;
   }> {
     this.logger.info(`Loading parameter map from '${command.mapPath}'`);
-    const paramMap = await this.envFileManager.getMapping(command.mapPath);
+    const paramMap = await this.variableStore.getMapping(command.mapPath);
 
     this.logger.info(
       `Loading environment variables from '${command.envFilePath}'`,
     );
-    const envVariables = await this.envFileManager.getEnvironment(
+    const envVariables = await this.variableStore.getEnvironment(
       command.envFilePath,
     );
 

@@ -23,7 +23,7 @@ export class PullSsmToEnvCommandHandler {
     @inject(TYPES.ISecretProvider)
     private readonly secretProvider: ISecretProvider,
     @inject(TYPES.IVariableStore)
-    private readonly envFileManager: IVariableStore,
+    private readonly variableStore: IVariableStore,
     @inject(TYPES.ILogger) private readonly logger: ILogger,
   ) {}
 
@@ -57,10 +57,10 @@ export class PullSsmToEnvCommandHandler {
     requestVariables: Record<string, string>;
     currentVariables: Record<string, string>;
   }> {
-    const requestVariables = await this.envFileManager.getMapping(
+    const requestVariables = await this.variableStore.getMapping(
       command.mapPath,
     );
-    const currentVariables = await this.envFileManager.getEnvironment(
+    const currentVariables = await this.variableStore.getEnvironment(
       command.envFilePath,
     );
 
@@ -71,7 +71,7 @@ export class PullSsmToEnvCommandHandler {
     envFilePath: string,
     variables: Record<string, string>,
   ): Promise<void> {
-    await this.envFileManager.saveEnvironment(envFilePath, variables);
+    await this.variableStore.saveEnvironment(envFilePath, variables);
   }
 
   private async envild(

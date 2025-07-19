@@ -13,7 +13,7 @@ import type { IVariableStore } from '../../envilder/domain/ports/IVariableStore.
 
 import { AwsSsmSecretProvider } from '../../envilder/infrastructure/aws/AwsSsmSecretProvider.js';
 import { ConsoleLogger } from '../../envilder/infrastructure/logger/ConsoleLogger.js';
-import { FileVariableStore } from '../../envilder/infrastructure/variableStore/FileConfigurationRepository.js';
+import { FileVariableStore } from '../../envilder/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../envilder/types.js';
 
 export class Startup {

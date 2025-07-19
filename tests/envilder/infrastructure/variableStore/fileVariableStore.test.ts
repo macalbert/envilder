@@ -2,7 +2,7 @@ import * as fs from 'node:fs/promises';
 import * as dotenv from 'dotenv';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConsoleLogger } from '../../../../src/envilder/infrastructure/logger/ConsoleLogger';
-import { FileVariableStore } from '../../../../src/envilder/infrastructure/variableStore/FileConfigurationRepository';
+import { FileVariableStore } from '../../../../src/envilder/infrastructure/variableStore/FileVariableStore';
 
 vi.mock('node:fs/promises', async () => {
   const actual = await vi.importActual('node:fs/promises');
