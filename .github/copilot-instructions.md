@@ -293,11 +293,11 @@ const mockInMemoryFiles = new Map<string, string>();
 #### Service Mocking with Vitest
 
 ```typescript
-const mockLogger = {
+const mockLogger: Mocked<ILogger> = {
   info: vi.fn(),
   warn: vi.fn(),
-  error: vi.fn()
-} as jest.Mocked<ILogger>;
+  error: vi.fn(),
+};
 ```
 
 ## File Extensions and Build
