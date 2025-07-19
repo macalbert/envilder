@@ -32,6 +32,12 @@ export class Startup {
     return this;
   }
 
+  /**
+   * Configures infrastructure services for the application.
+   * Optionally accepts an AWS profile to use for service configuration.
+   * @param awsProfile - The AWS profile to use for configuring infrastructure services.
+   * @returns The current instance for method chaining.
+   */
   configureInfrastructure(awsProfile?: string): this {
     this.configureInfrastructureServices(awsProfile);
     return this;
