@@ -126,7 +126,7 @@ npm run format:write   # Biome formatting
 
 ### Error Handling
 
-- Domain-specific error classes in `domain/errors/DomainErrors.ts`
+- Domain-specific error classes in `src/envilder/domain/errors/DomainErrors.ts`
 - All async operations use try/catch with logging
 - Validation happens in domain entities (e.g., `EnvironmentVariable.validate()`)
 
