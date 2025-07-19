@@ -1,35 +1,29 @@
 import { Command } from 'commander';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { main } from '../../../src/apps/cli/Cli';
-import { DispatchActionCommandHandlerBuilder } from '../../../src/envilder/application/dispatch/builders/DispatchActionCommandHandlerBuilder';
 import { DispatchActionCommand } from '../../../src/envilder/application/dispatch/DispatchActionCommand';
+import { DispatchActionCommandHandler } from '../../../src/envilder/application/dispatch/DispatchActionCommandHandler';
 import { OperationMode } from '../../../src/envilder/domain/OperationMode';
 
-function patchBuilderWithMocks() {
+function patchWithMocks() {
   const mockCommandHandler = {
     handleCommand: vi.fn().mockResolvedValue(undefined),
   };
 
-  const mockBuilder = {
-    withEnvFileManager: vi.fn().mockReturnThis(),
-    withProvider: vi.fn().mockReturnThis(),
-    withLogger: vi.fn().mockReturnThis(),
-    create: vi.fn().mockReturnValue(mockCommandHandler),
-  };
+  vi.spyOn(
+    DispatchActionCommandHandler.prototype,
+    'handleCommand',
+  ).mockImplementation(mockCommandHandler.handleCommand);
 
-  vi.spyOn(DispatchActionCommandHandlerBuilder, 'build').mockImplementation(
-    () => mockBuilder,
-  );
-
-  return { mockBuilder, mockCommandHandler };
+  return { mockCommandHandler };
 }
 
 describe('Cli', () => {
   const testProfile = 'test-profile';
-  let mocks: ReturnType<typeof patchBuilderWithMocks>;
+  let mocks: ReturnType<typeof patchWithMocks>;
 
   beforeEach(() => {
-    mocks = patchBuilderWithMocks();
+    mocks = patchWithMocks();
     vi.spyOn(process, 'exit').mockImplementation(() => {
       throw new Error('process.exit called');
     });
@@ -66,7 +60,6 @@ describe('Cli', () => {
     await main();
 
     // Assert
-    expect(mocks.mockBuilder.withProvider).toHaveBeenCalled();
     expect(mocks.mockCommandHandler.handleCommand).toHaveBeenCalledWith(
       mockCommand,
     );

@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import { PushEnvToSsmCommand } from '../../../../src/envilder/application/pushEnvToSsm/PushEnvToSsmCommand';
 import { PushEnvToSsmCommandHandler } from '../../../../src/envilder/application/pushEnvToSsm/PushEnvToSsmCommandHandler';
-import type { IEnvFileManager } from '../../../../src/envilder/domain/ports/IEnvFileManager';
 import type { ILogger } from '../../../../src/envilder/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../../src/envilder/domain/ports/ISecretProvider';
+import type { IVariableStore } from '../../../../src/envilder/domain/ports/IVariableStore';
 
 describe('PushEnvToSsmCommandHandler', () => {
   let mockSecretProvider: ISecretProvider;
-  let mockEnvFileManager: IEnvFileManager & {
-    loadMapFile: Mock;
-    loadEnvFile: Mock;
-    saveEnvFile: Mock;
+  let mockVariableStore: IVariableStore & {
+    getMapping: Mock;
+    getEnvironment: Mock;
+    saveEnvironment: Mock;
   };
   let mockLogger: ILogger;
   let sut: PushEnvToSsmCommandHandler;
@@ -24,10 +24,10 @@ describe('PushEnvToSsmCommandHandler', () => {
       setSecret: vi.fn(async (): Promise<void> => {}),
     };
 
-    mockEnvFileManager = {
-      loadMapFile: vi.fn().mockResolvedValue({} as Record<string, string>),
-      loadEnvFile: vi.fn().mockResolvedValue({} as Record<string, string>),
-      saveEnvFile: vi.fn(),
+    mockVariableStore = {
+      getMapping: vi.fn().mockResolvedValue({} as Record<string, string>),
+      getEnvironment: vi.fn().mockResolvedValue({} as Record<string, string>),
+      saveEnvironment: vi.fn(),
     };
 
     mockLogger = {
@@ -38,19 +38,19 @@ describe('PushEnvToSsmCommandHandler', () => {
 
     sut = new PushEnvToSsmCommandHandler(
       mockSecretProvider,
-      mockEnvFileManager,
+      mockVariableStore,
       mockLogger,
     );
   });
 
   it('Should_PushEnvFileToSSM_When_ValidEnvironmentVariablesAreProvided', async () => {
     // Arrange
-    mockEnvFileManager.loadMapFile.mockResolvedValue({
+    mockVariableStore.getMapping.mockResolvedValue({
       TEST_ENV_VAR: '/path/to/ssm/test',
       ANOTHER_VAR: '/path/to/ssm/another',
     });
 
-    mockEnvFileManager.loadEnvFile.mockResolvedValue({
+    mockVariableStore.getEnvironment.mockResolvedValue({
       TEST_ENV_VAR: 'test-value',
       ANOTHER_VAR: 'another-value',
     });
@@ -61,8 +61,8 @@ describe('PushEnvToSsmCommandHandler', () => {
     await sut.handle(command);
 
     // Assert
-    expect(mockEnvFileManager.loadMapFile).toHaveBeenCalledWith(mockMapPath);
-    expect(mockEnvFileManager.loadEnvFile).toHaveBeenCalledWith(
+    expect(mockVariableStore.getMapping).toHaveBeenCalledWith(mockMapPath);
+    expect(mockVariableStore.getEnvironment).toHaveBeenCalledWith(
       mockEnvFilePath,
     );
     expect(mockSecretProvider.setSecret).toHaveBeenCalledTimes(2);
@@ -81,12 +81,12 @@ describe('PushEnvToSsmCommandHandler', () => {
 
   it('Should_Warning_When_ImportsNotMatchesKey', async () => {
     // Arrange
-    mockEnvFileManager.loadMapFile.mockResolvedValue({
+    mockVariableStore.getMapping.mockResolvedValue({
       TEST_ENV_VAR: '/path/to/ssm/test',
       MISSING_VAR: '/path/to/ssm/missing',
     });
 
-    mockEnvFileManager.loadEnvFile.mockResolvedValue({
+    mockVariableStore.getEnvironment.mockResolvedValue({
       TEST_ENV_VAR: 'test-value',
       // MISSING_VAR is not present
     });
@@ -111,11 +111,11 @@ describe('PushEnvToSsmCommandHandler', () => {
       throw mockError;
     });
 
-    mockEnvFileManager.loadMapFile.mockResolvedValue({
+    mockVariableStore.getMapping.mockResolvedValue({
       TEST_ENV_VAR: '/path/to/ssm/test',
     });
 
-    mockEnvFileManager.loadEnvFile.mockResolvedValue({
+    mockVariableStore.getEnvironment.mockResolvedValue({
       TEST_ENV_VAR: 'test-value',
     });
 

@@ -1,35 +1,23 @@
 #!/usr/bin/env node
+import 'reflect-metadata';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { SSMClientConfig } from '@aws-sdk/client-ssm';
-import { SSM } from '@aws-sdk/client-ssm';
-import { fromIni } from '@aws-sdk/credential-providers';
 import { Command } from 'commander';
-import { DispatchActionCommandHandlerBuilder } from '../../envilder/application/dispatch/builders/DispatchActionCommandHandlerBuilder.js';
+import type { Container } from 'inversify';
 import { DispatchActionCommand } from '../../envilder/application/dispatch/DispatchActionCommand.js';
+import type { DispatchActionCommandHandler } from '../../envilder/application/dispatch/DispatchActionCommandHandler.js';
 import type { CliOptions } from '../../envilder/domain/CliOptions.js';
-import { AwsSsmSecretProvider } from '../../envilder/infrastructure/Aws/AwsSsmSecretProvider.js';
-import { EnvFileManager } from '../../envilder/infrastructure/EnvManager/EnvFileManager.js';
-import { ConsoleLogger } from '../../envilder/infrastructure/Logger/ConsoleLogger.js';
-import { PackageJsonFinder } from '../../envilder/infrastructure/VersionFinder/PackageJsonFinder.js';
+import type { ILogger } from '../../envilder/domain/ports/ILogger.js';
+import { PackageVersionReader } from '../../envilder/infrastructure/package/PackageVersionReader.js';
+import { TYPES } from '../../envilder/types.js';
+import { Startup } from './Startup.js';
+
+let serviceProvider: Container;
 
 async function executeCommand(options: CliOptions): Promise<void> {
-  const logger = new ConsoleLogger();
-  const fileManager = new EnvFileManager(logger);
-
-  const ssm = options.profile
-    ? new SSM({
-        credentials: fromIni({ profile: options.profile }),
-      } as SSMClientConfig)
-    : new SSM();
-
-  const secretProvider = new AwsSsmSecretProvider(ssm);
-
-  const commandHandler = DispatchActionCommandHandlerBuilder.build()
-    .withLogger(logger)
-    .withEnvFileManager(fileManager)
-    .withProvider(secretProvider)
-    .create();
+  const commandHandler = serviceProvider.get<DispatchActionCommandHandler>(
+    TYPES.DispatchActionCommandHandler,
+  );
 
   const command = DispatchActionCommand.fromCliOptions(options);
   await commandHandler.handleCommand(command);
@@ -74,6 +62,11 @@ export async function main() {
       'SSM path for the single environment variable (only with --push)',
     )
     .action(async (options: CliOptions) => {
+      serviceProvider = Startup.build()
+        .configureServices()
+        .configureInfrastructure(options.profile)
+        .create();
+
       await executeCommand(options);
     });
 
@@ -85,11 +78,12 @@ function readPackageVersion(): Promise<string> {
   const __dirname = dirname(__filename);
   const packageJsonPath = join(__dirname, '../../../package.json');
 
-  return new PackageJsonFinder().readPackageJsonVersion(packageJsonPath);
+  return new PackageVersionReader().getVersion(packageJsonPath);
 }
 
 main().catch((error) => {
-  const logger = new ConsoleLogger();
+  const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
+
   logger.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
   logger.error(error instanceof Error ? error.message : String(error));
 });

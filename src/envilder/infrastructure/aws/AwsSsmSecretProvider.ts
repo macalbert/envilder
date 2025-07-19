@@ -3,8 +3,10 @@ import {
   PutParameterCommand,
   type SSM,
 } from '@aws-sdk/client-ssm';
-import type { ISecretProvider } from '../../domain/ports/ISecretProvider';
+import { injectable } from 'inversify';
+import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 
+@injectable()
 export class AwsSsmSecretProvider implements ISecretProvider {
   private ssm: SSM;
 

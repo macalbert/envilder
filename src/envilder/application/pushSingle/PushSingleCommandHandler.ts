@@ -1,12 +1,16 @@
+import { inject, injectable } from 'inversify';
 import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
+import { TYPES } from '../../types.js';
 import type { PushSingleCommand } from './PushSingleCommand.js';
 
+@injectable()
 export class PushSingleCommandHandler {
   constructor(
+    @inject(TYPES.ISecretProvider)
     private readonly secretProvider: ISecretProvider,
-    private readonly logger: ILogger,
+    @inject(TYPES.ILogger) private readonly logger: ILogger,
   ) {}
 
   /**

@@ -31,6 +31,9 @@
       "quoteStyle": "single",
       "trailingCommas": "all",
       "semicolons": "always"
+    },
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
     }
   },
   "overrides": [],
