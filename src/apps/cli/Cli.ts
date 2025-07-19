@@ -3,6 +3,7 @@ import 'reflect-metadata';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
+import type { Container } from 'inversify';
 import { DispatchActionCommand } from '../../envilder/application/dispatch/DispatchActionCommand.js';
 import type { DispatchActionCommandHandler } from '../../envilder/application/dispatch/DispatchActionCommandHandler.js';
 import type { CliOptions } from '../../envilder/domain/CliOptions.js';
@@ -11,12 +12,9 @@ import { PackageVersionReader } from '../../envilder/infrastructure/package/Pack
 import { TYPES } from '../../envilder/types.js';
 import { Startup } from './Startup.js';
 
-async function executeCommand(options: CliOptions): Promise<void> {
-  const serviceProvider = Startup.build()
-    .configureServices()
-    .configureInfrastructure(options.profile)
-    .create();
+let serviceProvider: Container;
 
+async function executeCommand(options: CliOptions): Promise<void> {
   const commandHandler = serviceProvider.get<DispatchActionCommandHandler>(
     TYPES.DispatchActionCommandHandler,
   );
@@ -64,6 +62,11 @@ export async function main() {
       'SSM path for the single environment variable (only with --push)',
     )
     .action(async (options: CliOptions) => {
+      serviceProvider = Startup.build()
+        .configureServices()
+        .configureInfrastructure(options.profile)
+        .create();
+
       await executeCommand(options);
     });
 
@@ -79,12 +82,8 @@ function readPackageVersion(): Promise<string> {
 }
 
 main().catch((error) => {
-  const serviceProvider = Startup.build()
-    .configureServices()
-    .configureInfrastructure()
-    .create();
-
   const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
+
   logger.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
   logger.error(error instanceof Error ? error.message : String(error));
 });
