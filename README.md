@@ -138,8 +138,6 @@ Watch how easy it is to automate your .env management in less than 1 minute:
 After configuring the AWS CLI and ensuring you have the necessary permissions to create SSM parameters,
 you can begin pushing your first environment variables.
 
-Let me know if you want it split into two lines to resolve the markdown lint warning.
-
 1. **Create a mapping file:**
 
    ```json
