@@ -1,14 +1,19 @@
+import { inject, injectable } from 'inversify';
 import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
-import type { IEnvFileManager } from '../../domain/ports/IEnvFileManager.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
+import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
+import { TYPES } from '../../types.js';
 import type { PushEnvToSsmCommand } from './PushEnvToSsmCommand.js';
 
+@injectable()
 export class PushEnvToSsmCommandHandler {
   constructor(
+    @inject(TYPES.ISecretProvider)
     private readonly secretProvider: ISecretProvider,
-    private readonly envFileManager: IEnvFileManager,
-    private readonly logger: ILogger,
+    @inject(TYPES.IVariableStore)
+    private readonly variableStore: IVariableStore,
+    @inject(TYPES.ILogger) private readonly logger: ILogger,
   ) {}
 
   /**
@@ -42,12 +47,12 @@ export class PushEnvToSsmCommandHandler {
     envVariables: Record<string, string>;
   }> {
     this.logger.info(`Loading parameter map from '${command.mapPath}'`);
-    const paramMap = await this.envFileManager.loadMapFile(command.mapPath);
+    const paramMap = await this.variableStore.getMapping(command.mapPath);
 
     this.logger.info(
       `Loading environment variables from '${command.envFilePath}'`,
     );
-    const envVariables = await this.envFileManager.loadEnvFile(
+    const envVariables = await this.variableStore.getEnvironment(
       command.envFilePath,
     );
 

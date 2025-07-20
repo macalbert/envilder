@@ -1,9 +1,12 @@
+import { inject, injectable } from 'inversify';
 import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
-import type { IEnvFileManager } from '../../domain/ports/IEnvFileManager.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
+import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
+import { TYPES } from '../../types.js';
 import type { PullSsmToEnvCommand } from './PullSsmToEnvCommand.js';
 
+@injectable()
 export class PullSsmToEnvCommandHandler {
   private static readonly ERROR_MESSAGES = {
     FETCH_FAILED: 'Failed to generate environment file: ',
@@ -17,9 +20,11 @@ export class PullSsmToEnvCommandHandler {
   };
 
   constructor(
+    @inject(TYPES.ISecretProvider)
     private readonly secretProvider: ISecretProvider,
-    private readonly envFileManager: IEnvFileManager,
-    private readonly logger: ILogger,
+    @inject(TYPES.IVariableStore)
+    private readonly variableStore: IVariableStore,
+    @inject(TYPES.ILogger) private readonly logger: ILogger,
   ) {}
 
   /**
@@ -52,10 +57,10 @@ export class PullSsmToEnvCommandHandler {
     requestVariables: Record<string, string>;
     currentVariables: Record<string, string>;
   }> {
-    const requestVariables = await this.envFileManager.loadMapFile(
+    const requestVariables = await this.variableStore.getMapping(
       command.mapPath,
     );
-    const currentVariables = await this.envFileManager.loadEnvFile(
+    const currentVariables = await this.variableStore.getEnvironment(
       command.envFilePath,
     );
 
@@ -66,7 +71,7 @@ export class PullSsmToEnvCommandHandler {
     envFilePath: string,
     variables: Record<string, string>,
   ): Promise<void> {
-    await this.envFileManager.saveEnvFile(envFilePath, variables);
+    await this.variableStore.saveEnvironment(envFilePath, variables);
   }
 
   private async envild(

@@ -10,9 +10,9 @@ import {
 } from 'vitest';
 import { PullSsmToEnvCommand } from '../../../../src/envilder/application/pullSsmToEnv/PullSsmToEnvCommand';
 import { PullSsmToEnvCommandHandler } from '../../../../src/envilder/application/pullSsmToEnv/PullSsmToEnvCommandHandler';
-import type { IEnvFileManager } from '../../../../src/envilder/domain/ports/IEnvFileManager';
 import type { ILogger } from '../../../../src/envilder/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../../src/envilder/domain/ports/ISecretProvider';
+import type { IVariableStore } from '../../../../src/envilder/domain/ports/IVariableStore';
 
 const testValues: Record<string, string> = {
   '/path/to/ssm/email': 'mockedEmail@example.com',
@@ -22,10 +22,10 @@ const testValues: Record<string, string> = {
 
 describe('PullSsmToEnvCommandHandler', () => {
   let mockSecretProvider: ISecretProvider;
-  let mockEnvFileManager: IEnvFileManager & {
-    loadMapFile: Mock;
-    loadEnvFile: Mock;
-    saveEnvFile: Mock;
+  let mockEnvFileManager: IVariableStore & {
+    getMapping: Mock;
+    getEnvironment: Mock;
+    saveEnvironment: Mock;
   };
   let mockLogger: ILogger;
   let sut: PullSsmToEnvCommandHandler;
@@ -45,9 +45,9 @@ describe('PullSsmToEnvCommandHandler', () => {
     };
 
     mockEnvFileManager = {
-      loadMapFile: vi.fn().mockResolvedValue({} as Record<string, string>),
-      loadEnvFile: vi.fn().mockResolvedValue({} as Record<string, string>),
-      saveEnvFile: vi.fn().mockImplementation(() => Promise.resolve()),
+      getMapping: vi.fn().mockResolvedValue({} as Record<string, string>),
+      getEnvironment: vi.fn().mockResolvedValue({} as Record<string, string>),
+      saveEnvironment: vi.fn().mockImplementation(() => Promise.resolve()),
     };
 
     mockLogger = {
@@ -83,8 +83,8 @@ describe('PullSsmToEnvCommandHandler', () => {
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
 
-    mockEnvFileManager.loadMapFile.mockResolvedValue(paramMapContent);
-    mockEnvFileManager.loadEnvFile.mockResolvedValue({});
+    mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
+    mockEnvFileManager.getEnvironment.mockResolvedValue({});
 
     const command = PullSsmToEnvCommand.create(mockMapPath, mockEnvFilePath);
 
@@ -92,8 +92,8 @@ describe('PullSsmToEnvCommandHandler', () => {
     await sut.handle(command);
 
     // Assert
-    expect(mockEnvFileManager.loadMapFile).toHaveBeenCalledWith(mockMapPath);
-    expect(mockEnvFileManager.loadEnvFile).toHaveBeenCalledWith(
+    expect(mockEnvFileManager.getMapping).toHaveBeenCalledWith(mockMapPath);
+    expect(mockEnvFileManager.getEnvironment).toHaveBeenCalledWith(
       mockEnvFilePath,
     );
     expect(mockSecretProvider.getSecret).toHaveBeenCalledWith(
@@ -102,7 +102,7 @@ describe('PullSsmToEnvCommandHandler', () => {
     expect(mockSecretProvider.getSecret).toHaveBeenCalledWith(
       '/path/to/ssm/password',
     );
-    expect(mockEnvFileManager.saveEnvFile).toHaveBeenCalledWith(
+    expect(mockEnvFileManager.saveEnvironment).toHaveBeenCalledWith(
       mockEnvFilePath,
       {
         NEXT_PUBLIC_CREDENTIAL_EMAIL: 'mockedEmail@example.com',
@@ -122,8 +122,8 @@ describe('PullSsmToEnvCommandHandler', () => {
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
 
-    mockEnvFileManager.loadMapFile.mockResolvedValue(paramMapContent);
-    mockEnvFileManager.loadEnvFile.mockResolvedValue({});
+    mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
+    mockEnvFileManager.getEnvironment.mockResolvedValue({});
 
     const command = PullSsmToEnvCommand.create(mockMapPath, mockEnvFilePath);
 
@@ -146,8 +146,8 @@ describe('PullSsmToEnvCommandHandler', () => {
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
 
-    mockEnvFileManager.loadMapFile.mockResolvedValue(paramMapContent);
-    mockEnvFileManager.loadEnvFile.mockResolvedValue({});
+    mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
+    mockEnvFileManager.getEnvironment.mockResolvedValue({});
 
     const command = PullSsmToEnvCommand.create(mockMapPath, mockEnvFilePath);
 
@@ -167,8 +167,8 @@ describe('PullSsmToEnvCommandHandler', () => {
     };
     fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
 
-    mockEnvFileManager.loadMapFile.mockResolvedValue(paramMapContent);
-    mockEnvFileManager.loadEnvFile.mockResolvedValue({});
+    mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
+    mockEnvFileManager.getEnvironment.mockResolvedValue({});
 
     const command = PullSsmToEnvCommand.create(mockMapPath, mockEnvFilePath);
 

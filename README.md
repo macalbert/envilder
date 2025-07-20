@@ -3,36 +3,59 @@
 <p align="center">
   <img src="https://github.com/user-attachments/assets/96bf1efa-7d21-440a-a414-3a20e7f9a1f1" alt="Envilder">
 </p>
-</p>
 
 <p align="center">
-  <b>✨ A CLI that securely centralizes your environment variables from AWS SSM as a single source of truth ✨</b>
+  <b>Automate .env and secret management with Envilder</b><br>
+  <span>Streamline your environment setup with AWS Parameter Store</span>
 </p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/envilder">
     <img src="https://img.shields.io/npm/v/envilder.svg" alt="npm version">
   </a>
-  <a href="./LICENSE">
-    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
+  <a href="https://img.shields.io/npm/dm/envilder.svg">
+    <img src="https://img.shields.io/npm/dm/envilder.svg" alt="npm downloads">
+  </a>
+  <a href="https://github.com/macalbert/envilder/actions/workflows/tests.yml">
+    <img src="https://github.com/macalbert/envilder/actions/workflows/tests.yml/badge.svg" alt="CI Tests">
   </a>
   <a href="https://macalbert.github.io/envilder/">
     <img src="https://img.shields.io/badge/coverage-report-green.svg" alt="Coverage Report">
+  </a>
+  <a href="./LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
   </a>
 </p>
 
 ## Why centralize environment variables?
 
-Environment variables are crucial for configuring applications across different environments
-(development, production) or even projects. Without proper management, they become:
+Envilder is a CLI tool for .env automation, AWS SSM secrets management, and secure environment variable sync.
+Generating and maintaining consistent .env files is a real pain point for any development team. From outdated
+secrets to insecure practices, the risks are tangible. Envilder eliminates these pitfalls by centralizing and
+automating secret management across real-world environments (dev, test, production) in a simple, secure, and
+efficient way. Use Envilder to automate .env files, sync secrets with AWS Parameter Store, and streamline
+onboarding and CI/CD workflows.
 
-- 🔐 **Security risks** when stored in code repositories
-- 🔄 **Out of sync** across team members and deployment environments
-- 🧩 **Scattered** across various documentation, chat messages, and emails
+---
 
-**Envilder** solves these problems by using AWS SSM Parameter Store as a secure, centralized location for all your
-environment variables, ensuring everyone on your team works with the same configuration and no secrets are exposed
-in your codebase.
+## ❗ What Envilder solves
+
+- Desync between environments (dev, prod)
+- Secrets not properly propagated across team members
+- CI/CD pipeline failures due to outdated or missing .env files
+- Slow and manual onboarding processes
+- Security risks from sharing secrets via Slack, email, or other channels
+- Insecure .env practices and manual secret sharing
+
+## ✅ How Envilder makes life easier
+
+- 🛡️ Centralizes secrets in AWS Parameter Store
+- ⚙️ Generates .env files automatically for every environment
+- 🔄 Applies changes idempotently and instantly
+- 🔐 Improves security: no need to share secrets manually; everything is managed via AWS SSM
+- 👥 Simplifies onboarding and internal rotations
+- 🚀 Enables cloud-native, infrastructure-as-code secret management
+- 🤖 Perfect for DevOps, CI/CD, and team sync
 
 ---
 
@@ -40,26 +63,18 @@ in your codebase.
 
 - [🗝️ Envilder ☁️](#️-envilder-️)
   - [Why centralize environment variables?](#why-centralize-environment-variables)
+  - [❗ What Envilder solves](#-what-envilder-solves)
+  - [✅ How Envilder makes life easier](#-how-envilder-makes-life-easier)
   - [📚 Table of Contents](#-table-of-contents)
   - [⚙️ Features](#️-features)
     - [🧱 Feature Status](#-feature-status)
   - [💾 Installation](#-installation)
   - [🚀 Quick Start](#-quick-start)
-  - [🎥 Video Demonstration](#-video-demonstration)
+    - [🎥 Video Demonstration](#-video-demonstration)
+    - [🏁 Get Started (3 steps)](#-get-started-3-steps)
+    - [📚 Quick Links](#-quick-links)
   - [🛠️ How it works](#️-how-it-works)
-  - [🎮 Usage](#-usage)
-    - [🚀 Push Mode (`--push`)](#-push-mode---push)
-      - [🍄 Method 1: Push from .env file](#-method-1-push-from-env-file)
-    - [⭐ Method 2: Push a single variable](#-method-2-push-a-single-variable)
-    - [🧰 Push Mode options summary](#-push-mode-options-summary)
-    - [🧪 Push Mode Examples](#-push-mode-examples)
-    - [⬇️ Pull Mode (`--map` and `--envfile`)](#️-pull-mode---map-and---envfile)
-      - [⚙️ Pull Mode Options](#️-pull-mode-options)
-      - [🧪 Pull Mode Examples](#-pull-mode-examples)
-      - [📜 Sample Output](#-sample-output)
-  - [👥 Working with multiple AWS profiles](#-working-with-multiple-aws-profiles)
-    - [⬇️ Pull Mode Example](#️-pull-mode-example)
-    - [🚀 Push Mode Example](#-push-mode-example)
+  - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
   - [🏁 Roadmap](#-roadmap)
   - [🤝 Contributing](#-contributing)
   - [📜 License](#-license)
@@ -94,7 +109,7 @@ in your codebase.
 
 🛠 Requirements:
 
-- Node.js **v20+**
+- Node.js **v20+** (cloud-native compatible)
 - AWS CLI installed and configured
 - IAM user/role with `ssm:GetParameter`, `ssm:PutParameter`
 
@@ -112,36 +127,49 @@ npm install -g envilder
 
 ## 🚀 Quick Start
 
-Get started with **Envilder** in 3 simple steps. Remember to add `.env` to your `.gitignore` file for security.
+### 🎥 Video Demonstration
 
-Initial Setup
+Watch how easy it is to automate your .env management in less than 1 minute:  
 
-```bash
-# Step 1: Create a parameter mapping file
-echo '{
-  "DB_PASSWORD": "/my-app/db/password"
-}' > param-map.json
+![Watch the video](https://github.com/user-attachments/assets/9f194143-117d-49f3-a6fb-f400040ea514)
 
-# Step 2: Push a secret to AWS SSM Parameter Store
-envilder --push --key=DB_PASSWORD --value=12345 --ssm-path=/my-app/db/password
-```
+### 🏁 Get Started (3 steps)
 
-Ongoing Usage
+After configuring the AWS CLI and ensuring you have the necessary permissions to create SSM parameters,
+you can begin pushing your first environment variables.
 
-```bash
-# Step 3: Generate your .env file from AWS SSM
-envilder --map=param-map.json --envfile=.env
-```
+Let me know if you want it split into two lines to resolve the markdown lint warning.
 
-🎯 That’s it — your secrets are now managed and versioned from AWS SSM.
+1. **Create a mapping file:**
 
----
+   ```json
+   {
+     "DB_PASSWORD": "/my-app/db/password"
+   }
+   ```
 
-## 🎥 Video Demonstration
+2. **Push a secret to AWS SSM:**
 
-Watch how Envilder works in less than 1 minute:  
+   ```bash
+   envilder --push --key=DB_PASSWORD --value=12345 --ssm-path=/my-app/db/password
+   ```
 
-![Watch the video](https://github.com/user-attachments/assets/2de7cac3-0c13-4706-96f6-bf2ef12b661a)
+Once your secrets are stored in AWS, you can easily generate or synchronize your local .env files:
+
+1. **Generate your .env file from AWS SSM:**
+
+   ```bash
+   envilder --map=param-map.json --envfile=.env
+   ```
+
+Your secrets are now managed and versioned from AWS SSM. Add `.env` to your `.gitignore` for security.
+Envilder is designed for automation, onboarding, and secure cloud-native workflows.
+
+### 📚 Quick Links
+
+- [Requirements & Installation](docs/requirements-installation.md)
+- [Push Command Guide](docs/push-command.md)
+- [Pull Command Guide](docs/pull-command.md)
 
 ---
 
@@ -159,255 +187,33 @@ graph LR
     classDef core fill:#1f3b57,color:#fff,stroke:#ccc,stroke-width:2px;
 ```
 
-1. Define mappings in JSON: `{"ENV_VAR": "ssm/path"}`
-2. Run Envilder: `--push` to upload, or `--map` + `--envfile` to generate
-3. It talks to SSM using your AWS credentials
-4. Result: your secrets synced ✅
+1. Create a new `.env` file like `'ENV_VAR=12345'`
+2. Define mappings in a JSON file : `{"ENV_VAR": "ssm/path"}`
+3. Run Envilder: `--push` to upload, or `--map` + `--envfile` to generate
+4. Envilder syncs secrets securely with AWS SSM Parameter Store using your AWS credentials
+5. Result: your secrets are always up-to-date, secure, and ready for any environment
 
 ---
 
-## 🎮 Usage
+## Frequently Asked Questions (FAQ)
 
-### 🚀 Push Mode (`--push`)
+**Q: What is Envilder?**  
+A: Envilder is a CLI tool for automating .env and secret management using AWS SSM Parameter Store.
 
-Push Mode uploads environment variables to AWS SSM Parameter Store. It has two distinct operation methods:
+**Q: How does Envilder improve security?**  
+A: Secrets are never stored in code or shared via chat/email. All secrets are managed and synced securely via AWS SSM.
 
-#### 🍄 Method 1: Push from .env file
+**Q: Can I use Envilder in CI/CD pipelines?**  
+A: Yes! Envilder is designed for automation and works seamlessly in CI/CD workflows.
 
-**Requirements:**
+**Q: Does Envilder support multiple AWS profiles?**  
+A: Yes, you can use the `--profile` flag to select different AWS credentials.
 
-- `--push` flag to enable Push Mode
-- `--envfile` pointing to your local .env file
-- `--map` pointing to your parameter mapping JSON file
+**Q: What environments does Envilder support?**  
+A: Any environment supported by AWS SSM—dev, test, staging, production, etc.
 
-**How File-Based Push Works:**
-
-1. Envilder reads your local `.env` file to get variable names and values
-2. Envilder reads your `map` file to find the corresponding SSM paths
-3. For each variable found in both files, Envilder pushes the value to AWS SSM
-4. No modifications are made to your local files
-
-```mermaid
-graph LR
-  A[.env File] --> |Variables & Values| B[Envilder]:::core
-  C[Mapping File] --> |SSM Paths| B
-  D[AWS Profile]:::aws --> B
-  B --> E[AWS SSM Parameter Store]:::aws
-
-  classDef aws fill:#ffcc66,color:#000000,stroke:#333,stroke-width:1.5px;
-  classDef core fill:#1f3b57,color:#fff,stroke:#ccc,stroke-width:2px;
-```
-
-**Example:**
-If your `.env` file contains:
-
-```text
-API_KEY=abc123
-DB_PASSWORD=secret456
-```
-
-And your `param-map.json` file contains:
-
-```json
-{
-  "API_KEY": "/myapp/api/key",
-  "DB_PASSWORD": "/myapp/db/password"
-}
-```
-
-Running this command:
-
-```bash
-envilder --push --envfile=.env --map=param-map.json
-```
-
-Will push:
-
-- Value `abc123` to SSM path `/myapp/api/key`
-- Value `secret456` to SSM path `/myapp/db/password`
-
-### ⭐ Method 2: Push a single variable
-
-**What it does:**
-Uploads a single environment variable directly to AWS SSM Parameter Store without using any files.
-
-**Required parameters:**
-
-- `--push`: Activates Push Mode
-- `--key=VAR_NAME`: The name of the environment variable
-- `--value=secret123`: The value to store in AWS SSM
-- `--ssm-path=/your/path`: The full AWS SSM parameter path
-
-**Important notes:**
-
-- NO files are read or modified
-- This is a direct command-to-SSM operation
-- Useful for quick updates or CI/CD pipelines
-
-```mermaid
-graph LR
-  A[Command Line Arguments] --> B[Envilder]:::core
-  C[AWS Profile]:::aws --> B
-  B --> D[AWS SSM Parameter Store]:::aws
-
-  classDef aws fill:#ffcc66,color:#000000,stroke:#333,stroke-width:1.5px;
-  classDef core fill:#1f3b57,color:#fff,stroke:#ccc,stroke-width:2px;  
-```
-
-**Example:**
-
-```bash
-envilder --push --key=API_KEY --value=abc123 --ssm-path=/myapp/api/key
-```
-
-Will push:
-
-- Value `abc123` to SSM path `/myapp/api/key`
-
-### 🧰 Push Mode options summary
-
-**Common Options:**
-
-| Option       | Description                        |
-|------------- | ---------------------------------- |
-| `--push`     | Required: Enables push mode        |
-| `--profile`  | Optional: AWS CLI profile to use   |
-
-**Method 1: File-Based Push Options:**
-
-| Option       | Description                                        |
-|------------- | -------------------------------------------------- |
-| `--envfile`  | Required: Path to your local .env file             |
-| `--map`      | Required: Path to your parameter mapping JSON file |
-
-**Method 2: Single-Variable Push Options:**
-
-| Option       | Description                                 |
-|------------- | ------------------------------------------- |
-| `--key`      | Required: Environment variable name         |
-| `--value`    | Required: Value to store in AWS SSM         |
-| `--ssm-path` | Required: Full SSM parameter path           |
-
-### 🧪 Push Mode Examples
-
-**Method 1: Push from .env file (multiple variables at once):**
-
-```bash
-# Basic usage - pushes all variables found in both .env and map files
-envilder --push --envfile=.env --map=param-map.json
-
-# With AWS profile - for different environments
-envilder --push --envfile=.env.prod --map=param-map.json --profile=prod-account
-```
-
-**Method 2: Push a single variable (no files needed):**
-
-```bash
-# Basic usage - pushes one variable directly to SSM
-envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path
-
-# With AWS profile
-envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path --profile=dev
-```
-
----
-
-### ⬇️ Pull Mode (`--map` and `--envfile`)
-
-Downloads secrets from SSM and writes to `.env`.
-
-#### ⚙️ Pull Mode Options
-
-| Option      | Description                         |
-| ----------- | ----------------------------------- |
-| `--map`     | JSON mapping of env var to SSM path |
-| `--envfile` | Path to write `.env`                |
-| `--profile` | AWS profile to use                  |
-
-#### 🧪 Pull Mode Examples
-
-```bash
-envilder --map=param-map.json --envfile=.env
-```
-
-With profile:
-
-```bash
-envilder --map=param-map.json --envfile=.env --profile=dev-account
-```
-
-#### 📜 Sample Output
-
-After running the pull command above with a `param-map.json` file containing:
-
-```json
-{
-  "API_KEY": "/myapp/api/key",
-  "DB_PASSWORD": "/myapp/db/password",
-  "SECRET_TOKEN": "/myapp/auth/token"
-}
-```
-
-Your generated `.env` file would look like:
-
-```dotenv
-# Generated by Envilder on 2025-07-13
-API_KEY=abc123
-DB_PASSWORD=secret456
-SECRET_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
-```
-
-This keeps your sensitive values secure in AWS SSM while providing local access for development.
-
----
-
-## 👥 Working with multiple AWS profiles
-
-Edit your `~/.aws/credentials`:
-
-```ini
-[default]
-aws_access_key_id=DEFAULT_KEY
-aws_secret_access_key=DEFAULT_SECRET
-
-[dev-account]
-aws_access_key_id=DEV_KEY
-aws_secret_access_key=DEV_SECRET
-
-[prod-account]
-aws_access_key_id=PROD_KEY
-aws_secret_access_key=PROD_SECRET
-```
-
----
-
-### ⬇️ Pull Mode Example
-
-```bash
-# Default
-envilder --map=param-map.json --envfile=.env.dev
-
-# Development
-envilder --map=param-map.json --envfile=.env.dev --profile=dev-account
-
-# Production
-envilder --map=param-map.json --envfile=.env.prod --profile=prod-account
-```
-
----
-
-### 🚀 Push Mode Example
-
-```bash
-# Default
-envilder --push --key=API_KEY --value=secret123 --ssm-path=/dev/api/key
-
-# Development
-envilder --push --key=API_KEY --value=secret123 --ssm-path=/dev/api/key --profile=dev-account
-
-# Production
-envilder --push --key=API_KEY --value=secret123 --ssm-path=/prod/api/key --profile=prod-account
-```
+**Q: Is Envilder open source?**  
+A: Yes, licensed under MIT.
 
 ---
 
@@ -438,5 +244,3 @@ All help is welcome — PRs, issues, ideas!
 
 MIT © [Marçal Albert](https://github.com/macalbert)
 See [LICENSE](./LICENSE)
-
----

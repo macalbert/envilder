@@ -1,5 +1,7 @@
+import { inject, injectable } from 'inversify';
 import { InvalidArgumentError } from '../../domain/errors/DomainErrors.js';
 import { OperationMode } from '../../domain/OperationMode.js';
+import { TYPES } from '../../types.js';
 import { PullSsmToEnvCommand } from '../pullSsmToEnv/PullSsmToEnvCommand.js';
 import type { PullSsmToEnvCommandHandler } from '../pullSsmToEnv/PullSsmToEnvCommandHandler.js';
 import { PushEnvToSsmCommand } from '../pushEnvToSsm/PushEnvToSsmCommand.js';
@@ -8,10 +10,14 @@ import { PushSingleCommand } from '../pushSingle/PushSingleCommand.js';
 import type { PushSingleCommandHandler } from '../pushSingle/PushSingleCommandHandler.js';
 import type { DispatchActionCommand } from './DispatchActionCommand.js';
 
+@injectable()
 export class DispatchActionCommandHandler {
   constructor(
+    @inject(TYPES.PullSsmToEnvCommandHandler)
     private readonly pullHandler: PullSsmToEnvCommandHandler,
+    @inject(TYPES.PushEnvToSsmCommandHandler)
     private readonly pushHandler: PushEnvToSsmCommandHandler,
+    @inject(TYPES.PushSingleCommandHandler)
     private readonly pushSingleHandler: PushSingleCommandHandler,
   ) {}
 

@@ -17,6 +17,8 @@
     "declarationMap": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "types": ["node", "picocolors"]
   },
   "include": ["src/**/*"]
