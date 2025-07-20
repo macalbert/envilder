@@ -4,7 +4,7 @@
 
 The push command uploads environment variables from a local `.env` file to AWS SSM Parameter Store using a mapping file.
 
-![Push Mode Demo](https://github.com/user-attachments/assets/043bbfe2-42ca-4e38-afdc-05840072ddc9)
+![Push Mode Demo](https://github.com/user-attachments/assets/489b1270-9178-4c27-b92d-78a1ac7dc1cb)
 
 ## Usage
 

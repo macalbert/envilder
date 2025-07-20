@@ -4,7 +4,7 @@
 
 The pull command downloads secrets from AWS SSM Parameter Store and writes them to a local `.env` file using a mapping file.
 
-![Pull Mode Demo](https://github.com/user-attachments/assets/489b1270-9178-4c27-b92d-78a1ac7dc1cb)
+![Pull Mode Demo](https://github.com/user-attachments/assets/043bbfe2-42ca-4e38-afdc-05840072ddc9)
 
 ## Pull Mode
 
