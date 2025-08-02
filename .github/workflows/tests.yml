@@ -21,6 +21,9 @@ on:
       - "src/**"
       - "tests/**"
       - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'vite.config.ts'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
