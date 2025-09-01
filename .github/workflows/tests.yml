@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: 🧱 Enter the Pipe (Checkout)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🍄 Grab a Mushroom (Setup Node.js with Cache)
         uses: actions/setup-node@v4
