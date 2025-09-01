@@ -77,7 +77,7 @@
     "@types/glob": "^9.0.0",
     "@vitest/coverage-v8": "^3.1.1",
     "glob": "^11.0.2",
-    "secretlint": "^10.1.1",
+    "secretlint": "^11.2.0",
     "testcontainers": "^11.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2",
