@@ -63,7 +63,7 @@
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.806.0",
     "@aws-sdk/credential-providers": "^3.806.0",
-    "@types/node": "^22.5.5",
+    "@types/node": "^24.3.0",
     "commander": "^14.0.0",
     "dotenv": "^16.4.5",
     "inversify": "^7.6.1",
@@ -77,7 +77,7 @@
     "@types/glob": "^9.0.0",
     "@vitest/coverage-v8": "^3.1.1",
     "glob": "^11.0.2",
-    "secretlint": "^10.1.1",
+    "secretlint": "^11.2.0",
     "testcontainers": "^11.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2",
