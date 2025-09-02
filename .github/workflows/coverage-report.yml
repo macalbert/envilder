@@ -53,7 +53,7 @@ jobs:
         run: echo "The workflow is allowed to run for this PR"
 
       - name: 🧲 Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🛠️ Setup Node.js with Cache
         uses: actions/setup-node@v4
