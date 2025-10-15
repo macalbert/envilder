@@ -11,6 +11,7 @@ on:
 
 # Add explicit permissions for the GITHUB_TOKEN
 permissions:
+  id-token: write  # Required for OIDC
   contents: write
   packages: write
 
@@ -29,6 +30,10 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
+
+      # Ensure npm 11.5.1 or later is installed
+      - name: Update npm
+        run: npm install -g npm@latest
 
       - name: 👑 Detect version bump
         id: version-check
@@ -76,8 +81,6 @@ jobs:
       - name: 🚩 Publish to npm
         if: steps.version-check.outputs.version_changed == 'true'
         run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: 🏰 Create release
         if: steps.version-check.outputs.version_changed == 'true'

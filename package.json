@@ -1,6 +1,6 @@
 {
   "name": "envilder",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "description": "A CLI that securely centralizes your environment variables from AWS SSM as a single source of truth",
   "main": "./lib/apps/cli/Cli.js",
   "bin": {
