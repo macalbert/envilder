@@ -22,6 +22,9 @@
   <a href="https://macalbert.github.io/envilder/">
     <img src="https://img.shields.io/badge/coverage-report-green.svg" alt="Coverage Report">
   </a>
+  <a href="https://snyk.io/test/github/macalbert/envilder">
+    <img src="https://snyk.io/test/github/macalbert/envilder/badge.svg" alt="Known Vulnerabilities">
+  </a>
   <a href="./LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
   </a>
