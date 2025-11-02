@@ -20,9 +20,9 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
+  id-token: write
   contents: read
   pages: write
-  id-token: write
 
 jobs:
   shine-sprite-coverage:
@@ -45,7 +45,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: eu-west-1
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Check if the workflow should run
         if: ${{ steps.dependabot-check.outputs.is_dependabot == 'false' }}

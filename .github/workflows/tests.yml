@@ -1,6 +1,7 @@
 name: 🍄 1-Up Test Run
 
 permissions:
+  id-token: write  # Required for OIDC authentication with AWS
   checks: write
   pull-requests: write
   contents: read
@@ -49,7 +50,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: eu-west-1
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: 📦 Open the ? Block (Install packages)
         run: npm ci
