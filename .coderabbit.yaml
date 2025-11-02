@@ -1,0 +1,49 @@
+# CodeRabbit configuration for envilder
+# CLI tool for AWS SSM secrets management
+# https://docs.coderabbit.ai/guides/configure-coderabbit
+
+language: en-US
+
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+
+  # Security-focused path filters
+  path_filters:
+    - "!package-lock.json"
+    - "!lib/**"
+    - "!coverage/**"
+    - "src/**"
+    - "tests/**"
+    - "docs/**"
+
+  # Security-focused instructions
+  path_instructions:
+    - path: "**/aws/**"
+      instructions: "Verify AWS credential handling, no hardcoded secrets, and proper error handling for SDK calls"
+    - path: "**/infrastructure/**"
+      instructions: "Review dependency injection patterns and security best practices"
+    - path: "**/domain/**"
+      instructions: "Ensure domain logic is well-tested and follows SOLID principles"
+
+  # Enable security scanning
+  tools:
+    gitleaks:
+      enabled: true
+
+  auto_review:
+    enabled: true
+    drafts: false
+    ignore_title_keywords:
+      - "wip"
+      - "draft"
+      - "dependabot"
+
+  # Disable docstring coverage for CLI project
+  finishing_touches:
+    docstrings:
+      enabled: false
