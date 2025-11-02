@@ -23,7 +23,7 @@
     <img src="https://img.shields.io/badge/coverage-report-green.svg" alt="Coverage Report">
   </a>
   <a href="https://snyk.io/test/github/macalbert/envilder">
-    <img src="https://snyk.io/test/github/macalbert/envilder/badge.svg" alt="Known Vulnerabilities">
+    <img src="https://img.shields.io/snyk/vulnerabilities/github/macalbert/envilder" alt="Snyk Vulnerabilities">
   </a>
   <a href="./LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
