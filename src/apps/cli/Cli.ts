@@ -86,8 +86,13 @@ function readPackageVersion(): Promise<string> {
 }
 
 main().catch((error) => {
-  const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
+  const logger = serviceProvider?.get<ILogger>(TYPES.ILogger);
 
-  logger.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
-  logger.error(error instanceof Error ? error.message : String(error));
+  if (logger) {
+    logger.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
+    logger.error(error instanceof Error ? error.message : String(error));
+  } else {
+    console.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
+    console.error(error instanceof Error ? error.message : String(error));
+  }
 });
