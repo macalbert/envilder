@@ -180,6 +180,62 @@ describe('Envilder (E2E)', () => {
     const ssmValue = await GetParameterSsm(singleSsmPath);
     expect(ssmValue).toBe(value);
   });
+
+  it('Should_ShowErrorMessage_When_AzureProviderUsedWithoutVaultUrl', async () => {
+    // Arrange
+    const params = [
+      '--provider',
+      'azure',
+      '--key',
+      'TEST_KEY',
+      '--value',
+      'test-value',
+      '--ssm-path',
+      '/test/path',
+    ];
+
+    // Save current env
+    const originalVaultUrl = process.env.AZURE_KEY_VAULT_URL;
+    delete process.env.AZURE_KEY_VAULT_URL;
+
+    // Act
+    const actual = await runCommand(envilder, params);
+
+    // Assert
+    expect(actual.output).toContain(
+      'AZURE_KEY_VAULT_URL environment variable is required when using Azure provider',
+    );
+
+    // Restore env
+    if (originalVaultUrl) {
+      process.env.AZURE_KEY_VAULT_URL = originalVaultUrl;
+    }
+  });
+
+  it('Should_AcceptAwsProviderFlag_When_ProviderIsExplicitlySet', async () => {
+    // Arrange
+    const key = 'AWS_PROVIDER_TEST';
+    const value = 'aws-test-value';
+
+    const params = [
+      '--provider',
+      'aws',
+      '--key',
+      key,
+      '--value',
+      value,
+      '--ssm-path',
+      singleSsmPath,
+    ];
+
+    // Act
+    const actual = await runCommand(envilder, params);
+
+    // Assert
+    expect(actual.code).toBe(0);
+    const ssmValue = await GetParameterSsm(singleSsmPath);
+    expect(ssmValue).toBe(value);
+  });
 });
 
 function runCommand(
