@@ -123,6 +123,60 @@ describe('Startup', () => {
       // Assert
       expect(actual).toBeDefined();
     });
+
+    it('Should_ConfigureAwsProvider_When_ProviderIsAws', () => {
+      // Arrange
+      const sut = startup
+        .configureServices()
+        .configureInfrastructure(undefined, 'aws');
+
+      // Act
+      const container = sut.create();
+      const actual = container.get<ISecretProvider>(TYPES.ISecretProvider);
+
+      // Assert
+      expect(actual).toBeDefined();
+    });
+
+    it('Should_ThrowError_When_AzureProviderIsSelectedWithoutVaultUrl', () => {
+      // Arrange
+      delete process.env.AZURE_KEY_VAULT_URL;
+      const sut = startup.configureServices();
+
+      // Act & Assert
+      expect(() => sut.configureInfrastructure(undefined, 'azure')).toThrow(
+        'AZURE_KEY_VAULT_URL environment variable is required when using Azure provider',
+      );
+    });
+
+    it('Should_ConfigureAzureProvider_When_ProviderIsAzureAndVaultUrlIsSet', () => {
+      // Arrange
+      process.env.AZURE_KEY_VAULT_URL =
+        'https://test-vault.vault.azure.net';
+      const sut = startup
+        .configureServices()
+        .configureInfrastructure(undefined, 'azure');
+
+      // Act
+      const container = sut.create();
+      const actual = container.get<ISecretProvider>(TYPES.ISecretProvider);
+
+      // Assert
+      expect(actual).toBeDefined();
+
+      // Cleanup
+      delete process.env.AZURE_KEY_VAULT_URL;
+    });
+
+    it('Should_ThrowError_When_UnsupportedProviderIsSpecified', () => {
+      // Arrange
+      const sut = startup.configureServices();
+
+      // Act & Assert
+      expect(() =>
+        sut.configureInfrastructure(undefined, 'unsupported'),
+      ).toThrow('Unsupported provider: unsupported. Supported providers: aws, azure');
+    });
   });
 
   describe('integration', () => {

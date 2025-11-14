@@ -12,6 +12,7 @@ import type { ISecretProvider } from '../../envilder/domain/ports/ISecretProvide
 import type { IVariableStore } from '../../envilder/domain/ports/IVariableStore.js';
 
 import { AwsSsmSecretProvider } from '../../envilder/infrastructure/aws/AwsSsmSecretProvider.js';
+import { AzureKeyVaultSecretProvider } from '../../envilder/infrastructure/azure/AzureKeyVaultSecretProvider.js';
 import { ConsoleLogger } from '../../envilder/infrastructure/logger/ConsoleLogger.js';
 import { FileVariableStore } from '../../envilder/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../envilder/types.js';
@@ -36,10 +37,11 @@ export class Startup {
    * Configures infrastructure services for the application.
    * Optionally accepts an AWS profile to use for service configuration.
    * @param awsProfile - The AWS profile to use for configuring infrastructure services.
+   * @param provider - The cloud provider to use (aws or azure, defaults to aws).
    * @returns The current instance for method chaining.
    */
-  configureInfrastructure(awsProfile?: string): this {
-    this.configureInfrastructureServices(awsProfile);
+  configureInfrastructure(awsProfile?: string, provider?: string): this {
+    this.configureInfrastructureServices(awsProfile, provider);
     return this;
   }
 
@@ -51,7 +53,10 @@ export class Startup {
     return this.container;
   }
 
-  private configureInfrastructureServices(awsProfile?: string): void {
+  private configureInfrastructureServices(
+    awsProfile?: string,
+    provider?: string,
+  ): void {
     this.container
       .bind<ILogger>(TYPES.ILogger)
       .to(ConsoleLogger)
@@ -62,11 +67,30 @@ export class Startup {
       .to(FileVariableStore)
       .inSingletonScope();
 
-    const ssm = awsProfile
-      ? new SSM({ credentials: fromIni({ profile: awsProfile }) })
-      : new SSM();
+    // Default to AWS if no provider is specified
+    const selectedProvider = provider?.toLowerCase() || 'aws';
 
-    const secretProvider = new AwsSsmSecretProvider(ssm);
+    let secretProvider: ISecretProvider;
+
+    if (selectedProvider === 'azure') {
+      // For Azure, get the vault URL from environment variable
+      const vaultUrl = process.env.AZURE_KEY_VAULT_URL;
+      if (!vaultUrl) {
+        throw new Error(
+          'AZURE_KEY_VAULT_URL environment variable is required when using Azure provider',
+        );
+      }
+      secretProvider = new AzureKeyVaultSecretProvider(vaultUrl);
+    } else if (selectedProvider === 'aws') {
+      const ssm = awsProfile
+        ? new SSM({ credentials: fromIni({ profile: awsProfile }) })
+        : new SSM();
+      secretProvider = new AwsSsmSecretProvider(ssm);
+    } else {
+      throw new Error(
+        `Unsupported provider: ${provider}. Supported providers: aws, azure`,
+      );
+    }
 
     this.container
       .bind<ISecretProvider>(TYPES.ISecretProvider)
