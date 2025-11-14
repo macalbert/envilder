@@ -1,4 +1,4 @@
-import { SecretClient } from '@azure/keyvault-secrets';
+import type { SecretClient } from '@azure/keyvault-secrets';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AzureKeyVaultSecretProvider } from '../../../../src/envilder/infrastructure/azure/AzureKeyVaultSecretProvider';
 
@@ -20,7 +20,7 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
     // Create the provider and inject the mock client
     sut = new AzureKeyVaultSecretProvider('https://test-vault.vault.azure.net');
     // Override the private client with our mock
-    (sut as any).client = mockClient;
+    (sut as { client: SecretClient }).client = mockClient;
   });
 
   describe('getSecret', () => {
@@ -246,3 +246,58 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
     });
   });
 });
+
+// Integration tests with real Azure Key Vault (skipped if credentials not available)
+describe.skipIf(!process.env.AZURE_KEY_VAULT_URL)(
+  'AzureKeyVaultSecretProvider (integration with Azure Key Vault)',
+  () => {
+    const vaultUrl = process.env.AZURE_KEY_VAULT_URL as string;
+    const testSecretName = 'integration-test-secret';
+    const testSecretValue = 'integration-test-value';
+    const nonExistentSecret = 'non-existent-secret-xyz123';
+
+    it('Should_StoreAndRetrieveSecret_When_UsingRealAzureKeyVault', async () => {
+      // Arrange
+      const sut = new AzureKeyVaultSecretProvider(vaultUrl);
+
+      // Act - Set secret
+      await sut.setSecret(testSecretName, testSecretValue);
+
+      // Act - Get secret
+      const actual = await sut.getSecret(testSecretName);
+
+      // Assert
+      expect(actual).toBe(testSecretValue);
+    }, 30000);
+
+    it('Should_ReturnUndefined_When_SecretDoesNotExist', async () => {
+      // Arrange
+      const sut = new AzureKeyVaultSecretProvider(vaultUrl);
+
+      // Act
+      const actual = await sut.getSecret(nonExistentSecret);
+
+      // Assert
+      expect(actual).toBeUndefined();
+    }, 30000);
+
+    it('Should_UpdateSecretValue_When_SecretAlreadyExists', async () => {
+      // Arrange
+      const sut = new AzureKeyVaultSecretProvider(vaultUrl);
+      const initialValue = 'initial-value';
+      const updatedValue = 'updated-value';
+
+      // Setup initial value
+      await sut.setSecret(testSecretName, initialValue);
+
+      // Act
+      await sut.setSecret(testSecretName, updatedValue);
+
+      // Get the updated value
+      const actual = await sut.getSecret(testSecretName);
+
+      // Assert
+      expect(actual).toBe(updatedValue);
+    }, 30000);
+  },
+);

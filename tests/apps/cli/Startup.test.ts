@@ -151,8 +151,7 @@ describe('Startup', () => {
 
     it('Should_ConfigureAzureProvider_When_ProviderIsAzureAndVaultUrlIsSet', () => {
       // Arrange
-      process.env.AZURE_KEY_VAULT_URL =
-        'https://test-vault.vault.azure.net';
+      process.env.AZURE_KEY_VAULT_URL = 'https://test-vault.vault.azure.net';
       const sut = startup
         .configureServices()
         .configureInfrastructure(undefined, 'azure');
@@ -175,7 +174,9 @@ describe('Startup', () => {
       // Act & Assert
       expect(() =>
         sut.configureInfrastructure(undefined, 'unsupported'),
-      ).toThrow('Unsupported provider: unsupported. Supported providers: aws, azure');
+      ).toThrow(
+        'Unsupported provider: unsupported. Supported providers: aws, azure',
+      );
     });
   });
 
