@@ -1,6 +1,6 @@
 name: "Envilder AWS SSM Sync"
 description: "Pull secrets from AWS Systems Manager Parameter Store into .env files for your CI/CD workflows"
-author: "Marçal Albert Castellví"
+author: "macalbert"
 
 branding:
   icon: "lock"
