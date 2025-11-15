@@ -67,10 +67,12 @@ const startup = Startup.build();
 startup.configureServices().configureInfrastructure();
 serviceProvider = startup.create();
 
-// Run the main function
-main().catch((error) => {
-  const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
-  logger.error('🚨 Unexpected error occurred! 🍄💥');
-  logger.error(error instanceof Error ? error.message : String(error));
-  process.exit(1);
-});
+// Automatically run when executed inside GitHub Actions
+if (process.env.GITHUB_ACTIONS === 'true') {
+  main().catch((error) => {
+    const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
+    logger.error('🚨 Unexpected error occurred! 🍄💥');
+    logger.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  });
+}

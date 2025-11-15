@@ -14,7 +14,7 @@ Before using this action, ensure you have:
 1. **AWS Credentials** - Configured using `aws-actions/configure-aws-credentials`
 2. **IAM Permissions** - Your AWS role must have `ssm:GetParameter` permission
 
-> **Note:** If you're using the published action from GitHub Marketplace (`macalbert/envilder@v1`),
+> **Note:** If you're using the published action from GitHub Marketplace (`macalbert/envilder/github-action@v1`),
 > no build step is required. The action is pre-built and ready to use.
 
 ### Required IAM Policy
@@ -222,7 +222,7 @@ steps:
       aws-region: us-east-1
 
   - name: 🔐 Test Action (Local Reference)
-    uses: ./  # Reference action from current repo
+    uses: ./github-action  # Reference action from current repo
     with:
       map-file: e2e/sample/param-map.json
       env-file: .env
@@ -235,14 +235,14 @@ steps:
 
 ### Error: "Envilder GitHub Action is not built!"
 
-This error only occurs when using a local reference (`uses: ./`) during development.
+This error only occurs when using a local reference (`uses: ./github-action`) during development.
 
 **Solution for development:**
 
 ```yaml
 - run: npm ci
 - run: npm run build
-- uses: ./  # Local reference requires build
+- uses: ./github-action  # Local reference requires build
   with:
     map-file: param-map.json
     env-file: .env
@@ -311,7 +311,7 @@ For maintainers releasing new versions:
    ```
 
 The `lib/` directory **must be committed** for release tags so users can reference
-`macalbert/envilder@v1` without needing to build the action themselves.
+`macalbert/envilder/github-action@v1` without needing to build the action themselves.
 
 ## Examples
 

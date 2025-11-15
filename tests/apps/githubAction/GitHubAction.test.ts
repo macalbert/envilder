@@ -61,8 +61,8 @@ describe('GitHubAction', () => {
 
   it('Should_ExitWithError_When_RequiredInputsAreMissing', async () => {
     // Arrange
-    process.env.INPUT_MAP_FILE = undefined;
-    process.env.INPUT_ENV_FILE = undefined;
+    delete process.env.INPUT_MAP_FILE;
+    delete process.env.INPUT_ENV_FILE;
 
     // Act
     const action = () => main();
@@ -73,7 +73,7 @@ describe('GitHubAction', () => {
 
   it('Should_ExitWithError_When_MapFileIsMissing', async () => {
     // Arrange
-    process.env.INPUT_MAP_FILE = undefined;
+    delete process.env.INPUT_MAP_FILE;
     process.env.INPUT_ENV_FILE = 'test.env';
 
     // Act
@@ -86,7 +86,7 @@ describe('GitHubAction', () => {
   it('Should_ExitWithError_When_EnvFileIsMissing', async () => {
     // Arrange
     process.env.INPUT_MAP_FILE = 'test-map.json';
-    process.env.INPUT_ENV_FILE = undefined;
+    delete process.env.INPUT_ENV_FILE;
 
     // Act
     const action = () => main();
