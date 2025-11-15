@@ -1,0 +1,101 @@
+name: 🔑 Key Chest Publisher
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '🎮 Level to publish (e.g., 1.0.0)'
+        required: true
+      update-major:
+        description: '⭐ Update power-up tag (e.g., v1)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish-action:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    
+    steps:
+      - name: 🧱 Enter the Pipe (Checkout)
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: 🍄 Grab a Mushroom (Setup Node.js)
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: 📦 Open the ? Block (Install packages)
+        run: npm ci
+
+      - name: 🏗️ Build the Castle
+        run: npm run build
+
+      - name: 🔍 Check for Hidden Blocks (Verify build)
+        run: |
+          if [ ! -f "lib/apps/githubAction/GitHubAction.js" ]; then
+            echo "❌ Oh no! Mario fell into a pit! Build failed!"
+            exit 1
+          fi
+          echo "✅ Yahoo! Build successful! 🎉"
+
+      - name: 🏁 Place the Flagpole (Create version tag)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          echo "🔧 Collecting power-ups (adding built files)..."
+          git add -f lib/
+          git commit -m "🏗️ Build the castle for level v${{ inputs.version }}"
+          
+          echo "🏁 Raising the flag at level v${{ inputs.version }}!"
+          git tag -a "v${{ inputs.version }}" -m "🎮 Level v${{ inputs.version }} complete!"
+          git push origin "v${{ inputs.version }}"
+
+      - name: ⭐ Collect the Star (Update major version)
+        if: inputs.update-major == true
+        run: |
+          MAJOR_VERSION=$(echo "v${{ inputs.version }}" | cut -d. -f1)
+          
+          echo "⭐ Collecting star power! Updating $MAJOR_VERSION to v${{ inputs.version }}"
+          
+          git tag -fa "$MAJOR_VERSION" -m "⭐ Power-up $MAJOR_VERSION now at v${{ inputs.version }}"
+          git push origin "$MAJOR_VERSION" --force
+          echo "🌟 Star collected! $MAJOR_VERSION is now super-charged!"
+
+      - name: 🏰 Unlock the Castle (Create Release)
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "v${{ inputs.version }}"
+          name: "🔑 Secret Key Level v${{ inputs.version }}"
+          body: |
+            ## 🔑 Envilder GitHub Action - Level v${{ inputs.version }}
+            
+            🎮 **New power-up unlocked!** Pull secrets from AWS SSM like collecting coins! 🪙
+            
+            ### 🍄 How to use this power-up
+            
+            ```yaml
+            - uses: aws-actions/configure-aws-credentials@v5
+              with:
+                role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+                aws-region: us-east-1
+            
+            - uses: macalbert/envilder@v${{ inputs.version }}
+              with:
+                map-file: param-map.json
+                env-file: .env
+            ```
+            
+            📖 Check the [manual](https://github.com/macalbert/envilder/blob/main/docs/github-action.md) to master this level!
+            
+            🎊 **Let's-a-go!**
+          generateReleaseNotes: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          makeLatest: true
