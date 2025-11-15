@@ -25,7 +25,8 @@ Pull AWS SSM Parameter Store secrets into `.env` files in your GitHub Actions wo
 | `map-file` | ✅ Yes | - | Path to JSON file mapping environment variables to SSM parameter paths |
 | `env-file` | ✅ Yes | - | Path to `.env` file to generate/update |
 
-> **Note:** All paths (`map-file`, `env-file`) are relative to the repository root, not to any `working-directory` setting in your job. If you use `working-directory`, adjust the paths accordingly.
+> **Note:** All paths (`map-file`, `env-file`) are relative to the repository root, not to any `working-directory`
+> setting in your job. If you use `working-directory`, adjust the paths accordingly.
 
 ## Prerequisites
 
@@ -131,7 +132,8 @@ jobs:
 
 ### Using with `working-directory`
 
-If your workflow uses `working-directory` for steps, remember that **file paths in the action are relative to the repository root**, not the working directory:
+If your workflow uses `working-directory` for steps, remember that
+**file paths in the action are relative to the repository root**, not the working directory:
 
 ```yaml
 jobs:
@@ -274,7 +276,8 @@ SECRET_TOKEN=token_secret_value_here
 
 ### Error: "Could not find lib directory"
 
-The published action includes pre-built code. If you see this error, ensure you're using the marketplace version (`macalbert/envilder/github-action@v1`) not a local checkout.
+The published action includes pre-built code. If you see this error, ensure you're using the
+marketplace version (`macalbert/envilder/github-action@v1`) not a local checkout.
 
 ### Error: "Parameter not found"
 
