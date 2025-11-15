@@ -1,9 +1,7 @@
-name: 🍄 1-Up Test Run
+name: 🔑 Key Chest Test
 
 permissions:
   id-token: write  # Required for OIDC authentication with AWS
-  checks: write
-  pull-requests: write
   contents: read
 
 on:
@@ -18,24 +16,21 @@ on:
       - synchronize
       - ready_for_review
     paths:
-      - ".github/workflows/tests.yml"
+      - ".github/workflows/test-action.yml"
       - "github-action/action.yml"
-      - "src/**"
-      - "tests/**"
-      - 'package.json'
-      - 'package-lock.json'
-      - 'tsconfig.json'
-      - 'vite.config.ts'
+      - "src/apps/githubAction/**"
+      - "tests/apps/githubAction/**"
+      - "e2e/github-action.test.ts"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
   cancel-in-progress: true
 
 jobs:
-  powerup-test:
+  test-action:
     runs-on: ubuntu-24.04
     if: ${{ !github.event.pull_request.draft }}
-    timeout-minutes: 30
+    timeout-minutes: 15
 
     steps:
       - name: 🧱 Enter the Pipe (Checkout)
@@ -56,22 +51,25 @@ jobs:
       - name: 📦 Open the ? Block (Install packages)
         run: npm ci
 
-      - name: 🌟 Shine Sprite (Run formatting checker)
-        run: npm run format
-
-      - name: 🏁 Flagpole (Run code quality checker)
-        run: npm run lint
-
       - name: 🏗️ Build the Castle
         run: npm run build
 
-      - name: 🏎️ Race Through the Track (Run unit-test)
-        run: npm run test:ci
-
-      - name: 🍄 Reveal the Power-Up (Test core results)
-        uses: dorny/test-reporter@v2
-        if: always()
+      - name: 🔐 Test Action - Pull Secrets
+        uses: ./github-action
         with:
-          name: ✅ Test Core Unit Tests
-          path: ./coverage/junit/test-results.xml
-          reporter: jest-junit
+          map-file: e2e/sample/param-map.json
+          env-file: .env.test
+
+      - name: ✅ Verify .env file was created
+        run: |
+          if [ ! -f .env.test ]; then
+            echo "❌ .env.test file was not created!"
+            exit 1
+          fi
+          echo "✅ .env.test file created successfully!"
+          echo "Contents:"
+          cat .env.test
+
+      - name: 🧹 Clean up test file
+        if: always()
+        run: rm -f .env.test

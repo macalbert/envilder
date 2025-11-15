@@ -1,0 +1,45 @@
+name: "Envilder AWS SSM Sync"
+description: "Pull secrets from AWS Systems Manager Parameter Store into .env files for your CI/CD workflows"
+author: "Marçal Albert Castellví"
+
+branding:
+  icon: "lock"
+  color: "orange"
+
+inputs:
+  map-file:
+    description: "Path to the JSON file mapping environment variables to SSM parameter paths"
+    required: true
+  env-file:
+    description: "Path to the .env file to generate"
+    required: true
+
+outputs:
+  env-file-path:
+    description: "Path to the generated .env file"
+    value: ${{ inputs.env-file }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🔍 Validate Envilder CLI is built
+      shell: bash
+      run: |
+        if [ ! -f "${{ github.action_path }}/lib/apps/githubAction/GitHubAction.js" ]; then
+          echo "❌ Envilder GitHub Action is not built!"
+          echo ""
+          echo "Please ensure you run 'npm run build' before using this action."
+          echo "Add these steps before using envilder:"
+          echo "  - run: npm ci"
+          echo "  - run: npm run build"
+          exit 1
+        fi
+
+    - name: 🔐 Pull secrets from AWS SSM
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      env:
+        INPUT_MAP_FILE: ${{ inputs.map-file }}
+        INPUT_ENV_FILE: ${{ inputs.env-file }}
+      run: |
+        node "${{ github.action_path }}/lib/apps/githubAction/GitHubAction.js"

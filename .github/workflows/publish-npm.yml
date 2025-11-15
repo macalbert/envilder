@@ -1,4 +1,4 @@
-name: 🍄 Power-Up Publisher
+name: 📦 Publish NPM Package
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     paths:
       - 'src/**'
       - 'package.json'
-      - '.github/workflows/publish.yml'
+      - '.github/workflows/publish-npm.yml'
 
 # Add explicit permissions for the GITHUB_TOKEN
 permissions:
