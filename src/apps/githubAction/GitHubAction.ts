@@ -21,7 +21,6 @@ function readInputs(): CliOptions {
   return {
     map: mapFile,
     envfile: envFile,
-    profile: undefined,
     // GitHub Action only supports pull mode
     push: false,
   };
@@ -65,7 +64,7 @@ export async function main() {
 
 // Initialize the service provider
 const startup = Startup.build();
-startup.configureServices().configureInfrastructure(undefined);
+startup.configureServices().configureInfrastructure();
 serviceProvider = startup.create();
 
 // Run the main function

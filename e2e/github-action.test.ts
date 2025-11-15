@@ -161,40 +161,6 @@ describe('GitHub Action (E2E)', () => {
     expect(action).toThrow();
   });
 
-  it('Should_UseAwsProfile_When_ProfileInputIsProvided', async () => {
-    // Arrange
-    const ssmParams = JSON.parse(readFileSync(mapFilePath, 'utf8')) as Record<
-      string,
-      string
-    >;
-
-    for (const [key, ssmPath] of Object.entries(ssmParams)) {
-      const testValue = `test-value-for-${key}`;
-      await SetParameterSsm(ssmPath, testValue);
-    }
-
-    // Note: This test assumes a 'default' profile exists
-    // In real scenarios, you'd mock or use a test profile
-    process.env.INPUT_MAP_FILE = mapFilePath;
-    process.env.INPUT_ENV_FILE = envFilePath;
-    process.env.INPUT_AWS_PROFILE = 'default';
-
-    // Act
-    execSync(`node "${actionScript}"`, {
-      cwd: rootDir,
-      stdio: 'inherit',
-      env: {
-        ...process.env,
-        INPUT_MAP_FILE: mapFilePath,
-        INPUT_ENV_FILE: envFilePath,
-        INPUT_AWS_PROFILE: 'default',
-      },
-    });
-
-    // Assert
-    expect(existsSync(envFilePath)).toBe(true);
-  });
-
   it('Should_UpdateExistingEnvFile_When_EnvFileAlreadyExists', async () => {
     // Arrange
     const ssmParams = JSON.parse(readFileSync(mapFilePath, 'utf8')) as Record<
