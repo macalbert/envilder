@@ -1,5 +1,4 @@
-import { DefaultAzureCredential } from '@azure/identity';
-import { SecretClient } from '@azure/keyvault-secrets';
+import type { SecretClient } from '@azure/keyvault-secrets';
 import { injectable } from 'inversify';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 
@@ -7,9 +6,8 @@ import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 export class AzureKeyVaultSecretProvider implements ISecretProvider {
   private client: SecretClient;
 
-  constructor(vaultUrl: string) {
-    const credential = new DefaultAzureCredential();
-    this.client = new SecretClient(vaultUrl, credential);
+  constructor(client: SecretClient) {
+    this.client = client;
   }
 
   async getSecret(name: string): Promise<string | undefined> {

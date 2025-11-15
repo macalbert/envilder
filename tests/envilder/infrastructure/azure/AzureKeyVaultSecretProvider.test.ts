@@ -17,10 +17,8 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
       setSecret: mockSetSecretFn,
     } as unknown as SecretClient;
 
-    // Create the provider and inject the mock client
-    sut = new AzureKeyVaultSecretProvider('https://test-vault.vault.azure.net');
-    // Override the private client with our mock
-    (sut as { client: SecretClient }).client = mockClient;
+    // Create the provider with the mock client
+    sut = new AzureKeyVaultSecretProvider(mockClient);
   });
 
   describe('getSecret', () => {
@@ -258,7 +256,11 @@ describe.skipIf(!process.env.AZURE_KEY_VAULT_URL)(
 
     it('Should_StoreAndRetrieveSecret_When_UsingRealAzureKeyVault', async () => {
       // Arrange
-      const sut = new AzureKeyVaultSecretProvider(vaultUrl);
+      const { DefaultAzureCredential } = await import('@azure/identity');
+      const { SecretClient } = await import('@azure/keyvault-secrets');
+      const credential = new DefaultAzureCredential();
+      const client = new SecretClient(vaultUrl, credential);
+      const sut = new AzureKeyVaultSecretProvider(client);
 
       // Act - Set secret
       await sut.setSecret(testSecretName, testSecretValue);
@@ -272,7 +274,11 @@ describe.skipIf(!process.env.AZURE_KEY_VAULT_URL)(
 
     it('Should_ReturnUndefined_When_SecretDoesNotExist', async () => {
       // Arrange
-      const sut = new AzureKeyVaultSecretProvider(vaultUrl);
+      const { DefaultAzureCredential } = await import('@azure/identity');
+      const { SecretClient } = await import('@azure/keyvault-secrets');
+      const credential = new DefaultAzureCredential();
+      const client = new SecretClient(vaultUrl, credential);
+      const sut = new AzureKeyVaultSecretProvider(client);
 
       // Act
       const actual = await sut.getSecret(nonExistentSecret);
@@ -283,7 +289,11 @@ describe.skipIf(!process.env.AZURE_KEY_VAULT_URL)(
 
     it('Should_UpdateSecretValue_When_SecretAlreadyExists', async () => {
       // Arrange
-      const sut = new AzureKeyVaultSecretProvider(vaultUrl);
+      const { DefaultAzureCredential } = await import('@azure/identity');
+      const { SecretClient } = await import('@azure/keyvault-secrets');
+      const credential = new DefaultAzureCredential();
+      const client = new SecretClient(vaultUrl, credential);
+      const sut = new AzureKeyVaultSecretProvider(client);
       const initialValue = 'initial-value';
       const updatedValue = 'updated-value';
 

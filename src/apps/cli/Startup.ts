@@ -1,5 +1,7 @@
 import { SSM } from '@aws-sdk/client-ssm';
 import { fromIni } from '@aws-sdk/credential-providers';
+import { DefaultAzureCredential } from '@azure/identity';
+import { SecretClient } from '@azure/keyvault-secrets';
 import { Container } from 'inversify';
 
 import { DispatchActionCommandHandler } from '../../envilder/application/dispatch/DispatchActionCommandHandler.js';
@@ -80,7 +82,9 @@ export class Startup {
           'AZURE_KEY_VAULT_URL environment variable is required when using Azure provider',
         );
       }
-      secretProvider = new AzureKeyVaultSecretProvider(vaultUrl);
+      const credential = new DefaultAzureCredential();
+      const client = new SecretClient(vaultUrl, credential);
+      secretProvider = new AzureKeyVaultSecretProvider(client);
     } else if (selectedProvider === 'aws') {
       const ssm = awsProfile
         ? new SSM({ credentials: fromIni({ profile: awsProfile }) })
