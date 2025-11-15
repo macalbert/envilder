@@ -17,8 +17,6 @@ updates:
   labels:
   - "npm"
   - "dependencies"
-  reviewers:
-  - macalbert
   assignees:
   - macalbert
     
@@ -34,7 +32,5 @@ updates:
   labels:
   - "github-actions"
   - "dependencies"
-  reviewers:
-  - macalbert
   assignees:
   - macalbert
