@@ -124,6 +124,7 @@ describe('GitHub Action (E2E)', () => {
       stdio: 'inherit',
       env: {
         ...process.env,
+        GITHUB_ACTIONS: 'true',
         INPUT_MAP_FILE: mapFilePath,
         INPUT_ENV_FILE: envFilePath,
       },
@@ -141,8 +142,8 @@ describe('GitHub Action (E2E)', () => {
 
   it('Should_FailWithError_When_RequiredInputsAreMissing', () => {
     // Arrange
-    process.env.INPUT_MAP_FILE = undefined;
-    process.env.INPUT_ENV_FILE = undefined;
+    delete process.env.INPUT_MAP_FILE;
+    delete process.env.INPUT_ENV_FILE;
 
     // Act
     const action = () => {
@@ -151,8 +152,7 @@ describe('GitHub Action (E2E)', () => {
         stdio: 'pipe',
         env: {
           ...process.env,
-          INPUT_MAP_FILE: undefined,
-          INPUT_ENV_FILE: undefined,
+          GITHUB_ACTIONS: 'true',
         },
       });
     };
@@ -186,6 +186,7 @@ describe('GitHub Action (E2E)', () => {
       stdio: 'inherit',
       env: {
         ...process.env,
+        GITHUB_ACTIONS: 'true',
         INPUT_MAP_FILE: mapFilePath,
         INPUT_ENV_FILE: envFilePath,
       },
