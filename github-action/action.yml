@@ -25,7 +25,7 @@ runs:
     - name: 🔍 Validate Envilder CLI is built
       shell: bash
       run: |
-        if [ ! -f "${{ github.action_path }}/lib/apps/githubAction/GitHubAction.js" ]; then
+        if [ ! -f "${{ github.action_path }}/../lib/apps/githubAction/GitHubAction.js" ]; then
           echo "❌ Envilder GitHub Action is not built!"
           echo ""
           echo "Please ensure you run 'npm run build' before using this action."
@@ -42,4 +42,4 @@ runs:
         INPUT_MAP_FILE: ${{ inputs.map-file }}
         INPUT_ENV_FILE: ${{ inputs.env-file }}
       run: |
-        node "${{ github.action_path }}/lib/apps/githubAction/GitHubAction.js"
+        node "${{ github.action_path }}/../lib/apps/githubAction/GitHubAction.js"
