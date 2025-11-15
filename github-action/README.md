@@ -1,8 +1,31 @@
-# Envilder GitHub Action
+# 🗝️ Envilder GitHub Action 🏰
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/96bf1efa-7d21-440a-a414-3a20e7f9a1f1" alt="Envilder">
+</p>
+
+<p align="center">
+  <b>🍄 Power up your GitHub workflows with AWS SSM secrets! 🍄</b><br>
+  <span>Pull secrets from AWS Systems Manager Parameter Store into .env files automatically</span>
+</p>
+
+<p align="center">
+  <a href="https://github.com/macalbert/envilder/actions/workflows/test-action.yml">
+    <img src="https://github.com/macalbert/envilder/actions/workflows/test-action.yml/badge.svg" alt="Action Tests">
+  </a>
+  <a href="https://github.com/macalbert/envilder">
+    <img src="https://img.shields.io/badge/⭐-GitHub-orange.svg" alt="GitHub">
+  </a>
+  <a href="../LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
+  </a>
+</p>
+
+---
+
+## 🎮 Quick Start
 
 Pull AWS SSM Parameter Store secrets into `.env` files in your GitHub Actions workflows.
-
-## Quick Start
 
 ```yaml
 - name: 🪙 Configure AWS Credentials
@@ -18,19 +41,19 @@ Pull AWS SSM Parameter Store secrets into `.env` files in your GitHub Actions wo
     env-file: .env
 ```
 
-## Inputs
+## 🎯 Inputs
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `map-file` | ✅ Yes | - | Path to JSON file mapping environment variables to SSM parameter paths |
-| `env-file` | ✅ Yes | - | Path to `.env` file to generate/update |
+| `map-file` | ✅ Yes | - | 🗺️ Path to JSON file mapping environment variables to SSM parameter paths |
+| `env-file` | ✅ Yes | - | 📝 Path to `.env` file to generate/update |
 
 > **Note:** All paths (`map-file`, `env-file`) are relative to the repository root, not to any `working-directory`
 > setting in your job. If you use `working-directory`, adjust the paths accordingly.
 
-## Prerequisites
+## 🏁 Prerequisites
 
-### 1. AWS Credentials
+### 1. 🪙 AWS Credentials
 
 Configure AWS credentials using OIDC (recommended) or access keys:
 
@@ -48,7 +71,7 @@ jobs:
           aws-region: us-east-1
 ```
 
-### 2. IAM Permissions
+### 2. 🔑 IAM Permissions
 
 Your AWS role must have `ssm:GetParameter` permission:
 
@@ -65,7 +88,7 @@ Your AWS role must have `ssm:GetParameter` permission:
 }
 ```
 
-### 3. Parameter Mapping File
+### 3. 🗺️ Parameter Mapping File
 
 Create a JSON file mapping environment variables to SSM paths:
 
@@ -79,9 +102,9 @@ Create a JSON file mapping environment variables to SSM paths:
 }
 ```
 
-## Examples
+## 🌟 Examples
 
-### Basic Workflow
+### 🏰 Basic Workflow
 
 ```yaml
 name: 🚀 Deploy Application
@@ -130,7 +153,7 @@ jobs:
         run: npm run deploy
 ```
 
-### Using with `working-directory`
+### 🚧 Using with `working-directory`
 
 If your workflow uses `working-directory` for steps, remember that
 **file paths in the action are relative to the repository root**, not the working directory:
@@ -161,7 +184,7 @@ jobs:
       - run: npm build   # Runs in ./app
 ```
 
-### Multi-Environment Deployment
+### 🌍 Multi-Environment Deployment
 
 ```yaml
 name: 🌍 Deploy to Environment
@@ -206,7 +229,7 @@ jobs:
       - run: npm run deploy
 ```
 
-### Matrix Strategy for Multiple Environments
+### 🎯 Matrix Strategy for Multiple Environments
 
 ```yaml
 name: 🎯 Deploy All Environments
@@ -243,7 +266,7 @@ jobs:
       - run: npm run deploy
 ```
 
-## Output
+## 📦 Output
 
 The action generates/updates the specified `.env` file with values from AWS SSM:
 
@@ -255,9 +278,9 @@ API_KEY=sk_live_abc123xyz789
 SECRET_TOKEN=token_secret_value_here
 ```
 
-## Security Best Practices
+## 🛡️ Security Best Practices
 
-### ✅ DO
+### ✅ DO (Power-Ups!)
 
 - Use OIDC authentication instead of long-lived access keys
 - Scope IAM policies to specific parameter paths
@@ -265,14 +288,14 @@ SECRET_TOKEN=token_secret_value_here
 - Store sensitive SSM paths in GitHub Environment Secrets
 - Use GitHub Environments with protection rules for production
 
-### ❌ DON'T
+### ❌ DON'T (Game Over!)
 
 - Commit the generated `.env` file to version control
 - Grant overly broad IAM permissions (`ssm:*` on `*`)
 - Use the same SSM parameters across environments
 - Store AWS credentials in repository secrets (use OIDC)
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
 ### Error: "Could not find lib directory"
 
@@ -297,12 +320,18 @@ marketplace version (`macalbert/envilder/github-action@v1`) not a local checkout
 - Verify AWS credentials are configured before running the action
 - Review GitHub Actions logs for specific error messages
 
-## Related
+## 🔗 Related
 
-- **CLI Tool**: [Envilder CLI](https://www.npmjs.com/package/envilder) - npm package for local development
-- **Documentation**: [Full documentation](https://github.com/macalbert/envilder/tree/main/docs)
-- **Issues**: [Report issues](https://github.com/macalbert/envilder/issues)
+- 🍄 **CLI Tool**: [Envilder CLI](https://www.npmjs.com/package/envilder) - npm package for local development
+- 📚 **Documentation**: [Full documentation](https://github.com/macalbert/envilder/tree/main/docs)
+- 🐛 **Issues**: [Report issues](https://github.com/macalbert/envilder/issues)
 
-## License
+## 📜 License
 
 MIT License - see [LICENSE](../LICENSE) for details
+
+---
+
+<p align="center">
+  <b>🍄 Made with ❤️ and a little bit of Mario magic 🏰</b>
+</p>
