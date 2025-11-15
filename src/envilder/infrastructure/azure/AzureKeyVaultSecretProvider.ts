@@ -2,6 +2,10 @@ import type { SecretClient } from '@azure/keyvault-secrets';
 import { injectable } from 'inversify';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 
+/**
+ * Azure Key Vault secret provider implementation.
+ * Follows the same dependency injection pattern as AwsSsmSecretProvider.
+ */
 @injectable()
 export class AzureKeyVaultSecretProvider implements ISecretProvider {
   private client: SecretClient;
