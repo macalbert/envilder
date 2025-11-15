@@ -48,7 +48,11 @@ export async function main() {
       'Path to the .env file to be generated or imported (required for most commands)',
     )
     .option('--profile <name>', 'AWS CLI profile to use (optional)')
-    .option('--push', 'Push local .env file back to AWS SSM')
+    .option(
+      '--provider <name>',
+      'Cloud provider to use: aws or azure (default: aws)',
+    )
+    .option('--push', 'Push local .env file back to cloud provider')
     .option(
       '--key <name>',
       'Single environment variable name to push (only with --push)',
@@ -64,7 +68,7 @@ export async function main() {
     .action(async (options: CliOptions) => {
       serviceProvider = Startup.build()
         .configureServices()
-        .configureInfrastructure(options.profile)
+        .configureInfrastructure(options.profile, options.provider)
         .create();
 
       await executeCommand(options);
@@ -82,8 +86,13 @@ function readPackageVersion(): Promise<string> {
 }
 
 main().catch((error) => {
-  const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
+  const logger = serviceProvider?.get<ILogger>(TYPES.ILogger);
 
-  logger.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
-  logger.error(error instanceof Error ? error.message : String(error));
+  if (logger) {
+    logger.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
+    logger.error(error instanceof Error ? error.message : String(error));
+  } else {
+    console.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
+    console.error(error instanceof Error ? error.message : String(error));
+  }
 });
