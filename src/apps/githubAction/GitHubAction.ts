@@ -17,12 +17,11 @@ let serviceProvider: Container;
 function readInputs(): CliOptions {
   const mapFile = process.env.INPUT_MAP_FILE;
   const envFile = process.env.INPUT_ENV_FILE;
-  const awsProfile = process.env.INPUT_AWS_PROFILE;
 
   return {
     map: mapFile,
     envfile: envFile,
-    profile: awsProfile,
+    profile: undefined,
     // GitHub Action only supports pull mode
     push: false,
   };
@@ -54,10 +53,6 @@ export async function main() {
     logger?.info(`📋 Map file: ${options.map}`);
     logger?.info(`📄 Env file: ${options.envfile}`);
 
-    if (options.profile) {
-      logger?.info(`🪪 AWS Profile: ${options.profile}`);
-    }
-
     await executeCommand(options);
 
     logger?.info('✅ Secrets pulled successfully!');
@@ -70,9 +65,7 @@ export async function main() {
 
 // Initialize the service provider
 const startup = Startup.build();
-const awsProfile = process.env.INPUT_AWS_PROFILE;
-
-startup.configureServices().configureInfrastructure(awsProfile);
+startup.configureServices().configureInfrastructure(undefined);
 serviceProvider = startup.create();
 
 // Run the main function

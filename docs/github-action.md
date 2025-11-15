@@ -143,24 +143,12 @@ jobs:
       - run: npm run deploy
 ```
 
-### Using AWS Profile
-
-```yaml
-- name: 🔐 Pull Secrets with Profile
-  uses: macalbert/envilder/github-action@v1
-  with:
-    map-file: param-map.json
-    env-file: .env
-    aws-profile: production
-```
-
 ## Inputs
 
 | Input | Description | Required | Default |
-|-------|-------------|----------|---------|
+|-------|-------------|----------|---------||
 | `map-file` | Path to the JSON file mapping environment variables to SSM parameter paths | ✅ Yes | - |
 | `env-file` | Path to the `.env` file to generate | ✅ Yes | - |
-| `aws-profile` | AWS CLI profile name (optional, uses default AWS credentials if not specified) | ❌ No | - |
 
 ## Outputs
 

@@ -38,34 +38,6 @@ describe('GitHubAction', () => {
     // Arrange
     process.env.INPUT_MAP_FILE = 'test-map.json';
     process.env.INPUT_ENV_FILE = 'test.env';
-    process.env.INPUT_AWS_PROFILE = 'test-profile';
-
-    const mockCommand = {
-      map: 'test-map.json',
-      envfile: 'test.env',
-      profile: 'test-profile',
-      push: false,
-    };
-    vi.spyOn(DispatchActionCommand, 'fromCliOptions').mockReturnValue(
-      mockCommand as unknown as DispatchActionCommand,
-    );
-
-    // Act
-    await main();
-
-    // Assert
-    expect(mocks.mockCommandHandler.handleCommand).toHaveBeenCalledWith(
-      mockCommand,
-    );
-    expect(mocks.mockCommandHandler.handleCommand).toHaveBeenCalledTimes(1);
-    expect(mockCommand.profile).toBe('test-profile');
-  });
-
-  it('Should_HandleOptionalAwsProfile_When_NotProvided', async () => {
-    // Arrange
-    process.env.INPUT_MAP_FILE = 'test-map.json';
-    process.env.INPUT_ENV_FILE = 'test.env';
-    // INPUT_AWS_PROFILE not set
 
     const mockCommand = {
       map: 'test-map.json',
@@ -85,7 +57,6 @@ describe('GitHubAction', () => {
       mockCommand,
     );
     expect(mocks.mockCommandHandler.handleCommand).toHaveBeenCalledTimes(1);
-    expect(mockCommand.profile).toBeUndefined();
   });
 
   it('Should_ExitWithError_When_RequiredInputsAreMissing', async () => {
