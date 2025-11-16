@@ -13,10 +13,10 @@ Before you install Envilder, make sure you have:
 
 ## 2. Install Envilder
 
-Install Envilder globally using npm:
+Install Envilder globally using pnpm:
 
 ```bash
-npm install -g envilder
+pnpm add -g envilder
 ```
 
 ## 3. Configure AWS Credentials

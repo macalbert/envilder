@@ -173,7 +173,12 @@ DocProject/Help/html
 publish/
 lib/
 dit/
+package/
 envilder-*.tgz
+
+# GitHub Action compiled files - only track the bundle
+github-action/dist/
+!github-action/dist/index.js
 
 # Publish Web Output
 *.[Pp]ublish.xml

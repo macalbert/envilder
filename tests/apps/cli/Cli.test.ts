@@ -24,9 +24,6 @@ describe('Cli', () => {
 
   beforeEach(() => {
     mocks = patchWithMocks();
-    vi.spyOn(process, 'exit').mockImplementation(() => {
-      throw new Error('process.exit called');
-    });
   });
 
   afterEach(() => {

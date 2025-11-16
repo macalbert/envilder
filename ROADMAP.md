@@ -20,7 +20,7 @@ Envilder aims to be the simplest, most reliable way to generate `.env` files fro
 
 - [ ] 🔍 **Auto-discovery mode** (`--auto`) for fetching all parameters with a given prefix
 - [ ] ✍️ **Tutorial repo** showing full example with GitHub Actions
-- [ ] 🛍️ **Official GitHub Action** (in Marketplace)
+- [x] 🛍️ **Official GitHub Action** (in Marketplace)
 
 ### 🔹 Dev Experience & Adoption
 
@@ -59,6 +59,7 @@ Every bit of feedback helps make this tool better for the community.
 | Mapping-based secret resolution| ✅ Implemented | |
 | .env file generation           | ✅ Implemented | |
 | AWS profile support            | ✅ Implemented | |
+| GitHub Action                  | ✅ Implemented | Available as composite action |
 | Auto-discovery mode (`--auto`) | ❌ Not implemented | Planned |
 | Check/sync mode (`--check`)    | ❌ Not implemented | Planned |
 | Webhook/Slack notification     | ❌ Not implemented | Planned |
