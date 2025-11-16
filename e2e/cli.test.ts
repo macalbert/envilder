@@ -29,7 +29,7 @@ const ssmClient = new SSMClient({});
 describe('Envilder (E2E)', () => {
   beforeAll(async () => {
     await cleanUpSystem();
-    execSync('npm run build', { cwd: rootDir, stdio: 'inherit' });
+    execSync('pnpm build', { cwd: rootDir, stdio: 'inherit' });
     execSync('node --loader ts-node/esm scripts/pack-and-install.ts', {
       cwd: rootDir,
       stdio: 'inherit',
@@ -221,7 +221,14 @@ async function cleanUpSystem() {
     }
 
     // Uninstall global package (still sync, as pnpm API is not available async)
-    execSync('pnpm remove -g envilder', { stdio: 'inherit' });
+    try {
+      execSync('pnpm remove -g envilder 2>nul', {
+        stdio: 'inherit',
+        shell: 'cmd',
+      });
+    } catch {
+      // Ignore errors if not installed
+    }
   } catch {
     // Ignore errors if not installed
   }

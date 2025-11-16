@@ -49,7 +49,7 @@ function installPackageFile(rootDir: string, packageFile: string): void {
 
   console.log(`Installing from package: ${packagePath}`);
   try {
-    execSync(`npm install -g "${packagePath}"`, { stdio: 'inherit' });
+    execSync(`pnpm add -g "${packagePath}"`, { stdio: 'inherit' });
     console.log('✅ Package installed globally');
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
