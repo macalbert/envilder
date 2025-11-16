@@ -57,7 +57,7 @@ function GetSecretFromKey(envFilePath: string, key: string): string {
 describe('GitHub Action (E2E)', () => {
   const envFilePath = join(rootDir, 'e2e', 'sample', 'cli-validation.env');
   const mapFilePath = join(rootDir, 'e2e', 'sample', 'param-map.json');
-  const actionScript = join(rootDir, 'lib', 'apps', 'gha', 'GitHubAction.js');
+  const actionScript = join(rootDir, 'lib', 'apps', 'gha', 'index.js');
 
   beforeAll(async () => {
     // Build the project
@@ -195,6 +195,9 @@ describe('GitHub Action (E2E)', () => {
     for (const [key, ssmPath] of Object.entries(ssmParams)) {
       const envFileValue = GetSecretFromKey(envFilePath, key);
       const ssmValue = await GetParameterSsm(ssmPath);
+      console.log(
+        `Checking ${key}: envFile="${envFileValue}", ssm="${ssmValue}"`,
+      );
       expect(envFileValue).toBe(ssmValue);
     }
   });

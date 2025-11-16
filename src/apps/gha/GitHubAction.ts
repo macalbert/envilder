@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import 'reflect-metadata';
 import type { Container } from 'inversify';
 import { DispatchActionCommand } from '../../envilder/application/dispatch/DispatchActionCommand.js';
@@ -66,13 +65,3 @@ export async function main() {
 const startup = Startup.build();
 startup.configureServices().configureInfrastructure();
 serviceProvider = startup.create();
-
-// Automatically run when executed inside GitHub Actions
-if (process.env.GITHUB_ACTIONS === 'true') {
-  main().catch((error) => {
-    const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
-    logger.error('🚨 Unexpected error occurred! 🍄💥');
-    logger.error(error instanceof Error ? error.message : String(error));
-    process.exit(1);
-  });
-}
