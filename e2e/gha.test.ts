@@ -9,12 +9,67 @@ import {
   PutParameterCommand,
   SSMClient,
 } from '@aws-sdk/client-ssm';
-import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import {
+  LocalstackContainer,
+  type StartedLocalStackContainer,
+} from '@testcontainers/localstack';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vitest';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '..');
-const ssmClient = new SSMClient({});
+
+// LocalStack container
+const LOCALSTACK_IMAGE = 'localstack/localstack:4.0';
+let localstackContainer: StartedLocalStackContainer;
+let localstackEndpoint: string;
+let ssmClient: SSMClient;
+
+/**
+ * Simulates GitHub Actions environment by running the action entry point
+ * with INPUT_* environment variables (same as real GitHub Actions workflow)
+ */
+function runGitHubAction(inputs: { mapFile: string; envFile: string }): {
+  code: number;
+  output: string;
+  error: string;
+} {
+  const actionScript = join(rootDir, 'lib', 'apps', 'gha', 'index.js');
+
+  try {
+    const output = execSync(`node "${actionScript}"`, {
+      cwd: rootDir,
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        // GitHub Actions sets these automatically from action inputs
+        INPUT_MAP_FILE: inputs.mapFile,
+        INPUT_ENV_FILE: inputs.envFile,
+        // Point AWS SDK to LocalStack
+        AWS_ENDPOINT_URL: localstackEndpoint,
+        AWS_REGION: 'us-east-1',
+        AWS_ACCESS_KEY_ID: 'test',
+        AWS_SECRET_ACCESS_KEY: 'test',
+      },
+    });
+    return { code: 0, output, error: '' };
+  } catch (error: unknown) {
+    const err = error as { status?: number; stdout?: string; stderr?: string };
+    return {
+      code: err.status || 1,
+      output: err.stdout?.toString() || '',
+      error: err.stderr?.toString() || '',
+    };
+  }
+}
 
 // Helper functions
 async function SetParameterSsm(name: string, value: string): Promise<void> {
@@ -57,12 +112,32 @@ function GetSecretFromKey(envFilePath: string, key: string): string {
 describe('GitHub Action (E2E)', () => {
   const envFilePath = join(rootDir, 'e2e', 'sample', 'cli-validation.env');
   const mapFilePath = join(rootDir, 'e2e', 'sample', 'param-map.json');
-  const actionScript = join(rootDir, 'lib', 'apps', 'gha', 'index.js');
 
   beforeAll(async () => {
+    // Start LocalStack container
+    localstackContainer = await new LocalstackContainer(
+      LOCALSTACK_IMAGE,
+    ).start();
+    localstackEndpoint = localstackContainer.getConnectionUri();
+
+    // Initialize SSM client with LocalStack endpoint
+    ssmClient = new SSMClient({
+      endpoint: localstackEndpoint,
+      region: 'us-east-1',
+      credentials: {
+        accessKeyId: 'test',
+        secretAccessKey: 'test',
+      },
+    });
+
     // Build the project
     execSync('pnpm build', { cwd: rootDir, stdio: 'inherit' });
-  }, 30_000);
+  }, 60_000);
+
+  afterAll(async () => {
+    // Stop LocalStack container
+    await localstackContainer.stop();
+  });
 
   beforeEach(async () => {
     // Clean up SSM parameters before each test
@@ -108,23 +183,14 @@ describe('GitHub Action (E2E)', () => {
       await SetParameterSsm(ssmPath, testValue);
     }
 
-    // Set GitHub Actions environment variables
-    process.env.INPUT_MAP_FILE = mapFilePath;
-    process.env.INPUT_ENV_FILE = envFilePath;
-
     // Act
-    execSync(`node "${actionScript}"`, {
-      cwd: rootDir,
-      stdio: 'inherit',
-      env: {
-        ...process.env,
-        GITHUB_ACTIONS: 'true',
-        INPUT_MAP_FILE: mapFilePath,
-        INPUT_ENV_FILE: envFilePath,
-      },
+    const result = runGitHubAction({
+      mapFile: mapFilePath,
+      envFile: envFilePath,
     });
 
     // Assert
+    expect(result.code).toBe(0);
     expect(existsSync(envFilePath)).toBe(true);
 
     for (const [key, ssmPath] of Object.entries(ssmParams)) {
@@ -135,24 +201,15 @@ describe('GitHub Action (E2E)', () => {
   });
 
   it('Should_FailWithError_When_RequiredInputsAreMissing', () => {
-    // Arrange
-    delete process.env.INPUT_MAP_FILE;
-    delete process.env.INPUT_ENV_FILE;
-
-    // Act
-    const action = () => {
-      execSync(`node "${actionScript}"`, {
-        cwd: rootDir,
-        stdio: 'pipe',
-        env: {
-          ...process.env,
-          GITHUB_ACTIONS: 'true',
-        },
-      });
-    };
+    // Act - Simulates GitHub Actions calling action without required inputs
+    const result = runGitHubAction({
+      mapFile: '',
+      envFile: '',
+    });
 
     // Assert
-    expect(action).toThrow();
+    expect(result.code).not.toBe(0);
+    expect(result.error).toContain('Missing required inputs');
   });
 
   it('Should_UpdateExistingEnvFile_When_EnvFileAlreadyExists', async () => {
@@ -169,27 +226,22 @@ describe('GitHub Action (E2E)', () => {
     for (const [key, ssmPath] of Object.entries(ssmParams)) {
       const testValue = `test-value-for-${key}`;
       await SetParameterSsm(ssmPath, testValue);
+      console.log(`Set SSM parameter: ${ssmPath} = ${testValue}`);
     }
 
-    process.env.INPUT_MAP_FILE = mapFilePath;
-    process.env.INPUT_ENV_FILE = envFilePath;
-
     // Act
-    execSync(`node "${actionScript}"`, {
-      cwd: rootDir,
-      stdio: 'inherit',
-      env: {
-        ...process.env,
-        GITHUB_ACTIONS: 'true',
-        INPUT_MAP_FILE: mapFilePath,
-        INPUT_ENV_FILE: envFilePath,
-      },
+    console.log(`Executing action with existing .env file...`);
+    const result = runGitHubAction({
+      mapFile: mapFilePath,
+      envFile: envFilePath,
     });
 
     // Assert
+    expect(result.code).toBe(0);
     expect(existsSync(envFilePath)).toBe(true);
 
     const content = readFileSync(envFilePath, 'utf8');
+    console.log(`Final .env content:\n${content}`);
     expect(content).toContain('EXISTING_VAR=existing_value');
 
     for (const [key, ssmPath] of Object.entries(ssmParams)) {
@@ -200,5 +252,5 @@ describe('GitHub Action (E2E)', () => {
       );
       expect(envFileValue).toBe(ssmValue);
     }
-  });
+  }, 30_000); // 30 second timeout
 });
