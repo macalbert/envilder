@@ -1,3 +1,32 @@
+# [0.7.0](https://github.com/macalbert/envilder/compare/v0.6.6...v0.7.0) (2025-11-16)
+
+
+* ♻️ Move GitHub Action to github-action/ subfolder ([d9bf4d2](https://github.com/macalbert/envilder/commit/d9bf4d2e81acbb1ef2b4e0034c0b6aaa8b307ba3))
+
+
+### Bug Fixes
+
+* **githubAction:** Correct author name in action.yml ([e964aff](https://github.com/macalbert/envilder/commit/e964affbca8410aada8494648dee62ab2a1ab5de))
+* **githubAction:** Correct build command from ppnpm to pnpm ([c9df0c4](https://github.com/macalbert/envilder/commit/c9df0c4cb612de0f2b6ab6406235c54fcb45d0c2))
+* **githubAction:** Correct path to GitHubAction.js in validation step ([94d1166](https://github.com/macalbert/envilder/commit/94d116632f4a6de656449f238ec007eeede2f5f2))
+* **githubAction:** Remove source map generation from build:gha script ([8989448](https://github.com/macalbert/envilder/commit/898944898cdea866f28f8874b714bfe3fd2dd88e))
+* **githubAction:** Update action references in documentation and code ([412601b](https://github.com/macalbert/envilder/commit/412601b7b56a90dd50e031addcaf192e2dec8ba3))
+
+
+### Features
+
+* **githubAction:** Add end-to-end tests for GitHub Actions simulation ([29464a0](https://github.com/macalbert/envilder/commit/29464a016d0072cc728345400f68e0c62669579b))
+* **githubAction:** Update action paths and add new GitHub Action implementation ([4310e50](https://github.com/macalbert/envilder/commit/4310e5040fa4952c50e800578fb91e00cf2f7a36))
+* **githubAction:** Update action script paths and add entry point ([9f64e56](https://github.com/macalbert/envilder/commit/9f64e567d8c90832ee402accb6aba9264554a1e7))
+* **packaging:** Add project build and uninstall functionality ([70fc574](https://github.com/macalbert/envilder/commit/70fc5745c1490f33322f5fb8af1b68dd7e565fc1))
+
+
+### BREAKING CHANGES
+
+* Action path changed from macalbert/envilder@v1 to macalbert/envilder/github-action@v1
+
+
+
 # Changelog
 <!-- markdownlint-disable MD024 -->
 
@@ -5,30 +34,6 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
-
-## [0.7.0] - 2025-01-XX
-
-### Added
-
-- GitHub Action support for using Envilder in CI/CD workflows
-- Single-file bundled distribution using @vercel/ncc for improved GitHub Action performance
-- Comprehensive GitHub Action documentation with usage examples
-
-### Changed
-
-- Optimized GitHub Action bundle size with minification (786KB)
-- Simplified GitHub Action publishing workflow with version checks
-- Project structure to support multiple entry points (CLI + GitHub Action)
-- Build configuration for dual-mode operation
-
-### Documentation
-
-- Added comprehensive architecture documentation with hexagonal architecture diagrams
-- Introduced conventional commits workflow and configuration
-- Updated SECURITY.md with realistic solo maintainer policies
-- Reorganized documentation into dedicated docs/ folder
 
 ## [0.6.6] - 2025-11-02
 
@@ -38,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bumped vite from 7.1.10 to 7.1.11
 - Bumped @types/node from 24.7.2 to 24.9.2
 - Bumped @biomejs/biome from 2.2.6 to 2.3.2
-- Bumped github/codeql-action from 3 to 4
+- Bumped GitHub/codeql-action from 3 to 4
 - Bumped actions/setup-node from 5 to 6
 - Bumped vitest from 3.2.4 to 4.0.6
 
@@ -274,7 +279,7 @@ This changelog follows [Conventional Commits](https://www.conventionalcommits.or
 
 - `feat`: A new feature (triggers MINOR version bump)
 - `fix`: A bug fix (triggers PATCH version bump)
-- `docs`: Documentation only changes
+- `docs`: Documentation-only changes
 - `style`: Changes that don't affect code meaning (formatting, etc.)
 - `refactor`: Code change that neither fixes a bug nor adds a feature
 - `perf`: Performance improvements
@@ -323,7 +328,6 @@ This project uses automated changelog generation. To generate changelog entries:
    - Run `pnpm changelog` to generate entries from git history
    - Changelog will be auto-generated from commit messages
 
-[0.7.0]: https://github.com/macalbert/envilder/compare/v0.6.6...v0.7.0
 [0.6.6]: https://github.com/macalbert/envilder/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/macalbert/envilder/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/macalbert/envilder/compare/v0.6.3...v0.6.4
