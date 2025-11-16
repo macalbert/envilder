@@ -17,7 +17,7 @@ async function main(): Promise<void> {
 function createPackage(rootDir: string): string {
   console.log('📦 Creating package...');
   try {
-    const output = execSync('npm pack', {
+    const output = execSync('pnpm pack', {
       cwd: rootDir,
       encoding: 'utf8',
     });
@@ -26,7 +26,7 @@ function createPackage(rootDir: string): string {
     const packageFile = lines[lines.length - 1];
 
     if (!packageFile.endsWith('.tgz')) {
-      throw new Error('Could not determine package file from npm pack output');
+      throw new Error('Could not determine package file from pnpm pack output');
     }
 
     console.log(`✅ Package created as ${packageFile}`);

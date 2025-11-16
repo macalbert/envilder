@@ -67,7 +67,7 @@ describe('GitHub Action (E2E)', () => {
 
   beforeAll(async () => {
     // Build the project
-    execSync('npm run build', { cwd: rootDir, stdio: 'inherit' });
+    execSync('pnpm build', { cwd: rootDir, stdio: 'inherit' });
   }, 30_000);
 
   beforeEach(async () => {

@@ -141,16 +141,16 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '20.x'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: 📦 Install Dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: 🏗️ Build Application
-        run: npm run build
+        run: ppnpm build
         
       - name: 🚀 Deploy Application
-        run: npm run deploy
+        run: pnpm deploy
 ```
 
 ### 🚧 Using with `working-directory`
@@ -180,8 +180,8 @@ jobs:
           map-file: app/config/param-map.json  # Path from repo root!
           env-file: app/.env                    # Path from repo root!
       
-      - run: npm ci      # Runs in ./app
-      - run: npm build   # Runs in ./app
+      - run: pnpm install --frozen-lockfile      # Runs in ./app
+      - run: pnpm build   # Runs in ./app
 ```
 
 ### 🌍 Multi-Environment Deployment
@@ -224,9 +224,9 @@ jobs:
           map-file: config/${{ inputs.environment }}/param-map.json
           env-file: .env.${{ inputs.environment }}
 
-      - run: npm ci
-      - run: npm run build
-      - run: npm run deploy
+      - run: pnpm install --frozen-lockfile
+      - run: ppnpm build
+      - run: pnpm deploy
 ```
 
 ### 🎯 Matrix Strategy for Multiple Environments
@@ -262,8 +262,8 @@ jobs:
           map-file: config/${{ matrix.environment }}/param-map.json
           env-file: .env
       
-      - run: npm ci
-      - run: npm run deploy
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm deploy
 ```
 
 ## 📦 Output

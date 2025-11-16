@@ -81,16 +81,16 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '20.x'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: 📦 Install Dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: 🏗️ Build Application
-        run: npm run build
+        run: ppnpm build
 
       - name: 🚀 Deploy Application
-        run: npm run deploy
+        run: pnpm deploy
 ```
 
 ### Multi-Environment Example
@@ -136,11 +136,11 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '20.x'
-          cache: 'npm'
+          cache: 'pnpm'
 
-      - run: npm ci
-      - run: npm run build
-      - run: npm run deploy
+      - run: pnpm install --frozen-lockfile
+      - run: ppnpm build
+      - run: pnpm deploy
 ```
 
 ## Inputs
@@ -209,12 +209,12 @@ steps:
   - uses: actions/setup-node@v6
     with:
       node-version: '20.x'
-      cache: 'npm'
+      cache: 'pnpm'
 
   - name: 📦 Install and Build Envilder
     run: |
-      npm ci
-      npm run build
+      pnpm install --frozen-lockfile
+      ppnpm build
 
   - uses: aws-actions/configure-aws-credentials@v5
     with:
@@ -228,7 +228,7 @@ steps:
       env-file: .env
 ```
 
-> **Note:** The `npm run build` step is **only required for local development**.
+> **Note:** The `ppnpm build` step is **only required for local development**.
 > Published releases on GitHub Marketplace include pre-built code.
 
 ## Troubleshooting
@@ -240,8 +240,8 @@ This error only occurs when using a local reference (`uses: ./github-action`) du
 **Solution for development:**
 
 ```yaml
-- run: npm ci
-- run: npm run build
+- run: pnpm install --frozen-lockfile
+- run: ppnpm build
 - uses: ./github-action  # Local reference requires build
   with:
     map-file: param-map.json
@@ -290,8 +290,8 @@ For maintainers releasing new versions:
 1. **Build the project:**
 
    ```bash
-   npm ci
-   npm run build
+   pnpm install --frozen-lockfile
+   ppnpm build
    ```
 
 2. **Commit the `lib/` directory:**

@@ -24,16 +24,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
       - name: 🛠️ Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
-          cache: 'npm'
-
-      # Ensure npm 11.5.1 or later is installed
-      - name: Update npm
-        run: npm install -g npm@latest
+          cache: 'pnpm'
 
       - name: 👑 Detect version bump
         id: version-check
@@ -63,23 +64,23 @@ jobs:
 
       - name: 🌟 Install dependencies
         if: steps.version-check.outputs.version_changed == 'true'
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: 🔥 Lint
         if: steps.version-check.outputs.version_changed == 'true'
-        run: npm run lint
+        run: pnpm lint
           
       - name: 🍄 Run tests
         if: steps.version-check.outputs.version_changed == 'true'
-        run: npm test
+        run: pnpm test
 
       - name: 🏗️ Build package
         if: steps.version-check.outputs.version_changed == 'true'
-        run: npm run build
+        run: pnpm build
 
       - name: 🚩 Publish to npm
         if: steps.version-check.outputs.version_changed == 'true'
-        run: npm publish --access public
+        run: pnpm publish --access public
 
       - name: 🏰 Create release
         if: steps.version-check.outputs.version_changed == 'true'

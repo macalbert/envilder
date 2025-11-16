@@ -220,8 +220,8 @@ async function cleanUpSystem() {
       await unlink(file);
     }
 
-    // Uninstall global package (still sync, as npm API is not available async)
-    execSync('npm uninstall -g envilder', { stdio: 'inherit' });
+    // Uninstall global package (still sync, as pnpm API is not available async)
+    execSync('pnpm remove -g envilder', { stdio: 'inherit' });
   } catch {
     // Ignore errors if not installed
   }

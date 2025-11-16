@@ -25,17 +25,22 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
       - name: 🍄 Grab a Mushroom (Setup Node.js)
         uses: actions/setup-node@v6
         with:
           node-version: '20.x'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: 📦 Open the ? Block (Install packages)
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: 🏗️ Build the Castle
-        run: npm run build
+        run: pnpm build
 
       - name: 🔍 Check for Hidden Blocks (Verify build)
         run: |

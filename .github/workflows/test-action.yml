@@ -36,11 +36,16 @@ jobs:
       - name: 🧱 Enter the Pipe (Checkout)
         uses: actions/checkout@v5
 
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
       - name: 🍄 Grab a Mushroom (Setup Node.js with Cache)
         uses: actions/setup-node@v6
         with:
           node-version: '20.x'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: 🪙 Collect Coins (Configure AWS credentials)
         uses: aws-actions/configure-aws-credentials@v5
@@ -49,10 +54,10 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: 📦 Open the ? Block (Install packages)
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: 🏗️ Build the Castle
-        run: npm run build
+        run: pnpm build
 
       - name: 🔐 Test Action - Pull Secrets
         uses: ./github-action

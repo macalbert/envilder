@@ -28,10 +28,10 @@ runs:
         if [ ! -f "${{ github.action_path }}/../lib/apps/githubAction/GitHubAction.js" ]; then
           echo "❌ Envilder GitHub Action is not built!"
           echo ""
-          echo "Please ensure you run 'npm run build' before using this action."
+          echo "Please ensure you run 'pnpm build' before using this action."
           echo "Add these steps before using envilder:"
-          echo "  - run: npm ci"
-          echo "  - run: npm run build"
+          echo "  - run: pnpm install --frozen-lockfile"
+          echo "  - run: pnpm build"
           exit 1
         fi
 

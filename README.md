@@ -117,7 +117,7 @@ onboarding and CI/CD workflows.
 - IAM user/role with `ssm:GetParameter`, `ssm:PutParameter`
 
 ```bash
-npm install -g envilder
+pnpm add -g envilder
 ```
 
 > 💡 **New to AWS SSM?** AWS Systems Manager Parameter Store provides secure storage for configuration data and secrets:
