@@ -9,9 +9,56 @@ async function main(): Promise<void> {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   const rootDir = path.join(__dirname, '..');
+  
+  buildProject(rootDir);
+  uninstallEnvilder();
 
   const packageFile = createPackage(rootDir);
   installPackageFile(rootDir, packageFile);
+}
+
+function buildProject(rootDir: string): void {
+  console.log('🔨 Building project...');
+  try {
+    execSync('pnpm build', {
+      cwd: rootDir,
+      stdio: 'inherit',
+    });
+    console.log('✅ Build completed');
+  } catch (_err) {
+    const errorMessage = _err instanceof Error ? _err.message : String(_err);
+    console.error(`❌ Failed to build project: ${errorMessage}`);
+    process.exit(1);
+  }
+}
+
+function uninstallEnvilder(): void {
+  console.log('🗑️  Uninstalling all existing envilder installations...');
+
+  const packageManagers = [
+    { name: 'pnpm', cmd: 'pnpm uninstall -g envilder' },
+    { name: 'npm', cmd: 'npm uninstall -g envilder' },
+    { name: 'yarn', cmd: 'yarn global remove envilder' },
+    { name: 'bun', cmd: 'bun remove -g envilder' },
+  ];
+
+  let uninstalledCount = 0;
+
+  for (const pm of packageManagers) {
+    try {
+      execSync(pm.cmd, { stdio: 'pipe' });
+      console.log(`✅ Uninstalled envilder from ${pm.name} global`);
+      uninstalledCount++;
+    } catch {
+      // Silently ignore if not installed via this package manager
+    }
+  }
+
+  if (uninstalledCount === 0) {
+    console.log('ℹ️  No existing envilder installations found');
+  }
+
+  console.log('✅ Cleanup completed');
 }
 
 function createPackage(rootDir: string): string {
