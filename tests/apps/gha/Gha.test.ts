@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { main } from '../../../src/apps/gha/GitHubAction';
+import { main } from '../../../src/apps/gha/Gha';
 import { DispatchActionCommand } from '../../../src/envilder/application/dispatch/DispatchActionCommand';
 import { DispatchActionCommandHandler } from '../../../src/envilder/application/dispatch/DispatchActionCommandHandler';
 import type { CliOptions } from '../../../src/envilder/domain/CliOptions';
