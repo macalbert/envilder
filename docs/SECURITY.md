@@ -2,12 +2,12 @@
 
 ## 🔒 Supported Versions
 
-We release patches for security vulnerabilities in the following versions:
+We release patches for security vulnerabilities only in the latest version:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.7.x   | ✅ |
-| < 0.7   | ❌ |
+| Latest  | ✅ |
+| Older   | ❌ |
 
 ## 🚨 Reporting a Vulnerability
 
@@ -34,7 +34,8 @@ If you discover a security vulnerability in Envilder, please report it privately
 - **Resolution**: I'll work to release a fix as soon as feasible (timeline depends on severity and complexity)
 - **Credit**: You'll be credited in the security advisory (unless you prefer to remain anonymous)
 
-**Note**: This is a solo open-source project maintained in my spare time. While I take security seriously, response times may vary based on availability.
+**Note**: This is a solo open-source project maintained in my spare time. While I take security seriously,
+response times may vary based on availability.
 
 ## 🛡️ Security Best Practices
 
@@ -44,7 +45,7 @@ When using Envilder, follow these security guidelines:
 
 **DO**:
 
-- ✅ Use IAM roles with OIDC for GitHub Actions
+- ✅ Use IAM roles with OIDC for GitHub Actions ([setup guide](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services))
 - ✅ Use temporary credentials when possible
 - ✅ Follow the principle of least privilege
 
@@ -59,17 +60,24 @@ Envilder requires these AWS permissions:
 
 ```json
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ssm:GetParameter",
-        "ssm:PutParameter"
-      ],
-      "Resource": "arn:aws:ssm:REGION:ACCOUNT:parameter/YOUR_PREFIX/*"
-    }
-  ]
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Federated": "arn:aws:iam::123456123456:oidc-provider/token.actions.githubusercontent.com"
+            },
+            "Action": "sts:AssumeRoleWithWebIdentity",
+            "Condition": {
+                "StringLike": {
+                    "token.actions.githubusercontent.com:sub": "repo:octo-org/octo-repo:*"
+                },
+                "StringEquals": {
+                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+                }
+            }
+        }
+    ]
 }
 ```
 
@@ -98,7 +106,7 @@ When using Envilder GitHub Action:
 
 **DO**:
 
-- ✅ Use OIDC authentication instead of static credentials
+- ✅ Use OIDC authentication instead of static credentials ([OIDC setup guide](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services))
 - ✅ Pin action versions (e.g., `@v1.0.0` instead of `@main`)
 - ✅ Review action code before using in production
 
@@ -106,24 +114,6 @@ When using Envilder GitHub Action:
 
 - ❌ Store AWS credentials in GitHub Secrets (use OIDC roles)
 - ❌ Use overly permissive IAM policies
-
-Example secure configuration:
-
-```yaml
-permissions:
-  id-token: write  # Required for OIDC
-  contents: read   # Minimal permissions
-
-- uses: aws-actions/configure-aws-credentials@v5
-  with:
-    role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole
-    aws-region: us-east-1
-
-- uses: macalbert/envilder/github-action@v1
-  with:
-    map-file: config/param-map.json
-    env-file: .env
-```
 
 ## 🔍 Security Audits
 
@@ -173,15 +163,5 @@ When I receive a security vulnerability report:
 
 **Note**: As a solo maintainer working on this project in my spare time, I appreciate your
 understanding regarding response and fix timelines.
-
-Thank you for helping keep Envilder and its users safe! 🙏
-2. We will develop and test a fix
-3. We will release a security advisory and patched version
-4. We will credit the reporter (unless anonymity is requested)
-
-**Public Disclosure Timeline**:
-
-- Critical vulnerabilities: Disclosed after patch is released
-- Non-critical vulnerabilities: 90-day coordinated disclosure
 
 Thank you for helping keep Envilder and its users safe! 🙏

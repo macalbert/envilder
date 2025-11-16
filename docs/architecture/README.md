@@ -2,132 +2,168 @@
 
 ## Overview
 
-Envilder follows **Hexagonal Architecture** (Ports and Adapters) combined with **Clean Architecture**
-principles, ensuring a highly maintainable, testable, and extensible codebase.
+Envilder is built using **Hexagonal Architecture** (Ports & Adapters) and **Clean Architecture** principles.
+The goal is a codebase that is **predictable, testable, modular, and easy to extend**
+(new providers, new use-cases, new infrastructures).
+
+Envilder stays fully decoupled thanks to:
+
+* Clear **ports**
+* A focused **Application Layer**
+* A pure **Domain**
+* Infrastructure injected through **DI**
+
+---
 
 ## 📐 Architecture Diagram
 
 ```mermaid
-graph TB
-    subgraph "Entry Points"
-        CLI[CLI Application<br/>apps/cli/Cli.ts]
-        GHA[GitHub Action<br/>apps/gha/GitHubAction.ts]
-    end
+flowchart TB
 
-    subgraph "Application Layer"
-        DISPATCH[DispatchActionCommandHandler]
-        PULL[PullSsmToEnvCommandHandler]
-        PUSH[PushEnvToSsmCommandHandler]
-        SINGLE[PushSingleCommandHandler]
-    end
+%% ==== STYLES ====
+classDef node fill:#263238,stroke:#FFFFFF,color:#FFFFFF;
 
-    subgraph "Domain Layer"
-        PORTS[Ports/Interfaces<br/>ILogger, ISecretProvider, IVariableStore]
-        ENTITIES[Entities<br/>EnvironmentVariable]
-        ERRORS[Domain Errors<br/>ParameterNotFoundError, etc.]
-    end
+%% ================= INFRASTRUCTURE LAYER (RED BG) =================
+subgraph INFRA["Infrastructure Layer"]
+    direction LR
+    AWS[AwsSsmSecretProvider]
+    FILE[FileVariableStore]
+    LOG[ConsoleLogger]
+end
+class AWS,FILE,LOG node
+style INFRA fill:#C62828,stroke:#C62828,color:#FFFFFF
 
-    subgraph "Infrastructure Layer"
-        AWS[AwsSsmSecretProvider]
-        FILE[FileVariableStore]
-        LOGGER[ConsoleLogger]
-        DI[Dependency Injection<br/>InversifyJS]
-    end
+%% ================= APPLICATION LAYER (YELLOW BG) =================
+subgraph APP["Application Layer"]
+    direction LR
+    DISPATCH[DispatchActionCommandHandler]
+    PULL[PullSsmToEnv]
+    PUSH[PushEnvToSsm]
+    SINGLE[PushSingle]
+end
+class DISPATCH,PULL,PUSH,SINGLE node
+style APP fill:#F9A825,stroke:#F9A825,color:#000000
 
-    CLI --> DISPATCH
-    GHA --> DISPATCH
-    DISPATCH --> PULL
-    DISPATCH --> PUSH
-    DISPATCH --> SINGLE
-    
-    PULL --> PORTS
-    PUSH --> PORTS
-    SINGLE --> PORTS
-    
-    PORTS -.implements.-> AWS
-    PORTS -.implements.-> FILE
-    PORTS -.implements.-> LOGGER
-    
-    PULL --> ENTITIES
-    PUSH --> ENTITIES
-    SINGLE --> ENTITIES
-    
-    DI -.configures.-> AWS
-    DI -.configures.-> FILE
-    DI -.configures.-> LOGGER
+%% ================= DOMAIN LAYER (GREEN BG, WITH CORE) =================
+subgraph DOMAIN["Domain Layer"]
+    direction LR
+    PORTS[Ports / ILogger / ISecretProvider / IVariableStore]
+    ERR[Domain Errors]
+    ENT[Entities / EnvironmentVariable]
+    CORE[Core Domain<br/>Business Rules<br/>Value Objects]
+end
+class PORTS,ERR,ENT,CORE node
+style DOMAIN fill:#2E7D32,stroke:#2E7D32,color:#FFFFFF
 
-    style CLI fill:#e1f5ff
-    style GHA fill:#e1f5ff
-    style DISPATCH fill:#fff4e1
-    style PULL fill:#fff4e1
-    style PUSH fill:#fff4e1
-    style SINGLE fill:#fff4e1
-    style PORTS fill:#e8f5e9
-    style ENTITIES fill:#e8f5e9
-    style ERRORS fill:#e8f5e9
-    style AWS fill:#f3e5f5
-    style FILE fill:#f3e5f5
-    style LOGGER fill:#f3e5f5
-    style DI fill:#f3e5f5
+%% ================= PRESENTERS + DI (BLUE BG) =================
+subgraph PRESENTERS["Presenters"]
+    direction LR
+    CLI[CLI Application<br/>apps/cli/Cli.ts]
+    GHA[GitHub Action<br/>apps/gha/GitHubAction.ts]
+    DI[InversifyJS Container<br/>Dependency Injection Setup]
+end
+class CLI,GHA,DI node
+style PRESENTERS fill:#0D47A1,stroke:#0D47A1,color:#FFFFFF
+
+%% ================= FLOWS =================
+
+%% Presenters → DI → App
+CLI --> DI
+GHA --> DI
+DI --> DISPATCH
+
+%% App → Domain
+DISPATCH --> PULL
+DISPATCH --> PUSH
+DISPATCH --> SINGLE
+
+PULL --> PORTS
+PUSH --> PORTS
+SINGLE --> PORTS
+
+PULL --> ENT
+PUSH --> ENT
+SINGLE --> ENT
+
+%% Domain → Core
+PORTS --> CORE
+ENT --> CORE
+ERR --> CORE
+
+%% Infra → Domain (implement ports)
+PORTS -.implements.-> AWS
+PORTS -.implements.-> FILE
+PORTS -.implements.-> LOG
 ```
+
+---
 
 ## 🎯 Layer Responsibilities
 
-### 1. Entry Points (Blue)
+### 1. Presenters (Blue)
 
-- **CLI** (`apps/cli/`): Command-line interface using Commander.js
-- **GitHub Action** (`apps/gha/`): GitHub Actions integration
-- **Responsibilities**:
-  - Parse user input
-  - Bootstrap dependency injection container
-  - Invoke application layer
-  - Handle exit codes and top-level errors
+Entry points: CLI + GitHub Action + DI setup.
+
+Responsibilities:
+
+* Parse user input
+* Bootstrap DI
+* Invoke the application layer
+* Handle top-level errors and exit codes
+
+---
 
 ### 2. Application Layer (Yellow)
 
-- **Command Handlers**: Business logic orchestration
-- **Responsibilities**:
-  - Coordinate domain entities and infrastructure
-  - Implement use cases (pull, push, push-single)
-  - Validate input commands
-  - No direct dependencies on infrastructure details
+Business orchestration. No domain rules. No infrastructure.
 
-**Key Components**:
+Responsibilities:
 
-- `DispatchActionCommandHandler`: Routes to appropriate handler based on operation mode
-- `PullSsmToEnvCommandHandler`: Pulls secrets from AWS SSM to `.env`
-- `PushEnvToSsmCommandHandler`: Pushes `.env` to AWS SSM
-- `PushSingleCommandHandler`: Pushes single key-value pair to AWS SSM
+* Execute use-cases
+* Validate commands
+* Coordinate domain + ports
+* Route actions
+
+Handlers:
+
+* `DispatchActionCommandHandler`
+* `PullSsmToEnvCommandHandler`
+* `PushEnvToSsmCommandHandler`
+* `PushSingleCommandHandler`
+
+---
 
 ### 3. Domain Layer (Green)
 
-- **Pure business logic**: No external dependencies
-- **Responsibilities**:
-  - Define domain entities (Value Objects)
-  - Define ports (interfaces for infrastructure)
-  - Define domain errors
-  - Encapsulate business rules
+Pure business logic. No external dependencies.
 
-**Key Components**:
+Contains:
 
-- `EnvironmentVariable`: Value object representing env var
-- `ILogger`, `ISecretProvider`, `IVariableStore`: Port interfaces
-- `ParameterNotFoundError`, `SecretOperationError`: Domain errors
+* Entities and Value Objects
+* Domain Errors
+* Ports (interfaces)
+* Core domain rules
 
-### 4. Infrastructure Layer (Purple)
+---
 
-- **External system adapters**: Concrete implementations
-- **Responsibilities**:
-  - Implement domain ports
-  - Interact with AWS SDK, file system, console
-  - Handle technical concerns (retries, logging, etc.)
+### 4. Infrastructure Layer (Red)
 
-**Key Components**:
+External system adapters behind ports.
 
-- `AwsSsmSecretProvider`: AWS SSM integration
-- `FileVariableStore`: File system operations (read/write `.env`)
-- `ConsoleLogger`: Console output with colors
-- `Startup`: Dependency injection configuration
+Responsibilities:
+
+* Implement ports
+* AWS SSM interaction
+* File system access
+* Logging and technical concerns
+
+Components:
+
+* `AwsSsmSecretProvider`
+* `FileVariableStore`
+* `ConsoleLogger`
+
+---
 
 ## 🔄 Data Flow: Pull Operation
 
@@ -160,12 +196,14 @@ sequenceDiagram
     
     Pull->>Pull: Build updated env vars
     Pull->>FileStore: saveEnvironment(.env, vars)
-    FileStore-->>Pull: ✅ Saved
+    FileStore-->>Pull: Saved
     
-    Pull-->>Dispatch: ✅ Success
-    Dispatch-->>CLI: ✅ Success
-    CLI-->>User: ✅ Secrets pulled successfully!
+    Pull-->>Dispatch: Success
+    Dispatch-->>CLI: Success
+    CLI-->>User: Secrets pulled successfully
 ```
+
+---
 
 ## 🔄 Data Flow: Push Operation
 
@@ -192,44 +230,43 @@ sequenceDiagram
     loop For each mapping
         Push->>AWS: setSecret("/app/db-url", "postgresql://...")
         AWS->>SSM: PutParameter(Name="/app/db-url", Value="...", Type="SecureString")
-        SSM-->>AWS: ✅ Parameter updated
-        AWS-->>Push: ✅ Success
+        SSM-->>AWS: Parameter updated
+        AWS-->>Push: Success
     end
     
-    Push-->>Dispatch: ✅ Success
-    Dispatch-->>CLI: ✅ Success
-    CLI-->>User: ✅ Secrets pushed successfully!
+    Push-->>Dispatch: Success
+    Dispatch-->>CLI: Success
+    CLI-->>User: Secrets pushed successfully
 ```
+
+---
 
 ## 🧩 Dependency Injection
 
-Envilder uses **InversifyJS** for dependency injection, configured in `Startup.ts`:
-
-```typescript
-// Simplified example
+```ts
 class Startup {
   configureServices() {
     container.bind(TYPES.DispatchActionCommandHandler)
       .to(DispatchActionCommandHandler);
     container.bind(TYPES.PullSsmToEnvCommandHandler)
       .to(PullSsmToEnvCommandHandler);
-    // ...
   }
 
   configureInfrastructure(profile?: string) {
     container.bind(TYPES.ILogger).to(ConsoleLogger);
     container.bind(TYPES.ISecretProvider).to(AwsSsmSecretProvider);
     container.bind(TYPES.IVariableStore).to(FileVariableStore);
-    // ...
   }
 }
 ```
 
-**Benefits**:
+**Benefits:**
 
-- ✅ Testability: Easy to inject mocks
-- ✅ Flexibility: Swap implementations without changing business logic
-- ✅ Maintainability: Dependencies are explicit
+* Easy to test using mocks
+* Infrastructure can be swapped without touching the app or domain
+* Dependencies are explicitly declared
+
+---
 
 ## 🧪 Testing Strategy
 
@@ -257,143 +294,78 @@ graph LR
     IT1 --> E2E2
 ```
 
-### Test Pyramid
-
-1. **Unit Tests** (Fast, Isolated):
-   - Mock all dependencies
-   - Test business logic in isolation
-   - Example: `PullSsmToEnvCommandHandler.test.ts`
-
-2. **Integration Tests** (Medium):
-   - Test interactions between layers
-   - Use real file system, mocked AWS
-   - Example: `FileVariableStore.test.ts`
-
-3. **E2E Tests** (Slow, Comprehensive):
-   - Test complete workflows
-   - Use LocalStack for AWS simulation
-   - Example: `cli.test.ts`, `gha.test.ts`
+---
 
 ## 🔌 Extension Points
 
 ### Adding a New Secret Provider
 
-1. **Define the interface** (already exists):
+```ts
+interface ISecretProvider {
+  getSecret(name: string): Promise<string | undefined>;
+  setSecret(name: string, value: string): Promise<void>;
+}
+```
 
-   ```typescript
-   interface ISecretProvider {
-     getSecret(name: string): Promise<string | undefined>;
-     setSecret(name: string, value: string): Promise<void>;
-   }
-   ```
+```ts
+@injectable()
+class HashiCorpVaultProvider implements ISecretProvider {
+  async getSecret(name: string): Promise<string | undefined> {}
+  async setSecret(name: string, value: string): Promise<void> {}
+}
+```
 
-2. **Implement the adapter**:
+```ts
+container.bind(TYPES.ISecretProvider).to(HashiCorpVaultProvider);
+```
 
-   ```typescript
-   @injectable()
-   class HashiCorpVaultProvider implements ISecretProvider {
-     async getSecret(name: string): Promise<string | undefined> {
-       // Vault API call
-     }
-     async setSecret(name: string, value: string): Promise<void> {
-       // Vault API call
-     }
-   }
-   ```
+No changes required to application or domain layers.
 
-3. **Register in DI container**:
-
-   ```typescript
-   container.bind(TYPES.ISecretProvider).to(HashiCorpVaultProvider);
-   ```
-
-No changes needed in application or domain layers! 🎉
+---
 
 ## 🎨 Design Patterns Used
 
-| Pattern | Location | Purpose |
-|---------|----------|---------|
-| **Hexagonal Architecture** | Overall structure | Separation of concerns |
-| **Dependency Injection** | InversifyJS | Loose coupling |
-| **Command Pattern** | `*Command.ts` | Encapsulate operations |
-| **Handler Pattern** | `*CommandHandler.ts` | Process commands |
-| **Repository Pattern** | `IVariableStore` | Abstract data access |
-| **Value Object** | `EnvironmentVariable` | Immutable domain concepts |
-| **Factory Method** | `DispatchActionCommand.fromCliOptions` | Object creation |
+| Pattern                    | Purpose                |
+| -------------------------- | ---------------------- |
+| **Clean Architecture** | Layered design with ports and adapters |
+| **Dependency Injection**   | Loose coupling         |
+| **Command Pattern**        | Encapsulate actions    |
+| **Handler Pattern**        | Execute use-cases      |
+| **Repository Pattern**     | Abstract data stores   |
+| **Value Object**           | Immutable domain data  |
+| **Factory Method**         | Create domain commands |
+
+---
 
 ## 📁 Project Structure
 
 ```text
 src/
-├── apps/                         # Entry points
-│   ├── cli/                      # CLI application
-│   │   ├── Cli.ts                # Main CLI entry
-│   │   └── Startup.ts            # DI configuration
-│   └── gha/                      # GitHub Action
-│       ├── GitHubAction.ts       # Main GHA entry
-│       ├── Startup.ts            # DI configuration
-│       └── index.ts              # Entry point
+├── apps/                         
+│   ├── cli/                      
+│   │   ├── Cli.ts                
+│   │   └── Startup.ts            
+│   └── gha/                      
+│       ├── GitHubAction.ts       
+│       ├── Startup.ts            
+│       └── index.ts              
 │
-├── envilder/                     # Core logic
-│   ├── application/              # Application layer (use cases)
-│   │   ├── dispatch/             # Command dispatcher
-│   │   ├── pullSsmToEnv/         # Pull operation
-│   │   ├── pushEnvToSsm/         # Push operation
-│   │   └── pushSingle/           # Single push operation
-│   │
-│   ├── domain/                   # Domain layer (business logic)
-│   │   ├── EnvironmentVariable.ts
-│   │   ├── OperationMode.ts
-│   │   ├── CliOptions.ts
-│   │   ├── errors/               # Domain errors
-│   │   └── ports/                # Interfaces
-│   │       ├── ILogger.ts
-│   │       ├── ISecretProvider.ts
-│   │       └── IVariableStore.ts
-│   │
-│   └── infrastructure/           # Infrastructure layer (adapters)
-│       ├── aws/                  # AWS SSM adapter
-│       ├── logger/               # Console logger
-│       ├── variableStore/        # File system adapter
-│       └── package/              # Package version reader
+├── envilder/                     
+│   ├── application/              
+│   ├── domain/                   
+│   └── infrastructure/           
 │
-└── types.ts                      # DI type symbols
+└── types.ts                      
 ```
-
-## 🚀 Future Architecture Considerations
-
-### Plugin System (Planned)
-
-```typescript
-interface ISecretProviderPlugin {
-  name: string;
-  initialize(config: unknown): Promise<void>;
-  getSecret(name: string): Promise<string | undefined>;
-  setSecret(name: string, value: string): Promise<void>;
-}
-
-// Users could provide custom plugins:
-// envilder --provider=vault --provider-config=vault.json
-```
-
-### Event System (Planned)
-
-```typescript
-interface IEventPublisher {
-  publish(event: DomainEvent): Promise<void>;
-}
-
-// Enable notifications (Slack, webhooks) on secret changes
-```
-
-## 📚 Further Reading
-
-- [Hexagonal Architecture](https://alistair.cockburn.us/hexagonal-architecture/)
-- [Clean Architecture (Uncle Bob)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-- [Dependency Injection in TypeScript](https://github.com/inversify/InversifyJS)
-- [Domain-Driven Design](https://martinfowler.com/bliki/DomainDrivenDesign.html)
 
 ---
 
-**Last Updated**: November 2025  
+## 🚀 Future Architecture Considerations
+
+* Plugin system for custom secret providers
+* Event publishing for notifications/webhooks
+
+---
+
+**Last Updated**: November 2025
 **Maintainer**: Marçal Albert ([@macalbert](https://github.com/macalbert))
