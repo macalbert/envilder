@@ -5,7 +5,7 @@
  * This file is executed when the action runs
  */
 
-import { main } from './GitHubAction.js';
+import { main } from './Gha.js';
 
 main().catch((error) => {
   console.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
