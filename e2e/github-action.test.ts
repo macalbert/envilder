@@ -57,13 +57,7 @@ function GetSecretFromKey(envFilePath: string, key: string): string {
 describe('GitHub Action (E2E)', () => {
   const envFilePath = join(rootDir, 'e2e', 'sample', 'cli-validation.env');
   const mapFilePath = join(rootDir, 'e2e', 'sample', 'param-map.json');
-  const actionScript = join(
-    rootDir,
-    'lib',
-    'apps',
-    'githubAction',
-    'GitHubAction.js',
-  );
+  const actionScript = join(rootDir, 'lib', 'apps', 'gha', 'GitHubAction.js');
 
   beforeAll(async () => {
     // Build the project

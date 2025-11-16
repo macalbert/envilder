@@ -44,7 +44,7 @@ jobs:
 
       - name: 🔍 Check for Hidden Blocks (Verify build)
         run: |
-          if [ ! -f "lib/apps/githubAction/GitHubAction.js" ]; then
+          if [ ! -f "lib/apps/gha/GitHubAction.js" ]; then
             echo "❌ Oh no! Mario fell into a pit! Build failed!"
             exit 1
           fi
