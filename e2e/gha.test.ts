@@ -28,7 +28,7 @@ const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '..');
 
 // LocalStack container
-const LOCALSTACK_IMAGE = 'localstack/localstack:4.0';
+const LOCALSTACK_IMAGE = 'localstack/localstack:stable';
 let localstackContainer: StartedLocalStackContainer;
 let localstackEndpoint: string;
 let ssmClient: SSMClient;
