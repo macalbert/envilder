@@ -23,6 +23,24 @@
 
 ---
 
+## 🌟 Why Envilder?
+
+**Envilder** helps you manage environment variables and secrets across your
+infrastructure with AWS SSM Parameter Store as the single source of truth.
+This GitHub Action makes it easy to:
+
+- ✅ **Centralize secrets** - Store all your secrets in AWS SSM Parameter Store
+- 🔒 **Secure by design** - Leverage AWS IAM for access control and encryption at rest
+- 🚀 **Automate workflows** - Pull secrets directly in your CI/CD pipelines
+- 📦 **Zero configuration** - Just provide a mapping file and you're ready to go
+- 🔄 **Bidirectional sync** - Push local changes back to SSM when needed
+- 🎯 **Type-safe** - Full TypeScript support with IntelliSense
+
+> 💡 **Learn more:** Check out the [full documentation](https://github.com/macalbert/envilder/blob/main/README.md)
+> for CLI usage, advanced features, and more examples.
+
+---
+
 ## 🎮 Quick Start
 
 Pull AWS SSM Parameter Store secrets into `.env` files in your GitHub Actions workflows.
