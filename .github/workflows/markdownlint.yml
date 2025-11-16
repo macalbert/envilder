@@ -45,4 +45,4 @@ jobs:
         run: |
           echo "::add-matcher::.github/workflows/markdownlint-problem-matcher.json"
           pnpm add -g markdownlint-cli
-          markdownlint "**/*.md" --ignore "docs/CHANGELOG.md"
+          markdownlint "**/*.md"
