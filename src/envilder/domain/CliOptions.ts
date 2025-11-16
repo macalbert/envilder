@@ -38,7 +38,7 @@ export type CliOptions = {
   push?: boolean;
 
   /**
-   * Cloud provider to use (aws or azure, defaults to aws)
+   * Cloud provider to use (aws or azure), defaults to aws
    */
   provider?: string;
 };

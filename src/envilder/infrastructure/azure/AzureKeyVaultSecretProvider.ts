@@ -4,7 +4,7 @@ import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 
 /**
  * Azure Key Vault secret provider implementation.
- * Follows the same dependency injection pattern as AwsSsmSecretProvider.
+ * Implements the same interface as AWS SSM provider for consistency.
  */
 @injectable()
 export class AzureKeyVaultSecretProvider implements ISecretProvider {
@@ -16,8 +16,6 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
 
   async getSecret(name: string): Promise<string | undefined> {
     try {
-      // Azure Key Vault secret names must be alphanumeric and hyphens only
-      // Convert the name to a valid format
       const secretName = this.normalizeSecretName(name);
       const secret = await this.client.getSecret(secretName);
       return secret.value;
@@ -37,21 +35,16 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
   }
 
   async setSecret(name: string, value: string): Promise<void> {
-    // Azure Key Vault secret names must be alphanumeric and hyphens only
-    // Convert the name to a valid format
     const secretName = this.normalizeSecretName(name);
     await this.client.setSecret(secretName, value);
   }
 
   /**
-   * Normalize secret name to be compatible with Azure Key Vault naming requirements.
-   * Azure Key Vault secret names:
-   * - Must be 1-127 characters long
-   * - Can only contain alphanumeric characters and hyphens
-   * - Must start with a letter
-   * - Must not contain consecutive hyphens
-   *
-   * This function converts slashes and underscores to hyphens and ensures compliance.
+   * Normalize secret name to comply with Azure Key Vault naming requirements.
+   * Azure Key Vault secret names must:
+   * - Be 1-127 characters long
+   * - Contain only alphanumeric characters and hyphens
+   * - Start with a letter
    */
   private normalizeSecretName(name: string): string {
     // Remove leading slashes
@@ -60,26 +53,26 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
     // Replace slashes and underscores with hyphens
     normalized = normalized.replace(/[/_]/g, '-');
 
-    // Remove any characters that are not alphanumeric or hyphens
+    // Remove invalid characters
     normalized = normalized.replace(/[^a-zA-Z0-9-]/g, '');
 
-    // Replace consecutive hyphens with a single hyphen
+    // Remove consecutive hyphens
     normalized = normalized.replace(/-+/g, '-');
 
     // Remove leading/trailing hyphens
     normalized = normalized.replace(/^-+|-+$/g, '');
 
-    // Ensure it starts with a letter
+    // Ensure starts with a letter
     if (normalized.length > 0 && !/^[a-zA-Z]/.test(normalized)) {
       normalized = `secret-${normalized}`;
     }
 
-    // Truncate to 127 characters if needed
+    // Truncate to 127 characters
     if (normalized.length > 127) {
       normalized = normalized.substring(0, 127);
     }
 
-    // If still empty or invalid, use a default name
+    // Default name if empty
     if (normalized.length === 0) {
       normalized = 'secret';
     }

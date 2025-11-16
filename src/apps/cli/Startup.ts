@@ -37,9 +37,8 @@ export class Startup {
 
   /**
    * Configures infrastructure services for the application.
-   * Optionally accepts an AWS profile to use for service configuration.
    * @param awsProfile - The AWS profile to use for configuring infrastructure services.
-   * @param provider - The cloud provider to use (aws or azure, defaults to aws).
+   * @param provider - The cloud provider to use (aws or azure), defaults to aws.
    * @returns The current instance for method chaining.
    */
   configureInfrastructure(awsProfile?: string, provider?: string): this {
@@ -69,13 +68,13 @@ export class Startup {
       .to(FileVariableStore)
       .inSingletonScope();
 
-    // Default to AWS if no provider is specified
+    // Default to AWS if no provider specified
     const selectedProvider = provider?.toLowerCase() || 'aws';
 
     let secretProvider: ISecretProvider;
 
     if (selectedProvider === 'azure') {
-      // For Azure, get the vault URL from environment variable
+      // Azure Key Vault configuration
       const vaultUrl = process.env.AZURE_KEY_VAULT_URL;
       if (!vaultUrl) {
         throw new Error(
@@ -86,6 +85,7 @@ export class Startup {
       const client = new SecretClient(vaultUrl, credential);
       secretProvider = new AzureKeyVaultSecretProvider(client);
     } else if (selectedProvider === 'aws') {
+      // AWS SSM configuration
       const ssm = awsProfile
         ? new SSM({ credentials: fromIni({ profile: awsProfile }) })
         : new SSM();

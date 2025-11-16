@@ -63,7 +63,7 @@ export async function main() {
     )
     .option(
       '--ssm-path <path>',
-      'SSM path for the single environment variable (only with --push)',
+      'Secret path for the single environment variable (only with --push)',
     )
     .action(async (options: CliOptions) => {
       serviceProvider = Startup.build()

@@ -7,7 +7,26 @@ permissions:
   contents: read
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      map_file:
+        description: 'Path to the JSON file with environment variable mapping'
+        required: false
+        default: 'param-map.json'
+        type: string
+      env_file:
+        description: 'Path to the .env file to be generated or imported'
+        required: false
+        default: '.env'
+        type: string
+      provider:
+        description: 'Cloud provider to use'
+        required: false
+        default: 'aws'
+        type: choice
+        options:
+          - aws
+          - azure
 
   pull_request:
     branches:
