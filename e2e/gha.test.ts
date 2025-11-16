@@ -114,13 +114,11 @@ describe('GitHub Action (E2E)', () => {
   const mapFilePath = join(rootDir, 'e2e', 'sample', 'param-map.json');
 
   beforeAll(async () => {
-    // Start LocalStack container
     localstackContainer = await new LocalstackContainer(
       LOCALSTACK_IMAGE,
     ).start();
     localstackEndpoint = localstackContainer.getConnectionUri();
 
-    // Initialize SSM client with LocalStack endpoint
     ssmClient = new SSMClient({
       endpoint: localstackEndpoint,
       region: 'us-east-1',
@@ -130,17 +128,14 @@ describe('GitHub Action (E2E)', () => {
       },
     });
 
-    // Build the project
     execSync('pnpm build', { cwd: rootDir, stdio: 'inherit' });
   }, 60_000);
 
   afterAll(async () => {
-    // Stop LocalStack container
     await localstackContainer.stop();
   });
 
   beforeEach(async () => {
-    // Clean up SSM parameters before each test
     const ssmParams = JSON.parse(readFileSync(mapFilePath, 'utf8')) as Record<
       string,
       string
@@ -156,7 +151,6 @@ describe('GitHub Action (E2E)', () => {
   });
 
   afterEach(async () => {
-    // Clean up SSM parameters after each test
     const ssmParams = JSON.parse(readFileSync(mapFilePath, 'utf8')) as Record<
       string,
       string
@@ -165,7 +159,6 @@ describe('GitHub Action (E2E)', () => {
       await DeleteParameterSsm(ssmPath);
     }
 
-    // Clean up env file
     if (existsSync(envFilePath)) {
       await unlink(envFilePath);
     }
@@ -201,7 +194,7 @@ describe('GitHub Action (E2E)', () => {
   });
 
   it('Should_FailWithError_When_RequiredInputsAreMissing', () => {
-    // Act - Simulates GitHub Actions calling action without required inputs
+    // Act
     const result = runGitHubAction({
       mapFile: '',
       envFile: '',
@@ -219,7 +212,6 @@ describe('GitHub Action (E2E)', () => {
       string
     >;
 
-    // Create existing env file with some content
     const existingContent = 'EXISTING_VAR=existing_value\n';
     writeFileSync(envFilePath, existingContent, 'utf8');
 
@@ -252,5 +244,5 @@ describe('GitHub Action (E2E)', () => {
       );
       expect(envFileValue).toBe(ssmValue);
     }
-  }, 30_000); // 30 second timeout
+  }, 30_000);
 });

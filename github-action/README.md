@@ -165,7 +165,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: 🏗️ Build Application
-        run: ppnpm build
+        run: pnpm build
         
       - name: 🚀 Deploy Application
         run: pnpm deploy
@@ -243,7 +243,7 @@ jobs:
           env-file: .env.${{ inputs.environment }}
 
       - run: pnpm install --frozen-lockfile
-      - run: ppnpm build
+      - run: pnpm build
       - run: pnpm deploy
 ```
 

@@ -87,7 +87,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: 🏗️ Build Application
-        run: ppnpm build
+        run: pnpm build
 
       - name: 🚀 Deploy Application
         run: pnpm deploy
@@ -139,7 +139,7 @@ jobs:
           cache: 'pnpm'
 
       - run: pnpm install --frozen-lockfile
-      - run: ppnpm build
+      - run: pnpm build
       - run: pnpm deploy
 ```
 
@@ -214,7 +214,7 @@ steps:
   - name: 📦 Install and Build Envilder
     run: |
       pnpm install --frozen-lockfile
-      ppnpm build
+      pnpm build
 
   - uses: aws-actions/configure-aws-credentials@v5
     with:
@@ -228,7 +228,7 @@ steps:
       env-file: .env
 ```
 
-> **Note:** The `ppnpm build` step is **only required for local development**.
+> **Note:** The `pnpm build` step is **only required for local development**.
 > Published releases on GitHub Marketplace include pre-built code.
 
 ## Troubleshooting
@@ -241,7 +241,7 @@ This error only occurs when using a local reference (`uses: ./github-action`) du
 
 ```yaml
 - run: pnpm install --frozen-lockfile
-- run: ppnpm build
+- run: pnpm build
 - uses: ./github-action  # Local reference requires build
   with:
     map-file: param-map.json
@@ -291,7 +291,7 @@ For maintainers releasing new versions:
 
    ```bash
    pnpm install --frozen-lockfile
-   ppnpm build
+   pnpm build
    ```
 
 2. **Commit the `lib/` directory:**
