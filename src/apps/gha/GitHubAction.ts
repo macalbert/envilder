@@ -57,7 +57,7 @@ export async function main() {
   } catch (error) {
     logger?.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
     logger?.error(error instanceof Error ? error.message : String(error));
-    process.exit(1);
+    throw error;
   }
 }
 

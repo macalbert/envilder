@@ -24,9 +24,6 @@ describe('GitHubAction', () => {
   beforeEach(() => {
     mocks = patchWithMocks();
     originalEnv = { ...process.env };
-    vi.spyOn(process, 'exit').mockImplementation(() => {
-      throw new Error('process.exit called');
-    });
   });
 
   afterEach(() => {
@@ -68,7 +65,7 @@ describe('GitHubAction', () => {
     const action = () => main();
 
     // Assert
-    await expect(action()).rejects.toThrow('process.exit called');
+    await expect(action()).rejects.toThrow('Missing required inputs');
   });
 
   it('Should_ExitWithError_When_MapFileIsMissing', async () => {
@@ -80,7 +77,7 @@ describe('GitHubAction', () => {
     const action = () => main();
 
     // Assert
-    await expect(action()).rejects.toThrow('process.exit called');
+    await expect(action()).rejects.toThrow('Missing required inputs');
   });
 
   it('Should_ExitWithError_When_EnvFileIsMissing', async () => {
@@ -92,7 +89,7 @@ describe('GitHubAction', () => {
     const action = () => main();
 
     // Assert
-    await expect(action()).rejects.toThrow('process.exit called');
+    await expect(action()).rejects.toThrow('Missing required inputs');
   });
 
   it('Should_AlwaysUsePullMode_When_ActionIsInvoked', async () => {
