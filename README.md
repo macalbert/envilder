@@ -238,10 +238,12 @@ All help is welcome — PRs, issues, ideas!
 - 🔧 Use our [Pull Request Template](.github/pull_request_template.md)
 - 🧪 Add tests where possible
 - 💬 Feedback and discussion welcome
+- 🏗️ Check our [Architecture Documentation](./docs/architecture/README.md)
+- 🔒 Review our [Security Policy](./docs/SECURITY.md)
 
 ---
 
 ## 📜 License
 
-MIT © [Marçal Albert](https://github.com/macalbert)
-See [LICENSE](./LICENSE)
+MIT © [Marçal Albert](https://github.com/macalbert)  
+See [LICENSE](./LICENSE) | [CHANGELOG](./docs/CHANGELOG.md) | [Security Policy](./docs/SECURITY.md)

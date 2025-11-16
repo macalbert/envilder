@@ -33,82 +33,6 @@ let localstackContainer: StartedLocalStackContainer;
 let localstackEndpoint: string;
 let ssmClient: SSMClient;
 
-/**
- * Simulates GitHub Actions environment by running the action entry point
- * with INPUT_* environment variables (same as real GitHub Actions workflow)
- */
-function runGitHubAction(inputs: { mapFile: string; envFile: string }): {
-  code: number;
-  output: string;
-  error: string;
-} {
-  const actionScript = join(rootDir, 'lib', 'apps', 'gha', 'index.js');
-
-  try {
-    const output = execSync(`node "${actionScript}"`, {
-      cwd: rootDir,
-      encoding: 'utf8',
-      env: {
-        ...process.env,
-        // GitHub Actions sets these automatically from action inputs
-        INPUT_MAP_FILE: inputs.mapFile,
-        INPUT_ENV_FILE: inputs.envFile,
-        // Point AWS SDK to LocalStack
-        AWS_ENDPOINT_URL: localstackEndpoint,
-        AWS_REGION: 'us-east-1',
-        AWS_ACCESS_KEY_ID: 'test',
-        AWS_SECRET_ACCESS_KEY: 'test',
-      },
-    });
-    return { code: 0, output, error: '' };
-  } catch (error: unknown) {
-    const err = error as { status?: number; stdout?: string; stderr?: string };
-    return {
-      code: err.status || 1,
-      output: err.stdout?.toString() || '',
-      error: err.stderr?.toString() || '',
-    };
-  }
-}
-
-// Helper functions
-async function SetParameterSsm(name: string, value: string): Promise<void> {
-  await ssmClient.send(
-    new PutParameterCommand({
-      Name: name,
-      Value: value,
-      Type: 'SecureString',
-      Overwrite: true,
-    }),
-  );
-}
-
-async function GetParameterSsm(name: string): Promise<string | undefined> {
-  try {
-    const response = await ssmClient.send(
-      new GetParameterCommand({ Name: name, WithDecryption: true }),
-    );
-    return response.Parameter?.Value;
-  } catch {
-    return undefined;
-  }
-}
-
-async function DeleteParameterSsm(name: string): Promise<void> {
-  try {
-    await ssmClient.send(new DeleteParameterCommand({ Name: name }));
-  } catch {
-    // Ignore errors if parameter doesn't exist
-  }
-}
-
-function GetSecretFromKey(envFilePath: string, key: string): string {
-  const content = readFileSync(envFilePath, 'utf8');
-  const lines = content.split('\n');
-  const line = lines.find((l) => l.startsWith(`${key}=`));
-  return line?.split('=')[1] || '';
-}
-
 describe('GitHub Action (E2E)', () => {
   const envFilePath = join(rootDir, 'e2e', 'sample', 'cli-validation.env');
   const mapFilePath = join(rootDir, 'e2e', 'sample', 'param-map.json');
@@ -136,6 +60,14 @@ describe('GitHub Action (E2E)', () => {
   });
 
   beforeEach(async () => {
+    // Verify bundle exists and was recently built (within last minute - from global setup)
+    const bundlePath = join(rootDir, 'github-action', 'dist', 'index.js');
+    if (!existsSync(bundlePath)) {
+      throw new Error(
+        'GitHub Action bundle not found! Run `pnpm build:gha` first.',
+      );
+    }
+
     const ssmParams = JSON.parse(readFileSync(mapFilePath, 'utf8')) as Record<
       string,
       string
@@ -246,3 +178,79 @@ describe('GitHub Action (E2E)', () => {
     }
   }, 30_000);
 });
+
+/**
+ * Simulates GitHub Actions environment by running the action entry point
+ * with INPUT_* environment variables (same as real GitHub Actions workflow)
+ */
+function runGitHubAction(inputs: { mapFile: string; envFile: string }): {
+  code: number;
+  output: string;
+  error: string;
+} {
+  const actionScript = join(rootDir, 'github-action', 'dist', 'index.js');
+
+  try {
+    const output = execSync(`node "${actionScript}"`, {
+      cwd: rootDir,
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        // GitHub Actions sets these automatically from action inputs
+        INPUT_MAP_FILE: inputs.mapFile,
+        INPUT_ENV_FILE: inputs.envFile,
+        // Point AWS SDK to LocalStack
+        AWS_ENDPOINT_URL: localstackEndpoint,
+        AWS_REGION: 'us-east-1',
+        AWS_ACCESS_KEY_ID: 'test',
+        AWS_SECRET_ACCESS_KEY: 'test',
+      },
+    });
+    return { code: 0, output, error: '' };
+  } catch (error: unknown) {
+    const err = error as { status?: number; stdout?: string; stderr?: string };
+    return {
+      code: err.status || 1,
+      output: err.stdout?.toString() || '',
+      error: err.stderr?.toString() || '',
+    };
+  }
+}
+
+// Helper functions
+async function SetParameterSsm(name: string, value: string): Promise<void> {
+  await ssmClient.send(
+    new PutParameterCommand({
+      Name: name,
+      Value: value,
+      Type: 'SecureString',
+      Overwrite: true,
+    }),
+  );
+}
+
+async function GetParameterSsm(name: string): Promise<string | undefined> {
+  try {
+    const response = await ssmClient.send(
+      new GetParameterCommand({ Name: name, WithDecryption: true }),
+    );
+    return response.Parameter?.Value;
+  } catch {
+    return undefined;
+  }
+}
+
+async function DeleteParameterSsm(name: string): Promise<void> {
+  try {
+    await ssmClient.send(new DeleteParameterCommand({ Name: name }));
+  } catch {
+    // Ignore errors if parameter doesn't exist
+  }
+}
+
+function GetSecretFromKey(envFilePath: string, key: string): string {
+  const content = readFileSync(envFilePath, 'utf8');
+  const lines = content.split('\n');
+  const line = lines.find((l) => l.startsWith(`${key}=`));
+  return line?.split('=')[1] || '';
+}

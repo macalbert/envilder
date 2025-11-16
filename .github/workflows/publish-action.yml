@@ -39,32 +39,55 @@ jobs:
       - name: 📦 Open the ? Block (Install packages)
         run: pnpm install --frozen-lockfile
 
+      - name: 🔍 Check if Already Published
+        id: version-check
+        run: |
+          if git rev-parse "v${{ inputs.version }}" >/dev/null 2>&1; then
+            echo "⚠️ Version v${{ inputs.version }} already exists!"
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Version v${{ inputs.version }} is new!"
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: 🏗️ Build the Castle
-        run: pnpm build
+        if: steps.version-check.outputs.should_publish == 'true'
+        run: pnpm build:gha
 
       - name: 🔍 Check for Hidden Blocks (Verify build)
+        if: steps.version-check.outputs.should_publish == 'true'
         run: |
-          if [ ! -f "lib/apps/gha/index.js" ]; then
+          if [ ! -f "github-action/dist/index.js" ]; then
             echo "❌ Oh no! Mario fell into a pit! Build failed!"
             exit 1
           fi
           echo "✅ Yahoo! Build successful! 🎉"
 
-      - name: 🏁 Place the Flagpole (Create version tag)
+      - name: 📝 Commit Built Files
+        if: steps.version-check.outputs.should_publish == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          echo "🔧 Collecting power-ups (adding built files)..."
-          git add -f lib/
-          git commit -m "🏗️ Build the castle for level v${{ inputs.version }}"
+          git add -f github-action/dist/index.js
           
-          echo "🏁 Raising the flag at level v${{ inputs.version }}!"
-          git tag -a "v${{ inputs.version }}" -m "🎮 Level v${{ inputs.version }} complete!"
+          # Only commit if there are changes
+          if git diff --staged --quiet; then
+            echo "ℹ️ No changes to commit"
+          else
+            git commit -m "build: update compiled files for v${{ inputs.version }}"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
+
+      - name: 🏁 Place the Flagpole (Create version tag)
+        if: steps.version-check.outputs.should_publish == 'true'
+        run: |
+          echo "🏁 Creating tag v${{ inputs.version }}!"
+          git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }}"
           git push origin "v${{ inputs.version }}"
 
       - name: ⭐ Collect the Star (Update major version)
-        if: inputs.update-major == true
+        if: inputs.update-major == true && steps.version-check.outputs.should_publish == 'true'
         run: |
           MAJOR_VERSION=$(echo "v${{ inputs.version }}" | cut -d. -f1)
           
@@ -75,6 +98,7 @@ jobs:
           echo "🌟 Star collected! $MAJOR_VERSION is now super-charged!"
 
       - name: 🏰 Unlock the Castle (Create Release)
+        if: steps.version-check.outputs.should_publish == 'true'
         uses: ncipollo/release-action@v1
         with:
           tag: "v${{ inputs.version }}"

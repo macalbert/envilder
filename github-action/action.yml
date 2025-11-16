@@ -22,19 +22,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: 🔍 Validate Envilder CLI is built
-      shell: bash
-      run: |
-        if [ ! -f "${{ github.action_path }}/../lib/apps/gha/index.js" ]; then
-          echo "❌ Envilder GitHub Action is not built!"
-          echo ""
-          echo "Please ensure you run 'pnpm build' before using this action."
-          echo "Add these steps before using envilder:"
-          echo "  - run: pnpm install --frozen-lockfile"
-          echo "  - run: pnpm build"
-          exit 1
-        fi
-
     - name: 🔐 Pull secrets from AWS SSM
       shell: bash
       working-directory: ${{ github.workspace }}
@@ -42,4 +29,4 @@ runs:
         INPUT_MAP_FILE: ${{ inputs.map-file }}
         INPUT_ENV_FILE: ${{ inputs.env-file }}
       run: |
-        node "${{ github.action_path }}/../lib/apps/gha/index.js"
+        node "${{ github.action_path }}/dist/index.js"
