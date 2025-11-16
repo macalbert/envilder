@@ -59,6 +59,9 @@ jobs:
       - name: 🏗️ Build the Castle
         run: pnpm build
 
+      - name: 📦 Bundle GitHub Action
+        run: pnpm run build:gha
+
       - name: 🔐 Test Action - Pull Secrets
         uses: ./github-action
         with:
