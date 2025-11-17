@@ -1,0 +1,32 @@
+name: "Envilder GitHub Action"
+description: "Pull secrets from AWS Systems Manager Parameter Store into .env files for your CI/CD workflows"
+author: "macalbert"
+
+branding:
+  icon: "lock"
+  color: "orange"
+
+inputs:
+  map-file:
+    description: "Path to the JSON file mapping environment variables to SSM parameter paths"
+    required: true
+  env-file:
+    description: "Path to the .env file to generate"
+    required: true
+
+outputs:
+  env-file-path:
+    description: "Path to the generated .env file"
+    value: ${{ inputs.env-file }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🔐 Pull secrets from AWS SSM
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      env:
+        INPUT_MAP_FILE: ${{ inputs.map-file }}
+        INPUT_ENV_FILE: ${{ inputs.env-file }}
+      run: |
+        node "${{ github.action_path }}/dist/index.js"

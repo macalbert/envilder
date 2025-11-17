@@ -3,64 +3,38 @@
 Envilder aims to be the simplest, most reliable way to generate `.env` files from AWS SSM Parameter Store
 — for both local development and CI/CD pipelines.
 
-## ✅ Current Features
-
-- Map-based secret resolution via `param-map.json`
-- Outputs clean `.env` files
-- Supports AWS profiles (`AWS_PROFILE`)
-- Compatible with SecureString and plain parameters
-- CLI-first, lightweight
-- 📸 **Demo GIF/video** showing the tool in action (terminal + env + app)
+> **Note:** This roadmap contains ideas and potential features based on initial vision and community feedback.
+> Not all features are guaranteed to be implemented. Priorities may change based on user needs, feedback,
+> and real-world usage patterns. Your input matters—feel free to share your thoughts and suggestions!
 
 ---
 
-## 🚧 Planned Improvements
+## Feature Status & Roadmap
 
-### 🔹 Usability & Visibility
-
-- [ ] 🔍 **Auto-discovery mode** (`--auto`) for fetching all parameters with a given prefix
-- [ ] ✍️ **Tutorial repo** showing full example with GitHub Actions
-- [ ] 🛍️ **Official GitHub Action** (in Marketplace)
-
-### 🔹 Dev Experience & Adoption
-
-- [ ] ✅ **Check mode** (`--check`) to validate SSM vs existing `.env` and fail CI if out-of-sync
-- [ ] 📝 **Onboarding doc** for new teams (how to set up param-map, profiles, best practices)
-
-### 🔹 Advanced Features
-
-- [ ] ↩️ **Push mode** (`--push`) to push local `.env` back to AWS SSM
-- [ ] 🔔 **Optional webhook/Slack notifier** on secret sync (for audit/logging)
-- [ ] 🌐 **Web-based interactive demo** (optional) to test mappings live
-- [ ] 🧠 **Awesome list submissions** and community templates
+| Feature | Status | Priority | Notes |
+|---------|--------|----------|-------|
+| **Mapping-based resolution** | ✅ Implemented | - | Core functionality |
+| **`.env` file generation** | ✅ Implemented | - | Core functionality |
+| **AWS profile support** | ✅ Implemented | - | `--profile` flag |
+| **Push mode** (`--push`) | ✅ Implemented | - | [Guide](./docs/push-command.md) |
+| **GitHub Action** | ✅ Implemented | - | [Documentation](./github-action/README.md) |
+| **Onboarding documentation** | ✅ Implemented | - | [Setup guide](./docs/requirements-installation.md) |
+| **Plugin system / Multi-backend** | ❌ Planned | 🔥 Next | Starting with Azure Key Vault support |
+| **Check/sync mode** (`--check`) | ❌ Planned | High | Validate SSM vs `.env`, fail CI if out-of-sync |
+| **Auto-discovery mode** (`--auto`) | ❌ Planned | Medium | Fetch all parameters with a given prefix |
+| **Webhook/Slack notifications** | ❌ Planned | Low | Notify on secret sync for audit/logging |
+| **Hierarchical mapping** | ❌ Future | Low | Per-environment `param-map.json` |
+| **Web-based demo** | ❌ Future | Low | Interactive mapping tester |
 
 ---
 
-## 🧪 Long-term Ideas (Open to Feedback)
+## 🙌 Contribute or Suggest Ideas
 
-- [ ] 📁 Support hierarchical `param-map.json` per environment
-- [ ] 🧬 Plugin system for custom resolvers (e.g., secrets from other providers)
+If you've faced similar problems or want to help improve this tool, feel free to:
 
----
+- 🐛 [Open an issue](https://github.com/macalbert/envilder/issues/new)
+- 💡 Share feature ideas and use cases
+- 🔧 Submit a Pull Request
+- 💬 Provide feedback on planned features
 
-## 🙌 Contribute or suggest ideas
-
-If you’ve faced similar problems or want to help improve this tool, feel free to open an issue, submit a PR
-or reach out.  
-Every bit of feedback helps make this tool better for the community.
-
----
-
-## Feature Status
-
-| Feature                        | Status         | Notes |
-|--------------------------------|---------------|-------|
-| Push mode (`--push`)           | ✅ Implemented | |
-| Mapping-based secret resolution| ✅ Implemented | |
-| .env file generation           | ✅ Implemented | |
-| AWS profile support            | ✅ Implemented | |
-| Auto-discovery mode (`--auto`) | ❌ Not implemented | Planned |
-| Check/sync mode (`--check`)    | ❌ Not implemented | Planned |
-| Webhook/Slack notification     | ❌ Not implemented | Planned |
-| Hierarchical mapping           | ❌ Not implemented | Only flat JSON mapping supported |
-| Plugin system                  | ❌ Not implemented | Only AWS SSM supported |
+Every bit of feedback helps make this tool better for the community!

@@ -29,7 +29,7 @@ const ssmClient = new SSMClient({});
 describe('Envilder (E2E)', () => {
   beforeAll(async () => {
     await cleanUpSystem();
-    execSync('npm run build', { cwd: rootDir, stdio: 'inherit' });
+    execSync('pnpm build', { cwd: rootDir, stdio: 'inherit' });
     execSync('node --loader ts-node/esm scripts/pack-and-install.ts', {
       cwd: rootDir,
       stdio: 'inherit',
@@ -220,8 +220,15 @@ async function cleanUpSystem() {
       await unlink(file);
     }
 
-    // Uninstall global package (still sync, as npm API is not available async)
-    execSync('npm uninstall -g envilder', { stdio: 'inherit' });
+    // Uninstall global package (still sync, as pnpm API is not available async)
+    try {
+      execSync('pnpm remove -g envilder 2>nul', {
+        stdio: 'inherit',
+        shell: 'cmd',
+      });
+    } catch {
+      // Ignore errors if not installed
+    }
   } catch {
     // Ignore errors if not installed
   }
@@ -241,7 +248,7 @@ async function cleanUpSsm(
       await DeleteParameterSsm(ssmPath);
     }
   } catch (error) {
-    if (error.code === 'ENOENT') {
+    if (isNodeError(error) && error.code === 'ENOENT') {
       console.log('Parameter map file not found:', mapFilePath);
     } else if (error instanceof SyntaxError) {
       console.error('Invalid JSON in parameter map file:', error.message);
@@ -272,7 +279,7 @@ async function DeleteParameterSsm(ssmPath: string): Promise<void> {
     await ssmClient.send(command);
     console.log(`Deleted SSM parameter at path ${ssmPath}`);
   } catch (error) {
-    if (error.name === 'ParameterNotFound') {
+    if (hasNameProperty(error) && error.name === 'ParameterNotFound') {
       console.log(`SSM parameter ${ssmPath} does not exist, nothing to delete`);
     } else {
       console.error(`Error deleting SSM parameter at path ${ssmPath}:`, error);
@@ -294,6 +301,24 @@ async function SetParameterSsm(ssmPath: string, value: string): Promise<void> {
     console.error(`Error setting SSM parameter at path ${ssmPath}:`, error);
     throw error;
   }
+}
+
+function isNodeError(error: unknown): error is NodeJS.ErrnoException {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    typeof (error as { code?: unknown }).code === 'string'
+  );
+}
+
+function hasNameProperty(error: unknown): error is { name: string } {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'name' in error &&
+    typeof (error as { name?: unknown }).name === 'string'
+  );
 }
 
 function GetSecretFromKey(envFilePath: string, key: string): string {

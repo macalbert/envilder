@@ -1,0 +1,34 @@
+name: 🔍 Verify Action Build
+
+on:
+  pull_request:
+    paths:
+      - 'src/apps/gha/**'
+      - 'github-action/**'
+      - '.github/workflows/verify-action-build.yml'
+
+jobs:
+  verify-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    
+    steps:
+      - name: 🧱 Checkout
+        uses: actions/checkout@v5
+
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: 🍄 Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20.x'
+          cache: 'pnpm'
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔍 Verify build is up to date
+        run: pnpm verify:gha

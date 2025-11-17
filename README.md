@@ -70,7 +70,6 @@ onboarding and CI/CD workflows.
   - [✅ How Envilder makes life easier](#-how-envilder-makes-life-easier)
   - [📚 Table of Contents](#-table-of-contents)
   - [⚙️ Features](#️-features)
-    - [🧱 Feature Status](#-feature-status)
   - [💾 Installation](#-installation)
   - [🚀 Quick Start](#-quick-start)
     - [🎥 Video Demonstration](#-video-demonstration)
@@ -94,17 +93,9 @@ onboarding and CI/CD workflows.
 
 ### 🧱 Feature Status
 
-| Feature | Status | Notes |
-|--|--|--|
-| Mapping-based resolution | ✅ Implemented | |
-| `.env` file generation | ✅ Implemented | |
-| AWS profile support | ✅ Implemented | `--profile` flag |
-| Import/push mode (`--push`) | ✅ Implemented | |
-| Auto-discovery (`--auto`) | ❌ Planned | Detect keys based on env |
-| Check/sync mode (`--check`) | ❌ Planned | Diff local vs remote |
-| Webhook/Slack notification | ❌ Planned | On push/pull events |
-| Hierarchical mapping | ❌ Not yet | Flat mapping only |
-| Plugin system | ❌ Not yet | SSM is the only backend (for now) |
+- 🤖 **GitHub Action** — [Integrate directly in CI/CD workflows](./github-action/README.md)
+- 📤 **Push & Pull** — Bidirectional sync between local `.env` and AWS SSM
+- 🎯 **AWS Profile support** — Use `--profile` flag for multi-account setups
 
 ---
 
@@ -117,7 +108,7 @@ onboarding and CI/CD workflows.
 - IAM user/role with `ssm:GetParameter`, `ssm:PutParameter`
 
 ```bash
-npm install -g envilder
+pnpm add -g envilder
 ```
 
 > 💡 **New to AWS SSM?** AWS Systems Manager Parameter Store provides secure storage for configuration data and secrets:
@@ -125,6 +116,26 @@ npm install -g envilder
 > - [AWS SSM Parameter Store Overview](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html)
 > - [Setting up AWS CLI credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
 > - [IAM permissions for SSM](https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html)
+
+### 🤖 GitHub Action
+
+Use Envilder directly in your CI/CD workflows with our official GitHub Action:
+
+```yaml
+- name: Configure AWS Credentials
+  uses: aws-actions/configure-aws-credentials@v5
+  with:
+    role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+    aws-region: us-east-1
+
+- name: Pull secrets from AWS SSM
+  uses: macalbert/envilder/github-action@v0.7.1
+  with:
+    map-file: param-map.json
+    env-file: .env
+```
+
+📖 **[View full GitHub Action documentation](./github-action/README.md)**
 
 ---
 
@@ -220,14 +231,13 @@ A: Yes, licensed under MIT.
 
 ## 🏁 Roadmap
 
-🧭 Planned features:
+We're continuously improving Envilder based on community feedback. Upcoming features include:
 
-- 🔍 Drift detection (`--check`)
-- 🧠 Auto-discovery (`--auto`)
-- 📨 Slack/Webhook notifications
-- 🔌 Plugin system (Vault, Secrets Manager, etc.)
+- 🔌 **Multi-backend support** (Azure Key Vault, HashiCorp Vault, etc.)
+- 🔍 **Check/sync mode** for drift detection
+- 🧠 **Auto-discovery** for bulk parameter fetching
 
-👉 See full [ROADMAP.md](./ROADMAP.md)
+👉 **[View full roadmap with priorities](./ROADMAP.md)**
 
 ---
 
@@ -238,10 +248,12 @@ All help is welcome — PRs, issues, ideas!
 - 🔧 Use our [Pull Request Template](.github/pull_request_template.md)
 - 🧪 Add tests where possible
 - 💬 Feedback and discussion welcome
+- 🏗️ Check our [Architecture Documentation](./docs/architecture/README.md)
+- 🔒 Review our [Security Policy](./docs/SECURITY.md)
 
 ---
 
 ## 📜 License
 
-MIT © [Marçal Albert](https://github.com/macalbert)
-See [LICENSE](./LICENSE)
+MIT © [Marçal Albert](https://github.com/macalbert)  
+See [LICENSE](./LICENSE) | [CHANGELOG](./docs/CHANGELOG.md) | [Security Policy](./docs/SECURITY.md)

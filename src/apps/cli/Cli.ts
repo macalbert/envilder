@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import 'reflect-metadata';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
