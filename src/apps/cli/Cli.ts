@@ -6,7 +6,6 @@ import type { Container } from 'inversify';
 import { DispatchActionCommand } from '../../envilder/application/dispatch/DispatchActionCommand.js';
 import type { DispatchActionCommandHandler } from '../../envilder/application/dispatch/DispatchActionCommandHandler.js';
 import type { CliOptions } from '../../envilder/domain/CliOptions.js';
-import type { ILogger } from '../../envilder/domain/ports/ILogger.js';
 import { PackageVersionReader } from '../../envilder/infrastructure/package/PackageVersionReader.js';
 import { TYPES } from '../../envilder/types.js';
 import { Startup } from './Startup.js';
