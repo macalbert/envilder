@@ -74,7 +74,7 @@ export class FileVariableStore implements IVariableStore {
   }
 
   private escapeEnvValue(value: string): string {
-    // lgtm[js/incomplete-sanitization]
+    // codeql[js/incomplete-sanitization]
     // CodeQL flags this as incomplete sanitization because we don't escape backslashes
     // before newlines. However, this is intentional: the dotenv library does NOT
     // interpret escape sequences (it treats \n literally as backslash+n, not as a newline).

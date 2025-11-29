@@ -1,7 +1,17 @@
 {
   "name": "envilder",
-  "version": "0.7.1",
+  "version": "0.7.4",
   "description": "A CLI that securely centralizes your environment variables from AWS SSM as a single source of truth",
+  "author": {
+    "name": "Marçal Albert Castellví",
+    "email": "mac.albert@gmail.com",
+    "url": "https://github.com/macalbert/envilder"
+  },
+  "repo": "github:macalbert/envilder",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/macalbert/envilder.git"
+  },
   "main": "./lib/apps/cli/Index.js",
   "bin": {
     "envilder": "lib/apps/cli/Index.js"
@@ -21,12 +31,12 @@
     "test:ci": "vitest run --reporter=verbose --reporter=junit --coverage --outputFile=coverage/junit/test-results.xml",
     "changelog": "conventional-changelog -p angular -i docs/CHANGELOG.md -s",
     "changelog:all": "conventional-changelog -p angular -i docs/CHANGELOG.md -s -r 0",
-    "pnpm-publish": "pnpm lint && pnpm build && pnpm test && pnpm pack --dry-run && pnpm publish",
+    "publish": "npm run lint && npm run build && npm test && npm pack --dry-run && npm publish --provenance --access public",
     "action-publish": "pnpm build:gha && pnpm verify:gha",
-    "pnpm-release-patch": "pnpm version patch && pnpm changelog",
-    "pnpm-release-minor": "pnpm version minor && pnpm changelog",
-    "pnpm-release-major": "pnpm version major && pnpm changelog",
-    "pnpm-release-prerelease": "pnpm version prerelease"
+    "release-patch": "pnpm version patch && pnpm changelog",
+    "release-minor": "pnpm version minor && pnpm changelog",
+    "release-major": "pnpm version major && pnpm changelog",
+    "release-prerelease": "pnpm version prerelease"
   },
   "keywords": [
     "env",
@@ -48,16 +58,9 @@
     "github-action",
     "actions"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/macalbert/envilder.git"
-  },
   "bugs": {
     "url": "https://github.com/macalbert/envilder/issues"
   },
-  "author": "Marçal Albert Castellví",
-  "email": "mac.albert@gmail.com",
-  "url": "https://github.com/macalbert/envilder",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -85,8 +88,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.5",
-    "@commitlint/cli": "^19.6.0",
-    "@commitlint/config-conventional": "^19.6.0",
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
     "@secretlint/secretlint-rule-preset-recommend": "^11.2.5",
     "@testcontainers/localstack": "^11.8.1",
     "@vercel/ncc": "^0.38.4",

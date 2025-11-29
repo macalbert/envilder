@@ -61,9 +61,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: 📦 Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
 
       - name: 🍄 Grab a Mushroom (Setup Node.js with Cache)
         uses: actions/setup-node@v6
