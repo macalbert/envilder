@@ -53,7 +53,7 @@ Pull AWS SSM Parameter Store secrets into `.env` files in your GitHub Actions wo
     aws-region: us-east-1
 
 - name: 🔐 Pull Secrets from AWS SSM
-  uses: macalbert/envilder/github-action@v0.7.1
+  uses: macalbert/envilder/github-action@v0.7.2
   with:
     map-file: param-map.json
     env-file: .env

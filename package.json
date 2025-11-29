@@ -1,6 +1,6 @@
 {
   "name": "envilder",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "A CLI that securely centralizes your environment variables from AWS SSM as a single source of truth",
   "main": "./lib/apps/cli/Index.js",
   "bin": {
@@ -21,12 +21,12 @@
     "test:ci": "vitest run --reporter=verbose --reporter=junit --coverage --outputFile=coverage/junit/test-results.xml",
     "changelog": "conventional-changelog -p angular -i docs/CHANGELOG.md -s",
     "changelog:all": "conventional-changelog -p angular -i docs/CHANGELOG.md -s -r 0",
-    "pnpm-publish": "pnpm lint && pnpm build && pnpm test && pnpm pack --dry-run && pnpm publish",
+    "publish": "pnpm lint && pnpm build && pnpm test && pnpm pack --dry-run && pnpm publish",
     "action-publish": "pnpm build:gha && pnpm verify:gha",
-    "pnpm-release-patch": "pnpm version patch && pnpm changelog",
-    "pnpm-release-minor": "pnpm version minor && pnpm changelog",
-    "pnpm-release-major": "pnpm version major && pnpm changelog",
-    "pnpm-release-prerelease": "pnpm version prerelease"
+    "release-patch": "pnpm version patch && pnpm changelog",
+    "release-minor": "pnpm version minor && pnpm changelog",
+    "release-major": "pnpm version major && pnpm changelog",
+    "release-prerelease": "pnpm version prerelease"
   },
   "keywords": [
     "env",

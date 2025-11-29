@@ -129,7 +129,7 @@ Use Envilder directly in your CI/CD workflows with our official GitHub Action:
     aws-region: us-east-1
 
 - name: Pull secrets from AWS SSM
-  uses: macalbert/envilder/github-action@v0.7.1
+  uses: macalbert/envilder/github-action@v0.7.2
   with:
     map-file: param-map.json
     env-file: .env
