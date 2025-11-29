@@ -71,6 +71,7 @@
     "docs/SECURITY.md"
   ],
   "type": "module",
+  "packageManager": "pnpm@9.15.4",
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.932.0",
     "@aws-sdk/credential-providers": "^3.932.0",
