@@ -2,6 +2,16 @@
   "name": "envilder",
   "version": "0.7.2",
   "description": "A CLI that securely centralizes your environment variables from AWS SSM as a single source of truth",
+  "author": {
+    "name": "Marçal Albert Castellví",
+    "email": "mac.albert@gmail.com",
+    "url": "https://github.com/macalbert/envilder"
+  },
+  "repo": "github:macalbert/envilder",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/macalbert/envilder.git"
+  },
   "main": "./lib/apps/cli/Index.js",
   "bin": {
     "envilder": "lib/apps/cli/Index.js"
@@ -48,17 +58,9 @@
     "github-action",
     "actions"
   ],
-  "repo": "github:macalbert/envilder",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/macalbert/envilder.git"
-  },
   "bugs": {
     "url": "https://github.com/macalbert/envilder/issues"
   },
-  "author": "Marçal Albert Castellví",
-  "email": "mac.albert@gmail.com",
-  "url": "https://github.com/macalbert/envilder",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
