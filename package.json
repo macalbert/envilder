@@ -48,6 +48,7 @@
     "github-action",
     "actions"
   ],
+  "repo": "github:macalbert/envilder",
   "repository": {
     "type": "git",
     "url": "git://github.com/macalbert/envilder.git"
