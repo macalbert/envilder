@@ -34,7 +34,7 @@ describe('Envilder (E2E)', () => {
       cwd: rootDir,
       stdio: 'inherit',
     });
-  }, 30_000);
+  }, 60_000);
 
   const envilder = 'envilder';
   const envFilePath = join(rootDir, 'e2e', 'sample', 'cli-validation.env');
@@ -43,15 +43,15 @@ describe('Envilder (E2E)', () => {
 
   beforeEach(async () => {
     await cleanUpSsm(mapFilePath, singleSsmPath);
-  });
+  }, 60_000);
 
   afterEach(async () => {
     await cleanUpSsm(mapFilePath, singleSsmPath);
-  });
+  }, 60_000);
 
   afterAll(async () => {
     await cleanUpSystem();
-  });
+  }, 60_000);
 
   it('Should_PrintCorrectVersion_When_VersionFlagIsProvided', async () => {
     // Arrange
