@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths:
-      - 'src/**'
-      - 'package.json'
-      - '.github/workflows/publish-npm.yml'
+      - "src/**"
+      - "package.json"
+      - ".github/workflows/publish-npm.yml"
 
 # Add explicit permissions for the GITHUB_TOKEN
 permissions:
-  id-token: write  # Required for OIDC
+  id-token: write # Required for OIDC
   contents: write
   packages: write
 
@@ -32,9 +32,9 @@ jobs:
       - name: 🛠️ Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'pnpm'
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+          cache: "pnpm"
 
       - name: 👑 Detect version bump
         id: version-check
@@ -42,9 +42,9 @@ jobs:
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           LAST_TAG_VERSION=${LAST_TAG#v}
-          
+
           echo "Current version: $CURRENT_VERSION, Last tag version: $LAST_TAG_VERSION"
-          
+
           # Check if the current version is greater than the last tagged version
           if [ "$CURRENT_VERSION" != "$LAST_TAG_VERSION" ]; then
             echo "Version has been bumped from $LAST_TAG_VERSION to $CURRENT_VERSION"
@@ -69,7 +69,7 @@ jobs:
       - name: 🔥 Lint
         if: steps.version-check.outputs.version_changed == 'true'
         run: pnpm lint
-          
+
       - name: 🍄 Run tests
         if: steps.version-check.outputs.version_changed == 'true'
         run: pnpm test
@@ -80,7 +80,7 @@ jobs:
 
       - name: 🚩 Publish to npm
         if: steps.version-check.outputs.version_changed == 'true'
-        run: npm publish --provenance --access public
+        run: npm publish --access public
 
       - name: 🏰 Create release
         if: steps.version-check.outputs.version_changed == 'true'
