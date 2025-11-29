@@ -31,7 +31,7 @@
     "test:ci": "vitest run --reporter=verbose --reporter=junit --coverage --outputFile=coverage/junit/test-results.xml",
     "changelog": "conventional-changelog -p angular -i docs/CHANGELOG.md -s",
     "changelog:all": "conventional-changelog -p angular -i docs/CHANGELOG.md -s -r 0",
-    "publish": "pnpm lint && pnpm build && pnpm test && pnpm pack --dry-run && pnpm publish",
+    "publish": "npm run lint && npm run build && npm test && npm pack --dry-run && npm publish --provenance --access public",
     "action-publish": "pnpm build:gha && pnpm verify:gha",
     "release-patch": "pnpm version patch && pnpm changelog",
     "release-minor": "pnpm version minor && pnpm changelog",
