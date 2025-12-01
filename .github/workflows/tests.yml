@@ -39,7 +39,7 @@ jobs:
 
     steps:
       - name: 🧱 Enter the Pipe (Checkout)
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: 📦 Install pnpm
         uses: pnpm/action-setup@v4
