@@ -93,7 +93,7 @@
     "@vercel/ncc": "^0.38.4",
     "@vitest/coverage-v8": "^4.0.9",
     "conventional-changelog-cli": "^5.0.0",
-    "glob": "^11.0.3",
+    "glob": "^13.0.0",
     "secretlint": "^11.2.5",
     "testcontainers": "^11.8.1",
     "ts-node": "^10.9.2",
