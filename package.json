@@ -77,6 +77,8 @@
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.932.0",
     "@aws-sdk/credential-providers": "^3.932.0",
+    "@azure/identity": "^4.5.1",
+    "@azure/keyvault-secrets": "^4.9.1",
     "@types/node": "^24.10.1",
     "commander": "^14.0.2",
     "dotenv": "^17.2.3",
