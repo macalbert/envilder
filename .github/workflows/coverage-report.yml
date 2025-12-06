@@ -52,7 +52,7 @@ jobs:
         run: echo "The workflow is allowed to run for this PR"
 
       - name: 🧲 Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: 📦 Install pnpm
         uses: pnpm/action-setup@v4
