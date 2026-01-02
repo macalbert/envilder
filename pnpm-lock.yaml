@@ -9,10 +9,10 @@ importers:
   .:
     dependencies:
       '@aws-sdk/client-ssm':
-        specifier: ^3.932.0
+        specifier: ^3.958.0
         version: 3.958.0
       '@aws-sdk/credential-providers':
-        specifier: ^3.932.0
+        specifier: ^3.958.0
         version: 3.958.0
       '@types/node':
         specifier: ^25.0.3
@@ -24,7 +24,7 @@ importers:
         specifier: ^17.2.3
         version: 17.2.3
       inversify:
-        specifier: ^7.10.4
+        specifier: ^7.10.8
         version: 7.10.8(reflect-metadata@0.2.2)
       picocolors:
         specifier: ^1.1.1
@@ -34,25 +34,25 @@ importers:
         version: 0.2.2
     devDependencies:
       '@biomejs/biome':
-        specifier: ^2.3.5
+        specifier: ^2.3.10
         version: 2.3.10
       '@commitlint/cli':
-        specifier: ^20.1.0
+        specifier: ^20.3.0
         version: 20.3.0(@types/node@25.0.3)(typescript@5.9.3)
       '@commitlint/config-conventional':
-        specifier: ^20.0.0
+        specifier: ^20.3.0
         version: 20.3.0
       '@secretlint/secretlint-rule-preset-recommend':
         specifier: ^11.2.5
         version: 11.2.5
       '@testcontainers/localstack':
-        specifier: ^11.8.1
+        specifier: ^11.11.0
         version: 11.11.0
       '@vercel/ncc':
         specifier: ^0.38.4
         version: 0.38.4
       '@vitest/coverage-v8':
-        specifier: ^4.0.9
+        specifier: ^4.0.16
         version: 4.0.16(vitest@4.0.16(@types/node@25.0.3)(jiti@2.6.1)(yaml@2.8.2))
       conventional-changelog-cli:
         specifier: ^5.0.0
@@ -64,7 +64,7 @@ importers:
         specifier: ^11.2.5
         version: 11.2.5
       testcontainers:
-        specifier: ^11.8.1
+        specifier: ^11.11.0
         version: 11.11.0
       ts-node:
         specifier: ^10.9.2
@@ -73,7 +73,7 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
       vitest:
-        specifier: ^4.0.9
+        specifier: ^4.0.16
         version: 4.0.16(@types/node@25.0.3)(jiti@2.6.1)(yaml@2.8.2)
 
 packages:
