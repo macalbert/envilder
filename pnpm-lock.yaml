@@ -41,13 +41,13 @@ importers:
         version: 20.1.0(@types/node@25.0.3)(typescript@5.9.3)
       '@commitlint/config-conventional':
         specifier: ^20.0.0
-        version: 20.0.0
+        version: 20.2.0
       '@secretlint/secretlint-rule-preset-recommend':
         specifier: ^11.2.5
         version: 11.2.5
       '@testcontainers/localstack':
         specifier: ^11.8.1
-        version: 11.9.0
+        version: 11.11.0
       '@vercel/ncc':
         specifier: ^0.38.4
         version: 0.38.4
@@ -299,8 +299,8 @@ packages:
     engines: {node: '>=v18'}
     hasBin: true
 
-  '@commitlint/config-conventional@20.0.0':
-    resolution: {integrity: sha512-q7JroPIkDBtyOkVe9Bca0p7kAUYxZMxkrBArCfuD3yN4KjRAenP9PmYwnn7rsw8Q+hHq1QB2BRmBh0/Z19ZoJw==}
+  '@commitlint/config-conventional@20.2.0':
+    resolution: {integrity: sha512-MsRac+yNIbTB4Q/psstKK4/ciVzACHicSwz+04Sxve+4DW+PiJeTjU0JnS4m/oOnulrXYN+yBPlKaBSGemRfgQ==}
     engines: {node: '>=v18'}
 
   '@commitlint/config-validator@20.0.0':
@@ -361,6 +361,10 @@ packages:
 
   '@commitlint/types@20.0.0':
     resolution: {integrity: sha512-bVUNBqG6aznYcYjTjnc3+Cat/iBgbgpflxbIBTnsHTX0YVpnmINPEkSRWymT2Q8aSH3Y7aKnEbunilkYe8TybA==}
+    engines: {node: '>=v18'}
+
+  '@commitlint/types@20.2.0':
+    resolution: {integrity: sha512-KTy0OqRDLR5y/zZMnizyx09z/rPlPC/zKhYgH8o/q6PuAjoQAKlRfY4zzv0M64yybQ//6//4H1n14pxaLZfUnA==}
     engines: {node: '>=v18'}
 
   '@conventional-changelog/git-client@1.0.1':
@@ -980,8 +984,8 @@ packages:
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
 
-  '@testcontainers/localstack@11.9.0':
-    resolution: {integrity: sha512-Pls8DqN1R+Beb3y4cqwyqURhKZ1Hcjy3ZbzXU9zTzI5nkZjGBfG21NvrwPBFmGUJsE/FC3IP+RT9pd8T3ZopKA==}
+  '@testcontainers/localstack@11.11.0':
+    resolution: {integrity: sha512-ce2dQb/TojpUFDRtw71FaLTQFR7YKc3GrTO1jU7MWOtqtvTwJLUAJ7lcLfLlUdCj3M39fayp/2RGaoRKSICfHQ==}
 
   '@textlint/ast-node-types@15.4.0':
     resolution: {integrity: sha512-IqY8i7IOGuvy05wZxISB7Me1ZyrvhaQGgx6DavfQjH3cfwpPFdDbDYmMXMuSv2xLS1kDB1kYKBV7fL2Vi16lRA==}
@@ -2213,6 +2217,9 @@ packages:
     resolution: {integrity: sha512-lk+vH+MccxNqgVqSnkMVKx4VLJfnLjDBGzH16JVZjKE2DoxP57s6/vt6JmXV5I3jBcfGrxNrYtC+mPtU7WJztA==}
     engines: {node: '>=18'}
 
+  testcontainers@11.11.0:
+    resolution: {integrity: sha512-nKTJn3n/gkyGg/3SVkOwX+isPOGSHlfI+CWMobSmvQrsj7YW01aWvl2pYIfV4LMd+C8or783yYrzKSK2JlP+Qw==}
+
   testcontainers@11.9.0:
     resolution: {integrity: sha512-SQ6OqQUig7HcGVF72i+ZVIMvxPSpEz8cgC/B63ekqMzgf98DnveoBbOmqux/Wa5wQAQCt4mEPNMa/Jz7vMg9fQ==}
 
@@ -2981,9 +2988,9 @@ snapshots:
       - '@types/node'
       - typescript
 
-  '@commitlint/config-conventional@20.0.0':
+  '@commitlint/config-conventional@20.2.0':
     dependencies:
-      '@commitlint/types': 20.0.0
+      '@commitlint/types': 20.2.0
       conventional-changelog-conventionalcommits: 7.0.2
 
   '@commitlint/config-validator@20.0.0':
@@ -3074,6 +3081,11 @@ snapshots:
       find-up: 7.0.0
 
   '@commitlint/types@20.0.0':
+    dependencies:
+      '@types/conventional-commits-parser': 5.0.2
+      chalk: 5.6.2
+
+  '@commitlint/types@20.2.0':
     dependencies:
       '@types/conventional-commits-parser': 5.0.2
       chalk: 5.6.2
@@ -3702,9 +3714,9 @@ snapshots:
 
   '@standard-schema/spec@1.0.0': {}
 
-  '@testcontainers/localstack@11.9.0':
+  '@testcontainers/localstack@11.11.0':
     dependencies:
-      testcontainers: 11.9.0
+      testcontainers: 11.11.0
     transitivePeerDependencies:
       - bare-abort-controller
       - bare-buffer
@@ -5037,6 +5049,29 @@ snapshots:
     dependencies:
       ansi-escapes: 7.2.0
       supports-hyperlinks: 3.2.0
+
+  testcontainers@11.11.0:
+    dependencies:
+      '@balena/dockerignore': 1.0.2
+      '@types/dockerode': 3.3.47
+      archiver: 7.0.1
+      async-lock: 1.4.1
+      byline: 5.0.0
+      debug: 4.4.3
+      docker-compose: 1.3.0
+      dockerode: 4.0.9
+      get-port: 7.1.0
+      proper-lockfile: 4.1.2
+      properties-reader: 2.3.0
+      ssh-remote-port-forward: 1.0.4
+      tar-fs: 3.1.1
+      tmp: 0.2.5
+      undici: 7.16.0
+    transitivePeerDependencies:
+      - bare-abort-controller
+      - bare-buffer
+      - react-native-b4a
+      - supports-color
 
   testcontainers@11.9.0:
     dependencies:
