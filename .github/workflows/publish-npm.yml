@@ -80,7 +80,8 @@ jobs:
 
       - name: 🚩 Publish to npm
         if: steps.version-check.outputs.version_changed == 'true'
-        run: pnpm publish        
+        run: pnpm publish --no-git-checks
+
       - name: 🏰 Create release
         if: steps.version-check.outputs.version_changed == 'true'
         uses: ncipollo/release-action@v1
