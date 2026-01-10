@@ -1,7 +1,7 @@
 # 🗝️ Envilder ☁️
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/96bf1efa-7d21-440a-a414-3a20e7f9a1f1" alt="Envilder">
+  <img src="https://github.com/user-attachments/assets/70635670-9235-4400-83a9-cb6543915ed9" alt="Envilder">
 </p>
 
 <p align="center">
