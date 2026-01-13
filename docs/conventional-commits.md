@@ -115,18 +115,16 @@ npx husky install
 npx husky add .husky/commit-msg 'npx commitlint --edit $1'
 ```
 
-### Generate Changelog
+### Version Bumping
 
 ```bash
-# Manual version bump (updates CHANGELOG.md)
+# Manual version bump
 pnpm version patch   # 0.7.0 -> 0.7.1
 pnpm version minor   # 0.7.0 -> 0.8.0
 pnpm version major   # 0.7.0 -> 1.0.0
-
-# Or use conventional-changelog
-pnpm add -D conventional-changelog-cli
-npx conventional-changelog -p angular -i CHANGELOG.md -s
 ```
+
+> **Note**: Changelog generation has been removed. Update [CHANGELOG.md](./CHANGELOG.md) manually or use GitHub Releases.
 
 ## Workflow
 
