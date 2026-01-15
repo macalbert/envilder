@@ -16,7 +16,8 @@ You can run this script using the following npm command defined in `package.json
 npm run local:install
 ```
 
-This command will first build the project (`npm run build`) and then execute `pack-and-install.ts`. Behind the scene it runs:
+This command will first build the project (`npm run build`) and then execute `pack-and-install.ts`.
+Behind the scene it runs:
 
 ```bash
 npm run build 
