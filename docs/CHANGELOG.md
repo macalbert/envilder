@@ -419,6 +419,12 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org/
 **Alternative**: Use [GitHub Releases](https://github.com/macalbert/envilder/releases) to auto-generate release notes
 from commit messages.
 
+[0.7.6]: https://github.com/macalbert/envilder/compare/v0.7.5...v0.7.6
+[0.7.5]: https://github.com/macalbert/envilder/compare/v0.7.4...v0.7.5
+[0.7.4]: https://github.com/macalbert/envilder/compare/v0.7.3...v0.7.4
+[0.7.3]: https://github.com/macalbert/envilder/compare/v0.7.2...v0.7.3
+[0.7.2]: https://github.com/macalbert/envilder/compare/v0.7.1...v0.7.2
+[0.7.1]: https://github.com/macalbert/envilder/compare/v0.6.6...v0.7.1
 [0.6.6]: https://github.com/macalbert/envilder/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/macalbert/envilder/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/macalbert/envilder/compare/v0.6.3...v0.6.4
