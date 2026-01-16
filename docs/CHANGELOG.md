@@ -440,4 +440,4 @@ from commit messages.
 [0.2.3]: https://github.com/macalbert/envilder/compare/v0.2.1...v0.2.3
 [0.2.1]: https://github.com/macalbert/envilder/compare/v0.1.4...v0.2.1
 [0.1.4]: https://github.com/macalbert/envilder/releases/tag/v0.1.4
-<!-- markdownlint-disable MD024 -->
+<!-- markdownlint-enable MD024 -->
