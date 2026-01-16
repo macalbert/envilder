@@ -1,0 +1,130 @@
+name: 🔑 Key Chest Publisher
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '🎮 Level to publish (e.g., 1.0.0)'
+        required: true
+      update-major:
+        description: '⭐ Update power-up tag (e.g., v1)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish-action:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    
+    steps:
+      - name: 🧱 Enter the Pipe (Checkout)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: 🍄 Grab a Mushroom (Setup Node.js)
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20.x'
+          cache: 'pnpm'
+
+      - name: 📦 Open the ? Block (Install packages)
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔍 Check if Already Published
+        id: version-check
+        run: |
+          if git rev-parse "v${{ inputs.version }}" >/dev/null 2>&1; then
+            echo "⚠️ Version v${{ inputs.version }} already exists!"
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Version v${{ inputs.version }} is new!"
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🏗️ Build the Castle
+        if: steps.version-check.outputs.should_publish == 'true'
+        run: pnpm build:gha
+
+      - name: 🔍 Check for Hidden Blocks (Verify build)
+        if: steps.version-check.outputs.should_publish == 'true'
+        run: |
+          if [ ! -f "github-action/dist/index.js" ]; then
+            echo "❌ Oh no! Mario fell into a pit! Build failed!"
+            exit 1
+          fi
+          echo "✅ Yahoo! Build successful! 🎉"
+
+      - name: 📝 Commit Built Files
+        if: steps.version-check.outputs.should_publish == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add -f github-action/dist/index.js
+          
+          # Only commit if there are changes
+          if git diff --staged --quiet; then
+            echo "ℹ️ No changes to commit"
+          else
+            git commit -m "build: update compiled files for v${{ inputs.version }}"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
+
+      - name: 🏁 Place the Flagpole (Create version tag)
+        if: steps.version-check.outputs.should_publish == 'true'
+        run: |
+          echo "🏁 Creating tag v${{ inputs.version }}!"
+          git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }}"
+          git push origin "v${{ inputs.version }}"
+
+      - name: ⭐ Collect the Star (Update major version)
+        if: inputs.update-major == true && steps.version-check.outputs.should_publish == 'true'
+        run: |
+          MAJOR_VERSION=$(echo "v${{ inputs.version }}" | cut -d. -f1)
+          
+          echo "⭐ Collecting star power! Updating $MAJOR_VERSION to v${{ inputs.version }}"
+          
+          git tag -fa "$MAJOR_VERSION" -m "⭐ Power-up $MAJOR_VERSION now at v${{ inputs.version }}"
+          git push origin "$MAJOR_VERSION" --force
+          echo "🌟 Star collected! $MAJOR_VERSION is now super-charged!"
+
+      - name: 🏰 Unlock the Castle (Create Release)
+        if: steps.version-check.outputs.should_publish == 'true'
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "v${{ inputs.version }}"
+          name: "🔑 Secret Key Level v${{ inputs.version }}"
+          body: |
+            ## 🔑 Envilder GitHub Action - Level v${{ inputs.version }}
+            
+            🎮 **New power-up unlocked!** Pull secrets from AWS SSM like collecting coins! 🪙
+            
+            ### 🍄 How to use this power-up
+            
+            ```yaml
+            - uses: aws-actions/configure-aws-credentials@v5
+              with:
+                role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+                aws-region: us-east-1
+            
+            - uses: macalbert/envilder@v${{ inputs.version }}
+              with:
+                map-file: param-map.json
+                env-file: .env
+            ```
+            
+            📖 Check the [manual](https://github.com/macalbert/envilder/blob/main/docs/github-action.md) to master this level!
+            
+            🎊 **Let's-a-go!**
+          generateReleaseNotes: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          makeLatest: true
