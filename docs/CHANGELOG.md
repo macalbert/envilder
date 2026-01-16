@@ -1,4 +1,100 @@
-# [0.7.0](https://github.com/macalbert/envilder/compare/v0.6.6...v0.7.0) (2025-11-16)
+<!-- markdownlint-disable MD024 -->
+# Changelog
+
+## [0.7.6] - 2026-01-16
+
+### Fixed
+
+* **ci:** Align npm publish script with CI workflow expectations to prevent failures
+* Removed redundant validation steps (lint, build, test) from publish script that were already executed in CI
+
+### Changed
+
+* Simplified npm publish script from full validation pipeline to `npm pack --dry-run && npm publish`
+* Updated README badge links - npm downloads now links to npmcharts for visual statistics
+* Converted README badges from HTML to standard Markdown format for better maintainability
+* Updated GitHub Action version references from v0.7.2 to v0.7.6 in documentation
+
+### Removed
+
+* **ci:** Deleted deprecated `publish-action.yml` workflow
+
+---
+
+## [0.7.5] - 2026-01-15
+
+### Documentation
+
+* Remove changelog generation instructions from documentation ([#104](https://github.com/macalbert/envilder/pull/104))
+* Update GitHub Copilot instructions
+
+### Dependencies
+
+* Bump undici to address security vulnerability ([#105](https://github.com/macalbert/envilder/pull/105))
+
+---
+
+## [0.7.4] - 2026-01-02
+
+### Changed
+
+* **ci:** Update npm publish command to include `--no-git-checks` flag
+
+### Dependencies
+
+* Bump @commitlint/cli from 20.1.0 to 20.2.0 ([#103](https://github.com/macalbert/envilder/pull/103))
+* Bump testcontainers from 11.9.0 to 11.11.0 ([#102](https://github.com/macalbert/envilder/pull/102))
+* Bump @types/node from 24.10.1 to 25.0.3 ([#101](https://github.com/macalbert/envilder/pull/101))
+* Bump @testcontainers/localstack from 11.9.0 to 11.11.0 ([#100](https://github.com/macalbert/envilder/pull/100))
+* Bump @commitlint/config-conventional ([#99](https://github.com/macalbert/envilder/pull/99))
+
+---
+
+## [0.7.3] - 2025-12-06
+
+### Dependencies
+
+* Bump actions/checkout from 5 to 6 ([#98](https://github.com/macalbert/envilder/pull/98))
+* Bump glob from 11.1.0 to 13.0.0 ([#97](https://github.com/macalbert/envilder/pull/97))
+
+---
+
+## [0.7.2] - 2025-11-29
+
+### Changed
+
+* **ci:** Update Node.js version to 24 in workflow
+* Update publish command to use pnpm
+* Add repository field to package.json
+* Standardize quotes in publish-npm.yml
+
+### Dependencies
+
+* Bump pnpm/action-setup from 2 to 4 ([#92](https://github.com/macalbert/envilder/pull/92))
+* Bump @commitlint/cli from 19.8.1 to 20.1.0 ([#94](https://github.com/macalbert/envilder/pull/94))
+* Bump glob in the npm_and_yarn group ([#96](https://github.com/macalbert/envilder/pull/96))
+
+---
+
+## [0.7.1] - 2025-11-16
+
+### Documentation
+
+* Update README and ROADMAP for GitHub Action integration ([#95](https://github.com/macalbert/envilder/pull/95))
+* Update GitHub Action version from v1 to v0.7.1
+* Fix example version for GitHub Action
+
+### Changed
+
+* **ci:** Update workflow to use pnpm for dependency management
+
+### Tests
+
+* Increase timeout for E2E tests to 60 seconds
+
+---
+
+## [0.7.0](https://github.com/macalbert/envilder/compare/v0.6.6...v0.7.0) (2025-11-16)
 
 * ♻️ Move GitHub Action to github-action/ subfolder ([d9bf4d2](https://github.com/macalbert/envilder/commit/d9bf4d2e81acbb1ef2b4e0034c0b6aaa8b307ba3))
 
@@ -10,7 +106,7 @@
 * **githubAction:** Remove source map generation from build:gha script ([8989448](https://github.com/macalbert/envilder/commit/898944898cdea866f28f8874b714bfe3fd2dd88e))
 * **githubAction:** Update action references in documentation and code ([412601b](https://github.com/macalbert/envilder/commit/412601b7b56a90dd50e031addcaf192e2dec8ba3))
 
-### Features
+## Features
 
 * **githubAction:** Add end-to-end tests for GitHub Actions simulation ([29464a0](https://github.com/macalbert/envilder/commit/29464a016d0072cc728345400f68e0c62669579b))
 * **githubAction:** Update action paths and add new GitHub Action implementation ([4310e50](https://github.com/macalbert/envilder/commit/4310e5040fa4952c50e800578fb91e00cf2f7a36))
@@ -21,8 +117,9 @@
 
 * Action path changed from macalbert/envilder@v1 to macalbert/envilder/github-action@v1
 
-# Changelog
-<!-- markdownlint-disable MD024 -->
+---
+
+## Changelog
 
 All notable changes to this project will be documented in this file.
 
@@ -319,7 +416,8 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org/
 3. Run `pnpm version [patch|minor|major]` to create a new release
 4. Move `[Unreleased]` entries to the new version section
 
-**Alternative**: Use [GitHub Releases](https://github.com/macalbert/envilder/releases) to auto-generate release notes from commit messages.
+**Alternative**: Use [GitHub Releases](https://github.com/macalbert/envilder/releases) to auto-generate release notes
+from commit messages.
 
 [0.6.6]: https://github.com/macalbert/envilder/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/macalbert/envilder/compare/v0.6.4...v0.6.5
@@ -336,3 +434,4 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org/
 [0.2.3]: https://github.com/macalbert/envilder/compare/v0.2.1...v0.2.3
 [0.2.1]: https://github.com/macalbert/envilder/compare/v0.1.4...v0.2.1
 [0.1.4]: https://github.com/macalbert/envilder/releases/tag/v0.1.4
+<!-- markdownlint-disable MD024 -->
