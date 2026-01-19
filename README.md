@@ -9,26 +9,12 @@
   <span>Streamline your environment setup with AWS Parameter Store</span>
 </p>
 
-<p align="center">
-  <a href="https://www.npmjs.com/package/envilder">
-    <img src="https://img.shields.io/npm/v/envilder.svg" alt="npm version">
-  </a>
-  <a href="https://img.shields.io/npm/dm/envilder.svg">
-    <img src="https://img.shields.io/npm/dm/envilder.svg" alt="npm downloads">
-  </a>
-  <a href="https://github.com/macalbert/envilder/actions/workflows/tests.yml">
-    <img src="https://github.com/macalbert/envilder/actions/workflows/tests.yml/badge.svg" alt="CI Tests">
-  </a>
-  <a href="https://macalbert.github.io/envilder/">
-    <img src="https://img.shields.io/badge/coverage-report-green.svg" alt="Coverage Report">
-  </a>
-  <a href="https://snyk.io/test/github/macalbert/envilder">
-    <img src="https://snyk.io/test/github/macalbert/envilder/badge.svg" alt="Known Vulnerabilities">
-  </a>
-  <a href="./LICENSE">
-    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
-  </a>
-</p>
+[![npm version](https://img.shields.io/npm/v/envilder.svg)](https://www.npmjs.com/package/envilder)
+[![npm downloads](https://img.shields.io/npm/dm/envilder.svg)](https://npmcharts.com/compare/envilder)
+[![CI Tests](https://github.com/macalbert/envilder/actions/workflows/tests.yml/badge.svg)](https://github.com/macalbert/envilder/actions/workflows/tests.yml)
+[![Coverage Report](https://img.shields.io/badge/coverage-report-green.svg)](https://macalbert.github.io/envilder/)
+[![Known Vulnerabilities](https://snyk.io/test/github/macalbert/envilder/badge.svg)](https://snyk.io/test/github/macalbert/envilder)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 ## Why centralize environment variables?
 
@@ -70,7 +56,9 @@ onboarding and CI/CD workflows.
   - [✅ How Envilder makes life easier](#-how-envilder-makes-life-easier)
   - [📚 Table of Contents](#-table-of-contents)
   - [⚙️ Features](#️-features)
+    - [🧱 Feature Status](#-feature-status)
   - [💾 Installation](#-installation)
+    - [🤖 GitHub Action](#-github-action)
   - [🚀 Quick Start](#-quick-start)
     - [🎥 Video Demonstration](#-video-demonstration)
     - [🏁 Get Started (3 steps)](#-get-started-3-steps)
@@ -129,7 +117,7 @@ Use Envilder directly in your CI/CD workflows with our official GitHub Action:
     aws-region: us-east-1
 
 - name: Pull secrets from AWS SSM
-  uses: macalbert/envilder/github-action@v0.7.2
+  uses: macalbert/envilder/github-action@v0.7.6
   with:
     map-file: param-map.json
     env-file: .env

@@ -1,6 +1,6 @@
 {
   "name": "envilder",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "description": "A CLI that securely centralizes your environment variables from AWS SSM as a single source of truth",
   "author": {
     "name": "Marçal Albert Castellví",
@@ -29,7 +29,7 @@
     "lint:fix": "biome lint --fix",
     "test": "vitest run --reporter=verbose --coverage",
     "test:ci": "vitest run --reporter=verbose --reporter=junit --coverage --outputFile=coverage/junit/test-results.xml",
-    "publish": "npm run lint && npm run build && npm test && npm pack --dry-run && npm publish --provenance --access public",
+    "publish": "npm pack --dry-run && npm publish --provenance",
     "action-publish": "pnpm build:gha && pnpm verify:gha",
     "release-patch": "pnpm version patch",
     "release-minor": "pnpm version minor",
