@@ -208,7 +208,79 @@ describe('PushEnvToSsmCommandHandler', () => {
     );
   });
 
-  it('Should_PushAllVariablesBeforeFailing_When_OneVariableFails', async () => {
+  it('Should_LogAwsSdkError_When_AwsErrorWithNameIsThrown', async () => {
+    // Arrange
+    const awsSdkError = {
+      name: 'TooManyUpdates',
+      message: 'Rate exceeded',
+      $fault: 'client',
+    };
+    mockSecretProvider.setSecret = vi.fn(async (): Promise<void> => {
+      throw awsSdkError;
+    });
+
+    mockVariableStore.getMapping.mockResolvedValue({
+      TEST_ENV_VAR: '/path/to/ssm/test',
+    });
+
+    mockVariableStore.getEnvironment.mockResolvedValue({
+      TEST_ENV_VAR: 'test-value',
+    });
+
+    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+
+    // Act
+    const action = () => sut.handle(command);
+
+    // Assert
+    await expect(action).rejects.toEqual(awsSdkError);
+    // Should retry 5 times (maxRetries) + initial attempt = 6 total
+    expect(mockSecretProvider.setSecret).toHaveBeenCalledTimes(6);
+    expect(mockLogger.warn).toHaveBeenCalledTimes(5); // 5 retry warnings
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'Failed to push environment file: TooManyUpdates: Rate exceeded',
+    );
+  });
+
+  it('Should_RetryAndSucceed_When_ThrottlingErrorIsTemporary', async () => {
+    // Arrange
+    let attemptCount = 0;
+    const throttlingError = {
+      name: 'TooManyUpdates',
+      message: 'Rate exceeded',
+      $fault: 'client',
+    };
+
+    mockSecretProvider.setSecret = vi.fn(async (): Promise<void> => {
+      attemptCount++;
+      if (attemptCount <= 2) {
+        throw throttlingError;
+      }
+      // Succeeds on the 3rd attempt
+    });
+
+    mockVariableStore.getMapping.mockResolvedValue({
+      TEST_ENV_VAR: '/path/to/ssm/test',
+    });
+
+    mockVariableStore.getEnvironment.mockResolvedValue({
+      TEST_ENV_VAR: 'test-value',
+    });
+
+    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    expect(mockSecretProvider.setSecret).toHaveBeenCalledTimes(3); // 2 failures + 1 success
+    expect(mockLogger.warn).toHaveBeenCalledTimes(2); // 2 retry warnings
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('Successfully pushed environment variables'),
+    );
+  });
+
+  it('Should_ProcessAllVariablesWithRetry_When_OneVariableFails', async () => {
     // Arrange
     mockSecretProvider.setSecret = vi.fn(
       async (path: string): Promise<void> => {
@@ -239,6 +311,7 @@ describe('PushEnvToSsmCommandHandler', () => {
 
     // Assert
     await expect(action).rejects.toThrow('AWS SSM error');
+    // With parallel processing, all variables are attempted (including the failing one)
     expect(mockSecretProvider.setSecret).toHaveBeenCalledTimes(4);
     expect(mockLogger.error).toHaveBeenCalledWith(
       'Failed to push environment file: AWS SSM error',

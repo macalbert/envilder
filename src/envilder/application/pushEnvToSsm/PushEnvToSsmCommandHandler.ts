@@ -35,8 +35,7 @@ export class PushEnvToSsmCommandHandler {
         `Successfully pushed environment variables from '${command.envFilePath}' to AWS SSM.`,
       );
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = this.getErrorMessage(error);
       this.logger.error(`Failed to push environment file: ${errorMessage}`);
       throw error;
     }
@@ -80,18 +79,68 @@ export class PushEnvToSsmCommandHandler {
       `Processing ${keysToProcess.length} environment variables to push to AWS SSM`,
     );
 
+    // Process variables in parallel with retry logic for throttling errors
     const variableProcessingPromises = Object.entries(paramMap).map(
       ([envKey, ssmPath]) => {
-        return this.processVariable(
-          envKey,
-          ssmPath,
-          envVariables,
-          command.envFilePath,
+        return this.retryWithBackoff(() =>
+          this.processVariable(
+            envKey,
+            ssmPath,
+            envVariables,
+            command.envFilePath,
+          ),
         );
       },
     );
 
     await Promise.all(variableProcessingPromises);
+  }
+
+  /**
+   * Retries an async operation with exponential backoff and jitter.
+   * Handles AWS SSM throttling errors (TooManyUpdates).
+   */
+  private async retryWithBackoff<T>(
+    operation: () => Promise<T>,
+    maxRetries = 5,
+    baseDelayMs = 100,
+  ): Promise<T> {
+    let lastError: unknown;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error;
+
+        // Check if it's a throttling error
+        const isThrottlingError =
+          typeof error === 'object' &&
+          error !== null &&
+          'name' in error &&
+          (error.name === 'TooManyUpdates' ||
+            error.name === 'ThrottlingException' ||
+            error.name === 'TooManyRequestsException');
+
+        // If it's not a throttling error or we've exhausted retries, throw immediately
+        if (!isThrottlingError || attempt === maxRetries) {
+          throw error;
+        }
+
+        // Calculate delay with exponential backoff + jitter
+        const exponentialDelay = baseDelayMs * 2 ** attempt;
+        const jitter = Math.random() * exponentialDelay * 0.5; // 0-50% jitter
+        const delayMs = exponentialDelay + jitter;
+
+        this.logger.warn(
+          `Throttling detected (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${Math.round(delayMs)}ms...`,
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+    }
+
+    throw lastError;
   }
 
   private async processVariable(
@@ -116,5 +165,41 @@ export class PushEnvToSsmCommandHandler {
         `Warning: Environment variable ${envKey} not found in ${envFilePath}`,
       );
     }
+  }
+
+  private getErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    if (typeof error === 'string') {
+      return error;
+    }
+
+    if (error === null) {
+      return 'Unknown error (null)';
+    }
+
+    if (error === undefined) {
+      return 'Unknown error (undefined)';
+    }
+
+    if (typeof error === 'object') {
+      // AWS SDK errors have a 'name' property
+      const awsError = error as { name?: string; message?: string };
+      if (awsError.name) {
+        return awsError.message
+          ? `${awsError.name}: ${awsError.message}`
+          : awsError.name;
+      }
+
+      try {
+        return JSON.stringify(error);
+      } catch {
+        return `Unknown error (${typeof error})`;
+      }
+    }
+
+    return `Unknown error: ${String(error)}`;
   }
 }
