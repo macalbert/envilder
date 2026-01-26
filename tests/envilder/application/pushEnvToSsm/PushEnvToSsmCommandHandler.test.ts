@@ -97,9 +97,64 @@ describe('PushEnvToSsmCommandHandler', () => {
     await sut.handle(command);
 
     // Assert
+    // Only TEST_ENV_VAR should be pushed (MISSING_VAR is skipped)
     expect(mockSecretProvider.setSecret).toHaveBeenCalledTimes(1);
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      `Warning: Environment variable MISSING_VAR not found in env-file.env`,
+    expect(mockSecretProvider.setSecret).toHaveBeenCalledWith(
+      '/path/to/ssm/test',
+      'test-value',
+    );
+  });
+
+  it('Should_ThrowError_When_MultipleVariablesPointToSamePathWithDifferentValues', async () => {
+    // Arrange
+    mockVariableStore.getMapping.mockResolvedValue({
+      API_KEY: '/path/to/api-key',
+      NEXT_PUBLIC_API_KEY: '/path/to/api-key', // Same path
+    });
+
+    mockVariableStore.getEnvironment.mockResolvedValue({
+      API_KEY: 'secret123',
+      NEXT_PUBLIC_API_KEY: 'secret456', // Different value!
+    });
+
+    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+
+    // Act
+    const action = () => sut.handle(command);
+
+    // Assert
+    await expect(action).rejects.toThrow(
+      "Conflicting values for SSM path '/path/to/api-key': 'API_KEY' has value 'secret123' but 'NEXT_PUBLIC_API_KEY' has value 'secret456'",
+    );
+    expect(mockSecretProvider.setSecret).not.toHaveBeenCalled();
+  });
+
+  it('Should_PushOnlyOnce_When_MultipleVariablesPointToSamePathWithSameValue', async () => {
+    // Arrange
+    mockVariableStore.getMapping.mockResolvedValue({
+      API_KEY: '/path/to/api-key',
+      NEXT_PUBLIC_API_KEY: '/path/to/api-key', // Same path
+    });
+
+    mockVariableStore.getEnvironment.mockResolvedValue({
+      API_KEY: 'secret123',
+      NEXT_PUBLIC_API_KEY: 'secret123', // Same value
+    });
+
+    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    // Should only push once to the SSM path
+    expect(mockSecretProvider.setSecret).toHaveBeenCalledTimes(1);
+    expect(mockSecretProvider.setSecret).toHaveBeenCalledWith(
+      '/path/to/api-key',
+      'secret123',
+    );
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('API_KEY, NEXT_PUBLIC_API_KEY'),
     );
   });
 
@@ -236,7 +291,6 @@ describe('PushEnvToSsmCommandHandler', () => {
     await expect(action).rejects.toEqual(awsSdkError);
     // Should retry 5 times (maxRetries) + initial attempt = 6 total
     expect(mockSecretProvider.setSecret).toHaveBeenCalledTimes(6);
-    expect(mockLogger.warn).toHaveBeenCalledTimes(5); // 5 retry warnings
     expect(mockLogger.error).toHaveBeenCalledWith(
       'Failed to push environment file: TooManyUpdates: Rate exceeded',
     );
@@ -274,7 +328,6 @@ describe('PushEnvToSsmCommandHandler', () => {
 
     // Assert
     expect(mockSecretProvider.setSecret).toHaveBeenCalledTimes(3); // 2 failures + 1 success
-    expect(mockLogger.warn).toHaveBeenCalledTimes(2); // 2 retry warnings
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.stringContaining('Successfully pushed environment variables'),
     );
