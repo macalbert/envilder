@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: '🎮 Level to publish (e.g., 1.0.0)'
+        description: "🎮 Level to publish (e.g., 1.0.0)"
         required: true
       update-major:
-        description: '⭐ Update power-up tag (e.g., v1)'
+        description: "⭐ Update power-up tag (e.g., v1)"
         type: boolean
         default: true
 
@@ -18,7 +18,7 @@ jobs:
   publish-action:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    
+
     steps:
       - name: 🧱 Enter the Pipe (Checkout)
         uses: actions/checkout@v6
@@ -33,8 +33,8 @@ jobs:
       - name: 🍄 Grab a Mushroom (Setup Node.js)
         uses: actions/setup-node@v6
         with:
-          node-version: '20.x'
-          cache: 'pnpm'
+          node-version: "20.x"
+          cache: "pnpm"
 
       - name: 📦 Open the ? Block (Install packages)
         run: pnpm install --frozen-lockfile
@@ -68,9 +68,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
+
           git add -f github-action/dist/index.js
-          
+
           # Only commit if there are changes
           if git diff --staged --quiet; then
             echo "ℹ️ No changes to commit"
@@ -90,9 +90,9 @@ jobs:
         if: inputs.update-major == true && steps.version-check.outputs.should_publish == 'true'
         run: |
           MAJOR_VERSION=$(echo "v${{ inputs.version }}" | cut -d. -f1)
-          
+
           echo "⭐ Collecting star power! Updating $MAJOR_VERSION to v${{ inputs.version }}"
-          
+
           git tag -fa "$MAJOR_VERSION" -m "⭐ Power-up $MAJOR_VERSION now at v${{ inputs.version }}"
           git push origin "$MAJOR_VERSION" --force
           echo "🌟 Star collected! $MAJOR_VERSION is now super-charged!"
@@ -105,25 +105,25 @@ jobs:
           name: "🔑 Secret Key Level v${{ inputs.version }}"
           body: |
             ## 🔑 Envilder GitHub Action - Level v${{ inputs.version }}
-            
+
             🎮 **New power-up unlocked!** Pull secrets from AWS SSM like collecting coins! 🪙
-            
+
             ### 🍄 How to use this power-up
-            
+
             ```yaml
             - uses: aws-actions/configure-aws-credentials@v5
               with:
                 role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
                 aws-region: us-east-1
-            
+
             - uses: macalbert/envilder@v${{ inputs.version }}
               with:
                 map-file: param-map.json
                 env-file: .env
             ```
-            
+
             📖 Check the [manual](https://github.com/macalbert/envilder/blob/main/docs/github-action.md) to master this level!
-            
+
             🎊 **Let's-a-go!**
           generateReleaseNotes: true
           token: ${{ secrets.GITHUB_TOKEN }}

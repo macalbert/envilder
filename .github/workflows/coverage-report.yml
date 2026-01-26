@@ -41,7 +41,7 @@ jobs:
             echo "is_dependabot=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: 🪙 Collect Coins (Configure AWS credentials)      
+      - name: 🪙 Collect Coins (Configure AWS credentials)
         uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
