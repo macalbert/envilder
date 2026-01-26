@@ -30,7 +30,7 @@ export class PushEnvToSsmCommandHandler {
       );
       const config = await this.loadConfiguration(command);
       const validatedPaths = this.validateAndGroupByPath(config);
-      await this.pushParametersToSSM(validatedPaths, command);
+      await this.pushParametersToSSM(validatedPaths);
 
       this.logger.info(
         `Successfully pushed environment variables from '${command.envFilePath}' to AWS SSM.`,
@@ -115,7 +115,6 @@ export class PushEnvToSsmCommandHandler {
 
   private async pushParametersToSSM(
     pathToValueMap: Map<string, { value: string; sourceKeys: string[] }>,
-    command: PushEnvToSsmCommand,
   ): Promise<void> {
     const pathsToProcess = Array.from(pathToValueMap.keys());
     this.logger.info(
