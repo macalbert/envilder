@@ -103,12 +103,37 @@ describe('PushEnvToSsmCommandHandler', () => {
     );
   });
 
-  it('Should_ThrowError_When_ImportFails', async () => {
+  it('Should_NotShowAnyLogDescriptiveError_When_NoErrorsThrown', async () => {
     // Arrange
-    const mockError = new Error('Failed to import');
+    mockVariableStore.getMapping.mockResolvedValue({
+      TEST_ENV_VAR: '/path/to/ssm/test',
+    });
 
+    mockVariableStore.getEnvironment.mockResolvedValue({
+      TEST_ENV_VAR: 'test-value',
+    });
+
+    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    // Should NOT show any "Failed..." error message
+    expect(mockLogger.error).not.toHaveBeenCalled();
+    expect(mockLogger.error).not.toHaveBeenCalledWith(
+      expect.stringContaining('Failed to push environment file'),
+    );
+    // Should show success message
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      `Successfully pushed environment variables from 'env-file.env' to AWS SSM.`,
+    );
+  });
+
+  it('Should_LogDescriptiveError_When_NonErrorObjectIsThrown', async () => {
+    // Arrange
     mockSecretProvider.setSecret = vi.fn(async (): Promise<void> => {
-      throw mockError;
+      throw { code: 'AWS_ERROR', message: 'Access denied' };
     });
 
     mockVariableStore.getMapping.mockResolvedValue({
@@ -125,9 +150,98 @@ describe('PushEnvToSsmCommandHandler', () => {
     const action = () => sut.handle(command);
 
     // Assert
-    await expect(action).rejects.toThrow(mockError);
+    await expect(action).rejects.toBeDefined();
     expect(mockLogger.error).toHaveBeenCalledWith(
-      'Failed to push environment file: Failed to import',
+      'Failed to push environment file: {"code":"AWS_ERROR","message":"Access denied"}',
+    );
+  });
+
+  it('Should_LogStringError_When_StringIsThrown', async () => {
+    // Arrange
+    mockSecretProvider.setSecret = vi.fn(async (): Promise<void> => {
+      throw 'Connection timeout';
+    });
+
+    mockVariableStore.getMapping.mockResolvedValue({
+      TEST_ENV_VAR: '/path/to/ssm/test',
+    });
+
+    mockVariableStore.getEnvironment.mockResolvedValue({
+      TEST_ENV_VAR: 'test-value',
+    });
+
+    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+
+    // Act
+    const action = () => sut.handle(command);
+
+    // Assert
+    await expect(action).rejects.toBe('Connection timeout');
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'Failed to push environment file: Connection timeout',
+    );
+  });
+
+  it('Should_LogUndefinedError_When_UndefinedIsThrown', async () => {
+    // Arrange
+    mockSecretProvider.setSecret = vi.fn(async (): Promise<void> => {
+      throw undefined;
+    });
+
+    mockVariableStore.getMapping.mockResolvedValue({
+      TEST_ENV_VAR: '/path/to/ssm/test',
+    });
+
+    mockVariableStore.getEnvironment.mockResolvedValue({
+      TEST_ENV_VAR: 'test-value',
+    });
+
+    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+
+    // Act
+    const action = () => sut.handle(command);
+
+    // Assert
+    await expect(action).rejects.toBeUndefined();
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'Failed to push environment file: Unknown error (undefined)',
+    );
+  });
+
+  it('Should_PushAllVariablesBeforeFailing_When_OneVariableFails', async () => {
+    // Arrange
+    mockSecretProvider.setSecret = vi.fn(
+      async (path: string): Promise<void> => {
+        if (path === '/path/to/ssm/failing') {
+          throw new Error('AWS SSM error');
+        }
+      },
+    );
+
+    mockVariableStore.getMapping.mockResolvedValue({
+      VAR_ONE: '/path/to/ssm/one',
+      VAR_TWO: '/path/to/ssm/two',
+      FAILING_VAR: '/path/to/ssm/failing',
+      VAR_THREE: '/path/to/ssm/three',
+    });
+
+    mockVariableStore.getEnvironment.mockResolvedValue({
+      VAR_ONE: 'value-one',
+      VAR_TWO: 'value-two',
+      FAILING_VAR: 'value-failing',
+      VAR_THREE: 'value-three',
+    });
+
+    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+
+    // Act
+    const action = () => sut.handle(command);
+
+    // Assert
+    await expect(action).rejects.toThrow('AWS SSM error');
+    expect(mockSecretProvider.setSecret).toHaveBeenCalledTimes(4);
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'Failed to push environment file: AWS SSM error',
     );
   });
 });
