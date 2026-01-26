@@ -1,0 +1,664 @@
+export const id = 314;
+export const ids = [314];
+export const modules = {
+
+/***/ 9621:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.resolveHttpAuthSchemeConfig = exports.defaultSigninHttpAuthSchemeProvider = exports.defaultSigninHttpAuthSchemeParametersProvider = void 0;
+const core_1 = __webpack_require__(9901);
+const util_middleware_1 = __webpack_require__(1202);
+const defaultSigninHttpAuthSchemeParametersProvider = async (config, context, input) => {
+    return {
+        operation: (0, util_middleware_1.getSmithyContext)(context).operation,
+        region: (await (0, util_middleware_1.normalizeProvider)(config.region)()) ||
+            (() => {
+                throw new Error("expected `region` to be configured for `aws.auth#sigv4`");
+            })(),
+    };
+};
+exports.defaultSigninHttpAuthSchemeParametersProvider = defaultSigninHttpAuthSchemeParametersProvider;
+function createAwsAuthSigv4HttpAuthOption(authParameters) {
+    return {
+        schemeId: "aws.auth#sigv4",
+        signingProperties: {
+            name: "signin",
+            region: authParameters.region,
+        },
+        propertiesExtractor: (config, context) => ({
+            signingProperties: {
+                config,
+                context,
+            },
+        }),
+    };
+}
+function createSmithyApiNoAuthHttpAuthOption(authParameters) {
+    return {
+        schemeId: "smithy.api#noAuth",
+    };
+}
+const defaultSigninHttpAuthSchemeProvider = (authParameters) => {
+    const options = [];
+    switch (authParameters.operation) {
+        case "CreateOAuth2Token": {
+            options.push(createSmithyApiNoAuthHttpAuthOption(authParameters));
+            break;
+        }
+        default: {
+            options.push(createAwsAuthSigv4HttpAuthOption(authParameters));
+        }
+    }
+    return options;
+};
+exports.defaultSigninHttpAuthSchemeProvider = defaultSigninHttpAuthSchemeProvider;
+const resolveHttpAuthSchemeConfig = (config) => {
+    const config_0 = (0, core_1.resolveAwsSdkSigV4Config)(config);
+    return Object.assign(config_0, {
+        authSchemePreference: (0, util_middleware_1.normalizeProvider)(config.authSchemePreference ?? []),
+    });
+};
+exports.resolveHttpAuthSchemeConfig = resolveHttpAuthSchemeConfig;
+
+
+/***/ }),
+
+/***/ 5819:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.defaultEndpointResolver = void 0;
+const util_endpoints_1 = __webpack_require__(6636);
+const util_endpoints_2 = __webpack_require__(4279);
+const ruleset_1 = __webpack_require__(2288);
+const cache = new util_endpoints_2.EndpointCache({
+    size: 50,
+    params: ["Endpoint", "Region", "UseDualStack", "UseFIPS"],
+});
+const defaultEndpointResolver = (endpointParams, context = {}) => {
+    return cache.get(endpointParams, () => (0, util_endpoints_2.resolveEndpoint)(ruleset_1.ruleSet, {
+        endpointParams: endpointParams,
+        logger: context.logger,
+    }));
+};
+exports.defaultEndpointResolver = defaultEndpointResolver;
+util_endpoints_2.customEndpointFunctions.aws = util_endpoints_1.awsEndpointFunctions;
+
+
+/***/ }),
+
+/***/ 2288:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ruleSet = void 0;
+const u = "required", v = "fn", w = "argv", x = "ref";
+const a = true, b = "isSet", c = "booleanEquals", d = "error", e = "endpoint", f = "tree", g = "PartitionResult", h = "stringEquals", i = { [u]: true, "default": false, "type": "boolean" }, j = { [u]: false, "type": "string" }, k = { [x]: "Endpoint" }, l = { [v]: c, [w]: [{ [x]: "UseFIPS" }, true] }, m = { [v]: c, [w]: [{ [x]: "UseDualStack" }, true] }, n = {}, o = { [v]: "getAttr", [w]: [{ [x]: g }, "name"] }, p = { [v]: c, [w]: [{ [x]: "UseFIPS" }, false] }, q = { [v]: c, [w]: [{ [x]: "UseDualStack" }, false] }, r = { [v]: "getAttr", [w]: [{ [x]: g }, "supportsFIPS"] }, s = { [v]: c, [w]: [true, { [v]: "getAttr", [w]: [{ [x]: g }, "supportsDualStack"] }] }, t = [{ [x]: "Region" }];
+const _data = { version: "1.0", parameters: { UseDualStack: i, UseFIPS: i, Endpoint: j, Region: j }, rules: [{ conditions: [{ [v]: b, [w]: [k] }], rules: [{ conditions: [l], error: "Invalid Configuration: FIPS and custom endpoint are not supported", type: d }, { rules: [{ conditions: [m], error: "Invalid Configuration: Dualstack and custom endpoint are not supported", type: d }, { endpoint: { url: k, properties: n, headers: n }, type: e }], type: f }], type: f }, { rules: [{ conditions: [{ [v]: b, [w]: t }], rules: [{ conditions: [{ [v]: "aws.partition", [w]: t, assign: g }], rules: [{ conditions: [{ [v]: h, [w]: [o, "aws"] }, p, q], endpoint: { url: "https://{Region}.signin.aws.amazon.com", properties: n, headers: n }, type: e }, { conditions: [{ [v]: h, [w]: [o, "aws-cn"] }, p, q], endpoint: { url: "https://{Region}.signin.amazonaws.cn", properties: n, headers: n }, type: e }, { conditions: [{ [v]: h, [w]: [o, "aws-us-gov"] }, p, q], endpoint: { url: "https://{Region}.signin.amazonaws-us-gov.com", properties: n, headers: n }, type: e }, { conditions: [l, m], rules: [{ conditions: [{ [v]: c, [w]: [a, r] }, s], rules: [{ endpoint: { url: "https://signin-fips.{Region}.{PartitionResult#dualStackDnsSuffix}", properties: n, headers: n }, type: e }], type: f }, { error: "FIPS and DualStack are enabled, but this partition does not support one or both", type: d }], type: f }, { conditions: [l, q], rules: [{ conditions: [{ [v]: c, [w]: [r, a] }], rules: [{ endpoint: { url: "https://signin-fips.{Region}.{PartitionResult#dnsSuffix}", properties: n, headers: n }, type: e }], type: f }, { error: "FIPS is enabled but this partition does not support FIPS", type: d }], type: f }, { conditions: [p, m], rules: [{ conditions: [s], rules: [{ endpoint: { url: "https://signin.{Region}.{PartitionResult#dualStackDnsSuffix}", properties: n, headers: n }, type: e }], type: f }, { error: "DualStack is enabled but this partition does not support DualStack", type: d }], type: f }, { endpoint: { url: "https://signin.{Region}.{PartitionResult#dnsSuffix}", properties: n, headers: n }, type: e }], type: f }], type: f }, { error: "Invalid Configuration: Missing Region", type: d }], type: f }] };
+exports.ruleSet = _data;
+
+
+/***/ }),
+
+/***/ 8314:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+var __webpack_unused_export__;
+
+
+var middlewareHostHeader = __webpack_require__(1960);
+var middlewareLogger = __webpack_require__(1218);
+var middlewareRecursionDetection = __webpack_require__(1772);
+var middlewareUserAgent = __webpack_require__(6001);
+var configResolver = __webpack_require__(7358);
+var core = __webpack_require__(3234);
+var schema = __webpack_require__(7162);
+var middlewareContentLength = __webpack_require__(5550);
+var middlewareEndpoint = __webpack_require__(3065);
+var middlewareRetry = __webpack_require__(9579);
+var smithyClient = __webpack_require__(2958);
+var httpAuthSchemeProvider = __webpack_require__(9621);
+var runtimeConfig = __webpack_require__(1020);
+var regionConfigResolver = __webpack_require__(3334);
+var protocolHttp = __webpack_require__(1034);
+
+const resolveClientEndpointParameters = (options) => {
+    return Object.assign(options, {
+        useDualstackEndpoint: options.useDualstackEndpoint ?? false,
+        useFipsEndpoint: options.useFipsEndpoint ?? false,
+        defaultSigningName: "signin",
+    });
+};
+const commonParams = {
+    UseFIPS: { type: "builtInParams", name: "useFipsEndpoint" },
+    Endpoint: { type: "builtInParams", name: "endpoint" },
+    Region: { type: "builtInParams", name: "region" },
+    UseDualStack: { type: "builtInParams", name: "useDualstackEndpoint" },
+};
+
+const getHttpAuthExtensionConfiguration = (runtimeConfig) => {
+    const _httpAuthSchemes = runtimeConfig.httpAuthSchemes;
+    let _httpAuthSchemeProvider = runtimeConfig.httpAuthSchemeProvider;
+    let _credentials = runtimeConfig.credentials;
+    return {
+        setHttpAuthScheme(httpAuthScheme) {
+            const index = _httpAuthSchemes.findIndex((scheme) => scheme.schemeId === httpAuthScheme.schemeId);
+            if (index === -1) {
+                _httpAuthSchemes.push(httpAuthScheme);
+            }
+            else {
+                _httpAuthSchemes.splice(index, 1, httpAuthScheme);
+            }
+        },
+        httpAuthSchemes() {
+            return _httpAuthSchemes;
+        },
+        setHttpAuthSchemeProvider(httpAuthSchemeProvider) {
+            _httpAuthSchemeProvider = httpAuthSchemeProvider;
+        },
+        httpAuthSchemeProvider() {
+            return _httpAuthSchemeProvider;
+        },
+        setCredentials(credentials) {
+            _credentials = credentials;
+        },
+        credentials() {
+            return _credentials;
+        },
+    };
+};
+const resolveHttpAuthRuntimeConfig = (config) => {
+    return {
+        httpAuthSchemes: config.httpAuthSchemes(),
+        httpAuthSchemeProvider: config.httpAuthSchemeProvider(),
+        credentials: config.credentials(),
+    };
+};
+
+const resolveRuntimeExtensions = (runtimeConfig, extensions) => {
+    const extensionConfiguration = Object.assign(regionConfigResolver.getAwsRegionExtensionConfiguration(runtimeConfig), smithyClient.getDefaultExtensionConfiguration(runtimeConfig), protocolHttp.getHttpHandlerExtensionConfiguration(runtimeConfig), getHttpAuthExtensionConfiguration(runtimeConfig));
+    extensions.forEach((extension) => extension.configure(extensionConfiguration));
+    return Object.assign(runtimeConfig, regionConfigResolver.resolveAwsRegionExtensionConfiguration(extensionConfiguration), smithyClient.resolveDefaultRuntimeConfig(extensionConfiguration), protocolHttp.resolveHttpHandlerRuntimeConfig(extensionConfiguration), resolveHttpAuthRuntimeConfig(extensionConfiguration));
+};
+
+class SigninClient extends smithyClient.Client {
+    config;
+    constructor(...[configuration]) {
+        const _config_0 = runtimeConfig.getRuntimeConfig(configuration || {});
+        super(_config_0);
+        this.initConfig = _config_0;
+        const _config_1 = resolveClientEndpointParameters(_config_0);
+        const _config_2 = middlewareUserAgent.resolveUserAgentConfig(_config_1);
+        const _config_3 = middlewareRetry.resolveRetryConfig(_config_2);
+        const _config_4 = configResolver.resolveRegionConfig(_config_3);
+        const _config_5 = middlewareHostHeader.resolveHostHeaderConfig(_config_4);
+        const _config_6 = middlewareEndpoint.resolveEndpointConfig(_config_5);
+        const _config_7 = httpAuthSchemeProvider.resolveHttpAuthSchemeConfig(_config_6);
+        const _config_8 = resolveRuntimeExtensions(_config_7, configuration?.extensions || []);
+        this.config = _config_8;
+        this.middlewareStack.use(schema.getSchemaSerdePlugin(this.config));
+        this.middlewareStack.use(middlewareUserAgent.getUserAgentPlugin(this.config));
+        this.middlewareStack.use(middlewareRetry.getRetryPlugin(this.config));
+        this.middlewareStack.use(middlewareContentLength.getContentLengthPlugin(this.config));
+        this.middlewareStack.use(middlewareHostHeader.getHostHeaderPlugin(this.config));
+        this.middlewareStack.use(middlewareLogger.getLoggerPlugin(this.config));
+        this.middlewareStack.use(middlewareRecursionDetection.getRecursionDetectionPlugin(this.config));
+        this.middlewareStack.use(core.getHttpAuthSchemeEndpointRuleSetPlugin(this.config, {
+            httpAuthSchemeParametersProvider: httpAuthSchemeProvider.defaultSigninHttpAuthSchemeParametersProvider,
+            identityProviderConfigProvider: async (config) => new core.DefaultIdentityProviderConfig({
+                "aws.auth#sigv4": config.credentials,
+            }),
+        }));
+        this.middlewareStack.use(core.getHttpSigningPlugin(this.config));
+    }
+    destroy() {
+        super.destroy();
+    }
+}
+
+let SigninServiceException$1 = class SigninServiceException extends smithyClient.ServiceException {
+    constructor(options) {
+        super(options);
+        Object.setPrototypeOf(this, SigninServiceException.prototype);
+    }
+};
+
+let AccessDeniedException$1 = class AccessDeniedException extends SigninServiceException$1 {
+    name = "AccessDeniedException";
+    $fault = "client";
+    error;
+    constructor(opts) {
+        super({
+            name: "AccessDeniedException",
+            $fault: "client",
+            ...opts,
+        });
+        Object.setPrototypeOf(this, AccessDeniedException.prototype);
+        this.error = opts.error;
+    }
+};
+let InternalServerException$1 = class InternalServerException extends SigninServiceException$1 {
+    name = "InternalServerException";
+    $fault = "server";
+    error;
+    constructor(opts) {
+        super({
+            name: "InternalServerException",
+            $fault: "server",
+            ...opts,
+        });
+        Object.setPrototypeOf(this, InternalServerException.prototype);
+        this.error = opts.error;
+    }
+};
+let TooManyRequestsError$1 = class TooManyRequestsError extends SigninServiceException$1 {
+    name = "TooManyRequestsError";
+    $fault = "client";
+    error;
+    constructor(opts) {
+        super({
+            name: "TooManyRequestsError",
+            $fault: "client",
+            ...opts,
+        });
+        Object.setPrototypeOf(this, TooManyRequestsError.prototype);
+        this.error = opts.error;
+    }
+};
+let ValidationException$1 = class ValidationException extends SigninServiceException$1 {
+    name = "ValidationException";
+    $fault = "client";
+    error;
+    constructor(opts) {
+        super({
+            name: "ValidationException",
+            $fault: "client",
+            ...opts,
+        });
+        Object.setPrototypeOf(this, ValidationException.prototype);
+        this.error = opts.error;
+    }
+};
+
+const _ADE = "AccessDeniedException";
+const _AT = "AccessToken";
+const _COAT = "CreateOAuth2Token";
+const _COATR = "CreateOAuth2TokenRequest";
+const _COATRB = "CreateOAuth2TokenRequestBody";
+const _COATRBr = "CreateOAuth2TokenResponseBody";
+const _COATRr = "CreateOAuth2TokenResponse";
+const _ISE = "InternalServerException";
+const _RT = "RefreshToken";
+const _TMRE = "TooManyRequestsError";
+const _VE = "ValidationException";
+const _aKI = "accessKeyId";
+const _aT = "accessToken";
+const _c = "client";
+const _cI = "clientId";
+const _cV = "codeVerifier";
+const _co = "code";
+const _e = "error";
+const _eI = "expiresIn";
+const _gT = "grantType";
+const _h = "http";
+const _hE = "httpError";
+const _iT = "idToken";
+const _jN = "jsonName";
+const _m = "message";
+const _rT = "refreshToken";
+const _rU = "redirectUri";
+const _s = "server";
+const _sAK = "secretAccessKey";
+const _sT = "sessionToken";
+const _sm = "smithy.ts.sdk.synthetic.com.amazonaws.signin";
+const _tI = "tokenInput";
+const _tO = "tokenOutput";
+const _tT = "tokenType";
+const n0 = "com.amazonaws.signin";
+var RefreshToken = [0, n0, _RT, 8, 0];
+var AccessDeniedException = [
+    -3,
+    n0,
+    _ADE,
+    {
+        [_e]: _c,
+    },
+    [_e, _m],
+    [0, 0],
+];
+schema.TypeRegistry.for(n0).registerError(AccessDeniedException, AccessDeniedException$1);
+var AccessToken = [
+    3,
+    n0,
+    _AT,
+    8,
+    [_aKI, _sAK, _sT],
+    [
+        [
+            0,
+            {
+                [_jN]: _aKI,
+            },
+        ],
+        [
+            0,
+            {
+                [_jN]: _sAK,
+            },
+        ],
+        [
+            0,
+            {
+                [_jN]: _sT,
+            },
+        ],
+    ],
+];
+var CreateOAuth2TokenRequest = [
+    3,
+    n0,
+    _COATR,
+    0,
+    [_tI],
+    [[() => CreateOAuth2TokenRequestBody, 16]],
+];
+var CreateOAuth2TokenRequestBody = [
+    3,
+    n0,
+    _COATRB,
+    0,
+    [_cI, _gT, _co, _rU, _cV, _rT],
+    [
+        [
+            0,
+            {
+                [_jN]: _cI,
+            },
+        ],
+        [
+            0,
+            {
+                [_jN]: _gT,
+            },
+        ],
+        0,
+        [
+            0,
+            {
+                [_jN]: _rU,
+            },
+        ],
+        [
+            0,
+            {
+                [_jN]: _cV,
+            },
+        ],
+        [
+            () => RefreshToken,
+            {
+                [_jN]: _rT,
+            },
+        ],
+    ],
+];
+var CreateOAuth2TokenResponse = [
+    3,
+    n0,
+    _COATRr,
+    0,
+    [_tO],
+    [[() => CreateOAuth2TokenResponseBody, 16]],
+];
+var CreateOAuth2TokenResponseBody = [
+    3,
+    n0,
+    _COATRBr,
+    0,
+    [_aT, _tT, _eI, _rT, _iT],
+    [
+        [
+            () => AccessToken,
+            {
+                [_jN]: _aT,
+            },
+        ],
+        [
+            0,
+            {
+                [_jN]: _tT,
+            },
+        ],
+        [
+            1,
+            {
+                [_jN]: _eI,
+            },
+        ],
+        [
+            () => RefreshToken,
+            {
+                [_jN]: _rT,
+            },
+        ],
+        [
+            0,
+            {
+                [_jN]: _iT,
+            },
+        ],
+    ],
+];
+var InternalServerException = [
+    -3,
+    n0,
+    _ISE,
+    {
+        [_e]: _s,
+        [_hE]: 500,
+    },
+    [_e, _m],
+    [0, 0],
+];
+schema.TypeRegistry.for(n0).registerError(InternalServerException, InternalServerException$1);
+var TooManyRequestsError = [
+    -3,
+    n0,
+    _TMRE,
+    {
+        [_e]: _c,
+        [_hE]: 429,
+    },
+    [_e, _m],
+    [0, 0],
+];
+schema.TypeRegistry.for(n0).registerError(TooManyRequestsError, TooManyRequestsError$1);
+var ValidationException = [
+    -3,
+    n0,
+    _VE,
+    {
+        [_e]: _c,
+        [_hE]: 400,
+    },
+    [_e, _m],
+    [0, 0],
+];
+schema.TypeRegistry.for(n0).registerError(ValidationException, ValidationException$1);
+var SigninServiceException = [-3, _sm, "SigninServiceException", 0, [], []];
+schema.TypeRegistry.for(_sm).registerError(SigninServiceException, SigninServiceException$1);
+var CreateOAuth2Token = [
+    9,
+    n0,
+    _COAT,
+    {
+        [_h]: ["POST", "/v1/token", 200],
+    },
+    () => CreateOAuth2TokenRequest,
+    () => CreateOAuth2TokenResponse,
+];
+
+class CreateOAuth2TokenCommand extends smithyClient.Command
+    .classBuilder()
+    .ep(commonParams)
+    .m(function (Command, cs, config, o) {
+    return [middlewareEndpoint.getEndpointPlugin(config, Command.getEndpointParameterInstructions())];
+})
+    .s("Signin", "CreateOAuth2Token", {})
+    .n("SigninClient", "CreateOAuth2TokenCommand")
+    .sc(CreateOAuth2Token)
+    .build() {
+}
+
+const commands = {
+    CreateOAuth2TokenCommand,
+};
+class Signin extends SigninClient {
+}
+smithyClient.createAggregatedClient(commands, Signin);
+
+const OAuth2ErrorCode = {
+    AUTHCODE_EXPIRED: "AUTHCODE_EXPIRED",
+    INSUFFICIENT_PERMISSIONS: "INSUFFICIENT_PERMISSIONS",
+    INVALID_REQUEST: "INVALID_REQUEST",
+    SERVER_ERROR: "server_error",
+    TOKEN_EXPIRED: "TOKEN_EXPIRED",
+    USER_CREDENTIALS_CHANGED: "USER_CREDENTIALS_CHANGED",
+};
+
+__webpack_unused_export__ = ({
+    enumerable: true,
+    get: function () { return smithyClient.Command; }
+});
+__webpack_unused_export__ = ({
+    enumerable: true,
+    get: function () { return smithyClient.Client; }
+});
+__webpack_unused_export__ = AccessDeniedException$1;
+exports.CreateOAuth2TokenCommand = CreateOAuth2TokenCommand;
+__webpack_unused_export__ = InternalServerException$1;
+__webpack_unused_export__ = OAuth2ErrorCode;
+__webpack_unused_export__ = Signin;
+exports.SigninClient = SigninClient;
+__webpack_unused_export__ = SigninServiceException$1;
+__webpack_unused_export__ = TooManyRequestsError$1;
+__webpack_unused_export__ = ValidationException$1;
+
+
+/***/ }),
+
+/***/ 1020:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getRuntimeConfig = void 0;
+const tslib_1 = __webpack_require__(7892);
+const package_json_1 = tslib_1.__importDefault(__webpack_require__(3246));
+const core_1 = __webpack_require__(9901);
+const util_user_agent_node_1 = __webpack_require__(6025);
+const config_resolver_1 = __webpack_require__(7358);
+const hash_node_1 = __webpack_require__(6354);
+const middleware_retry_1 = __webpack_require__(9579);
+const node_config_provider_1 = __webpack_require__(913);
+const node_http_handler_1 = __webpack_require__(4654);
+const util_body_length_node_1 = __webpack_require__(7062);
+const util_retry_1 = __webpack_require__(5840);
+const runtimeConfig_shared_1 = __webpack_require__(861);
+const smithy_client_1 = __webpack_require__(2958);
+const util_defaults_mode_node_1 = __webpack_require__(3910);
+const smithy_client_2 = __webpack_require__(2958);
+const getRuntimeConfig = (config) => {
+    (0, smithy_client_2.emitWarningIfUnsupportedVersion)(process.version);
+    const defaultsMode = (0, util_defaults_mode_node_1.resolveDefaultsModeConfig)(config);
+    const defaultConfigProvider = () => defaultsMode().then(smithy_client_1.loadConfigsForDefaultMode);
+    const clientSharedValues = (0, runtimeConfig_shared_1.getRuntimeConfig)(config);
+    (0, core_1.emitWarningIfUnsupportedVersion)(process.version);
+    const loaderConfig = {
+        profile: config?.profile,
+        logger: clientSharedValues.logger,
+    };
+    return {
+        ...clientSharedValues,
+        ...config,
+        runtime: "node",
+        defaultsMode,
+        authSchemePreference: config?.authSchemePreference ?? (0, node_config_provider_1.loadConfig)(core_1.NODE_AUTH_SCHEME_PREFERENCE_OPTIONS, loaderConfig),
+        bodyLengthChecker: config?.bodyLengthChecker ?? util_body_length_node_1.calculateBodyLength,
+        defaultUserAgentProvider: config?.defaultUserAgentProvider ??
+            (0, util_user_agent_node_1.createDefaultUserAgentProvider)({ serviceId: clientSharedValues.serviceId, clientVersion: package_json_1.default.version }),
+        maxAttempts: config?.maxAttempts ?? (0, node_config_provider_1.loadConfig)(middleware_retry_1.NODE_MAX_ATTEMPT_CONFIG_OPTIONS, config),
+        region: config?.region ??
+            (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_REGION_CONFIG_OPTIONS, { ...config_resolver_1.NODE_REGION_CONFIG_FILE_OPTIONS, ...loaderConfig }),
+        requestHandler: node_http_handler_1.NodeHttpHandler.create(config?.requestHandler ?? defaultConfigProvider),
+        retryMode: config?.retryMode ??
+            (0, node_config_provider_1.loadConfig)({
+                ...middleware_retry_1.NODE_RETRY_MODE_CONFIG_OPTIONS,
+                default: async () => (await defaultConfigProvider()).retryMode || util_retry_1.DEFAULT_RETRY_MODE,
+            }, config),
+        sha256: config?.sha256 ?? hash_node_1.Hash.bind(null, "sha256"),
+        streamCollector: config?.streamCollector ?? node_http_handler_1.streamCollector,
+        useDualstackEndpoint: config?.useDualstackEndpoint ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS, loaderConfig),
+        useFipsEndpoint: config?.useFipsEndpoint ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS, loaderConfig),
+        userAgentAppId: config?.userAgentAppId ?? (0, node_config_provider_1.loadConfig)(util_user_agent_node_1.NODE_APP_ID_CONFIG_OPTIONS, loaderConfig),
+    };
+};
+exports.getRuntimeConfig = getRuntimeConfig;
+
+
+/***/ }),
+
+/***/ 861:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getRuntimeConfig = void 0;
+const core_1 = __webpack_require__(9901);
+const protocols_1 = __webpack_require__(4755);
+const core_2 = __webpack_require__(3234);
+const smithy_client_1 = __webpack_require__(2958);
+const url_parser_1 = __webpack_require__(7272);
+const util_base64_1 = __webpack_require__(1532);
+const util_utf8_1 = __webpack_require__(5579);
+const httpAuthSchemeProvider_1 = __webpack_require__(9621);
+const endpointResolver_1 = __webpack_require__(5819);
+const getRuntimeConfig = (config) => {
+    return {
+        apiVersion: "2023-01-01",
+        base64Decoder: config?.base64Decoder ?? util_base64_1.fromBase64,
+        base64Encoder: config?.base64Encoder ?? util_base64_1.toBase64,
+        disableHostPrefix: config?.disableHostPrefix ?? false,
+        endpointProvider: config?.endpointProvider ?? endpointResolver_1.defaultEndpointResolver,
+        extensions: config?.extensions ?? [],
+        httpAuthSchemeProvider: config?.httpAuthSchemeProvider ?? httpAuthSchemeProvider_1.defaultSigninHttpAuthSchemeProvider,
+        httpAuthSchemes: config?.httpAuthSchemes ?? [
+            {
+                schemeId: "aws.auth#sigv4",
+                identityProvider: (ipc) => ipc.getIdentityProvider("aws.auth#sigv4"),
+                signer: new core_1.AwsSdkSigV4Signer(),
+            },
+            {
+                schemeId: "smithy.api#noAuth",
+                identityProvider: (ipc) => ipc.getIdentityProvider("smithy.api#noAuth") || (async () => ({})),
+                signer: new core_2.NoAuthSigner(),
+            },
+        ],
+        logger: config?.logger ?? new smithy_client_1.NoOpLogger(),
+        protocol: config?.protocol ?? new protocols_1.AwsRestJsonProtocol({ defaultNamespace: "com.amazonaws.signin" }),
+        serviceId: config?.serviceId ?? "Signin",
+        urlParser: config?.urlParser ?? url_parser_1.parseUrl,
+        utf8Decoder: config?.utf8Decoder ?? util_utf8_1.fromUtf8,
+        utf8Encoder: config?.utf8Encoder ?? util_utf8_1.toUtf8,
+    };
+};
+exports.getRuntimeConfig = getRuntimeConfig;
+
+
+/***/ })
+
+};
