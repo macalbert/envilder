@@ -216,11 +216,23 @@ export class PushEnvToSsmCommandHandler {
     }
 
     if (typeof error === 'object') {
-      const awsError = error as { name?: string; message?: string };
+      const awsError = error as {
+        name?: string;
+        message?: string;
+        code?: string;
+      };
       if (awsError.name) {
         return awsError.message
           ? `${awsError.name}: ${awsError.message}`
           : awsError.name;
+      }
+
+      const safeFields: string[] = [];
+      if (awsError.code) safeFields.push(`code: ${awsError.code}`);
+      if (awsError.message) safeFields.push(`message: ${awsError.message}`);
+
+      if (safeFields.length > 0) {
+        return `Object error (${safeFields.join(', ')})`;
       }
 
       return `Object error: ${Object.keys(error as object).join(', ')}`;

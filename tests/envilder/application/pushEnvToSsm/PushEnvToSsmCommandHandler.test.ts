@@ -124,7 +124,7 @@ describe('PushEnvToSsmCommandHandler', () => {
 
     // Assert
     await expect(action).rejects.toThrow(
-      "Conflicting values for SSM path '/path/to/api-key': 'API_KEY' has value 'secret123' but 'NEXT_PUBLIC_API_KEY' has value 'secret456'",
+      "Conflicting values for SSM path '/path/to/api-key': 'API_KEY' has value '*********' but 'NEXT_PUBLIC_API_KEY' has value '*********'",
     );
     expect(mockSecretProvider.setSecret).not.toHaveBeenCalled();
   });
@@ -207,7 +207,7 @@ describe('PushEnvToSsmCommandHandler', () => {
     // Assert
     await expect(action).rejects.toBeDefined();
     expect(mockLogger.error).toHaveBeenCalledWith(
-      'Failed to push environment file: {"code":"AWS_ERROR","message":"Access denied"}',
+      'Failed to push environment file: Object error (code: AWS_ERROR, message: Access denied)',
     );
   });
 
