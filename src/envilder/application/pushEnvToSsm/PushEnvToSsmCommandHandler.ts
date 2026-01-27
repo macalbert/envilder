@@ -85,17 +85,26 @@ export class PushEnvToSsmCommandHandler {
       const envValue = envVariables[envKey];
 
       if (envValue === undefined) {
-        continue; // Skip missing variables (already handled by processVariable)
+        this.logger.warn(
+          `Warning: Environment variable ${envKey} not found in environment file`,
+        );
+        continue;
       }
 
       const existing = pathToValueMap.get(ssmPath);
       if (existing) {
-        // Multiple variables point to the same SSM path - validate they have the same value
         if (existing.value !== envValue) {
+          const existingMasked = new EnvironmentVariable(
+            existing.sourceKeys[0],
+            existing.value,
+            true,
+          ).maskedValue;
+          const newMasked = new EnvironmentVariable(envKey, envValue, true)
+            .maskedValue;
           throw new Error(
             `Conflicting values for SSM path '${ssmPath}': ` +
-              `'${existing.sourceKeys[0]}' has value '${existing.value}' ` +
-              `but '${envKey}' has value '${envValue}'`,
+              `'${existing.sourceKeys[0]}' has value '${existingMasked}' ` +
+              `but '${envKey}' has value '${newMasked}'`,
           );
         }
         existing.sourceKeys.push(envKey);
@@ -166,7 +175,6 @@ export class PushEnvToSsmCommandHandler {
       } catch (error) {
         lastError = error;
 
-        // Check if it's a throttling error
         const isThrottlingError =
           typeof error === 'object' &&
           error !== null &&
@@ -175,12 +183,10 @@ export class PushEnvToSsmCommandHandler {
             error.name === 'ThrottlingException' ||
             error.name === 'TooManyRequestsException');
 
-        // If it's not a throttling error or we've exhausted retries, throw immediately
         if (!isThrottlingError || attempt === maxRetries) {
           throw error;
         }
 
-        // Calculate delay with exponential backoff + jitter
         const exponentialDelay = baseDelayMs * 2 ** attempt;
         const jitter = Math.random() * exponentialDelay * 0.5; // 0-50% jitter
         const delayMs = exponentialDelay + jitter;
@@ -210,7 +216,6 @@ export class PushEnvToSsmCommandHandler {
     }
 
     if (typeof error === 'object') {
-      // AWS SDK errors have a 'name' property
       const awsError = error as { name?: string; message?: string };
       if (awsError.name) {
         return awsError.message
@@ -218,11 +223,7 @@ export class PushEnvToSsmCommandHandler {
           : awsError.name;
       }
 
-      try {
-        return JSON.stringify(error);
-      } catch {
-        return `Unknown error (${typeof error})`;
-      }
+      return `Object error: ${Object.keys(error as object).join(', ')}`;
     }
 
     return `Unknown error: ${String(error)}`;
