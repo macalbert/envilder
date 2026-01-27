@@ -28,15 +28,15 @@ export class PushEnvToSsmCommandHandler {
       this.logger.info(
         `Starting push operation from '${command.envFilePath}' using map '${command.mapPath}'`,
       );
-      const paramMap = await this.loadConfiguration(command);
-      await this.pushVariablesToSSM(paramMap, command);
+      const config = await this.loadConfiguration(command);
+      const validatedPaths = this.validateAndGroupByPath(config);
+      await this.pushParametersToSSM(validatedPaths);
 
       this.logger.info(
         `Successfully pushed environment variables from '${command.envFilePath}' to AWS SSM.`,
       );
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = this.getErrorMessage(error);
       this.logger.error(`Failed to push environment file: ${errorMessage}`);
       throw error;
     }
@@ -66,55 +66,178 @@ export class PushEnvToSsmCommandHandler {
     return { paramMap, envVariables };
   }
 
-  private async pushVariablesToSSM(
-    config: {
-      paramMap: Record<string, string>;
-      envVariables: Record<string, string>;
-    },
-    command: PushEnvToSsmCommand,
-  ): Promise<void> {
+  /**
+   * Validates and groups environment variables by SSM path.
+   * Ensures that all variables pointing to the same SSM path have the same value.
+   * Returns a map of SSM path to value.
+   */
+  private validateAndGroupByPath(config: {
+    paramMap: Record<string, string>;
+    envVariables: Record<string, string>;
+  }): Map<string, { value: string; sourceKeys: string[] }> {
     const { paramMap, envVariables } = config;
+    const pathToValueMap = new Map<
+      string,
+      { value: string; sourceKeys: string[] }
+    >();
 
-    const keysToProcess = Object.keys(paramMap);
-    this.logger.info(
-      `Processing ${keysToProcess.length} environment variables to push to AWS SSM`,
-    );
+    for (const [envKey, ssmPath] of Object.entries(paramMap)) {
+      const envValue = envVariables[envKey];
 
-    const variableProcessingPromises = Object.entries(paramMap).map(
-      ([envKey, ssmPath]) => {
-        return this.processVariable(
-          envKey,
-          ssmPath,
-          envVariables,
-          command.envFilePath,
+      if (envValue === undefined) {
+        this.logger.warn(
+          `Warning: Environment variable ${envKey} not found in environment file`,
         );
-      },
+        continue;
+      }
+
+      const existing = pathToValueMap.get(ssmPath);
+      if (existing) {
+        if (existing.value !== envValue) {
+          const existingMasked = new EnvironmentVariable(
+            existing.sourceKeys[0],
+            existing.value,
+            true,
+          ).maskedValue;
+          const newMasked = new EnvironmentVariable(envKey, envValue, true)
+            .maskedValue;
+          throw new Error(
+            `Conflicting values for SSM path '${ssmPath}': ` +
+              `'${existing.sourceKeys[0]}' has value '${existingMasked}' ` +
+              `but '${envKey}' has value '${newMasked}'`,
+          );
+        }
+        existing.sourceKeys.push(envKey);
+      } else {
+        pathToValueMap.set(ssmPath, { value: envValue, sourceKeys: [envKey] });
+      }
+    }
+
+    const uniquePaths = pathToValueMap.size;
+    const totalVariables = Object.keys(paramMap).length;
+    this.logger.info(
+      `Validated ${totalVariables} environment variables mapping to ${uniquePaths} unique SSM parameters`,
     );
 
-    await Promise.all(variableProcessingPromises);
+    return pathToValueMap;
   }
 
-  private async processVariable(
-    envKey: string,
-    ssmPath: string,
-    envVariables: Record<string, string>,
-    envFilePath: string,
+  private async pushParametersToSSM(
+    pathToValueMap: Map<string, { value: string; sourceKeys: string[] }>,
   ): Promise<void> {
-    if (Object.hasOwn(envVariables, envKey)) {
-      const envVariable = new EnvironmentVariable(
-        envKey,
-        envVariables[envKey],
-        true,
-      );
+    const pathsToProcess = Array.from(pathToValueMap.keys());
+    this.logger.info(
+      `Processing ${pathsToProcess.length} unique SSM parameters`,
+    );
 
-      await this.secretProvider.setSecret(ssmPath, envVariables[envKey]);
-      this.logger.info(
-        `Pushed ${envKey}=${envVariable.maskedValue} to AWS SSM at path ${ssmPath}`,
+    // Process parameters in parallel with retry logic for throttling errors
+    const parameterProcessingPromises = Array.from(
+      pathToValueMap.entries(),
+    ).map(([ssmPath, { value, sourceKeys }]) => {
+      return this.retryWithBackoff(() =>
+        this.pushParameter(ssmPath, value, sourceKeys),
       );
-    } else {
-      this.logger.warn(
-        `Warning: Environment variable ${envKey} not found in ${envFilePath}`,
-      );
+    });
+
+    await Promise.all(parameterProcessingPromises);
+  }
+
+  private async pushParameter(
+    ssmPath: string,
+    value: string,
+    sourceKeys: string[],
+  ): Promise<void> {
+    const envVariable = new EnvironmentVariable(sourceKeys[0], value, true);
+    await this.secretProvider.setSecret(ssmPath, value);
+
+    const keysDescription =
+      sourceKeys.length > 1 ? `${sourceKeys.join(', ')}` : sourceKeys[0];
+
+    this.logger.info(
+      `Pushed ${keysDescription}=${envVariable.maskedValue} to AWS SSM at path ${ssmPath}`,
+    );
+  }
+
+  /**
+   * Retries an async operation with exponential backoff and jitter.
+   * Handles AWS SSM throttling errors (TooManyUpdates).
+   */
+  private async retryWithBackoff<T>(
+    operation: () => Promise<T>,
+    maxRetries = 5,
+    baseDelayMs = 100,
+  ): Promise<T> {
+    let lastError: unknown;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error;
+
+        const isThrottlingError =
+          typeof error === 'object' &&
+          error !== null &&
+          'name' in error &&
+          (error.name === 'TooManyUpdates' ||
+            error.name === 'ThrottlingException' ||
+            error.name === 'TooManyRequestsException');
+
+        if (!isThrottlingError || attempt === maxRetries) {
+          throw error;
+        }
+
+        const exponentialDelay = baseDelayMs * 2 ** attempt;
+        const jitter = Math.random() * exponentialDelay * 0.5; // 0-50% jitter
+        const delayMs = exponentialDelay + jitter;
+
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
     }
+
+    throw lastError;
+  }
+
+  private getErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    if (typeof error === 'string') {
+      return error;
+    }
+
+    if (error === null) {
+      return 'Unknown error (null)';
+    }
+
+    if (error === undefined) {
+      return 'Unknown error (undefined)';
+    }
+
+    if (typeof error === 'object') {
+      const awsError = error as {
+        name?: string;
+        message?: string;
+        code?: string;
+      };
+      if (awsError.name) {
+        return awsError.message
+          ? `${awsError.name}: ${awsError.message}`
+          : awsError.name;
+      }
+
+      const safeFields: string[] = [];
+      if (awsError.code) safeFields.push(`code: ${awsError.code}`);
+      if (awsError.message) safeFields.push(`message: ${awsError.message}`);
+
+      if (safeFields.length > 0) {
+        return `Object error (${safeFields.join(', ')})`;
+      }
+
+      return `Object error: ${Object.keys(error as object).join(', ')}`;
+    }
+
+    return `Unknown error: ${String(error)}`;
   }
 }

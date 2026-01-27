@@ -180,6 +180,33 @@ describe('Envilder (E2E)', () => {
     const ssmValue = await GetParameterSsm(singleSsmPath);
     expect(ssmValue).toBe(value);
   });
+
+  it('Should_SuccessfullyPushAllVariables_When_AllParametersAreValid', async () => {
+    // Arrange
+    const params = ['--push', '--envfile', envFilePath, '--map', mapFilePath];
+
+    const ssmParams = JSON.parse(readFileSync(mapFilePath, 'utf8')) as Record<
+      string,
+      string
+    >;
+
+    // Act
+    const actual = await runCommand(envilder, params);
+
+    // Assert
+    expect(actual.code).toBe(0);
+    expect(actual.output).toContain(
+      'Successfully pushed environment variables',
+    );
+    expect(actual.output).not.toContain('Failed to push environment file');
+    expect(actual.output).not.toContain('Unknown');
+
+    for (const [key, ssmPath] of Object.entries(ssmParams)) {
+      const expectedValue = GetSecretFromKey(envFilePath, key);
+      const ssmValue = await GetParameterSsm(ssmPath);
+      expect(ssmValue).toBe(expectedValue);
+    }
+  });
 });
 
 function runCommand(

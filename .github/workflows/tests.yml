@@ -1,7 +1,7 @@
 name: 🍄 1-Up Test Run
 
 permissions:
-  id-token: write  # Required for OIDC authentication with AWS
+  id-token: write # Required for OIDC authentication with AWS
   checks: write
   pull-requests: write
   contents: read
@@ -22,10 +22,10 @@ on:
       - \"github-action/action.yml\"
       - \"src/**\"
       - \"tests/**\"
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'tsconfig.json'
-      - 'vite.config.ts'
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "tsconfig.json"
+      - "vite.config.ts"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
@@ -49,8 +49,8 @@ jobs:
       - name: 🍄 Grab a Mushroom (Setup Node.js with Cache)
         uses: actions/setup-node@v6
         with:
-          node-version: '20.x'
-          cache: 'pnpm'
+          node-version: "20.x"
+          cache: "pnpm"
 
       - name: 🪙 Collect Coins (Configure AWS credentials)
         uses: aws-actions/configure-aws-credentials@v5
