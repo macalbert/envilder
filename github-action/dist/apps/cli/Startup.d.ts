@@ -6,11 +6,11 @@ export declare class Startup {
     configureServices(): this;
     /**
      * Configures infrastructure services for the application.
-     * Optionally accepts an AWS profile to use for service configuration.
      * @param awsProfile - The AWS profile to use for configuring infrastructure services.
+     * @param provider - The cloud provider to use (aws or azure), defaults to aws.
      * @returns The current instance for method chaining.
      */
-    configureInfrastructure(awsProfile?: string): this;
+    configureInfrastructure(awsProfile?: string, provider?: string): this;
     create(): Container;
     getServiceProvider(): Container;
     private configureInfrastructureServices;

@@ -14,6 +14,9 @@ importers:
       '@aws-sdk/credential-providers':
         specifier: ^3.958.0
         version: 3.958.0
+      '@azure/core-rest-pipeline':
+        specifier: ^1.22.2
+        version: 1.22.2
       '@azure/identity':
         specifier: ^4.13.0
         version: 4.13.0
