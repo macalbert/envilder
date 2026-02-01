@@ -11,6 +11,8 @@ import {
   vi,
 } from 'vitest';
 import { AzureKeyVaultSecretProvider } from '../../../../src/envilder/infrastructure/azure/AzureKeyVaultSecretProvider';
+import https from 'https';
+import { createDefaultHttpClient } from '@azure/core-rest-pipeline';
 
 // Constants for integration tests
 const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:2.5.8';
@@ -170,25 +172,36 @@ describe('AzureKeyVaultSecretProvider (integration with Lowkey Vault)', () => {
 
     // Create SecretClient with custom endpoint
     // Note: Lowkey Vault uses self-signed certificates
-    // In production, use proper certificate validation
+    // In production and tests, use proper certificate validation
     const { SecretClient } = await import('@azure/keyvault-secrets');
 
-    // For testing with self-signed certs, we need to disable TLS validation
-    // This should ONLY be done in test environments
-    const originalRejectUnauthorized = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    // Configure HTTPS agent to trust Lowkey Vault's certificate without disabling
+    // global TLS validation. If needed, provide a custom CA for the self-signed cert.
+    const lowkeyCa = process.env.LOWKEY_VAULT_CA;
+    const httpsAgent = new https.Agent({
+      rejectUnauthorized: true,
+      ca: lowkeyCa ? lowkeyCa : undefined,
+    });
 
-    secretClient = new SecretClient(vaultUrl, new DefaultAzureCredential());
+    const httpClient = createDefaultHttpClient({
+      agent: {
+        https: httpsAgent,
+      },
+    });
+
+    secretClient = new SecretClient(
+      vaultUrl,
+      new DefaultAzureCredential(),
+      {
+        httpClient,
+      },
+    );
 
     // Set up initial test secret
     try {
       await secretClient.setSecret(SECRET_NAME, SECRET_VALUE);
     } catch (error) {
       console.error('Failed to set up test secret:', error);
-      // Restore TLS setting
-      if (originalRejectUnauthorized !== undefined) {
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalRejectUnauthorized;
-      }
       throw error;
     }
   }, 120000);
