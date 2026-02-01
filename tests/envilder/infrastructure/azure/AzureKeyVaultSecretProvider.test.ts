@@ -1,3 +1,5 @@
+import https from 'node:https';
+import { createDefaultHttpClient } from '@azure/core-rest-pipeline';
 import { DefaultAzureCredential } from '@azure/identity';
 import type { SecretClient } from '@azure/keyvault-secrets';
 import { GenericContainer, type StartedTestContainer } from 'testcontainers';
@@ -11,8 +13,6 @@ import {
   vi,
 } from 'vitest';
 import { AzureKeyVaultSecretProvider } from '../../../../src/envilder/infrastructure/azure/AzureKeyVaultSecretProvider';
-import https from 'https';
-import { createDefaultHttpClient } from '@azure/core-rest-pipeline';
 
 // Constants for integration tests
 const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:2.5.8';
@@ -189,13 +189,9 @@ describe('AzureKeyVaultSecretProvider (integration with Lowkey Vault)', () => {
       },
     });
 
-    secretClient = new SecretClient(
-      vaultUrl,
-      new DefaultAzureCredential(),
-      {
-        httpClient,
-      },
-    );
+    secretClient = new SecretClient(vaultUrl, new DefaultAzureCredential(), {
+      httpClient,
+    });
 
     // Set up initial test secret
     try {
