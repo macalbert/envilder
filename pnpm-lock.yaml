@@ -44,7 +44,7 @@ importers:
         version: 20.3.0
       '@secretlint/secretlint-rule-preset-recommend':
         specifier: ^11.2.5
-        version: 11.2.5
+        version: 11.3.1
       '@testcontainers/localstack':
         specifier: ^11.11.0
         version: 11.11.0
@@ -866,8 +866,8 @@ packages:
   '@secretlint/resolver@11.3.1':
     resolution: {integrity: sha512-+bGKntF0wXyPyhFe4wxPk3mxKLHE0sQVeF4FwOH2uFKUzXZJxF9NwISYWAmCzyzAxZbjBDjcpJAEtB2492ohbg==}
 
-  '@secretlint/secretlint-rule-preset-recommend@11.2.5':
-    resolution: {integrity: sha512-FAnp/dPdbvHEw50aF9JMPF/OwW58ULvVXEsk+mXTtBD09VJZhG0vFum8WzxMbB98Eo4xDddGzYtE3g27pBOaQA==}
+  '@secretlint/secretlint-rule-preset-recommend@11.3.1':
+    resolution: {integrity: sha512-zRkESw8Mhuh4J65+biFKkpTW8Gjpse+D4BZhznASCtge38ervYcuG3IgHvFLf1AbTM+YQdH5wRVNdU0+btaEBw==}
     engines: {node: '>=20.0.0'}
 
   '@secretlint/source-creator@11.3.1':
@@ -3619,7 +3619,7 @@ snapshots:
 
   '@secretlint/resolver@11.3.1': {}
 
-  '@secretlint/secretlint-rule-preset-recommend@11.2.5': {}
+  '@secretlint/secretlint-rule-preset-recommend@11.3.1': {}
 
   '@secretlint/source-creator@11.3.1':
     dependencies:
