@@ -80,7 +80,7 @@ jobs:
 
       - name: 🚩 Publish to npm
         if: steps.version-check.outputs.version_changed == 'true'
-        run: npm pack --dry-run && npm publish --provenance
+        run: npm publish --provenance
 
       - name: 🏰 Create release
         if: steps.version-check.outputs.version_changed == 'true'
