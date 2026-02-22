@@ -73,8 +73,8 @@
   ],
   "type": "module",
   "dependencies": {
-    "@aws-sdk/client-ssm": "^3.983.0",
-    "@aws-sdk/credential-providers": "^3.983.0",
+    "@aws-sdk/client-ssm": "^3.995.0",
+    "@aws-sdk/credential-providers": "^3.995.0",
     "@types/node": "^25.0.3",
     "commander": "^14.0.2",
     "dotenv": "^17.2.3",
@@ -84,13 +84,13 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.10",
-    "@commitlint/cli": "^20.3.0",
-    "@commitlint/config-conventional": "^20.3.0",
+    "@commitlint/cli": "^20.4.2",
+    "@commitlint/config-conventional": "^20.4.2",
     "@secretlint/secretlint-rule-preset-recommend": "^11.2.5",
     "@testcontainers/localstack": "^11.11.0",
     "@vercel/ncc": "^0.38.4",
     "@vitest/coverage-v8": "^4.0.16",
-    "glob": "^13.0.0",
+    "glob": "^13.0.6",
     "secretlint": "^11.2.5",
     "testcontainers": "^11.11.0",
     "ts-node": "^10.9.2",
@@ -99,5 +99,11 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "ajv": "^8.18.0",
+      "minimatch": "^10.2.2"
+    }
   }
 }
