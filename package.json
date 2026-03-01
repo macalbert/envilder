@@ -1,6 +1,6 @@
 {
   "name": "envilder",
-  "version": "1.0.0",
+  "version": "0.7.10",
   "description": "A CLI that securely centralizes your environment variables from AWS SSM as a single source of truth",
   "author": {
     "name": "Marçal Albert Castellví",
@@ -29,7 +29,7 @@
     "lint:fix": "biome lint --fix",
     "test": "vitest run --reporter=verbose --coverage",
     "test:ci": "vitest run --reporter=verbose --reporter=junit --coverage --outputFile=coverage/junit/test-results.xml",
-    "publish": "npm pack --dry-run && npm publish --provenance",
+    "release:publish": "npm pack --dry-run && npm publish --provenance",
     "action-publish": "pnpm build:gha && pnpm verify:gha",
     "release-patch": "pnpm version patch",
     "release-minor": "pnpm version minor",
@@ -73,34 +73,40 @@
   ],
   "type": "module",
   "dependencies": {
-    "@aws-sdk/client-ssm": "^3.958.0",
-    "@aws-sdk/credential-providers": "^3.958.0",
+    "@aws-sdk/client-ssm": "^3.1000.0",
+    "@aws-sdk/credential-providers": "^3.1000.0",
     "@azure/core-rest-pipeline": "^1.22.2",
     "@azure/identity": "^4.13.0",
     "@azure/keyvault-secrets": "^4.10.0",
-    "@types/node": "^25.0.3",
-    "commander": "^14.0.2",
-    "dotenv": "^17.2.3",
-    "inversify": "^7.10.8",
+    "@types/node": "^25.3.3",
+    "commander": "^14.0.3",
+    "dotenv": "^17.3.1",
+    "inversify": "^7.11.0",
     "picocolors": "^1.1.1",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.10",
-    "@commitlint/cli": "^20.3.0",
-    "@commitlint/config-conventional": "^20.3.0",
-    "@secretlint/secretlint-rule-preset-recommend": "^11.2.5",
-    "@testcontainers/localstack": "^11.11.0",
+    "@biomejs/biome": "^2.4.4",
+    "@commitlint/cli": "^20.4.2",
+    "@commitlint/config-conventional": "^20.4.2",
+    "@secretlint/secretlint-rule-preset-recommend": "^11.3.1",
+    "@testcontainers/localstack": "^11.12.0",
     "@vercel/ncc": "^0.38.4",
-    "@vitest/coverage-v8": "^4.0.16",
-    "glob": "^13.0.0",
-    "secretlint": "^11.2.5",
-    "testcontainers": "^11.11.0",
+    "@vitest/coverage-v8": "^4.0.18",
+    "glob": "^13.0.6",
+    "secretlint": "^11.3.1",
+    "testcontainers": "^11.12.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.18"
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "ajv": "^8.18.0",
+      "minimatch": "^10.2.2"
+    }
   }
 }
