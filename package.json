@@ -73,9 +73,9 @@
   ],
   "type": "module",
   "dependencies": {
-    "@aws-sdk/client-ssm": "^3.995.0",
-    "@aws-sdk/credential-providers": "^3.995.0",
-    "@types/node": "^25.3.0",
+    "@aws-sdk/client-ssm": "^3.1000.0",
+    "@aws-sdk/credential-providers": "^3.1000.0",
+    "@types/node": "^25.3.3",
     "commander": "^14.0.3",
     "dotenv": "^17.3.1",
     "inversify": "^7.11.0",
