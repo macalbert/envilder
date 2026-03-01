@@ -18,10 +18,10 @@ on:
       - synchronize
       - ready_for_review
     paths:
-      - \".github/workflows/tests.yml\"
-      - \"github-action/action.yml\"
-      - \"src/**\"
-      - \"tests/**\"
+      - ".github/workflows/tests.yml"
+      - "github-action/action.yml"
+      - "src/**"
+      - "tests/**"
       - "package.json"
       - "pnpm-lock.yaml"
       - "tsconfig.json"
