@@ -57,7 +57,7 @@ jobs:
 
       - name: 💉 Configure AWS credentials
         if: steps.version-check.outputs.version_changed == 'true'
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
