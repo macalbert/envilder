@@ -53,7 +53,7 @@ Pull AWS SSM Parameter Store secrets into `.env` files in your GitHub Actions wo
     aws-region: us-east-1
 
 - name: 🔐 Pull Secrets from AWS SSM
-  uses: macalbert/envilder/github-action@v0
+  uses: macalbert/envilder/github-action@v0.7.11
   with:
     map-file: param-map.json
     env-file: .env
@@ -150,7 +150,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: 🔐 Pull Secrets from AWS SSM
-        uses: macalbert/envilder/github-action@v0
+        uses: macalbert/envilder/github-action@v0.7.11
         with:
           map-file: config/param-map.json
           env-file: .env
@@ -193,7 +193,7 @@ jobs:
           aws-region: us-east-1
       
       - name: 🔐 Pull Secrets
-        uses: macalbert/envilder/github-action@v0
+        uses: macalbert/envilder/github-action@v0.7.11
         with:
           map-file: app/config/param-map.json  # Path from repo root!
           env-file: app/.env                    # Path from repo root!
@@ -237,7 +237,7 @@ jobs:
           aws-region: us-east-1
 
       - name: 🔐 Pull ${{ inputs.environment }} secrets
-        uses: macalbert/envilder/github-action@v0
+        uses: macalbert/envilder/github-action@v0.7.11
         with:
           map-file: config/${{ inputs.environment }}/param-map.json
           env-file: .env.${{ inputs.environment }}
@@ -275,7 +275,7 @@ jobs:
           role-to-assume: ${{ secrets[format('AWS_ROLE_{0}', matrix.environment)] }}
           aws-region: us-east-1
       
-      - uses: macalbert/envilder/github-action@v0
+      - uses: macalbert/envilder/github-action@v0.7.11
         with:
           map-file: config/${{ matrix.environment }}/param-map.json
           env-file: .env
@@ -318,7 +318,7 @@ SECRET_TOKEN=token_secret_value_here
 ### Error: "Could not find lib directory"
 
 The published action includes pre-built code. If you see this error, ensure you're using the
-marketplace version (`macalbert/envilder/github-action@v0`) not a local checkout.
+marketplace version (`macalbert/envilder/github-action@v0.7.11`) not a local checkout.
 
 ### Error: "Parameter not found"
 
