@@ -22,64 +22,51 @@ function parsePayload(raw) {
   }
 }
 
+function findStringValue(possible) {
+  for (const value of possible) {
+    if (typeof value === 'string' && value.trim().length > 0) {
+      return value;
+    }
+  }
+
+  return '';
+}
+
 function findCommandString(payload) {
-  const possible = [
+  return findStringValue([
     payload?.toolInput?.command,
     payload?.tool_input?.command,
     payload?.toolCall?.arguments?.command,
     payload?.tool_call?.arguments?.command,
     payload?.arguments?.command,
     payload?.command,
-  ];
-
-  for (const value of possible) {
-    if (typeof value === 'string' && value.trim().length > 0) {
-      return value;
-    }
-  }
-
-  return '';
+  ]);
 }
 
 function findToolName(payload) {
-  const possible = [
+  return findStringValue([
     payload?.toolName,
     payload?.tool_name,
     payload?.toolCall?.name,
     payload?.tool_call?.name,
     payload?.name,
-  ];
-
-  for (const value of possible) {
-    if (typeof value === 'string' && value.trim().length > 0) {
-      return value;
-    }
-  }
-
-  return '';
+  ]);
 }
 
 function findHookEventName(payload) {
-  const possible = [
+  return findStringValue([
     payload?.hookEventName,
     payload?.hook_event_name,
     payload?.hookEvent?.name,
     payload?.hook_event?.name,
     payload?.eventName,
     payload?.event_name,
-  ];
-
-  for (const value of possible) {
-    if (typeof value === 'string' && value.trim().length > 0) {
-      return value;
-    }
-  }
-
-  return '';
+  ]);
 }
 
 function isGitPush(command) {
-  return /(^|\s)git\s+push(\s|$)/i.test(command);
+  // Match standalone command starts and common shell separators.
+  return /(^|[;&|])\s*git\s+push(\s|$)/i.test(command);
 }
 
 function runStep(stepCommand) {
@@ -143,31 +130,35 @@ function allow(eventName) {
   );
 }
 
+function runQualityGate(hookEventName, blockReason) {
+  const steps = ['pnpm format:write', 'pnpm lint', 'pnpm test'];
+
+  for (const step of steps) {
+    const ok = runStep(step);
+
+    if (!ok) {
+      deny(
+        hookEventName,
+        `Blocked ${blockReason}: quality gate failed while running "${step}".`,
+      );
+      process.exit(2);
+    }
+  }
+
+  allow(hookEventName);
+}
+
 async function main() {
   const raw = await readStdin();
   const payload = parsePayload(raw);
   const hookEventName = findHookEventName(payload) || 'PreToolUse';
-  const toolName = findToolName(payload);
 
   if (hookEventName === 'Stop') {
-    const steps = ['pnpm format:write', 'pnpm lint', 'pnpm test'];
-
-    for (const step of steps) {
-      const ok = runStep(step);
-
-      if (!ok) {
-        deny(
-          hookEventName,
-          `Blocked session stop: quality gate failed while running "${step}".`,
-        );
-        process.exit(2);
-        return;
-      }
-    }
-
-    allow(hookEventName);
+    runQualityGate(hookEventName, 'session stop');
     return;
   }
+
+  const toolName = findToolName(payload);
 
   if (toolName !== 'run_in_terminal') {
     allow(hookEventName);
@@ -181,22 +172,7 @@ async function main() {
     return;
   }
 
-  const steps = ['pnpm format:write', 'pnpm lint', 'pnpm test'];
-
-  for (const step of steps) {
-    const ok = runStep(step);
-
-    if (!ok) {
-      deny(
-        hookEventName,
-        `Blocked git push: quality gate failed while running "${step}".`,
-      );
-      process.exit(2);
-      return;
-    }
-  }
-
-  allow(hookEventName);
+  runQualityGate(hookEventName, 'git push');
 }
 
 main().catch((error) => {
