@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "node ./.github/hooks/scripts/pre-push-quality-gate.mjs",
+        "timeout": 1800
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node ./.github/hooks/scripts/pre-push-quality-gate.mjs",
+        "timeout": 1800
+      }
+    ]
+  }
+}
