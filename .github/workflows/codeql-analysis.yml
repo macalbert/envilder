@@ -11,7 +11,7 @@ on:
     paths:
       - ".github/workflows/codeql-analysis.yml"
       - "src/**"
-      - "test/**"
+      - "tests/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ["typescript"]
+        language: ["javascript-typescript"]
 
     permissions:
       security-events: write
