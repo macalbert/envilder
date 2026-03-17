@@ -9,6 +9,8 @@
   <span>Streamline your environment setup with AWS Parameter Store</span>
 </p>
 
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/macalbert/envilder?utm_source=oss&utm_medium=github&utm_campaign=macalbert%2Fenvilder&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+
 [![npm version](https://img.shields.io/npm/v/envilder.svg)](https://www.npmjs.com/package/envilder)
 [![npm downloads](https://img.shields.io/npm/dm/envilder.svg)](https://npmcharts.com/compare/envilder)
 [![CI Tests](https://github.com/macalbert/envilder/actions/workflows/tests.yml/badge.svg)](https://github.com/macalbert/envilder/actions/workflows/tests.yml)
@@ -117,7 +119,7 @@ Use Envilder directly in your CI/CD workflows with our official GitHub Action:
     aws-region: us-east-1
 
 - name: Pull secrets from AWS SSM
-  uses: macalbert/envilder/github-action@v0.7.10
+  uses: macalbert/envilder/github-action@v0.7.11
   with:
     map-file: param-map.json
     env-file: .env
