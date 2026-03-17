@@ -10,7 +10,8 @@ applyTo:
 These rules are hard requirements for Envilder source code changes.
 
 - Keep domain code pure in `src/envilder/domain`: no SDK, filesystem, process, or framework dependencies.
-- Model external systems behind domain ports (`ISecretProvider`, `IVariableStore`, `ILogger`), and implement them only in infrastructure.
+- Model external systems behind domain ports (`ISecretProvider`, `IVariableStore`, `ILogger`),
+and implement them only in infrastructure.
 - Use the Command/Handler pattern in the application layer: add a `*Command` with static `.create()` and a matching `*CommandHandler`.
 - Route new behavior via `DispatchActionCommandHandler` and `OperationMode` instead of branching directly in entry points.
 - Keep `src/apps/*` focused on input parsing, startup wiring, and process exit behavior.
