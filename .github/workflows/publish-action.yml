@@ -6,10 +6,6 @@ on:
       version:
         description: "🎮 Level to publish (e.g., 1.0.0)"
         required: true
-      update-major:
-        description: "⭐ Update power-up tag (e.g., v1)"
-        type: boolean
-        default: true
 
 permissions:
   contents: write
@@ -86,8 +82,8 @@ jobs:
           git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }}"
           git push origin "v${{ inputs.version }}"
 
-      - name: ⭐ Collect the Star (Update major version)
-        if: inputs.update-major == true && steps.version-check.outputs.should_publish == 'true'
+      - name: ⭐ Collect the Star (Update major tag)
+        if: steps.version-check.outputs.should_publish == 'true'
         run: |
           MAJOR_VERSION=$(echo "v${{ inputs.version }}" | cut -d. -f1)
 
@@ -116,7 +112,7 @@ jobs:
                 role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
                 aws-region: us-east-1
 
-            - uses: macalbert/envilder@v${{ inputs.version }}
+            - uses: macalbert/envilder/github-action@v${{ inputs.version }}
               with:
                 map-file: param-map.json
                 env-file: .env
