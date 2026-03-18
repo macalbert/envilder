@@ -154,128 +154,125 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
 });
 
 // Integration tests with Lowkey Vault
-describe.runIf(process.env.CI || process.env.INTEGRATION)(
-  'AzureKeyVaultSecretProvider (integration with Lowkey Vault)',
-  () => {
-    let container: StartedTestContainer;
-    let vaultUrl: string;
-    let secretClient: SecretClient;
+describe('AzureKeyVaultSecretProvider (integration with Lowkey Vault)', () => {
+  let container: StartedTestContainer;
+  let vaultUrl: string;
+  let secretClient: SecretClient;
 
-    beforeAll(async () => {
-      // Start Lowkey Vault container
-      container = await new GenericContainer(LOWKEY_VAULT_IMAGE)
-        .withExposedPorts(LOWKEY_VAULT_PORT)
-        .withEnvironment('LOWKEY_ARGS', '--server.port=8443')
-        .start();
+  beforeAll(async () => {
+    // Start Lowkey Vault container
+    container = await new GenericContainer(LOWKEY_VAULT_IMAGE)
+      .withExposedPorts(LOWKEY_VAULT_PORT)
+      .withEnvironment('LOWKEY_ARGS', '--server.port=8443')
+      .start();
 
-      const host = container.getHost();
-      const port = container.getMappedPort(LOWKEY_VAULT_PORT);
-      vaultUrl = `https://${host}:${port}`;
+    const host = container.getHost();
+    const port = container.getMappedPort(LOWKEY_VAULT_PORT);
+    vaultUrl = `https://${host}:${port}`;
 
-      // Create SecretClient with custom endpoint
-      // Note: Lowkey Vault uses self-signed certificates
-      // In production and tests, use proper certificate validation
-      const { SecretClient } = await import('@azure/keyvault-secrets');
+    // Create SecretClient with custom endpoint
+    // Note: Lowkey Vault uses self-signed certificates
+    // In production and tests, use proper certificate validation
+    const { SecretClient } = await import('@azure/keyvault-secrets');
 
-      // Configure HTTPS agent to trust Lowkey Vault's certificate without disabling
-      // global TLS validation. If needed, provide a custom CA for the self-signed cert.
-      const lowkeyCa = process.env.LOWKEY_VAULT_CA;
-      const httpsAgent = new https.Agent({
-        rejectUnauthorized: true,
-        ca: lowkeyCa ? lowkeyCa : undefined,
-      });
-
-      const httpClient = createDefaultHttpClient({
-        agent: {
-          https: httpsAgent,
-        },
-      });
-
-      secretClient = new SecretClient(vaultUrl, new DefaultAzureCredential(), {
-        httpClient,
-      });
-
-      // Set up initial test secret
-      try {
-        await secretClient.setSecret(SECRET_NAME, SECRET_VALUE);
-      } catch (error) {
-        console.error('Failed to set up test secret:', error);
-        throw error;
-      }
-    }, 120000);
-
-    afterAll(async () => {
-      if (container) {
-        await container.stop();
-      }
+    // Configure HTTPS agent to trust Lowkey Vault's certificate without disabling
+    // global TLS validation. If needed, provide a custom CA for the self-signed cert.
+    const lowkeyCa = process.env.LOWKEY_VAULT_CA;
+    const httpsAgent = new https.Agent({
+      rejectUnauthorized: true,
+      ca: lowkeyCa ? lowkeyCa : undefined,
     });
 
-    it('Should_ReturnSecretValue_When_SecretExists', async () => {
-      // Arrange
-      const sut = new AzureKeyVaultSecretProvider(secretClient);
-
-      // Act
-      const actual = await sut.getSecret(SECRET_NAME);
-
-      // Assert
-      expect(actual).toBe(SECRET_VALUE);
+    const httpClient = createDefaultHttpClient({
+      agent: {
+        https: httpsAgent,
+      },
     });
 
-    it('Should_ReturnUndefined_When_SecretDoesNotExist', async () => {
-      // Arrange
-      const sut = new AzureKeyVaultSecretProvider(secretClient);
-
-      // Act
-      const actual = await sut.getSecret(NON_EXISTENT_SECRET);
-
-      // Assert
-      expect(actual).toBeUndefined();
+    secretClient = new SecretClient(vaultUrl, new DefaultAzureCredential(), {
+      httpClient,
     });
 
-    it('Should_StoreSecretValue_When_SetSecretIsCalled', async () => {
-      // Arrange
-      const sut = new AzureKeyVaultSecretProvider(secretClient);
-      const secretName = 'new-test-secret';
-      const secretValue = 'new-secret-value';
+    // Set up initial test secret
+    try {
+      await secretClient.setSecret(SECRET_NAME, SECRET_VALUE);
+    } catch (error) {
+      console.error('Failed to set up test secret:', error);
+      throw error;
+    }
+  }, 120000);
 
-      // Act
-      await sut.setSecret(secretName, secretValue);
+  afterAll(async () => {
+    if (container) {
+      await container.stop();
+    }
+  });
 
-      // Assert
-      const result = await secretClient.getSecret(secretName);
-      expect(result.value).toBe(secretValue);
-    });
+  it('Should_ReturnSecretValue_When_SecretExists', async () => {
+    // Arrange
+    const sut = new AzureKeyVaultSecretProvider(secretClient);
 
-    it('Should_UpdateSecretValue_When_SecretAlreadyExists', async () => {
-      // Arrange
-      const sut = new AzureKeyVaultSecretProvider(secretClient);
-      const secretName = 'update-test-secret';
-      const initialValue = 'initial-value';
-      const updatedValue = 'updated-value';
+    // Act
+    const actual = await sut.getSecret(SECRET_NAME);
 
-      // Setup initial value
-      await secretClient.setSecret(secretName, initialValue);
+    // Assert
+    expect(actual).toBe(SECRET_VALUE);
+  });
 
-      // Act
-      await sut.setSecret(secretName, updatedValue);
+  it('Should_ReturnUndefined_When_SecretDoesNotExist', async () => {
+    // Arrange
+    const sut = new AzureKeyVaultSecretProvider(secretClient);
 
-      // Assert
-      const result = await secretClient.getSecret(secretName);
-      expect(result.value).toBe(updatedValue);
-    });
+    // Act
+    const actual = await sut.getSecret(NON_EXISTENT_SECRET);
 
-    it('Should_HandleNameNormalization_When_SettingAndGettingSecret', async () => {
-      // Arrange
-      const sut = new AzureKeyVaultSecretProvider(secretClient);
-      const originalName = '/my/app/db/password';
-      const secretValue = 'normalized-test-value';
+    // Assert
+    expect(actual).toBeUndefined();
+  });
 
-      // Act
-      await sut.setSecret(originalName, secretValue);
-      const actual = await sut.getSecret(originalName);
+  it('Should_StoreSecretValue_When_SetSecretIsCalled', async () => {
+    // Arrange
+    const sut = new AzureKeyVaultSecretProvider(secretClient);
+    const secretName = 'new-test-secret';
+    const secretValue = 'new-secret-value';
 
-      // Assert
-      expect(actual).toBe(secretValue);
-    });
-  },
-);
+    // Act
+    await sut.setSecret(secretName, secretValue);
+
+    // Assert
+    const result = await secretClient.getSecret(secretName);
+    expect(result.value).toBe(secretValue);
+  });
+
+  it('Should_UpdateSecretValue_When_SecretAlreadyExists', async () => {
+    // Arrange
+    const sut = new AzureKeyVaultSecretProvider(secretClient);
+    const secretName = 'update-test-secret';
+    const initialValue = 'initial-value';
+    const updatedValue = 'updated-value';
+
+    // Setup initial value
+    await secretClient.setSecret(secretName, initialValue);
+
+    // Act
+    await sut.setSecret(secretName, updatedValue);
+
+    // Assert
+    const result = await secretClient.getSecret(secretName);
+    expect(result.value).toBe(updatedValue);
+  });
+
+  it('Should_HandleNameNormalization_When_SettingAndGettingSecret', async () => {
+    // Arrange
+    const sut = new AzureKeyVaultSecretProvider(secretClient);
+    const originalName = '/my/app/db/password';
+    const secretValue = 'normalized-test-value';
+
+    // Act
+    await sut.setSecret(originalName, secretValue);
+    const actual = await sut.getSecret(originalName);
+
+    // Assert
+    expect(actual).toBe(secretValue);
+  });
+});
