@@ -2,7 +2,10 @@
 
 ## Project Overview
 
-Envilder is a TypeScript CLI tool and GitHub Action that securely centralizes environment variables from AWS SSM Parameter Store. Built with **Hexagonal Architecture** (Ports & Adapters) and **Clean Architecture** principles for testability and modularity.
+Envilder is a TypeScript CLI tool and GitHub Action that securely centralizes
+environment variables from AWS SSM Parameter Store. Built with **Hexagonal
+Architecture** (Ports & Adapters) and **Clean Architecture** principles for
+testability and modularity.
 
 ## Architecture Layers
 
@@ -54,7 +57,9 @@ container.bind<PullSsmToEnvCommandHandler>(TYPES.PullSsmToEnvCommandHandler)
   .inTransientScope();  // Application handlers
 ```
 
-**AWS Profile Handling**: CLI supports `--profile` flag → passed to `Startup.configureInfrastructure(awsProfile)` → creates SSM client with `fromIni({ profile })`.
+**AWS Profile Handling**: CLI supports `--profile` flag → passed to
+`Startup.configureInfrastructure(awsProfile)` → creates SSM client with
+`fromIni({ profile })`.
 
 ## Key Workflows & Commands
 
@@ -75,7 +80,8 @@ container.bind<PullSsmToEnvCommandHandler>(TYPES.PullSsmToEnvCommandHandler)
 - `pnpm lint` — Runs Secretlint (credential detection), Biome (format/lint), and `tsc --noEmit`
 - `pnpm format:write` — Auto-format with Biome
 
-**E2E Tests**: Located in `e2e/`, use real AWS SSM via LocalStack (TestContainers). Run `pnpm build` + `pack-and-install.ts` before E2E.
+**E2E Tests**: Located in `e2e/`, use real AWS SSM via LocalStack (TestContainers).
+Run `pnpm build` + `pack-and-install.ts` before E2E.
 
 ## Coding Conventions
 
@@ -114,7 +120,8 @@ Example (PushSingle):
 - **Framework**: Vitest with built-in mocking (`vi.fn()`, `vi.mock()`)
 - **E2E Testing**: TestContainers with `@testcontainers/localstack` for real AWS SSM integration
 - **Naming**: Use `Should_<Expected>_When_<Condition>` pattern (e.g., `Should_ThrowError_When_SSMParameterIsNotFound`)
-- **Structure**: Follow AAA (Arrange-Act-Assert) pattern with explicit comment markers:
+- **Structure**: Follow AAA (Arrange-Act-Assert) pattern with explicit comment markers —
+**each marker appears at most once per test** (if you need two Acts or Asserts, write two tests):
 
   ```typescript
   it('Should_GenerateEnvFile_When_ValidParametersProvided', async () => {
@@ -151,7 +158,7 @@ Example (PushSingle):
 
 ## Adding a New Feature (Step-by-Step)
 
-**Example: Add "validate" command to check SSM parameter existence without pulling**
+### Example: Add "validate" command to check SSM parameter existence without pulling
 
 1. **Domain**: Create `src/envilder/domain/OperationMode.ts` enum entry: `VALIDATE`
 2. **Application**:
