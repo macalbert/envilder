@@ -1,0 +1,7 @@
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: "*.{ts,tsx,js,jsx,json}"
+      run: pnpx biome check --write --unsafe --no-errors-on-unmatched {staged_files}
+      stage_fixed: true

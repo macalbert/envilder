@@ -17,6 +17,7 @@
     "envilder": "lib/apps/cli/Index.js"
   },
   "scripts": {
+    "prepare": "lefthook install",
     "clean": "pnpm store prune && pnpm dlx rimraf lib && pnpm dlx rimraf coverage && pnpm dlx rimraf node_modules",
     "build": "tsc",
     "build:gha": "ncc build src/apps/gha/Index.ts -o github-action/dist --minify",
@@ -28,6 +29,7 @@
     "lint": "secretlint \"**/*\" && biome check --write && tsc --noEmit",
     "lint:fix": "biome lint --fix",
     "test": "vitest run --reporter=verbose --coverage",
+    "test:e2e": "vitest run --reporter=verbose e2e/",
     "test:ci": "vitest run --reporter=verbose --reporter=junit --coverage --outputFile=coverage/junit/test-results.xml",
     "release:publish": "npm pack --dry-run && npm publish --provenance",
     "action-publish": "pnpm build:gha && pnpm verify:gha",
@@ -94,6 +96,7 @@
     "@vercel/ncc": "^0.38.4",
     "@vitest/coverage-v8": "^4.0.18",
     "glob": "^13.0.6",
+    "lefthook": "^2.1.4",
     "secretlint": "^11.3.1",
     "testcontainers": "^11.12.0",
     "ts-node": "^10.9.2",
@@ -107,6 +110,13 @@
     "overrides": {
       "ajv": "^8.18.0",
       "minimatch": "^10.2.2"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "cpu-features",
+      "esbuild",
+      "lefthook",
+      "protobufjs",
+      "ssh2"
+    ]
   }
 }
