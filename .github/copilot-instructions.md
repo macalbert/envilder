@@ -120,7 +120,8 @@ Example (PushSingle):
 - **Framework**: Vitest with built-in mocking (`vi.fn()`, `vi.mock()`)
 - **E2E Testing**: TestContainers with `@testcontainers/localstack` for real AWS SSM integration
 - **Naming**: Use `Should_<Expected>_When_<Condition>` pattern (e.g., `Should_ThrowError_When_SSMParameterIsNotFound`)
-- **Structure**: Follow AAA (Arrange-Act-Assert) pattern with explicit comment markers:
+- **Structure**: Follow AAA (Arrange-Act-Assert) pattern with explicit comment markers —
+**each marker appears at most once per test** (if you need two Acts or Asserts, write two tests):
 
   ```typescript
   it('Should_GenerateEnvFile_When_ValidParametersProvided', async () => {

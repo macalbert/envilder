@@ -40,6 +40,9 @@ confidence level across unit, integration, and e2e coverage.
      - `// Arrange`
      - `// Act`
      - `// Assert`
+   - **Each marker appears at most once per test.** If you need to
+     test two actions or two assertions on different behaviors,
+     write two separate tests.
 5. Mock at the port boundary for application tests.
    - Build test doubles by implementing domain port interfaces.
    - Prefer `vi.fn()` to control behavior and assertions.
@@ -69,7 +72,7 @@ confidence level across unit, integration, and e2e coverage.
 ## Completion Criteria
 
 - Test names follow `Should_<Expected>_When_<Condition>`
-- AAA markers are present and clear
+- AAA markers are present, clear, and appear at most once each per test
 - Positive and negative paths are both covered
 - No mandatory coverage percentage threshold is enforced by this skill
 - Tests run green locally with `pnpm test`
@@ -80,3 +83,52 @@ confidence level across unit, integration, and e2e coverage.
 - "Use testing-conventions for `PullSsmToEnvCommandHandler` and add missing error-path tests."
 - "Apply testing-conventions to review `tests/apps/gha/Gha.test.ts` for naming and AAA compliance."
 - "Use testing-conventions to design e2e coverage for SSM not-found behavior."
+
+## Anti-Pattern: Duplicate Act/Assert Blocks
+
+**Wrong** — two Acts and Asserts in one test:
+
+```typescript
+it('Should_HandleParameters_When_Called', async () => {
+  // Arrange
+  const mockData = { KEY: '/ssm/path' };
+
+  // Act
+  await handler.handle(commandA);
+
+  // Assert
+  expect(mockStore.saveEnvironment).toHaveBeenCalledOnce();
+
+  // Act
+  await handler.handle(commandB);
+
+  // Assert
+  expect(mockStore.saveEnvironment).toHaveBeenCalledTimes(2);
+});
+```
+
+**Correct** — split into two focused tests:
+
+```typescript
+it('Should_SaveEnvironment_When_CommandAProvided', async () => {
+  // Arrange
+  const mockData = { KEY: '/ssm/path' };
+
+  // Act
+  await handler.handle(commandA);
+
+  // Assert
+  expect(mockStore.saveEnvironment).toHaveBeenCalledOnce();
+});
+
+it('Should_SaveEnvironment_When_CommandBProvided', async () => {
+  // Arrange
+  const mockData = { KEY: '/ssm/path' };
+
+  // Act
+  await handler.handle(commandB);
+
+  // Assert
+  expect(mockStore.saveEnvironment).toHaveBeenCalledOnce();
+});
+```
