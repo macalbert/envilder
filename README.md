@@ -68,7 +68,12 @@ and streamline onboarding and CI/CD workflows.
       - [AWS SSM (default)](#aws-ssm-default)
       - [Azure Key Vault](#azure-key-vault)
     - [📚 Quick Links](#-quick-links)
-  - [🛠️ How it works](#️-how-it-works)
+  - [�️ Mapping File Format](#️-mapping-file-format)
+    - [Basic Format (AWS SSM — default)](#basic-format-aws-ssm--default)
+    - [With `$config` (explicit provider)](#with-config-explicit-provider)
+    - [`$config` Options](#config-options)
+    - [Configuration Priority](#configuration-priority)
+  - [�🛠️ How it works](#️-how-it-works)
   - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
   - [🏁 Roadmap](#-roadmap)
   - [🤝 Contributing](#-contributing)
@@ -233,7 +238,89 @@ Envilder is designed for automation, onboarding, and secure cloud-native workflo
 
 ---
 
-## 🛠️ How it works
+## �️ Mapping File Format
+
+The mapping file (`param-map.json`) is the core of Envilder. It maps environment variable names to secret paths
+in your cloud provider. You can optionally include a `$config` section to declare which provider and settings to use.
+
+### Basic Format (AWS SSM — default)
+
+When no `$config` is present, Envilder defaults to AWS SSM Parameter Store:
+
+```json
+{
+  "API_KEY": "/myapp/prod/api-key",
+  "DB_PASSWORD": "/myapp/prod/db-password",
+  "SECRET_TOKEN": "/myapp/prod/secret-token"
+}
+```
+
+Values are SSM parameter paths (e.g., `/myapp/prod/api-key`).
+
+### With `$config` (explicit provider)
+
+Add a `$config` key to declare the provider and its settings. Envilder reads `$config` for configuration
+and uses all other keys as secret mappings:
+
+**AWS SSM with profile:**
+
+```json
+{
+  "$config": {
+    "provider": "aws",
+    "profile": "prod-account"
+  },
+  "API_KEY": "/myapp/prod/api-key",
+  "DB_PASSWORD": "/myapp/prod/db-password"
+}
+```
+
+**Azure Key Vault:**
+
+```json
+{
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "API_KEY": "myapp-prod-api-key",
+  "DB_PASSWORD": "myapp-prod-db-password"
+}
+```
+
+> **Azure naming:** Key Vault secret names only allow alphanumeric characters and hyphens.
+> Envilder automatically normalizes names — slashes and underscores become hyphens
+> (e.g., `/myapp/db/password` → `myapp-db-password`).
+
+### `$config` Options
+
+| Key | Type | Default | Description |
+| --- | --- | --- | --- |
+| `provider` | `"aws"` \| `"azure"` | `"aws"` | Cloud provider to use |
+| `vaultUrl` | `string` | — | Azure Key Vault URL (required when `provider` is `"azure"`) |
+| `profile` | `string` | — | AWS CLI profile for multi-account setups (AWS only) |
+
+### Configuration Priority
+
+CLI flags and GitHub Action inputs always override `$config` values:
+
+```txt
+CLI flags / GHA inputs  >  $config in map file  >  defaults (AWS)
+```
+
+This means you can set a default provider in `$config` and override it per invocation:
+
+```bash
+# Uses $config from the map file
+envilder --map=param-map.json --envfile=.env
+
+# Overrides provider and vault URL from the map file
+envilder --provider=azure --vault-url=https://other-vault.vault.azure.net --map=param-map.json --envfile=.env
+```
+
+---
+
+## �🛠️ How it works
 
 ```mermaid
 graph LR

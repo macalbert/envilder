@@ -27,6 +27,8 @@ graph LR
 **Example:**
 If your `param-map.json` file contains:
 
+> 📖 See [Mapping File Format](../README.md#️-mapping-file-format) for the full reference on `$config` and provider options.
+
 ```json
 {
   "API_KEY": "/myapp/api/key",

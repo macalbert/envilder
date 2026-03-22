@@ -21,12 +21,33 @@ envilder --push --envfile=.env.prod --map=param-map.json --profile=prod-account
 
 ## Mapping File Example (`param-map.json`)
 
+> 📖 See [Mapping File Format](../README.md#️-mapping-file-format) for the full reference on `$config` and provider options.
+
+### AWS SSM (default)
+
 ```json
 {
   "API_KEY": "/myapp/api/key",
   "DB_PASSWORD": "/myapp/db/password"
 }
 ```
+
+### Azure Key Vault (via `$config`)
+
+Add `$config` to your map file to target Azure Key Vault:
+
+```json
+{
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "API_KEY": "myapp-prod-api-key",
+  "DB_PASSWORD": "myapp-prod-db-password"
+}
+```
+
+> CLI flags (`--provider`, `--vault-url`, `--profile`) override `$config` values in the map file.
 
 ## .env File Example
 
@@ -147,6 +168,18 @@ With AWS profile:
 
 ```bash
 envilder --push --envfile=.env.prod --map=param-map.json --profile=prod-account
+```
+
+**Azure Key Vault (via `$config` in map file):**
+
+```bash
+envilder --push --envfile=.env --map=azure-param-map.json
+```
+
+**Azure Key Vault (via CLI flags):**
+
+```bash
+envilder --push --provider=azure --vault-url=https://my-vault.vault.azure.net --envfile=.env --map=param-map.json
 ```
 
 **Single variable push:**
