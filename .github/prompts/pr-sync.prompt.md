@@ -48,20 +48,27 @@ If the branch has a single commit, use that commit's message as the title.
 
 ## Commands
 
-**Create new PR:**
+Always write the PR body to a **temporary file** and use `--body-file` instead
+of inline `--body`. PowerShell treats the backtick (`` ` ``) as an escape
+character, which corrupts inline markdown containing code spans.
 
 ```bash
-gh pr create --base main --title "<title>" --body "<body>"
-```
+# 1. Write body to temp file (use create_file tool, NOT echo/Set-Content)
+#    Path: .pr-body.md  (gitignored or deleted after use)
 
-**Update existing PR:**
+# 2. Create new PR:
+gh pr create --base main --title "<title>" --body-file .pr-body.md
 
-```bash
-gh pr edit --title "<title>" --body "<body>"
+# 3. Or update existing PR:
+gh pr edit --title "<title>" --body-file .pr-body.md
+
+# 4. Clean up temp file:
+Remove-Item .pr-body.md
 ```
 
 ## Constraints
 
 - Never force-push or amend published commits
 - Always target `main` unless user specifies otherwise
+- Always use `--body-file` with a temp file — never pass markdown inline via `--body`
 - If `gh` CLI is not available, output the title and body for manual creation
