@@ -1,6 +1,39 @@
 <!-- markdownlint-disable MD024 -->
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+* **Azure Key Vault support** — Use `--provider=azure` (CLI) or `provider: azure` (GitHub Action) to pull/push secrets
+from Azure Key Vault ([#90](https://github.com/macalbert/envilder/pull/90))
+* New infrastructure adapter: `AzureKeyVaultSecretProvider` implementing `ISecretProvider`
+* New CLI option `--provider <name>` to select cloud provider (`aws` or `azure`, default: `aws`)
+* New GitHub Action input `provider` for selecting the cloud provider
+* Azure authentication via `DefaultAzureCredential` (supports Azure CLI, managed identity, etc.)
+* Automatic secret name normalization for Azure Key Vault naming constraints
+
+### Changed
+
+* Extracted shared `ContainerConfiguration` module (`src/apps/shared/`) for DI setup reused by CLI and GitHub Action
+* Both `Startup.ts` files (CLI and GHA) now delegate to shared `configureInfrastructureServices()` and `configureApplicationServices()`
+* Updated CLI description to include Azure Key Vault examples
+* Updated `action.yml` description and inputs to reflect multi-provider support
+
+### Dependencies
+
+* Added `@azure/keyvault-secrets`
+* Added `@azure/identity`
+* Added `@azure/core-rest-pipeline`
+
+### Documentation
+
+* Updated all documentation files to reflect Azure Key Vault support
+* Updated architecture diagrams to include `AzureKeyVaultSecretProvider`
+* Updated ROADMAP to mark Azure Key Vault as implemented
+
+---
+
 ## [0.7.6] - 2026-01-16
 
 ### Fixed

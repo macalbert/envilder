@@ -156,7 +156,7 @@ describe('AwsSsmSecretProvider (integration with LocalStack)', () => {
         Type: 'SecureString',
       }),
     );
-  }, 60000);
+  }, 60_000);
 
   afterAll(async () => {
     await container.stop();

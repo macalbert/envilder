@@ -3,16 +3,24 @@
 ## Overview
 
 The Envilder GitHub Action allows you to seamlessly pull secrets from AWS Systems Manager (SSM)
-Parameter Store into `.env` files within your GitHub Actions workflows. This eliminates the need
-to manually manage environment variables in CI/CD pipelines and ensures your applications always
-have the latest configuration from your centralized secret store.
+Parameter Store or Azure Key Vault into `.env` files within your GitHub Actions workflows. This
+eliminates the need to manually manage environment variables in CI/CD pipelines and ensures your
+applications always have the latest configuration from your centralized secret store.
 
 ## Prerequisites
 
 Before using this action, ensure you have:
 
+### For AWS SSM (default)
+
 1. **AWS Credentials** - Configured using `aws-actions/configure-aws-credentials`
 2. **IAM Permissions** - Your AWS role must have `ssm:GetParameter` permission
+
+### For Azure Key Vault
+
+1. **Azure Credentials** - Configured using `azure/login`
+2. **Key Vault Access** - Your identity must have `Get` secret permission
+3. **`AZURE_KEY_VAULT_URL`** - Set as an environment variable (e.g. `https://my-vault.vault.azure.net`)
 
 > **Note:** If you're using the published action from GitHub Marketplace (`macalbert/envilder/github-action@v1`),
 > no build step is required. The action is pre-built and ready to use.
@@ -146,9 +154,12 @@ jobs:
 ## Inputs
 
 | Input | Description | Required | Default |
-|-------|-------------|----------|---------||
-| `map-file` | Path to the JSON file mapping environment variables to SSM parameter paths | ✅ Yes | - |
+|-------|-------------|----------|---------|
+| `map-file` | Path to the JSON file mapping environment variables to secret paths | ✅ Yes | - |
 | `env-file` | Path to the `.env` file to generate | ✅ Yes | - |
+| `provider` | Cloud provider to use: `aws` or `azure` | ❌ No | `aws` |
+
+> **Azure:** When using `provider: azure`, set the `AZURE_KEY_VAULT_URL` environment variable.
 
 ## Outputs
 

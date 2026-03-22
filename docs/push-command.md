@@ -2,7 +2,8 @@
 
 ## Overview
 
-The push command uploads environment variables from a local `.env` file to AWS SSM Parameter Store using a mapping file.
+The push command uploads environment variables from a local `.env` file to your cloud provider (AWS SSM Parameter Store
+or Azure Key Vault) using a mapping file.
 
 ![Push Mode Demo](https://github.com/user-attachments/assets/489b1270-9178-4c27-b92d-78a1ac7dc1cb)
 
@@ -36,24 +37,26 @@ DB_PASSWORD=secret456
 
 ## What Happens
 
-- Each variable found in both `.env` and mapping file is pushed to the corresponding SSM path.
+- Each variable found in both `.env` and mapping file is pushed to the corresponding secret path.
 - No files are modified locally.
-- Use the `--profile` flag for different AWS accounts.
+- Use `--provider=azure` to push to Azure Key Vault instead of AWS SSM.
+- Use the `--profile` flag for different AWS accounts (AWS only).
+- For Azure, set the `AZURE_KEY_VAULT_URL` environment variable.
 
 ## Push Mode
 
-Sync your local `.env` variables to AWS SSM using a mapping file and mapping JSON.
+Sync your local `.env` variables to your cloud provider using a mapping file and mapping JSON.
 
 ### How File-Based Push Works
 
 ```mermaid
 graph LR
   A[.env File] --> |Variables & Values| B[Envilder]:::core
-  C[Mapping File] --> |SSM Paths| B
-  D[AWS Profile]:::aws --> B
-  B --> E[AWS SSM Parameter Store]:::aws
+  C[Mapping File] --> |Secret Paths| B
+  D[Cloud Credentials]:::cloud --> B
+  B --> E[AWS SSM / Azure Key Vault]:::cloud
 
-  classDef aws fill:#ffcc66,color:#000000,stroke:#333,stroke-width:1.5px;
+  classDef cloud fill:#ffcc66,color:#000000,stroke:#333,stroke-width:1.5px;
   classDef core fill:#1f3b57,color:#fff,stroke:#ccc,stroke-width:2px;
 ```
 
@@ -87,15 +90,15 @@ Will push:
 
 ### Single Variable Push
 
-Push a single environment variable directly to AWS SSM Parameter Store without using any files.
+Push a single environment variable directly to your cloud provider without using any files.
 
 ```mermaid
 graph LR
   A[Command Line Arguments] --> B[Envilder]:::core
-  C[AWS Profile]:::aws --> B
-  B --> D[AWS SSM Parameter Store]:::aws
+  C[Cloud Credentials]:::cloud --> B
+  B --> D[AWS SSM / Azure Key Vault]:::cloud
 
-  classDef aws fill:#ffcc66,color:#000000,stroke:#333,stroke-width:1.5px;
+  classDef cloud fill:#ffcc66,color:#000000,stroke:#333,stroke-width:1.5px;
   classDef core fill:#1f3b57,color:#fff,stroke:#ccc,stroke-width:2px;  
 ```
 
@@ -111,22 +114,24 @@ Will push:
 
 ### Push Mode Options
 
-| Option       | Description                        |
-|------------- | ---------------------------------- |
-| `--push`     | Required: Enables push mode        |
-| `--profile`  | Optional: AWS CLI profile to use   |
-| `--envfile`  | Required: Path to your local .env file             |
-| `--map`      | Required: Path to your parameter mapping JSON file |
+| Option       | Description                                                |
+|------------- | ---------------------------------------------------------- |
+| `--push`     | Required: Enables push mode                                |
+| `--provider` | Optional: Cloud provider `aws` (default) or `azure`        |
+| `--profile`  | Optional: AWS CLI profile to use (AWS only)                |
+| `--envfile`  | Required: Path to your local .env file                     |
+| `--map`      | Required: Path to your parameter mapping JSON file         |
 
 ### Push Single Mode Options
 
-| Option       | Description                        |
-|------------- | ---------------------------------- |
-| `--push`     | Required: Enables push mode        |
-| `--profile`  | Optional: AWS CLI profile to use   |
-| `--key`      | Required: Environment variable name         |
-| `--value`    | Required: Value to store in AWS SSM         |
-| `--ssm-path` | Required: Full SSM parameter path           |
+| Option       | Description                                                |
+|------------- | ---------------------------------------------------------- |
+| `--push`     | Required: Enables push mode                                |
+| `--provider` | Optional: Cloud provider `aws` (default) or `azure`        |
+| `--profile`  | Optional: AWS CLI profile to use (AWS only)                |
+| `--key`      | Required: Environment variable name                        |
+| `--value`    | Required: Value to store in your cloud provider            |
+| `--ssm-path` | Required: Full secret path in your cloud provider          |
 
 ### Push Mode Examples
 

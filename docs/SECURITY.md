@@ -54,9 +54,25 @@ When using Envilder, follow these security guidelines:
 - ❌ Store AWS access keys in code or environment variables
 - ❌ Share AWS credentials via Slack, email, or chat
 
+### Azure Credentials
+
+**DO**:
+
+- ✅ Use workload identity federation (OIDC) for GitHub Actions ([setup guide](https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation-create-trust-github))
+- ✅ Use managed identities in Azure-hosted environments
+- ✅ Scope Key Vault access to specific secrets and operations
+- ✅ Set `AZURE_KEY_VAULT_URL` via repository secrets or environment variables—never commit it
+
+**DON'T**:
+
+- ❌ Store Azure client secrets in code
+- ❌ Use overly broad Key Vault access policies
+
 ### IAM Permissions
 
-Envilder requires these AWS permissions:
+Envilder requires these cloud provider permissions:
+
+#### AWS
 
 ```json
 {

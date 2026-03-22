@@ -203,12 +203,7 @@ describe('AzureKeyVaultSecretProvider (integration with Lowkey Vault)', () => {
     });
 
     // Set up initial test secret
-    try {
-      await secretClient.setSecret(SECRET_NAME, SECRET_VALUE);
-    } catch (error) {
-      console.error('Failed to set up test secret:', error);
-      throw error;
-    }
+    await secretClient.setSecret(SECRET_NAME, SECRET_VALUE);
   }, 120000);
 
   afterAll(async () => {
