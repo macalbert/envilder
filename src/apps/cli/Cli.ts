@@ -6,7 +6,9 @@ import type { Container } from 'inversify';
 import { DispatchActionCommand } from '../../envilder/application/dispatch/DispatchActionCommand.js';
 import type { DispatchActionCommandHandler } from '../../envilder/application/dispatch/DispatchActionCommandHandler.js';
 import type { CliOptions } from '../../envilder/domain/CliOptions.js';
+import type { MapFileConfig } from '../../envilder/domain/MapFileConfig.js';
 import { PackageVersionReader } from '../../envilder/infrastructure/package/PackageVersionReader.js';
+import { readMapFileConfig } from '../../envilder/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../envilder/types.js';
 import { Startup } from './Startup.js';
 
@@ -52,6 +54,10 @@ export async function main() {
       '--provider <name>',
       'Cloud provider to use: aws or azure (default: aws)',
     )
+    .option(
+      '--vault-url <url>',
+      'Azure Key Vault URL (overrides $config.vaultUrl in map file)',
+    )
     .option('--push', 'Push local .env file back to cloud provider')
     .option(
       '--key <name>',
@@ -66,10 +72,25 @@ export async function main() {
       'Secret path in your cloud provider for the single variable (only with --push)',
     )
     .action(
-      async ({ provider, ...options }: CliOptions & { provider?: string }) => {
+      async ({
+        provider,
+        vaultUrl,
+        ...options
+      }: CliOptions & { provider?: string; vaultUrl?: string }) => {
+        const fileConfig = options.map
+          ? await readMapFileConfig(options.map)
+          : {};
+
+        const config: MapFileConfig = {
+          ...fileConfig,
+          ...(provider && { provider }),
+          ...(vaultUrl && { vaultUrl }),
+          ...(options.profile && { profile: options.profile }),
+        };
+
         serviceProvider = Startup.build()
           .configureServices()
-          .configureInfrastructure(options.profile, provider)
+          .configureInfrastructure(config)
           .create();
 
         await executeCommand(options);

@@ -14,9 +14,12 @@ inputs:
     description: "Path to the .env file to generate"
     required: true
   provider:
-    description: "Cloud provider to use: aws or azure (default: aws)"
+    description: "Cloud provider to use: aws or azure (default: aws). Can also be set via $config.provider in the map file."
     required: false
     default: "aws"
+  vault-url:
+    description: "Azure Key Vault URL (overrides $config.vaultUrl in map file)"
+    required: false
 
 outputs:
   env-file-path:
@@ -33,5 +36,6 @@ runs:
         INPUT_MAP_FILE: ${{ inputs.map-file }}
         INPUT_ENV_FILE: ${{ inputs.env-file }}
         INPUT_PROVIDER: ${{ inputs.provider }}
+        INPUT_VAULT_URL: ${{ inputs.vault-url }}
       run: |
         node "${{ github.action_path }}/dist/index.js"

@@ -38,13 +38,11 @@ describe('Startup', () => {
   });
 
   it('Should_ResolveAllServices_When_AzureProviderConfigured', () => {
-    // Arrange
-    process.env.AZURE_KEY_VAULT_URL = 'https://test-vault.vault.azure.net';
-
-    // Act
-    const sut = startup
-      .configureServices()
-      .configureInfrastructure(undefined, 'azure');
+    // Arrange / Act
+    const sut = startup.configureServices().configureInfrastructure({
+      provider: 'azure',
+      vaultUrl: 'https://test-vault.vault.azure.net',
+    });
     const container = sut.create();
     const secretProvider = container.get<ISecretProvider>(
       TYPES.ISecretProvider,
@@ -52,37 +50,28 @@ describe('Startup', () => {
 
     // Assert
     expect(secretProvider).toBeInstanceOf(AzureKeyVaultSecretProvider);
-
-    // Cleanup
-    delete process.env.AZURE_KEY_VAULT_URL;
   });
 
   it('Should_ThrowError_When_AzureProviderSelectedButVaultUrlMissing', () => {
-    // Arrange
-    delete process.env.AZURE_KEY_VAULT_URL;
-
-    // Act
+    // Arrange / Act
     const action = () =>
-      startup.configureServices().configureInfrastructure(undefined, 'azure');
+      startup
+        .configureServices()
+        .configureInfrastructure({ provider: 'azure' });
 
     // Assert
-    expect(action).toThrow(
-      'AZURE_KEY_VAULT_URL environment variable is required',
-    );
+    expect(action).toThrow('vaultUrl is required when using Azure provider');
   });
 
   it('Should_ThrowError_When_AzureVaultUrlIsNotHttps', () => {
-    // Arrange
-    process.env.AZURE_KEY_VAULT_URL = 'http://test-vault.vault.azure.net';
-
-    // Act
+    // Arrange / Act
     const action = () =>
-      startup.configureServices().configureInfrastructure(undefined, 'azure');
+      startup.configureServices().configureInfrastructure({
+        provider: 'azure',
+        vaultUrl: 'http://test-vault.vault.azure.net',
+      });
 
     // Assert
-    expect(action).toThrow('AZURE_KEY_VAULT_URL must use https:// protocol');
-
-    // Cleanup
-    delete process.env.AZURE_KEY_VAULT_URL;
+    expect(action).toThrow('vaultUrl must use https:// protocol');
   });
 });

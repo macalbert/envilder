@@ -1,4 +1,5 @@
 import { Container } from 'inversify';
+import type { MapFileConfig } from '../../envilder/domain/MapFileConfig.js';
 import {
   configureApplicationServices,
   configureInfrastructureServices,
@@ -20,8 +21,8 @@ export class Startup {
     return this;
   }
 
-  configureInfrastructure(awsProfile?: string, provider?: string): this {
-    configureInfrastructureServices(this.container, awsProfile, provider);
+  configureInfrastructure(config?: MapFileConfig): this {
+    configureInfrastructureServices(this.container, config);
     return this;
   }
 

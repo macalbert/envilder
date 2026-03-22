@@ -3,7 +3,9 @@ import type { Container } from 'inversify';
 import { DispatchActionCommand } from '../../envilder/application/dispatch/DispatchActionCommand.js';
 import type { DispatchActionCommandHandler } from '../../envilder/application/dispatch/DispatchActionCommandHandler.js';
 import type { CliOptions } from '../../envilder/domain/CliOptions.js';
+import type { MapFileConfig } from '../../envilder/domain/MapFileConfig.js';
 import type { ILogger } from '../../envilder/domain/ports/ILogger.js';
+import { readMapFileConfig } from '../../envilder/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../envilder/types.js';
 import { Startup } from './Startup.js';
 
@@ -11,10 +13,15 @@ import { Startup } from './Startup.js';
  * Reads GitHub Actions inputs from environment variables.
  * GitHub Actions passes inputs as INPUT_<NAME> environment variables.
  */
-function readInputs(): { options: CliOptions; provider?: string } {
+function readInputs(): {
+  options: CliOptions;
+  provider?: string;
+  vaultUrl?: string;
+} {
   const mapFile = process.env.INPUT_MAP_FILE;
   const envFile = process.env.INPUT_ENV_FILE;
   const provider = process.env.INPUT_PROVIDER;
+  const vaultUrl = process.env.INPUT_VAULT_URL;
 
   return {
     options: {
@@ -24,6 +31,7 @@ function readInputs(): { options: CliOptions; provider?: string } {
       push: false,
     },
     provider: provider || undefined,
+    vaultUrl: vaultUrl || undefined,
   };
 }
 
@@ -40,10 +48,18 @@ async function executeCommand(
 }
 
 export async function main() {
-  const { options, provider } = readInputs();
+  const { options, provider, vaultUrl } = readInputs();
+
+  const fileConfig = options.map ? await readMapFileConfig(options.map) : {};
+
+  const config: MapFileConfig = {
+    ...fileConfig,
+    ...(provider && { provider }),
+    ...(vaultUrl && { vaultUrl }),
+  };
 
   const startup = Startup.build();
-  startup.configureServices().configureInfrastructure(undefined, provider);
+  startup.configureServices().configureInfrastructure(config);
   const serviceProvider = startup.create();
 
   const logger = serviceProvider.get<ILogger>(TYPES.ILogger);

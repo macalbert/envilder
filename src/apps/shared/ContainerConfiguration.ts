@@ -12,6 +12,7 @@ import {
   DependencyMissingError,
   InvalidArgumentError,
 } from '../../envilder/domain/errors/DomainErrors.js';
+import type { MapFileConfig } from '../../envilder/domain/MapFileConfig.js';
 import type { ILogger } from '../../envilder/domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../envilder/domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../envilder/domain/ports/IVariableStore.js';
@@ -26,19 +27,16 @@ function validateAzureVaultUrl(vaultUrl: string): void {
   try {
     url = new URL(vaultUrl);
   } catch {
-    throw new InvalidArgumentError('AZURE_KEY_VAULT_URL must be a valid URL');
+    throw new InvalidArgumentError('vaultUrl must be a valid URL');
   }
   if (url.protocol !== 'https:') {
-    throw new InvalidArgumentError(
-      'AZURE_KEY_VAULT_URL must use https:// protocol',
-    );
+    throw new InvalidArgumentError('vaultUrl must use https:// protocol');
   }
 }
 
 export function configureInfrastructureServices(
   container: Container,
-  awsProfile?: string,
-  provider?: string,
+  config: MapFileConfig = {},
 ): void {
   container.bind<ILogger>(TYPES.ILogger).to(ConsoleLogger).inSingletonScope();
 
@@ -47,15 +45,15 @@ export function configureInfrastructureServices(
     .to(FileVariableStore)
     .inSingletonScope();
 
-  const selectedProvider = provider?.toLowerCase() || 'aws';
+  const selectedProvider = config.provider?.toLowerCase() || 'aws';
 
   let secretProvider: ISecretProvider;
 
   if (selectedProvider === 'azure') {
-    const vaultUrl = process.env.AZURE_KEY_VAULT_URL;
+    const { vaultUrl } = config;
     if (!vaultUrl) {
       throw new DependencyMissingError(
-        'AZURE_KEY_VAULT_URL environment variable is required when using Azure provider',
+        'vaultUrl is required when using Azure provider. Set it in $config.vaultUrl in your map file or via --vault-url flag.',
       );
     }
     validateAzureVaultUrl(vaultUrl);
@@ -63,13 +61,13 @@ export function configureInfrastructureServices(
     const client = new SecretClient(vaultUrl, credential);
     secretProvider = new AzureKeyVaultSecretProvider(client);
   } else if (selectedProvider === 'aws') {
-    const ssm = awsProfile
-      ? new SSM({ credentials: fromIni({ profile: awsProfile }) })
+    const ssm = config.profile
+      ? new SSM({ credentials: fromIni({ profile: config.profile }) })
       : new SSM();
     secretProvider = new AwsSsmSecretProvider(ssm);
   } else {
     throw new InvalidArgumentError(
-      `Unsupported provider: ${provider}. Supported providers: aws, azure`,
+      `Unsupported provider: ${config.provider}. Supported providers: aws, azure`,
     );
   }
 

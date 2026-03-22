@@ -4,6 +4,20 @@ import { Startup } from '../../../src/apps/gha/Startup';
 import { DispatchActionCommand } from '../../../src/envilder/application/dispatch/DispatchActionCommand';
 import { DispatchActionCommandHandler } from '../../../src/envilder/application/dispatch/DispatchActionCommandHandler';
 import type { CliOptions } from '../../../src/envilder/domain/CliOptions';
+import * as FileVariableStore from '../../../src/envilder/infrastructure/variableStore/FileVariableStore';
+
+vi.mock(
+  '../../../src/envilder/infrastructure/variableStore/FileVariableStore',
+  async () => {
+    const actual = await vi.importActual(
+      '../../../src/envilder/infrastructure/variableStore/FileVariableStore',
+    );
+    return {
+      ...(actual as object),
+      readMapFileConfig: vi.fn().mockResolvedValue({}),
+    };
+  },
+);
 
 function patchWithMocks() {
   const mockCommandHandler = {
@@ -118,7 +132,7 @@ describe('GitHubAction', () => {
     process.env.INPUT_MAP_FILE = 'test-map.json';
     process.env.INPUT_ENV_FILE = 'test.env';
     process.env.INPUT_PROVIDER = 'azure';
-    process.env.AZURE_KEY_VAULT_URL = 'https://my-vault.vault.azure.net';
+    process.env.INPUT_VAULT_URL = 'https://my-vault.vault.azure.net';
 
     const configureSpy = vi.spyOn(Startup.prototype, 'configureInfrastructure');
 
@@ -126,14 +140,17 @@ describe('GitHubAction', () => {
     await main();
 
     // Assert
-    expect(configureSpy).toHaveBeenCalledWith(undefined, 'azure');
+    expect(configureSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ provider: 'azure' }),
+    );
   });
 
-  it('Should_DefaultToUndefinedProvider_When_ProviderInputIsNotSet', async () => {
+  it('Should_DefaultToEmptyConfig_When_ProviderInputIsNotSet', async () => {
     // Arrange
     process.env.INPUT_MAP_FILE = 'test-map.json';
     process.env.INPUT_ENV_FILE = 'test.env';
     delete process.env.INPUT_PROVIDER;
+    delete process.env.INPUT_VAULT_URL;
 
     const configureSpy = vi.spyOn(Startup.prototype, 'configureInfrastructure');
 
@@ -141,22 +158,50 @@ describe('GitHubAction', () => {
     await main();
 
     // Assert
-    expect(configureSpy).toHaveBeenCalledWith(undefined, undefined);
+    expect(configureSpy).toHaveBeenCalledWith({});
   });
 
-  it('Should_ThrowError_When_AzureProviderSelectedButVaultUrlMissing', async () => {
+  it('Should_MergeVaultUrlFromInput_When_VaultUrlInputIsSet', async () => {
     // Arrange
     process.env.INPUT_MAP_FILE = 'test-map.json';
     process.env.INPUT_ENV_FILE = 'test.env';
     process.env.INPUT_PROVIDER = 'azure';
-    delete process.env.AZURE_KEY_VAULT_URL;
+    process.env.INPUT_VAULT_URL = 'https://my-vault.vault.azure.net';
+
+    const configureSpy = vi.spyOn(Startup.prototype, 'configureInfrastructure');
 
     // Act
-    const action = () => main();
+    await main();
 
     // Assert
-    await expect(action()).rejects.toThrow(
-      'AZURE_KEY_VAULT_URL environment variable is required',
+    expect(configureSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        provider: 'azure',
+        vaultUrl: 'https://my-vault.vault.azure.net',
+      }),
+    );
+  });
+
+  it('Should_MergeFileConfigWithInputOverrides_When_BothProvided', async () => {
+    // Arrange
+    process.env.INPUT_MAP_FILE = 'test-map.json';
+    process.env.INPUT_ENV_FILE = 'test.env';
+    process.env.INPUT_PROVIDER = 'aws';
+    delete process.env.INPUT_VAULT_URL;
+
+    vi.mocked(FileVariableStore.readMapFileConfig).mockResolvedValue({
+      provider: 'azure',
+      vaultUrl: 'https://file-vault.vault.azure.net',
+    });
+
+    const configureSpy = vi.spyOn(Startup.prototype, 'configureInfrastructure');
+
+    // Act
+    await main();
+
+    // Assert
+    expect(configureSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ provider: 'aws' }),
     );
   });
 });

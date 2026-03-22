@@ -1,10 +1,11 @@
 import { Container } from 'inversify';
+import type { MapFileConfig } from '../../envilder/domain/MapFileConfig.js';
 export declare class Startup {
     private readonly container;
     constructor();
     static build(): Startup;
     configureServices(): this;
-    configureInfrastructure(awsProfile?: string, provider?: string): this;
+    configureInfrastructure(config?: MapFileConfig): this;
     create(): Container;
     getServiceProvider(): Container;
 }

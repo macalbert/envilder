@@ -5,6 +5,19 @@ import { DispatchActionCommand } from '../../../src/envilder/application/dispatc
 import { DispatchActionCommandHandler } from '../../../src/envilder/application/dispatch/DispatchActionCommandHandler';
 import { OperationMode } from '../../../src/envilder/domain/OperationMode';
 
+vi.mock(
+  '../../../src/envilder/infrastructure/variableStore/FileVariableStore',
+  async () => {
+    const actual = await vi.importActual(
+      '../../../src/envilder/infrastructure/variableStore/FileVariableStore',
+    );
+    return {
+      ...(actual as object),
+      readMapFileConfig: vi.fn().mockResolvedValue({}),
+    };
+  },
+);
+
 function patchWithMocks() {
   const mockCommandHandler = {
     handleCommand: vi.fn().mockResolvedValue(undefined),
