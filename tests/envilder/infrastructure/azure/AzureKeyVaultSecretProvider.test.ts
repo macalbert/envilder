@@ -157,13 +157,40 @@ describe('AzureKeyVaultSecretProvider (integration with Lowkey Vault)', () => {
   let vaultUrl: string;
   let secretClient: SecretClient;
 
-  let originalTlsRejectUnauthorized: string | undefined;
+  /**
+   * Fetches the TLS certificate from Lowkey Vault so we can trust it
+   * explicitly via tlsOptions.ca instead of disabling TLS globally.
+   */
+  async function fetchServerCertPem(
+    host: string,
+    port: number,
+  ): Promise<string> {
+    const tls = await import('node:tls');
+    return new Promise((resolve, reject) => {
+      const socket = tls.connect(
+        {
+          host,
+          port,
+          // Initial connection to container we just started — safe to
+          // skip validation once in order to pin the certificate.
+          rejectUnauthorized: false, // CodeQL [js/disabling-certificate-validation] Suppressed: one-shot cert fetch from a local test container
+        },
+        () => {
+          const cert = socket.getPeerCertificate();
+          const pem = [
+            '-----BEGIN CERTIFICATE-----',
+            cert.raw.toString('base64').replace(/(.{64})/g, '$1\n'),
+            '-----END CERTIFICATE-----',
+          ].join('\n');
+          socket.end();
+          resolve(pem);
+        },
+      );
+      socket.on('error', reject);
+    });
+  }
 
   beforeAll(async () => {
-    // Disable TLS verification for self-signed Lowkey Vault cert (test-only)
-    originalTlsRejectUnauthorized = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
     // Start Lowkey Vault container (exposes HTTPS 8443 + HTTP 8080 for token endpoint)
     container = await new GenericContainer(LOWKEY_VAULT_IMAGE)
       .withExposedPorts(LOWKEY_VAULT_PORT, 8080)
@@ -177,14 +204,18 @@ describe('AzureKeyVaultSecretProvider (integration with Lowkey Vault)', () => {
     const tokenPort = container.getMappedPort(8080);
     vaultUrl = `https://${host}:${port}`;
 
+    // Fetch the self-signed cert and trust it explicitly (cert pinning)
+    const caCert = await fetchServerCertPem(host, port);
+
     // Point DefaultAzureCredential to Lowkey Vault's built-in token endpoint
     process.env.AZURE_POD_IDENTITY_AUTHORITY_HOST = `http://${host}:${tokenPort}`;
 
-    // Create SecretClient with HTTPS endpoint
+    // Create SecretClient trusting only this container's certificate
     const { SecretClient } = await import('@azure/keyvault-secrets');
 
     secretClient = new SecretClient(vaultUrl, new DefaultAzureCredential(), {
       disableChallengeResourceVerification: true,
+      tlsOptions: { ca: caCert },
     });
 
     // Set up initial test secret
@@ -199,12 +230,6 @@ describe('AzureKeyVaultSecretProvider (integration with Lowkey Vault)', () => {
   afterAll(async () => {
     if (container) {
       await container.stop();
-    }
-    // Restore TLS verification
-    if (originalTlsRejectUnauthorized === undefined) {
-      delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-    } else {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalTlsRejectUnauthorized;
     }
   });
 
