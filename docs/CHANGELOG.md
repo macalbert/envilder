@@ -1,6 +1,48 @@
 <!-- markdownlint-disable MD024 -->
 # Changelog
 
+## [0.8.0] - 2026-03-22
+
+### Added
+
+* **`$config` section in map files** — Map files now support an optional `$config` key to declare provider and connection
+details inline (e.g., `"provider": "azure"`, `"vaultUrl": "https://..."`, `"profile": "dev-account"`)
+* New CLI flag `--vault-url <url>` — Azure Key Vault URL, overrides `$config.vaultUrl` in the map file
+* New GitHub Action input `vault-url` — Azure Key Vault URL, overrides `$config.vaultUrl` in the map file
+* Precedence chain: CLI flags / GHA inputs > `$config` in map file > defaults
+* Backward compatible: existing map files without `$config` continue to work (defaults to AWS provider)
+* **Azure Key Vault support** — Use `--provider=azure` (CLI) or `provider: azure` (GitHub Action) to pull/push secrets
+from Azure Key Vault ([#90](https://github.com/macalbert/envilder/pull/90))
+* New infrastructure adapter: `AzureKeyVaultSecretProvider` implementing `ISecretProvider`
+* New CLI option `--provider <name>` to select cloud provider (`aws` or `azure`, default: `aws`)
+* New GitHub Action input `provider` for selecting the cloud provider
+* Azure authentication via `DefaultAzureCredential` (supports Azure CLI, managed identity, etc.)
+* Automatic secret name normalization for Azure Key Vault naming constraints
+
+### Changed
+
+* `configureInfrastructureServices()` now receives a single `MapFileConfig` object instead of separate parameters
+* CLI and GHA entry points read `$config` from the map file and merge with CLI flags / GHA inputs
+* Extracted shared `ContainerConfiguration` module (`src/apps/shared/`) for DI setup reused by CLI and GitHub Action
+* Both `Startup.ts` files (CLI and GHA) now delegate to shared `configureInfrastructureServices()` and `configureApplicationServices()`
+* Updated CLI description to include Azure Key Vault examples
+* Updated `action.yml` description and inputs to reflect multi-provider support
+
+### Dependencies
+
+* Added `@azure/keyvault-secrets`
+* Added `@azure/identity`
+* Added `@azure/core-rest-pipeline`
+
+### Documentation
+
+* Updated all documentation to reflect `$config` map-file section and `--vault-url` flag
+* Updated architecture diagrams and DI code snippets
+* Updated GitHub Action examples to use `vault-url` input
+* Updated ROADMAP to mark Azure Key Vault as fully implemented
+
+---
+
 ## [0.7.6] - 2026-01-16
 
 ### Fixed

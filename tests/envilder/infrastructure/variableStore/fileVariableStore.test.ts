@@ -2,7 +2,10 @@ import * as fs from 'node:fs/promises';
 import * as dotenv from 'dotenv';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConsoleLogger } from '../../../../src/envilder/infrastructure/logger/ConsoleLogger';
-import { FileVariableStore } from '../../../../src/envilder/infrastructure/variableStore/FileVariableStore';
+import {
+  FileVariableStore,
+  readMapFileConfig,
+} from '../../../../src/envilder/infrastructure/variableStore/FileVariableStore';
 
 vi.mock('node:fs/promises', async () => {
   const actual = await vi.importActual('node:fs/promises');
@@ -285,6 +288,135 @@ describe('FileVariableStore', () => {
 
       // Assert
       await expect(action()).rejects.toThrow();
+    });
+  });
+
+  describe('getParsedMapping', () => {
+    it('Should_ReturnEmptyConfig_When_MapFileHasNoConfigSection', async () => {
+      // Arrange
+      const mapData = {
+        DB_URL: '/app/db',
+        API_KEY: '/app/key',
+      };
+      mockInMemoryFiles.set(mockMapPath, JSON.stringify(mapData));
+
+      // Act
+      const result = await sut.getParsedMapping(mockMapPath);
+
+      // Assert
+      expect(result.config).toEqual({});
+      expect(result.mappings).toEqual(mapData);
+    });
+
+    it('Should_ExtractConfig_When_MapFileHasConfigSection', async () => {
+      // Arrange
+      const mapData = {
+        $config: {
+          provider: 'azure',
+          vaultUrl: 'https://my-vault.vault.azure.net',
+        },
+        DB_URL: 'myapp-db-url',
+        API_KEY: 'myapp-api-key',
+      };
+      mockInMemoryFiles.set(mockMapPath, JSON.stringify(mapData));
+
+      // Act
+      const result = await sut.getParsedMapping(mockMapPath);
+
+      // Assert
+      expect(result.config).toEqual({
+        provider: 'azure',
+        vaultUrl: 'https://my-vault.vault.azure.net',
+      });
+    });
+
+    it('Should_ExcludeConfigFromMappings_When_ConfigSectionPresent', async () => {
+      // Arrange
+      const mapData = {
+        $config: {
+          provider: 'azure',
+          vaultUrl: 'https://my-vault.vault.azure.net',
+        },
+        DB_URL: 'myapp-db-url',
+        API_KEY: 'myapp-api-key',
+      };
+      mockInMemoryFiles.set(mockMapPath, JSON.stringify(mapData));
+
+      // Act
+      const result = await sut.getParsedMapping(mockMapPath);
+
+      // Assert
+      expect(result.mappings).toEqual({
+        DB_URL: 'myapp-db-url',
+        API_KEY: 'myapp-api-key',
+      });
+      expect(result.mappings).not.toHaveProperty('$config');
+    });
+  });
+
+  describe('getMapping with $config', () => {
+    it('Should_StripConfigFromGetMapping_When_ConfigSectionPresent', async () => {
+      // Arrange
+      const mapData = {
+        $config: { provider: 'azure' },
+        DB_URL: 'myapp-db-url',
+      };
+      mockInMemoryFiles.set(mockMapPath, JSON.stringify(mapData));
+
+      // Act
+      const result = await sut.getMapping(mockMapPath);
+
+      // Assert
+      expect(result).toEqual({ DB_URL: 'myapp-db-url' });
+      expect(result).not.toHaveProperty('$config');
+    });
+  });
+
+  describe('readMapFileConfig', () => {
+    it('Should_ReturnEmptyConfig_When_FileHasNoConfigSection', async () => {
+      // Arrange
+      const mapData = { DB_URL: '/app/db' };
+      mockInMemoryFiles.set(mockMapPath, JSON.stringify(mapData));
+
+      // Act
+      const result = await readMapFileConfig(mockMapPath);
+
+      // Assert
+      expect(result).toEqual({});
+    });
+
+    it('Should_ReturnConfig_When_FileHasConfigSection', async () => {
+      // Arrange
+      const mapData = {
+        $config: {
+          provider: 'azure',
+          vaultUrl: 'https://my-vault.vault.azure.net',
+        },
+        DB_URL: 'myapp-db-url',
+      };
+      mockInMemoryFiles.set(mockMapPath, JSON.stringify(mapData));
+
+      // Act
+      const result = await readMapFileConfig(mockMapPath);
+
+      // Assert
+      expect(result).toEqual({
+        provider: 'azure',
+        vaultUrl: 'https://my-vault.vault.azure.net',
+      });
+    });
+
+    it('Should_ThrowError_When_FileDoesNotExist', async () => {
+      // Arrange
+      const nonExistentPath = './tests/non-existent-config.json';
+
+      // Act
+      const action = () => readMapFileConfig(nonExistentPath);
+
+      // Assert
+      await expect(action()).rejects.toThrow(
+        `Failed to read map file: ${nonExistentPath}`,
+      );
     });
   });
 });

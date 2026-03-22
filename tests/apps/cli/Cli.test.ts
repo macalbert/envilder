@@ -5,6 +5,19 @@ import { DispatchActionCommand } from '../../../src/envilder/application/dispatc
 import { DispatchActionCommandHandler } from '../../../src/envilder/application/dispatch/DispatchActionCommandHandler';
 import { OperationMode } from '../../../src/envilder/domain/OperationMode';
 
+vi.mock(
+  '../../../src/envilder/infrastructure/variableStore/FileVariableStore',
+  async () => {
+    const actual = await vi.importActual(
+      '../../../src/envilder/infrastructure/variableStore/FileVariableStore',
+    );
+    return {
+      ...(actual as object),
+      readMapFileConfig: vi.fn().mockResolvedValue({}),
+    };
+  },
+);
+
 function patchWithMocks() {
   const mockCommandHandler = {
     handleCommand: vi.fn().mockResolvedValue(undefined),
@@ -43,7 +56,6 @@ describe('Cli', () => {
       testProfile,
     ];
 
-    // Mock command creation
     const mockCommand = {
       map: 'map.json',
       envfile: '.env',
@@ -60,6 +72,7 @@ describe('Cli', () => {
     expect(mocks.mockCommandHandler.handleCommand).toHaveBeenCalledWith(
       mockCommand,
     );
+    expect(mocks.mockCommandHandler.handleCommand).toHaveBeenCalledTimes(1);
   });
 
   it('Should_ThrowError_When_ArgumentsAreInvalids', async () => {

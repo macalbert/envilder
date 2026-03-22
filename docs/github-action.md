@@ -3,18 +3,26 @@
 ## Overview
 
 The Envilder GitHub Action allows you to seamlessly pull secrets from AWS Systems Manager (SSM)
-Parameter Store into `.env` files within your GitHub Actions workflows. This eliminates the need
-to manually manage environment variables in CI/CD pipelines and ensures your applications always
-have the latest configuration from your centralized secret store.
+Parameter Store or Azure Key Vault into `.env` files within your GitHub Actions workflows. This
+eliminates the need to manually manage environment variables in CI/CD pipelines and ensures your
+applications always have the latest configuration from your centralized secret store.
 
 ## Prerequisites
 
 Before using this action, ensure you have:
 
+### For AWS SSM (default)
+
 1. **AWS Credentials** - Configured using `aws-actions/configure-aws-credentials`
 2. **IAM Permissions** - Your AWS role must have `ssm:GetParameter` permission
 
-> **Note:** If you're using the published action from GitHub Marketplace (`macalbert/envilder/github-action@v1`),
+### For Azure Key Vault
+
+1. **Azure Credentials** - Configured using `azure/login`
+2. **Key Vault Access** - Your identity must have `Get` secret permission
+3. **Vault URL** - Set via `$config.vaultUrl` in your map file or `vault-url` action input
+
+> **Note:** If you're using the published action from GitHub Marketplace (`macalbert/envilder/github-action@v0.8.0`),
 > no build step is required. The action is pre-built and ready to use.
 
 ### Required IAM Policy
@@ -72,7 +80,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: 🔐 Pull Secrets from AWS SSM
-        uses: macalbert/envilder/github-action@v1
+        uses: macalbert/envilder/github-action@v0.8.0
         with:
           map-file: config/param-map.json
           env-file: .env
@@ -128,7 +136,7 @@ jobs:
           aws-region: us-east-1
 
       - name: 🔐 Pull ${{ inputs.environment }} secrets
-        uses: macalbert/envilder/github-action@v1
+        uses: macalbert/envilder/github-action@v0.8.0
         with:
           map-file: config/${{ inputs.environment }}/param-map.json
           env-file: .env
@@ -146,9 +154,14 @@ jobs:
 ## Inputs
 
 | Input | Description | Required | Default |
-|-------|-------------|----------|---------||
-| `map-file` | Path to the JSON file mapping environment variables to SSM parameter paths | ✅ Yes | - |
+|-------|-------------|----------|---------|
+| `map-file` | Path to the JSON file mapping environment variables to secret paths | ✅ Yes | - |
 | `env-file` | Path to the `.env` file to generate | ✅ Yes | - |
+| `provider` | Cloud provider to use: `aws` or `azure`. Can also be set via `$config.provider` in the map file. | ❌ No |`aws`|
+| `vault-url` | Azure Key Vault URL (overrides `$config.vaultUrl` in map file) | ❌ No | - |
+
+> **Azure:** When using `provider: azure`, provide the vault URL via the `vault-url` input
+> or set `$config.vaultUrl` in your map file. Authentication uses Azure Default Credentials.
 
 ## Outputs
 
@@ -261,7 +274,7 @@ Ensure you've configured AWS credentials before the action:
     role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
     aws-region: ${{ secrets.AWS_REGION }}
 
-- uses: macalbert/envilder/github-action@v1
+- uses: macalbert/envilder/github-action@v0.8.0
   with:
     map-file: param-map.json
     env-file: .env

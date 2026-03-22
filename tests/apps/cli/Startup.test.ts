@@ -102,7 +102,7 @@ describe('Startup', () => {
       // Arrange
       const sut = startup
         .configureServices()
-        .configureInfrastructure('test-profile');
+        .configureInfrastructure({ profile: 'test-profile' });
 
       // Act
       const container = sut.create();
@@ -122,6 +122,69 @@ describe('Startup', () => {
 
       // Assert
       expect(actual).toBeDefined();
+    });
+
+    describe('azure provider', () => {
+      it('Should_ConfigureAzureProvider_When_ProviderIsAzure', () => {
+        // Arrange / Act
+        const sut = startup.configureServices().configureInfrastructure({
+          provider: 'azure',
+          vaultUrl: 'https://test-vault.vault.azure.net',
+        });
+        const container = sut.create();
+        const actual = container.get<ISecretProvider>(TYPES.ISecretProvider);
+
+        // Assert
+        expect(actual).toBeDefined();
+      });
+
+      it('Should_ThrowError_When_AzureSelectedButVaultUrlMissing', () => {
+        // Arrange / Act
+        const action = () =>
+          startup
+            .configureServices()
+            .configureInfrastructure({ provider: 'azure' });
+
+        // Assert
+        expect(action).toThrow(
+          'vaultUrl is required when using Azure provider',
+        );
+      });
+
+      it('Should_ThrowError_When_UnsupportedProviderIsGiven', () => {
+        // Arrange / Act
+        const action = () =>
+          startup
+            .configureServices()
+            .configureInfrastructure({ provider: 'gcp' });
+
+        // Assert
+        expect(action).toThrow('Unsupported provider: gcp');
+      });
+
+      it('Should_ThrowError_When_AzureVaultUrlIsNotHttps', () => {
+        // Arrange / Act
+        const action = () =>
+          startup.configureServices().configureInfrastructure({
+            provider: 'azure',
+            vaultUrl: 'http://test-vault.vault.azure.net',
+          });
+
+        // Assert
+        expect(action).toThrow('vaultUrl must use https:// protocol');
+      });
+
+      it('Should_ThrowError_When_AzureVaultUrlIsInvalidFormat', () => {
+        // Arrange / Act
+        const action = () =>
+          startup.configureServices().configureInfrastructure({
+            provider: 'azure',
+            vaultUrl: 'not-a-valid-url',
+          });
+
+        // Assert
+        expect(action).toThrow('vaultUrl must be a valid URL');
+      });
     });
   });
 

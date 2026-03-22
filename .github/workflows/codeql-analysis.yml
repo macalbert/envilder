@@ -39,6 +39,7 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
+          config-file: .github/codeql-config.yml
 
       - name: 🏗️ Autobuild (Build the Bridge)
         uses: github/codeql-action/autobuild@v4
