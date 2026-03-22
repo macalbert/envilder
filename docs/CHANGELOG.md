@@ -5,7 +5,8 @@
 
 ### Added
 
-* **`$config` section in map files** — Map files now support an optional `$config` key to declare provider and connection details inline (e.g., `"provider": "azure"`, `"vaultUrl": "https://..."`, `"profile": "dev-account"`)
+* **`$config` section in map files** — Map files now support an optional `$config` key to declare provider and connection
+details inline (e.g., `"provider": "azure"`, `"vaultUrl": "https://..."`, `"profile": "dev-account"`)
 * New CLI flag `--vault-url <url>` — Azure Key Vault URL, overrides `$config.vaultUrl` in the map file
 * New GitHub Action input `vault-url` — Azure Key Vault URL, overrides `$config.vaultUrl` in the map file
 * Precedence chain: CLI flags / GHA inputs > `$config` in map file > defaults
@@ -27,10 +28,6 @@ from Azure Key Vault ([#90](https://github.com/macalbert/envilder/pull/90))
 * Updated CLI description to include Azure Key Vault examples
 * Updated `action.yml` description and inputs to reflect multi-provider support
 
-### Removed
-
-* **`AZURE_KEY_VAULT_URL` environment variable** is no longer used for Azure configuration — replaced by `$config.vaultUrl` in the map file or `--vault-url` / `vault-url` input
-
 ### Dependencies
 
 * Added `@azure/keyvault-secrets`
@@ -40,9 +37,8 @@ from Azure Key Vault ([#90](https://github.com/macalbert/envilder/pull/90))
 ### Documentation
 
 * Updated all documentation to reflect `$config` map-file section and `--vault-url` flag
-* Removed all references to `AZURE_KEY_VAULT_URL` environment variable
 * Updated architecture diagrams and DI code snippets
-* Updated GitHub Action examples to use `vault-url` input instead of environment variable
+* Updated GitHub Action examples to use `vault-url` input
 * Updated ROADMAP to mark Azure Key Vault as fully implemented
 
 ---
