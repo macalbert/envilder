@@ -19,7 +19,7 @@ Envilder aims to be the simplest, most reliable way to generate `.env` files fro
 | **Push mode** (`--push`) | ✅ Implemented | - | [Guide](./docs/push-command.md) |
 | **GitHub Action** | ✅ Implemented | - | [Documentation](./github-action/README.md) |
 | **Onboarding documentation** | ✅ Implemented | - | [Setup guide](./docs/requirements-installation.md) |
-| **Plugin system / Multi-backend** | ✅ In progress | 🔥 Next | Azure Key Vault support added ([#90](https://github.com/macalbert/envilder/pull/90)) |
+| **Plugin system / Multi-backend** | ✅ Implemented | - | Azure Key Vault support with `$config` map-file section ([#90](https://github.com/macalbert/envilder/pull/90)) |
 | **Check/sync mode** (`--check`) | ❌ Planned | High | Validate SSM vs `.env`, fail CI if out-of-sync |
 | **Auto-discovery mode** (`--auto`) | ❌ Planned | Medium | Fetch all parameters with a given prefix |
 | **Webhook/Slack notifications** | ❌ Planned | Low | Notify on secret sync for audit/logging |

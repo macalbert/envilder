@@ -39,9 +39,9 @@ DB_PASSWORD=secret456
 
 - Each variable found in both `.env` and mapping file is pushed to the corresponding secret path.
 - No files are modified locally.
-- Use `--provider=azure` to push to Azure Key Vault instead of AWS SSM.
+- Use `--provider=azure` or `$config.provider` in the map file to push to Azure Key Vault instead of AWS SSM.
+- Use the `--vault-url` flag or `$config.vaultUrl` for the Azure Key Vault URL.
 - Use the `--profile` flag for different AWS accounts (AWS only).
-- For Azure, set the `AZURE_KEY_VAULT_URL` environment variable.
 
 ## Push Mode
 
@@ -114,21 +114,23 @@ Will push:
 
 ### Push Mode Options
 
-| Option       | Description                                                |
-|------------- | ---------------------------------------------------------- |
-| `--push`     | Required: Enables push mode                                |
-| `--provider` | Optional: Cloud provider `aws` (default) or `azure`        |
-| `--profile`  | Optional: AWS CLI profile to use (AWS only)                |
-| `--envfile`  | Required: Path to your local .env file                     |
-| `--map`      | Required: Path to your parameter mapping JSON file         |
+| Option        | Description                                                |
+|-------------- | ---------------------------------------------------------- |
+| `--push`      | Required: Enables push mode                                |
+| `--provider`  | Optional: Cloud provider `aws` (default) or `azure`        |
+| `--vault-url` | Optional: Azure Key Vault URL (overrides `$config.vaultUrl`)|
+| `--profile`   | Optional: AWS CLI profile to use (AWS only)                |
+| `--envfile`   | Required: Path to your local .env file                     |
+| `--map`       | Required: Path to your parameter mapping JSON file         |
 
 ### Push Single Mode Options
 
-| Option       | Description                                                |
-|------------- | ---------------------------------------------------------- |
-| `--push`     | Required: Enables push mode                                |
-| `--provider` | Optional: Cloud provider `aws` (default) or `azure`        |
-| `--profile`  | Optional: AWS CLI profile to use (AWS only)                |
+| Option        | Description                                                |
+|-------------- | ---------------------------------------------------------- |
+| `--push`      | Required: Enables push mode                                |
+| `--provider`  | Optional: Cloud provider `aws` (default) or `azure`        |
+| `--vault-url` | Optional: Azure Key Vault URL (overrides `$config.vaultUrl`)|
+| `--profile`   | Optional: AWS CLI profile to use (AWS only)                |
 | `--key`      | Required: Environment variable name                        |
 | `--value`    | Required: Value to store in your cloud provider            |
 | `--ssm-path` | Required: Full secret path in your cloud provider          |

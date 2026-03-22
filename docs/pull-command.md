@@ -58,14 +58,16 @@ SECRET_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
 
 ### Pull Mode Options
 
-| Option       | Description                                              |
-| ------------ | -------------------------------------------------------- |
-| `--map`      | JSON mapping of env var to secret path                   |
-| `--envfile`  | Path to write `.env`                                     |
-| `--provider` | Cloud provider: `aws` (default) or `azure`               |
-| `--profile`  | AWS profile to use (AWS only)                            |
+| Option        | Description                                                        |
+| ------------- | ------------------------------------------------------------------ |
+| `--map`       | JSON mapping of env var to secret path                             |
+| `--envfile`   | Path to write `.env`                                               |
+| `--provider`  | Cloud provider: `aws` (default) or `azure` (overrides `$config`)   |
+| `--vault-url` | Azure Key Vault URL (overrides `$config.vaultUrl` in map file)     |
+| `--profile`   | AWS profile to use (overrides `$config.profile`)                   |
 
-> **Azure:** Set the `AZURE_KEY_VAULT_URL` environment variable when using `--provider=azure`.
+> **Azure:** Provide the vault URL via `$config.vaultUrl` in your map file or use `--vault-url`.
+> CLI flags (`--provider`, `--vault-url`, `--profile`) override `$config` values in the map file.
 
 ### Pull Mode Examples
 
@@ -81,11 +83,31 @@ With profile:
 envilder --map=param-map.json --envfile=.env --profile=dev-account
 ```
 
-**Azure Key Vault:**
+**Azure Key Vault (via `$config` in map file):**
+
+Add `$config` to your map file:
+
+```json
+{
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "API_KEY": "myapp-prod-api-key",
+  "DB_PASSWORD": "myapp-prod-db-password"
+}
+```
+
+Then pull as usual:
 
 ```bash
-export AZURE_KEY_VAULT_URL=https://my-vault.vault.azure.net
-envilder --provider=azure --map=param-map.json --envfile=.env
+envilder --map=param-map.json --envfile=.env
+```
+
+**Azure Key Vault (via CLI flags):**
+
+```bash
+envilder --provider=azure --vault-url=https://my-vault.vault.azure.net --map=param-map.json --envfile=.env
 ```
 
 **Other environment examples:**
@@ -97,15 +119,18 @@ envilder --map=param-map.json --envfile=.env.dev
 envilder --map=param-map.json --envfile=.env.dev --profile=dev-account
 # Production
 envilder --map=param-map.json --envfile=.env.prod --profile=prod-account
-# Azure
-export AZURE_KEY_VAULT_URL=https://prod-vault.vault.azure.net
-envilder --provider=azure --map=param-map.json --envfile=.env.prod
+# Azure (using $config in map file)
+envilder --map=azure-param-map.json --envfile=.env.prod
+# Azure (using CLI flags)
+envilder --provider=azure --vault-url=https://prod-vault.vault.azure.net --map=param-map.json --envfile=.env.prod
 ```
 
 ## Notes
 
 - Only variables defined in the mapping file are pulled.
-- Use the `--provider` flag to switch between AWS and Azure.
-- Use the `--profile` flag to select AWS credentials (AWS only).
-- For Azure, set the `AZURE_KEY_VAULT_URL` environment variable.
+- Use the `--provider` flag or `$config.provider` in the map file to switch between AWS and Azure.
+- Use the `--vault-url` flag or `$config.vaultUrl` in the map file for Azure Key Vault URL.
+- Use the `--profile` flag or `$config.profile` to select AWS credentials.
+- CLI flags override `$config` values: `--provider` > `$config.provider`, `--vault-url` > `$config.vaultUrl`,
+`--profile` > `$config.profile`.
 - No secrets are exposed in code or version control.

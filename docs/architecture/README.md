@@ -251,18 +251,22 @@ sequenceDiagram
 // apps/shared/ContainerConfiguration.ts
 function configureInfrastructureServices(
   container: Container,
-  awsProfile?: string,
-  provider?: string,
+  config: MapFileConfig = {},
 ) {
   container.bind(TYPES.ILogger).to(ConsoleLogger);
   container.bind(TYPES.IVariableStore).to(FileVariableStore);
 
-  // Provider selection: 'aws' (default) or 'azure'
+  // Provider selection via config: 'aws' (default) or 'azure'
+  // config comes from $config in the map file, overridden by CLI flags
+  const provider = config.provider?.toLowerCase() || 'aws';
   if (provider === 'azure') {
-    const client = new SecretClient(vaultUrl, new DefaultAzureCredential());
+    const client = new SecretClient(config.vaultUrl, new DefaultAzureCredential());
     container.bind(TYPES.ISecretProvider)
       .toConstantValue(new AzureKeyVaultSecretProvider(client));
   } else {
+    const ssm = config.profile
+      ? new SSM({ credentials: fromIni({ profile: config.profile }) })
+      : new SSM();
     container.bind(TYPES.ISecretProvider)
       .toConstantValue(new AwsSsmSecretProvider(ssm));
   }
@@ -390,5 +394,5 @@ src/
 
 ---
 
-**Last Updated**: November 2025
+**Last Updated**: March 2026
 **Maintainer**: Marçal Albert ([@macalbert](https://github.com/macalbert))

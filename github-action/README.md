@@ -77,8 +77,7 @@ Pull secrets from AWS SSM Parameter Store or Azure Key Vault into `.env` files i
     map-file: param-map.json
     env-file: .env
     provider: azure
-  env:
-    AZURE_KEY_VAULT_URL: ${{ secrets.AZURE_KEY_VAULT_URL }}
+    vault-url: ${{ secrets.AZURE_KEY_VAULT_URL }}
 ```
 
 ## 🎯 Inputs
@@ -87,13 +86,14 @@ Pull secrets from AWS SSM Parameter Store or Azure Key Vault into `.env` files i
 |-------|----------|---------|-------------|
 | `map-file` | ✅ Yes | - | 🗺️ Path to JSON file mapping environment variables to secret paths |
 | `env-file` | ✅ Yes | - | 📝 Path to `.env` file to generate/update |
-| `provider` | ❌ No | `aws` | ☁️ Cloud provider to use: `aws` or `azure` |
+| `provider` | ❌ No | `aws` | ☁️ `aws` or `azure`. Also settable via `$config.provider` in the map file. |
+| `vault-url` | ❌ No | - | 🔑 Azure Key Vault URL (overrides `$config.vaultUrl` in map file) |
 
 > **Note:** All paths (`map-file`, `env-file`) are relative to the repository root, not to any `working-directory`
 > setting in your job. If you use `working-directory`, adjust the paths accordingly.
 >
-> **Azure:** When using `provider: azure`, you must set the `AZURE_KEY_VAULT_URL` environment variable
-> (e.g. `https://my-vault.vault.azure.net`). Authentication uses Azure Default Credentials.
+> **Azure:** When using `provider: azure`, provide the vault URL via the `vault-url` input
+> or set `$config.vaultUrl` in your map file. Authentication uses Azure Default Credentials.
 
 ## 🏁 Prerequisites
 
@@ -148,13 +148,21 @@ Create a JSON file mapping environment variables to secret paths:
 
 **`param-map.json` (Azure Key Vault):**
 
+Use the optional `$config` section to declare the provider and vault URL:
+
 ```json
 {
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
   "DATABASE_URL": "myapp-prod-database-url",
   "API_KEY": "myapp-prod-api-key",
   "SECRET_TOKEN": "myapp-prod-secret-token"
 }
 ```
+
+Alternatively, pass provider and vault URL via action inputs (`provider`, `vault-url`), which override `$config`.
 
 > **Note:** Azure Key Vault secret names can only contain alphanumeric characters and hyphens.
 > Envilder automatically normalizes names (replacing slashes/underscores with hyphens).

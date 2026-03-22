@@ -61,7 +61,7 @@ When using Envilder, follow these security guidelines:
 - ✅ Use workload identity federation (OIDC) for GitHub Actions ([setup guide](https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation-create-trust-github))
 - ✅ Use managed identities in Azure-hosted environments
 - ✅ Scope Key Vault access to specific secrets and operations
-- ✅ Set `AZURE_KEY_VAULT_URL` via repository secrets or environment variables—never commit it
+- ✅ Set vault URL via `$config.vaultUrl` in your map file or `--vault-url` flag—never hardcode secrets in code
 
 **DON'T**:
 

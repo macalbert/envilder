@@ -20,9 +20,9 @@ Before using this action, ensure you have:
 
 1. **Azure Credentials** - Configured using `azure/login`
 2. **Key Vault Access** - Your identity must have `Get` secret permission
-3. **`AZURE_KEY_VAULT_URL`** - Set as an environment variable (e.g. `https://my-vault.vault.azure.net`)
+3. **Vault URL** - Set via `$config.vaultUrl` in your map file or `vault-url` action input
 
-> **Note:** If you're using the published action from GitHub Marketplace (`macalbert/envilder/github-action@v1`),
+> **Note:** If you're using the published action from GitHub Marketplace (`macalbert/envilder/github-action@v0.8.0`),
 > no build step is required. The action is pre-built and ready to use.
 
 ### Required IAM Policy
@@ -80,7 +80,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: 🔐 Pull Secrets from AWS SSM
-        uses: macalbert/envilder/github-action@v1
+        uses: macalbert/envilder/github-action@v0.8.0
         with:
           map-file: config/param-map.json
           env-file: .env
@@ -136,7 +136,7 @@ jobs:
           aws-region: us-east-1
 
       - name: 🔐 Pull ${{ inputs.environment }} secrets
-        uses: macalbert/envilder/github-action@v1
+        uses: macalbert/envilder/github-action@v0.8.0
         with:
           map-file: config/${{ inputs.environment }}/param-map.json
           env-file: .env
@@ -157,9 +157,11 @@ jobs:
 |-------|-------------|----------|---------|
 | `map-file` | Path to the JSON file mapping environment variables to secret paths | ✅ Yes | - |
 | `env-file` | Path to the `.env` file to generate | ✅ Yes | - |
-| `provider` | Cloud provider to use: `aws` or `azure` | ❌ No | `aws` |
+| `provider` | Cloud provider to use: `aws` or `azure`. Can also be set via `$config.provider` in the map file. | ❌ No |`aws`|
+| `vault-url` | Azure Key Vault URL (overrides `$config.vaultUrl` in map file) | ❌ No | - |
 
-> **Azure:** When using `provider: azure`, set the `AZURE_KEY_VAULT_URL` environment variable.
+> **Azure:** When using `provider: azure`, provide the vault URL via the `vault-url` input
+> or set `$config.vaultUrl` in your map file. Authentication uses Azure Default Credentials.
 
 ## Outputs
 
@@ -272,7 +274,7 @@ Ensure you've configured AWS credentials before the action:
     role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
     aws-region: ${{ secrets.AWS_REGION }}
 
-- uses: macalbert/envilder/github-action@v1
+- uses: macalbert/envilder/github-action@v0.8.0
   with:
     map-file: param-map.json
     env-file: .env

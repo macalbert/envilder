@@ -19,7 +19,7 @@ Before you install Envilder, make sure you have:
 - **Azure CLI**
   - Install: [Azure CLI Installation Guide](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
   - Login: Run `az login` to authenticate.
-- **`AZURE_KEY_VAULT_URL`** environment variable set to your vault URL (e.g. `https://my-vault.vault.azure.net`)
+- **Vault URL** configured via `$config.vaultUrl` in your map file or `--vault-url` CLI flag
 - Authentication uses [Azure Default Credentials](https://learn.microsoft.com/en-us/javascript/api/@azure/identity/defaultazurecredential)
 (Azure CLI, managed identity, environment variables, etc.)
 
@@ -59,13 +59,25 @@ Envilder uses Azure Default Credentials. Log in with the Azure CLI:
 az login
 ```
 
-Set the vault URL environment variable:
+Provide the vault URL via `$config.vaultUrl` in your map file:
 
-```bash
-export AZURE_KEY_VAULT_URL=https://my-vault.vault.azure.net
+```json
+{
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "MY_SECRET": "my-secret-name"
+}
 ```
 
-Then use `--provider=azure` when running Envilder commands.
+Or use the `--vault-url` CLI flag:
+
+```bash
+envilder --provider=azure --vault-url=https://my-vault.vault.azure.net --map=param-map.json --envfile=.env
+```
+
+CLI flags override `$config` values in the map file.
 
 ## 4. Set Up IAM Permissions
 

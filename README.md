@@ -100,7 +100,7 @@ and streamline onboarding and CI/CD workflows.
 
 - Node.js **v20+** (cloud-native compatible)
 - **AWS provider**: AWS CLI installed and configured; IAM user/role with `ssm:GetParameter`, `ssm:PutParameter`
-- **Azure provider**: Azure CLI installed; `AZURE_KEY_VAULT_URL` environment variable set to your vault URL (e.g. `https://my-vault.vault.azure.net`)
+- **Azure provider**: Azure CLI installed; vault URL configured via `$config.vaultUrl` in your map file or `--vault-url` flag
 
 ```bash
 pnpm add -g envilder
@@ -154,8 +154,7 @@ Use Envilder directly in your CI/CD workflows with our official GitHub Action:
     map-file: param-map.json
     env-file: .env
     provider: azure
-  env:
-    AZURE_KEY_VAULT_URL: ${{ secrets.AZURE_KEY_VAULT_URL }}
+    vault-url: ${{ secrets.AZURE_KEY_VAULT_URL }}
 ```
 
 📖 **[View full GitHub Action documentation](./github-action/README.md)**
@@ -198,16 +197,28 @@ After configuring your cloud provider credentials, you can begin managing your s
 
 #### Azure Key Vault
 
-1. **Set your vault URL:**
+1. **Add `$config` to your mapping file:**
 
-   ```bash
-   export AZURE_KEY_VAULT_URL=https://my-vault.vault.azure.net
+   ```json
+   {
+     "$config": {
+       "provider": "azure",
+       "vaultUrl": "https://my-vault.vault.azure.net"
+     },
+     "DB_PASSWORD": "my-app-db-password"
+   }
    ```
 
 2. **Pull secrets from Azure Key Vault:**
 
    ```bash
-   envilder --provider=azure --map=param-map.json --envfile=.env
+   envilder --map=param-map.json --envfile=.env
+   ```
+
+   Or use CLI flags to override:
+
+   ```bash
+   envilder --provider=azure --vault-url=https://my-vault.vault.azure.net --map=param-map.json --envfile=.env
    ```
 
 Your secrets are now managed and versioned from your cloud provider. Add `.env` to your `.gitignore` for security.
@@ -263,8 +274,8 @@ A: Yes! Envilder is designed for automation and works seamlessly in CI/CD workfl
 A: Yes, you can use the `--profile` flag to select different AWS credentials.
 
 **Q: How do I configure Azure Key Vault?**  
-A: Set the `AZURE_KEY_VAULT_URL` environment variable to your vault URL (e.g. `https://my-vault.vault.azure.net`)
-and use `--provider=azure`. Authentication uses Azure Default Credentials (Azure CLI, managed identity, etc.).
+A: Add a `$config` section to your map file with `"provider": "azure"` and `"vaultUrl": "https://my-vault.vault.azure.net"`,
+or use `--provider=azure --vault-url=https://my-vault.vault.azure.net` CLI flags. Authentication uses Azure Default Credentials (Azure CLI, managed identity, etc.).
 
 **Q: What environments does Envilder support?**  
 A: Any environment supported by your cloud provider—dev, test, staging, production, etc.
