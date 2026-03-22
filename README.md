@@ -78,7 +78,8 @@ and streamline onboarding and CI/CD workflows.
 
 ## ⚙️ Features
 
-- 🔒 **Strict access control** — IAM policies (AWS) or RBAC (Azure) define access to secrets across stages (dev, staging, prod)
+- 🔒 **Strict access control** — IAM policies (AWS) or RBAC (Azure) define access to secrets across stages
+(dev, staging, prod)
 - 📊 **Auditable** — All reads/writes are logged in AWS CloudTrail or Azure Monitor
 - 🧩 **Single source of truth** — No more Notion, emails or copy/paste of envs
 - 🔁 **Idempotent sync** — Only what's in your map gets updated. Nothing else is touched
@@ -110,7 +111,7 @@ pnpm add -g envilder
 > - [AWS SSM Parameter Store Overview](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html)
 > - [Setting up AWS CLI credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
 > - [IAM permissions for SSM](https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html)
-
+>
 > 💡 **New to Azure Key Vault?** Azure Key Vault safeguards cryptographic keys and secrets used by cloud apps:
 >
 > - [Azure Key Vault Overview](https://learn.microsoft.com/en-us/azure/key-vault/general/overview)
