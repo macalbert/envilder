@@ -324,11 +324,11 @@ envilder --provider=azure --vault-url=https://other-vault.vault.azure.net --map=
 
 ```mermaid
 graph LR
-    A["Mapping File<br/>(param-map.json)"] --> B[Envilder]:::core
-    C["Environment File<br/> '.env' or --key"] --> B
-    D["Cloud Credentials<br/>(AWS or Azure)"]:::cloud --> B
+    A["Mapping File (param-map.json)"] --> B[Envilder]:::core
+    C["Environment File (.env or --key)"] --> B
+    D["Cloud Credentials (AWS or Azure)"]:::cloud --> B
     E["AWS SSM / Azure Key Vault"]:::cloud --> B
-    B --> F["Pull/Push Secrets 💾"]
+    B --> F["Pull/Push Secrets"]
 
     classDef cloud fill:#ffcc66,color:#000000,stroke:#333,stroke-width:1.5px;
     classDef core fill:#1f3b57,color:#fff,stroke:#ccc,stroke-width:2px;
