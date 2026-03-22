@@ -100,7 +100,8 @@ and streamline onboarding and CI/CD workflows.
 
 - Node.js **v20+** (cloud-native compatible)
 - **AWS provider**: AWS CLI installed and configured; IAM user/role with `ssm:GetParameter`, `ssm:PutParameter`
-- **Azure provider**: Azure CLI installed; vault URL configured via `$config.vaultUrl` in your map file or `--vault-url` flag
+- **Azure provider**: Azure CLI installed; vault URL configured via
+`$config.vaultUrl` in your map file or `--vault-url` flag
 
 ```bash
 pnpm add -g envilder
@@ -275,7 +276,8 @@ A: Yes, you can use the `--profile` flag to select different AWS credentials.
 
 **Q: How do I configure Azure Key Vault?**  
 A: Add a `$config` section to your map file with `"provider": "azure"` and `"vaultUrl": "https://my-vault.vault.azure.net"`,
-or use `--provider=azure --vault-url=https://my-vault.vault.azure.net` CLI flags. Authentication uses Azure Default Credentials (Azure CLI, managed identity, etc.).
+or use `--provider=azure --vault-url=https://my-vault.vault.azure.net` CLI flags. Authentication uses Azure
+Default Credentials (Azure CLI, managed identity, etc.).
 
 **Q: What environments does Envilder support?**  
 A: Any environment supported by your cloud provider—dev, test, staging, production, etc.
