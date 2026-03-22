@@ -1,5 +1,3 @@
-import https from 'node:https';
-import { createDefaultHttpClient } from '@azure/core-rest-pipeline';
 import { DefaultAzureCredential } from '@azure/identity';
 import type { SecretClient } from '@azure/keyvault-secrets';
 import { GenericContainer, type StartedTestContainer } from 'testcontainers';
@@ -163,7 +161,7 @@ describe('AzureKeyVaultSecretProvider (integration with Lowkey Vault)', () => {
     // Start Lowkey Vault container
     container = await new GenericContainer(LOWKEY_VAULT_IMAGE)
       .withExposedPorts(LOWKEY_VAULT_PORT)
-      .withEnvironment('LOWKEY_ARGS', '--server.port=8443')
+      .withEnvironment({ LOWKEY_ARGS: '--server.port=8443' })
       .start();
 
     const host = container.getHost();
@@ -175,22 +173,8 @@ describe('AzureKeyVaultSecretProvider (integration with Lowkey Vault)', () => {
     // In production and tests, use proper certificate validation
     const { SecretClient } = await import('@azure/keyvault-secrets');
 
-    // Configure HTTPS agent to trust Lowkey Vault's certificate without disabling
-    // global TLS validation. If needed, provide a custom CA for the self-signed cert.
-    const lowkeyCa = process.env.LOWKEY_VAULT_CA;
-    const httpsAgent = new https.Agent({
-      rejectUnauthorized: true,
-      ca: lowkeyCa ? lowkeyCa : undefined,
-    });
-
-    const httpClient = createDefaultHttpClient({
-      agent: {
-        https: httpsAgent,
-      },
-    });
-
     secretClient = new SecretClient(vaultUrl, new DefaultAzureCredential(), {
-      httpClient,
+      allowInsecureConnection: true,
     });
 
     // Set up initial test secret

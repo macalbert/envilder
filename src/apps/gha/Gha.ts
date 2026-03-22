@@ -7,8 +7,6 @@ import type { ILogger } from '../../envilder/domain/ports/ILogger.js';
 import { TYPES } from '../../envilder/types.js';
 import { Startup } from './Startup.js';
 
-let serviceProvider: Container;
-
 /**
  * Reads GitHub Actions inputs from environment variables.
  * GitHub Actions passes inputs as INPUT_<NAME> environment variables.
@@ -16,16 +14,21 @@ let serviceProvider: Container;
 function readInputs(): CliOptions {
   const mapFile = process.env.INPUT_MAP_FILE;
   const envFile = process.env.INPUT_ENV_FILE;
+  const provider = process.env.INPUT_PROVIDER;
 
   return {
     map: mapFile,
     envfile: envFile,
     // GitHub Action only supports pull mode
     push: false,
+    provider: provider || undefined,
   };
 }
 
-async function executeCommand(options: CliOptions): Promise<void> {
+async function executeCommand(
+  serviceProvider: Container,
+  options: CliOptions,
+): Promise<void> {
   const commandHandler = serviceProvider.get<DispatchActionCommandHandler>(
     TYPES.DispatchActionCommandHandler,
   );
@@ -35,11 +38,18 @@ async function executeCommand(options: CliOptions): Promise<void> {
 }
 
 export async function main() {
-  const logger = serviceProvider?.get<ILogger>(TYPES.ILogger);
+  const options = readInputs();
+
+  // Initialize the service provider with the selected cloud provider
+  const startup = Startup.build();
+  startup
+    .configureServices()
+    .configureInfrastructure(undefined, options.provider);
+  const serviceProvider = startup.create();
+
+  const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
 
   try {
-    const options = readInputs();
-
     // Validate required inputs
     if (!options.map || !options.envfile) {
       throw new Error(
@@ -47,21 +57,16 @@ export async function main() {
       );
     }
 
-    logger?.info('🔑 Envilder GitHub Action - Starting secret pull...');
-    logger?.info(`📋 Map file: ${options.map}`);
-    logger?.info(`📄 Env file: ${options.envfile}`);
+    logger.info('🔑 Envilder GitHub Action - Starting secret pull...');
+    logger.info(`📋 Map file: ${options.map}`);
+    logger.info(`📄 Env file: ${options.envfile}`);
 
-    await executeCommand(options);
+    await executeCommand(serviceProvider, options);
 
-    logger?.info('✅ Secrets pulled successfully!');
+    logger.info('✅ Secrets pulled successfully!');
   } catch (error) {
-    logger?.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
-    logger?.error(error instanceof Error ? error.message : String(error));
+    logger.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
+    logger.error(error instanceof Error ? error.message : String(error));
     throw error;
   }
 }
-
-// Initialize the service provider
-const startup = Startup.build();
-startup.configureServices().configureInfrastructure();
-serviceProvider = startup.create();

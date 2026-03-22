@@ -111,4 +111,63 @@ describe('GitHubAction', () => {
     // Assert
     expect(capturedOptions?.push).toBe(false);
   });
+
+  it('Should_ReadProviderFromEnvironment_When_ProviderInputIsSet', async () => {
+    // Arrange
+    process.env.INPUT_MAP_FILE = 'test-map.json';
+    process.env.INPUT_ENV_FILE = 'test.env';
+    process.env.INPUT_PROVIDER = 'azure';
+    process.env.AZURE_KEY_VAULT_URL = 'https://my-vault.vault.azure.net';
+
+    let capturedOptions: CliOptions | undefined;
+    vi.spyOn(DispatchActionCommand, 'fromCliOptions').mockImplementation(
+      (options) => {
+        capturedOptions = options;
+        return {} as DispatchActionCommand;
+      },
+    );
+
+    // Act
+    await main();
+
+    // Assert
+    expect(capturedOptions?.provider).toBe('azure');
+  });
+
+  it('Should_DefaultToUndefinedProvider_When_ProviderInputIsNotSet', async () => {
+    // Arrange
+    process.env.INPUT_MAP_FILE = 'test-map.json';
+    process.env.INPUT_ENV_FILE = 'test.env';
+    delete process.env.INPUT_PROVIDER;
+
+    let capturedOptions: CliOptions | undefined;
+    vi.spyOn(DispatchActionCommand, 'fromCliOptions').mockImplementation(
+      (options) => {
+        capturedOptions = options;
+        return {} as DispatchActionCommand;
+      },
+    );
+
+    // Act
+    await main();
+
+    // Assert
+    expect(capturedOptions?.provider).toBeUndefined();
+  });
+
+  it('Should_ThrowError_When_AzureProviderSelectedButVaultUrlMissing', async () => {
+    // Arrange
+    process.env.INPUT_MAP_FILE = 'test-map.json';
+    process.env.INPUT_ENV_FILE = 'test.env';
+    process.env.INPUT_PROVIDER = 'azure';
+    delete process.env.AZURE_KEY_VAULT_URL;
+
+    // Act
+    const action = () => main();
+
+    // Assert
+    await expect(action()).rejects.toThrow(
+      'AZURE_KEY_VAULT_URL environment variable is required',
+    );
+  });
 });

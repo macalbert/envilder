@@ -123,6 +123,51 @@ describe('Startup', () => {
       // Assert
       expect(actual).toBeDefined();
     });
+
+    describe('azure provider', () => {
+      it('Should_ConfigureAzureProvider_When_ProviderIsAzure', () => {
+        // Arrange
+        process.env.AZURE_KEY_VAULT_URL = 'https://test-vault.vault.azure.net';
+
+        // Act
+        const sut = startup
+          .configureServices()
+          .configureInfrastructure(undefined, 'azure');
+        const container = sut.create();
+        const actual = container.get<ISecretProvider>(TYPES.ISecretProvider);
+
+        // Assert
+        expect(actual).toBeDefined();
+
+        // Cleanup
+        delete process.env.AZURE_KEY_VAULT_URL;
+      });
+
+      it('Should_ThrowError_When_AzureSelectedButVaultUrlMissing', () => {
+        // Arrange
+        delete process.env.AZURE_KEY_VAULT_URL;
+
+        // Act
+        const action = () =>
+          startup
+            .configureServices()
+            .configureInfrastructure(undefined, 'azure');
+
+        // Assert
+        expect(action).toThrow(
+          'AZURE_KEY_VAULT_URL environment variable is required',
+        );
+      });
+
+      it('Should_ThrowError_When_UnsupportedProviderIsGiven', () => {
+        // Arrange / Act
+        const action = () =>
+          startup.configureServices().configureInfrastructure(undefined, 'gcp');
+
+        // Assert
+        expect(action).toThrow('Unsupported provider: gcp');
+      });
+    });
   });
 
   describe('integration', () => {

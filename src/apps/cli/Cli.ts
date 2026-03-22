@@ -29,13 +29,15 @@ export async function main() {
   program
     .name('envilder')
     .description(
-      '🌟 A CLI tool to manage environment variables with AWS SSM. What do you want to do today?\n\n' +
+      '🌟 A CLI tool to manage environment variables with AWS SSM or Azure Key Vault. What do you want to do today?\n\n' +
         '✨ Generate a .env file?\n' +
         '  Example: envilder --map=param-map.json --envfile=.env\n\n' +
-        '🔄 Sync your local .env file back to AWS SSM?\n' +
+        '🔄 Sync your local .env file back to your cloud provider?\n' +
         '  Example: envilder --push --map=param-map.json --envfile=.env\n\n' +
         '🎯 Create or update a single secret?\n' +
-        '  Example: envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path\n',
+        '  Example: envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path\n\n' +
+        '☁️  Use Azure Key Vault?\n' +
+        '  Example: envilder --provider=azure --map=param-map.json --envfile=.env\n',
     )
     .version(version)
     .option(
