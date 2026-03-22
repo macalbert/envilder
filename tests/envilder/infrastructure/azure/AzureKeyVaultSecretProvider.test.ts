@@ -13,7 +13,7 @@ import {
 import { AzureKeyVaultSecretProvider } from '../../../../src/envilder/infrastructure/azure/AzureKeyVaultSecretProvider';
 
 // Constants for integration tests
-const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:2.5.8';
+const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.32';
 const LOWKEY_VAULT_PORT = 8443;
 const SECRET_NAME = 'test-secret';
 const SECRET_VALUE = 'super-secret-value';
@@ -157,24 +157,34 @@ describe('AzureKeyVaultSecretProvider (integration with Lowkey Vault)', () => {
   let vaultUrl: string;
   let secretClient: SecretClient;
 
+  let originalTlsRejectUnauthorized: string | undefined;
+
   beforeAll(async () => {
-    // Start Lowkey Vault container
+    // Disable TLS verification for self-signed Lowkey Vault cert (test-only)
+    originalTlsRejectUnauthorized = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+    // Start Lowkey Vault container (exposes HTTPS 8443 + HTTP 8080 for token endpoint)
     container = await new GenericContainer(LOWKEY_VAULT_IMAGE)
-      .withExposedPorts(LOWKEY_VAULT_PORT)
-      .withEnvironment({ LOWKEY_ARGS: '--server.port=8443' })
+      .withExposedPorts(LOWKEY_VAULT_PORT, 8080)
+      .withEnvironment({
+        LOWKEY_ARGS: '--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true',
+      })
       .start();
 
     const host = container.getHost();
     const port = container.getMappedPort(LOWKEY_VAULT_PORT);
+    const tokenPort = container.getMappedPort(8080);
     vaultUrl = `https://${host}:${port}`;
 
-    // Create SecretClient with custom endpoint
-    // Note: Lowkey Vault uses self-signed certificates
-    // In production and tests, use proper certificate validation
+    // Point DefaultAzureCredential to Lowkey Vault's built-in token endpoint
+    process.env.AZURE_POD_IDENTITY_AUTHORITY_HOST = `http://${host}:${tokenPort}`;
+
+    // Create SecretClient with HTTPS endpoint
     const { SecretClient } = await import('@azure/keyvault-secrets');
 
     secretClient = new SecretClient(vaultUrl, new DefaultAzureCredential(), {
-      allowInsecureConnection: true,
+      disableChallengeResourceVerification: true,
     });
 
     // Set up initial test secret
@@ -189,6 +199,12 @@ describe('AzureKeyVaultSecretProvider (integration with Lowkey Vault)', () => {
   afterAll(async () => {
     if (container) {
       await container.stop();
+    }
+    // Restore TLS verification
+    if (originalTlsRejectUnauthorized === undefined) {
+      delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+    } else {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalTlsRejectUnauthorized;
     }
   });
 
