@@ -75,8 +75,8 @@
   ],
   "type": "module",
   "dependencies": {
-    "@aws-sdk/client-ssm": "^3.1002.0",
-    "@aws-sdk/credential-providers": "^3.1002.0",
+    "@aws-sdk/client-ssm": "^3.1014.0",
+    "@aws-sdk/credential-providers": "^3.1014.0",
     "@azure/core-rest-pipeline": "^1.22.2",
     "@azure/identity": "^4.13.0",
     "@azure/keyvault-secrets": "^4.10.0",
@@ -108,7 +108,6 @@
   },
   "pnpm": {
     "overrides": {
-      "ajv": "^8.18.0",
       "minimatch": "^10.2.2"
     },
     "onlyBuiltDependencies": [

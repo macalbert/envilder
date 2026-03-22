@@ -64,10 +64,30 @@ When a change has unclear scope, delegate a read-only analysis to
 
 ## Constraints
 
+- **Always respond and write PR comments in English**, regardless of user's language.
 - Do not make unrelated refactors while resolving comments
 - Do not claim resolved without concrete evidence
 - Keep explanations concise and evidence-based
 - Follow [review-response.instructions.md](../instructions/review-response.instructions.md)
+
+## GitHub API Comment Encoding
+
+When posting or updating PR comments via `gh api`, use **single quotes** for the
+`-f body=` parameter to preserve Markdown backticks. PowerShell double-quoted
+strings and `-f body="..."` escape backticks as `\``, producing broken rendering
+(e.g.`\v0.7.11\` instead of `` `v0.7.11` ``).
+
+**Correct:**
+
+```bash
+gh api repos/{owner}/{repo}/pulls/comments/{id} -X PATCH -f body='**Resolved.** Updated references from `v0.7.11` to `v0.7.12`.'
+```
+
+**Wrong (backticks get mangled):**
+
+```bash
+gh api ... -X PATCH -f body="**Resolved.** Updated references from \`v0.7.11\` to \`v0.7.12\`."
+```
 
 ## Next Steps
 
