@@ -75,8 +75,8 @@
   ],
   "type": "module",
   "dependencies": {
-    "@aws-sdk/client-ssm": "^3.1002.0",
-    "@aws-sdk/credential-providers": "^3.1002.0",
+    "@aws-sdk/client-ssm": "^3.1014.0",
+    "@aws-sdk/credential-providers": "^3.1014.0",
     "@types/node": "^25.3.3",
     "commander": "^14.0.3",
     "dotenv": "^17.3.1",
@@ -105,7 +105,6 @@
   },
   "pnpm": {
     "overrides": {
-      "ajv": "^8.18.0",
       "minimatch": "^10.2.2"
     },
     "onlyBuiltDependencies": [
