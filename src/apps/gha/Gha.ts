@@ -11,16 +11,18 @@ import { Startup } from './Startup.js';
  * Reads GitHub Actions inputs from environment variables.
  * GitHub Actions passes inputs as INPUT_<NAME> environment variables.
  */
-function readInputs(): CliOptions {
+function readInputs(): { options: CliOptions; provider?: string } {
   const mapFile = process.env.INPUT_MAP_FILE;
   const envFile = process.env.INPUT_ENV_FILE;
   const provider = process.env.INPUT_PROVIDER;
 
   return {
-    map: mapFile,
-    envfile: envFile,
-    // GitHub Action only supports pull mode
-    push: false,
+    options: {
+      map: mapFile,
+      envfile: envFile,
+      // GitHub Action only supports pull mode
+      push: false,
+    },
     provider: provider || undefined,
   };
 }
@@ -38,13 +40,10 @@ async function executeCommand(
 }
 
 export async function main() {
-  const options = readInputs();
+  const { options, provider } = readInputs();
 
-  // Initialize the service provider with the selected cloud provider
   const startup = Startup.build();
-  startup
-    .configureServices()
-    .configureInfrastructure(undefined, options.provider);
+  startup.configureServices().configureInfrastructure(undefined, provider);
   const serviceProvider = startup.create();
 
   const logger = serviceProvider.get<ILogger>(TYPES.ILogger);

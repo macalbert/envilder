@@ -43,7 +43,6 @@ describe('Cli', () => {
       testProfile,
     ];
 
-    // Mock command creation
     const mockCommand = {
       map: 'map.json',
       envfile: '.env',
@@ -60,6 +59,7 @@ describe('Cli', () => {
     expect(mocks.mockCommandHandler.handleCommand).toHaveBeenCalledWith(
       mockCommand,
     );
+    expect(mocks.mockCommandHandler.handleCommand).toHaveBeenCalledTimes(1);
   });
 
   it('Should_ThrowError_When_ArgumentsAreInvalids', async () => {

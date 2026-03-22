@@ -6,7 +6,6 @@ import type { Container } from 'inversify';
 import { DispatchActionCommand } from '../../envilder/application/dispatch/DispatchActionCommand.js';
 import type { DispatchActionCommandHandler } from '../../envilder/application/dispatch/DispatchActionCommandHandler.js';
 import type { CliOptions } from '../../envilder/domain/CliOptions.js';
-import type { ILogger } from '../../envilder/domain/ports/ILogger.js';
 import { PackageVersionReader } from '../../envilder/infrastructure/package/PackageVersionReader.js';
 import { TYPES } from '../../envilder/types.js';
 import { Startup } from './Startup.js';
@@ -64,16 +63,18 @@ export async function main() {
     )
     .option(
       '--ssm-path <path>',
-      'Secret path for the single environment variable (only with --push)',
+      'Secret path in your cloud provider for the single variable (only with --push)',
     )
-    .action(async (options: CliOptions) => {
-      serviceProvider = Startup.build()
-        .configureServices()
-        .configureInfrastructure(options.profile, options.provider)
-        .create();
+    .action(
+      async ({ provider, ...options }: CliOptions & { provider?: string }) => {
+        serviceProvider = Startup.build()
+          .configureServices()
+          .configureInfrastructure(options.profile, provider)
+          .create();
 
-      await executeCommand(options);
-    });
+        await executeCommand(options);
+      },
+    );
 
   await program.parseAsync(process.argv);
 }
@@ -85,15 +86,3 @@ function readPackageVersion(): Promise<string> {
 
   return new PackageVersionReader().getVersion(packageJsonPath);
 }
-
-main().catch((error) => {
-  const logger = serviceProvider?.get<ILogger>(TYPES.ILogger);
-
-  if (logger) {
-    logger.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
-    logger.error(error instanceof Error ? error.message : String(error));
-  } else {
-    console.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
-    console.error(error instanceof Error ? error.message : String(error));
-  }
-});

@@ -70,4 +70,19 @@ describe('Startup', () => {
       'AZURE_KEY_VAULT_URL environment variable is required',
     );
   });
+
+  it('Should_ThrowError_When_AzureVaultUrlIsNotHttps', () => {
+    // Arrange
+    process.env.AZURE_KEY_VAULT_URL = 'http://test-vault.vault.azure.net';
+
+    // Act
+    const action = () =>
+      startup.configureServices().configureInfrastructure(undefined, 'azure');
+
+    // Assert
+    expect(action).toThrow('AZURE_KEY_VAULT_URL must use https:// protocol');
+
+    // Cleanup
+    delete process.env.AZURE_KEY_VAULT_URL;
+  });
 });

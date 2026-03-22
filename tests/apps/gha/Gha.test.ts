@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { main } from '../../../src/apps/gha/Gha';
+import { Startup } from '../../../src/apps/gha/Startup';
 import { DispatchActionCommand } from '../../../src/envilder/application/dispatch/DispatchActionCommand';
 import { DispatchActionCommandHandler } from '../../../src/envilder/application/dispatch/DispatchActionCommandHandler';
 import type { CliOptions } from '../../../src/envilder/domain/CliOptions';
@@ -119,19 +120,13 @@ describe('GitHubAction', () => {
     process.env.INPUT_PROVIDER = 'azure';
     process.env.AZURE_KEY_VAULT_URL = 'https://my-vault.vault.azure.net';
 
-    let capturedOptions: CliOptions | undefined;
-    vi.spyOn(DispatchActionCommand, 'fromCliOptions').mockImplementation(
-      (options) => {
-        capturedOptions = options;
-        return {} as DispatchActionCommand;
-      },
-    );
+    const configureSpy = vi.spyOn(Startup.prototype, 'configureInfrastructure');
 
     // Act
     await main();
 
     // Assert
-    expect(capturedOptions?.provider).toBe('azure');
+    expect(configureSpy).toHaveBeenCalledWith(undefined, 'azure');
   });
 
   it('Should_DefaultToUndefinedProvider_When_ProviderInputIsNotSet', async () => {
@@ -140,19 +135,13 @@ describe('GitHubAction', () => {
     process.env.INPUT_ENV_FILE = 'test.env';
     delete process.env.INPUT_PROVIDER;
 
-    let capturedOptions: CliOptions | undefined;
-    vi.spyOn(DispatchActionCommand, 'fromCliOptions').mockImplementation(
-      (options) => {
-        capturedOptions = options;
-        return {} as DispatchActionCommand;
-      },
-    );
+    const configureSpy = vi.spyOn(Startup.prototype, 'configureInfrastructure');
 
     // Act
     await main();
 
     // Assert
-    expect(capturedOptions?.provider).toBeUndefined();
+    expect(configureSpy).toHaveBeenCalledWith(undefined, undefined);
   });
 
   it('Should_ThrowError_When_AzureProviderSelectedButVaultUrlMissing', async () => {

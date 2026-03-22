@@ -2,10 +2,6 @@ import type { SecretClient } from '@azure/keyvault-secrets';
 import { injectable } from 'inversify';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 
-/**
- * Azure Key Vault secret provider implementation.
- * Implements the same interface as AWS SSM provider for consistency.
- */
 @injectable()
 export class AzureKeyVaultSecretProvider implements ISecretProvider {
   private client: SecretClient;
@@ -35,17 +31,17 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
   }
 
   async setSecret(name: string, value: string): Promise<void> {
-    const secretName = this.normalizeSecretName(name);
-    await this.client.setSecret(secretName, value);
+    try {
+      const secretName = this.normalizeSecretName(name);
+      await this.client.setSecret(secretName, value);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to set secret ${name}: ${errorMessage}`);
+    }
   }
 
-  /**
-   * Normalize secret name to comply with Azure Key Vault naming requirements.
-   * Azure Key Vault secret names must:
-   * - Be 1-127 characters long
-   * - Contain only alphanumeric characters and hyphens
-   * - Start with a letter
-   */
+  // Azure Key Vault secret names: 1-127 chars, alphanumeric + hyphens, start with letter
   private normalizeSecretName(name: string): string {
     // Remove leading slashes
     let normalized = name.replace(/^\/+/, '');
@@ -67,9 +63,10 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
       normalized = `secret-${normalized}`;
     }
 
-    // Truncate to 127 characters
+    // Truncate to 127 characters and strip any trailing hyphen
     if (normalized.length > 127) {
       normalized = normalized.substring(0, 127);
+      normalized = normalized.replace(/-+$/, '');
     }
 
     // Default name if empty

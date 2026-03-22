@@ -36,9 +36,4 @@ export type CliOptions = {
    * Flag to push local .env file back to AWS SSM (renamed from import)
    */
   push?: boolean;
-
-  /**
-   * Cloud provider to use (aws or azure), defaults to aws
-   */
-  provider?: string;
 };

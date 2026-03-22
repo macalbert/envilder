@@ -146,7 +146,24 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
       const action = () => sut.setSecret('test-secret', 'test-value');
 
       // Assert
-      await expect(action()).rejects.toThrow('Access denied');
+      await expect(action()).rejects.toThrow(
+        'Failed to set secret test-secret: Access denied',
+      );
+    });
+  });
+
+  describe('normalizeSecretName', () => {
+    it('Should_StripTrailingHyphen_When_TruncationProducesOne', async () => {
+      // Arrange
+      mockGetSecretFn.mockResolvedValueOnce({ value: 'value' });
+      const longName = `a${'b'.repeat(125)}-d`;
+
+      // Act
+      await sut.getSecret(longName);
+
+      // Assert
+      const expectedName = `a${'b'.repeat(125)}`;
+      expect(mockGetSecretFn).toHaveBeenCalledWith(expectedName);
     });
   });
 });

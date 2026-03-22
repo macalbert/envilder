@@ -167,6 +167,42 @@ describe('Startup', () => {
         // Assert
         expect(action).toThrow('Unsupported provider: gcp');
       });
+
+      it('Should_ThrowError_When_AzureVaultUrlIsNotHttps', () => {
+        // Arrange
+        process.env.AZURE_KEY_VAULT_URL = 'http://test-vault.vault.azure.net';
+
+        // Act
+        const action = () =>
+          startup
+            .configureServices()
+            .configureInfrastructure(undefined, 'azure');
+
+        // Assert
+        expect(action).toThrow(
+          'AZURE_KEY_VAULT_URL must use https:// protocol',
+        );
+
+        // Cleanup
+        delete process.env.AZURE_KEY_VAULT_URL;
+      });
+
+      it('Should_ThrowError_When_AzureVaultUrlIsInvalidFormat', () => {
+        // Arrange
+        process.env.AZURE_KEY_VAULT_URL = 'not-a-valid-url';
+
+        // Act
+        const action = () =>
+          startup
+            .configureServices()
+            .configureInfrastructure(undefined, 'azure');
+
+        // Assert
+        expect(action).toThrow('AZURE_KEY_VAULT_URL must be a valid URL');
+
+        // Cleanup
+        delete process.env.AZURE_KEY_VAULT_URL;
+      });
     });
   });
 
