@@ -1,7 +1,7 @@
 # 🛣️ Envilder Roadmap
 
-Envilder aims to be the simplest, most reliable way to generate `.env` files from AWS SSM Parameter Store
-— for both local development and CI/CD pipelines.
+Envilder aims to be the simplest, most reliable way to generate `.env` files from cloud secret stores
+(AWS SSM Parameter Store, Azure Key Vault) — for both local development and CI/CD pipelines.
 
 > **Note:** This roadmap contains ideas and potential features based on initial vision and community feedback.
 > Not all features are guaranteed to be implemented. Priorities may change based on user needs, feedback,

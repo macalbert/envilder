@@ -171,7 +171,9 @@ jobs:
 
 ## Parameter Mapping File
 
-Create a `param-map.json` file that maps environment variable names to AWS SSM parameter paths:
+Create a `param-map.json` file that maps environment variable names to secret paths in your cloud provider.
+
+**AWS SSM (default):**
 
 ```json
 {
@@ -180,6 +182,22 @@ Create a `param-map.json` file that maps environment variable names to AWS SSM p
   "SECRET_TOKEN": "/myapp/production/secret-token"
 }
 ```
+
+**Azure Key Vault (via `$config`):**
+
+```json
+{
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "DATABASE_URL": "myapp-production-database-url",
+  "API_KEY": "myapp-production-api-key",
+  "SECRET_TOKEN": "myapp-production-secret-token"
+}
+```
+
+> You can also set provider and vault URL via action inputs (`provider`, `vault-url`), which override `$config`.
 
 ## AWS Authentication
 

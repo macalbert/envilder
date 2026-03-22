@@ -274,9 +274,13 @@ function configureInfrastructureServices(
 
 function configureApplicationServices(container: Container) {
   container.bind(TYPES.DispatchActionCommandHandler)
-    .to(DispatchActionCommandHandler);
+    .to(DispatchActionCommandHandler).inTransientScope();
   container.bind(TYPES.PullSsmToEnvCommandHandler)
-    .to(PullSsmToEnvCommandHandler);
+    .to(PullSsmToEnvCommandHandler).inTransientScope();
+  container.bind(TYPES.PushEnvToSsmCommandHandler)
+    .to(PushEnvToSsmCommandHandler).inTransientScope();
+  container.bind(TYPES.PushSingleCommandHandler)
+    .to(PushSingleCommandHandler).inTransientScope();
 }
 ```
 

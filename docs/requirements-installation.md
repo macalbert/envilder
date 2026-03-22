@@ -134,10 +134,6 @@ You can assign these via Azure RBAC role `Key Vault Secrets Officer` or through 
 - [Key Vault RBAC Guide](https://learn.microsoft.com/en-us/azure/key-vault/general/rbac-guide)
 - [Azure Default Credentials](https://learn.microsoft.com/en-us/javascript/api/@azure/identity/defaultazurecredential)
 
-Otherwise, the default profile is used automatically.
-
-This will automatically update your `~/.aws/credentials` and `~/.aws/config` files. Repeat for as many profiles as you need.
-
 ## Verifying Installation
 
 Check that Envilder is installed and available:
@@ -147,10 +143,3 @@ envilder --help
 ```
 
 If you see the CLI help output, you're ready to use Envilder!
-
-## Useful Links
-
-- [AWS SSM Parameter Store Overview](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html)
-- [IAM permissions for SSM](https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html)
-- [Azure Key Vault Overview](https://learn.microsoft.com/en-us/azure/key-vault/general/overview)
-- [Azure CLI Installation](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)

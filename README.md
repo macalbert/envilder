@@ -68,12 +68,12 @@ and streamline onboarding and CI/CD workflows.
       - [AWS SSM (default)](#aws-ssm-default)
       - [Azure Key Vault](#azure-key-vault)
     - [📚 Quick Links](#-quick-links)
-  - [�️ Mapping File Format](#️-mapping-file-format)
+  - [🗺️ Mapping File Format](#️-mapping-file-format)
     - [Basic Format (AWS SSM — default)](#basic-format-aws-ssm--default)
     - [With `$config` (explicit provider)](#with-config-explicit-provider)
     - [`$config` Options](#config-options)
     - [Configuration Priority](#configuration-priority)
-  - [�🛠️ How it works](#️-how-it-works)
+  - [🛠️ How it works](#️-how-it-works)
   - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
   - [🏁 Roadmap](#-roadmap)
   - [🤝 Contributing](#-contributing)
@@ -238,7 +238,7 @@ Envilder is designed for automation, onboarding, and secure cloud-native workflo
 
 ---
 
-## �️ Mapping File Format
+## 🗺️ Mapping File Format
 
 The mapping file (`param-map.json`) is the core of Envilder. It maps environment variable names to secret paths
 in your cloud provider. You can optionally include a `$config` section to declare which provider and settings to use.
@@ -320,7 +320,7 @@ envilder --provider=azure --vault-url=https://other-vault.vault.azure.net --map=
 
 ---
 
-## �🛠️ How it works
+## 🛠️ How it works
 
 ```mermaid
 graph LR
