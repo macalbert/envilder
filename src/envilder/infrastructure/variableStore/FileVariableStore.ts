@@ -106,10 +106,19 @@ export async function readMapFileConfig(
 ): Promise<MapFileConfig> {
   try {
     const content = await fs.readFile(mapPath, 'utf-8');
-    const raw = JSON.parse(content);
-    const config = raw.$config;
-    return config && typeof config === 'object' ? config : {};
-  } catch {
+    try {
+      const raw = JSON.parse(content);
+      const config = raw.$config;
+      return config && typeof config === 'object' ? config : {};
+    } catch {
+      throw new EnvironmentFileError(
+        `Invalid JSON in parameter map file: ${mapPath}`,
+      );
+    }
+  } catch (error) {
+    if (error instanceof EnvironmentFileError) {
+      throw error;
+    }
     throw new EnvironmentFileError(`Failed to read map file: ${mapPath}`);
   }
 }

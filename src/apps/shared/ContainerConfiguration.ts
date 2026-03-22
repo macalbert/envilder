@@ -58,9 +58,7 @@ export function configureInfrastructureServices(
     }
     validateAzureVaultUrl(vaultUrl);
     const credential = new DefaultAzureCredential();
-    const client = new SecretClient(vaultUrl, credential, {
-      disableChallengeResourceVerification: true,
-    });
+    const client = new SecretClient(vaultUrl, credential);
     secretProvider = new AzureKeyVaultSecretProvider(client);
   } else if (selectedProvider === 'aws') {
     const ssm = config.profile

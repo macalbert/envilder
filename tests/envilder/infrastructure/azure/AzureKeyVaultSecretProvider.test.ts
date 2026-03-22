@@ -215,6 +215,7 @@ describe('AzureKeyVaultSecretProvider (integration with Lowkey Vault)', () => {
     } else {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalTlsRejectUnauthorized;
     }
+    delete process.env.AZURE_POD_IDENTITY_AUTHORITY_HOST;
   });
 
   it('Should_ReturnSecretValue_When_SecretExists', async () => {

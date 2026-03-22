@@ -418,5 +418,18 @@ describe('FileVariableStore', () => {
         `Failed to read map file: ${nonExistentPath}`,
       );
     });
+
+    it('Should_ThrowInvalidJsonError_When_FileContainsMalformedJson', async () => {
+      // Arrange
+      mockInMemoryFiles.set(mockMapPath, 'not valid json {{{');
+
+      // Act
+      const action = () => readMapFileConfig(mockMapPath);
+
+      // Assert
+      await expect(action()).rejects.toThrow(
+        `Invalid JSON in parameter map file: ${mockMapPath}`,
+      );
+    });
   });
 });

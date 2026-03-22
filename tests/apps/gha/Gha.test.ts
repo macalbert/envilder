@@ -204,4 +204,30 @@ describe('GitHubAction', () => {
       expect.objectContaining({ provider: 'aws' }),
     );
   });
+
+  it('Should_UseFileConfigProvider_When_ProviderInputIsNotSet', async () => {
+    // Arrange
+    process.env.INPUT_MAP_FILE = 'test-map.json';
+    process.env.INPUT_ENV_FILE = 'test.env';
+    delete process.env.INPUT_PROVIDER;
+    delete process.env.INPUT_VAULT_URL;
+
+    vi.mocked(FileVariableStore.readMapFileConfig).mockResolvedValue({
+      provider: 'azure',
+      vaultUrl: 'https://file-vault.vault.azure.net',
+    });
+
+    const configureSpy = vi.spyOn(Startup.prototype, 'configureInfrastructure');
+
+    // Act
+    await main();
+
+    // Assert
+    expect(configureSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        provider: 'azure',
+        vaultUrl: 'https://file-vault.vault.azure.net',
+      }),
+    );
+  });
 });

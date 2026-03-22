@@ -16,7 +16,6 @@ inputs:
   provider:
     description: "Cloud provider to use: aws or azure (default: aws). Can also be set via $config.provider in the map file."
     required: false
-    default: "aws"
   vault-url:
     description: "Azure Key Vault URL (overrides $config.vaultUrl in map file)"
     required: false
