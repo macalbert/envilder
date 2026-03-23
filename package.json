@@ -29,7 +29,6 @@
     "lint": "secretlint \"**/*\" && biome check --write && tsc --noEmit",
     "lint:fix": "biome lint --fix",
     "test": "vitest run --reporter=verbose --coverage",
-    "test:e2e": "vitest run --reporter=verbose e2e/",
     "test:ci": "vitest run --reporter=verbose --reporter=junit --coverage --outputFile=coverage/junit/test-results.xml",
     "release:publish": "npm pack --dry-run && npm publish --provenance",
     "action-publish": "pnpm build:gha && pnpm verify:gha",
