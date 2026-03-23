@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { execSync } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { unlink } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
@@ -56,9 +57,9 @@ describe('GitHub Action (E2E)', () => {
   );
 
   beforeAll(async () => {
-    localstackContainer = await new LocalstackContainer(
-      LOCALSTACK_IMAGE,
-    ).start();
+    localstackContainer = await new LocalstackContainer(LOCALSTACK_IMAGE)
+      .withName(`localstack-gha-${randomUUID().slice(0, 8)}`)
+      .start();
     localstackEndpoint = localstackContainer.getConnectionUri();
 
     ssmClient = new SSMClient({
@@ -245,6 +246,7 @@ describe('GitHub Action (E2E)', () => {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
       lowkeyVaultContainer = await new GenericContainer(LOWKEY_VAULT_IMAGE)
+        .withName(`lowkey-vault-gha-${randomUUID().slice(0, 8)}`)
         .withExposedPorts(LOWKEY_VAULT_PORT, 8080)
         .withEnvironment({
           LOWKEY_ARGS: '--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true',

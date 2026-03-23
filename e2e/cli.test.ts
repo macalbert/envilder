@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { execSync, spawn } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { rm, unlink } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
@@ -297,6 +298,7 @@ describe('Envilder (E2E)', () => {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
       lowkeyVaultContainer = await new GenericContainer(LOWKEY_VAULT_IMAGE)
+        .withName(`lowkey-vault-cli-${randomUUID().slice(0, 8)}`)
         .withExposedPorts(LOWKEY_VAULT_PORT, 8080)
         .withEnvironment({
           LOWKEY_ARGS: '--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true',
