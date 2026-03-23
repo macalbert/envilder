@@ -22,17 +22,14 @@ import { ConsoleLogger } from '../../envilder/infrastructure/logger/ConsoleLogge
 import { FileVariableStore } from '../../envilder/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../envilder/types.js';
 
-const AZURE_VAULT_HOSTS = [
+const DEFAULT_VAULT_HOSTS = [
   '.vault.azure.net',
   '.vault.azure.cn',
   '.vault.usgovcloudapi.net',
   '.vault.microsoftazure.de',
 ];
 
-function validateAzureVaultUrl(
-  vaultUrl: string,
-  additionalHosts: string[] = [],
-): void {
+function validateAzureVaultUrl(vaultUrl: string, allowedHosts: string[]): void {
   let url: URL;
   try {
     url = new URL(vaultUrl);
@@ -42,13 +39,12 @@ function validateAzureVaultUrl(
   if (url.protocol !== 'https:') {
     throw new InvalidArgumentError('vaultUrl must use https:// protocol');
   }
-  const allHosts = [...AZURE_VAULT_HOSTS, ...additionalHosts];
-  const isAllowedHost = allHosts.some((suffix) =>
+  const isAllowedHost = allowedHosts.some((suffix) =>
     url.hostname.endsWith(suffix),
   );
   if (!isAllowedHost) {
     throw new InvalidArgumentError(
-      `vaultUrl hostname must end with one of: ${AZURE_VAULT_HOSTS.join(', ')}`,
+      `vaultUrl hostname must end with one of: ${allowedHosts.join(', ')}`,
     );
   }
 }
@@ -56,7 +52,7 @@ function validateAzureVaultUrl(
 export function configureInfrastructureServices(
   container: Container,
   config: MapFileConfig = {},
-  additionalVaultHosts: string[] = [],
+  allowedVaultHosts: string[] = DEFAULT_VAULT_HOSTS,
 ): void {
   container.bind<ILogger>(TYPES.ILogger).to(ConsoleLogger).inSingletonScope();
 
@@ -76,9 +72,12 @@ export function configureInfrastructureServices(
         'vaultUrl is required when using Azure provider. Set it in $config.vaultUrl in your map file or via --vault-url flag.',
       );
     }
-    validateAzureVaultUrl(vaultUrl, additionalVaultHosts);
+    validateAzureVaultUrl(vaultUrl, allowedVaultHosts);
     const credential = new DefaultAzureCredential();
-    const client = new SecretClient(vaultUrl, credential);
+    const client = new SecretClient(vaultUrl, credential, {
+      disableChallengeResourceVerification:
+        allowedVaultHosts !== DEFAULT_VAULT_HOSTS,
+    });
     secretProvider = new AzureKeyVaultSecretProvider(client);
   } else if (selectedProvider === 'aws') {
     const ssm = config.profile

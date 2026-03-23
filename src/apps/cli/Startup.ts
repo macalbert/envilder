@@ -23,13 +23,9 @@ export class Startup {
 
   configureInfrastructure(
     config?: MapFileConfig,
-    additionalVaultHosts?: string[],
+    allowedVaultHosts?: string[],
   ): this {
-    configureInfrastructureServices(
-      this.container,
-      config,
-      additionalVaultHosts,
-    );
+    configureInfrastructureServices(this.container, config, allowedVaultHosts);
     return this;
   }
 

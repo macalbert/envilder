@@ -186,9 +186,13 @@ describe('Envilder (E2E)', () => {
 
   it('Should_PushEnvFileToSSM_When_PushFlagIsUsed', async () => {
     // Arrange
-    const params = ['--push', '--envfile', envFilePath, '--map', mapFilePath];
-
     const ssmParams = readMappings(mapFilePath);
+    const envContent = Object.keys(ssmParams)
+      .map((key) => `${key}=push-test-${key}`)
+      .join('\n');
+    writeFileSync(envFilePath, envContent, 'utf8');
+
+    const params = ['--push', '--envfile', envFilePath, '--map', mapFilePath];
 
     // Act
     const actual = await runCommand(envilder, params);
@@ -204,6 +208,12 @@ describe('Envilder (E2E)', () => {
 
   it('Should_PushEnvFileToSSM_When_MapFileContainsConfig', async () => {
     // Arrange
+    const ssmParams = readMappings(mapFileWithConfigPath);
+    const envContent = Object.keys(ssmParams)
+      .map((key) => `${key}=push-test-${key}`)
+      .join('\n');
+    writeFileSync(envFilePath, envContent, 'utf8');
+
     const params = [
       '--push',
       '--envfile',
@@ -211,8 +221,6 @@ describe('Envilder (E2E)', () => {
       '--map',
       mapFileWithConfigPath,
     ];
-
-    const ssmParams = readMappings(mapFileWithConfigPath);
 
     // Act
     const actual = await runCommand(envilder, params);
@@ -251,9 +259,13 @@ describe('Envilder (E2E)', () => {
 
   it('Should_SuccessfullyPushAllVariables_When_AllParametersAreValid', async () => {
     // Arrange
-    const params = ['--push', '--envfile', envFilePath, '--map', mapFilePath];
-
     const ssmParams = readMappings(mapFilePath);
+    const envContent = Object.keys(ssmParams)
+      .map((key) => `${key}=push-test-${key}`)
+      .join('\n');
+    writeFileSync(envFilePath, envContent, 'utf8');
+
+    const params = ['--push', '--envfile', envFilePath, '--map', mapFilePath];
 
     // Act
     const actual = await runCommand(envilder, params);
