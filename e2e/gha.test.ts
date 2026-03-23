@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { execSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { unlink } from 'node:fs/promises';
@@ -25,6 +26,10 @@ import {
   expect,
   it,
 } from 'vitest';
+import { Startup } from '../src/apps/gha/Startup';
+import { DispatchActionCommand } from '../src/envilder/application/dispatch/DispatchActionCommand';
+import type { DispatchActionCommandHandler } from '../src/envilder/application/dispatch/DispatchActionCommandHandler';
+import { TYPES } from '../src/envilder/types';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -218,6 +223,7 @@ describe('GitHub Action (E2E)', () => {
   describe('Azure Key Vault', () => {
     let lowkeyVaultContainer: StartedTestContainer;
     let azureVaultUrl: string;
+    let lowkeyVaultHost: string;
     let azureSecretClient: SecretClient;
     const azureMapFilePath = join(
       rootDir,
@@ -248,6 +254,7 @@ describe('GitHub Action (E2E)', () => {
       const host = lowkeyVaultContainer.getHost();
       const port = lowkeyVaultContainer.getMappedPort(LOWKEY_VAULT_PORT);
       const tokenPort = lowkeyVaultContainer.getMappedPort(8080);
+      lowkeyVaultHost = host;
       azureVaultUrl = `https://${host}:${port}`;
 
       // Point DefaultAzureCredential to Lowkey Vault's built-in token endpoint
@@ -264,7 +271,10 @@ describe('GitHub Action (E2E)', () => {
         azureMapFilePath,
         JSON.stringify(
           {
-            $config: { provider: 'azure', vaultUrl: azureVaultUrl },
+            $config: {
+              provider: 'azure',
+              vaultUrl: azureVaultUrl,
+            },
             VAULT_SECRET: 'test-secret',
           },
           null,
@@ -300,15 +310,23 @@ describe('GitHub Action (E2E)', () => {
     it('Should_PullFromAzureKeyVault_When_MapFileContainsAzureConfig', async () => {
       // Arrange
       await azureSecretClient.setSecret('test-secret', 'azure-gha-value');
+      const config = { provider: 'azure', vaultUrl: azureVaultUrl };
 
-      // Act
-      const result = runGitHubAction({
-        mapFile: azureMapFilePath,
-        envFile: azureEnvFilePath,
+      // Act — invoke production code directly, passing test vault host
+      const container = Startup.build()
+        .configureServices()
+        .configureInfrastructure(config, [lowkeyVaultHost])
+        .create();
+      const handler = container.get<DispatchActionCommandHandler>(
+        TYPES.DispatchActionCommandHandler,
+      );
+      const command = DispatchActionCommand.fromCliOptions({
+        map: azureMapFilePath,
+        envfile: azureEnvFilePath,
       });
+      await handler.handleCommand(command);
 
       // Assert
-      expect(result.code).toBe(0);
       expect(existsSync(azureEnvFilePath)).toBe(true);
       const envValue = GetSecretFromKey(azureEnvFilePath, 'VAULT_SECRET');
       expect(envValue).toBe('azure-gha-value');

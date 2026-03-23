@@ -10,6 +10,7 @@ import {
   it,
   vi,
 } from 'vitest';
+import { SecretOperationError } from '../../../../src/envilder/domain/errors/DomainErrors';
 import { AzureKeyVaultSecretProvider } from '../../../../src/envilder/infrastructure/azure/AzureKeyVaultSecretProvider';
 
 // Constants for integration tests
@@ -64,31 +65,27 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
       expect(result).toBeUndefined();
     });
 
-    it('Should_ThrowError_When_OtherErrorOccurs', async () => {
+    it('Should_ThrowSecretOperationError_When_OtherErrorOccurs', async () => {
       // Arrange
       const error = new Error('Network error');
       mockGetSecretFn.mockRejectedValueOnce(error);
 
       // Act
-      const action = () => sut.getSecret('test-secret');
+      const action = sut.getSecret('test-secret');
 
       // Assert
-      await expect(action()).rejects.toThrow(
-        'Failed to get secret test-secret: Network error',
-      );
+      await expect(action).rejects.toThrow(SecretOperationError);
     });
 
-    it('Should_HandleNonErrorObject_When_ErrorIsThrown', async () => {
+    it('Should_ThrowSecretOperationError_When_NonErrorObjectIsThrown', async () => {
       // Arrange
       mockGetSecretFn.mockRejectedValueOnce('String error');
 
       // Act
-      const action = () => sut.getSecret('test-secret');
+      const action = sut.getSecret('test-secret');
 
       // Assert
-      await expect(action()).rejects.toThrow(
-        'Failed to get secret test-secret: String error',
-      );
+      await expect(action).rejects.toThrow(SecretOperationError);
     });
 
     it('Should_NormalizeSecretName_When_NameContainsSlashes', async () => {

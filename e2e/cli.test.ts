@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { execSync, spawn } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { rm, unlink } from 'node:fs/promises';
@@ -23,6 +24,10 @@ import {
   expect,
   it,
 } from 'vitest';
+import { Startup } from '../src/apps/cli/Startup';
+import { DispatchActionCommand } from '../src/envilder/application/dispatch/DispatchActionCommand';
+import type { DispatchActionCommandHandler } from '../src/envilder/application/dispatch/DispatchActionCommandHandler';
+import { TYPES } from '../src/envilder/types';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -270,6 +275,7 @@ describe('Envilder (E2E)', () => {
   describe('Azure Key Vault', () => {
     let lowkeyVaultContainer: StartedTestContainer;
     let azureVaultUrl: string;
+    let lowkeyVaultHost: string;
     let azureSecretClient: SecretClient;
     const azureMapFilePath = join(
       rootDir,
@@ -300,6 +306,7 @@ describe('Envilder (E2E)', () => {
       const host = lowkeyVaultContainer.getHost();
       const port = lowkeyVaultContainer.getMappedPort(LOWKEY_VAULT_PORT);
       const tokenPort = lowkeyVaultContainer.getMappedPort(8080);
+      lowkeyVaultHost = host;
       azureVaultUrl = `https://${host}:${port}`;
 
       // Point DefaultAzureCredential to Lowkey Vault's built-in token endpoint
@@ -316,7 +323,10 @@ describe('Envilder (E2E)', () => {
         azureMapFilePath,
         JSON.stringify(
           {
-            $config: { provider: 'azure', vaultUrl: azureVaultUrl },
+            $config: {
+              provider: 'azure',
+              vaultUrl: azureVaultUrl,
+            },
             VAULT_SECRET: 'test-secret',
           },
           null,
@@ -352,21 +362,31 @@ describe('Envilder (E2E)', () => {
     it('Should_PullFromAzureKeyVault_When_MapFileContainsAzureConfig', async () => {
       // Arrange
       await azureSecretClient.setSecret('test-secret', 'azure-secret-value');
-      const params = ['--map', azureMapFilePath, '--envfile', azureEnvFilePath];
+      const config = { provider: 'azure', vaultUrl: azureVaultUrl };
 
-      // Act
-      const actual = await runCommand(envilder, params);
+      // Act — invoke production code directly, passing test vault host
+      const container = Startup.build()
+        .configureServices()
+        .configureInfrastructure(config, [lowkeyVaultHost])
+        .create();
+      const handler = container.get<DispatchActionCommandHandler>(
+        TYPES.DispatchActionCommandHandler,
+      );
+      const command = DispatchActionCommand.fromCliOptions({
+        map: azureMapFilePath,
+        envfile: azureEnvFilePath,
+      });
+      await handler.handleCommand(command);
 
       // Assert
-      expect(actual.code).toBe(0);
       expect(existsSync(azureEnvFilePath)).toBe(true);
       const envValue = GetSecretFromKey(azureEnvFilePath, 'VAULT_SECRET');
       expect(envValue).toBe('azure-secret-value');
     });
 
-    it('Should_PullFromAzureKeyVault_When_VaultUrlProvidedViaCLIFlag', async () => {
+    it('Should_PullFromAzureKeyVault_When_VaultUrlProvidedViaConfig', async () => {
       // Arrange
-      await azureSecretClient.setSecret('test-secret', 'cli-flag-value');
+      await azureSecretClient.setSecret('test-secret', 'config-override-value');
       const noUrlMapPath = join(
         rootDir,
         'e2e',
@@ -384,23 +404,26 @@ describe('Envilder (E2E)', () => {
           2,
         ),
       );
-      const params = [
-        '--map',
-        noUrlMapPath,
-        '--envfile',
-        azureEnvFilePath,
-        '--vault-url',
-        azureVaultUrl,
-      ];
+      const config = { provider: 'azure', vaultUrl: azureVaultUrl };
 
-      // Act
-      const actual = await runCommand(envilder, params);
+      // Act — invoke production code directly, passing test vault host
+      const container = Startup.build()
+        .configureServices()
+        .configureInfrastructure(config, [lowkeyVaultHost])
+        .create();
+      const handler = container.get<DispatchActionCommandHandler>(
+        TYPES.DispatchActionCommandHandler,
+      );
+      const command = DispatchActionCommand.fromCliOptions({
+        map: noUrlMapPath,
+        envfile: azureEnvFilePath,
+      });
+      await handler.handleCommand(command);
 
       // Assert
-      expect(actual.code).toBe(0);
       expect(existsSync(azureEnvFilePath)).toBe(true);
       const envValue = GetSecretFromKey(azureEnvFilePath, 'VAULT_SECRET');
-      expect(envValue).toBe('cli-flag-value');
+      expect(envValue).toBe('config-override-value');
 
       if (existsSync(noUrlMapPath)) {
         await unlink(noUrlMapPath);

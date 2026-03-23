@@ -21,8 +21,15 @@ export class Startup {
     return this;
   }
 
-  configureInfrastructure(config?: MapFileConfig): this {
-    configureInfrastructureServices(this.container, config);
+  configureInfrastructure(
+    config?: MapFileConfig,
+    additionalVaultHosts?: string[],
+  ): this {
+    configureInfrastructureServices(
+      this.container,
+      config,
+      additionalVaultHosts,
+    );
     return this;
   }
 

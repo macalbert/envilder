@@ -5,7 +5,7 @@ export declare class Startup {
     constructor();
     static build(): Startup;
     configureServices(): this;
-    configureInfrastructure(config?: MapFileConfig): this;
+    configureInfrastructure(config?: MapFileConfig, additionalVaultHosts?: string[]): this;
     create(): Container;
     getServiceProvider(): Container;
 }

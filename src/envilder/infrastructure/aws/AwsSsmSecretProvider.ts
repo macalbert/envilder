@@ -4,6 +4,7 @@ import {
   type SSM,
 } from '@aws-sdk/client-ssm';
 import { injectable } from 'inversify';
+import { SecretOperationError } from '../../domain/errors/DomainErrors.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 
 @injectable()
@@ -33,7 +34,9 @@ export class AwsSsmSecretProvider implements ISecretProvider {
       }
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to get secret ${name}: ${errorMessage}`);
+      throw new SecretOperationError(
+        `Failed to get secret ${name}: ${errorMessage}`,
+      );
     }
   }
 

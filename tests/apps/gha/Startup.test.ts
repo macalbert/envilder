@@ -38,11 +38,14 @@ describe('Startup', () => {
   });
 
   it('Should_ResolveAllServices_When_AzureProviderConfigured', () => {
-    // Arrange / Act
-    const sut = startup.configureServices().configureInfrastructure({
+    // Arrange
+    const config = {
       provider: 'azure',
       vaultUrl: 'https://test-vault.vault.azure.net',
-    });
+    };
+
+    // Act
+    const sut = startup.configureServices().configureInfrastructure(config);
     const container = sut.create();
     const secretProvider = container.get<ISecretProvider>(
       TYPES.ISecretProvider,
@@ -53,25 +56,44 @@ describe('Startup', () => {
   });
 
   it('Should_ThrowError_When_AzureProviderSelectedButVaultUrlMissing', () => {
-    // Arrange / Act
+    // Arrange
+    const config = { provider: 'azure' };
+
+    // Act
     const action = () =>
-      startup
-        .configureServices()
-        .configureInfrastructure({ provider: 'azure' });
+      startup.configureServices().configureInfrastructure(config);
 
     // Assert
     expect(action).toThrow('vaultUrl is required when using Azure provider');
   });
 
   it('Should_ThrowError_When_AzureVaultUrlIsNotHttps', () => {
-    // Arrange / Act
+    // Arrange
+    const config = {
+      provider: 'azure',
+      vaultUrl: 'http://test-vault.vault.azure.net',
+    };
+
+    // Act
     const action = () =>
-      startup.configureServices().configureInfrastructure({
-        provider: 'azure',
-        vaultUrl: 'http://test-vault.vault.azure.net',
-      });
+      startup.configureServices().configureInfrastructure(config);
 
     // Assert
     expect(action).toThrow('vaultUrl must use https:// protocol');
+  });
+
+  it('Should_ThrowError_When_AzureVaultUrlHostIsNotAzure', () => {
+    // Arrange
+    const config = {
+      provider: 'azure',
+      vaultUrl: 'https://evil-server.example.com',
+    };
+
+    // Act
+    const action = () =>
+      startup.configureServices().configureInfrastructure(config);
+
+    // Assert
+    expect(action).toThrow('vaultUrl hostname must end with one of');
   });
 });

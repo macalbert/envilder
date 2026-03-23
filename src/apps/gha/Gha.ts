@@ -58,11 +58,19 @@ export async function main() {
     ...(vaultUrl && { vaultUrl }),
   };
 
-  const startup = Startup.build();
-  startup.configureServices().configureInfrastructure(config);
-  const serviceProvider = startup.create();
+  let serviceProvider: Container;
+  let logger: ILogger;
 
-  const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
+  try {
+    const startup = Startup.build();
+    startup.configureServices().configureInfrastructure(config);
+    serviceProvider = startup.create();
+    logger = serviceProvider.get<ILogger>(TYPES.ILogger);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`🚨 Failed to initialize: ${message}`);
+    throw error;
+  }
 
   try {
     // Validate required inputs

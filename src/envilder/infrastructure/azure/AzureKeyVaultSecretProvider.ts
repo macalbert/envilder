@@ -1,5 +1,6 @@
 import type { SecretClient } from '@azure/keyvault-secrets';
 import { injectable } from 'inversify';
+import { SecretOperationError } from '../../domain/errors/DomainErrors.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 
 @injectable()
@@ -14,7 +15,7 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
     try {
       const secretName = this.normalizeSecretName(name);
       const secret = await this.client.getSecret(secretName);
-      return secret.value;
+      return secret.value ?? undefined;
     } catch (error) {
       if (
         typeof error === 'object' &&
@@ -26,7 +27,9 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
       }
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to get secret ${name}: ${errorMessage}`);
+      throw new SecretOperationError(
+        `Failed to get secret ${name}: ${errorMessage}`,
+      );
     }
   }
 
@@ -37,7 +40,9 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to set secret ${name}: ${errorMessage}`);
+      throw new SecretOperationError(
+        `Failed to set secret ${name}: ${errorMessage}`,
+      );
     }
   }
 
