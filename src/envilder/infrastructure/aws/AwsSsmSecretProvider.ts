@@ -41,12 +41,20 @@ export class AwsSsmSecretProvider implements ISecretProvider {
   }
 
   async setSecret(name: string, value: string): Promise<void> {
-    const command = new PutParameterCommand({
-      Name: name,
-      Value: value,
-      Type: 'SecureString',
-      Overwrite: true,
-    });
-    await this.ssm.send(command);
+    try {
+      const command = new PutParameterCommand({
+        Name: name,
+        Value: value,
+        Type: 'SecureString',
+        Overwrite: true,
+      });
+      await this.ssm.send(command);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      throw new SecretOperationError(
+        `Failed to set secret ${name}: ${errorMessage}`,
+      );
+    }
   }
 }

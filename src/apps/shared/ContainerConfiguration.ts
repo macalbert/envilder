@@ -39,9 +39,10 @@ function validateAzureVaultUrl(vaultUrl: string, allowedHosts: string[]): void {
   if (url.protocol !== 'https:') {
     throw new InvalidArgumentError('vaultUrl must use https:// protocol');
   }
-  const isAllowedHost = allowedHosts.some((suffix) =>
-    url.hostname.endsWith(suffix),
-  );
+  const isAllowedHost = allowedHosts.some((suffix) => {
+    const dotSuffix = suffix.startsWith('.') ? suffix : `.${suffix}`;
+    return url.hostname === suffix || url.hostname.endsWith(dotSuffix);
+  });
   if (!isAllowedHost) {
     throw new InvalidArgumentError(
       `vaultUrl hostname must end with one of: ${allowedHosts.join(', ')}`,
@@ -74,9 +75,11 @@ export function configureInfrastructureServices(
     }
     validateAzureVaultUrl(vaultUrl, allowedVaultHosts);
     const credential = new DefaultAzureCredential();
+    const isCustomHosts =
+      allowedVaultHosts.length !== DEFAULT_VAULT_HOSTS.length ||
+      allowedVaultHosts.some((h, i) => h !== DEFAULT_VAULT_HOSTS[i]);
     const client = new SecretClient(vaultUrl, credential, {
-      disableChallengeResourceVerification:
-        allowedVaultHosts !== DEFAULT_VAULT_HOSTS,
+      disableChallengeResourceVerification: isCustomHosts,
     });
     secretProvider = new AzureKeyVaultSecretProvider(client);
   } else if (selectedProvider === 'aws') {

@@ -59,10 +59,10 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
       mockGetSecretFn.mockRejectedValueOnce(error);
 
       // Act
-      const result = await sut.getSecret('non-existent-secret');
+      const actual = await sut.getSecret('non-existent-secret');
 
       // Assert
-      expect(result).toBeUndefined();
+      expect(actual).toBeUndefined();
     });
 
     it('Should_ThrowSecretOperationError_When_OtherErrorOccurs', async () => {
@@ -119,6 +119,17 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
 
       // Assert
       expect(mockGetSecretFn).toHaveBeenCalledWith('secret-123-test');
+    });
+
+    it('Should_ReturnUndefined_When_AzureSDKReturnsNull', async () => {
+      // Arrange
+      mockGetSecretFn.mockResolvedValueOnce(null);
+
+      // Act
+      const actual = await sut.getSecret('some-secret');
+
+      // Assert
+      expect(actual).toBeUndefined();
     });
   });
 

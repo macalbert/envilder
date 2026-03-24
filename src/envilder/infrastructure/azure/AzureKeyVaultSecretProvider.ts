@@ -15,7 +15,7 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
     try {
       const secretName = this.normalizeSecretName(name);
       const secret = await this.client.getSecret(secretName);
-      return secret.value ?? undefined;
+      return secret?.value ?? undefined;
     } catch (error) {
       if (
         typeof error === 'object' &&

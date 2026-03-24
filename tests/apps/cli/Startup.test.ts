@@ -211,6 +211,24 @@ describe('Startup', () => {
         // Assert
         expect(action).toThrow('vaultUrl hostname must end with one of');
       });
+
+      it('Should_ThrowError_When_VaultUrlHostnameSpoofsSuffixWithoutDotBoundary', () => {
+        // Arrange
+        const config = {
+          provider: 'azure',
+          vaultUrl: 'https://evilocalhost:8443',
+        };
+        const allowedVaultHosts = ['localhost'];
+
+        // Act
+        const action = () =>
+          startup
+            .configureServices()
+            .configureInfrastructure(config, allowedVaultHosts);
+
+        // Assert
+        expect(action).toThrow('vaultUrl hostname must end with one of');
+      });
     });
   });
 
