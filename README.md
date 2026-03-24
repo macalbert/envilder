@@ -73,9 +73,9 @@ and streamline onboarding and CI/CD workflows.
     - [With `$config` (explicit provider)](#with-config-explicit-provider)
     - [`$config` Options](#config-options)
     - [Configuration Priority](#configuration-priority)
-  - [🔍 Envilder vs. Alternatives](#-envilder-vs-alternatives)
-  - [🛠️ How it works](#️-how-it-works)
+  - [�️ How it works](#️-how-it-works)
   - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
+  - [🔍 Envilder vs. Alternatives](#-envilder-vs-alternatives)
   - [🏁 Roadmap](#-roadmap)
   - [🤝 Contributing](#-contributing)
   - [📜 License](#-license)
@@ -120,7 +120,7 @@ npm install -g envilder
 ```
 
 > 💡 **Want to try without installing?** Run `npx envilder --help` to explore the CLI instantly.
-
+>
 > 💡 **New to AWS SSM?** AWS Systems Manager Parameter Store provides secure storage for configuration data and secrets:
 >
 > - [AWS SSM Parameter Store Overview](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html)
