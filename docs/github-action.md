@@ -288,7 +288,7 @@ steps:
 > **Note:** The `pnpm build` step is **only required for local development**.
 > Published releases on GitHub Marketplace include pre-built code.
 
-## Troubleshooting
+## Development Troubleshooting
 
 ### Error: "Envilder GitHub Action is not built!"
 
