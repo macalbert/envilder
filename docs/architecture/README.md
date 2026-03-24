@@ -171,7 +171,7 @@ Components:
 
 ## 🔄 Data Flow: Pull Operation
 
-#### AWS SSM Path
+### AWS SSM Path (flow)
 
 ```mermaid
 sequenceDiagram
@@ -209,7 +209,7 @@ sequenceDiagram
     CLI-->>User: Secrets pulled successfully
 ```
 
-#### Azure Key Vault Path
+### Azure Key Vault Path (flow)
 
 ```mermaid
 sequenceDiagram
@@ -251,7 +251,7 @@ sequenceDiagram
 
 ## 🔄 Data Flow: Push Operation
 
-#### AWS SSM Path
+### AWS SSM Path
 
 ```mermaid
 sequenceDiagram
@@ -285,7 +285,7 @@ sequenceDiagram
     CLI-->>User: Secrets pushed successfully
 ```
 
-#### Azure Key Vault Path
+### Azure Key Vault Path
 
 ```mermaid
 sequenceDiagram
