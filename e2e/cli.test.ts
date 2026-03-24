@@ -443,6 +443,56 @@ describe('Envilder (E2E)', () => {
         await unlink(noUrlMapPath);
       }
     });
+
+    it('Should_PushEnvFileToAzureKeyVault_When_PushFlagWithAzureProvider', async () => {
+      // Arrange
+      writeFileSync(azureEnvFilePath, 'VAULT_SECRET=push-azure-value', 'utf8');
+      const config = { provider: 'azure', vaultUrl: azureVaultUrl };
+
+      // Act
+      const container = Startup.build()
+        .configureServices()
+        .configureInfrastructure(config, [lowkeyVaultHost])
+        .create();
+      const handler = container.get<DispatchActionCommandHandler>(
+        TYPES.DispatchActionCommandHandler,
+      );
+      const command = DispatchActionCommand.fromCliOptions({
+        map: azureMapFilePath,
+        envfile: azureEnvFilePath,
+        push: true,
+      });
+      await handler.handleCommand(command);
+
+      // Assert
+      const secret = await azureSecretClient.getSecret('test-secret');
+      expect(secret.value).toBe('push-azure-value');
+    });
+
+    it('Should_PushSingleToAzureKeyVault_When_KeyValueAndPathProvided', async () => {
+      // Arrange
+      const config = { provider: 'azure', vaultUrl: azureVaultUrl };
+
+      // Act
+      const container = Startup.build()
+        .configureServices()
+        .configureInfrastructure(config, [lowkeyVaultHost])
+        .create();
+      const handler = container.get<DispatchActionCommandHandler>(
+        TYPES.DispatchActionCommandHandler,
+      );
+      const command = DispatchActionCommand.fromCliOptions({
+        key: 'SINGLE_VAR',
+        value: 'single-azure-value',
+        ssmPath: 'single-azure-test',
+      });
+      await handler.handleCommand(command);
+
+      // Assert
+      const secret =
+        await azureSecretClient.getSecret('single-azure-test');
+      expect(secret.value).toBe('single-azure-value');
+    });
   });
 });
 
