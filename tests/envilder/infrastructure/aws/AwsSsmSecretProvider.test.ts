@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import {
   GetParameterCommand,
   PutParameterCommand,
@@ -144,7 +145,12 @@ describe('AwsSsmSecretProvider (integration with LocalStack)', () => {
   let ssmClient: SSM;
 
   beforeAll(async () => {
-    container = await new LocalstackContainer(LOCALSTACK_IMAGE).start();
+    container = await new LocalstackContainer(LOCALSTACK_IMAGE)
+      .withName(`localstack-ssm-${randomUUID().slice(0, 8)}`)
+      .withEnvironment({
+        LOCALSTACK_ACKNOWLEDGE_ACCOUNT_REQUIREMENT: '1',
+      })
+      .start();
     endpoint = container.getConnectionUri();
     ssmClient = new SSM({
       endpoint,
