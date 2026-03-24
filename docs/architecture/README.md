@@ -171,6 +171,8 @@ Components:
 
 ## 🔄 Data Flow: Pull Operation
 
+#### AWS SSM Path
+
 ```mermaid
 sequenceDiagram
     actor User
@@ -207,9 +209,49 @@ sequenceDiagram
     CLI-->>User: Secrets pulled successfully
 ```
 
+#### Azure Key Vault Path
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant CLI as CLI/GHA
+    participant Dispatch as DispatchActionCommandHandler
+    participant Pull as PullSsmToEnvCommandHandler
+    participant FileStore as FileVariableStore
+    participant AZ as AzureKeyVaultSecretProvider
+    participant KV as Azure Key Vault
+
+    User->>CLI: envilder --map=map.json --envfile=.env
+    CLI->>Dispatch: handleCommand(command)
+    Dispatch->>Pull: handle(PullSsmToEnvCommand)
+    
+    Pull->>FileStore: getMapping(map.json)
+    FileStore-->>Pull: {"DB_URL": "app-db-url"}
+    
+    Pull->>FileStore: getEnvironment(.env)
+    FileStore-->>Pull: existing env vars
+    
+    loop For each mapping
+        Pull->>AZ: getSecret("app-db-url")
+        AZ->>KV: SecretClient.getSecret("app-db-url")
+        KV-->>AZ: SecretProperties{value="postgresql://..."}
+        AZ-->>Pull: "postgresql://..."
+    end
+    
+    Pull->>Pull: Build updated env vars
+    Pull->>FileStore: saveEnvironment(.env, vars)
+    FileStore-->>Pull: Saved
+    
+    Pull-->>Dispatch: Success
+    Dispatch-->>CLI: Success
+    CLI-->>User: Secrets pulled successfully
+```
+
 ---
 
 ## 🔄 Data Flow: Push Operation
+
+#### AWS SSM Path
 
 ```mermaid
 sequenceDiagram
@@ -236,6 +278,40 @@ sequenceDiagram
         AWS->>SSM: PutParameter(Name="/app/db-url", Value="...", Type="SecureString")
         SSM-->>AWS: Parameter updated
         AWS-->>Push: Success
+    end
+    
+    Push-->>Dispatch: Success
+    Dispatch-->>CLI: Success
+    CLI-->>User: Secrets pushed successfully
+```
+
+#### Azure Key Vault Path
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant CLI as CLI/GHA
+    participant Dispatch as DispatchActionCommandHandler
+    participant Push as PushEnvToSsmCommandHandler
+    participant FileStore as FileVariableStore
+    participant AZ as AzureKeyVaultSecretProvider
+    participant KV as Azure Key Vault
+
+    User->>CLI: envilder --push --map=map.json --envfile=.env
+    CLI->>Dispatch: handleCommand(command)
+    Dispatch->>Push: handle(PushEnvToSsmCommand)
+    
+    Push->>FileStore: getMapping(map.json)
+    FileStore-->>Push: {"DB_URL": "app-db-url"}
+    
+    Push->>FileStore: getEnvironment(.env)
+    FileStore-->>Push: {"DB_URL": "postgresql://..."}
+    
+    loop For each mapping
+        Push->>AZ: setSecret("app-db-url", "postgresql://...")
+        AZ->>KV: SecretClient.setSecret("app-db-url", "postgresql://...")
+        KV-->>AZ: Secret updated
+        AZ-->>Push: Success
     end
     
     Push-->>Dispatch: Success

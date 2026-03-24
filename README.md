@@ -73,6 +73,7 @@ and streamline onboarding and CI/CD workflows.
     - [With `$config` (explicit provider)](#with-config-explicit-provider)
     - [`$config` Options](#config-options)
     - [Configuration Priority](#configuration-priority)
+  - [🔍 Envilder vs. Alternatives](#-envilder-vs-alternatives)
   - [🛠️ How it works](#️-how-it-works)
   - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
   - [🏁 Roadmap](#-roadmap)
@@ -111,6 +112,14 @@ and streamline onboarding and CI/CD workflows.
 ```bash
 pnpm add -g envilder
 ```
+
+Or use your preferred package manager:
+
+```bash
+npm install -g envilder
+```
+
+> 💡 **Want to try without installing?** Run `npx envilder --help` to explore the CLI instantly.
 
 > 💡 **New to AWS SSM?** AWS Systems Manager Parameter Store provides secure storage for configuration data and secrets:
 >
@@ -334,9 +343,9 @@ graph LR
     classDef core fill:#1f3b57,color:#fff,stroke:#ccc,stroke-width:2px;
 ```
 
-1. Create a new `.env` file like `'ENV_VAR=12345'`
-2. Define mappings in a JSON file : `{"ENV_VAR": "secret/path"}`
-3. Run Envilder: `--push` to upload, or `--map` + `--envfile` to generate
+1. Define mappings in a JSON file: `{"DB_PASSWORD": "/myapp/db/password"}`
+2. **Pull** secrets into a `.env` file: `envilder --map=param-map.json --envfile=.env`
+3. **Push** local values back: `envilder --push --map=param-map.json --envfile=.env`
 4. Envilder syncs secrets securely with AWS SSM or Azure Key Vault using your cloud credentials
 5. Use `--provider=azure` to switch from the default AWS provider
 6. Result: your secrets are always up-to-date, secure, and ready for any environment
@@ -356,7 +365,8 @@ A: Secrets are never stored in code or shared via chat/email. All secrets are ma
 cloud provider.
 
 **Q: Can I use Envilder in CI/CD pipelines?**  
-A: Yes! Envilder is designed for automation and works seamlessly in CI/CD workflows.
+A: Yes! Use the official [Envilder GitHub Action](./github-action/README.md) to pull secrets directly
+in your workflows — no extra setup needed.
 
 **Q: Does Envilder support multiple AWS profiles?**  
 A: Yes, you can use the `--profile` flag to select different AWS credentials.
@@ -371,6 +381,27 @@ A: Any environment supported by your cloud provider—dev, test, staging, produc
 
 **Q: Is Envilder open source?**  
 A: Yes, licensed under MIT.
+
+---
+
+## 🔍 Envilder vs. Alternatives
+
+| Feature | Envilder | dotenv-vault | chamber | aws-vault | infisical |
+|---------|----------|-------------|---------|-----------|----------|
+| **CLI tool** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **GitHub Action** | ✅ Built-in | ❌ | ❌ | ❌ | ✅ |
+| **AWS SSM support** | ✅ Native | ❌ | ✅ | ❌ (STS only) | ✅ |
+| **Azure Key Vault** | ✅ Native | ❌ | ❌ | ❌ | ✅ |
+| **Mapping file** | ✅ JSON | ❌ | ❌ | ❌ | ❌ |
+| **Push & Pull** | ✅ Bidirectional | Pull only | Write only | ❌ | ✅ |
+| **Self-hosted** | ✅ No server | ❌ SaaS | ✅ | ✅ | Optional |
+| **Zero infrastructure** | ✅ | ❌ | ✅ | ✅ | ❌ |
+| **Open source** | ✅ MIT | Partial | ✅ | ✅ | ✅ |
+| **Multi-env (.env.dev, .env.prod)** | ✅ | ✅ | ❌ | ❌ | ✅ |
+
+**Why choose Envilder?** If you already use AWS SSM or Azure Key Vault and want a lightweight,
+zero-infrastructure CLI that generates `.env` files from a simple JSON mapping — without a SaaS
+dependency or extra servers — Envilder is the simplest path.
 
 ---
 

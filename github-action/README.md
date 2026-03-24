@@ -406,6 +406,18 @@ marketplace version (`macalbert/envilder/github-action@v0.8.0`) not a local chec
 - Verify AWS credentials are configured before running the action
 - Review GitHub Actions logs for specific error messages
 
+### Azure: "SecretNotFound" or "VaultNotFound"
+
+- Verify the vault URL is correct and accessible (e.g., `https://my-vault.vault.azure.net`)
+- Check your Azure identity has **Key Vault Secrets User** role on the vault
+- Ensure `azure/login` runs before the Envilder action step
+
+### Azure: Secret name contains invalid characters
+
+- Azure Key Vault secret names only allow alphanumeric characters and hyphens
+- Envilder automatically normalizes names (slashes and underscores become hyphens)
+- If you see unexpected results, check the normalized name in the action logs
+
 ## 🔗 Related
 
 - 🍄 **CLI Tool**: [Envilder CLI](https://www.npmjs.com/package/envilder) - npm package for local development

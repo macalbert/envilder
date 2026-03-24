@@ -55,7 +55,10 @@
     "envfile",
     "github-actions",
     "github-action",
-    "actions"
+    "actions",
+    "azure",
+    "key-vault",
+    "azure-key-vault"
   ],
   "bugs": {
     "url": "https://github.com/macalbert/envilder/issues"

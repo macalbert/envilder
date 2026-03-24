@@ -199,6 +199,32 @@ Create a `param-map.json` file that maps environment variable names to secret pa
 
 > You can also set provider and vault URL via action inputs (`provider`, `vault-url`), which override `$config`.
 
+## Troubleshooting
+
+### Error: "Parameter not found"
+
+- Verify the parameter exists in AWS SSM Parameter Store
+- Check your IAM role has `ssm:GetParameter` permission for that parameter
+- Ensure the parameter path in `param-map.json` is correct (case-sensitive)
+
+### Error: "Unable to assume role"
+
+- Verify your GitHub OIDC trust policy is configured correctly
+- Check the role ARN is correct
+- Ensure `id-token: write` permission is set in your workflow
+
+### Azure: "SecretNotFound" or "VaultNotFound"
+
+- Verify the vault URL is correct and accessible (e.g., `https://my-vault.vault.azure.net`)
+- Check your Azure identity has **Key Vault Secrets User** role on the vault
+- Ensure `azure/login` runs before the Envilder action step
+
+### Generated `.env` file is empty
+
+- Check that `param-map.json` exists and has valid JSON syntax
+- Verify cloud credentials are configured before running the action
+- Review GitHub Actions logs for specific error messages
+
 ## AWS Authentication
 
 This action works with any AWS authentication method supported by the AWS SDK. The recommended
