@@ -48,6 +48,9 @@ describe('PullSecretsToEnvCommandHandler', () => {
       getMapping: vi.fn().mockResolvedValue({} as Record<string, string>),
       getEnvironment: vi.fn().mockResolvedValue({} as Record<string, string>),
       saveEnvironment: vi.fn().mockImplementation(() => Promise.resolve()),
+      getParsedMapping: vi
+        .fn()
+        .mockResolvedValue({ variables: {}, config: {} }),
     };
 
     mockLogger = {
