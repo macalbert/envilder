@@ -136,3 +136,6 @@ envilder --provider=azure --vault-url=https://prod-vault.vault.azure.net --map=p
 - CLI flags override `$config` values: `--provider` > `$config.provider`, `--vault-url` > `$config.vaultUrl`,
 `--profile` > `$config.profile`.
 - No secrets are exposed in code or version control.
+
+> **Permissions:** Your cloud identity must have read access to secrets.
+> See [Set Up IAM Permissions](requirements-installation.md#4-set-up-iam-permissions) for AWS and Azure setup.

@@ -110,11 +110,67 @@ Attach this policy to your IAM user or role using the AWS Console or CLI.
 
 ### Azure
 
-Your Azure identity (user, service principal, or managed identity) needs the following Key Vault access:
+Your Azure identity (user, service principal, or managed identity) needs the following Key Vault secret permissions:
 
-- **Get** and **Set** secret permissions
+| Operation | Required Permission |
+| --------- | ------------------- |
+| Pull       | **Get** (read secrets) |
+| Push       | **Set** (write secrets) |
 
-You can assign these via Azure RBAC role `Key Vault Secrets Officer` or through Key Vault access policies.
+Azure Key Vault supports two access models. Check which one your vault uses:
+
+```bash
+az keyvault show --name <VAULT_NAME> --query properties.enableRbacAuthorization
+```
+
+- `true` → **Azure RBAC** (recommended)
+- `false` / `null` → **Vault Access Policy** (classic)
+
+#### Option A — Azure RBAC (recommended)
+
+Assign the **Key Vault Secrets Officer** role to your identity:
+
+```bash
+az role assignment create \
+  --role "Key Vault Secrets Officer" \
+  --assignee <YOUR_OBJECT_ID> \
+  --scope /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>/providers/Microsoft.KeyVault/vaults/<VAULT_NAME>
+```
+
+> Use `az ad signed-in-user show --query id -o tsv` to get your object ID.
+
+If you only need read access (pull), **Key Vault Secrets User** is sufficient:
+
+```bash
+az role assignment create \
+  --role "Key Vault Secrets User" \
+  --assignee <YOUR_OBJECT_ID> \
+  --scope /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>/providers/Microsoft.KeyVault/vaults/<VAULT_NAME>
+```
+
+#### Option B — Vault Access Policy (classic)
+
+Grant secret permissions directly on the vault:
+
+```bash
+az keyvault set-policy \
+  --name <VAULT_NAME> \
+  --object-id <YOUR_OBJECT_ID> \
+  --secret-permissions get set list
+```
+
+> For pull-only access, `get list` is enough. Add `set` when you also need push.
+
+#### Troubleshooting
+
+If you see an error like:
+
+```txt
+does not have secrets set permission on key vault '...'
+```
+
+Your identity is authenticated correctly but lacks the required permission.
+Follow Option A or B above to grant access, then retry.
 
 ## 5. Useful Links
 

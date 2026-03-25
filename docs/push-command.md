@@ -64,6 +64,9 @@ DB_PASSWORD=secret456
 - Use the `--vault-url` flag or `$config.vaultUrl` for the Azure Key Vault URL.
 - Use the `--profile` flag for different AWS accounts (AWS only).
 
+> **Permissions:** Your cloud identity must have write access to secrets.
+> See [Set Up IAM Permissions](requirements-installation.md#4-set-up-iam-permissions) for AWS and Azure setup.
+
 ## Push Mode
 
 Sync your local `.env` variables to your cloud provider using a mapping file and mapping JSON.
