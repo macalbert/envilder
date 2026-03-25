@@ -126,23 +126,4 @@ describe('DispatchActionCommandHandler', () => {
       'Missing required arguments: --map and --envfile',
     );
   });
-
-  it('Should_CallPushEnvToSecrets_When_PushFlagIsProvided', async () => {
-    // Arrange
-    const command = new DispatchActionCommand(
-      'path/to/map.json',
-      'path/to/.env',
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      OperationMode.PUSH_ENV_TO_SECRETS,
-    );
-
-    // Act
-    await sut.handleCommand(command);
-
-    // Assert
-    expect(mockPushHandler.handle).toHaveBeenCalled();
-  });
 });

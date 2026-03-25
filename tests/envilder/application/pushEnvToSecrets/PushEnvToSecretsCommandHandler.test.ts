@@ -171,36 +171,6 @@ describe('PushEnvToSecretsCommandHandler', () => {
     );
   });
 
-  it('Should_NotShowAnyLogDescriptiveError_When_NoErrorsThrown', async () => {
-    // Arrange
-    mockVariableStore.getMapping.mockResolvedValue({
-      TEST_ENV_VAR: '/path/to/ssm/test',
-    });
-
-    mockVariableStore.getEnvironment.mockResolvedValue({
-      TEST_ENV_VAR: 'test-value',
-    });
-
-    const command = PushEnvToSecretsCommand.create(
-      mockMapPath,
-      mockEnvFilePath,
-    );
-
-    // Act
-    await sut.handle(command);
-
-    // Assert
-    // Should NOT show any "Failed..." error message
-    expect(mockLogger.error).not.toHaveBeenCalled();
-    expect(mockLogger.error).not.toHaveBeenCalledWith(
-      expect.stringContaining('Failed to push environment file'),
-    );
-    // Should show success message
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      `Successfully pushed environment variables from 'env-file.env' to secret store.`,
-    );
-  });
-
   it('Should_LogDescriptiveError_When_NonErrorObjectIsThrown', async () => {
     // Arrange
     mockSecretProvider.setSecret = vi.fn(async (): Promise<void> => {

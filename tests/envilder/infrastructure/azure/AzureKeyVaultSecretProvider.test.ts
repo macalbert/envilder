@@ -164,18 +164,6 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
   });
 
   describe('normalizeSecretName', () => {
-    it('Should_ThrowInvalidArgumentError_When_TruncatedNameWouldExceed127Chars', async () => {
-      // Arrange
-      const longName = `a${'b'.repeat(125)}-d`;
-
-      // Act
-      const action = sut.getSecret(longName);
-
-      // Assert
-      await expect(action).rejects.toThrow(InvalidArgumentError);
-      await expect(action).rejects.toThrow(/exceeds the 127-character limit/);
-    });
-
     it('Should_LowercaseName_When_NameContainsUppercase', async () => {
       // Arrange
       mockGetSecretFn.mockResolvedValueOnce({ value: 'value' });

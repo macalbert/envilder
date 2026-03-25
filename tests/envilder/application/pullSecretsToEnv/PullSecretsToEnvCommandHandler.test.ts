@@ -1,13 +1,4 @@
-import * as fs from 'node:fs';
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  type Mock,
-  vi,
-} from 'vitest';
+import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import { PullSecretsToEnvCommand } from '../../../../src/envilder/application/pullSecretsToEnv/PullSecretsToEnvCommand';
 import { PullSecretsToEnvCommandHandler } from '../../../../src/envilder/application/pullSecretsToEnv/PullSecretsToEnvCommandHandler';
 import type { ILogger } from '../../../../src/envilder/domain/ports/ILogger';
@@ -64,18 +55,6 @@ describe('PullSecretsToEnvCommandHandler', () => {
       mockEnvFileManager,
       mockLogger,
     );
-
-    fs.writeFileSync(mockMapPath, '{}');
-    fs.writeFileSync(mockEnvFilePath, '');
-  });
-
-  afterEach(() => {
-    if (fs.existsSync(mockMapPath)) {
-      fs.unlinkSync(mockMapPath);
-    }
-    if (fs.existsSync(mockEnvFilePath)) {
-      fs.unlinkSync(mockEnvFilePath);
-    }
   });
 
   it('Should_GenerateEnvFileFromSecrets_When_ValidSecretsAreProvided', async () => {
@@ -84,7 +63,6 @@ describe('PullSecretsToEnvCommandHandler', () => {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
       NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password',
     };
-    fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
 
     mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
     mockEnvFileManager.getEnvironment.mockResolvedValue({});
@@ -126,7 +104,6 @@ describe('PullSecretsToEnvCommandHandler', () => {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
       NON_EXISTENT_PARAM: 'non-existent parameter',
     };
-    fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
 
     mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
     mockEnvFileManager.getEnvironment.mockResolvedValue({});
@@ -151,7 +128,6 @@ describe('PullSecretsToEnvCommandHandler', () => {
     const paramMapContent = {
       EMPTY_PARAM: '/path/to/ssm/password_no_value',
     };
-    fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
 
     mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
     mockEnvFileManager.getEnvironment.mockResolvedValue({});
@@ -175,7 +151,6 @@ describe('PullSecretsToEnvCommandHandler', () => {
     const paramMapContent = {
       PASSWORD: '/path/to/ssm/password',
     };
-    fs.writeFileSync(mockMapPath, JSON.stringify(paramMapContent));
 
     mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
     mockEnvFileManager.getEnvironment.mockResolvedValue({});

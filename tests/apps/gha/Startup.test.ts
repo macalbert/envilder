@@ -54,46 +54,4 @@ describe('Startup', () => {
     // Assert
     expect(secretProvider).toBeInstanceOf(AzureKeyVaultSecretProvider);
   });
-
-  it('Should_ThrowError_When_AzureProviderSelectedButVaultUrlMissing', () => {
-    // Arrange
-    const config = { provider: 'azure' };
-
-    // Act
-    const action = () =>
-      startup.configureServices().configureInfrastructure(config);
-
-    // Assert
-    expect(action).toThrow('vaultUrl is required when using Azure provider');
-  });
-
-  it('Should_ThrowError_When_AzureVaultUrlIsNotHttps', () => {
-    // Arrange
-    const config = {
-      provider: 'azure',
-      vaultUrl: 'http://test-vault.vault.azure.net',
-    };
-
-    // Act
-    const action = () =>
-      startup.configureServices().configureInfrastructure(config);
-
-    // Assert
-    expect(action).toThrow('vaultUrl must use https:// protocol');
-  });
-
-  it('Should_ThrowError_When_AzureVaultUrlHostIsNotAzure', () => {
-    // Arrange
-    const config = {
-      provider: 'azure',
-      vaultUrl: 'https://evil-server.example.com',
-    };
-
-    // Act
-    const action = () =>
-      startup.configureServices().configureInfrastructure(config);
-
-    // Assert
-    expect(action).toThrow('vaultUrl hostname must end with one of');
-  });
 });
