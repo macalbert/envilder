@@ -40,8 +40,11 @@ function validateAzureVaultUrl(vaultUrl: string, allowedHosts: string[]): void {
     throw new InvalidArgumentError('vaultUrl must use https:// protocol');
   }
   const isAllowedHost = allowedHosts.some((suffix) => {
-    const dotSuffix = suffix.startsWith('.') ? suffix : `.${suffix}`;
-    return url.hostname.endsWith(dotSuffix);
+    const normalizedSuffix = suffix.startsWith('.') ? suffix.slice(1) : suffix;
+    return (
+      url.hostname === normalizedSuffix ||
+      url.hostname.endsWith(`.${normalizedSuffix}`)
+    );
   });
   if (!isAllowedHost) {
     throw new InvalidArgumentError(
