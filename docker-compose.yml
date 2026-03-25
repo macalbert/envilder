@@ -1,7 +1,7 @@
 # Development environment: LocalStack (AWS SSM) + Lowkey Vault (Azure Key Vault)
 #
 # Usage:
-#   docker compose -f docker-compose.dev.yml up -d
+#   docker compose -f docker-compose.yml up -d
 #
 # AWS SSM endpoint:        http://localhost:4566
 # Azure Key Vault URL:     https://localhost:8443
