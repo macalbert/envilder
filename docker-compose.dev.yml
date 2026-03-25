@@ -1,0 +1,36 @@
+# Development environment: LocalStack (AWS SSM) + Lowkey Vault (Azure Key Vault)
+#
+# Usage:
+#   docker compose -f docker-compose.dev.yml up -d
+#
+# AWS SSM endpoint:        http://localhost:4566
+# Azure Key Vault URL:     https://localhost:8443
+# Azure Token endpoint:    http://localhost:8080
+
+services:
+  localstack:
+    image: localstack/localstack:stable
+    container_name: envilder-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      LOCALSTACK_ACKNOWLEDGE_ACCOUNT_REQUIREMENT: "1"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  lowkey-vault:
+    image: nagyesta/lowkey-vault:7.1.32
+    container_name: envilder-lowkey-vault
+    ports:
+      - "8443:8443"
+      - "8080:8080"
+    environment:
+      LOWKEY_ARGS: "--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true"
+    healthcheck:
+      test: ["CMD", "curl", "-fk", "https://localhost:8443/ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10

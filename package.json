@@ -35,7 +35,10 @@
     "release-patch": "pnpm version patch",
     "release-minor": "pnpm version minor",
     "release-major": "pnpm version major",
-    "release-prerelease": "pnpm version prerelease"
+    "release-prerelease": "pnpm version prerelease",
+    "dev:run": "node --env-file=dev.env --import tsx src/apps/cli/Index.ts --",
+    "docker:up": "docker compose -f docker-compose.dev.yml up -d",
+    "docker:down": "docker compose -f docker-compose.dev.yml down"
   },
   "keywords": [
     "env",
