@@ -56,7 +56,7 @@ describe('Envilder (E2E)', () => {
     rootDir,
     'e2e',
     'sample',
-    'param-map-with-config.json',
+    'param-map-with-aws-config.json',
   );
   const singleSsmPath = '/Test/SingleVariable';
 

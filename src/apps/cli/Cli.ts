@@ -88,9 +88,18 @@ export async function main() {
           ...(options.profile && { profile: options.profile }),
         };
 
+        const infraOptions: Record<string, unknown> = {};
+        const extraHosts = process.env.ENVILDER_ALLOWED_VAULT_HOSTS;
+        if (extraHosts) {
+          infraOptions.allowedVaultHosts = extraHosts
+            .split(',')
+            .map((h) => h.trim());
+          infraOptions.disableChallengeResourceVerification = true;
+        }
+
         serviceProvider = Startup.build()
           .configureServices()
-          .configureInfrastructure(config)
+          .configureInfrastructure(config, infraOptions)
           .create();
 
         await executeCommand(options);

@@ -53,7 +53,7 @@ describe('GitHub Action (E2E)', () => {
     rootDir,
     'e2e',
     'sample',
-    'param-map-with-config.json',
+    'param-map-with-aws-config.json',
   );
 
   beforeAll(async () => {

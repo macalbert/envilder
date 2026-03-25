@@ -1,0 +1,7 @@
+{
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://localhost:8443"
+  },
+  "TOKEN_SECRET": "/Test/Token"
+}
