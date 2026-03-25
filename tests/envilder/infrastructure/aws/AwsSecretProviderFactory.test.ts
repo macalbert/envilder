@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
+import { fromIni } from '@aws-sdk/credential-providers';
+import { createAwsSecretProvider } from '../../../../src/envilder/infrastructure/aws/AwsSecretProviderFactory.js';
 
 vi.mock('@aws-sdk/client-ssm', () => {
   const SSM = vi.fn();
@@ -12,10 +14,6 @@ vi.mock('@aws-sdk/credential-providers', () => {
   }));
   return { fromIni };
 });
-
-import { SSM } from '@aws-sdk/client-ssm';
-import { fromIni } from '@aws-sdk/credential-providers';
-import { createAwsSecretProvider } from '../../../../src/envilder/infrastructure/aws/AwsSecretProviderFactory.js';
 
 describe('createAwsSecretProvider', () => {
   it('Should_ReturnAwsProvider_When_ProfileProvided', () => {
