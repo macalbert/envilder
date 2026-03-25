@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import type { Container } from 'inversify';
+import pc from 'picocolors';
 import { DispatchActionCommand } from '../../envilder/application/dispatch/DispatchActionCommand.js';
 import type { DispatchActionCommandHandler } from '../../envilder/application/dispatch/DispatchActionCommandHandler.js';
 import type { CliOptions } from '../../envilder/domain/CliOptions.js';
@@ -27,19 +28,35 @@ export async function main() {
   const program = new Command();
   const version = await readPackageVersion();
 
+  const banner = `
+  ${pc.green('███████╗')}${pc.cyan('███╗   ██╗')}${pc.magenta('██╗   ██╗')}${pc.yellow('██╗')}${pc.red('██╗     ')}${pc.blue('██████╗ ')}${pc.green('███████╗')}${pc.cyan('██████╗ ')}
+  ${pc.green('██╔════╝')}${pc.cyan('████╗  ██║')}${pc.magenta('██║   ██║')}${pc.yellow('██║')}${pc.red('██║     ')}${pc.blue('██╔══██╗')}${pc.green('██╔════╝')}${pc.cyan('██╔══██╗')}
+  ${pc.green('█████╗  ')}${pc.cyan('██╔██╗ ██║')}${pc.magenta('██║   ██║')}${pc.yellow('██║')}${pc.red('██║     ')}${pc.blue('██║  ██║')}${pc.green('█████╗  ')}${pc.cyan('██████╔╝')}
+  ${pc.green('██╔══╝  ')}${pc.cyan('██║╚██╗██║')}${pc.magenta('╚██╗ ██╔╝')}${pc.yellow('██║')}${pc.red('██║     ')}${pc.blue('██║  ██║')}${pc.green('██╔══╝  ')}${pc.cyan('██╔══██╗')}
+  ${pc.green('███████╗')}${pc.cyan('██║ ╚████║')}${pc.magenta(' ╚████╔╝ ')}${pc.yellow('██║')}${pc.red('███████╗')}${pc.blue('██████╔╝')}${pc.green('███████╗')}${pc.cyan('██║  ██║')}
+  ${pc.green('╚══════╝')}${pc.cyan('╚═╝  ╚═══╝')}${pc.magenta('  ╚═══╝  ')}${pc.yellow('╚═╝')}${pc.red('╚══════╝')}${pc.blue('╚═════╝ ')}${pc.green('╚══════╝')}${pc.cyan('╚═╝  ╚═╝')}
+  ${pc.dim('Your secrets, one command away')}          ${pc.dim('aws & azure')}
+
+  ${pc.yellow('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')}
+  ${pc.green('WORLD 1-1')} ${pc.dim('— SELECT YOUR MISSION')}
+  ${pc.yellow('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')}
+
+  ${pc.green('>')} ${pc.bold('Generate a .env file')}  ${pc.dim('(pull secrets from the cloud)')}
+    ${pc.cyan('envilder --map=param-map.json --envfile=.env')}
+
+  ${pc.magenta('>')} ${pc.bold('Sync .env back to cloud')}  ${pc.dim('(push secrets up)')}
+    ${pc.cyan('envilder --push --map=param-map.json --envfile=.env')}
+
+  ${pc.red('>')} ${pc.bold('Push a single secret')}
+    ${pc.cyan('envilder --push --key=API_KEY --value=s3cret --secret-path=/my/path')}
+
+  ${pc.blue('>')} ${pc.bold('Use Azure Key Vault')}
+    ${pc.cyan('envilder --provider=azure --map=param-map.json --envfile=.env')}
+`;
+
   program
     .name('envilder')
-    .description(
-      '🌟 A CLI tool to manage environment variables with AWS SSM or Azure Key Vault. What do you want to do today?\n\n' +
-        '✨ Generate a .env file?\n' +
-        '  Example: envilder --map=param-map.json --envfile=.env\n\n' +
-        '🔄 Sync your local .env file back to your cloud provider?\n' +
-        '  Example: envilder --push --map=param-map.json --envfile=.env\n\n' +
-        '🎯 Create or update a single secret?\n' +
-        '  Example: envilder --push --key=API_KEY --value=secret123 --secret-path=/my/path\n\n' +
-        '☁️  Use Azure Key Vault?\n' +
-        '  Example: envilder --provider=azure --map=param-map.json --envfile=.env\n',
-    )
+    .description(banner)
     .version(version)
     .option(
       '--map <path>',
