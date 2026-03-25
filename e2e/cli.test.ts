@@ -489,8 +489,7 @@ describe('Envilder (E2E)', () => {
       await handler.handleCommand(command);
 
       // Assert
-      const secret =
-        await azureSecretClient.getSecret('single-azure-test');
+      const secret = await azureSecretClient.getSecret('single-azure-test');
       expect(secret.value).toBe('single-azure-value');
     });
   });
