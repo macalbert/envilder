@@ -5,6 +5,7 @@ import type { DispatchActionCommandHandler } from '../../envilder/application/di
 import type { CliOptions } from '../../envilder/domain/CliOptions.js';
 import type { MapFileConfig } from '../../envilder/domain/MapFileConfig.js';
 import type { ILogger } from '../../envilder/domain/ports/ILogger.js';
+import { ConsoleLogger } from '../../envilder/infrastructure/logger/ConsoleLogger.js';
 import { readMapFileConfig } from '../../envilder/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../envilder/types.js';
 import { Startup } from './Startup.js';
@@ -50,25 +51,25 @@ async function executeCommand(
 export async function main() {
   const { options, provider, vaultUrl } = readInputs();
 
-  const fileConfig = options.map ? await readMapFileConfig(options.map) : {};
-
-  const config: MapFileConfig = {
-    ...fileConfig,
-    ...(provider && { provider }),
-    ...(vaultUrl && { vaultUrl }),
-  };
-
   let serviceProvider: Container;
-  let logger: ILogger;
+  let logger: ILogger = new ConsoleLogger();
 
   try {
+    const fileConfig = options.map ? await readMapFileConfig(options.map) : {};
+
+    const config: MapFileConfig = {
+      ...fileConfig,
+      ...(provider && { provider }),
+      ...(vaultUrl && { vaultUrl }),
+    };
+
     const startup = Startup.build();
     startup.configureServices().configureInfrastructure(config);
     serviceProvider = startup.create();
     logger = serviceProvider.get<ILogger>(TYPES.ILogger);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error(`🚨 Failed to initialize: ${message}`);
+    logger.error(`🚨 Failed to initialize: ${message}`);
     throw error;
   }
 

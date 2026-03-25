@@ -218,13 +218,11 @@ describe('Startup', () => {
           provider: 'azure',
           vaultUrl: 'https://evilocalhost:8443',
         };
-        const allowedVaultHosts = ['localhost'];
-
         // Act
         const action = () =>
-          startup
-            .configureServices()
-            .configureInfrastructure(config, allowedVaultHosts);
+          startup.configureServices().configureInfrastructure(config, {
+            allowedVaultHosts: ['localhost'],
+          });
 
         // Assert
         expect(action).toThrow('vaultUrl hostname must end with one of');

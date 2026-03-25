@@ -7,9 +7,9 @@ export class DispatchActionCommand {
     public readonly envfile?: string,
     public readonly key?: string,
     public readonly value?: string,
-    public readonly ssmPath?: string,
+    public readonly secretPath?: string,
     public readonly profile?: string,
-    public readonly mode: OperationMode = OperationMode.PULL_SSM_TO_ENV,
+    public readonly mode: OperationMode = OperationMode.PULL_SECRETS_TO_ENV,
   ) {}
 
   static fromCliOptions(options: CliOptions): DispatchActionCommand {
@@ -19,21 +19,21 @@ export class DispatchActionCommand {
       options.envfile,
       options.key,
       options.value,
-      options.ssmPath,
+      options.secretPath,
       options.profile,
       mode,
     );
   }
 
   private static determineOperationMode(options: CliOptions): OperationMode {
-    if (options.key && options.value && options.ssmPath) {
+    if (options.key && options.value && options.secretPath) {
       return OperationMode.PUSH_SINGLE;
     }
 
     if (options.push) {
-      return OperationMode.PUSH_ENV_TO_SSM;
+      return OperationMode.PUSH_ENV_TO_SECRETS;
     }
 
-    return OperationMode.PULL_SSM_TO_ENV;
+    return OperationMode.PULL_SECRETS_TO_ENV;
   }
 }

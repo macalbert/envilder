@@ -86,7 +86,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
 
       // Assert
       await expect(action()).rejects.toThrow(
-        'Failed to get secret test-param: Network error',
+        'Failed to get secret *******ram: Network error',
       );
     });
 
@@ -99,7 +99,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
 
       // Assert
       await expect(action()).rejects.toThrow(
-        'Failed to get secret test-param: String error',
+        'Failed to get secret *******ram: String error',
       );
     });
   });
@@ -138,7 +138,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       // Assert
       expect(thrown).toBeInstanceOf(SecretOperationError);
       expect((thrown as Error).message).toBe(
-        'Failed to set secret test-param: Access denied',
+        'Failed to set secret *******ram: Access denied',
       );
     });
   });

@@ -1,0 +1,6 @@
+{
+  "$config": {
+    "provider": "azure"
+  },
+  "VAULT_SECRET": "test-secret"
+}

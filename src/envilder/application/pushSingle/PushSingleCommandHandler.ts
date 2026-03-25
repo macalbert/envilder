@@ -14,14 +14,14 @@ export class PushSingleCommandHandler {
   ) {}
 
   /**
-   * Handles the PushSingleCommand which pushes a single environment variable to AWS SSM.
+   * Handles the PushSingleCommand which pushes a single environment variable to the secret store.
    *
-   * @param command - The PushSingleCommand containing key, value and ssmPath
+   * @param command - The PushSingleCommand containing key, value and secretPath
    */
   async handle(command: PushSingleCommand): Promise<void> {
     try {
       this.logger.info(
-        `Starting push operation for key '${command.key}' to path '${command.ssmPath}'`,
+        `Starting push operation for key '${command.key}' to path '${command.secretPath}'`,
       );
 
       const envVariable = new EnvironmentVariable(
@@ -30,14 +30,16 @@ export class PushSingleCommandHandler {
         true,
       );
 
-      await this.secretProvider.setSecret(command.ssmPath, command.value);
+      await this.secretProvider.setSecret(command.secretPath, command.value);
       this.logger.info(
-        `Pushed ${command.key}=${envVariable.maskedValue} to AWS SSM at path ${command.ssmPath}`,
+        `Pushed ${command.key}=${envVariable.maskedValue} to secret store at path ${command.secretPath}`,
       );
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      this.logger.error(`Failed to push variable to SSM: ${errorMessage}`);
+      this.logger.error(
+        `Failed to push variable to secret store: ${errorMessage}`,
+      );
       throw error;
     }
   }

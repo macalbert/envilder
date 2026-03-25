@@ -320,7 +320,10 @@ describe('GitHub Action (E2E)', () => {
       // Act — invoke production code directly, passing test vault host
       const container = Startup.build()
         .configureServices()
-        .configureInfrastructure(config, [lowkeyVaultHost])
+        .configureInfrastructure(config, {
+          allowedVaultHosts: [lowkeyVaultHost],
+          disableChallengeResourceVerification: true,
+        })
         .create();
       const handler = container.get<DispatchActionCommandHandler>(
         TYPES.DispatchActionCommandHandler,

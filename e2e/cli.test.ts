@@ -244,7 +244,7 @@ describe('Envilder (E2E)', () => {
       key,
       '--value',
       value,
-      '--ssm-path',
+      '--secret-path',
       singleSsmPath,
     ];
 
@@ -381,7 +381,10 @@ describe('Envilder (E2E)', () => {
       // Act — invoke production code directly, passing test vault host
       const container = Startup.build()
         .configureServices()
-        .configureInfrastructure(config, [lowkeyVaultHost])
+        .configureInfrastructure(config, {
+          allowedVaultHosts: [lowkeyVaultHost],
+          disableChallengeResourceVerification: true,
+        })
         .create();
       const handler = container.get<DispatchActionCommandHandler>(
         TYPES.DispatchActionCommandHandler,
@@ -423,7 +426,10 @@ describe('Envilder (E2E)', () => {
       // Act — invoke production code directly, passing test vault host
       const container = Startup.build()
         .configureServices()
-        .configureInfrastructure(config, [lowkeyVaultHost])
+        .configureInfrastructure(config, {
+          allowedVaultHosts: [lowkeyVaultHost],
+          disableChallengeResourceVerification: true,
+        })
         .create();
       const handler = container.get<DispatchActionCommandHandler>(
         TYPES.DispatchActionCommandHandler,
@@ -452,7 +458,10 @@ describe('Envilder (E2E)', () => {
       // Act
       const container = Startup.build()
         .configureServices()
-        .configureInfrastructure(config, [lowkeyVaultHost])
+        .configureInfrastructure(config, {
+          allowedVaultHosts: [lowkeyVaultHost],
+          disableChallengeResourceVerification: true,
+        })
         .create();
       const handler = container.get<DispatchActionCommandHandler>(
         TYPES.DispatchActionCommandHandler,
@@ -476,7 +485,10 @@ describe('Envilder (E2E)', () => {
       // Act
       const container = Startup.build()
         .configureServices()
-        .configureInfrastructure(config, [lowkeyVaultHost])
+        .configureInfrastructure(config, {
+          allowedVaultHosts: [lowkeyVaultHost],
+          disableChallengeResourceVerification: true,
+        })
         .create();
       const handler = container.get<DispatchActionCommandHandler>(
         TYPES.DispatchActionCommandHandler,
@@ -484,7 +496,7 @@ describe('Envilder (E2E)', () => {
       const command = DispatchActionCommand.fromCliOptions({
         key: 'SINGLE_VAR',
         value: 'single-azure-value',
-        ssmPath: 'single-azure-test',
+        secretPath: 'single-azure-test',
       });
       await handler.handleCommand(command);
 

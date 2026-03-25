@@ -5,8 +5,8 @@ import { SecretClient } from '@azure/keyvault-secrets';
 import type { Container } from 'inversify';
 
 import { DispatchActionCommandHandler } from '../../envilder/application/dispatch/DispatchActionCommandHandler.js';
-import { PullSsmToEnvCommandHandler } from '../../envilder/application/pullSsmToEnv/PullSsmToEnvCommandHandler.js';
-import { PushEnvToSsmCommandHandler } from '../../envilder/application/pushEnvToSsm/PushEnvToSsmCommandHandler.js';
+import { PullSecretsToEnvCommandHandler } from '../../envilder/application/pullSecretsToEnv/PullSecretsToEnvCommandHandler.js';
+import { PushEnvToSecretsCommandHandler } from '../../envilder/application/pushEnvToSecrets/PushEnvToSecretsCommandHandler.js';
 import { PushSingleCommandHandler } from '../../envilder/application/pushSingle/PushSingleCommandHandler.js';
 import {
   DependencyMissingError,
@@ -41,7 +41,7 @@ function validateAzureVaultUrl(vaultUrl: string, allowedHosts: string[]): void {
   }
   const isAllowedHost = allowedHosts.some((suffix) => {
     const dotSuffix = suffix.startsWith('.') ? suffix : `.${suffix}`;
-    return url.hostname === suffix || url.hostname.endsWith(dotSuffix);
+    return url.hostname.endsWith(dotSuffix);
   });
   if (!isAllowedHost) {
     throw new InvalidArgumentError(
@@ -50,11 +50,30 @@ function validateAzureVaultUrl(vaultUrl: string, allowedHosts: string[]): void {
   }
 }
 
+/**
+ * Options that only test or infrastructure code should set.
+ * Not exposed via CLI flags or map-file $config.
+ */
+export type InfrastructureOptions = {
+  /** Override the default Azure vault host allowlist (for test doubles). */
+  allowedVaultHosts?: string[];
+  /**
+   * Disable Azure SDK challenge-resource verification.
+   * Only for local test doubles (e.g. Lowkey Vault).
+   * Weakens SSRF protection — never enable in production.
+   */
+  disableChallengeResourceVerification?: boolean;
+};
+
 export function configureInfrastructureServices(
   container: Container,
   config: MapFileConfig = {},
-  allowedVaultHosts: string[] = DEFAULT_VAULT_HOSTS,
+  options: InfrastructureOptions = {},
 ): void {
+  const {
+    allowedVaultHosts = DEFAULT_VAULT_HOSTS,
+    disableChallengeResourceVerification = false,
+  } = options;
   container.bind<ILogger>(TYPES.ILogger).to(ConsoleLogger).inSingletonScope();
 
   container
@@ -63,6 +82,13 @@ export function configureInfrastructureServices(
     .inSingletonScope();
 
   const selectedProvider = config.provider?.toLowerCase() || 'aws';
+
+  if (config.profile && selectedProvider !== 'aws') {
+    const logger = container.get<ILogger>(TYPES.ILogger);
+    logger.warn(
+      `--profile is only supported with the aws provider and will be ignored (current provider: ${selectedProvider}).`,
+    );
+  }
 
   let secretProvider: ISecretProvider;
 
@@ -75,11 +101,8 @@ export function configureInfrastructureServices(
     }
     validateAzureVaultUrl(vaultUrl, allowedVaultHosts);
     const credential = new DefaultAzureCredential();
-    const isCustomHosts =
-      allowedVaultHosts.length !== DEFAULT_VAULT_HOSTS.length ||
-      allowedVaultHosts.some((h, i) => h !== DEFAULT_VAULT_HOSTS[i]);
     const client = new SecretClient(vaultUrl, credential, {
-      disableChallengeResourceVerification: isCustomHosts,
+      disableChallengeResourceVerification,
     });
     secretProvider = new AzureKeyVaultSecretProvider(client);
   } else if (selectedProvider === 'aws') {
@@ -100,13 +123,13 @@ export function configureInfrastructureServices(
 
 export function configureApplicationServices(container: Container): void {
   container
-    .bind<PullSsmToEnvCommandHandler>(TYPES.PullSsmToEnvCommandHandler)
-    .to(PullSsmToEnvCommandHandler)
+    .bind<PullSecretsToEnvCommandHandler>(TYPES.PullSecretsToEnvCommandHandler)
+    .to(PullSecretsToEnvCommandHandler)
     .inTransientScope();
 
   container
-    .bind<PushEnvToSsmCommandHandler>(TYPES.PushEnvToSsmCommandHandler)
-    .to(PushEnvToSsmCommandHandler)
+    .bind<PushEnvToSecretsCommandHandler>(TYPES.PushEnvToSecretsCommandHandler)
+    .to(PushEnvToSecretsCommandHandler)
     .inTransientScope();
 
   container

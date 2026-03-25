@@ -4,10 +4,10 @@ import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
 import { TYPES } from '../../types.js';
-import type { PushEnvToSsmCommand } from './PushEnvToSsmCommand.js';
+import type { PushEnvToSecretsCommand } from './PushEnvToSecretsCommand.js';
 
 @injectable()
-export class PushEnvToSsmCommandHandler {
+export class PushEnvToSecretsCommandHandler {
   constructor(
     @inject(TYPES.ISecretProvider)
     private readonly secretProvider: ISecretProvider,
@@ -17,23 +17,23 @@ export class PushEnvToSsmCommandHandler {
   ) {}
 
   /**
-   * Handles the PushEnvToSsmCommand which imports environment variables
-   * from a local file and pushes them to AWS SSM.
-   * Uses a map file to determine the SSM parameter path for each environment variable.
+   * Handles the PushEnvToSecretsCommand which imports environment variables
+   * from a local file and pushes them to the secret store.
+   * Uses a map file to determine the secret path for each environment variable.
    *
-   * @param command - The PushEnvToSsmCommand containing mapPath and envFilePath
+   * @param command - The PushEnvToSecretsCommand containing mapPath and envFilePath
    */
-  async handle(command: PushEnvToSsmCommand): Promise<void> {
+  async handle(command: PushEnvToSecretsCommand): Promise<void> {
     try {
       this.logger.info(
         `Starting push operation from '${command.envFilePath}' using map '${command.mapPath}'`,
       );
       const config = await this.loadConfiguration(command);
       const validatedPaths = this.validateAndGroupByPath(config);
-      await this.pushParametersToSSM(validatedPaths);
+      await this.pushParametersToStore(validatedPaths);
 
       this.logger.info(
-        `Successfully pushed environment variables from '${command.envFilePath}' to AWS SSM.`,
+        `Successfully pushed environment variables from '${command.envFilePath}' to secret store.`,
       );
     } catch (error) {
       const errorMessage = this.getErrorMessage(error);
@@ -42,7 +42,7 @@ export class PushEnvToSsmCommandHandler {
     }
   }
 
-  private async loadConfiguration(command: PushEnvToSsmCommand): Promise<{
+  private async loadConfiguration(command: PushEnvToSecretsCommand): Promise<{
     paramMap: Record<string, string>;
     envVariables: Record<string, string>;
   }> {
@@ -67,9 +67,9 @@ export class PushEnvToSsmCommandHandler {
   }
 
   /**
-   * Validates and groups environment variables by SSM path.
-   * Ensures that all variables pointing to the same SSM path have the same value.
-   * Returns a map of SSM path to value.
+   * Validates and groups environment variables by secret path.
+   * Ensures that all variables pointing to the same secret path have the same value.
+   * Returns a map of secret path to value.
    */
   private validateAndGroupByPath(config: {
     paramMap: Record<string, string>;
@@ -81,7 +81,7 @@ export class PushEnvToSsmCommandHandler {
       { value: string; sourceKeys: string[] }
     >();
 
-    for (const [envKey, ssmPath] of Object.entries(paramMap)) {
+    for (const [envKey, secretPath] of Object.entries(paramMap)) {
       const envValue = envVariables[envKey];
 
       if (envValue === undefined) {
@@ -91,7 +91,7 @@ export class PushEnvToSsmCommandHandler {
         continue;
       }
 
-      const existing = pathToValueMap.get(ssmPath);
+      const existing = pathToValueMap.get(secretPath);
       if (existing) {
         if (existing.value !== envValue) {
           const existingMasked = new EnvironmentVariable(
@@ -102,40 +102,41 @@ export class PushEnvToSsmCommandHandler {
           const newMasked = new EnvironmentVariable(envKey, envValue, true)
             .maskedValue;
           throw new Error(
-            `Conflicting values for SSM path '${ssmPath}': ` +
+            `Conflicting values for secret path '${secretPath}': ` +
               `'${existing.sourceKeys[0]}' has value '${existingMasked}' ` +
               `but '${envKey}' has value '${newMasked}'`,
           );
         }
         existing.sourceKeys.push(envKey);
       } else {
-        pathToValueMap.set(ssmPath, { value: envValue, sourceKeys: [envKey] });
+        pathToValueMap.set(secretPath, {
+          value: envValue,
+          sourceKeys: [envKey],
+        });
       }
     }
 
     const uniquePaths = pathToValueMap.size;
     const totalVariables = Object.keys(paramMap).length;
     this.logger.info(
-      `Validated ${totalVariables} environment variables mapping to ${uniquePaths} unique SSM parameters`,
+      `Validated ${totalVariables} environment variables mapping to ${uniquePaths} unique secrets`,
     );
 
     return pathToValueMap;
   }
 
-  private async pushParametersToSSM(
+  private async pushParametersToStore(
     pathToValueMap: Map<string, { value: string; sourceKeys: string[] }>,
   ): Promise<void> {
     const pathsToProcess = Array.from(pathToValueMap.keys());
-    this.logger.info(
-      `Processing ${pathsToProcess.length} unique SSM parameters`,
-    );
+    this.logger.info(`Processing ${pathsToProcess.length} unique secrets`);
 
-    // Process parameters in parallel with retry logic for throttling errors
+    // Process secrets in parallel with retry logic for throttling errors
     const parameterProcessingPromises = Array.from(
       pathToValueMap.entries(),
-    ).map(([ssmPath, { value, sourceKeys }]) => {
+    ).map(([secretPath, { value, sourceKeys }]) => {
       return this.retryWithBackoff(() =>
-        this.pushParameter(ssmPath, value, sourceKeys),
+        this.pushParameter(secretPath, value, sourceKeys),
       );
     });
 
@@ -143,24 +144,24 @@ export class PushEnvToSsmCommandHandler {
   }
 
   private async pushParameter(
-    ssmPath: string,
+    secretPath: string,
     value: string,
     sourceKeys: string[],
   ): Promise<void> {
     const envVariable = new EnvironmentVariable(sourceKeys[0], value, true);
-    await this.secretProvider.setSecret(ssmPath, value);
+    await this.secretProvider.setSecret(secretPath, value);
 
     const keysDescription =
       sourceKeys.length > 1 ? `${sourceKeys.join(', ')}` : sourceKeys[0];
 
     this.logger.info(
-      `Pushed ${keysDescription}=${envVariable.maskedValue} to AWS SSM at path ${ssmPath}`,
+      `Pushed ${keysDescription}=${envVariable.maskedValue} to secret store at path ${secretPath}`,
     );
   }
 
   /**
    * Retries an async operation with exponential backoff and jitter.
-   * Handles AWS SSM throttling errors (TooManyUpdates).
+   * Handles throttling errors from cloud providers.
    */
   private async retryWithBackoff<T>(
     operation: () => Promise<T>,

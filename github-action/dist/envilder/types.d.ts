@@ -4,15 +4,15 @@ export declare const DOMAIN: {
     IVariableStore: symbol;
 };
 export declare const APPLICATION: {
-    PullSsmToEnvCommandHandler: symbol;
-    PushEnvToSsmCommandHandler: symbol;
+    PullSecretsToEnvCommandHandler: symbol;
+    PushEnvToSecretsCommandHandler: symbol;
     PushSingleCommandHandler: symbol;
     DispatchActionCommandHandler: symbol;
 };
 export declare const INFRASTRUCTURE: {};
 export declare const TYPES: {
-    PullSsmToEnvCommandHandler: symbol;
-    PushEnvToSsmCommandHandler: symbol;
+    PullSecretsToEnvCommandHandler: symbol;
+    PushEnvToSecretsCommandHandler: symbol;
     PushSingleCommandHandler: symbol;
     DispatchActionCommandHandler: symbol;
     ILogger: symbol;

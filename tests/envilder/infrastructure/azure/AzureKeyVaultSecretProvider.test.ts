@@ -10,7 +10,10 @@ import {
   it,
   vi,
 } from 'vitest';
-import { SecretOperationError } from '../../../../src/envilder/domain/errors/DomainErrors';
+import {
+  InvalidArgumentError,
+  SecretOperationError,
+} from '../../../../src/envilder/domain/errors/DomainErrors';
 import { AzureKeyVaultSecretProvider } from '../../../../src/envilder/infrastructure/azure/AzureKeyVaultSecretProvider';
 
 // Constants for integration tests
@@ -155,23 +158,146 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
 
       // Assert
       await expect(action()).rejects.toThrow(
-        'Failed to set secret test-secret: Access denied',
+        'Failed to set secret ********ret: Access denied',
       );
     });
   });
 
   describe('normalizeSecretName', () => {
-    it('Should_StripTrailingHyphen_When_TruncationProducesOne', async () => {
+    it('Should_ThrowInvalidArgumentError_When_TruncatedNameWouldExceed127Chars', async () => {
       // Arrange
-      mockGetSecretFn.mockResolvedValueOnce({ value: 'value' });
       const longName = `a${'b'.repeat(125)}-d`;
 
       // Act
-      await sut.getSecret(longName);
+      const action = sut.getSecret(longName);
 
       // Assert
-      const expectedName = `a${'b'.repeat(125)}`;
-      expect(mockGetSecretFn).toHaveBeenCalledWith(expectedName);
+      await expect(action).rejects.toThrow(InvalidArgumentError);
+      await expect(action).rejects.toThrow(/exceeds the 127-character limit/);
+    });
+
+    it('Should_LowercaseName_When_NameContainsUppercase', async () => {
+      // Arrange
+      mockGetSecretFn.mockResolvedValueOnce({ value: 'value' });
+
+      // Act
+      await sut.getSecret('MY-SECRET-NAME');
+
+      // Assert
+      expect(mockGetSecretFn).toHaveBeenCalledWith('my-secret-name');
+    });
+  });
+
+  describe('collision detection', () => {
+    it('Should_ThrowSecretOperationError_When_DifferentNamesNormalizeToSameKey', async () => {
+      // Arrange
+      mockGetSecretFn.mockResolvedValueOnce({ value: 'value1' });
+      await sut.getSecret('/app/db-url');
+
+      // Act
+      const action = sut.getSecret('/app/db_url');
+
+      // Assert
+      await expect(action).rejects.toThrow(SecretOperationError);
+      await expect(action).rejects.toThrow(/Secret name collision/);
+    });
+
+    it('Should_ThrowSecretOperationError_When_NamesCollideOnlyByCase', async () => {
+      // Arrange
+      mockGetSecretFn.mockResolvedValueOnce({ value: 'value1' });
+      await sut.getSecret('/APP/DB');
+
+      // Act
+      const action = sut.getSecret('/app/db');
+
+      // Assert
+      await expect(action).rejects.toThrow(SecretOperationError);
+      await expect(action).rejects.toThrow(/Secret name collision/);
+    });
+
+    it('Should_NotThrow_When_SameOriginalNameIsUsedTwice', async () => {
+      // Arrange
+      mockGetSecretFn.mockResolvedValue({ value: 'value' });
+      await sut.getSecret('/app/db-url');
+
+      // Act
+      const action = sut.getSecret('/app/db-url');
+
+      // Assert
+      await expect(action).resolves.toBe('value');
+    });
+
+    it('Should_DetectCollisionOnSetSecret_When_DifferentNamesNormalizeSame', async () => {
+      // Arrange
+      mockSetSecretFn.mockResolvedValueOnce({});
+      await sut.setSecret('/app/db-url', 'value1');
+
+      // Act
+      const action = sut.setSecret('/app/db_url', 'value2');
+
+      // Assert
+      await expect(action).rejects.toThrow(SecretOperationError);
+      await expect(action).rejects.toThrow(/Secret name collision/);
+    });
+  });
+
+  describe('name validation', () => {
+    it('Should_ThrowInvalidArgumentError_When_SecretNameIsEmpty', async () => {
+      // Arrange
+      // (sut is already created in beforeEach)
+
+      // Act
+      const action = sut.getSecret('');
+
+      // Assert
+      await expect(action).rejects.toThrow(InvalidArgumentError);
+    });
+
+    it('Should_ThrowInvalidArgumentError_When_SecretNameContainsOnlyInvalidChars', async () => {
+      // Arrange
+      // (sut is already created in beforeEach)
+
+      // Act
+      const action = sut.getSecret('@#$%^&');
+
+      // Assert
+      await expect(action).rejects.toThrow(InvalidArgumentError);
+    });
+
+    it('Should_ThrowInvalidArgumentError_When_NormalizedNameExceeds127Chars', async () => {
+      // Arrange
+      const longName = `a${'-bcd'.repeat(50)}`;
+
+      // Act
+      const action = sut.getSecret(longName);
+
+      // Assert
+      await expect(action).rejects.toThrow(InvalidArgumentError);
+      await expect(action).rejects.toThrow(/exceeds the 127-character limit/);
+    });
+
+    it('Should_AcceptName_When_NameContainsSlashesAndUnderscores', async () => {
+      // Arrange
+      mockGetSecretFn.mockResolvedValueOnce({ value: 'db-connection-string' });
+
+      // Act
+      const actual = await sut.getSecret('/my/app_config/db_url');
+
+      // Assert
+      expect(mockGetSecretFn).toHaveBeenCalledWith('my-app-config-db-url');
+      expect(actual).toBe('db-connection-string');
+    });
+
+    it('Should_ThrowInvalidArgumentError_When_SecretNameContainsUnexpectedSpecialChars', async () => {
+      // Arrange
+      const name = '/my/app/db@url!';
+
+      // Act
+      const action = sut.getSecret(name);
+
+      // Assert
+      await expect(action).rejects.toThrow(InvalidArgumentError);
+      await expect(action).rejects.toThrow(/characters not allowed/);
     });
   });
 });

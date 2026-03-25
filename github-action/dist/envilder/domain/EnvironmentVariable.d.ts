@@ -30,6 +30,11 @@ export declare class EnvironmentVariable {
      */
     get maskedValue(): string;
     /**
+     * Returns a masked representation of a secret path for safe logging.
+     */
+    static maskSecretPath(path: string): string;
+    private static mask;
+    /**
      * Validates the environment variable
      */
     private validate;

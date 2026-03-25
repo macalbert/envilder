@@ -3,6 +3,7 @@ import type { MapFileConfig } from '../../envilder/domain/MapFileConfig.js';
 import {
   configureApplicationServices,
   configureInfrastructureServices,
+  type InfrastructureOptions,
 } from '../shared/ContainerConfiguration.js';
 
 export class Startup {
@@ -23,9 +24,9 @@ export class Startup {
 
   configureInfrastructure(
     config?: MapFileConfig,
-    allowedVaultHosts?: string[],
+    options?: InfrastructureOptions,
   ): this {
-    configureInfrastructureServices(this.container, config, allowedVaultHosts);
+    configureInfrastructureServices(this.container, config, options);
     return this;
   }
 

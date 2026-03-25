@@ -23,9 +23,9 @@ export type CliOptions = {
   value?: string;
 
   /**
-   * SSM path for the single environment variable
+   * Secret path in the cloud provider for the single environment variable
    */
-  ssmPath?: string;
+  secretPath?: string;
 
   /**
    * AWS CLI profile to use
@@ -33,7 +33,7 @@ export type CliOptions = {
   profile?: string;
 
   /**
-   * Flag to push local .env file back to AWS SSM (renamed from import)
+   * Flag to push local .env file back to the secret store
    */
   push?: boolean;
 };

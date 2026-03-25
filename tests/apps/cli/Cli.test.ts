@@ -109,7 +109,7 @@ describe('Cli', () => {
     const exportCommand = DispatchActionCommand.fromCliOptions(options);
 
     // Assert
-    expect(exportCommand.mode).toBe(OperationMode.PULL_SSM_TO_ENV);
+    expect(exportCommand.mode).toBe(OperationMode.PULL_SECRETS_TO_ENV);
     expect(exportCommand.map).toBe('map.json');
     expect(exportCommand.envfile).toBe('.env');
   });
@@ -126,7 +126,7 @@ describe('Cli', () => {
     const importCommand = DispatchActionCommand.fromCliOptions(options);
 
     // Assert
-    expect(importCommand.mode).toBe(OperationMode.PUSH_ENV_TO_SSM);
+    expect(importCommand.mode).toBe(OperationMode.PUSH_ENV_TO_SECRETS);
   });
 
   it('Should_CreateSinglePushCommand_When_OptionsAreProvided', () => {
@@ -134,7 +134,7 @@ describe('Cli', () => {
     const options = {
       key: 'API_KEY',
       value: 'secret123',
-      ssmPath: '/my/path',
+      secretPath: '/my/path',
     };
 
     // Act
@@ -144,6 +144,6 @@ describe('Cli', () => {
     expect(pushCommand.mode).toBe(OperationMode.PUSH_SINGLE);
     expect(pushCommand.key).toBe('API_KEY');
     expect(pushCommand.value).toBe('secret123');
-    expect(pushCommand.ssmPath).toBe('/my/path');
+    expect(pushCommand.secretPath).toBe('/my/path');
   });
 });

@@ -8,8 +8,8 @@ import {
   type Mock,
   vi,
 } from 'vitest';
-import { PullSsmToEnvCommand } from '../../../../src/envilder/application/pullSsmToEnv/PullSsmToEnvCommand';
-import { PullSsmToEnvCommandHandler } from '../../../../src/envilder/application/pullSsmToEnv/PullSsmToEnvCommandHandler';
+import { PullSecretsToEnvCommand } from '../../../../src/envilder/application/pullSecretsToEnv/PullSecretsToEnvCommand';
+import { PullSecretsToEnvCommandHandler } from '../../../../src/envilder/application/pullSecretsToEnv/PullSecretsToEnvCommandHandler';
 import type { ILogger } from '../../../../src/envilder/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../../src/envilder/domain/ports/ISecretProvider';
 import type { IVariableStore } from '../../../../src/envilder/domain/ports/IVariableStore';
@@ -20,7 +20,7 @@ const testValues: Record<string, string> = {
   '/path/to/ssm/password_no_value': '',
 };
 
-describe('PullSsmToEnvCommandHandler', () => {
+describe('PullSecretsToEnvCommandHandler', () => {
   let mockSecretProvider: ISecretProvider;
   let mockEnvFileManager: IVariableStore & {
     getMapping: Mock;
@@ -28,7 +28,7 @@ describe('PullSsmToEnvCommandHandler', () => {
     saveEnvironment: Mock;
   };
   let mockLogger: ILogger;
-  let sut: PullSsmToEnvCommandHandler;
+  let sut: PullSecretsToEnvCommandHandler;
 
   const mockMapPath = './tests/param-map.json';
   const mockEnvFilePath = './tests/env-file.env';
@@ -56,7 +56,7 @@ describe('PullSsmToEnvCommandHandler', () => {
       error: vi.fn(),
     };
 
-    sut = new PullSsmToEnvCommandHandler(
+    sut = new PullSecretsToEnvCommandHandler(
       mockSecretProvider,
       mockEnvFileManager,
       mockLogger,
@@ -75,7 +75,7 @@ describe('PullSsmToEnvCommandHandler', () => {
     }
   });
 
-  it('Should_GenerateEnvFileFromSSMParameters_When_ValidSSMParametersAreProvided', async () => {
+  it('Should_GenerateEnvFileFromSecrets_When_ValidSecretsAreProvided', async () => {
     // Arrange
     const paramMapContent = {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
@@ -86,7 +86,10 @@ describe('PullSsmToEnvCommandHandler', () => {
     mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
     mockEnvFileManager.getEnvironment.mockResolvedValue({});
 
-    const command = PullSsmToEnvCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PullSecretsToEnvCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
 
     // Act
     await sut.handle(command);
@@ -114,7 +117,7 @@ describe('PullSsmToEnvCommandHandler', () => {
     );
   });
 
-  it('Should_ThrowError_When_SSMParameterIsNotFound', async () => {
+  it('Should_ThrowError_When_SecretIsNotFound', async () => {
     // Arrange
     const paramMapContent = {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
@@ -125,21 +128,22 @@ describe('PullSsmToEnvCommandHandler', () => {
     mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
     mockEnvFileManager.getEnvironment.mockResolvedValue({});
 
-    const command = PullSsmToEnvCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PullSecretsToEnvCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
 
     // Act
     const action = () => sut.handle(command);
 
     // Assert
-    await expect(action).rejects.toThrow(
-      'Some parameters could not be fetched',
-    );
+    await expect(action).rejects.toThrow('Some secrets could not be fetched');
     expect(mockLogger.error).toHaveBeenCalledWith(
-      "Error fetching parameter: 'non-existent parameter'",
+      "Error fetching secret: 'non-existent parameter'",
     );
   });
 
-  it('Should_LogWarning_When_SSMParameterHasNoValue', async () => {
+  it('Should_LogWarning_When_SecretHasNoValue', async () => {
     // Arrange
     const paramMapContent = {
       EMPTY_PARAM: '/path/to/ssm/password_no_value',
@@ -149,7 +153,10 @@ describe('PullSsmToEnvCommandHandler', () => {
     mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
     mockEnvFileManager.getEnvironment.mockResolvedValue({});
 
-    const command = PullSsmToEnvCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PullSecretsToEnvCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
 
     // Act
     await sut.handle(command);
@@ -170,7 +177,10 @@ describe('PullSsmToEnvCommandHandler', () => {
     mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
     mockEnvFileManager.getEnvironment.mockResolvedValue({});
 
-    const command = PullSsmToEnvCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PullSecretsToEnvCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
 
     // Act
     await sut.handle(command);

@@ -41,15 +41,15 @@ describe('PushSingleCommandHandler', () => {
 
     const key = 'TEST_VAR';
     const value = 'test-value';
-    const ssmPath = '/path/to/ssm/test';
-    const command = PushSingleCommand.create(key, value, ssmPath);
+    const secretPath = '/path/to/ssm/test';
+    const command = PushSingleCommand.create(key, value, secretPath);
 
     // Act
     await sut.handle(command);
 
     // Assert
     expect(mocks.mockSecretProvider.setSecret).toHaveBeenCalledWith(
-      ssmPath,
+      secretPath,
       value,
     );
   });
@@ -65,8 +65,8 @@ describe('PushSingleCommandHandler', () => {
 
     const key = 'TEST_VAR';
     const value = 'test-value';
-    const ssmPath = '/path/to/ssm/test';
-    const command = PushSingleCommand.create(key, value, ssmPath);
+    const secretPath = '/path/to/ssm/test';
+    const command = PushSingleCommand.create(key, value, secretPath);
 
     // Act
     const action = () => sut.handle(command);
@@ -74,7 +74,7 @@ describe('PushSingleCommandHandler', () => {
     // Assert
     await expect(action()).rejects.toThrow(errorMocks.mockError);
     expect(errorMocks.mockLogger.error).toHaveBeenCalledWith(
-      'Failed to push variable to SSM: Failed to push variable',
+      'Failed to push variable to secret store: Failed to push variable',
     );
   });
 });

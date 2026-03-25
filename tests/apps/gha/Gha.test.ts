@@ -230,4 +230,25 @@ describe('GitHubAction', () => {
       }),
     );
   });
+
+  it('Should_LogAndThrowError_When_ReadMapFileConfigFails', async () => {
+    // Arrange
+    process.env.INPUT_MAP_FILE = 'nonexistent-map.json';
+    process.env.INPUT_ENV_FILE = 'test.env';
+
+    vi.mocked(FileVariableStore.readMapFileConfig).mockRejectedValue(
+      new Error('ENOENT: no such file or directory'),
+    );
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    // Act
+    const action = () => main();
+
+    // Assert
+    await expect(action()).rejects.toThrow('ENOENT: no such file or directory');
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to initialize'),
+    );
+  });
 });

@@ -36,7 +36,7 @@ export async function main() {
         '🔄 Sync your local .env file back to your cloud provider?\n' +
         '  Example: envilder --push --map=param-map.json --envfile=.env\n\n' +
         '🎯 Create or update a single secret?\n' +
-        '  Example: envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path\n\n' +
+        '  Example: envilder --push --key=API_KEY --value=secret123 --secret-path=/my/path\n\n' +
         '☁️  Use Azure Key Vault?\n' +
         '  Example: envilder --provider=azure --map=param-map.json --envfile=.env\n',
     )
@@ -68,7 +68,7 @@ export async function main() {
       'Value of the single environment variable to push (only with --push)',
     )
     .option(
-      '--ssm-path <path>',
+      '--secret-path <path>',
       'Secret path in your cloud provider for the single variable (only with --push)',
     )
     .action(

@@ -1,8 +1,8 @@
 export declare class PushSingleCommand {
     readonly key: string;
     readonly value: string;
-    readonly ssmPath: string;
-    constructor(key: string, value: string, ssmPath: string);
-    static create(key: string, value: string, ssmPath: string): PushSingleCommand;
+    readonly secretPath: string;
+    constructor(key: string, value: string, secretPath: string);
+    static create(key: string, value: string, secretPath: string): PushSingleCommand;
 }
 //# sourceMappingURL=PushSingleCommand.d.ts.map
