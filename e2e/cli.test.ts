@@ -40,7 +40,38 @@ const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.32';
 const LOWKEY_VAULT_PORT = 8443;
 
 describe('Envilder (E2E)', () => {
+  // Unique ID per test run prevents race conditions between concurrent CI runs
+  const runId = randomUUID().slice(0, 8);
+  const ssmPrefix = `/Test/${runId}`;
+
+  const envilder = 'envilder';
+  const envFilePath = join(rootDir, 'e2e', 'sample', 'cli-validation.env');
+  const mapFilePath = join(rootDir, 'e2e', 'sample', `param-map-${runId}.json`);
+  const mapFileWithConfigPath = join(
+    rootDir,
+    'e2e',
+    'sample',
+    `param-map-with-aws-config-${runId}.json`,
+  );
+  const singleSsmPath = `${ssmPrefix}/SingleVariable`;
+
   beforeAll(async () => {
+    writeFileSync(
+      mapFilePath,
+      JSON.stringify({ TOKEN_SECRET: `${ssmPrefix}/Token` }, null, 2),
+    );
+    writeFileSync(
+      mapFileWithConfigPath,
+      JSON.stringify(
+        {
+          $config: { provider: 'aws' },
+          TOKEN_SECRET: `${ssmPrefix}/Token`,
+        },
+        null,
+        2,
+      ),
+    );
+
     await cleanUpSystem();
     execSync('pnpm build', { cwd: rootDir, stdio: 'inherit' });
     execSync('node --loader ts-node/esm scripts/pack-and-install.ts', {
@@ -48,17 +79,6 @@ describe('Envilder (E2E)', () => {
       stdio: 'inherit',
     });
   }, 60_000);
-
-  const envilder = 'envilder';
-  const envFilePath = join(rootDir, 'e2e', 'sample', 'cli-validation.env');
-  const mapFilePath = join(rootDir, 'e2e', 'sample', 'param-map.json');
-  const mapFileWithConfigPath = join(
-    rootDir,
-    'e2e',
-    'sample',
-    'param-map-with-aws-config.json',
-  );
-  const singleSsmPath = '/Test/SingleVariable';
 
   beforeEach(async () => {
     await cleanUpSsm(mapFilePath, singleSsmPath);
@@ -72,6 +92,11 @@ describe('Envilder (E2E)', () => {
 
   afterAll(async () => {
     await cleanUpSystem();
+    for (const f of [mapFilePath, mapFileWithConfigPath]) {
+      if (existsSync(f)) {
+        await unlink(f);
+      }
+    }
   }, 60_000);
 
   it('Should_PrintCorrectVersion_When_VersionFlagIsProvided', async () => {
