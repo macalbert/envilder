@@ -21,6 +21,8 @@ from Azure Key Vault ([#90](https://github.com/macalbert/envilder/pull/90))
 
 ### Changed
 
+* **CLI flag `--ssm-path` renamed to `--secret-path`** — The old flag is still accepted as a deprecated alias and
+prints a warning. It will be removed in a future release.
 * `configureInfrastructureServices()` now receives a single `MapFileConfig` object instead of separate parameters
 * CLI and GHA entry points read `$config` from the map file and merge with CLI flags / GHA inputs
 * Extracted shared `ContainerConfiguration` module (`src/apps/shared/`) for DI setup reused by CLI and GitHub Action

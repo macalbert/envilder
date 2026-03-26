@@ -88,6 +88,23 @@ export async function main() {
       '--secret-path <path>',
       'Secret path in your cloud provider for the single variable (only with --push)',
     )
+    .option(
+      '--ssm-path <path>',
+      '[DEPRECATED: use --secret-path] Alias for --secret-path',
+    )
+    .hook('preAction', (thisCommand) => {
+      const opts = thisCommand.opts();
+      if (opts.ssmPath) {
+        console.warn(
+          pc.yellow(
+            '⚠️  --ssm-path is deprecated and will be removed in a future release. Use --secret-path instead.',
+          ),
+        );
+        if (!opts.secretPath) {
+          thisCommand.setOptionValue('secretPath', opts.ssmPath);
+        }
+      }
+    })
     .action(
       async ({
         provider,

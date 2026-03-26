@@ -73,7 +73,7 @@ and streamline onboarding and CI/CD workflows.
     - [With `$config` (explicit provider)](#with-config-explicit-provider)
     - [`$config` Options](#config-options)
     - [Configuration Priority](#configuration-priority)
-  - [�️ How it works](#️-how-it-works)
+  - [🛠️ How it works](#️-how-it-works)
   - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
   - [🔍 Envilder vs. Alternatives](#-envilder-vs-alternatives)
   - [🏁 Roadmap](#-roadmap)
@@ -201,7 +201,7 @@ After configuring your cloud provider credentials, you can begin managing your s
 2. **Push a secret to AWS SSM:**
 
    ```bash
-   envilder --push --key=DB_PASSWORD --value=12345 --ssm-path=/my-app/db/password
+   envilder --push --key=DB_PASSWORD --value=12345 --secret-path=/my-app/db/password
    ```
 
 3. **Generate your .env file from AWS SSM:**

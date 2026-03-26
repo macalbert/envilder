@@ -129,12 +129,12 @@ graph LR
 **Example:**
 
 ```bash
-envilder --push --key=API_KEY --value=abc123 --ssm-path=/myapp/api/key
+envilder --push --key=API_KEY --value=abc123 --secret-path=/myapp/api/key
 ```
 
 Will push:
 
-- Value `abc123` to SSM path `/myapp/api/key`
+- Value `abc123` to secret path `/myapp/api/key`
 
 ### Push Mode Options
 
@@ -157,7 +157,7 @@ Will push:
 | `--profile`   | Optional: AWS CLI profile to use (AWS only)                |
 | `--key`      | Required: Environment variable name                        |
 | `--value`    | Required: Value to store in your cloud provider            |
-| `--ssm-path` | Required: Full secret path in your cloud provider          |
+| `--secret-path` | Required: Full secret path in your cloud provider       |
 
 ### Push Mode Examples
 
@@ -188,11 +188,11 @@ envilder --push --provider=azure --vault-url=https://my-vault.vault.azure.net --
 **Single variable push:**
 
 ```bash
-envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path
+envilder --push --key=API_KEY --value=secret123 --secret-path=/my/path
 ```
 
 With AWS profile:
 
 ```bash
-envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path --profile=dev
+envilder --push --key=API_KEY --value=secret123 --secret-path=/my/path --profile=dev
 ```
