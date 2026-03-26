@@ -5,6 +5,7 @@ import type { DispatchActionCommandHandler } from '../../../src/envilder/applica
 import type { ILogger } from '../../../src/envilder/domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../../src/envilder/domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../../src/envilder/domain/ports/IVariableStore.js';
+import { AzureKeyVaultSecretProvider } from '../../../src/envilder/infrastructure/azure/AzureKeyVaultSecretProvider.js';
 import { TYPES } from '../../../src/envilder/types.js';
 
 describe('Startup', () => {
@@ -34,5 +35,23 @@ describe('Startup', () => {
     expect(() =>
       container.get<IVariableStore>(TYPES.IVariableStore),
     ).not.toThrow();
+  });
+
+  it('Should_ResolveAllServices_When_AzureProviderConfigured', () => {
+    // Arrange
+    const config = {
+      provider: 'azure',
+      vaultUrl: 'https://test-vault.vault.azure.net',
+    };
+
+    // Act
+    const sut = startup.configureServices().configureInfrastructure(config);
+    const container = sut.create();
+    const secretProvider = container.get<ISecretProvider>(
+      TYPES.ISecretProvider,
+    );
+
+    // Assert
+    expect(secretProvider).toBeInstanceOf(AzureKeyVaultSecretProvider);
   });
 });

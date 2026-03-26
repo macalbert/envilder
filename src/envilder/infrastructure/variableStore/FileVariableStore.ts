@@ -5,6 +5,10 @@ import {
   DependencyMissingError,
   EnvironmentFileError,
 } from '../../domain/errors/DomainErrors.js';
+import type {
+  MapFileConfig,
+  ParsedMapFile,
+} from '../../domain/MapFileConfig.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
 import { TYPES } from '../../types.js';
@@ -21,6 +25,19 @@ export class FileVariableStore implements IVariableStore {
   }
 
   async getMapping(source: string): Promise<Record<string, string>> {
+    const { mappings } = await this.getParsedMapping(source);
+    return mappings;
+  }
+
+  async getParsedMapping(source: string): Promise<ParsedMapFile> {
+    const raw = await this.readJsonFile(source);
+    const { $config, ...rest } = raw;
+    const config: MapFileConfig =
+      $config && typeof $config === 'object' ? $config : {};
+    return { config, mappings: rest as Record<string, string> };
+  }
+
+  private async readJsonFile(source: string): Promise<Record<string, unknown>> {
     try {
       const content = await fs.readFile(source, 'utf-8');
       try {
@@ -81,5 +98,27 @@ export class FileVariableStore implements IVariableStore {
     // Therefore, escaping backslashes would actually break the functionality by
     // doubling them when read back by dotenv. This is not a security issue in this context.
     return value.replace(/(\r\n|\n|\r)/g, '\\n');
+  }
+}
+
+export async function readMapFileConfig(
+  mapPath: string,
+): Promise<MapFileConfig> {
+  try {
+    const content = await fs.readFile(mapPath, 'utf-8');
+    try {
+      const raw = JSON.parse(content);
+      const config = raw.$config;
+      return config && typeof config === 'object' ? config : {};
+    } catch {
+      throw new EnvironmentFileError(
+        `Invalid JSON in parameter map file: ${mapPath}`,
+      );
+    }
+  } catch (error) {
+    if (error instanceof EnvironmentFileError) {
+      throw error;
+    }
+    throw new EnvironmentFileError(`Failed to read map file: ${mapPath}`);
   }
 }

@@ -2,7 +2,8 @@
 
 ## Overview
 
-The push command uploads environment variables from a local `.env` file to AWS SSM Parameter Store using a mapping file.
+The push command uploads environment variables from a local `.env` file to your cloud provider (AWS SSM Parameter Store
+or Azure Key Vault) using a mapping file.
 
 ![Push Mode Demo](https://github.com/user-attachments/assets/489b1270-9178-4c27-b92d-78a1ac7dc1cb)
 
@@ -20,12 +21,33 @@ envilder --push --envfile=.env.prod --map=param-map.json --profile=prod-account
 
 ## Mapping File Example (`param-map.json`)
 
+> 📖 See [Mapping File Format](../README.md#️-mapping-file-format) for the full reference on `$config` and provider options.
+
+### AWS SSM (default)
+
 ```json
 {
   "API_KEY": "/myapp/api/key",
   "DB_PASSWORD": "/myapp/db/password"
 }
 ```
+
+### Azure Key Vault (via `$config`)
+
+Add `$config` to your map file to target Azure Key Vault:
+
+```json
+{
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "API_KEY": "myapp-prod-api-key",
+  "DB_PASSWORD": "myapp-prod-db-password"
+}
+```
+
+> CLI flags (`--provider`, `--vault-url`, `--profile`) override `$config` values in the map file.
 
 ## .env File Example
 
@@ -36,24 +58,29 @@ DB_PASSWORD=secret456
 
 ## What Happens
 
-- Each variable found in both `.env` and mapping file is pushed to the corresponding SSM path.
+- Each variable found in both `.env` and mapping file is pushed to the corresponding secret path.
 - No files are modified locally.
-- Use the `--profile` flag for different AWS accounts.
+- Use `--provider=azure` or `$config.provider` in the map file to push to Azure Key Vault instead of AWS SSM.
+- Use the `--vault-url` flag or `$config.vaultUrl` for the Azure Key Vault URL.
+- Use the `--profile` flag for different AWS accounts (AWS only).
+
+> **Permissions:** Your cloud identity must have write access to secrets.
+> See [Set Up IAM Permissions](requirements-installation.md#4-set-up-iam-permissions) for AWS and Azure setup.
 
 ## Push Mode
 
-Sync your local `.env` variables to AWS SSM using a mapping file and mapping JSON.
+Sync your local `.env` variables to your cloud provider using a mapping file and mapping JSON.
 
 ### How File-Based Push Works
 
 ```mermaid
 graph LR
   A[.env File] --> |Variables & Values| B[Envilder]:::core
-  C[Mapping File] --> |SSM Paths| B
-  D[AWS Profile]:::aws --> B
-  B --> E[AWS SSM Parameter Store]:::aws
+  C[Mapping File] --> |Secret Paths| B
+  D[Cloud Credentials]:::cloud --> B
+  B --> E[AWS SSM / Azure Key Vault]:::cloud
 
-  classDef aws fill:#ffcc66,color:#000000,stroke:#333,stroke-width:1.5px;
+  classDef cloud fill:#ffcc66,color:#000000,stroke:#333,stroke-width:1.5px;
   classDef core fill:#1f3b57,color:#fff,stroke:#ccc,stroke-width:2px;
 ```
 
@@ -87,46 +114,50 @@ Will push:
 
 ### Single Variable Push
 
-Push a single environment variable directly to AWS SSM Parameter Store without using any files.
+Push a single environment variable directly to your cloud provider without using any files.
 
 ```mermaid
 graph LR
   A[Command Line Arguments] --> B[Envilder]:::core
-  C[AWS Profile]:::aws --> B
-  B --> D[AWS SSM Parameter Store]:::aws
+  C[Cloud Credentials]:::cloud --> B
+  B --> D[AWS SSM / Azure Key Vault]:::cloud
 
-  classDef aws fill:#ffcc66,color:#000000,stroke:#333,stroke-width:1.5px;
+  classDef cloud fill:#ffcc66,color:#000000,stroke:#333,stroke-width:1.5px;
   classDef core fill:#1f3b57,color:#fff,stroke:#ccc,stroke-width:2px;  
 ```
 
 **Example:**
 
 ```bash
-envilder --push --key=API_KEY --value=abc123 --ssm-path=/myapp/api/key
+envilder --push --key=API_KEY --value=abc123 --secret-path=/myapp/api/key
 ```
 
 Will push:
 
-- Value `abc123` to SSM path `/myapp/api/key`
+- Value `abc123` to secret path `/myapp/api/key`
 
 ### Push Mode Options
 
-| Option       | Description                        |
-|------------- | ---------------------------------- |
-| `--push`     | Required: Enables push mode        |
-| `--profile`  | Optional: AWS CLI profile to use   |
-| `--envfile`  | Required: Path to your local .env file             |
-| `--map`      | Required: Path to your parameter mapping JSON file |
+| Option        | Description                                                |
+|-------------- | ---------------------------------------------------------- |
+| `--push`      | Required: Enables push mode                                |
+| `--provider`  | Optional: Cloud provider `aws` (default) or `azure`        |
+| `--vault-url` | Optional: Azure Key Vault URL (overrides `$config.vaultUrl`)|
+| `--profile`   | Optional: AWS CLI profile to use (AWS only)                |
+| `--envfile`   | Required: Path to your local .env file                     |
+| `--map`       | Required: Path to your parameter mapping JSON file         |
 
 ### Push Single Mode Options
 
-| Option       | Description                        |
-|------------- | ---------------------------------- |
-| `--push`     | Required: Enables push mode        |
-| `--profile`  | Optional: AWS CLI profile to use   |
-| `--key`      | Required: Environment variable name         |
-| `--value`    | Required: Value to store in AWS SSM         |
-| `--ssm-path` | Required: Full SSM parameter path           |
+| Option        | Description                                                |
+|-------------- | ---------------------------------------------------------- |
+| `--push`      | Required: Enables push mode                                |
+| `--provider`  | Optional: Cloud provider `aws` (default) or `azure`        |
+| `--vault-url` | Optional: Azure Key Vault URL (overrides `$config.vaultUrl`)|
+| `--profile`   | Optional: AWS CLI profile to use (AWS only)                |
+| `--key`      | Required: Environment variable name                        |
+| `--value`    | Required: Value to store in your cloud provider            |
+| `--secret-path` | Required: Full secret path in your cloud provider       |
 
 ### Push Mode Examples
 
@@ -142,14 +173,26 @@ With AWS profile:
 envilder --push --envfile=.env.prod --map=param-map.json --profile=prod-account
 ```
 
+**Azure Key Vault (via `$config` in map file):**
+
+```bash
+envilder --push --envfile=.env --map=azure-param-map.json
+```
+
+**Azure Key Vault (via CLI flags):**
+
+```bash
+envilder --push --provider=azure --vault-url=https://my-vault.vault.azure.net --envfile=.env --map=param-map.json
+```
+
 **Single variable push:**
 
 ```bash
-envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path
+envilder --push --key=API_KEY --value=secret123 --secret-path=/my/path
 ```
 
 With AWS profile:
 
 ```bash
-envilder --push --key=API_KEY --value=secret123 --ssm-path=/my/path --profile=dev
+envilder --push --key=API_KEY --value=secret123 --secret-path=/my/path --profile=dev
 ```

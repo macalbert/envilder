@@ -1,0 +1,6 @@
+{
+  "$config": {
+    "provider": "aws"
+  },
+  "TOKEN_SECRET": "/Test/Token"
+}

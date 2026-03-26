@@ -43,7 +43,7 @@ describe('PackageVersionReader', () => {
     // Act
     const action = async () => await sut.getVersion(nonExistentPath);
 
-    //  Assert
+    // Assert
     await expect(action()).rejects.toThrow('package.json not found');
   });
 

@@ -2,29 +2,32 @@
 
 ## Overview
 
-The pull command downloads secrets from AWS SSM Parameter Store and writes them to a local `.env` file using a mapping file.
+The pull command downloads secrets from your cloud provider (AWS SSM Parameter Store or Azure Key Vault)
+and writes them to a local `.env` file using a mapping file.
 
 ![Pull Mode Demo](https://github.com/user-attachments/assets/043bbfe2-42ca-4e38-afdc-05840072ddc9)
 
 ## Pull Mode
 
-Download secrets from AWS SSM and generate a local `.env` file using a mapping JSON.
+Download secrets from your cloud provider and generate a local `.env` file using a mapping JSON.
 
 ### How Pull Mode Works
 
 ```mermaid
 graph LR
-    A[Mapping File] --> |SSM Paths| B[Envilder]:::core
-    D[AWS Profile]:::aws --> B
-    B --> E[AWS SSM Parameter Store]:::aws
+    A[Mapping File] --> |Secret Paths| B[Envilder]:::core
+    D[Cloud Credentials]:::cloud --> B
+    B --> E[AWS SSM / Azure Key Vault]:::cloud
     B --> F[.env File]
 
-    classDef aws fill:#ffcc66,color:#000000,stroke:#333,stroke-width:1.5px;
+    classDef cloud fill:#ffcc66,color:#000000,stroke:#333,stroke-width:1.5px;
     classDef core fill:#1f3b57,color:#fff,stroke:#ccc,stroke-width:2px;
 ```
 
 **Example:**
 If your `param-map.json` file contains:
+
+> 📖 See [Mapping File Format](../README.md#️-mapping-file-format) for the full reference on `$config` and provider options.
 
 ```json
 {
@@ -57,13 +60,20 @@ SECRET_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
 
 ### Pull Mode Options
 
-| Option      | Description                         |
-| ----------- | ----------------------------------- |
-| `--map`     | JSON mapping of env var to SSM path |
-| `--envfile` | Path to write `.env`                |
-| `--profile` | AWS profile to use                  |
+| Option        | Description                                                        |
+| ------------- | ------------------------------------------------------------------ |
+| `--map`       | JSON mapping of env var to secret path                             |
+| `--envfile`   | Path to write `.env`                                               |
+| `--provider`  | Cloud provider: `aws` (default) or `azure` (overrides `$config`)   |
+| `--vault-url` | Azure Key Vault URL (overrides `$config.vaultUrl` in map file)     |
+| `--profile`   | AWS profile to use (overrides `$config.profile`)                   |
+
+> **Azure:** Provide the vault URL via `$config.vaultUrl` in your map file or use `--vault-url`.
+> CLI flags (`--provider`, `--vault-url`, `--profile`) override `$config` values in the map file.
 
 ### Pull Mode Examples
+
+**AWS SSM (default):**
 
 ```bash
 envilder --map=param-map.json --envfile=.env
@@ -75,6 +85,33 @@ With profile:
 envilder --map=param-map.json --envfile=.env --profile=dev-account
 ```
 
+**Azure Key Vault (via `$config` in map file):**
+
+Add `$config` to your map file:
+
+```json
+{
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "API_KEY": "myapp-prod-api-key",
+  "DB_PASSWORD": "myapp-prod-db-password"
+}
+```
+
+Then pull as usual:
+
+```bash
+envilder --map=param-map.json --envfile=.env
+```
+
+**Azure Key Vault (via CLI flags):**
+
+```bash
+envilder --provider=azure --vault-url=https://my-vault.vault.azure.net --map=param-map.json --envfile=.env
+```
+
 **Other environment examples:**
 
 ```bash
@@ -84,10 +121,21 @@ envilder --map=param-map.json --envfile=.env.dev
 envilder --map=param-map.json --envfile=.env.dev --profile=dev-account
 # Production
 envilder --map=param-map.json --envfile=.env.prod --profile=prod-account
+# Azure (using $config in map file)
+envilder --map=azure-param-map.json --envfile=.env.prod
+# Azure (using CLI flags)
+envilder --provider=azure --vault-url=https://prod-vault.vault.azure.net --map=param-map.json --envfile=.env.prod
 ```
 
 ## Notes
 
 - Only variables defined in the mapping file are pulled.
-- Use the `--profile` flag to select AWS credentials.
+- Use the `--provider` flag or `$config.provider` in the map file to switch between AWS and Azure.
+- Use the `--vault-url` flag or `$config.vaultUrl` in the map file for Azure Key Vault URL.
+- Use the `--profile` flag or `$config.profile` to select AWS credentials.
+- CLI flags override `$config` values: `--provider` > `$config.provider`, `--vault-url` > `$config.vaultUrl`,
+`--profile` > `$config.profile`.
 - No secrets are exposed in code or version control.
+
+> **Permissions:** Your cloud identity must have read access to secrets.
+> See [Set Up IAM Permissions](requirements-installation.md#4-set-up-iam-permissions) for AWS and Azure setup.

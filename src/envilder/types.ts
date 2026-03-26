@@ -5,8 +5,8 @@ export const DOMAIN = {
 };
 
 export const APPLICATION = {
-  PullSsmToEnvCommandHandler: Symbol.for('PullSsmToEnvCommandHandler'),
-  PushEnvToSsmCommandHandler: Symbol.for('PushEnvToSsmCommandHandler'),
+  PullSecretsToEnvCommandHandler: Symbol.for('PullSecretsToEnvCommandHandler'),
+  PushEnvToSecretsCommandHandler: Symbol.for('PushEnvToSecretsCommandHandler'),
   PushSingleCommandHandler: Symbol.for('PushSingleCommandHandler'),
   DispatchActionCommandHandler: Symbol.for('DispatchActionCommandHandler'),
 };

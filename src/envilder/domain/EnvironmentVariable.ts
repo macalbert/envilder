@@ -49,9 +49,20 @@ export class EnvironmentVariable {
       return this._value;
     }
 
-    return this._value.length > 10
-      ? '*'.repeat(this._value.length - 3) + this._value.slice(-3)
-      : '*'.repeat(this._value.length);
+    return EnvironmentVariable.mask(this._value, 10);
+  }
+
+  /**
+   * Returns a masked representation of a secret path for safe logging.
+   */
+  static maskSecretPath(path: string): string {
+    return EnvironmentVariable.mask(path, 3);
+  }
+
+  private static mask(value: string, minLengthToShowTail: number): string {
+    return value.length > minLengthToShowTail
+      ? '*'.repeat(value.length - 3) + value.slice(-3)
+      : '*'.repeat(value.length);
   }
 
   /**

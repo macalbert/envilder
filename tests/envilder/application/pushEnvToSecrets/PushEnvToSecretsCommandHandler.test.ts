@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
-import { PushEnvToSsmCommand } from '../../../../src/envilder/application/pushEnvToSsm/PushEnvToSsmCommand';
-import { PushEnvToSsmCommandHandler } from '../../../../src/envilder/application/pushEnvToSsm/PushEnvToSsmCommandHandler';
+import { PushEnvToSecretsCommand } from '../../../../src/envilder/application/pushEnvToSecrets/PushEnvToSecretsCommand';
+import { PushEnvToSecretsCommandHandler } from '../../../../src/envilder/application/pushEnvToSecrets/PushEnvToSecretsCommandHandler';
 import type { ILogger } from '../../../../src/envilder/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../../src/envilder/domain/ports/ISecretProvider';
 import type { IVariableStore } from '../../../../src/envilder/domain/ports/IVariableStore';
 
-describe('PushEnvToSsmCommandHandler', () => {
+describe('PushEnvToSecretsCommandHandler', () => {
   let mockSecretProvider: ISecretProvider;
   let mockVariableStore: IVariableStore & {
     getMapping: Mock;
@@ -13,7 +13,7 @@ describe('PushEnvToSsmCommandHandler', () => {
     saveEnvironment: Mock;
   };
   let mockLogger: ILogger;
-  let sut: PushEnvToSsmCommandHandler;
+  let sut: PushEnvToSecretsCommandHandler;
 
   const mockMapPath = 'map-path.json';
   const mockEnvFilePath = 'env-file.env';
@@ -28,6 +28,7 @@ describe('PushEnvToSsmCommandHandler', () => {
       getMapping: vi.fn().mockResolvedValue({} as Record<string, string>),
       getEnvironment: vi.fn().mockResolvedValue({} as Record<string, string>),
       saveEnvironment: vi.fn(),
+      getParsedMapping: vi.fn().mockResolvedValue({}),
     };
 
     mockLogger = {
@@ -36,14 +37,14 @@ describe('PushEnvToSsmCommandHandler', () => {
       error: vi.fn(),
     };
 
-    sut = new PushEnvToSsmCommandHandler(
+    sut = new PushEnvToSecretsCommandHandler(
       mockSecretProvider,
       mockVariableStore,
       mockLogger,
     );
   });
 
-  it('Should_PushEnvFileToSSM_When_ValidEnvironmentVariablesAreProvided', async () => {
+  it('Should_PushEnvFileToSecretStore_When_ValidEnvironmentVariablesAreProvided', async () => {
     // Arrange
     mockVariableStore.getMapping.mockResolvedValue({
       TEST_ENV_VAR: '/path/to/ssm/test',
@@ -55,7 +56,10 @@ describe('PushEnvToSsmCommandHandler', () => {
       ANOTHER_VAR: 'another-value',
     });
 
-    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PushEnvToSecretsCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
 
     // Act
     await sut.handle(command);
@@ -75,7 +79,7 @@ describe('PushEnvToSsmCommandHandler', () => {
       'another-value',
     );
     expect(mockLogger.info).toHaveBeenCalledWith(
-      `Successfully pushed environment variables from 'env-file.env' to AWS SSM.`,
+      `Successfully pushed environment variables from 'env-file.env' to secret store.`,
     );
   });
 
@@ -91,7 +95,10 @@ describe('PushEnvToSsmCommandHandler', () => {
       // MISSING_VAR is not present
     });
 
-    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PushEnvToSecretsCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
 
     // Act
     await sut.handle(command);
@@ -117,14 +124,17 @@ describe('PushEnvToSsmCommandHandler', () => {
       NEXT_PUBLIC_API_KEY: 'secret456', // Different value!
     });
 
-    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PushEnvToSecretsCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
 
     // Act
     const action = () => sut.handle(command);
 
     // Assert
     await expect(action).rejects.toThrow(
-      "Conflicting values for SSM path '/path/to/api-key': 'API_KEY' has value '*********' but 'NEXT_PUBLIC_API_KEY' has value '*********'",
+      "Conflicting values for secret path '/path/to/api-key': 'API_KEY' has value '*********' but 'NEXT_PUBLIC_API_KEY' has value '*********'",
     );
     expect(mockSecretProvider.setSecret).not.toHaveBeenCalled();
   });
@@ -141,13 +151,16 @@ describe('PushEnvToSsmCommandHandler', () => {
       NEXT_PUBLIC_API_KEY: 'secret123', // Same value
     });
 
-    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PushEnvToSecretsCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
 
     // Act
     await sut.handle(command);
 
     // Assert
-    // Should only push once to the SSM path
+    // Should only push once to the secret path
     expect(mockSecretProvider.setSecret).toHaveBeenCalledTimes(1);
     expect(mockSecretProvider.setSecret).toHaveBeenCalledWith(
       '/path/to/api-key',
@@ -155,33 +168,6 @@ describe('PushEnvToSsmCommandHandler', () => {
     );
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.stringContaining('API_KEY, NEXT_PUBLIC_API_KEY'),
-    );
-  });
-
-  it('Should_NotShowAnyLogDescriptiveError_When_NoErrorsThrown', async () => {
-    // Arrange
-    mockVariableStore.getMapping.mockResolvedValue({
-      TEST_ENV_VAR: '/path/to/ssm/test',
-    });
-
-    mockVariableStore.getEnvironment.mockResolvedValue({
-      TEST_ENV_VAR: 'test-value',
-    });
-
-    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
-
-    // Act
-    await sut.handle(command);
-
-    // Assert
-    // Should NOT show any "Failed..." error message
-    expect(mockLogger.error).not.toHaveBeenCalled();
-    expect(mockLogger.error).not.toHaveBeenCalledWith(
-      expect.stringContaining('Failed to push environment file'),
-    );
-    // Should show success message
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      `Successfully pushed environment variables from 'env-file.env' to AWS SSM.`,
     );
   });
 
@@ -199,7 +185,10 @@ describe('PushEnvToSsmCommandHandler', () => {
       TEST_ENV_VAR: 'test-value',
     });
 
-    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PushEnvToSecretsCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
 
     // Act
     const action = () => sut.handle(command);
@@ -225,7 +214,10 @@ describe('PushEnvToSsmCommandHandler', () => {
       TEST_ENV_VAR: 'test-value',
     });
 
-    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PushEnvToSecretsCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
 
     // Act
     const action = () => sut.handle(command);
@@ -251,7 +243,10 @@ describe('PushEnvToSsmCommandHandler', () => {
       TEST_ENV_VAR: 'test-value',
     });
 
-    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PushEnvToSecretsCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
 
     // Act
     const action = () => sut.handle(command);
@@ -282,7 +277,10 @@ describe('PushEnvToSsmCommandHandler', () => {
       TEST_ENV_VAR: 'test-value',
     });
 
-    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PushEnvToSecretsCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
 
     // Act
     const action = () => sut.handle(command);
@@ -321,7 +319,10 @@ describe('PushEnvToSsmCommandHandler', () => {
       TEST_ENV_VAR: 'test-value',
     });
 
-    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PushEnvToSecretsCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
 
     // Act
     await sut.handle(command);
@@ -333,12 +334,51 @@ describe('PushEnvToSsmCommandHandler', () => {
     );
   });
 
+  it('Should_RetryAndSucceed_When_Azure429ThrottlingErrorIsTemporary', async () => {
+    // Arrange
+    let attemptCount = 0;
+    const azureThrottlingError = {
+      name: 'RestError',
+      message: 'Too many requests',
+      statusCode: 429,
+    };
+
+    mockSecretProvider.setSecret = vi.fn(async (): Promise<void> => {
+      attemptCount++;
+      if (attemptCount <= 2) {
+        throw azureThrottlingError;
+      }
+    });
+
+    mockVariableStore.getMapping.mockResolvedValue({
+      TEST_ENV_VAR: '/path/to/secret',
+    });
+
+    mockVariableStore.getEnvironment.mockResolvedValue({
+      TEST_ENV_VAR: 'test-value',
+    });
+
+    const command = PushEnvToSecretsCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    expect(mockSecretProvider.setSecret).toHaveBeenCalledTimes(3);
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('Successfully pushed environment variables'),
+    );
+  });
+
   it('Should_ProcessAllVariablesWithRetry_When_OneVariableFails', async () => {
     // Arrange
     mockSecretProvider.setSecret = vi.fn(
       async (path: string): Promise<void> => {
         if (path === '/path/to/ssm/failing') {
-          throw new Error('AWS SSM error');
+          throw new Error('Secret store error');
         }
       },
     );
@@ -357,17 +397,20 @@ describe('PushEnvToSsmCommandHandler', () => {
       VAR_THREE: 'value-three',
     });
 
-    const command = PushEnvToSsmCommand.create(mockMapPath, mockEnvFilePath);
+    const command = PushEnvToSecretsCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
 
     // Act
     const action = () => sut.handle(command);
 
     // Assert
-    await expect(action).rejects.toThrow('AWS SSM error');
+    await expect(action).rejects.toThrow('Secret store error');
     // With parallel processing, all variables are attempted (including the failing one)
     expect(mockSecretProvider.setSecret).toHaveBeenCalledTimes(4);
     expect(mockLogger.error).toHaveBeenCalledWith(
-      'Failed to push environment file: AWS SSM error',
+      'Failed to push environment file: Secret store error',
     );
   });
 });

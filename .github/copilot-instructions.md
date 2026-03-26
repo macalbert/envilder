@@ -3,9 +3,9 @@
 ## Project Overview
 
 Envilder is a TypeScript CLI tool and GitHub Action that securely centralizes
-environment variables from AWS SSM Parameter Store. Built with **Hexagonal
-Architecture** (Ports & Adapters) and **Clean Architecture** principles for
-testability and modularity.
+environment variables from AWS SSM Parameter Store or Azure Key Vault. Built
+with **Hexagonal Architecture** (Ports & Adapters) and **Clean Architecture**
+principles for testability and modularity.
 
 ## Architecture Layers
 
@@ -32,7 +32,8 @@ testability and modularity.
 **Adapters implementing domain ports.**
 
 - `AwsSsmSecretProvider`: Implements `ISecretProvider` using `@aws-sdk/client-ssm`
-- `FileVariableStore`: Implements `IVariableStore` for .env and mapping JSON files
+- `AzureKeyVaultSecretProvider`: Implements `ISecretProvider` using `@azure/keyvault-secrets`
+- `FileVariableStore`: Implements `IVariableStore` for .env and mapping JSON files (supports `$config` section)
 - `ConsoleLogger`: Implements `ILogger` with colored output via `picocolors`
 
 ### Apps Layer (`src/apps`)
@@ -41,25 +42,35 @@ testability and modularity.
 
 - `cli/Cli.ts`: Uses `commander` for CLI parsing
 - `gha/Gha.ts`: Reads inputs from `process.env.INPUT_*` (GitHub Actions convention)
-- Each has `Startup.ts` that configures InversifyJS container
+- `shared/ContainerConfiguration.ts`: Shared DI setup (provider selection, handler binding) used by both CLI and GHA
+- Each has `Startup.ts` that delegates to shared `ContainerConfiguration`
 
 ## Dependency Injection (InversifyJS)
 
 **Symbol Registry**: `src/envilder/types.ts` exports `DOMAIN`, `APPLICATION`, and legacy `TYPES` objects.
 
-**Container Setup Pattern** (see `Startup.ts` files):
+**Container Setup Pattern** (see `src/apps/shared/ContainerConfiguration.ts`):
 
 ```typescript
-container.bind<ISecretProvider>(TYPES.ISecretProvider)
-  .toConstantValue(new AwsSsmSecretProvider(ssm));  // Infrastructure
-container.bind<PullSsmToEnvCommandHandler>(TYPES.PullSsmToEnvCommandHandler)
-  .to(PullSsmToEnvCommandHandler)
-  .inTransientScope();  // Application handlers
+// Provider selection based on MapFileConfig
+const provider = config.provider?.toLowerCase() || 'aws';
+if (provider === 'azure') {
+  const client = new SecretClient(config.vaultUrl, new DefaultAzureCredential());
+  container.bind(TYPES.ISecretProvider)
+    .toConstantValue(new AzureKeyVaultSecretProvider(client));
+} else {
+  const ssm = config.profile
+    ? new SSM({ credentials: fromIni({ profile: config.profile }) })
+    : new SSM();
+  container.bind(TYPES.ISecretProvider)
+    .toConstantValue(new AwsSsmSecretProvider(ssm));
+}
 ```
 
-**AWS Profile Handling**: CLI supports `--profile` flag → passed to
-`Startup.configureInfrastructure(awsProfile)` → creates SSM client with
-`fromIni({ profile })`.
+**Provider Configuration**: CLI reads `$config` from the map file and merges
+with CLI flags (`--provider`, `--vault-url`, `--profile`) into a `MapFileConfig`
+object passed to `configureInfrastructureServices()`. CLI flags override
+`$config` values.
 
 ## Key Workflows & Commands
 
@@ -80,8 +91,8 @@ container.bind<PullSsmToEnvCommandHandler>(TYPES.PullSsmToEnvCommandHandler)
 - `pnpm lint` — Runs Secretlint (credential detection), Biome (format/lint), and `tsc --noEmit`
 - `pnpm format:write` — Auto-format with Biome
 
-**E2E Tests**: Located in `e2e/`, use real AWS SSM via LocalStack (TestContainers).
-Run `pnpm build` + `pack-and-install.ts` before E2E.
+**E2E Tests**: Located in `e2e/`, use real AWS SSM via LocalStack and Azure Key Vault
+via Lowkey Vault (both via TestContainers). Run `pnpm build` + `pack-and-install.ts` before E2E.
 
 ## Coding Conventions
 
@@ -89,7 +100,7 @@ Run `pnpm build` + `pack-and-install.ts` before E2E.
 
 1. **Command class**: Data container with validation via static `.create()` method
 2. **Handler class**: Decorated with `@injectable()`, injects ports via constructor
-3. **Registration**: Add symbol to `TYPES`, bind in `Startup.configureApplicationServices()`
+3. **Registration**: Add symbol to `TYPES`, bind in `configureApplicationServices()` (`src/apps/shared/ContainerConfiguration.ts`)
 4. **Routing**: Add case to `DispatchActionCommandHandler.handleCommand()` switch
 
 Example (PushSingle):
@@ -148,13 +159,15 @@ Example (PushSingle):
 ## Data Flow Example (Pull Operation)
 
 1. User runs `envilder --map=map.json --envfile=.env`
-2. `Cli.ts` parses options → calls `DispatchActionCommandHandler`
-3. Dispatcher creates `PullSsmToEnvCommand` → invokes `PullSsmToEnvCommandHandler`
-4. Handler loads mapping via `IVariableStore.getMapping()` → gets `{"DB_URL": "/app/db"}`
-5. For each mapping, handler calls `ISecretProvider.getSecret("/app/db")`
-6. AWS adapter uses `GetParameterCommand` with `WithDecryption: true`
-7. Handler builds new env vars → calls `IVariableStore.saveEnvironment()`
-8. Logs success with masked values
+2. `Cli.ts` parses options, reads `$config` from map file, merges with CLI flags into `MapFileConfig`
+3. `Startup` builds DI container via shared `ContainerConfiguration` (selects provider from config)
+4. Dispatcher creates `PullSsmToEnvCommand` → invokes `PullSsmToEnvCommandHandler`
+5. Handler loads mapping via `IVariableStore.getMapping()` → gets `{"DB_URL": "/app/db"}`
+6. For each mapping, handler calls `ISecretProvider.getSecret("/app/db")`
+7. Provider adapter fetches the secret (AWS: `GetParameterCommand` with `WithDecryption: true`;
+   Azure: `SecretClient.getSecret()`)
+8. Handler builds new env vars → calls `IVariableStore.saveEnvironment()`
+9. Logs success with masked values
 
 ## Adding a New Feature (Step-by-Step)
 
@@ -165,7 +178,7 @@ Example (PushSingle):
    - Create `src/envilder/application/validate/ValidateCommand.ts` with `.create()` factory
    - Create `ValidateCommandHandler.ts`, inject `ISecretProvider` + `ILogger`
    - Add `ValidateCommandHandler: Symbol.for('ValidateCommandHandler')` to `APPLICATION` in `types.ts`
-3. **DI Setup**: In `Startup.configureApplicationServices()`, bind handler with `.inTransientScope()`
+3. **DI Setup**: In `configureApplicationServices()` (`src/apps/shared/ContainerConfiguration.ts`), bind handler with `.inTransientScope()`
 4. **Routing**: Add `case OperationMode.VALIDATE:` to `DispatchActionCommandHandler`
 5. **CLI**: In `Cli.ts`, add `.option('--validate')` and map to `OperationMode.VALIDATE`
 6. **Tests**: Create `tests/envilder/application/validate/ValidateCommandHandler.test.ts`, mock ports with `vi.fn()`
@@ -176,7 +189,9 @@ Example (PushSingle):
 **New Secret Provider** (e.g., HashiCorp Vault):
 
 1. Implement `ISecretProvider` interface in `src/envilder/infrastructure/vault/`
-2. Update `Startup.configureInfrastructure()` to bind based on config flag
+2. Add a new case in `configureInfrastructureServices()` (`src/apps/shared/ContainerConfiguration.ts`)
 3. No changes needed to application or domain layers
 
-**Multi-Backend Support**: Use InversifyJS conditional binding or factory pattern based on env var/flag.
+**Multi-Backend Support**: Already implemented — `configureInfrastructureServices()` selects
+provider based on `MapFileConfig.provider` (`aws` or `azure`). To add more providers, extend
+the provider selection logic in `ContainerConfiguration.ts`.

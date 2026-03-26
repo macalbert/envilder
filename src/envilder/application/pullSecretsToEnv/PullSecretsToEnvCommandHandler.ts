@@ -4,15 +4,15 @@ import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
 import { TYPES } from '../../types.js';
-import type { PullSsmToEnvCommand } from './PullSsmToEnvCommand.js';
+import type { PullSecretsToEnvCommand } from './PullSecretsToEnvCommand.js';
 
 @injectable()
-export class PullSsmToEnvCommandHandler {
+export class PullSecretsToEnvCommandHandler {
   private static readonly ERROR_MESSAGES = {
     FETCH_FAILED: 'Failed to generate environment file: ',
-    PARAM_NOT_FOUND: 'Some parameters could not be fetched:\n',
+    PARAM_NOT_FOUND: 'Some secrets could not be fetched:\n',
     NO_VALUE_FOUND: 'Warning: No value found for: ',
-    ERROR_FETCHING: 'Error fetching parameter: ',
+    ERROR_FETCHING: 'Error fetching secret: ',
   };
 
   private static readonly SUCCESS_MESSAGES = {
@@ -28,12 +28,12 @@ export class PullSsmToEnvCommandHandler {
   ) {}
 
   /**
-   * Handles the PullSsmToEnvCommand which orchestrates the process of fetching
-   * environment variable values from a key vault and writing them to a local environment file.
+   * Handles the PullSecretsToEnvCommand which orchestrates the process of fetching
+   * environment variable values from a secret store and writing them to a local environment file.
    *
-   * @param command - The PullSsmToEnvCommand containing mapPath and envFilePath
+   * @param command - The PullSecretsToEnvCommand containing mapPath and envFilePath
    */
-  async handle(command: PullSsmToEnvCommand): Promise<void> {
+  async handle(command: PullSecretsToEnvCommand): Promise<void> {
     try {
       const { requestVariables, currentVariables } =
         await this.loadVariables(command);
@@ -41,19 +41,19 @@ export class PullSsmToEnvCommandHandler {
       await this.saveEnvFile(command.envFilePath, envilded);
 
       this.logger.info(
-        `${PullSsmToEnvCommandHandler.SUCCESS_MESSAGES.ENV_GENERATED}'${command.envFilePath}'`,
+        `${PullSecretsToEnvCommandHandler.SUCCESS_MESSAGES.ENV_GENERATED}'${command.envFilePath}'`,
       );
     } catch (_error) {
       const errorMessage =
         _error instanceof Error ? _error.message : String(_error);
       this.logger.error(
-        `${PullSsmToEnvCommandHandler.ERROR_MESSAGES.FETCH_FAILED}${errorMessage}`,
+        `${PullSecretsToEnvCommandHandler.ERROR_MESSAGES.FETCH_FAILED}${errorMessage}`,
       );
       throw _error;
     }
   }
 
-  private async loadVariables(command: PullSsmToEnvCommand): Promise<{
+  private async loadVariables(command: PullSecretsToEnvCommand): Promise<{
     requestVariables: Record<string, string>;
     currentVariables: Record<string, string>;
   }> {
@@ -90,7 +90,7 @@ export class PullSsmToEnvCommandHandler {
 
     if (errors.length > 0) {
       throw new Error(
-        `${PullSsmToEnvCommandHandler.ERROR_MESSAGES.PARAM_NOT_FOUND}${errors.join('\n')}`,
+        `${PullSecretsToEnvCommandHandler.ERROR_MESSAGES.PARAM_NOT_FOUND}${errors.join('\n')}`,
       );
     }
     return existingEnvVariables;
@@ -105,7 +105,7 @@ export class PullSsmToEnvCommandHandler {
       const value = await this.secretProvider.getSecret(secretName);
       if (!value) {
         this.logger.warn(
-          `${PullSsmToEnvCommandHandler.ERROR_MESSAGES.NO_VALUE_FOUND}'${secretName}'`,
+          `${PullSecretsToEnvCommandHandler.ERROR_MESSAGES.NO_VALUE_FOUND}'${secretName}'`,
         );
         return null;
       }
@@ -118,7 +118,7 @@ export class PullSsmToEnvCommandHandler {
       return null;
     } catch (_error) {
       this.logger.error(
-        `${PullSsmToEnvCommandHandler.ERROR_MESSAGES.ERROR_FETCHING}'${secretName}'`,
+        `${PullSecretsToEnvCommandHandler.ERROR_MESSAGES.ERROR_FETCHING}'${secretName}'`,
       );
       return `ParameterNotFound: ${secretName}`;
     }

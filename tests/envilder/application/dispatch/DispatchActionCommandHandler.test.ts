@@ -1,18 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DispatchActionCommand } from '../../../../src/envilder/application/dispatch/DispatchActionCommand';
 import { DispatchActionCommandHandler } from '../../../../src/envilder/application/dispatch/DispatchActionCommandHandler';
-import type { PullSsmToEnvCommandHandler } from '../../../../src/envilder/application/pullSsmToEnv/PullSsmToEnvCommandHandler';
-import type { PushEnvToSsmCommandHandler } from '../../../../src/envilder/application/pushEnvToSsm/PushEnvToSsmCommandHandler';
+import type { PullSecretsToEnvCommandHandler } from '../../../../src/envilder/application/pullSecretsToEnv/PullSecretsToEnvCommandHandler';
+import type { PushEnvToSecretsCommandHandler } from '../../../../src/envilder/application/pushEnvToSecrets/PushEnvToSecretsCommandHandler';
 import type { PushSingleCommandHandler } from '../../../../src/envilder/application/pushSingle/PushSingleCommandHandler';
 import { OperationMode } from '../../../../src/envilder/domain/OperationMode';
 
 const mockPullHandler = {
   handle: vi.fn(),
-} as unknown as PullSsmToEnvCommandHandler;
+} as unknown as PullSecretsToEnvCommandHandler;
 
 const mockPushHandler = {
   handle: vi.fn(),
-} as unknown as PushEnvToSsmCommandHandler;
+} as unknown as PushEnvToSecretsCommandHandler;
 
 const mockPushSingleHandler = {
   handle: vi.fn(),
@@ -29,7 +29,7 @@ describe('DispatchActionCommandHandler', () => {
     vi.clearAllMocks();
   });
 
-  it('Should_CallPullSsmToEnv_When_PullSsmToEnvModeIsProvided', async () => {
+  it('Should_CallPullSecretsToEnv_When_PullSecretsToEnvModeIsProvided', async () => {
     // Arrange
     const command = new DispatchActionCommand(
       'path/to/map.json',
@@ -38,7 +38,7 @@ describe('DispatchActionCommandHandler', () => {
       undefined,
       undefined,
       undefined,
-      OperationMode.PULL_SSM_TO_ENV,
+      OperationMode.PULL_SECRETS_TO_ENV,
     );
 
     // Act
@@ -48,7 +48,7 @@ describe('DispatchActionCommandHandler', () => {
     expect(mockPullHandler.handle).toHaveBeenCalled();
   });
 
-  it('Should_CallPushEnvToSsm_When_PushEnvToSsmModeIsProvided', async () => {
+  it('Should_CallPushEnvToSecrets_When_PushEnvToSecretsModeIsProvided', async () => {
     // Arrange
     const command = new DispatchActionCommand(
       'path/to/map.json',
@@ -57,7 +57,7 @@ describe('DispatchActionCommandHandler', () => {
       undefined,
       undefined,
       undefined,
-      OperationMode.PUSH_ENV_TO_SSM,
+      OperationMode.PUSH_ENV_TO_SECRETS,
     );
 
     // Act
@@ -67,7 +67,7 @@ describe('DispatchActionCommandHandler', () => {
     expect(mockPushHandler.handle).toHaveBeenCalled();
   });
 
-  it('Should_CallPushSingleToSSM_When_PushSingleModeIsProvided', async () => {
+  it('Should_CallPushSingleToSecretStore_When_PushSingleModeIsProvided', async () => {
     // Arrange
     const command = new DispatchActionCommand(
       undefined,
@@ -94,7 +94,7 @@ describe('DispatchActionCommandHandler', () => {
       undefined,
       undefined,
       undefined,
-      OperationMode.PUSH_ENV_TO_SSM,
+      OperationMode.PUSH_ENV_TO_SECRETS,
     );
 
     // Act
@@ -115,7 +115,7 @@ describe('DispatchActionCommandHandler', () => {
       undefined,
       undefined,
       undefined,
-      OperationMode.PULL_SSM_TO_ENV,
+      OperationMode.PULL_SECRETS_TO_ENV,
     );
 
     // Act
@@ -125,24 +125,5 @@ describe('DispatchActionCommandHandler', () => {
     await expect(action).rejects.toThrow(
       'Missing required arguments: --map and --envfile',
     );
-  });
-
-  it('Should_CallPushEnvToSsm_When_PushFlagIsProvided', async () => {
-    // Arrange
-    const command = new DispatchActionCommand(
-      'path/to/map.json',
-      'path/to/.env',
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      OperationMode.PUSH_ENV_TO_SSM,
-    );
-
-    // Act
-    await sut.handleCommand(command);
-
-    // Assert
-    expect(mockPushHandler.handle).toHaveBeenCalled();
   });
 });

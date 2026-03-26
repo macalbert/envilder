@@ -6,9 +6,9 @@ export declare class PushSingleCommandHandler {
     private readonly logger;
     constructor(secretProvider: ISecretProvider, logger: ILogger);
     /**
-     * Handles the PushSingleCommand which pushes a single environment variable to AWS SSM.
+     * Handles the PushSingleCommand which pushes a single environment variable to the secret store.
      *
-     * @param command - The PushSingleCommand containing key, value and ssmPath
+     * @param command - The PushSingleCommand containing key, value and secretPath
      */
     handle(command: PushSingleCommand): Promise<void>;
 }

@@ -1,9 +1,23 @@
 import { Command } from 'commander';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { main } from '../../../src/apps/cli/Cli';
+import { Startup } from '../../../src/apps/cli/Startup';
 import { DispatchActionCommand } from '../../../src/envilder/application/dispatch/DispatchActionCommand';
 import { DispatchActionCommandHandler } from '../../../src/envilder/application/dispatch/DispatchActionCommandHandler';
 import { OperationMode } from '../../../src/envilder/domain/OperationMode';
+
+vi.mock(
+  '../../../src/envilder/infrastructure/variableStore/FileVariableStore',
+  async () => {
+    const actual = await vi.importActual(
+      '../../../src/envilder/infrastructure/variableStore/FileVariableStore',
+    );
+    return {
+      ...(actual as object),
+      readMapFileConfig: vi.fn().mockResolvedValue({}),
+    };
+  },
+);
 
 function patchWithMocks() {
   const mockCommandHandler = {
@@ -43,7 +57,6 @@ describe('Cli', () => {
       testProfile,
     ];
 
-    // Mock command creation
     const mockCommand = {
       map: 'map.json',
       envfile: '.env',
@@ -60,9 +73,10 @@ describe('Cli', () => {
     expect(mocks.mockCommandHandler.handleCommand).toHaveBeenCalledWith(
       mockCommand,
     );
+    expect(mocks.mockCommandHandler.handleCommand).toHaveBeenCalledTimes(1);
   });
 
-  it('Should_ThrowError_When_ArgumentsAreInvalids', async () => {
+  it('Should_ThrowError_When_ArgumentsAreInvalid', async () => {
     // Arrange
     process.argv = [
       'node',
@@ -96,7 +110,7 @@ describe('Cli', () => {
     const exportCommand = DispatchActionCommand.fromCliOptions(options);
 
     // Assert
-    expect(exportCommand.mode).toBe(OperationMode.PULL_SSM_TO_ENV);
+    expect(exportCommand.mode).toBe(OperationMode.PULL_SECRETS_TO_ENV);
     expect(exportCommand.map).toBe('map.json');
     expect(exportCommand.envfile).toBe('.env');
   });
@@ -113,7 +127,7 @@ describe('Cli', () => {
     const importCommand = DispatchActionCommand.fromCliOptions(options);
 
     // Assert
-    expect(importCommand.mode).toBe(OperationMode.PUSH_ENV_TO_SSM);
+    expect(importCommand.mode).toBe(OperationMode.PUSH_ENV_TO_SECRETS);
   });
 
   it('Should_CreateSinglePushCommand_When_OptionsAreProvided', () => {
@@ -121,7 +135,7 @@ describe('Cli', () => {
     const options = {
       key: 'API_KEY',
       value: 'secret123',
-      ssmPath: '/my/path',
+      secretPath: '/my/path',
     };
 
     // Act
@@ -131,6 +145,40 @@ describe('Cli', () => {
     expect(pushCommand.mode).toBe(OperationMode.PUSH_SINGLE);
     expect(pushCommand.key).toBe('API_KEY');
     expect(pushCommand.value).toBe('secret123');
-    expect(pushCommand.ssmPath).toBe('/my/path');
+    expect(pushCommand.secretPath).toBe('/my/path');
+  });
+
+  it('Should_PassAllowedVaultHosts_When_EnvVarIsSet', async () => {
+    // Arrange
+    process.env.ENVILDER_ALLOWED_VAULT_HOSTS = 'localhost,custom.host';
+    const infraSpy = vi.spyOn(Startup.prototype, 'configureInfrastructure');
+    process.argv = ['node', 'cli.js', '--map', 'map.json', '--envfile', '.env'];
+
+    // Act
+    await main();
+
+    // Assert
+    expect(infraSpy).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        allowedVaultHosts: ['localhost', 'custom.host'],
+        disableChallengeResourceVerification: true,
+      }),
+    );
+    delete process.env.ENVILDER_ALLOWED_VAULT_HOSTS;
+  });
+
+  it('Should_NotPassInfraOptions_When_EnvVarIsNotSet', async () => {
+    // Arrange
+    delete process.env.ENVILDER_ALLOWED_VAULT_HOSTS;
+    const infraSpy = vi.spyOn(Startup.prototype, 'configureInfrastructure');
+    process.argv = ['node', 'cli.js', '--map', 'map.json', '--envfile', '.env'];
+
+    // Act
+    await main();
+
+    // Assert
+    expect(infraSpy).toHaveBeenCalled();
+    expect(infraSpy).toHaveBeenCalledWith(expect.any(Object), {});
   });
 });

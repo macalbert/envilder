@@ -1,7 +1,7 @@
 {
   "name": "envilder",
-  "version": "0.7.12",
-  "description": "A CLI that securely centralizes your environment variables from AWS SSM as a single source of truth",
+  "version": "0.8.0",
+  "description": "A CLI that securely centralizes your environment variables from AWS SSM or Azure Key Vault as a single source of truth",
   "author": {
     "name": "Marçal Albert Castellví",
     "email": "mac.albert@gmail.com",
@@ -29,14 +29,16 @@
     "lint": "secretlint \"**/*\" && biome check --write && tsc --noEmit",
     "lint:fix": "biome lint --fix",
     "test": "vitest run --reporter=verbose --coverage",
-    "test:e2e": "vitest run --reporter=verbose e2e/",
     "test:ci": "vitest run --reporter=verbose --reporter=junit --coverage --outputFile=coverage/junit/test-results.xml",
     "release:publish": "npm pack --dry-run && npm publish --provenance",
     "action-publish": "pnpm build:gha && pnpm verify:gha",
     "release-patch": "pnpm version patch",
     "release-minor": "pnpm version minor",
     "release-major": "pnpm version major",
-    "release-prerelease": "pnpm version prerelease"
+    "release-prerelease": "pnpm version prerelease",
+    "dev:run": "node --env-file=dev.env --import tsx src/apps/cli/Index.ts",
+    "docker:up": "docker compose -f docker-compose.yml up -d",
+    "docker:down": "docker compose -f docker-compose.yml down"
   },
   "keywords": [
     "env",
@@ -56,7 +58,10 @@
     "envfile",
     "github-actions",
     "github-action",
-    "actions"
+    "actions",
+    "azure",
+    "key-vault",
+    "azure-key-vault"
   ],
   "bugs": {
     "url": "https://github.com/macalbert/envilder/issues"
@@ -77,6 +82,9 @@
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.1014.0",
     "@aws-sdk/credential-providers": "^3.1014.0",
+    "@azure/core-rest-pipeline": "^1.22.2",
+    "@azure/identity": "^4.13.0",
+    "@azure/keyvault-secrets": "^4.10.0",
     "@types/node": "^25.3.3",
     "commander": "^14.0.3",
     "dotenv": "^17.3.1",
@@ -97,6 +105,7 @@
     "secretlint": "^11.3.1",
     "testcontainers": "^11.12.0",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   },

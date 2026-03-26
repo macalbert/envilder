@@ -27,10 +27,11 @@ classDef node fill:#263238,stroke:#FFFFFF,color:#FFFFFF;
 subgraph INFRA["Infrastructure Layer"]
     direction LR
     AWS[AwsSsmSecretProvider]
+    AZURE[AzureKeyVaultSecretProvider]
     FILE[FileVariableStore]
     LOG[ConsoleLogger]
 end
-class AWS,FILE,LOG node
+class AWS,AZURE,FILE,LOG node
 style INFRA fill:#C62828,stroke:#C62828,color:#FFFFFF
 
 %% ================= APPLICATION LAYER (YELLOW BG) =================
@@ -59,8 +60,8 @@ style DOMAIN fill:#2E7D32,stroke:#2E7D32,color:#FFFFFF
 subgraph PRESENTERS["Presenters"]
     direction LR
     CLI[CLI Application<br/>apps/cli/Cli.ts]
-    GHA[GitHub Action<br/>apps/gha/GitHubAction.ts]
-    DI[InversifyJS Container<br/>Dependency Injection Setup]
+    GHA[GitHub Action<br/>apps/gha/Gha.ts]
+    DI[InversifyJS Container<br/>Shared ContainerConfiguration]
 end
 class CLI,GHA,DI node
 style PRESENTERS fill:#0D47A1,stroke:#0D47A1,color:#FFFFFF
@@ -92,6 +93,7 @@ ERR --> CORE
 
 %% Infra → Domain (implement ports)
 PORTS -.implements.-> AWS
+PORTS -.implements.-> AZURE
 PORTS -.implements.-> FILE
 PORTS -.implements.-> LOG
 ```
@@ -154,18 +156,22 @@ Responsibilities:
 
 * Implement ports
 * AWS SSM interaction
+* Azure Key Vault interaction
 * File system access
 * Logging and technical concerns
 
 Components:
 
 * `AwsSsmSecretProvider`
+* `AzureKeyVaultSecretProvider`
 * `FileVariableStore`
 * `ConsoleLogger`
 
 ---
 
 ## 🔄 Data Flow: Pull Operation
+
+### AWS SSM Path (flow)
 
 ```mermaid
 sequenceDiagram
@@ -203,9 +209,49 @@ sequenceDiagram
     CLI-->>User: Secrets pulled successfully
 ```
 
+### Azure Key Vault Path (flow)
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant CLI as CLI/GHA
+    participant Dispatch as DispatchActionCommandHandler
+    participant Pull as PullSsmToEnvCommandHandler
+    participant FileStore as FileVariableStore
+    participant AZ as AzureKeyVaultSecretProvider
+    participant KV as Azure Key Vault
+
+    User->>CLI: envilder --map=map.json --envfile=.env
+    CLI->>Dispatch: handleCommand(command)
+    Dispatch->>Pull: handle(PullSsmToEnvCommand)
+    
+    Pull->>FileStore: getMapping(map.json)
+    FileStore-->>Pull: {"DB_URL": "app-db-url"}
+    
+    Pull->>FileStore: getEnvironment(.env)
+    FileStore-->>Pull: existing env vars
+    
+    loop For each mapping
+        Pull->>AZ: getSecret("app-db-url")
+        AZ->>KV: SecretClient.getSecret("app-db-url")
+        KV-->>AZ: SecretProperties{value="postgresql://..."}
+        AZ-->>Pull: "postgresql://..."
+    end
+    
+    Pull->>Pull: Build updated env vars
+    Pull->>FileStore: saveEnvironment(.env, vars)
+    FileStore-->>Pull: Saved
+    
+    Pull-->>Dispatch: Success
+    Dispatch-->>CLI: Success
+    CLI-->>User: Secrets pulled successfully
+```
+
 ---
 
 ## 🔄 Data Flow: Push Operation
+
+### AWS SSM Path
 
 ```mermaid
 sequenceDiagram
@@ -239,24 +285,78 @@ sequenceDiagram
     CLI-->>User: Secrets pushed successfully
 ```
 
+### Azure Key Vault Path
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant CLI as CLI/GHA
+    participant Dispatch as DispatchActionCommandHandler
+    participant Push as PushEnvToSsmCommandHandler
+    participant FileStore as FileVariableStore
+    participant AZ as AzureKeyVaultSecretProvider
+    participant KV as Azure Key Vault
+
+    User->>CLI: envilder --push --map=map.json --envfile=.env
+    CLI->>Dispatch: handleCommand(command)
+    Dispatch->>Push: handle(PushEnvToSsmCommand)
+    
+    Push->>FileStore: getMapping(map.json)
+    FileStore-->>Push: {"DB_URL": "app-db-url"}
+    
+    Push->>FileStore: getEnvironment(.env)
+    FileStore-->>Push: {"DB_URL": "postgresql://..."}
+    
+    loop For each mapping
+        Push->>AZ: setSecret("app-db-url", "postgresql://...")
+        AZ->>KV: SecretClient.setSecret("app-db-url", "postgresql://...")
+        KV-->>AZ: Secret updated
+        AZ-->>Push: Success
+    end
+    
+    Push-->>Dispatch: Success
+    Dispatch-->>CLI: Success
+    CLI-->>User: Secrets pushed successfully
+```
+
 ---
 
 ## 🧩 Dependency Injection
 
 ```ts
-class Startup {
-  configureServices() {
-    container.bind(TYPES.DispatchActionCommandHandler)
-      .to(DispatchActionCommandHandler);
-    container.bind(TYPES.PullSsmToEnvCommandHandler)
-      .to(PullSsmToEnvCommandHandler);
-  }
+// apps/shared/ContainerConfiguration.ts
+function configureInfrastructureServices(
+  container: Container,
+  config: MapFileConfig = {},
+) {
+  container.bind(TYPES.ILogger).to(ConsoleLogger);
+  container.bind(TYPES.IVariableStore).to(FileVariableStore);
 
-  configureInfrastructure(profile?: string) {
-    container.bind(TYPES.ILogger).to(ConsoleLogger);
-    container.bind(TYPES.ISecretProvider).to(AwsSsmSecretProvider);
-    container.bind(TYPES.IVariableStore).to(FileVariableStore);
+  // Provider selection via config: 'aws' (default) or 'azure'
+  // config comes from $config in the map file, overridden by CLI flags
+  const provider = config.provider?.toLowerCase() || 'aws';
+  if (provider === 'azure') {
+    const client = new SecretClient(config.vaultUrl, new DefaultAzureCredential());
+    container.bind(TYPES.ISecretProvider)
+      .toConstantValue(new AzureKeyVaultSecretProvider(client));
+  } else {
+    const ssm = config.profile
+      ? new SSM({ credentials: fromIni({ profile: config.profile }) })
+      : new SSM();
+    container.bind(TYPES.ISecretProvider)
+      .toConstantValue(new AwsSsmSecretProvider(ssm));
   }
+}
+
+function configureApplicationServices(container: Container) {
+  container.bind(TYPES.DispatchActionCommandHandler)
+    .to(DispatchActionCommandHandler).inTransientScope();
+  container.bind(TYPES.PullSsmToEnvCommandHandler)
+    .to(PullSsmToEnvCommandHandler).inTransientScope();
+  container.bind(TYPES.PushEnvToSsmCommandHandler)
+    .to(PushEnvToSsmCommandHandler).inTransientScope();
+  container.bind(TYPES.PushSingleCommandHandler)
+    .to(PushSingleCommandHandler).inTransientScope();
 }
 ```
 
@@ -300,6 +400,9 @@ graph LR
 
 ### Adding a New Secret Provider
 
+Envilder already supports AWS SSM and Azure Key Vault. To add another provider
+(e.g., HashiCorp Vault), implement the `ISecretProvider` interface:
+
 ```ts
 interface ISecretProvider {
   getSecret(name: string): Promise<string | undefined>;
@@ -315,8 +418,12 @@ class HashiCorpVaultProvider implements ISecretProvider {
 }
 ```
 
+Then add a new case in `configureInfrastructureServices()` in `ContainerConfiguration.ts`:
+
 ```ts
-container.bind(TYPES.ISecretProvider).to(HashiCorpVaultProvider);
+if (provider === 'vault') {
+  container.bind(TYPES.ISecretProvider).to(HashiCorpVaultProvider);
+}
 ```
 
 No changes required to application or domain layers.
@@ -367,5 +474,5 @@ src/
 
 ---
 
-**Last Updated**: November 2025
+**Last Updated**: March 2026
 **Maintainer**: Marçal Albert ([@macalbert](https://github.com/macalbert))

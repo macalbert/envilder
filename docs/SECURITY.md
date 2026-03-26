@@ -54,9 +54,25 @@ When using Envilder, follow these security guidelines:
 - ❌ Store AWS access keys in code or environment variables
 - ❌ Share AWS credentials via Slack, email, or chat
 
+### Azure Credentials
+
+**DO**:
+
+- ✅ Use workload identity federation (OIDC) for GitHub Actions ([setup guide](https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation-create-trust-github))
+- ✅ Use managed identities in Azure-hosted environments
+- ✅ Scope Key Vault access to specific secrets and operations
+- ✅ Set vault URL via `$config.vaultUrl` in your map file or `--vault-url` flag—never hardcode secrets in code
+
+**DON'T**:
+
+- ❌ Store Azure client secrets in code
+- ❌ Use overly broad Key Vault access policies
+
 ### IAM Permissions
 
-Envilder requires these AWS permissions:
+Envilder requires these cloud provider permissions:
+
+#### AWS
 
 ```json
 {
@@ -107,7 +123,7 @@ When using Envilder GitHub Action:
 **DO**:
 
 - ✅ Use OIDC authentication instead of static credentials ([OIDC setup guide](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services))
-- ✅ Pin action versions (e.g., `@v1.0.0` instead of `@main`)
+- ✅ Pin action versions (e.g., `@v0.8.0` instead of `@main`)
 - ✅ Review action code before using in production
 
 **DON'T**:
@@ -134,6 +150,14 @@ View current security status: [![Known Vulnerabilities](https://snyk.io/test/git
 - All API calls are logged in CloudTrail
 - Access is controlled via IAM policies
 - Supports versioning and automatic rotation
+
+### Azure Key Vault
+
+- Secrets are encrypted at rest using Azure-managed or customer-managed keys
+- All access is logged in Azure Monitor and Activity Log
+- Access is controlled via Azure RBAC or Key Vault access policies
+- Supports secret versioning, expiration dates, and soft delete
+- Network isolation available via private endpoints and firewall rules
 
 ### Local Environment Files
 

@@ -4,77 +4,68 @@ import { PushSingleCommandHandler } from '../../../../src/envilder/application/p
 import type { ILogger } from '../../../../src/envilder/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../../src/envilder/domain/ports/ISecretProvider';
 
-function createMocks(throwError = false) {
-  const mockError = new Error('Failed to push variable');
-
-  const mockSecretProvider: ISecretProvider = {
-    getSecret: vi.fn(),
-    setSecret: throwError
-      ? vi.fn(async (): Promise<void> => {
-          throw mockError;
-        })
-      : vi.fn(async (): Promise<void> => {}),
-  };
-
-  const mockLogger: ILogger = {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-  };
-
-  return { mockSecretProvider, mockLogger, mockError };
-}
-
 describe('PushSingleCommandHandler', () => {
-  let mocks: ReturnType<typeof createMocks>;
+  let mockSecretProvider: ISecretProvider;
+  let mockLogger: ILogger;
 
   beforeEach(() => {
-    mocks = createMocks();
+    mockSecretProvider = {
+      getSecret: vi.fn(),
+      setSecret: vi.fn(async (): Promise<void> => {}),
+    };
+
+    mockLogger = {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    };
   });
 
   it('Should_SetSecret_When_PushingSingleVariable', async () => {
     // Arrange
-    const sut = new PushSingleCommandHandler(
-      mocks.mockSecretProvider,
-      mocks.mockLogger,
+    const sut = new PushSingleCommandHandler(mockSecretProvider, mockLogger);
+    const command = PushSingleCommand.create(
+      'TEST_VAR',
+      'test-value',
+      '/path/to/ssm/test',
     );
-
-    const key = 'TEST_VAR';
-    const value = 'test-value';
-    const ssmPath = '/path/to/ssm/test';
-    const command = PushSingleCommand.create(key, value, ssmPath);
 
     // Act
     await sut.handle(command);
 
     // Assert
-    expect(mocks.mockSecretProvider.setSecret).toHaveBeenCalledWith(
-      ssmPath,
-      value,
+    expect(mockSecretProvider.setSecret).toHaveBeenCalledWith(
+      '/path/to/ssm/test',
+      'test-value',
+    );
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      "Starting push operation for key 'TEST_VAR' to path '**************est'",
+    );
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('to secret store at path **************est'),
     );
   });
 
   it('Should_ThrowError_When_PushingSingleVariableFails', async () => {
     // Arrange
-    const errorMocks = createMocks(true);
-
-    const sut = new PushSingleCommandHandler(
-      errorMocks.mockSecretProvider,
-      errorMocks.mockLogger,
+    const mockError = new Error('Failed to push variable');
+    mockSecretProvider.setSecret = vi.fn(async (): Promise<void> => {
+      throw mockError;
+    });
+    const sut = new PushSingleCommandHandler(mockSecretProvider, mockLogger);
+    const command = PushSingleCommand.create(
+      'TEST_VAR',
+      'test-value',
+      '/path/to/ssm/test',
     );
-
-    const key = 'TEST_VAR';
-    const value = 'test-value';
-    const ssmPath = '/path/to/ssm/test';
-    const command = PushSingleCommand.create(key, value, ssmPath);
 
     // Act
     const action = () => sut.handle(command);
 
     // Assert
-    await expect(action()).rejects.toThrow(errorMocks.mockError);
-    expect(errorMocks.mockLogger.error).toHaveBeenCalledWith(
-      'Failed to push variable to SSM: Failed to push variable',
+    await expect(action()).rejects.toThrow(mockError);
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'Failed to push variable to secret store: Failed to push variable',
     );
   });
 });

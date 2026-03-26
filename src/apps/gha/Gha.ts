@@ -3,29 +3,43 @@ import type { Container } from 'inversify';
 import { DispatchActionCommand } from '../../envilder/application/dispatch/DispatchActionCommand.js';
 import type { DispatchActionCommandHandler } from '../../envilder/application/dispatch/DispatchActionCommandHandler.js';
 import type { CliOptions } from '../../envilder/domain/CliOptions.js';
+import type { MapFileConfig } from '../../envilder/domain/MapFileConfig.js';
 import type { ILogger } from '../../envilder/domain/ports/ILogger.js';
+import { ConsoleLogger } from '../../envilder/infrastructure/logger/ConsoleLogger.js';
+import { readMapFileConfig } from '../../envilder/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../envilder/types.js';
 import { Startup } from './Startup.js';
-
-let serviceProvider: Container;
 
 /**
  * Reads GitHub Actions inputs from environment variables.
  * GitHub Actions passes inputs as INPUT_<NAME> environment variables.
  */
-function readInputs(): CliOptions {
+function readInputs(): {
+  options: CliOptions;
+  provider?: string;
+  vaultUrl?: string;
+} {
   const mapFile = process.env.INPUT_MAP_FILE;
   const envFile = process.env.INPUT_ENV_FILE;
+  const provider = process.env.INPUT_PROVIDER;
+  const vaultUrl = process.env.INPUT_VAULT_URL;
 
   return {
-    map: mapFile,
-    envfile: envFile,
-    // GitHub Action only supports pull mode
-    push: false,
+    options: {
+      map: mapFile,
+      envfile: envFile,
+      // GitHub Action only supports pull mode
+      push: false,
+    },
+    provider: provider || undefined,
+    vaultUrl: vaultUrl || undefined,
   };
 }
 
-async function executeCommand(options: CliOptions): Promise<void> {
+async function executeCommand(
+  serviceProvider: Container,
+  options: CliOptions,
+): Promise<void> {
   const commandHandler = serviceProvider.get<DispatchActionCommandHandler>(
     TYPES.DispatchActionCommandHandler,
   );
@@ -35,11 +49,31 @@ async function executeCommand(options: CliOptions): Promise<void> {
 }
 
 export async function main() {
-  const logger = serviceProvider?.get<ILogger>(TYPES.ILogger);
+  const { options, provider, vaultUrl } = readInputs();
+
+  let serviceProvider: Container;
+  let logger: ILogger = new ConsoleLogger();
 
   try {
-    const options = readInputs();
+    const fileConfig = options.map ? await readMapFileConfig(options.map) : {};
 
+    const config: MapFileConfig = {
+      ...fileConfig,
+      ...(provider && { provider }),
+      ...(vaultUrl && { vaultUrl }),
+    };
+
+    const startup = Startup.build();
+    startup.configureServices().configureInfrastructure(config);
+    serviceProvider = startup.create();
+    logger = serviceProvider.get<ILogger>(TYPES.ILogger);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error(`🚨 Failed to initialize: ${message}`);
+    throw error;
+  }
+
+  try {
     // Validate required inputs
     if (!options.map || !options.envfile) {
       throw new Error(
@@ -47,21 +81,16 @@ export async function main() {
       );
     }
 
-    logger?.info('🔑 Envilder GitHub Action - Starting secret pull...');
-    logger?.info(`📋 Map file: ${options.map}`);
-    logger?.info(`📄 Env file: ${options.envfile}`);
+    logger.info('🔑 Envilder GitHub Action - Starting secret pull...');
+    logger.info(`📋 Map file: ${options.map}`);
+    logger.info(`📄 Env file: ${options.envfile}`);
 
-    await executeCommand(options);
+    await executeCommand(serviceProvider, options);
 
-    logger?.info('✅ Secrets pulled successfully!');
+    logger.info('✅ Secrets pulled successfully!');
   } catch (error) {
-    logger?.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
-    logger?.error(error instanceof Error ? error.message : String(error));
+    logger.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
+    logger.error(error instanceof Error ? error.message : String(error));
     throw error;
   }
 }
-
-// Initialize the service provider
-const startup = Startup.build();
-startup.configureServices().configureInfrastructure();
-serviceProvider = startup.create();

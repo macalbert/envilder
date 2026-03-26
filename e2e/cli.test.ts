@@ -1,5 +1,7 @@
+import 'reflect-metadata';
 import { execSync, spawn } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { rm, unlink } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,8 +11,11 @@ import {
   PutParameterCommand,
   SSMClient,
 } from '@aws-sdk/client-ssm';
+import { DefaultAzureCredential } from '@azure/identity';
+import { SecretClient } from '@azure/keyvault-secrets';
 import { glob } from 'glob';
 import pc from 'picocolors';
+import { GenericContainer, type StartedTestContainer } from 'testcontainers';
 import {
   afterAll,
   afterEach,
@@ -20,11 +25,19 @@ import {
   expect,
   it,
 } from 'vitest';
+import { Startup } from '../src/apps/cli/Startup';
+import { DispatchActionCommand } from '../src/envilder/application/dispatch/DispatchActionCommand';
+import type { DispatchActionCommandHandler } from '../src/envilder/application/dispatch/DispatchActionCommandHandler';
+import { TYPES } from '../src/envilder/types';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '..');
 const ssmClient = new SSMClient({});
+
+// Lowkey Vault (Azure Key Vault test double)
+const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.32';
+const LOWKEY_VAULT_PORT = 8443;
 
 describe('Envilder (E2E)', () => {
   beforeAll(async () => {
@@ -39,14 +52,22 @@ describe('Envilder (E2E)', () => {
   const envilder = 'envilder';
   const envFilePath = join(rootDir, 'e2e', 'sample', 'cli-validation.env');
   const mapFilePath = join(rootDir, 'e2e', 'sample', 'param-map.json');
+  const mapFileWithConfigPath = join(
+    rootDir,
+    'e2e',
+    'sample',
+    'param-map-with-aws-config.json',
+  );
   const singleSsmPath = '/Test/SingleVariable';
 
   beforeEach(async () => {
     await cleanUpSsm(mapFilePath, singleSsmPath);
+    await cleanUpSsm(mapFileWithConfigPath);
   }, 60_000);
 
   afterEach(async () => {
     await cleanUpSsm(mapFilePath, singleSsmPath);
+    await cleanUpSsm(mapFileWithConfigPath);
   }, 60_000);
 
   afterAll(async () => {
@@ -84,10 +105,36 @@ describe('Envilder (E2E)', () => {
     // Arrange
     const params = ['--map', mapFilePath, '--envfile', envFilePath];
 
-    const ssmParams = JSON.parse(readFileSync(mapFilePath, 'utf8')) as Record<
-      string,
-      string
-    >;
+    const ssmParams = readMappings(mapFilePath);
+
+    for (const [key, ssmPath] of Object.entries(ssmParams)) {
+      const testValue = `test-value-for-${key}`;
+      await SetParameterSsm(ssmPath, testValue);
+    }
+
+    if (existsSync(envFilePath)) {
+      await unlink(envFilePath);
+    }
+
+    // Act
+    const actual = await runCommand(envilder, params);
+
+    // Assert
+    expect(actual.code).toBe(0);
+    expect(existsSync(envFilePath)).toBe(true);
+
+    for (const [key, ssmPath] of Object.entries(ssmParams)) {
+      const envFileValue = GetSecretFromKey(envFilePath, key);
+      const ssmValue = await GetParameterSsm(ssmPath);
+      expect(envFileValue).toBe(ssmValue);
+    }
+  });
+
+  it('Should_GenerateEnvironmentFile_When_MapFileContainsConfig', async () => {
+    // Arrange
+    const params = ['--map', mapFileWithConfigPath, '--envfile', envFilePath];
+
+    const ssmParams = readMappings(mapFileWithConfigPath);
 
     for (const [key, ssmPath] of Object.entries(ssmParams)) {
       const testValue = `test-value-for-${key}`;
@@ -139,12 +186,41 @@ describe('Envilder (E2E)', () => {
 
   it('Should_PushEnvFileToSSM_When_PushFlagIsUsed', async () => {
     // Arrange
+    const ssmParams = readMappings(mapFilePath);
+    const envContent = Object.keys(ssmParams)
+      .map((key) => `${key}=push-test-${key}`)
+      .join('\n');
+    writeFileSync(envFilePath, envContent, 'utf8');
+
     const params = ['--push', '--envfile', envFilePath, '--map', mapFilePath];
 
-    const ssmParams = JSON.parse(readFileSync(mapFilePath, 'utf8')) as Record<
-      string,
-      string
-    >;
+    // Act
+    const actual = await runCommand(envilder, params);
+
+    // Assert
+    expect(actual.code).toBe(0);
+    for (const [key, ssmPath] of Object.entries(ssmParams)) {
+      const expectedValue = GetSecretFromKey(envFilePath, key);
+      const ssmValue = await GetParameterSsm(ssmPath);
+      expect(ssmValue).toBe(expectedValue);
+    }
+  });
+
+  it('Should_PushEnvFileToSSM_When_MapFileContainsConfig', async () => {
+    // Arrange
+    const ssmParams = readMappings(mapFileWithConfigPath);
+    const envContent = Object.keys(ssmParams)
+      .map((key) => `${key}=push-test-${key}`)
+      .join('\n');
+    writeFileSync(envFilePath, envContent, 'utf8');
+
+    const params = [
+      '--push',
+      '--envfile',
+      envFilePath,
+      '--map',
+      mapFileWithConfigPath,
+    ];
 
     // Act
     const actual = await runCommand(envilder, params);
@@ -168,7 +244,7 @@ describe('Envilder (E2E)', () => {
       key,
       '--value',
       value,
-      '--ssm-path',
+      '--secret-path',
       singleSsmPath,
     ];
 
@@ -183,12 +259,13 @@ describe('Envilder (E2E)', () => {
 
   it('Should_SuccessfullyPushAllVariables_When_AllParametersAreValid', async () => {
     // Arrange
-    const params = ['--push', '--envfile', envFilePath, '--map', mapFilePath];
+    const ssmParams = readMappings(mapFilePath);
+    const envContent = Object.keys(ssmParams)
+      .map((key) => `${key}=push-test-${key}`)
+      .join('\n');
+    writeFileSync(envFilePath, envContent, 'utf8');
 
-    const ssmParams = JSON.parse(readFileSync(mapFilePath, 'utf8')) as Record<
-      string,
-      string
-    >;
+    const params = ['--push', '--envfile', envFilePath, '--map', mapFilePath];
 
     // Act
     const actual = await runCommand(envilder, params);
@@ -206,6 +283,227 @@ describe('Envilder (E2E)', () => {
       const ssmValue = await GetParameterSsm(ssmPath);
       expect(ssmValue).toBe(expectedValue);
     }
+  });
+
+  describe('Azure Key Vault', () => {
+    let lowkeyVaultContainer: StartedTestContainer;
+    let azureVaultUrl: string;
+    let lowkeyVaultHost: string;
+    let azureSecretClient: SecretClient;
+    const azureMapFilePath = join(
+      rootDir,
+      'e2e',
+      'sample',
+      'param-map-azure.json',
+    );
+    const azureEnvFilePath = join(
+      rootDir,
+      'e2e',
+      'sample',
+      'azure-validation.env',
+    );
+    let originalTlsReject: string | undefined;
+
+    beforeAll(async () => {
+      originalTlsReject = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+      // Self-signed cert on a local test container — safe to skip validation
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+      lowkeyVaultContainer = await new GenericContainer(LOWKEY_VAULT_IMAGE)
+        .withName(`lowkey-vault-cli-${randomUUID().slice(0, 8)}`)
+        .withExposedPorts(LOWKEY_VAULT_PORT, 8080)
+        .withEnvironment({
+          LOWKEY_ARGS: '--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true',
+        })
+        .start();
+
+      const host = lowkeyVaultContainer.getHost();
+      const port = lowkeyVaultContainer.getMappedPort(LOWKEY_VAULT_PORT);
+      const tokenPort = lowkeyVaultContainer.getMappedPort(8080);
+      lowkeyVaultHost = host;
+      azureVaultUrl = `https://${host}:${port}`;
+
+      // Point DefaultAzureCredential to Lowkey Vault's built-in token endpoint
+      process.env.AZURE_POD_IDENTITY_AUTHORITY_HOST = `http://${host}:${tokenPort}`;
+
+      azureSecretClient = new SecretClient(
+        azureVaultUrl,
+        new DefaultAzureCredential(),
+        { disableChallengeResourceVerification: true },
+      );
+
+      // Write dynamic map file with container's vault URL
+      writeFileSync(
+        azureMapFilePath,
+        JSON.stringify(
+          {
+            $config: {
+              provider: 'azure',
+              vaultUrl: azureVaultUrl,
+            },
+            VAULT_SECRET: 'test-secret',
+          },
+          null,
+          2,
+        ),
+      );
+    }, 120_000);
+
+    afterAll(async () => {
+      if (lowkeyVaultContainer) {
+        await lowkeyVaultContainer.stop();
+      }
+      if (originalTlsReject === undefined) {
+        delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+      } else {
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalTlsReject;
+      }
+      delete process.env.AZURE_POD_IDENTITY_AUTHORITY_HOST;
+      if (existsSync(azureMapFilePath)) {
+        await unlink(azureMapFilePath);
+      }
+      if (existsSync(azureEnvFilePath)) {
+        await unlink(azureEnvFilePath);
+      }
+    }, 60_000);
+
+    beforeEach(async () => {
+      if (existsSync(azureEnvFilePath)) {
+        await unlink(azureEnvFilePath);
+      }
+    });
+
+    it('Should_PullFromAzureKeyVault_When_MapFileContainsAzureConfig', async () => {
+      // Arrange
+      await azureSecretClient.setSecret('test-secret', 'azure-secret-value');
+      const config = { provider: 'azure', vaultUrl: azureVaultUrl };
+
+      // Act — invoke production code directly, passing test vault host
+      const container = Startup.build()
+        .configureServices()
+        .configureInfrastructure(config, {
+          allowedVaultHosts: [lowkeyVaultHost],
+          disableChallengeResourceVerification: true,
+        })
+        .create();
+      const handler = container.get<DispatchActionCommandHandler>(
+        TYPES.DispatchActionCommandHandler,
+      );
+      const command = DispatchActionCommand.fromCliOptions({
+        map: azureMapFilePath,
+        envfile: azureEnvFilePath,
+      });
+      await handler.handleCommand(command);
+
+      // Assert
+      expect(existsSync(azureEnvFilePath)).toBe(true);
+      const envValue = GetSecretFromKey(azureEnvFilePath, 'VAULT_SECRET');
+      expect(envValue).toBe('azure-secret-value');
+    });
+
+    it('Should_PullFromAzureKeyVault_When_VaultUrlProvidedViaConfig', async () => {
+      // Arrange
+      await azureSecretClient.setSecret('test-secret', 'config-override-value');
+      const noUrlMapPath = join(
+        rootDir,
+        'e2e',
+        'sample',
+        'param-map-azure-no-url.json',
+      );
+      writeFileSync(
+        noUrlMapPath,
+        JSON.stringify(
+          {
+            $config: { provider: 'azure' },
+            VAULT_SECRET: 'test-secret',
+          },
+          null,
+          2,
+        ),
+      );
+      const config = { provider: 'azure', vaultUrl: azureVaultUrl };
+
+      // Act — invoke production code directly, passing test vault host
+      const container = Startup.build()
+        .configureServices()
+        .configureInfrastructure(config, {
+          allowedVaultHosts: [lowkeyVaultHost],
+          disableChallengeResourceVerification: true,
+        })
+        .create();
+      const handler = container.get<DispatchActionCommandHandler>(
+        TYPES.DispatchActionCommandHandler,
+      );
+      const command = DispatchActionCommand.fromCliOptions({
+        map: noUrlMapPath,
+        envfile: azureEnvFilePath,
+      });
+      await handler.handleCommand(command);
+
+      // Assert
+      expect(existsSync(azureEnvFilePath)).toBe(true);
+      const envValue = GetSecretFromKey(azureEnvFilePath, 'VAULT_SECRET');
+      expect(envValue).toBe('config-override-value');
+
+      if (existsSync(noUrlMapPath)) {
+        await unlink(noUrlMapPath);
+      }
+    });
+
+    it('Should_PushEnvFileToAzureKeyVault_When_PushFlagWithAzureProvider', async () => {
+      // Arrange
+      writeFileSync(azureEnvFilePath, 'VAULT_SECRET=push-azure-value', 'utf8');
+      const config = { provider: 'azure', vaultUrl: azureVaultUrl };
+
+      // Act
+      const container = Startup.build()
+        .configureServices()
+        .configureInfrastructure(config, {
+          allowedVaultHosts: [lowkeyVaultHost],
+          disableChallengeResourceVerification: true,
+        })
+        .create();
+      const handler = container.get<DispatchActionCommandHandler>(
+        TYPES.DispatchActionCommandHandler,
+      );
+      const command = DispatchActionCommand.fromCliOptions({
+        map: azureMapFilePath,
+        envfile: azureEnvFilePath,
+        push: true,
+      });
+      await handler.handleCommand(command);
+
+      // Assert
+      const secret = await azureSecretClient.getSecret('test-secret');
+      expect(secret.value).toBe('push-azure-value');
+    });
+
+    it('Should_PushSingleToAzureKeyVault_When_KeyValueAndPathProvided', async () => {
+      // Arrange
+      const config = { provider: 'azure', vaultUrl: azureVaultUrl };
+
+      // Act
+      const container = Startup.build()
+        .configureServices()
+        .configureInfrastructure(config, {
+          allowedVaultHosts: [lowkeyVaultHost],
+          disableChallengeResourceVerification: true,
+        })
+        .create();
+      const handler = container.get<DispatchActionCommandHandler>(
+        TYPES.DispatchActionCommandHandler,
+      );
+      const command = DispatchActionCommand.fromCliOptions({
+        key: 'SINGLE_VAR',
+        value: 'single-azure-value',
+        secretPath: 'single-azure-test',
+      });
+      await handler.handleCommand(command);
+
+      // Assert
+      const secret = await azureSecretClient.getSecret('single-azure-test');
+      expect(secret.value).toBe('single-azure-value');
+    });
   });
 });
 
@@ -261,16 +559,19 @@ async function cleanUpSystem() {
   }
 }
 
+function readMappings(mapPath: string): Record<string, string> {
+  const raw = JSON.parse(readFileSync(mapPath, 'utf8'));
+  const { $config, ...mappings } = raw;
+  return mappings as Record<string, string>;
+}
+
 async function cleanUpSsm(
   mapFilePath: string,
-  singleSsmPath: string,
+  singleSsmPath?: string,
 ): Promise<void> {
   // Clean up all parameters from the map file
   try {
-    const ssmParams = JSON.parse(readFileSync(mapFilePath, 'utf8')) as Record<
-      string,
-      string
-    >;
+    const ssmParams = readMappings(mapFilePath);
     for (const [, ssmPath] of Object.entries(ssmParams)) {
       await DeleteParameterSsm(ssmPath);
     }
@@ -284,7 +585,9 @@ async function cleanUpSsm(
     }
   }
 
-  await DeleteParameterSsm(singleSsmPath);
+  if (singleSsmPath) {
+    await DeleteParameterSsm(singleSsmPath);
+  }
 }
 
 async function GetParameterSsm(ssmPath: string): Promise<string> {

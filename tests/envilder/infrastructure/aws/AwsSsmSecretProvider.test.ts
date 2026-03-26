@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import {
   GetParameterCommand,
   PutParameterCommand,
@@ -84,7 +85,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
 
       // Assert
       await expect(action()).rejects.toThrow(
-        'Failed to get secret test-param: Network error',
+        'Failed to get secret *******ram: Network error',
       );
     });
 
@@ -97,7 +98,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
 
       // Assert
       await expect(action()).rejects.toThrow(
-        'Failed to get secret test-param: String error',
+        'Failed to get secret *******ram: String error',
       );
     });
   });
@@ -138,98 +139,100 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
 });
 
 // Integration tests with LocalStack — requires Docker
-describe.runIf(process.env.CI || process.env.INTEGRATION)(
-  'AwsSsmSecretProvider (integration with LocalStack)',
-  () => {
-    let container: StartedLocalStackContainer;
-    let endpoint: string;
-    let ssmClient: SSM;
+describe('AwsSsmSecretProvider (integration with LocalStack)', () => {
+  let container: StartedLocalStackContainer;
+  let endpoint: string;
+  let ssmClient: SSM;
 
-    beforeAll(async () => {
-      container = await new LocalstackContainer(LOCALSTACK_IMAGE).start();
-      endpoint = container.getConnectionUri();
-      ssmClient = new SSM({
-        endpoint,
-      });
-      await ssmClient.send(
-        new PutParameterCommand({
-          Name: PARAM_NAME,
-          Value: PARAM_VALUE,
-          Type: 'SecureString',
-        }),
-      );
-    }, 60000);
-
-    afterAll(async () => {
-      await container.stop();
+  beforeAll(async () => {
+    container = await new LocalstackContainer(LOCALSTACK_IMAGE)
+      .withName(`localstack-ssm-${randomUUID().slice(0, 8)}`)
+      .withEnvironment({
+        LOCALSTACK_ACKNOWLEDGE_ACCOUNT_REQUIREMENT: '1',
+      })
+      .start();
+    endpoint = container.getConnectionUri();
+    ssmClient = new SSM({
+      endpoint,
     });
+    await ssmClient.send(
+      new PutParameterCommand({
+        Name: PARAM_NAME,
+        Value: PARAM_VALUE,
+        Type: 'SecureString',
+      }),
+    );
+  }, 60_000);
 
-    it('Should_ReturnSecretValue_When_ParameterExists', async () => {
-      // Arrange
-      const sut = new AwsSsmSecretProvider(ssmClient);
+  afterAll(async () => {
+    await container.stop();
+  });
 
-      // Act
-      const actual = await sut.getSecret(PARAM_NAME);
+  it('Should_ReturnSecretValue_When_ParameterExists', async () => {
+    // Arrange
+    const sut = new AwsSsmSecretProvider(ssmClient);
 
-      // Assert
-      expect(actual).toBe(PARAM_VALUE);
+    // Act
+    const actual = await sut.getSecret(PARAM_NAME);
+
+    // Assert
+    expect(actual).toBe(PARAM_VALUE);
+  });
+
+  it('Should_ReturnUndefined_When_ParameterDoesNotExist', async () => {
+    // Arrange
+    const sut = new AwsSsmSecretProvider(ssmClient);
+
+    // Act
+    const actual = await sut.getSecret(NON_EXISTENT_PARAM);
+
+    // Assert
+    expect(actual).toBeUndefined();
+  });
+
+  it('Should_StoreSecretValue_When_SetSecretIsCalled', async () => {
+    // Arrange
+    const sut = new AwsSsmSecretProvider(ssmClient);
+    const paramName = '/test/new-secret';
+    const paramValue = 'new-secret-value';
+
+    // Act
+    await sut.setSecret(paramName, paramValue);
+
+    // Assert
+    const command = new GetParameterCommand({
+      Name: paramName,
+      WithDecryption: true,
     });
+    const response = await ssmClient.send(command);
+    expect(response.Parameter?.Value).toBe(paramValue);
+  });
 
-    it('Should_ReturnUndefined_When_ParameterDoesNotExist', async () => {
-      // Arrange
-      const sut = new AwsSsmSecretProvider(ssmClient);
+  it('Should_UpdateSecretValue_When_SecretAlreadyExists', async () => {
+    // Arrange
+    const sut = new AwsSsmSecretProvider(ssmClient);
+    const paramName = '/test/update-secret';
+    const initialValue = 'initial-value';
+    const updatedValue = 'updated-value';
 
-      // Act
-      const actual = await sut.getSecret(NON_EXISTENT_PARAM);
-
-      // Assert
-      expect(actual).toBeUndefined();
-    });
-
-    it('Should_StoreSecretValue_When_SetSecretIsCalled', async () => {
-      // Arrange
-      const sut = new AwsSsmSecretProvider(ssmClient);
-      const paramName = '/test/new-secret';
-      const paramValue = 'new-secret-value';
-
-      // Act
-      await sut.setSecret(paramName, paramValue);
-
-      // Assert
-      const command = new GetParameterCommand({
+    // Setup initial value
+    await ssmClient.send(
+      new PutParameterCommand({
         Name: paramName,
-        WithDecryption: true,
-      });
-      const response = await ssmClient.send(command);
-      expect(response.Parameter?.Value).toBe(paramValue);
+        Value: initialValue,
+        Type: 'SecureString',
+      }),
+    );
+
+    // Act
+    await sut.setSecret(paramName, updatedValue);
+
+    // Assert
+    const command = new GetParameterCommand({
+      Name: paramName,
+      WithDecryption: true,
     });
-
-    it('Should_UpdateSecretValue_When_SecretAlreadyExists', async () => {
-      // Arrange
-      const sut = new AwsSsmSecretProvider(ssmClient);
-      const paramName = '/test/update-secret';
-      const initialValue = 'initial-value';
-      const updatedValue = 'updated-value';
-
-      // Setup initial value
-      await ssmClient.send(
-        new PutParameterCommand({
-          Name: paramName,
-          Value: initialValue,
-          Type: 'SecureString',
-        }),
-      );
-
-      // Act
-      await sut.setSecret(paramName, updatedValue);
-
-      // Assert
-      const command = new GetParameterCommand({
-        Name: paramName,
-        WithDecryption: true,
-      });
-      const response = await ssmClient.send(command);
-      expect(response.Parameter?.Value).toBe(updatedValue);
-    });
-  },
-);
+    const response = await ssmClient.send(command);
+    expect(response.Parameter?.Value).toBe(updatedValue);
+  });
+});

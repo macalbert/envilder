@@ -86,4 +86,28 @@ describe('EnvironmentVariable', () => {
       'Value for environment variable NAME cannot be null or undefined',
     );
   });
+
+  describe('maskSecretPath', () => {
+    it('Should_MaskPath_When_PathIsLongerThanThreeChars', () => {
+      // Arrange
+      const path = '/prod/database/password';
+
+      // Act
+      const masked = EnvironmentVariable.maskSecretPath(path);
+
+      // Assert
+      expect(masked).toBe('********************ord');
+    });
+
+    it('Should_FullyMask_When_PathIsThreeCharsOrShorter', () => {
+      // Arrange
+      const shortPath = '/db';
+
+      // Act
+      const masked = EnvironmentVariable.maskSecretPath(shortPath);
+
+      // Assert
+      expect(masked).toBe('***');
+    });
+  });
 });
