@@ -334,6 +334,45 @@ describe('PushEnvToSecretsCommandHandler', () => {
     );
   });
 
+  it('Should_RetryAndSucceed_When_Azure429ThrottlingErrorIsTemporary', async () => {
+    // Arrange
+    let attemptCount = 0;
+    const azureThrottlingError = {
+      name: 'RestError',
+      message: 'Too many requests',
+      statusCode: 429,
+    };
+
+    mockSecretProvider.setSecret = vi.fn(async (): Promise<void> => {
+      attemptCount++;
+      if (attemptCount <= 2) {
+        throw azureThrottlingError;
+      }
+    });
+
+    mockVariableStore.getMapping.mockResolvedValue({
+      TEST_ENV_VAR: '/path/to/secret',
+    });
+
+    mockVariableStore.getEnvironment.mockResolvedValue({
+      TEST_ENV_VAR: 'test-value',
+    });
+
+    const command = PushEnvToSecretsCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    expect(mockSecretProvider.setSecret).toHaveBeenCalledTimes(3);
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('Successfully pushed environment variables'),
+    );
+  });
+
   it('Should_ProcessAllVariablesWithRetry_When_OneVariableFails', async () => {
     // Arrange
     mockSecretProvider.setSecret = vi.fn(

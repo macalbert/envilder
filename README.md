@@ -76,6 +76,11 @@ and streamline onboarding and CI/CD workflows.
   - [🛠️ How it works](#️-how-it-works)
   - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
   - [🔍 Envilder vs. Alternatives](#-envilder-vs-alternatives)
+    - [Secrets sync tools (direct alternatives)](#secrets-sync-tools-direct-alternatives)
+    - [Runtime \& credential tools (not direct alternatives)](#runtime--credential-tools-not-direct-alternatives)
+    - [When to use what](#when-to-use-what)
+    - [Why choose Envilder?](#why-choose-envilder)
+    - [Where Envilder fits best](#where-envilder-fits-best)
   - [🏁 Roadmap](#-roadmap)
   - [🤝 Contributing](#-contributing)
   - [📜 License](#-license)
@@ -386,22 +391,74 @@ A: Yes, licensed under MIT.
 
 ## 🔍 Envilder vs. Alternatives
 
-| Feature | Envilder | dotenv-vault | chamber | aws-vault | infisical |
-|---------|----------|-------------|---------|-----------|----------|
-| **CLI tool** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **GitHub Action** | ✅ Built-in | ❌ | ❌ | ❌ | ✅ |
-| **AWS SSM support** | ✅ Native | ❌ | ✅ | ❌ (STS only) | ✅ |
-| **Azure Key Vault** | ✅ Native | ❌ | ❌ | ❌ | ✅ |
-| **Mapping file** | ✅ JSON | ❌ | ❌ | ❌ | ❌ |
-| **Push & Pull** | ✅ Bidirectional | Pull only | Write only | ❌ | ✅ |
-| **Self-hosted** | ✅ No server | ❌ SaaS | ✅ | ✅ | Optional |
-| **Zero infrastructure** | ✅ | ❌ | ✅ | ✅ | ❌ |
-| **Open source** | ✅ MIT | Partial | ✅ | ✅ | ✅ |
-| **Multi-env (.env.dev, .env.prod)** | ✅ | ✅ | ❌ | ❌ | ✅ |
+Envilder is not a secrets manager. It is a **deterministic projection layer** from cloud secret
+stores into `.env` files. It does not store secrets, does not require a backend, and integrates
+cleanly into CI/CD pipelines.
 
-**Why choose Envilder?** If you already use AWS SSM or Azure Key Vault and want a lightweight,
-zero-infrastructure CLI that generates `.env` files from a simple JSON mapping — without a SaaS
-dependency or extra servers — Envilder is the simplest path.
+To make a fair comparison, it's important to separate tools by what they actually do:
+
+### Secrets sync tools (direct alternatives)
+
+These tools manage secrets as data and project them into `.env` or runtime:
+
+| Feature | Envilder | dotenv-vault | infisical |
+|---------|----------|-------------|----------|
+| **Source of truth** | External (SSM / Key Vault) | dotenv vault (SaaS) | Infisical backend |
+| **Sync direction** | Bidirectional | Pull only | Bidirectional |
+| **Declarative mapping** | ✅ JSON mapping | ❌ | ❌ |
+| **Multi-provider (AWS + Azure)** | ✅ | ❌ | ⚠️ (primarily its own backend) |
+| **Local `.env` generation** | ✅ | ✅ | ✅ |
+| **CI/CD integration** | ✅ Native GitHub Action | Manual | ✅ Native |
+| **Requires SaaS** | ❌ | ✅ | Optional |
+| **Self-hosted** | N/A (no server needed) | ❌ | ✅ |
+| **Complexity** | Low | Low | Medium |
+| **Vendor lock-in** | Low | High | Medium |
+| **Open source** | ✅ MIT | Partial | ✅ |
+
+### Runtime & credential tools (not direct alternatives)
+
+These tools serve different purposes and are better seen as **complements**, not competitors:
+
+| Tool | Purpose | Manages app secrets? | Works with `.env`? |
+|------|---------|---------------------|-------------------|
+| **chamber** | Injects SSM params at runtime (`exec` with env) | ❌ | ❌ |
+| **aws-vault** | Safely assumes AWS IAM roles / STS credentials | ❌ | ❌ |
+
+### When to use what
+
+- **Need a full vault with its own backend?** → [Infisical](https://infisical.com)
+- **Need SaaS simplicity for `.env` sync?** → [dotenv-vault](https://www.dotenv.org/vault)
+- **Need a projection layer from existing cloud stores?** → **Envilder**
+
+### Why choose Envilder?
+
+If you already use AWS SSM or Azure Key Vault and want a lightweight, zero-infrastructure CLI
+that generates `.env` files from a declarative JSON mapping — without a SaaS dependency or extra
+servers — Envilder is the simplest path.
+
+Envilder also brings unique strengths in **determinism** and **testability**:
+
+- **Versioned mappings** — your `param-map.json` lives in source control, making secret
+  projections reproducible across environments
+- **Mockable architecture** — hexagonal design with port interfaces makes offline testing
+  and CI validation straightforward
+- **Audit trail** — all reads/writes are logged by your cloud provider
+  (AWS CloudTrail / Azure Monitor), not by a third-party SaaS
+
+### Where Envilder fits best
+
+Envilder generates `.env` files on disk. This is ideal for:
+
+- **Local development** — onboard new team members with a single command
+- **CI/CD pipelines** — inject secrets at build time without hardcoding them
+- **SSG/SSR builds** — frameworks like Next.js, Nuxt, or Astro that read env vars at build time
+
+For **production runtime**, container orchestrators (ECS, Kubernetes) and platform services
+(Vercel, Fly.io) can inject secrets directly as environment variables — no `.env` file needed.
+In those cases, prefer native secret injection over writing secrets to disk.
+
+> **Coming soon:** An `--exec` mode is planned to inject secrets directly into a child process
+> without writing to disk (e.g., `envilder exec -- node server.js`). See the [Roadmap](./ROADMAP.md).
 
 ---
 
@@ -410,7 +467,9 @@ dependency or extra servers — Envilder is the simplest path.
 We're continuously improving Envilder based on community feedback. Upcoming features include:
 
 - ✅ **Azure Key Vault support** — now available alongside AWS SSM
+- � **Exec mode** — inject secrets into a child process without writing to disk
 - 🔍 **Check/sync mode** for drift detection
+- 🌐 **Documentation website** — dedicated docs site with guides and examples
 - 🧠 **Auto-discovery** for bulk parameter fetching
 - 🔌 **More backends** (HashiCorp Vault, GCP Secret Manager, etc.)
 

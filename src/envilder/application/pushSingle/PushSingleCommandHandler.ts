@@ -21,7 +21,7 @@ export class PushSingleCommandHandler {
   async handle(command: PushSingleCommand): Promise<void> {
     try {
       this.logger.info(
-        `Starting push operation for key '${command.key}' to path '${command.secretPath}'`,
+        `Starting push operation for key '${command.key}' to path '${EnvironmentVariable.maskSecretPath(command.secretPath)}'`,
       );
 
       const envVariable = new EnvironmentVariable(
@@ -32,7 +32,7 @@ export class PushSingleCommandHandler {
 
       await this.secretProvider.setSecret(command.secretPath, command.value);
       this.logger.info(
-        `Pushed ${command.key}=${envVariable.maskedValue} to secret store at path ${command.secretPath}`,
+        `Pushed ${command.key}=${envVariable.maskedValue} to secret store at path ${EnvironmentVariable.maskSecretPath(command.secretPath)}`,
       );
     } catch (error) {
       const errorMessage =

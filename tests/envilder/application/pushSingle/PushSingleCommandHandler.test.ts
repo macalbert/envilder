@@ -38,6 +38,12 @@ describe('PushSingleCommandHandler', () => {
       '/path/to/ssm/test',
       'test-value',
     );
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      "Starting push operation for key 'TEST_VAR' to path '**************est'",
+    );
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('to secret store at path **************est'),
+    );
   });
 
   it('Should_ThrowError_When_PushingSingleVariableFails', async () => {

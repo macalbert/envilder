@@ -11,6 +11,8 @@ Envilder aims to be the simplest, most reliable way to generate `.env` files fro
 
 ## Feature Status & Roadmap
 
+<!-- markdownlint-disable MD013 -->
+
 | Feature | Status | Priority | Notes |
 |---------|--------|----------|-------|
 | **Mapping-based resolution** | ✅ Implemented | - | Core functionality |
@@ -20,11 +22,15 @@ Envilder aims to be the simplest, most reliable way to generate `.env` files fro
 | **GitHub Action** | ✅ Implemented | - | [Documentation](./github-action/README.md) |
 | **Onboarding documentation** | ✅ Implemented | - | [Setup guide](./docs/requirements-installation.md) |
 | **Plugin system / Multi-backend** | ✅ Implemented | - | Azure Key Vault support with `$config` map-file section ([#90](https://github.com/macalbert/envilder/pull/90)) |
+| **Exec mode** (`--exec`) | ❌ Planned | High | Inject secrets into child process env without writing to disk (`envilder exec -- node server.js`) |
 | **Check/sync mode** (`--check`) | ❌ Planned | High | Validate SSM vs `.env`, fail CI if out-of-sync |
+| **Documentation website** | ❌ Planned | Medium | Dedicated docs site with guides, examples, and API reference |
 | **Auto-discovery mode** (`--auto`) | ❌ Planned | Medium | Fetch all parameters with a given prefix |
+| **Exec with refresh** (`--refresh-interval`) | ❌ Future | Low | Kill & restart child process periodically with fresh secrets (requires `--exec`) |
 | **Webhook/Slack notifications** | ❌ Planned | Low | Notify on secret sync for audit/logging |
 | **Hierarchical mapping** | ❌ Future | Low | Per-environment `param-map.json` |
-| **Web-based demo** | ❌ Future | Low | Interactive mapping tester |
+
+<!-- markdownlint-enable MD013 -->
 
 ---
 

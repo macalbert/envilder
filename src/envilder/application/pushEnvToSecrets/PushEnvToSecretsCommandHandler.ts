@@ -179,10 +179,11 @@ export class PushEnvToSecretsCommandHandler {
         const isThrottlingError =
           typeof error === 'object' &&
           error !== null &&
-          'name' in error &&
-          (error.name === 'TooManyUpdates' ||
-            error.name === 'ThrottlingException' ||
-            error.name === 'TooManyRequestsException');
+          (('name' in error &&
+            (error.name === 'TooManyUpdates' ||
+              error.name === 'ThrottlingException' ||
+              error.name === 'TooManyRequestsException')) ||
+            ('statusCode' in error && error.statusCode === 429));
 
         if (!isThrottlingError || attempt === maxRetries) {
           throw error;

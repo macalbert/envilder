@@ -17,7 +17,6 @@ import {
   it,
   vi,
 } from 'vitest';
-import { SecretOperationError } from '../../../../src/envilder/domain/errors/DomainErrors';
 import { AwsSsmSecretProvider } from '../../../../src/envilder/infrastructure/aws/AwsSsmSecretProvider';
 
 // Constants for integration tests
@@ -125,21 +124,16 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       );
     });
 
-    it('Should_ThrowSecretOperationError_When_SetSecretFails', async () => {
+    it('Should_PropagateError_When_SetSecretFails', async () => {
       // Arrange
       const error = new Error('Access denied');
       mockSendFn.mockRejectedValueOnce(error);
 
       // Act
-      const thrown = await sut
-        .setSecret('test-param', 'test-value')
-        .catch((e: unknown) => e);
+      const action = () => sut.setSecret('test-param', 'test-value');
 
       // Assert
-      expect(thrown).toBeInstanceOf(SecretOperationError);
-      expect((thrown as Error).message).toBe(
-        'Failed to set secret *******ram: Access denied',
-      );
+      await expect(action()).rejects.toThrow('Access denied');
     });
   });
 });

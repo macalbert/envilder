@@ -40,15 +40,7 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
 
   async setSecret(name: string, value: string): Promise<void> {
     const secretName = this.resolveSecretName(name);
-    try {
-      await this.client.setSecret(secretName, value);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      throw new SecretOperationError(
-        `Failed to set secret ${EnvironmentVariable.maskSecretPath(name)}: ${errorMessage}`,
-      );
-    }
+    await this.client.setSecret(secretName, value);
   }
 
   /**

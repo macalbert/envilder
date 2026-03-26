@@ -157,9 +157,7 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
       const action = () => sut.setSecret('test-secret', 'test-value');
 
       // Assert
-      await expect(action()).rejects.toThrow(
-        'Failed to set secret ********ret: Access denied',
-      );
+      await expect(action()).rejects.toThrow('Access denied');
     });
   });
 
