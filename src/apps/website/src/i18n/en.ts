@@ -216,7 +216,7 @@ export const en: Translations = {
     thDescription: 'Description',
     inputMapDesc: 'Path to JSON file mapping env vars to secret paths',
     inputEnvDesc: 'Path to .env file to generate',
-    inputProviderDesc: 'Cloud provider: aws or azure',
+    inputProviderDesc: 'Cloud provider: aws or azure (default: aws)',
     inputVaultDesc: 'Azure Key Vault URL',
     output: 'Output:',
     outputDesc: 'Path to the generated .env file',
@@ -260,14 +260,9 @@ export const en: Translations = {
       {
         status: 'done',
         label: '✅',
-        title: 'Mapping-based resolution',
-        description: 'Map env var names to cloud secret paths via JSON',
-      },
-      {
-        status: 'done',
-        label: '✅',
-        title: '.env file generation',
-        description: 'Generate .env files from cloud provider secrets',
+        title: 'Pull secrets to .env',
+        description:
+          'Map env var names to cloud secret paths via JSON and generate .env files automatically',
       },
       {
         status: 'done',
@@ -303,17 +298,11 @@ export const en: Translations = {
           'Inject secrets into child process without writing to disk',
       },
       {
-        status: 'next',
-        label: '🔍',
-        title: 'Check/sync mode (--check)',
-        description: 'Validate SSM vs .env, fail CI if out-of-sync',
-      },
-      {
         status: 'planned',
-        label: '🤖',
-        title: 'Auto-discovery mode (--auto)',
+        label: '…',
+        title: 'And more',
         description:
-          'Fetch all parameters with a given prefix automatically',
+          'Check/sync mode, auto-discovery, and other features on the way',
       },
     ],
   },

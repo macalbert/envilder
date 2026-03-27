@@ -19,23 +19,27 @@ const t = useTranslations(lang);
     </div>
 
     <div class="roadmap-timeline">
-      {t.roadmap.items.map((item) => (
-        <div class={`roadmap-item roadmap-${item.status}`}>
-          <div class="roadmap-marker">
-            <span class="roadmap-dot"></span>
-          </div>
-          <div class="roadmap-content">
-            <div class="roadmap-header">
-              <span class="roadmap-label">{item.label}</span>
-              <h3>{item.title}</h3>
-              {item.status === 'next' && (
-                <span class="badge badge-primary">{t.roadmap.upNext}</span>
-              )}
+      {t.roadmap.items.map((item, i) => {
+        const next = t.roadmap.items[i + 1];
+        const lineActive = item.status === 'done' && next?.status === 'done';
+        return (
+          <div class={`roadmap-item roadmap-${item.status}${lineActive ? ' roadmap-line-active' : ''}`}>
+            <div class="roadmap-marker">
+              <span class="roadmap-dot"></span>
             </div>
-            <p>{item.description}</p>
+            <div class="roadmap-content">
+              <div class="roadmap-header">
+                <span class="roadmap-label">{item.label}</span>
+                <h3>{item.title}</h3>
+                {item.status === 'next' && (
+                  <span class="badge badge-primary">{t.roadmap.upNext}</span>
+                )}
+              </div>
+              <p>{item.description}</p>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   </div>
 </section>
@@ -103,7 +107,7 @@ const t = useTranslations(lang);
     z-index: 1;
   }
 
-  .roadmap-done:not(:last-child) .roadmap-marker::after {
+  .roadmap-line-active:not(:last-child) .roadmap-marker::after {
     background: var(--color-success);
   }
 
@@ -122,6 +126,17 @@ const t = useTranslations(lang);
 
   .roadmap-label {
     font-size: 1rem;
+    filter: grayscale(100%) sepia(60%) saturate(400%) hue-rotate(50deg) brightness(0.9);
+    text-shadow:
+      1px 0 0 rgba(139, 172, 15, 0.25),
+      0 1px 0 rgba(139, 172, 15, 0.25);
+  }
+
+  :global([data-theme="light"]) .roadmap-label {
+    filter: grayscale(100%) sepia(40%) saturate(100%) brightness(0.7) contrast(1.1);
+    text-shadow:
+      1px 0 0 rgba(107, 104, 96, 0.2),
+      0 1px 0 rgba(107, 104, 96, 0.2);
   }
 
   .roadmap-header h3 {

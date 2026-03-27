@@ -22,10 +22,9 @@ const t = useTranslations(lang);
     <div class="providers-grid">
       <div class="provider-block">
         <div class="provider-header">
-          <span class="pixel-icon">☁️</span>
+          <img class="pixel-icon provider-logo" src="/AWS.svg" alt="AWS" width="36" height="36" loading="lazy" />
           <div>
             <h3>{t.providers.awsTitle}</h3>
-            <p class="provider-default">{t.providers.awsDefault}</p>
           </div>
         </div>
 
@@ -55,12 +54,9 @@ const t = useTranslations(lang);
 
       <div class="provider-block">
         <div class="provider-header">
-          <span class="pixel-icon">🔑</span>
+          <img class="pixel-icon provider-logo" src="/Azure.svg" alt="Azure" width="36" height="36" loading="lazy" />
           <div>
             <h3>{t.providers.azureTitle}</h3>
-            <p class="provider-new">
-              <span class="badge badge-primary">{t.providers.azureBadge}</span>
-            </p>
           </div>
         </div>
 
@@ -89,16 +85,6 @@ const t = useTranslations(lang);
       </div>
     </div>
 
-    <div class="config-priority">
-      <h3>{t.providers.configPriorityTitle}</h3>
-      <div class="priority-chain">
-        <span class="priority-item priority-high">{t.providers.priorityHigh}</span>
-        <span class="priority-arrow">→</span>
-        <span class="priority-item priority-mid">{t.providers.priorityMid}</span>
-        <span class="priority-arrow">→</span>
-        <span class="priority-item priority-low">{t.providers.priorityLow}</span>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -200,50 +186,4 @@ const t = useTranslations(lang);
     font-size: 0.78rem;
   }
 
-  .config-priority {
-    margin-top: var(--space-2xl);
-    text-align: center;
-  }
-
-  .config-priority h3 {
-    margin-bottom: var(--space-lg);
-    font-size: 0.7rem;
-  }
-
-  .priority-chain {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-md);
-    flex-wrap: wrap;
-  }
-
-  .priority-item {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    padding: var(--space-sm) var(--space-md);
-    border: 2px solid var(--color-border);
-    background: var(--color-surface);
-  }
-
-  .priority-high {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-  }
-
-  .priority-mid {
-    border-color: var(--color-secondary);
-    color: var(--color-secondary);
-  }
-
-  .priority-low {
-    border-color: var(--color-text-dim);
-    color: var(--color-text-dim);
-  }
-
-  .priority-arrow {
-    font-family: var(--font-pixel);
-    font-size: 0.6rem;
-    color: var(--color-text-dim);
-  }
 </style>

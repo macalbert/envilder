@@ -217,7 +217,7 @@ export const es: Translations = {
     inputMapDesc:
       'Ruta al archivo JSON que mapea variables de entorno a rutas de secretos',
     inputEnvDesc: 'Ruta al archivo .env a generar',
-    inputProviderDesc: 'Proveedor en la nube: aws o azure',
+    inputProviderDesc: 'Proveedor en la nube: aws o azure (por defecto: aws)',
     inputVaultDesc: 'URL de Azure Key Vault',
     output: 'Output:',
     outputDesc: 'Ruta al archivo .env generado',
@@ -263,16 +263,9 @@ export const es: Translations = {
       {
         status: 'done',
         label: '✅',
-        title: 'Resolución basada en mapeo',
+        title: 'Descargar secretos a .env',
         description:
-          'Mapea nombres de variables de entorno a rutas de secretos en la nube vía JSON',
-      },
-      {
-        status: 'done',
-        label: '✅',
-        title: 'Generación de archivos .env',
-        description:
-          'Genera archivos .env desde secretos del proveedor en la nube',
+          'Mapea nombres de variables de entorno a rutas de secretos en la nube vía JSON y genera archivos .env automáticamente',
       },
       {
         status: 'done',
@@ -310,18 +303,11 @@ export const es: Translations = {
           'Inyecta secretos en un proceso hijo sin escribir a disco',
       },
       {
-        status: 'next',
-        label: '🔍',
-        title: 'Modo check/sync (--check)',
-        description:
-          'Valida SSM vs .env, falla CI si están desincronizados',
-      },
-      {
         status: 'planned',
-        label: '🤖',
-        title: 'Modo auto-descubrimiento (--auto)',
+        label: '…',
+        title: 'Y más',
         description:
-          'Obtén todos los parámetros con un prefijo dado automáticamente',
+          'Modo check/sync, auto-descubrimiento y otras funcionalidades en camino',
       },
     ],
   },

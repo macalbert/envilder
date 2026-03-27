@@ -48,6 +48,8 @@ html {
   --color-nav-bg:      rgba(26, 33, 24, 0.95);
   --color-nav-mobile:  rgba(26, 33, 24, 0.98);
   --color-btn-text:    #1a2118;   /* dark bg for button labels */
+  --color-code-bg:     #282c34;   /* neutral dark grey for code blocks */
+  --color-code-header:  #2e3340;  /* slightly lighter for headers */
 
   /* Typography */
   --font-pixel:   'Press Start 2P', monospace;
@@ -105,6 +107,8 @@ html {
   --color-nav-bg:      rgba(245, 244, 241, 0.92);
   --color-nav-mobile:  rgba(245, 244, 241, 0.98);
   --color-btn-text:    #f5f4f1;
+  --color-code-bg:     #e4e2de;   /* darker grey for code blocks */
+  --color-code-header:  #dcdad6;  /* slightly darker for headers */
 
   --pixel-shadow: 4px 4px 0 var(--color-border);
   --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);
@@ -139,6 +143,8 @@ html {
     --color-nav-bg:      rgba(245, 245, 240, 0.92);
     --color-nav-mobile:  rgba(245, 245, 240, 0.98);
     --color-btn-text:    #f5f5f0;
+    --color-code-bg:     #e4e2de;
+    --color-code-header:  #dcdad6;
 
     --pixel-shadow: 4px 4px 0 var(--color-border);
     --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);
@@ -288,20 +294,21 @@ code {
 }
 
 .btn-primary:hover {
-  background: transparent;
+  background: var(--color-surface);
   color: var(--color-primary);
   transform: translate(2px, 2px);
   box-shadow: none;
 }
 
 .btn-outline {
-  background: transparent;
+  background: var(--color-surface);
   color: var(--color-text);
   border-color: var(--color-border-light);
   box-shadow: var(--pixel-shadow);
 }
 
 .btn-outline:hover {
+  background: var(--color-surface-alt);
   border-color: var(--color-primary);
   color: var(--color-primary);
   transform: translate(2px, 2px);
@@ -344,9 +351,19 @@ code {
 .pixel-icon {
   font-size: 1.8rem;
   display: inline-block;
-  filter: url(#pixelate);
   image-rendering: pixelated;
   margin-bottom: var(--space-md);
+  filter: grayscale(100%) sepia(60%) saturate(400%) hue-rotate(50deg) brightness(0.9);
+  text-shadow:
+    1px 0 0 rgba(139, 172, 15, 0.25),
+    0 1px 0 rgba(139, 172, 15, 0.25);
+}
+
+[data-theme="light"] .pixel-icon {
+  filter: grayscale(100%) sepia(40%) saturate(100%) brightness(0.7) contrast(1.1);
+  text-shadow:
+    1px 0 0 rgba(107, 104, 96, 0.2),
+    0 1px 0 rgba(107, 104, 96, 0.2);
 }
 
 /* ── Badge / Tag ──────────────────────────────────────── */

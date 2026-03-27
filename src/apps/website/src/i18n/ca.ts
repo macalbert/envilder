@@ -217,7 +217,7 @@ export const ca: Translations = {
     inputMapDesc:
       'Ruta al fitxer JSON que mapeja variables d\'entorn a rutes de secrets',
     inputEnvDesc: 'Ruta al fitxer .env a generar',
-    inputProviderDesc: 'Proveïdor al núvol: aws o azure',
+    inputProviderDesc: 'Proveïdor al núvol: aws o azure (per defecte: aws)',
     inputVaultDesc: 'URL d\'Azure Key Vault',
     output: 'Output:',
     outputDesc: 'Ruta al fitxer .env generat',
@@ -263,16 +263,9 @@ export const ca: Translations = {
       {
         status: 'done',
         label: '✅',
-        title: 'Resolució basada en mapeig',
+        title: 'Descarregar secrets a .env',
         description:
-          'Mapeja noms de variables d\'entorn a rutes de secrets al núvol via JSON',
-      },
-      {
-        status: 'done',
-        label: '✅',
-        title: 'Generació de fitxers .env',
-        description:
-          'Genera fitxers .env des de secrets del proveïdor al núvol',
+          'Mapeja noms de variables d\'entorn a rutes de secrets al núvol via JSON i genera fitxers .env automàticament',
       },
       {
         status: 'done',
@@ -310,18 +303,11 @@ export const ca: Translations = {
           'Injecta secrets en un procés fill sense escriure a disc',
       },
       {
-        status: 'next',
-        label: '🔍',
-        title: 'Mode check/sync (--check)',
-        description:
-          'Valida SSM vs .env, falla CI si estan desincronitzats',
-      },
-      {
         status: 'planned',
-        label: '🤖',
-        title: 'Mode auto-descobriment (--auto)',
+        label: '…',
+        title: 'I més',
         description:
-          'Obté tots els paràmetres amb un prefix donat automàticament',
+          'Mode check/sync, auto-descobriment i altres funcionalitats en camí',
       },
     ],
   },
