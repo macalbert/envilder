@@ -162,6 +162,19 @@ body {
   line-height: 1.7;
   font-size: 1rem;
   overflow-x: hidden;
+  cursor: default;
+}
+
+h1, h2, h3, h4, h5, h6,
+p, li, span, label,
+.pixel-card, .section-title,
+.step, .feature-card {
+  cursor: default;
+}
+
+code, pre, .codeblock {
+  cursor: text;
+  user-select: text;
 }
 
 img, video {
