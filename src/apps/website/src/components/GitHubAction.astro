@@ -1,0 +1,182 @@
+---
+import CodeBlock from './CodeBlock.astro';
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="section section-alt" id="github-action">
+  <div class="container">
+    <div class="section-title">
+      <h2><span>{t.gha.title}</span></h2>
+      <p class="section-subtitle">
+        {t.gha.subtitle}
+      </p>
+    </div>
+
+    <div class="gha-grid">
+      <div class="gha-block">
+        <h3>{t.gha.awsSsm}</h3>
+        <CodeBlock lang="yaml" filename=".github/workflows/deploy.yml">
+{`- name: 🪙 Configure AWS Credentials
+  uses: aws-actions/configure-aws-credentials@v6
+  with:
+    role-to-assume: \${{ secrets.AWS_ROLE_TO_ASSUME }}
+    aws-region: us-east-1
+
+- name: 🔐 Pull Secrets from AWS SSM
+  uses: macalbert/envilder/github-action@v0
+  with:
+    map-file: param-map.json
+    env-file: .env`}
+        </CodeBlock>
+      </div>
+
+      <div class="gha-block">
+        <h3>{t.gha.azureKeyVault}</h3>
+        <CodeBlock lang="yaml" filename=".github/workflows/deploy.yml">
+{`- name: 🔑 Azure Login
+  uses: azure/login@v2
+  with:
+    client-id: \${{ secrets.AZURE_CLIENT_ID }}
+    tenant-id: \${{ secrets.AZURE_TENANT_ID }}
+    subscription-id: \${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+- name: 🔐 Pull Secrets from Azure Key Vault
+  uses: macalbert/envilder/github-action@v0
+  with:
+    map-file: param-map.json
+    env-file: .env
+    provider: azure
+    vault-url: \${{ secrets.AZURE_KEY_VAULT_URL }}`}
+        </CodeBlock>
+      </div>
+    </div>
+
+    <div class="gha-inputs">
+      <h3>{t.gha.actionInputs}</h3>
+      <div class="inputs-table-wrap">
+        <table class="inputs-table">
+          <thead>
+            <tr>
+              <th>{t.gha.thInput}</th>
+              <th>{t.gha.thRequired}</th>
+              <th>{t.gha.thDefault}</th>
+              <th>{t.gha.thDescription}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>map-file</code></td>
+              <td><span class="badge badge-primary">Yes</span></td>
+              <td>—</td>
+              <td>{t.gha.inputMapDesc}</td>
+            </tr>
+            <tr>
+              <td><code>env-file</code></td>
+              <td><span class="badge badge-primary">Yes</span></td>
+              <td>—</td>
+              <td>{t.gha.inputEnvDesc}</td>
+            </tr>
+            <tr>
+              <td><code>provider</code></td>
+              <td>No</td>
+              <td><code>aws</code></td>
+              <td>{t.gha.inputProviderDesc}</td>
+            </tr>
+            <tr>
+              <td><code>vault-url</code></td>
+              <td>No</td>
+              <td>—</td>
+              <td>{t.gha.inputVaultDesc}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="gha-output">
+        <strong>{t.gha.output}</strong> <code>env-file-path</code> — {t.gha.outputDesc}
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .gha-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  @media (min-width: 1024px) {
+    .gha-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .gha-block h3 {
+    margin-bottom: var(--space-md);
+    font-size: 0.7rem;
+    color: var(--color-text);
+  }
+
+  .gha-inputs {
+    margin-top: var(--space-2xl);
+  }
+
+  .gha-inputs h3 {
+    font-size: 0.7rem;
+    margin-bottom: var(--space-lg);
+    text-align: center;
+  }
+
+  .inputs-table-wrap {
+    overflow-x: auto;
+  }
+
+  .inputs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .inputs-table th,
+  .inputs-table td {
+    padding: var(--space-sm) var(--space-md);
+    text-align: left;
+    border: 1px solid var(--color-border);
+  }
+
+  .inputs-table th {
+    background: var(--color-surface);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+  }
+
+  .inputs-table td {
+    font-family: var(--font-body);
+    color: var(--color-text-muted);
+  }
+
+  .inputs-table code {
+    font-size: 0.8rem;
+  }
+
+  .gha-output {
+    margin-top: var(--space-lg);
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+  }
+
+  .gha-output strong {
+    color: var(--color-text);
+  }
+</style>

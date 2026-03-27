@@ -1,0 +1,103 @@
+---
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="section" id="why">
+  <div class="container">
+    <div class="section-title">
+      <h2>{t.problemSolution.title}<span>{t.problemSolution.titleAccent}</span> with .env files</h2>
+      <p class="section-subtitle">
+        {t.problemSolution.subtitle}
+      </p>
+    </div>
+
+    <div class="grid-3 problems-grid">
+      {t.problemSolution.problems.map((p) => (
+        <div class="pixel-card problem-card">
+          <span class="pixel-icon">{p.icon}</span>
+          <h3>{p.title}</h3>
+          <p>{p.description}</p>
+        </div>
+      ))}
+    </div>
+
+    <div class="arrow-divider">
+      <span class="arrow-text">{t.problemSolution.arrowText}</span>
+    </div>
+
+    <div class="grid-3 solutions-grid">
+      {t.problemSolution.solutions.map((s) => (
+        <div class="pixel-card solution-card">
+          <span class="pixel-icon">{s.icon}</span>
+          <h3>{s.title}</h3>
+          <p>{s.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .problem-card {
+    border-color: var(--color-error);
+  }
+
+  .problem-card::before {
+    border-color: var(--color-error);
+  }
+
+  .problem-card:hover {
+    border-color: var(--color-error);
+    box-shadow: 4px 4px 0 rgba(160, 80, 80, 0.35);
+  }
+
+  .problem-card:hover::before {
+    border-color: var(--color-error);
+  }
+
+  .solution-card {
+    border-color: var(--color-success);
+  }
+
+  .solution-card::before {
+    border-color: var(--color-success);
+  }
+
+  .solution-card:hover {
+    border-color: var(--color-success);
+    box-shadow: 4px 4px 0 rgba(138, 154, 108, 0.4);
+  }
+
+  .solution-card:hover::before {
+    border-color: var(--color-success);
+  }
+
+  .pixel-card h3 {
+    margin-bottom: var(--space-sm);
+    color: var(--color-text);
+  }
+
+  .pixel-card p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .arrow-divider {
+    text-align: center;
+    padding: var(--space-2xl) 0;
+  }
+
+  .arrow-text {
+    font-family: var(--font-pixel);
+    font-size: 0.6rem;
+    color: var(--color-primary);
+    letter-spacing: 0.1em;
+  }
+</style>

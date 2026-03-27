@@ -1,0 +1,187 @@
+---
+import CodeBlock from './CodeBlock.astro';
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="section section-alt" id="how-it-works">
+  <div class="container">
+    <div class="section-title">
+      <h2>{t.howItWorks.title}<span>{t.howItWorks.titleAccent}</span></h2>
+      <p class="section-subtitle">
+        {t.howItWorks.subtitle}
+      </p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">
+          <span>01</span>
+        </div>
+        <div class="step-content">
+          <h3>{t.howItWorks.steps[0].title}</h3>
+          <p>
+            {t.howItWorks.steps[0].description}
+          </p>
+          <CodeBlock lang="json" filename="param-map.json">
+{`{
+  "DB_PASSWORD": "/my-app/prod/db-password",
+  "API_KEY":     "/my-app/prod/api-key",
+  "SECRET_TOKEN": "/my-app/prod/secret-token"
+}`}
+          </CodeBlock>
+        </div>
+      </div>
+
+      <div class="step-connector">
+        <span class="connector-line"></span>
+        <span class="connector-arrow">▼</span>
+        <span class="connector-line"></span>
+      </div>
+
+      <div class="step">
+        <div class="step-number">
+          <span>02</span>
+        </div>
+        <div class="step-content">
+          <h3>{t.howItWorks.steps[1].title}</h3>
+          <p>
+            {t.howItWorks.steps[1].description}
+          </p>
+          <CodeBlock lang="bash" filename="terminal">
+{`$ envilder --map=param-map.json --envfile=.env
+
+✔ Fetched DB_PASSWORD  → ···word
+✔ Fetched API_KEY      → ···key
+✔ Fetched SECRET_TOKEN → ···oken
+✔ Environment file written to .env`}
+          </CodeBlock>
+        </div>
+      </div>
+
+      <div class="step-connector">
+        <span class="connector-line"></span>
+        <span class="connector-arrow">▼</span>
+        <span class="connector-line"></span>
+      </div>
+
+      <div class="step">
+        <div class="step-number">
+          <span>03</span>
+        </div>
+        <div class="step-content">
+          <h3>{t.howItWorks.steps[2].title}</h3>
+          <p>
+            {t.howItWorks.steps[2].description}
+          </p>
+          <CodeBlock lang="bash" filename=".env">
+{`DB_PASSWORD=my-super-secret-password
+API_KEY=sk_live_abc123def456
+SECRET_TOKEN=tok_prod_xyz789`}
+          </CodeBlock>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .steps {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .step {
+    display: flex;
+    gap: var(--space-xl);
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .step-number {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary);
+    border: 2px solid var(--color-primary);
+    box-shadow: var(--pixel-shadow-primary);
+  }
+
+  .step-number span {
+    font-family: var(--font-pixel);
+    font-size: 0.65rem;
+    color: var(--color-btn-text);
+  }
+
+  .step-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .step-content h3 {
+    color: var(--color-text);
+    font-size: 0.75rem;
+  }
+
+  .step-content p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .step-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-md) 0;
+    margin-left: 23px;
+    width: 2px;
+  }
+
+  .connector-line {
+    width: 2px;
+    height: 16px;
+    background: var(--color-border);
+  }
+
+  .connector-arrow {
+    font-family: var(--font-pixel);
+    font-size: 0.5rem;
+    color: var(--color-primary);
+    padding: var(--space-xs) 0;
+  }
+
+  @media (max-width: 640px) {
+    .step {
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .step-connector {
+      margin-left: 0;
+      flex-direction: row;
+      width: auto;
+      gap: var(--space-sm);
+      padding: var(--space-sm) 0;
+    }
+
+    .connector-line {
+      width: 16px;
+      height: 2px;
+    }
+  }
+</style>

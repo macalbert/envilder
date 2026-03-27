@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Pixel-art lock icon in muted sage -->
+  <rect x="10" y="14" width="12" height="12" fill="#8a9a6c"/>
+  <rect x="12" y="8" width="8" height="6" fill="none" stroke="#8a9a6c" stroke-width="2"/>
+  <rect x="15" y="18" width="2" height="4" fill="#111311"/>
+</svg>

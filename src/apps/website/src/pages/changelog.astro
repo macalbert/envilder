@@ -1,0 +1,180 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import { useTranslations, localizedPath } from '../i18n/utils';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+
+const lang = 'en';
+const t = useTranslations(lang);
+
+// Read the changelog from the project root
+const changelogPath = resolve(process.cwd(), '../../../docs/CHANGELOG.md');
+let changelogContent = '';
+try {
+  changelogContent = await readFile(changelogPath, 'utf-8');
+} catch {
+  changelogContent = '# Changelog\n\nChangelog file not found. See [GitHub Releases](https://github.com/macalbert/envilder/releases).';
+}
+
+// Simple markdown-to-HTML conversion for the changelog
+function simpleMarkdownToHtml(md: string): string {
+  return md
+    .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    .replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>')
+    .replace(/^(?!<[hul]|<li|<strong)(.+)$/gm, '<p>$1</p>')
+    .replace(/\n{2,}/g, '\n');
+}
+
+const changelogHtml = simpleMarkdownToHtml(changelogContent);
+---
+
+<BaseLayout
+  title={t.changelogPage.title}
+  lang={lang}
+>
+  <Navbar lang={lang} />
+  <main class="changelog-page">
+    <div class="container">
+      <div class="changelog-header">
+        <a href={localizedPath(lang, '/')} class="back-link">{t.changelogPage.backToHome}</a>
+        <h1>{t.changelogPage.fullChangelog}<span class="accent">{t.changelogPage.changelogAccent}</span></h1>
+        <p class="changelog-intro">
+          {t.changelogPage.intro}
+          <a href="https://github.com/macalbert/envilder/releases" target="_blank" rel="noopener noreferrer">
+            {t.changelogPage.githubReleases}
+          </a>.
+        </p>
+      </div>
+      <article class="changelog-content" set:html={changelogHtml} />
+    </div>
+  </main>
+  <Footer lang={lang} />
+</BaseLayout>
+
+<style>
+  .changelog-page {
+    padding-top: calc(var(--nav-height) + var(--space-3xl));
+    padding-bottom: var(--space-4xl);
+  }
+
+  .changelog-header {
+    margin-bottom: var(--space-3xl);
+  }
+
+  .back-link {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    display: inline-block;
+    margin-bottom: var(--space-lg);
+  }
+
+  .back-link:hover {
+    color: var(--color-primary);
+  }
+
+  .changelog-header h1 {
+    margin-bottom: var(--space-md);
+  }
+
+  .accent {
+    color: var(--color-primary);
+  }
+
+  .changelog-intro {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+  }
+
+  .changelog-intro a {
+    color: var(--color-secondary);
+  }
+
+  /* Changelog article styling */
+  .changelog-content {
+    max-width: 800px;
+  }
+
+  .changelog-content :global(h1) {
+    font-family: var(--font-pixel);
+    font-size: 1.2rem;
+    color: var(--color-text);
+    margin: var(--space-3xl) 0 var(--space-lg);
+    padding-bottom: var(--space-md);
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  .changelog-content :global(h2) {
+    font-family: var(--font-pixel);
+    font-size: 0.85rem;
+    color: var(--color-primary);
+    margin: var(--space-2xl) 0 var(--space-md);
+  }
+
+  .changelog-content :global(h3) {
+    font-family: var(--font-pixel);
+    font-size: 0.7rem;
+    color: var(--color-text);
+    margin: var(--space-xl) 0 var(--space-sm);
+  }
+
+  .changelog-content :global(h4) {
+    font-family: var(--font-pixel);
+    font-size: 0.6rem;
+    color: var(--color-text-muted);
+    margin: var(--space-lg) 0 var(--space-sm);
+  }
+
+  .changelog-content :global(p) {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-md);
+  }
+
+  .changelog-content :global(ul) {
+    list-style: none;
+    margin-bottom: var(--space-md);
+  }
+
+  .changelog-content :global(li) {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    padding: var(--space-xs) 0;
+    padding-left: var(--space-lg);
+    position: relative;
+  }
+
+  .changelog-content :global(li::before) {
+    content: '›';
+    position: absolute;
+    left: var(--space-sm);
+    color: var(--color-primary);
+    font-weight: bold;
+  }
+
+  .changelog-content :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--color-surface);
+    padding: 0.15em 0.4em;
+    border: 1px solid var(--color-border);
+  }
+
+  .changelog-content :global(a) {
+    color: var(--color-secondary);
+  }
+
+  .changelog-content :global(strong) {
+    color: var(--color-text);
+  }
+</style>

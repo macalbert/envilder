@@ -1,0 +1,109 @@
+---
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="section section-alt" id="demo">
+  <div class="container">
+    <div class="section-title">
+      <h2>{t.demo.title}<span>{t.demo.titleAccent}</span></h2>
+      <p class="section-subtitle">
+        {t.demo.subtitle}
+      </p>
+    </div>
+
+    <div class="video-grid">
+      <div class="video-placeholder">
+        <div class="video-frame">
+          <div class="video-icon">▶</div>
+          <p class="video-label">{t.demo.cliDemo}</p>
+          <p class="video-sublabel">{t.demo.comingSoon}</p>
+        </div>
+      </div>
+
+      <div class="video-placeholder">
+        <div class="video-frame">
+          <div class="video-icon">▶</div>
+          <p class="video-label">{t.demo.ghaWorkflow}</p>
+          <p class="video-sublabel">{t.demo.comingSoon}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .video-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  @media (min-width: 768px) {
+    .video-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .video-placeholder {
+    border: 2px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: var(--pixel-shadow);
+    overflow: hidden;
+  }
+
+  .video-frame {
+    aspect-ratio: 16 / 9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.01) 2px,
+      rgba(255, 255, 255, 0.01) 4px
+    );
+  }
+
+  .video-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
+    font-size: 1.5rem;
+    transition: all var(--transition-base);
+  }
+
+  .video-placeholder:hover .video-icon {
+    background: var(--color-primary);
+    color: var(--color-btn-text);
+    box-shadow: var(--glow-primary);
+  }
+
+  .video-label {
+    font-family: var(--font-pixel);
+    font-size: 0.55rem;
+    color: var(--color-text);
+    text-align: center;
+  }
+
+  .video-sublabel {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-text-dim);
+  }
+</style>

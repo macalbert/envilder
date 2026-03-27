@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import DocsContent from '../../components/DocsContent.astro';
+import { useTranslations } from '../../i18n/utils';
+
+const lang = 'es';
+const t = useTranslations(lang);
+---
+
+<BaseLayout
+  title={t.docs.title}
+  lang={lang}
+>
+  <Navbar lang={lang} />
+  <DocsContent lang={lang} />
+</BaseLayout>

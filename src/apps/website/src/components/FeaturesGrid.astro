@@ -1,0 +1,47 @@
+---
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-title">
+      <h2>{t.features.title}<span>{t.features.titleAccent}</span></h2>
+      <p class="section-subtitle">
+        {t.features.subtitle}
+      </p>
+    </div>
+
+    <div class="grid-4 features-grid">
+      {t.features.features.map((f) => (
+        <div class="pixel-card feature-card">
+          <span class="pixel-icon">{f.icon}</span>
+          <h3>{f.title}</h3>
+          <p>{f.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .feature-card h3 {
+    margin-bottom: var(--space-sm);
+    color: var(--color-text);
+  }
+
+  .feature-card p {
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .feature-card .pixel-icon {
+    font-size: 1.5rem;
+  }
+</style>

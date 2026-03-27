@@ -1,0 +1,234 @@
+---
+import CodeBlock from './CodeBlock.astro';
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="section" id="providers">
+  <div class="container">
+    <div class="section-title">
+      <h2>{t.providers.title}<span>{t.providers.titleAccent}</span></h2>
+      <p class="section-subtitle">
+        {t.providers.subtitle}
+      </p>
+    </div>
+
+    <div class="providers-grid">
+      <div class="provider-block">
+        <div class="provider-header">
+          <span class="pixel-icon">☁️</span>
+          <div>
+            <h3>{t.providers.awsTitle}</h3>
+            <p class="provider-default">{t.providers.awsDefault}</p>
+          </div>
+        </div>
+
+        <CodeBlock lang="json" filename="param-map.json">
+{`{
+  "$config": {
+    "provider": "aws",
+    "profile": "prod-account"
+  },
+  "DB_PASSWORD": "/my-app/prod/db-password",
+  "API_KEY": "/my-app/prod/api-key"
+}`}
+        </CodeBlock>
+
+        <div class="provider-cmd">
+          <code>
+            <span class="prompt">$</span> envilder --map=param-map.json --envfile=.env
+          </code>
+        </div>
+
+        <ul class="provider-features">
+          {t.providers.awsFeatures.map((f) => (
+            <li>✔ {f}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="provider-block">
+        <div class="provider-header">
+          <span class="pixel-icon">🔑</span>
+          <div>
+            <h3>{t.providers.azureTitle}</h3>
+            <p class="provider-new">
+              <span class="badge badge-primary">New in v0.8</span>
+            </p>
+          </div>
+        </div>
+
+        <CodeBlock lang="json" filename="param-map.json">
+{`{
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "DB_PASSWORD": "my-app-prod-db-password",
+  "API_KEY": "my-app-prod-api-key"
+}`}
+        </CodeBlock>
+
+        <div class="provider-cmd">
+          <code>
+            <span class="prompt">$</span> envilder --provider=azure --vault-url=https://my-vault.vault.azure.net --map=param-map.json --envfile=.env
+          </code>
+        </div>
+
+        <ul class="provider-features">
+          {t.providers.azureFeatures.map((f) => (
+            <li>✔ {f}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <div class="config-priority">
+      <h3>{t.providers.configPriorityTitle}</h3>
+      <div class="priority-chain">
+        <span class="priority-item priority-high">{t.providers.priorityHigh}</span>
+        <span class="priority-arrow">→</span>
+        <span class="priority-item priority-mid">{t.providers.priorityMid}</span>
+        <span class="priority-arrow">→</span>
+        <span class="priority-item priority-low">{t.providers.priorityLow}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .providers-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .provider-block {
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    padding: var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .provider-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .provider-header .pixel-icon {
+    font-size: 2rem;
+    margin-bottom: 0;
+  }
+
+  .provider-header h3 {
+    color: var(--color-text);
+    font-size: 0.7rem;
+  }
+
+  .provider-default {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-success);
+    margin-top: var(--space-xs);
+  }
+
+  .provider-new {
+    margin-top: var(--space-xs);
+  }
+
+  .provider-cmd {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    padding: var(--space-sm) var(--space-md);
+    overflow-x: auto;
+  }
+
+  .provider-cmd code {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    background: transparent;
+    border: none;
+    padding: 0;
+    white-space: nowrap;
+    color: var(--color-text);
+  }
+
+  .provider-cmd .prompt {
+    color: var(--color-success);
+  }
+
+  .provider-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .provider-features li {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .provider-features code {
+    font-size: 0.78rem;
+  }
+
+  .config-priority {
+    margin-top: var(--space-2xl);
+    text-align: center;
+  }
+
+  .config-priority h3 {
+    margin-bottom: var(--space-lg);
+    font-size: 0.7rem;
+  }
+
+  .priority-chain {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+  }
+
+  .priority-item {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    padding: var(--space-sm) var(--space-md);
+    border: 2px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .priority-high {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  .priority-mid {
+    border-color: var(--color-secondary);
+    color: var(--color-secondary);
+  }
+
+  .priority-low {
+    border-color: var(--color-text-dim);
+    color: var(--color-text-dim);
+  }
+
+  .priority-arrow {
+    font-family: var(--font-pixel);
+    font-size: 0.6rem;
+    color: var(--color-text-dim);
+  }
+</style>

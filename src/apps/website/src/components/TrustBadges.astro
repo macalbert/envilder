@@ -1,0 +1,117 @@
+---
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="trust section-alt">
+  <div class="container">
+    <p class="trust-label">{t.trust.label}</p>
+    <div class="trust-grid">
+
+      <div class="trust-item">
+        <svg class="trust-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- AWS icon – simplified cloud/arrow mark -->
+          <path d="M20 38c-5 0-9-3.6-9-8s4-8 9-8c.5-5.5 5.2-10 11-10 5 0 9.2 3.3 10.6 8C42.2 20 43 20 44 20c4.4 0 8 3.6 8 8s-3.6 8-8 8H20z"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M24 46l8 6 8-6M32 52V36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="trust-name">AWS SSM</span>
+      </div>
+
+      <div class="trust-item">
+        <svg class="trust-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- Azure Key Vault – key icon -->
+          <circle cx="24" cy="24" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+          <circle cx="24" cy="24" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="32" y1="24" x2="52" y2="24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="52" y1="24" x2="52" y2="32" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="46" y1="24" x2="46" y2="30" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span class="trust-name">Azure Key Vault</span>
+      </div>
+
+      <div class="trust-item">
+        <svg class="trust-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- GitHub Actions – gear/cog -->
+          <path d="M32 20a12 12 0 1 0 0 24 12 12 0 0 0 0-24z" fill="none" stroke="currentColor" stroke-width="2"/>
+          <circle cx="32" cy="32" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="32" y1="8" x2="32" y2="16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="32" y1="48" x2="32" y2="56" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="15" y1="15" x2="20.7" y2="20.7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="43.3" y1="43.3" x2="49" y2="49" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="8" y1="32" x2="16" y2="32" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="48" y1="32" x2="56" y2="32" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="15" y1="49" x2="20.7" y2="43.3" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="43.3" y1="20.7" x2="49" y2="15" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <span class="trust-name">GitHub Actions</span>
+      </div>
+
+      <div class="trust-item">
+        <svg class="trust-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- npm – box/cube outline -->
+          <rect x="10" y="16" width="44" height="32" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+          <line x1="10" y1="26" x2="54" y2="26" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M22 26v16M22 42h10V30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="42" y1="26" x2="42" y2="42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span class="trust-name">npm</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .trust {
+    padding: var(--space-2xl) 0;
+    border-top: 2px solid var(--color-border);
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  .trust-label {
+    font-family: var(--font-pixel);
+    font-size: 0.55rem;
+    color: var(--color-text-dim);
+    text-align: center;
+    letter-spacing: 0.2em;
+    margin-bottom: var(--space-lg);
+  }
+
+  .trust-grid {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-2xl);
+  }
+
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .trust-logo {
+    width: 28px;
+    height: 28px;
+    color: var(--color-text-muted);
+    opacity: 0.55;
+    transition: opacity 0.2s ease;
+  }
+
+  .trust-item:hover .trust-logo {
+    opacity: 0.85;
+  }
+
+  .trust-name {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+</style>

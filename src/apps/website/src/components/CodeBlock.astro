@@ -1,0 +1,61 @@
+---
+export interface Props {
+  lang?: string;
+  filename?: string;
+}
+
+const { lang = 'json', filename } = Astro.props;
+---
+
+<div class="codeblock">
+  {filename && (
+    <div class="codeblock-header">
+      <span class="codeblock-filename">{filename}</span>
+      <span class="codeblock-lang">{lang}</span>
+    </div>
+  )}
+  <pre class="codeblock-body"><slot /></pre>
+</div>
+
+<style>
+  .codeblock {
+    background: var(--color-bg-alt);
+    border: 2px solid var(--color-border);
+    overflow: hidden;
+    box-shadow: var(--pixel-shadow);
+    width: 100%;
+  }
+
+  .codeblock-header {
+    background: var(--color-surface);
+    padding: var(--space-sm) var(--space-md);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  .codeblock-filename {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+  }
+
+  .codeblock-lang {
+    font-family: var(--font-pixel);
+    font-size: 0.5rem;
+    color: var(--color-text-dim);
+    text-transform: uppercase;
+  }
+
+  .codeblock-body {
+    padding: var(--space-lg);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.8;
+    overflow-x: auto;
+    color: var(--color-text);
+    margin: 0;
+    white-space: pre;
+  }
+</style>
