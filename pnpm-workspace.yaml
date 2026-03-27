@@ -1,6 +1,8 @@
 packages:
   - "."
   - "src/apps/website"
+  - "src/iac"
+  - "tests/iac"
 
 onlyBuiltDependencies:
   - cpu-features

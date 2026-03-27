@@ -1,5 +1,5 @@
 {
-	"app": "npx ts-node --prefer-ts-exts src/infra/iac.ts",
+	"app": "npx ts-node --prefer-ts-exts infra/iac.ts",
 	"profile": "mac",
 	"watch": {
 		"include": [

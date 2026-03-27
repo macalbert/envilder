@@ -1,0 +1,12 @@
+{
+  "extends": "../../src/iac/tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "outDir": null,
+    "declaration": false,
+    "composite": false
+  },
+  "include": [
+    "**/*.ts"
+  ]
+}

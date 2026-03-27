@@ -18,84 +18,37 @@ const t = useTranslations(lang);
       </p>
     </div>
 
-    <div class="video-grid">
-      <div class="video-placeholder">
-        <div class="video-frame">
-          <div class="video-icon">▶</div>
-          <p class="video-label">{t.demo.cliDemo}</p>
-          <p class="video-sublabel">{t.demo.comingSoon}</p>
-        </div>
+    <div class="demo-wrapper">
+      <div class="demo-frame">
+        <img
+          src="https://github.com/user-attachments/assets/9f194143-117d-49f3-a6fb-f400040ea514"
+          alt={t.demo.cliDemo}
+          loading="lazy"
+        />
       </div>
     </div>
   </div>
 </section>
 
 <style>
-  .video-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-xl);
-    max-width: 900px;
+  .demo-wrapper {
+    max-width: 800px;
     margin: 0 auto;
   }
 
-  @media (min-width: 768px) {
-    .video-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  .video-placeholder {
+  .demo-frame {
     border: 2px solid var(--color-border);
     background: var(--color-surface);
     box-shadow: var(--pixel-shadow);
     overflow: hidden;
+    aspect-ratio: 16 / 10;
   }
 
-  .video-frame {
-    aspect-ratio: 16 / 9;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-md);
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(255, 255, 255, 0.01) 2px,
-      rgba(255, 255, 255, 0.01) 4px
-    );
-  }
-
-  .video-icon {
-    width: 64px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid var(--color-primary);
-    color: var(--color-primary);
-    font-size: 1.5rem;
-    transition: all var(--transition-base);
-  }
-
-  .video-placeholder:hover .video-icon {
-    background: var(--color-primary);
-    color: var(--color-btn-text);
-    box-shadow: var(--glow-primary);
-  }
-
-  .video-label {
-    font-family: var(--font-pixel);
-    font-size: 0.55rem;
-    color: var(--color-text);
-    text-align: center;
-  }
-
-  .video-sublabel {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--color-text-dim);
+  .demo-frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
   }
 </style>

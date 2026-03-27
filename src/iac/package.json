@@ -5,25 +5,18 @@
     "scripts": {
         "build": "tsc --build",
         "watch": "tsc -w",
-        "test": "jest --colors --seed=1",
-        "test:update": "jest --colors --seed=1 --updateSnapshot --verbose",
-        "test:ci": "jest --colors --seed=1 --ci --verbose",
-        "test:ci:update": "jest --colors --seed=1 --ci --updateSnapshot --verbose",
         "cdk": "cdk",
-        "lint": "biome lint ./src ./test",
-        "lint:fix": "biome lint --fix ./src ./test",
-        "format": "biome format ./src ./test",
-        "format:write": "biome format --write ./src ./test"
+        "lint": "biome lint ./aws ./config ./infra",
+        "lint:fix": "biome lint --fix ./aws ./config ./infra",
+        "format": "biome format ./aws ./config ./infra",
+        "format:write": "biome format --write ./aws ./config ./infra"
     },
     "dependencies": {
         "aws-cdk-lib": "^2.200.0",
         "constructs": "^10.4.2"
     },
     "devDependencies": {
-        "@types/jest": "^29.5.14",
         "aws-cdk": "^2.200.0",
-        "jest": "^29.7.0",
-        "ts-jest": "^29.3.4",
         "ts-node": "^10.9.2",
         "typescript": "^5.9.3"
     }
