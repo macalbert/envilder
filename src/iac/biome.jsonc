@@ -1,0 +1,9 @@
+{
+  "extends": "//",
+  // CDK projects use bin/ for source code, so we need to re-include it
+  "files": {
+    "includes": [
+      "**"
+    ]
+  }
+}

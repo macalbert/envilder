@@ -1,0 +1,19 @@
+*.js
+!jest.config.js
+*.d.ts
+node_modules
+
+# CDK asset staging directory
+.cdk.staging
+**/cdk.out/
+**/dist/
+**/coverage/
+
+# Custom files
+coverage
+*.js.map
+!*.snap
+!bin
+
+yarn.lock
+cdk.context.json

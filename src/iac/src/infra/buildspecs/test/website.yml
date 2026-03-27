@@ -1,0 +1,28 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 24
+
+    commands:
+      - echo "Install started on `date`"
+      - npm install -g pnpm
+
+  pre_build:
+    commands:
+      - cd envilder
+      - pnpm install --frozen-lockfile
+
+  build:
+    commands:
+      - echo "Build started on `date`"
+      - pnpm --filter @envilder/website build
+
+  post_build:
+    commands:
+      - echo "Build completed on `date`"
+
+cache:
+  paths:
+    - "/root/.local/share/pnpm/store/**/*"
