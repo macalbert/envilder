@@ -6,7 +6,6 @@ import { AppEnvironment } from '../../../../src/config/domain/model/appEnvironme
 import { ConfigValidationError } from '../../../../src/config/infrastructure/utilities/errors';
 
 // Mock AWS infrastructure (VPC + CDK Stacks)
-jest.mock('../../../../src/aws/developerTools/codepipeline/pipelineStack');
 jest.mock('../../../../src/aws/network/vpcLookupStack');
 jest.mock('../../../../src/aws/website/staticWebsiteStack');
 
@@ -56,9 +55,6 @@ describe('DeployInfrastructureUseCase', () => {
       stacks: {
         frontend: {
           staticWebsites: [],
-        },
-        shared: {
-          pipeline: [],
         },
       },
     };

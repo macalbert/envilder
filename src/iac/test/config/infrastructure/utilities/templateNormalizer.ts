@@ -120,7 +120,11 @@ function normalizeObjectValues(obj: CloudFormationObject): void {
   normalizeFnJoinExpression(obj);
 
   for (const key in obj) {
-    if (Object.hasOwn(obj, key) && obj[key] && typeof obj[key] === 'object') {
+    if (
+      Object.prototype.hasOwnProperty.call(obj, key) &&
+      obj[key] &&
+      typeof obj[key] === 'object'
+    ) {
       normalizeAllDockerHashesRecursively(
         obj[key] as CloudFormationObject | CloudFormationArray,
       );

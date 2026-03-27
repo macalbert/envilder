@@ -37,7 +37,6 @@ describe('ConsoleDeploymentLogger', () => {
           },
         ],
       },
-      shared: {},
     },
   });
 

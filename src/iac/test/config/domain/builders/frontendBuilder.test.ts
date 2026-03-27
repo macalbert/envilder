@@ -27,7 +27,6 @@ describe('FrontendBuilder', () => {
       frontend: {
         staticWebsites: [],
       },
-      shared: {},
     },
   });
 

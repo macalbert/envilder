@@ -1,5 +1,5 @@
 import type { AppEnvironment } from './appEnvironment';
-import type { FrontendStackConfig, SharedStackConfig } from './stackConfig';
+import type { FrontendStackConfig } from './stackConfig';
 
 /**
  * Main deployment configuration interface for IAC projects
@@ -16,6 +16,5 @@ export interface IDeploymentConfig {
   };
   stacks: {
     frontend: FrontendStackConfig;
-    shared: SharedStackConfig;
   };
 }

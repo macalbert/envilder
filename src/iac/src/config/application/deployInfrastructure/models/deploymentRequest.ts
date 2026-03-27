@@ -1,8 +1,5 @@
 import type { AppEnvironment } from '../../../domain/model/appEnvironment';
-import type {
-  FrontendStackConfig,
-  SharedStackConfig,
-} from '../../../domain/model/stackConfig';
+import type { FrontendStackConfig } from '../../../domain/model/stackConfig';
 
 /**
  * IAC Domain configuration interface
@@ -21,7 +18,6 @@ export interface IacDomainConfig {
  */
 export interface StacksConfig {
   frontend: FrontendStackConfig;
-  shared: SharedStackConfig;
 }
 
 /**
@@ -45,12 +41,6 @@ export interface IDeploymentRequest {
 
   /** Stacks configuration */
   stacks: StacksConfig;
-
-  /**
-   * GitHub secret ARN for pipeline authentication
-   * @optional If not provided, a default pattern will be used
-   */
-  githubSecretArn?: string;
 
   /**
    * Root path for project resolution

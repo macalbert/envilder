@@ -25,9 +25,6 @@ describe('ConfigValidator', () => {
         frontend: {
           staticWebsites: [],
         },
-        shared: {
-          pipeline: [],
-        },
       },
     };
   }

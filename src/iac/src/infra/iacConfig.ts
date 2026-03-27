@@ -1,7 +1,6 @@
 import type { IDeploymentConfig } from '../config/domain/model/deploymentConfig';
 import { AppEnvironment } from '../config/domain/model/appEnvironment';
 import { frontendConfig } from './config/frontendConfig';
-import { sharedConfig } from './config/sharedConfig';
 
 export const iacConfig: IDeploymentConfig = {
   repoName: 'envilder',
@@ -15,6 +14,5 @@ export const iacConfig: IDeploymentConfig = {
   },
   stacks: {
     frontend: frontendConfig,
-    shared: sharedConfig,
   },
 };

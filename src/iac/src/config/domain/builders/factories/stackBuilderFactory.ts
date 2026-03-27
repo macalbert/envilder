@@ -4,7 +4,6 @@ import { FileProjectPath } from '../../../infrastructure/projectPath/fileProject
 import type { IStackBuilder } from '../../iStackBuilder';
 import type { IProjectPath } from '../../ports/iProjectPath';
 import { FrontendBuilder } from '../frontendBuilder';
-import { SharedBuilder } from '../sharedBuilder';
 
 /**
  * Factory for creating stack builders based on configuration
@@ -28,16 +27,6 @@ export class StackBuilderFactory {
           scope: app,
           iacConfig: config,
           projectPathResolver,
-        }),
-      );
-    }
-
-    if (config.stacks.shared) {
-      stackParts.push(
-        new SharedBuilder({
-          stackName: 'SharedStack',
-          scope: app,
-          iacConfig: config,
         }),
       );
     }

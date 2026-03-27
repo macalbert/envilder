@@ -41,7 +41,6 @@ describe('IStackBuilder', () => {
     },
     stacks: {
       frontend: { staticWebsites: [] },
-      shared: {},
     },
   });
 
