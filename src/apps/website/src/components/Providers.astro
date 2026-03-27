@@ -107,8 +107,9 @@ const t = useTranslations(lang);
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--space-xl);
-    max-width: 800px;
+    max-width: 960px;
     margin: 0 auto;
+    justify-items: center;
   }
 
   .provider-block {
@@ -118,6 +119,18 @@ const t = useTranslations(lang);
     display: flex;
     flex-direction: column;
     gap: var(--space-lg);
+    width: 100%;
+    max-width: 520px;
+  }
+
+  @media (min-width: 768px) {
+    .providers-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .provider-block {
+      max-width: none;
+    }
   }
 
   .provider-header {

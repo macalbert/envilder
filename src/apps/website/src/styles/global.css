@@ -18,31 +18,36 @@ html {
 
 /* ── CSS Custom Properties ────────────────────────────── */
 :root {
-  /* Colors — Game Boy LCD neutral palette (retro / dark default) */
-  --color-bg:          #111311;
-  --color-bg-alt:      #151815;
-  --color-surface:     #1c1f1c;
-  --color-surface-alt: #242824;
-  --color-border:      #343834;
-  --color-border-light:#454a45;
+  /*
+   * Game Boy — softened LCD palette
+   * Keeps the unmistakable GB green tint but dialled back
+   * so it's comfortable to read on a modern screen.
+   * Think Game Boy Pocket: same vibe, less eye-burn.
+   */
+  --color-bg:          #1a2118;   /* very dark green-black */
+  --color-bg-alt:      #1f2a1d;   /* slightly lighter band */
+  --color-surface:     #253024;   /* card/panel background */
+  --color-surface-alt: #2a362a;   /* surface hover */
+  --color-border:      #3a4a38;   /* subtle green border */
+  --color-border-light:#4d5f4a;   /* lighter border */
 
-  --color-primary:     #8a9a6c;
-  --color-primary-dim: #6b7a52;
-  --color-secondary:   #a0ac8e;
-  --color-secondary-dim:#7a8868;
-  --color-accent:      #c8ceb8;
+  --color-primary:     #8bac0f;   /* THE Game Boy green — used sparingly */
+  --color-primary-dim: #6d8a0c;   /* dimmed primary */
+  --color-secondary:   #7a9a3a;   /* softer secondary green */
+  --color-secondary-dim:#5a7a2a;  /* muted secondary */
+  --color-accent:      #9bbc0f;   /* full LCD green for highlights */
 
-  --color-text:        #c5c8c0;
-  --color-text-muted:  #8a8e86;
-  --color-text-dim:    #5c605a;
+  --color-text:        #c2d1a0;   /* soft sage — easy on the eyes */
+  --color-text-muted:  #8a9a72;   /* muted green-grey */
+  --color-text-dim:    #5a6a4a;   /* hint text */
 
-  --color-success:     #8a9a6c;
-  --color-warning:     #b8b090;
-  --color-error:       #a05050;
+  --color-success:     #8bac0f;   /* GB green */
+  --color-warning:     #b8b060;   /* warm yellow-green */
+  --color-error:       #a06050;   /* muted red (small concession) */
 
-  --color-nav-bg:      rgba(17, 19, 17, 0.92);
-  --color-nav-mobile:  rgba(17, 19, 17, 0.98);
-  --color-btn-text:    #111311;
+  --color-nav-bg:      rgba(26, 33, 24, 0.95);
+  --color-nav-mobile:  rgba(26, 33, 24, 0.98);
+  --color-btn-text:    #1a2118;   /* dark bg for button labels */
 
   /* Typography */
   --font-pixel:   'Press Start 2P', monospace;
@@ -66,8 +71,8 @@ html {
   /* Effects */
   --pixel-shadow: 4px 4px 0 var(--color-border);
   --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);
-  --glow-primary: 0 0 20px rgba(138, 154, 108, 0.3);
-  --glow-secondary: 0 0 15px rgba(160, 172, 142, 0.2);
+  --glow-primary: 0 0 20px rgba(139, 172, 15, 0.15);
+  --glow-secondary: 0 0 12px rgba(155, 188, 15, 0.10);
 
   /* Transitions */
   --transition-fast: 150ms ease;
