@@ -14,7 +14,6 @@ export interface ThemeTranslations {
 }
 
 export interface HeroTranslations {
-  version: string;
   openSource: string;
   title1: string;
   title2: string;
@@ -22,8 +21,15 @@ export interface HeroTranslations {
   description: string;
   descAws: string;
   descAzure: string;
+  descOr: string;
+  descSuffix: string;
   getStarted: string;
   viewOnGithub: string;
+  terminalComment1: string;
+  terminalComment2: string;
+  terminalFetched1: string;
+  terminalFetched2: string;
+  terminalWritten: string;
 }
 
 export interface TrustTranslations {
@@ -39,6 +45,7 @@ export interface ProblemItem {
 export interface ProblemSolutionTranslations {
   title: string;
   titleAccent: string;
+  titleSuffix: string;
   subtitle: string;
   problems: ProblemItem[];
   arrowText: string;
@@ -55,6 +62,10 @@ export interface HowItWorksTranslations {
   titleAccent: string;
   subtitle: string;
   steps: StepItem[];
+  terminalFetched1: string;
+  terminalFetched2: string;
+  terminalFetched3: string;
+  terminalWritten: string;
 }
 
 export interface FeatureItem {
@@ -87,6 +98,7 @@ export interface ProvidersTranslations {
   awsDefault: string;
   awsFeatures: string[];
   azureTitle: string;
+  azureBadge: string;
   azureFeatures: string[];
   configPriorityTitle: string;
   priorityHigh: string;
@@ -110,6 +122,8 @@ export interface GhaTranslations {
   inputVaultDesc: string;
   output: string;
   outputDesc: string;
+  yes: string;
+  no: string;
 }
 
 export interface ChangelogHighlight {
@@ -122,6 +136,7 @@ export interface ChangelogTranslations {
   titleAccent: string;
   subtitle: string;
   releaseTitle: string;
+  releaseDate: string;
   highlights: ChangelogHighlight[];
   fullChangelog: string;
   viewReleases: string;
@@ -151,6 +166,8 @@ export interface GetStartedTranslations {
   prereqAws: string;
   prereqAzure: string;
   prereqIam: string;
+  prereqAwsNote: string;
+  prereqAzureNote: string;
   install: string;
   quickStart: string;
   step1: string;
@@ -182,6 +199,7 @@ export interface FooterTranslations {
   linkDiscussions: string;
   linkSecurity: string;
   linkSponsor: string;
+  license: string;
   copyright: string;
   builtWith: string;
 }
@@ -225,6 +243,8 @@ export interface DocsTranslations {
   reqNode: string;
   reqAws: string;
   reqAzure: string;
+  reqAwsNote: string;
+  reqAzureNote: string;
   reqDownload: string;
   reqInstallGuide: string;
   // Installation
@@ -304,6 +324,7 @@ export interface DocsTranslations {
   pullOptions: string;
   pullExamples: string;
   pullOutput: string;
+  optionHeader: string;
   pullOptMap: string;
   pullOptEnv: string;
   pullOptProvider: string;
@@ -313,6 +334,7 @@ export interface DocsTranslations {
   pullCommentProfile: string;
   pullCommentAzureConfig: string;
   pullCommentAzureFlags: string;
+  pullOutputTitle: string;
   // Push command
   pushTitle: string;
   pushDesc: string;

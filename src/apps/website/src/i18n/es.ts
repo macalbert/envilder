@@ -15,7 +15,6 @@ export const es: Translations = {
     light: 'Claro',
   },
   hero: {
-    version: 'v0.8.0',
     openSource: 'Código abierto · MIT',
     title1: 'Tus secretos.',
     title2: 'Un comando.',
@@ -24,8 +23,16 @@ export const es: Translations = {
       'Una herramienta CLI y GitHub Action que centraliza de forma segura tus variables de entorno desde',
     descAws: 'AWS SSM',
     descAzure: 'Azure Key Vault',
+    descOr: 'o',
+    descSuffix:
+      'como fuente única de verdad. Se acabó copiar y pegar secretos.',
     getStarted: '▶ Empezar',
     viewOnGithub: '★ Ver en GitHub',
+    terminalComment1: '# 1. Define tu mapeo',
+    terminalComment2: '# 2. Descarga secretos → genera .env',
+    terminalFetched1: ' Obtenido DB_PASSWORD → ···pass',
+    terminalFetched2: ' Obtenido API_KEY     → ···key',
+    terminalWritten: ' Archivo de entorno escrito en .env',
   },
   trust: {
     label: 'COMPATIBLE CON',
@@ -33,6 +40,7 @@ export const es: Translations = {
   problemSolution: {
     title: 'El ',
     titleAccent: 'problema',
+    titleSuffix: ' con archivos .env',
     subtitle:
       'Gestionar secretos manualmente no escala. Es inseguro, propenso a errores y crea fricción para todo el equipo.',
     problems: [
@@ -99,6 +107,10 @@ export const es: Translations = {
           'Un archivo de entorno limpio y actualizado — generado desde la fuente de verdad. Úsalo localmente o inyéctalo en CI/CD con la GitHub Action.',
       },
     ],
+    terminalFetched1: '✔ Obtenido DB_PASSWORD  → ···word',
+    terminalFetched2: '✔ Obtenido API_KEY      → ···key',
+    terminalFetched3: '✔ Obtenido SECRET_TOKEN → ···oken',
+    terminalWritten: '✔ Archivo de entorno escrito en .env',
   },
   features: {
     title: 'Hecho para ',
@@ -179,6 +191,7 @@ export const es: Translations = {
       'Registro de auditoría CloudTrail',
     ],
     azureTitle: 'Azure Key Vault',
+    azureBadge: 'Nuevo en v0.8',
     azureFeatures: [
       'Auto-normaliza nombres de secretos (barras → guiones)',
       'Autenticación DefaultAzureCredential',
@@ -208,6 +221,8 @@ export const es: Translations = {
     inputVaultDesc: 'URL de Azure Key Vault',
     output: 'Output:',
     outputDesc: 'Ruta al archivo .env generado',
+    yes: 'Sí',
+    no: 'No',
   },
   changelog: {
     title: 'Qué hay de ',
@@ -215,6 +230,7 @@ export const es: Translations = {
     subtitle:
       'Novedades de la última versión. El soporte multi-proveedor ya está aquí.',
     releaseTitle: 'Soporte Multi-Proveedor',
+    releaseDate: '22 de marzo de 2026',
     highlights: [
       {
         icon: '✨',
@@ -280,6 +296,13 @@ export const es: Translations = {
           'Soporte de AWS SSM Parameter Store y Azure Key Vault',
       },
       {
+        status: 'done',
+        label: '📖',
+        title: 'Web de documentación',
+        description:
+          'Web de docs dedicada con guías, ejemplos y referencia API',
+      },
+      {
         status: 'next',
         label: '⚡',
         title: 'Modo exec (--exec)',
@@ -295,13 +318,6 @@ export const es: Translations = {
       },
       {
         status: 'planned',
-        label: '📖',
-        title: 'Web de documentación',
-        description:
-          'Web de docs dedicada con guías, ejemplos y referencia API',
-      },
-      {
-        status: 'planned',
         label: '🤖',
         title: 'Modo auto-descubrimiento (--auto)',
         description:
@@ -313,11 +329,13 @@ export const es: Translations = {
     title: 'Empieza ',
     titleAccent: 'ahora',
     subtitle: 'En funcionamiento en menos de un minuto.',
-    prerequisites: 'Prerequisitos',
+    prerequisites: 'Prerrequisitos',
     prereqNode: 'Node.js v20+',
     prereqAws: 'AWS CLI configurado',
     prereqAzure: 'Azure CLI configurado',
     prereqIam: 'Permisos IAM:',
+    prereqAwsNote: 'para AWS SSM',
+    prereqAzureNote: 'para Azure Key Vault',
     install: 'Instalar',
     quickStart: 'Inicio rápido',
     step1: 'Crea un param-map.json que mapee variables de entorno a rutas de secretos',
@@ -349,6 +367,7 @@ export const es: Translations = {
     linkDiscussions: 'Discusiones',
     linkSecurity: 'Seguridad',
     linkSponsor: 'Patrocinar',
+    license: 'Licencia MIT',
     copyright: 'Hecho con Astro. Código abierto en GitHub.',
     builtWith: 'Hecho con Astro. Código abierto en GitHub.',
   },
@@ -388,6 +407,8 @@ export const es: Translations = {
     reqNode: 'Node.js v20+',
     reqAws: 'AWS CLI',
     reqAzure: 'Azure CLI',
+    reqAwsNote: 'para AWS SSM',
+    reqAzureNote: 'para Azure Key Vault',
     reqDownload: 'Descargar',
     reqInstallGuide: 'Guía de instalación',
     installTitle: 'Instalación',
@@ -483,6 +504,7 @@ export const es: Translations = {
     pullOptions: 'Opciones',
     pullExamples: 'Ejemplos',
     pullOutput: 'Salida',
+    optionHeader: 'Opción',
     pullOptMap: 'Ruta al archivo JSON de mapeo',
     pullOptEnv: 'Ruta donde escribir el .env',
     pullOptProvider: 'aws (por defecto) o azure',
@@ -492,6 +514,7 @@ export const es: Translations = {
     pullCommentProfile: '# Con perfil AWS',
     pullCommentAzureConfig: '# Azure vía $config en archivo de mapeo',
     pullCommentAzureFlags: '# Azure vía flags CLI',
+    pullOutputTitle: 'Salida',
     pushTitle: 'Comando push',
     pushDesc:
       'Sube variables de entorno de un archivo .env local a tu proveedor en la nube usando un archivo de mapeo.',
@@ -521,7 +544,7 @@ export const es: Translations = {
     ghaSetupTitle: 'Configuración de GitHub Action',
     ghaSetupDesc:
       'La GitHub Action de Envilder obtiene secretos de AWS SSM o Azure Key Vault en archivos .env durante tu workflow CI/CD. No hace falta compilar — la action está pre-construida y lista para usar desde GitHub Marketplace.',
-    ghaPrerequisites: 'Prerequisitos',
+    ghaPrerequisites: 'Prerrequisitos',
     ghaPrereqAws:
       'AWS: Configura credenciales con aws-actions/configure-aws-credentials',
     ghaPrereqAzure: 'Azure: Configura credenciales con azure/login',

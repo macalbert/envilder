@@ -7,6 +7,7 @@ interface Props {
 
 const { lang = 'en' } = Astro.props;
 const t = useTranslations(lang);
+const version = `v${__APP_VERSION__}`;
 ---
 
 <section class="section" id="changelog">
@@ -21,10 +22,10 @@ const t = useTranslations(lang);
     <div class="changelog-card">
       <div class="release-header">
         <div class="release-info">
-          <span class="badge badge-primary">v0.8.0</span>
+          <span class="badge badge-primary">{version}</span>
           <h3>{t.changelog.releaseTitle}</h3>
         </div>
-        <span class="release-date">March 22, 2026</span>
+        <span class="release-date">{t.changelog.releaseDate}</span>
       </div>
 
       <ul class="release-list">

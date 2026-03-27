@@ -8,13 +8,14 @@ interface Props {
 
 const { lang = 'en' } = Astro.props;
 const t = useTranslations(lang);
+const version = `v${__APP_VERSION__}`;
 ---
 
 <section class="hero scanlines" id="hero">
   <div class="container hero-container">
     <div class="hero-content">
       <div class="hero-badges">
-        <span class="badge badge-primary">{t.hero.version}</span>
+        <span class="badge badge-primary">{version}</span>
         <span class="badge">{t.hero.openSource}</span>
       </div>
 
@@ -26,8 +27,8 @@ const t = useTranslations(lang);
 
       <p class="hero-description">
         {t.hero.description}{' '}
-        <strong>{t.hero.descAws}</strong> or <strong>{t.hero.descAzure}</strong>
-        {' '}as a single source of truth. No more copy-pasting secrets.
+        <strong>{t.hero.descAws}</strong> {t.hero.descOr} <strong>{t.hero.descAzure}</strong>
+        {' '}{t.hero.descSuffix}
       </p>
 
       <div class="hero-actions">
@@ -54,7 +55,7 @@ const t = useTranslations(lang);
     <div class="hero-terminal">
       <TerminalMockup title="envilder">
         <span class="line">
-          <span class="comment"># 1. Define your mapping</span>
+          <span class="comment">{t.hero.terminalComment1}</span>
         </span>
         <span class="line">
           <span class="prompt">$</span>
@@ -75,7 +76,7 @@ const t = useTranslations(lang);
         </span>
         <span class="line">&nbsp;</span>
         <span class="line">
-          <span class="comment"># 2. Pull secrets → generate .env</span>
+          <span class="comment">{t.hero.terminalComment2}</span>
         </span>
         <span class="line">
           <span class="prompt">$</span>
@@ -88,15 +89,15 @@ const t = useTranslations(lang);
         <span class="line">&nbsp;</span>
         <span class="line">
           <span class="highlight">✔</span>
-          <span class="output"> Fetched DB_PASSWORD → ···pass</span>
+          <span class="output">{t.hero.terminalFetched1}</span>
         </span>
         <span class="line">
           <span class="highlight">✔</span>
-          <span class="output"> Fetched API_KEY     → ···key</span>
+          <span class="output">{t.hero.terminalFetched2}</span>
         </span>
         <span class="line">
           <span class="highlight">✔</span>
-          <span class="output"> Environment file written to .env</span>
+          <span class="output">{t.hero.terminalWritten}</span>
         </span>
         <span class="line">&nbsp;</span>
         <span class="line">

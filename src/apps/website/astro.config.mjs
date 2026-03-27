@@ -1,5 +1,10 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { readFileSync } from 'node:fs';
+
+const rootPkg = JSON.parse(
+  readFileSync(new URL('../../../package.json', import.meta.url), 'utf-8'),
+);
 
 export default defineConfig({
   site: 'https://envilder.com',
@@ -10,6 +15,11 @@ export default defineConfig({
     locales: ['en', 'ca', 'es'],
     routing: {
       prefixDefaultLocale: false,
+    },
+  },
+  vite: {
+    define: {
+      __APP_VERSION__: JSON.stringify(rootPkg.version),
     },
   },
   build: {

@@ -15,7 +15,6 @@ export const ca: Translations = {
     light: 'Clar',
   },
   hero: {
-    version: 'v0.8.0',
     openSource: 'Codi obert · MIT',
     title1: 'Els teus secrets.',
     title2: 'Una comanda.',
@@ -24,8 +23,16 @@ export const ca: Translations = {
       'Una eina CLI i GitHub Action que centralitza de forma segura les teves variables d\'entorn des de',
     descAws: 'AWS SSM',
     descAzure: 'Azure Key Vault',
+    descOr: 'o',
+    descSuffix:
+      'com a font de veritat única. Adéu a copiar i enganxar secrets.',
     getStarted: '▶ Comença',
     viewOnGithub: '★ Veure a GitHub',
+    terminalComment1: '# 1. Defineix el mapeig',
+    terminalComment2: '# 2. Descarrega secrets → genera .env',
+    terminalFetched1: ' Obtingut DB_PASSWORD → ···pass',
+    terminalFetched2: ' Obtingut API_KEY     → ···key',
+    terminalWritten: ' Fitxer d\'entorn escrit a .env',
   },
   trust: {
     label: 'COMPATIBLE AMB',
@@ -33,6 +40,7 @@ export const ca: Translations = {
   problemSolution: {
     title: 'El ',
     titleAccent: 'problema',
+    titleSuffix: ' amb fitxers .env',
     subtitle:
       'Gestionar secrets manualment no escala. És insegur, propens a errors i crea fricció per a tot l\'equip.',
     problems: [
@@ -99,6 +107,10 @@ export const ca: Translations = {
           'Un fitxer d\'entorn net i actualitzat — generat des de la font de veritat. Utilitza\'l localment o injecta\'l en CI/CD amb la GitHub Action.',
       },
     ],
+    terminalFetched1: '✔ Obtingut DB_PASSWORD  → ···word',
+    terminalFetched2: '✔ Obtingut API_KEY      → ···key',
+    terminalFetched3: '✔ Obtingut SECRET_TOKEN → ···oken',
+    terminalWritten: '✔ Fitxer d\'entorn escrit a .env',
   },
   features: {
     title: 'Fet per a ',
@@ -179,6 +191,7 @@ export const ca: Translations = {
       'Registre d\'auditoria CloudTrail',
     ],
     azureTitle: 'Azure Key Vault',
+    azureBadge: 'Nou a v0.8',
     azureFeatures: [
       'Auto-normalitza noms de secrets (barres → guions)',
       'Autenticació DefaultAzureCredential',
@@ -208,6 +221,8 @@ export const ca: Translations = {
     inputVaultDesc: 'URL d\'Azure Key Vault',
     output: 'Output:',
     outputDesc: 'Ruta al fitxer .env generat',
+    yes: 'Sí',
+    no: 'No',
   },
   changelog: {
     title: 'Què hi ha de ',
@@ -215,6 +230,7 @@ export const ca: Translations = {
     subtitle:
       'Novetats de l\'última versió. El suport multi-proveïdor ja és aquí.',
     releaseTitle: 'Suport Multi-Proveïdor',
+    releaseDate: '22 de març de 2026',
     highlights: [
       {
         icon: '✨',
@@ -280,6 +296,13 @@ export const ca: Translations = {
           'Suport d\'AWS SSM Parameter Store i Azure Key Vault',
       },
       {
+        status: 'done',
+        label: '📖',
+        title: 'Web de documentació',
+        description:
+          'Web de docs dedicada amb guies, exemples i referència API',
+      },
+      {
         status: 'next',
         label: '⚡',
         title: 'Mode exec (--exec)',
@@ -292,13 +315,6 @@ export const ca: Translations = {
         title: 'Mode check/sync (--check)',
         description:
           'Valida SSM vs .env, falla CI si estan desincronitzats',
-      },
-      {
-        status: 'planned',
-        label: '📖',
-        title: 'Web de documentació',
-        description:
-          'Web de docs dedicada amb guies, exemples i referència API',
       },
       {
         status: 'planned',
@@ -318,6 +334,8 @@ export const ca: Translations = {
     prereqAws: 'AWS CLI configurat',
     prereqAzure: 'Azure CLI configurat',
     prereqIam: 'Permisos IAM:',
+    prereqAwsNote: 'per AWS SSM',
+    prereqAzureNote: 'per Azure Key Vault',
     install: 'Instal·lar',
     quickStart: 'Inici ràpid',
     step1: 'Crea un param-map.json que mapegi variables d\'entorn a rutes de secrets',
@@ -349,6 +367,7 @@ export const ca: Translations = {
     linkDiscussions: 'Discussions',
     linkSecurity: 'Seguretat',
     linkSponsor: 'Patrocina',
+    license: 'Llicència MIT',
     copyright: 'Fet amb Astro. Codi obert a GitHub.',
     builtWith: 'Fet amb Astro. Codi obert a GitHub.',
   },
@@ -388,6 +407,8 @@ export const ca: Translations = {
     reqNode: 'Node.js v20+',
     reqAws: 'AWS CLI',
     reqAzure: 'Azure CLI',
+    reqAwsNote: 'per AWS SSM',
+    reqAzureNote: 'per Azure Key Vault',
     reqDownload: 'Descarregar',
     reqInstallGuide: 'Guia d\'instal·lació',
     installTitle: 'Instal·lació',
@@ -483,6 +504,7 @@ export const ca: Translations = {
     pullOptions: 'Opcions',
     pullExamples: 'Exemples',
     pullOutput: 'Sortida',
+    optionHeader: 'Opció',
     pullOptMap: 'Ruta al fitxer JSON de mapeig',
     pullOptEnv: 'Ruta on escriure el .env',
     pullOptProvider: 'aws (per defecte) o azure',
@@ -492,6 +514,7 @@ export const ca: Translations = {
     pullCommentProfile: '# Amb perfil AWS',
     pullCommentAzureConfig: '# Azure via $config al fitxer de mapeig',
     pullCommentAzureFlags: '# Azure via flags CLI',
+    pullOutputTitle: 'Sortida',
     pushTitle: 'Comanda push',
     pushDesc:
       'Puja variables d\'entorn d\'un fitxer .env local al teu proveïdor al núvol utilitzant un fitxer de mapeig.',
@@ -543,7 +566,7 @@ export const ca: Translations = {
     ghaThOutput: 'Output',
     ghaYes: 'Sí',
     ghaNo: 'No',
-    ghaInputMap: 'Ruta al fitxer JSON de mapatge',
+    ghaInputMap: 'Ruta al fitxer JSON de mapeig',
     ghaInputEnv: 'Ruta al fitxer .env a generar',
     ghaInputProvider: 'aws o azure',
     ghaInputVault: 'URL d\'Azure Key Vault',
@@ -551,7 +574,7 @@ export const ca: Translations = {
     configPriorityDesc:
       'Quan hi ha múltiples fonts de configuració, Envilder les resol en aquest ordre (el més alt guanya):',
     configPriority1: 'Flags CLI / inputs GHA',
-    configPriority2: '$config al fitxer de mapatge',
+    configPriority2: '$config al fitxer de mapeig',
     configPriority3: 'Per defecte (AWS)',
     configPriorityExplain:
       'Això vol dir que --provider=azure a la CLI sobreescriurà "provider": "aws" a $config.',

@@ -344,6 +344,7 @@ code {
 .pixel-icon {
   font-size: 1.8rem;
   display: inline-block;
+  filter: url(#pixelate);
   image-rendering: pixelated;
   margin-bottom: var(--space-md);
 }

@@ -15,7 +15,6 @@ export const en: Translations = {
     light: 'Light',
   },
   hero: {
-    version: 'v0.8.0',
     openSource: 'Open Source · MIT',
     title1: 'Your secrets.',
     title2: 'One command.',
@@ -24,8 +23,16 @@ export const en: Translations = {
       'A CLI tool and GitHub Action that securely centralizes your environment variables from',
     descAws: 'AWS SSM',
     descAzure: 'Azure Key Vault',
+    descOr: 'or',
+    descSuffix:
+      'as a single source of truth. No more copy-pasting secrets.',
     getStarted: '▶ Get Started',
     viewOnGithub: '★ View on GitHub',
+    terminalComment1: '# 1. Define your mapping',
+    terminalComment2: '# 2. Pull secrets → generate .env',
+    terminalFetched1: ' Fetched DB_PASSWORD → ···pass',
+    terminalFetched2: ' Fetched API_KEY     → ···key',
+    terminalWritten: ' Environment file written to .env',
   },
   trust: {
     label: 'WORKS WITH',
@@ -33,6 +40,7 @@ export const en: Translations = {
   problemSolution: {
     title: 'The ',
     titleAccent: 'problem',
+    titleSuffix: ' with .env files',
     subtitle:
       "Managing secrets manually doesn't scale. It's insecure, error-prone, and creates friction for your entire team.",
     problems: [
@@ -99,6 +107,10 @@ export const en: Translations = {
           'A clean, up-to-date environment file — generated from the source of truth. Use it locally or inject it in CI/CD with the GitHub Action.',
       },
     ],
+    terminalFetched1: '✔ Fetched DB_PASSWORD  → ···word',
+    terminalFetched2: '✔ Fetched API_KEY      → ···key',
+    terminalFetched3: '✔ Fetched SECRET_TOKEN → ···oken',
+    terminalWritten: '✔ Environment file written to .env',
   },
   features: {
     title: 'Built for ',
@@ -179,6 +191,7 @@ export const en: Translations = {
       'CloudTrail audit logging',
     ],
     azureTitle: 'Azure Key Vault',
+    azureBadge: 'New in v0.8',
     azureFeatures: [
       'Auto-normalizes secret names (slashes → hyphens)',
       'DefaultAzureCredential authentication',
@@ -207,12 +220,15 @@ export const en: Translations = {
     inputVaultDesc: 'Azure Key Vault URL',
     output: 'Output:',
     outputDesc: 'Path to the generated .env file',
+    yes: 'Yes',
+    no: 'No',
   },
   changelog: {
     title: "What's ",
     titleAccent: 'new',
     subtitle: 'Latest release highlights. Multi-provider support is here.',
     releaseTitle: 'Multi-Provider Support',
+    releaseDate: 'March 22, 2026',
     highlights: [
       {
         icon: '✨',
@@ -273,6 +289,13 @@ export const en: Translations = {
         description: 'AWS SSM Parameter Store and Azure Key Vault support',
       },
       {
+        status: 'done',
+        label: '📖',
+        title: 'Documentation website',
+        description:
+          'Dedicated docs site with guides, examples, API reference',
+      },
+      {
         status: 'next',
         label: '⚡',
         title: 'Exec mode (--exec)',
@@ -284,13 +307,6 @@ export const en: Translations = {
         label: '🔍',
         title: 'Check/sync mode (--check)',
         description: 'Validate SSM vs .env, fail CI if out-of-sync',
-      },
-      {
-        status: 'planned',
-        label: '📖',
-        title: 'Documentation website',
-        description:
-          'Dedicated docs site with guides, examples, API reference',
       },
       {
         status: 'planned',
@@ -310,6 +326,8 @@ export const en: Translations = {
     prereqAws: 'AWS CLI configured',
     prereqAzure: 'Azure CLI configured',
     prereqIam: 'IAM permissions:',
+    prereqAwsNote: 'for AWS SSM',
+    prereqAzureNote: 'for Azure Key Vault',
     install: 'Install',
     quickStart: 'Quick start',
     step1: 'Create a param-map.json mapping env vars to secret paths',
@@ -341,6 +359,7 @@ export const en: Translations = {
     linkDiscussions: 'Discussions',
     linkSecurity: 'Security',
     linkSponsor: 'Sponsor',
+    license: 'MIT License',
     copyright: 'Built with Astro. Open source on GitHub.',
     builtWith: 'Built with Astro. Open source on GitHub.',
   },
@@ -380,6 +399,8 @@ export const en: Translations = {
     reqNode: 'Node.js v20+',
     reqAws: 'AWS CLI',
     reqAzure: 'Azure CLI',
+    reqAwsNote: 'for AWS SSM',
+    reqAzureNote: 'for Azure Key Vault',
     reqDownload: 'Download',
     reqInstallGuide: 'Install guide',
     installTitle: 'Installation',
@@ -474,6 +495,7 @@ export const en: Translations = {
     pullOptions: 'Options',
     pullExamples: 'Examples',
     pullOutput: 'Output',
+    optionHeader: 'Option',
     pullOptMap: 'Path to JSON mapping file',
     pullOptEnv: 'Path to write .env',
     pullOptProvider: 'aws (default) or azure',
@@ -483,6 +505,7 @@ export const en: Translations = {
     pullCommentProfile: '# With AWS profile',
     pullCommentAzureConfig: '# Azure via $config in map file',
     pullCommentAzureFlags: '# Azure via CLI flags',
+    pullOutputTitle: 'Output',
     pushTitle: 'Push command',
     pushDesc:
       'Upload environment variables from a local .env file to your cloud provider using a mapping file.',

@@ -57,10 +57,10 @@ const t = useTranslations(lang);
           <CodeBlock lang="bash" filename="terminal">
 {`$ envilder --map=param-map.json --envfile=.env
 
-✔ Fetched DB_PASSWORD  → ···word
-✔ Fetched API_KEY      → ···key
-✔ Fetched SECRET_TOKEN → ···oken
-✔ Environment file written to .env`}
+${t.howItWorks.terminalFetched1}
+${t.howItWorks.terminalFetched2}
+${t.howItWorks.terminalFetched3}
+${t.howItWorks.terminalWritten}`}
           </CodeBlock>
         </div>
       </div>

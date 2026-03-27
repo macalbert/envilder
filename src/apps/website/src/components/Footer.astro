@@ -8,6 +8,7 @@ interface Props {
 
 const { lang = 'en' } = Astro.props;
 const t = useTranslations(lang);
+const version = `v${__APP_VERSION__}`;
 const currentYear = new Date().getFullYear();
 const currentPath = Astro.url.pathname;
 
@@ -46,8 +47,8 @@ const links = {
           {t.footer.tagline}
         </p>
         <div class="footer-badges">
-          <span class="badge">MIT License</span>
-          <span class="badge">v0.8.0</span>
+          <span class="badge">{t.footer.license}</span>
+          <span class="badge">{version}</span>
         </div>
       </div>
 
