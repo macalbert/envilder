@@ -1,6 +1,7 @@
 ---
 import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import Footer from '../components/Footer.astro';
 import Navbar from '../components/Navbar.astro';
 import { localizedPath, useTranslations } from '../i18n/utils';
@@ -11,7 +12,8 @@ const lang = 'en';
 const t = useTranslations(lang);
 
 // Read the changelog from the project root
-const changelogPath = resolve(process.cwd(), '../../../docs/CHANGELOG.md');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const changelogPath = resolve(__dirname, '../../../../../docs/CHANGELOG.md');
 let changelogContent = '';
 try {
   changelogContent = await readFile(changelogPath, 'utf-8');

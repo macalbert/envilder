@@ -58,7 +58,7 @@ describe('CustomStack', () => {
     expect(tags).toBeDefined();
   });
 
-  test('Should_FormatRepoNameForCloudFormation_When_ToCloudFormationCalled', () => {
+  test('Should_FormatRepoNameForCloudFormation_When_GetCloudFormationRepoNameCalled', () => {
     // Arrange
     const app = new App();
     const props = createCustomStackProps();
@@ -66,7 +66,7 @@ describe('CustomStack', () => {
     const stack = new CustomStack(app, props);
 
     // Act
-    const result = stack.toCloudFormation();
+    const result = stack.getCloudFormationRepoName();
 
     // Assert
     expect(result).toBe('my-test-repo');
@@ -93,7 +93,7 @@ describe('CustomStack', () => {
 
     // Act
     const stack = new CustomStack(app, props);
-    const cloudFormationName = stack.toCloudFormation();
+    const cloudFormationName = stack.getCloudFormationRepoName();
 
     // Assert
     expect(cloudFormationName).toMatch(/^[a-z0-9-]+$/);

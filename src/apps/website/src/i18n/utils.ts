@@ -15,12 +15,18 @@ export const defaultLang = 'en';
 
 export type Lang = keyof typeof languages;
 
+function normalizeLang(lang: string): Lang {
+  return Object.prototype.hasOwnProperty.call(languages, lang)
+    ? (lang as Lang)
+    : defaultLang;
+}
+
 export function useTranslations(lang: string) {
-  const dict = translations[lang] || translations[defaultLang];
-  return dict;
+  return translations[normalizeLang(lang)];
 }
 
 export function localizedPath(lang: string, path: string) {
-  if (lang === defaultLang) return path;
-  return `/${lang}${path}`;
+  const normalized = normalizeLang(lang);
+  if (normalized === defaultLang) return path;
+  return `/${normalized}${path}`;
 }

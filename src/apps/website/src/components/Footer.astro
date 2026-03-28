@@ -20,21 +20,24 @@ const links = {
     },
     { label: t.footer.linkNpm, href: 'https://www.npmjs.com/package/envilder' },
     { label: t.footer.linkChangelog, href: localizedPath(lang, '/changelog') },
-    { label: t.footer.linkRoadmap, href: '#roadmap' },
+    { label: t.footer.linkRoadmap, href: localizedPath(lang, '/#roadmap') },
   ],
   docs: [
-    { label: t.footer.linkGettingStarted, href: '#get-started' },
+    {
+      label: t.footer.linkGettingStarted,
+      href: localizedPath(lang, '/#get-started'),
+    },
     {
       label: t.footer.linkPullCommand,
-      href: 'https://github.com/macalbert/envilder/blob/main/docs/pull-command.md',
+      href: localizedPath(lang, '/docs#pull-command'),
     },
     {
       label: t.footer.linkPushCommand,
-      href: 'https://github.com/macalbert/envilder/blob/main/docs/push-command.md',
+      href: localizedPath(lang, '/docs#push-command'),
     },
     {
       label: t.footer.linkGithubAction,
-      href: 'https://github.com/macalbert/envilder/blob/main/docs/github-action.md',
+      href: localizedPath(lang, '/docs#gha-setup'),
     },
   ],
   community: [
@@ -109,7 +112,7 @@ const links = {
       <div class="footer-bottom-row">
         <div class="footer-preferences">
           <div class="lang-switcher">
-            {Object.entries(languages).map(([code, label]) => (
+            {Object.entries(languages).map(([code, _label]) => (
               <a
                 href={code === 'en' ? currentPath.replace(/^\/(ca|es)/, '') || '/' : `/${code}${currentPath.replace(/^\/(ca|es)/, '') || '/'}`}
                 class:list={['lang-link', { active: code === lang }]}

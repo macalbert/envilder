@@ -13,6 +13,10 @@ export class ConfigValidator {
       errors.push('branch is required and cannot be empty');
     }
 
+    if (config.environment === undefined || config.environment === null) {
+      errors.push('environment is required and cannot be empty');
+    }
+
     if (!config.domain) {
       errors.push('domain configuration is required');
     } else {

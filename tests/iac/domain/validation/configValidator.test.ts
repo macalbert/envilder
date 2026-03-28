@@ -227,6 +227,26 @@ describe('ConfigValidator', () => {
     expect(() => validator.validate(config)).not.toThrow();
   });
 
+  test('Should_ThrowConfigValidationError_When_EnvironmentMissing', () => {
+    // Arrange
+    const config = createValidConfig();
+    // biome-ignore lint/suspicious/noExplicitAny: testing null config
+    config.environment = null as any;
+
+    // Act
+    const act = () => validator.validate(config);
+
+    // Assert
+    expect(act).toThrow(ConfigValidationError);
+    expect(act).toThrow(
+      expect.objectContaining({
+        validationErrors: expect.arrayContaining([
+          'environment is required and cannot be empty',
+        ]),
+      }),
+    );
+  });
+
   test('Should_ThrowConfigValidationError_When_MultipleErrorsExist', () => {
     // Arrange
     const config = createValidConfig();

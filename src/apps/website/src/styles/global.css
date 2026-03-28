@@ -50,6 +50,10 @@ html {
   --color-btn-text: #1a2118; /* dark bg for button labels */
   --color-code-bg: #1c2127; /* dark charcoal for code blocks */
   --color-code-header: #212830; /* slightly lighter for headers */
+  --color-code-text: var(--color-text);
+  --color-code-text-muted: var(--color-text-muted);
+  --color-code-text-dim: var(--color-text-dim);
+  --color-code-border: var(--color-border);
   --color-sponsor: #db61a2; /* GitHub sponsor pink */
 
   /* Typography */
@@ -109,8 +113,12 @@ html {
   --color-nav-bg: rgba(245, 244, 241, 0.92);
   --color-nav-mobile: rgba(245, 244, 241, 0.98);
   --color-btn-text: #f5f4f1;
-  --color-code-bg: #e4e2de; /* darker grey for code blocks */
-  --color-code-header: #dcdad6; /* slightly darker for headers */
+  --color-code-bg: #1c2127; /* keep dark terminal look in light theme */
+  --color-code-header: #212830; /* keep dark header in light theme */
+  --color-code-text: #c2d1a0; /* light text for dark code bg */
+  --color-code-text-muted: #8a9a72;
+  --color-code-text-dim: #5a6a4a;
+  --color-code-border: #3a4a38;
   --color-sponsor: #c74b8e; /* GitHub sponsor pink — light */
 
   --pixel-shadow: 4px 4px 0 var(--color-border);
@@ -147,8 +155,6 @@ h5,
 h6,
 p,
 li,
-span,
-label,
 .pixel-card,
 .section-title,
 .step,
@@ -218,6 +224,16 @@ code {
   padding: 0.15em 0.4em;
   border-radius: 3px;
   border: 1px solid var(--color-border);
+}
+
+/* Reset inline-code styling inside code blocks / terminals */
+pre code,
+.codeblock code,
+.terminal code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  border: none;
 }
 
 /* ── Layout Utilities ─────────────────────────────────── */

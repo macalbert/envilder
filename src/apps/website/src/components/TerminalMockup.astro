@@ -24,10 +24,11 @@ const { title = 'bash' } = Astro.props;
 <style>
   .terminal {
     background: var(--color-code-bg);
-    border: 2px solid var(--color-border);
+    border: 2px solid var(--color-code-border, var(--color-border));
     overflow: hidden;
     box-shadow: var(--pixel-shadow);
     width: 100%;
+    color: var(--color-code-text, var(--color-text));
   }
 
   .terminal-header {
@@ -36,7 +37,7 @@ const { title = 'bash' } = Astro.props;
     display: flex;
     align-items: center;
     gap: var(--space-sm);
-    border-bottom: 2px solid var(--color-border);
+    border-bottom: 2px solid var(--color-code-border, var(--color-border));
   }
 
   .terminal-dots {
@@ -57,7 +58,7 @@ const { title = 'bash' } = Astro.props;
   .terminal-title {
     font-family: var(--font-mono);
     font-size: 0.75rem;
-    color: var(--color-text-dim);
+    color: var(--color-code-text-dim, var(--color-text-dim));
   }
 
   .terminal-spacer {
@@ -81,7 +82,7 @@ const { title = 'bash' } = Astro.props;
   }
 
   .terminal-body :global(.command) {
-    color: var(--color-text);
+    color: var(--color-code-text, var(--color-text));
   }
 
   .terminal-body :global(.flag) {
@@ -89,11 +90,11 @@ const { title = 'bash' } = Astro.props;
   }
 
   .terminal-body :global(.output) {
-    color: var(--color-text-muted);
+    color: var(--color-code-text-muted, var(--color-text-muted));
   }
 
   .terminal-body :global(.comment) {
-    color: var(--color-text-dim);
+    color: var(--color-code-text-dim, var(--color-text-dim));
   }
 
   .terminal-body :global(.highlight) {
@@ -111,5 +112,11 @@ const { title = 'bash' } = Astro.props;
 
   @keyframes blink {
     50% { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .terminal-body :global(.cursor) {
+      animation: none;
+    }
   }
 </style>

@@ -7,7 +7,7 @@ import type { IDeploymentConfig } from '../../../src/iac/domain/model/deployment
 import type { ILogger } from '../../../src/iac/domain/ports/iLogger';
 import type { IProjectPath } from '../../../src/iac/domain/ports/iProjectPath';
 
-jest.mock('../../../src/iac/infrastructure/stacks/staticWebsiteStack');
+vi.mock('../../../src/iac/infrastructure/stacks/staticWebsiteStack');
 
 describe('DeployInfrastructureHandler', () => {
   let app: App;
@@ -18,10 +18,10 @@ describe('DeployInfrastructureHandler', () => {
   let mockProjectPath: IProjectPath;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     app = new App({ outdir: '/tmp/cdk.out' });
-    jest.spyOn(app, 'synth').mockImplementation();
+    vi.spyOn(app, 'synth').mockImplementation(() => ({}) as any);
 
     envFromCli = {
       region: 'us-east-1',
@@ -29,14 +29,14 @@ describe('DeployInfrastructureHandler', () => {
     };
 
     mockLogger = {
-      info: jest.fn(),
-      error: jest.fn(),
-      table: jest.fn(),
+      info: vi.fn(),
+      error: vi.fn(),
+      table: vi.fn(),
     };
 
     mockProjectPath = {
-      getRootPath: jest.fn().mockReturnValue('/root'),
-      resolveFullPath: jest.fn((p: string) => `/root/${p}`),
+      getRootPath: vi.fn().mockReturnValue('/root'),
+      resolveFullPath: vi.fn((p: string) => `/root/${p}`),
     };
 
     config = createValidConfig();

@@ -20,7 +20,7 @@ phases:
     commands:
       - echo "Build started on `date`"
       - cd src/iac
-      - cdk deploy envilder-envilder-Website-production-stack --require-approval never
+      - cdk deploy macalbert-envilder-website-production-stack --require-approval never
 
   post_build:
     commands:

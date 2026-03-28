@@ -46,7 +46,7 @@ export class CustomStack extends Stack {
     });
   }
 
-  public toCloudFormation(): string {
+  public getCloudFormationRepoName(): string {
     return formatRepoNameForCloudFormation(this.props.githubRepo);
   }
 }

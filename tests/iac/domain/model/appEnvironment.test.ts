@@ -17,7 +17,7 @@ describe('AppEnvironment', () => {
     expect(value).toBe('Development');
   });
 
-  test('Should_HaveAllSixValues_When_EnumIsChecked', () => {
+  test('Should_HaveAllExpectedValues_When_EnumIsChecked', () => {
     // Arrange
     const expectedValues = ['Production', 'Development'];
 

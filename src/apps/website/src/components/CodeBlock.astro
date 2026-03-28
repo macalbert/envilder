@@ -14,16 +14,17 @@ const { lang = 'json', filename } = Astro.props;
       <span class="codeblock-lang">{lang}</span>
     </div>
   )}
-  <pre class="codeblock-body"><slot /></pre>
+  <pre class="codeblock-body"><code><slot /></code></pre>
 </div>
 
 <style>
   .codeblock {
     background: var(--color-code-bg);
-    border: 2px solid var(--color-border);
+    border: 2px solid var(--color-code-border, var(--color-border));
     overflow: hidden;
     box-shadow: var(--pixel-shadow);
     width: 100%;
+    color: var(--color-code-text, var(--color-text));
   }
 
   .codeblock-header {
@@ -32,19 +33,19 @@ const { lang = 'json', filename } = Astro.props;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 2px solid var(--color-border);
+    border-bottom: 2px solid var(--color-code-border, var(--color-border));
   }
 
   .codeblock-filename {
     font-family: var(--font-mono);
     font-size: 0.75rem;
-    color: var(--color-text-muted);
+    color: var(--color-code-text-muted, var(--color-text-muted));
   }
 
   .codeblock-lang {
     font-family: var(--font-pixel);
     font-size: 0.5rem;
-    color: var(--color-text-dim);
+    color: var(--color-code-text-dim, var(--color-text-dim));
     text-transform: uppercase;
   }
 
@@ -55,8 +56,13 @@ const { lang = 'json', filename } = Astro.props;
     line-height: 1.8;
     letter-spacing: -0.02em;
     overflow-x: auto;
-    color: var(--color-text);
+    color: var(--color-code-text, var(--color-text));
     margin: 0;
     white-space: pre;
+  }
+
+  .codeblock-body code {
+    font: inherit;
+    color: inherit;
   }
 </style>

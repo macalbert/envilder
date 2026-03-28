@@ -8,18 +8,11 @@
     "lint": "biome lint ./application ./domain ./infrastructure --files-ignore-unknown=true",
     "lint:fix": "biome lint --fix ./application ./domain ./infrastructure --files-ignore-unknown=true",
     "format": "biome format ./application ./domain ./infrastructure --files-ignore-unknown=true",
-    "format:write": "biome format --write ./application ./domain ./infrastructure --files-ignore-unknown=true",
-    "test": "jest --colors --seed=1",
-    "test:update": "jest --colors --seed=1 --updateSnapshot --verbose",
-    "test:ci": "jest --colors --seed=1 --ci --verbose",
-    "test:ci:update": "jest --colors --seed=1 --ci --verbose --updateSnapshot"
+    "format:write": "biome format --write ./application ./domain ./infrastructure --files-ignore-unknown=true"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.14",
     "aws-cdk-lib": "^2.200.0",
     "constructs": "^10.4.2",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.3.4",
     "typescript": "^5.9.3"
   }
 }

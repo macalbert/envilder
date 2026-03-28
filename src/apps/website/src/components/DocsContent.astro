@@ -127,7 +127,7 @@ envilder --map=param-map.json --envfile=.env --profile=dev-account`}</CodeBlock>
   "Statement": [{
     "Effect": "Allow",
     "Action": ["ssm:GetParameter", "ssm:PutParameter"],
-    "Resource": "arn:aws:ssm:us-east-1:123456789:parameter/myapp/*"
+    "Resource": "arn:aws:ssm:us-east-1:123456789012:parameter/myapp/*"
   }]
 }`}</CodeBlock>
 
@@ -389,7 +389,7 @@ envilder --push --provider=azure \\
         <h2>{t.docs.pushSingleTitle}</h2>
         <p>{t.docs.pushSingleDesc}</p>
 
-        <CodeBlock lang="bash">{`envilder --push --key=API_KEY --value=abc123 --secret-path=/myapp/api/key`}</CodeBlock>
+        <CodeBlock lang="bash">{`envilder --push --key=API_KEY --value=<SECRET> --secret-path=/myapp/api/key`}</CodeBlock>
 
         <h3>{t.docs.pushSingleOptions}</h3>
         <table class="docs-table">
@@ -932,6 +932,12 @@ jobs:
       padding-right: 0;
       padding-bottom: var(--space-lg);
       margin-bottom: var(--space-lg);
+    }
+
+    .docs-table {
+      display: block;
+      overflow-x: auto;
+      white-space: nowrap;
     }
 
     .multi-env-grid {

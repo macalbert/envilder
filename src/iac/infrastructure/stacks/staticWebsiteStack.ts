@@ -223,13 +223,13 @@ export class StaticWebsiteStack extends CustomStack {
     new CfnOutput(this, 'CloudFrontDistributionDomainName', {
       value: distribution.distributionDomainName,
       description: 'CloudFront distribution domain',
-      exportName: `${this.toCloudFormation()}-${props.envName}-CdnDomainName`,
+      exportName: `${this.getCloudFormationRepoName()}-${props.envName}-CdnDomainName`,
     });
 
     new CfnOutput(this, 'DnsRecordName', {
       value: aliasRecords[0].domainName || allDomainNames[0],
       description: 'The DNS record name (primary)',
-      exportName: `${this.toCloudFormation()}-${props.envName}-AliasRecord`,
+      exportName: `${this.getCloudFormationRepoName()}-${props.envName}-AliasRecord`,
     });
   }
 }
