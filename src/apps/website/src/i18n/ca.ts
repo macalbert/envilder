@@ -20,7 +20,7 @@ export const ca: Translations = {
     title2: 'Una comanda.',
     titleAccent: 'Cada entorn.',
     description:
-      'Una eina CLI i GitHub Action que centralitza de forma segura les teves variables d\'entorn des de',
+      "Una eina CLI i GitHub Action que centralitza de forma segura les teves variables d'entorn des de",
     descAws: 'AWS SSM',
     descAzure: 'Azure Key Vault',
     descOr: 'o',
@@ -32,7 +32,7 @@ export const ca: Translations = {
     terminalComment2: '# 2. Descarrega secrets → genera .env',
     terminalFetched1: ' Obtingut DB_PASSWORD → ···pass',
     terminalFetched2: ' Obtingut API_KEY     → ···key',
-    terminalWritten: ' Fitxer d\'entorn escrit a .env',
+    terminalWritten: " Fitxer d'entorn escrit a .env",
   },
   trust: {
     label: 'COMPATIBLE AMB',
@@ -42,7 +42,7 @@ export const ca: Translations = {
     titleAccent: 'problema',
     titleSuffix: ' amb fitxers .env',
     subtitle:
-      'Gestionar secrets manualment no escala. És insegur, propens a errors i crea fricció per a tot l\'equip.',
+      "Gestionar secrets manualment no escala. És insegur, propens a errors i crea fricció per a tot l'equip.",
     problems: [
       {
         icon: '💀',
@@ -60,7 +60,7 @@ export const ca: Translations = {
         icon: '🐌',
         title: 'Onboarding i rotacions lentes',
         description:
-          'Un nou membre s\'uneix a l\'equip? Copia i enganxa un .env de la màquina d\'algú. Algú rota? Espera que tothom actualitzi manualment.',
+          "Un nou membre s'uneix a l'equip? Copia i enganxa un .env de la màquina d'algú. Algú rota? Espera que tothom actualitzi manualment.",
       },
     ],
     arrowText: '▼ envilder ho soluciona ▼',
@@ -88,13 +88,12 @@ export const ca: Translations = {
   howItWorks: {
     title: 'Com ',
     titleAccent: 'funciona',
-    subtitle:
-      'Tres passos. De secrets dispersos a una única font de veritat.',
+    subtitle: 'Tres passos. De secrets dispersos a una única font de veritat.',
     steps: [
       {
         title: 'Crea un fitxer de mapeig',
         description:
-          'Mapeja els noms de les teves variables d\'entorn a les seves rutes de secrets a AWS SSM o Azure Key Vault.',
+          "Mapeja els noms de les teves variables d'entorn a les seves rutes de secrets a AWS SSM o Azure Key Vault.",
       },
       {
         title: 'Executa una comanda',
@@ -104,19 +103,19 @@ export const ca: Translations = {
       {
         title: 'El teu .env està llest',
         description:
-          'Un fitxer d\'entorn net i actualitzat — generat des de la font de veritat. Utilitza\'l localment o injecta\'l en CI/CD amb la GitHub Action.',
+          "Un fitxer d'entorn net i actualitzat — generat des de la font de veritat. Utilitza'l localment o injecta'l en CI/CD amb la GitHub Action.",
       },
     ],
     terminalFetched1: '✔ Obtingut DB_PASSWORD  → ···word',
     terminalFetched2: '✔ Obtingut API_KEY      → ···key',
     terminalFetched3: '✔ Obtingut SECRET_TOKEN → ···oken',
-    terminalWritten: '✔ Fitxer d\'entorn escrit a .env',
+    terminalWritten: "✔ Fitxer d'entorn escrit a .env",
   },
   features: {
     title: 'Fet per a ',
     titleAccent: 'equips reals',
     subtitle:
-      'Tot el que necessites per gestionar secrets d\'entorn de forma segura i a escala.',
+      "Tot el que necessites per gestionar secrets d'entorn de forma segura i a escala.",
     features: [
       {
         icon: '☁️',
@@ -128,7 +127,7 @@ export const ca: Translations = {
         icon: '🔄',
         title: 'Sincronització bidireccional',
         description:
-          'Obté secrets a fitxers .env o puja valors .env al teu proveïdor al núvol. Suport complet d\'anada i tornada.',
+          "Obté secrets a fitxers .env o puja valors .env al teu proveïdor al núvol. Suport complet d'anada i tornada.",
       },
       {
         icon: '⚙️',
@@ -140,7 +139,7 @@ export const ca: Translations = {
         icon: '🔒',
         title: 'Accés IAM i RBAC',
         description:
-          'Aprofita el control d\'accés natiu del núvol. Les polítiques IAM d\'AWS o RBAC d\'Azure defineixen qui llegeix què, per entorn.',
+          "Aprofita el control d'accés natiu del núvol. Les polítiques IAM d'AWS o RBAC d'Azure defineixen qui llegeix què, per entorn.",
       },
       {
         icon: '📊',
@@ -152,7 +151,7 @@ export const ca: Translations = {
         icon: '🔁',
         title: 'Sincronització idempotent',
         description:
-          'Només s\'actualitza el que hi ha al teu mapeig. Res més es toca. Executa\'l deu vegades — mateix resultat, zero efectes secundaris.',
+          "Només s'actualitza el que hi ha al teu mapeig. Res més es toca. Executa'l deu vegades — mateix resultat, zero efectes secundaris.",
       },
       {
         icon: '🧱',
@@ -169,7 +168,7 @@ export const ca: Translations = {
     ],
   },
   demo: {
-    title: 'Mira\'l en ',
+    title: "Mira'l en ",
     titleAccent: 'acció',
     subtitle:
       'Mira com Envilder simplifica la gestió de secrets en menys de 2 minuts.',
@@ -187,16 +186,16 @@ export const ca: Translations = {
     awsFeatures: [
       'Suport de GetParameter amb WithDecryption',
       'Suport de perfil AWS per a multi-compte',
-      'Control d\'accés basat en polítiques IAM',
-      'Registre d\'auditoria CloudTrail',
+      "Control d'accés basat en polítiques IAM",
+      "Registre d'auditoria CloudTrail",
     ],
     azureTitle: 'Azure Key Vault',
     azureBadge: 'Nou a v0.8',
     azureFeatures: [
       'Auto-normalitza noms de secrets (barres → guions)',
       'Autenticació DefaultAzureCredential',
-      'Control d\'accés Azure RBAC',
-      'Registre d\'auditoria Azure Monitor',
+      "Control d'accés Azure RBAC",
+      "Registre d'auditoria Azure Monitor",
     ],
     configPriorityTitle: 'Prioritat de configuració',
     priorityHigh: 'Flags CLI / Inputs GHA',
@@ -209,16 +208,16 @@ export const ca: Translations = {
       'Obté secrets en el moment del desplegament. Afegeix-lo a qualsevol workflow en minuts.',
     awsSsm: '☁️ AWS SSM',
     azureKeyVault: '🔑 Azure Key Vault',
-    actionInputs: 'Inputs de l\'Action',
+    actionInputs: "Inputs de l'Action",
     thInput: 'Input',
     thRequired: 'Requerit',
     thDefault: 'Per defecte',
     thDescription: 'Descripció',
     inputMapDesc:
-      'Ruta al fitxer JSON que mapeja variables d\'entorn a rutes de secrets',
+      "Ruta al fitxer JSON que mapeja variables d'entorn a rutes de secrets",
     inputEnvDesc: 'Ruta al fitxer .env a generar',
     inputProviderDesc: 'Proveïdor al núvol: aws o azure (per defecte: aws)',
-    inputVaultDesc: 'URL d\'Azure Key Vault',
+    inputVaultDesc: "URL d'Azure Key Vault",
     output: 'Output:',
     outputDesc: 'Ruta al fitxer .env generat',
     yes: 'Sí',
@@ -228,7 +227,7 @@ export const ca: Translations = {
     title: 'Què hi ha de ',
     titleAccent: 'nou',
     subtitle:
-      'Novetats de l\'última versió. El suport multi-proveïdor ja és aquí.',
+      "Novetats de l'última versió. El suport multi-proveïdor ja és aquí.",
     releaseTitle: 'Suport Multi-Proveïdor',
     releaseDate: '22 de març de 2026',
     highlights: [
@@ -238,7 +237,7 @@ export const ca: Translations = {
       },
       {
         icon: '✨',
-        text: 'Suport d\'Azure Key Vault — paritat completa amb AWS SSM',
+        text: "Suport d'Azure Key Vault — paritat completa amb AWS SSM",
       },
       { icon: '✨', text: 'Flags CLI --vault-url i --provider' },
       {
@@ -247,7 +246,7 @@ export const ca: Translations = {
       },
       {
         icon: '⚠️',
-        text: 'Canvi incompatible: --ssm-path reanomenat a --secret-path (l\'antic flag encara funciona com a àlies obsolet)',
+        text: "Canvi incompatible: --ssm-path reanomenat a --secret-path (l'antic flag encara funciona com a àlies obsolet)",
       },
     ],
     fullChangelog: '📋 Historial complet',
@@ -256,8 +255,7 @@ export const ca: Translations = {
   roadmap: {
     title: 'Què ve ',
     titleAccent: 'ara',
-    subtitle:
-      'Envilder es desenvolupa activament. Aquí és cap on anem.',
+    subtitle: 'Envilder es desenvolupa activament. Aquí és cap on anem.',
     upNext: 'Pròximament',
     items: [
       {
@@ -265,7 +263,7 @@ export const ca: Translations = {
         label: '✅',
         title: 'Descarregar secrets a .env',
         description:
-          'Mapeja noms de variables d\'entorn a rutes de secrets al núvol via JSON i genera fitxers .env automàticament',
+          "Mapeja noms de variables d'entorn a rutes de secrets al núvol via JSON i genera fitxers .env automàticament",
       },
       {
         status: 'done',
@@ -278,15 +276,13 @@ export const ca: Translations = {
         status: 'done',
         label: '✅',
         title: 'GitHub Action',
-        description:
-          'Utilitza Envilder en workflows CI/CD de forma nativa',
+        description: 'Utilitza Envilder en workflows CI/CD de forma nativa',
       },
       {
         status: 'done',
         label: '✅',
         title: 'Multi-proveïdor (AWS + Azure)',
-        description:
-          'Suport d\'AWS SSM Parameter Store i Azure Key Vault',
+        description: "Suport d'AWS SSM Parameter Store i Azure Key Vault",
       },
       {
         status: 'done',
@@ -299,8 +295,7 @@ export const ca: Translations = {
         status: 'next',
         label: '⚡',
         title: 'Mode exec (--exec)',
-        description:
-          'Injecta secrets en un procés fill sense escriure a disc',
+        description: 'Injecta secrets en un procés fill sense escriure a disc',
       },
       {
         status: 'planned',
@@ -314,7 +309,7 @@ export const ca: Translations = {
   getStarted: {
     title: 'Comença ',
     titleAccent: 'ara',
-    subtitle: 'En funcionament en menys d\'un minut.',
+    subtitle: "En funcionament en menys d'un minut.",
     prerequisites: 'Prerequisits',
     prereqNode: 'Node.js v20+',
     prereqAws: 'AWS CLI configurat',
@@ -324,7 +319,8 @@ export const ca: Translations = {
     prereqAzureNote: 'per Azure Key Vault',
     install: 'Instal·lar',
     quickStart: 'Inici ràpid',
-    step1: 'Crea un param-map.json que mapegi variables d\'entorn a rutes de secrets',
+    step1:
+      "Crea un param-map.json que mapegi variables d'entorn a rutes de secrets",
     step2: 'Executa envilder --map=param-map.json --envfile=.env',
     step3: 'El teu fitxer .env està llest ✔',
     terminalTitle: 'Inici ràpid',
@@ -337,7 +333,7 @@ export const ca: Translations = {
   },
   footer: {
     tagline:
-      'Centralitza de forma segura les teves variables d\'entorn des d\'AWS SSM o Azure Key Vault.',
+      "Centralitza de forma segura les teves variables d'entorn des d'AWS SSM o Azure Key Vault.",
     project: 'Projecte',
     documentation: 'Documentació',
     community: 'Comunitat',
@@ -359,7 +355,7 @@ export const ca: Translations = {
   },
   changelogPage: {
     title: 'Historial de canvis — Envilder',
-    backToHome: '← Tornar a l\'inici',
+    backToHome: "← Tornar a l'inici",
     fullChangelog: 'Historial de ',
     changelogAccent: 'canvis',
     intro: 'Historial complet de versions. Vegeu també',
@@ -367,7 +363,7 @@ export const ca: Translations = {
   },
   docs: {
     title: 'Documentació — Envilder',
-    backToHome: '← Tornar a l\'inici',
+    backToHome: "← Tornar a l'inici",
     pageTitle: 'Documentació',
     intro: 'Tot el que necessites per començar amb Envilder.',
     sidebarGettingStarted: 'Primers passos',
@@ -396,7 +392,7 @@ export const ca: Translations = {
     reqAwsNote: 'per AWS SSM',
     reqAzureNote: 'per Azure Key Vault',
     reqDownload: 'Descarregar',
-    reqInstallGuide: 'Guia d\'instal·lació',
+    reqInstallGuide: "Guia d'instal·lació",
     installTitle: 'Instal·lació',
     credTitle: 'Credencials del núvol',
     credAwsTitle: 'AWS (per defecte)',
@@ -407,7 +403,7 @@ export const ca: Translations = {
     credAzureDesc:
       'Envilder utilitza Azure Default Credentials. Inicia sessió amb:',
     credAzureVault:
-      'Proporciona l\'URL del vault via $config al fitxer de mapeig o el flag --vault-url.',
+      "Proporciona l'URL del vault via $config al fitxer de mapeig o el flag --vault-url.",
     permTitle: 'Permisos IAM',
     permAwsTitle: 'AWS',
     permAwsDesc: 'El teu usuari o rol IAM necessita:',
@@ -417,16 +413,15 @@ export const ca: Translations = {
     permPush: 'Push',
     permPolicyExample: 'Exemple de política IAM:',
     permAzureTitle: 'Azure',
-    permAzureRbac:
-      'Recomanat — assigna Key Vault Secrets Officer via RBAC:',
+    permAzureRbac: 'Recomanat — assigna Key Vault Secrets Officer via RBAC:',
     permAzurePullNote:
       'Per accés només de lectura, Key Vault Secrets User és suficient.',
     mapTitle: 'Fitxer de mapeig',
     mapIntro:
-      'El fitxer de mapeig (param-map.json) és el nucli d\'Envilder. És un fitxer JSON que mapeja noms de variables d\'entorn (claus) a rutes de secrets (valors) al teu proveïdor al núvol.',
+      "El fitxer de mapeig (param-map.json) és el nucli d'Envilder. És un fitxer JSON que mapeja noms de variables d'entorn (claus) a rutes de secrets (valors) al teu proveïdor al núvol.",
     mapCalloutStructure: 'Estructura:',
     mapCalloutKey:
-      'Cada clau es converteix en un nom de variable d\'entorn al teu fitxer .env.',
+      "Cada clau es converteix en un nom de variable d'entorn al teu fitxer .env.",
     mapCalloutValue:
       'Cada valor és la ruta on viu el secret al teu proveïdor al núvol.',
     mapBasicTitle: 'Format bàsic (AWS SSM — per defecte)',
@@ -473,11 +468,11 @@ export const ca: Translations = {
     mapAzureAuth: 'Azure Default Credentials',
     mapMultiEnvTitle: 'Múltiples entorns',
     mapMultiEnvDesc:
-      'Un patró comú és tenir un fitxer de mapeig per entorn. L\'estructura és la mateixa, només canvien les rutes dels secrets:',
+      "Un patró comú és tenir un fitxer de mapeig per entorn. L'estructura és la mateixa, només canvien les rutes dels secrets:",
     mapMultiEnvThenPull: 'Després obté el correcte:',
     mapOverrideTitle: 'Sobreescriure $config amb flags CLI',
     mapOverrideDesc:
-      'Els flags CLI sempre tenen prioritat sobre els valors de $config. Això et permet establir valors per defecte al fitxer i sobreescriure\'ls per invocació:',
+      "Els flags CLI sempre tenen prioritat sobre els valors de $config. Això et permet establir valors per defecte al fitxer i sobreescriure'ls per invocació:",
     mapOverrideComment1: '# Utilitza $config del fitxer de mapeig tal qual',
     mapOverrideComment2:
       '# Sobreescriu proveïdor i URL del vault, ignorant $config',
@@ -494,7 +489,7 @@ export const ca: Translations = {
     pullOptMap: 'Ruta al fitxer JSON de mapeig',
     pullOptEnv: 'Ruta on escriure el .env',
     pullOptProvider: 'aws (per defecte) o azure',
-    pullOptVault: 'URL d\'Azure Key Vault',
+    pullOptVault: "URL d'Azure Key Vault",
     pullOptProfile: 'Perfil AWS CLI a utilitzar',
     pullCommentDefault: '# Per defecte (AWS SSM)',
     pullCommentProfile: '# Amb perfil AWS',
@@ -503,14 +498,14 @@ export const ca: Translations = {
     pullOutputTitle: 'Sortida',
     pushTitle: 'Comanda push',
     pushDesc:
-      'Puja variables d\'entorn d\'un fitxer .env local al teu proveïdor al núvol utilitzant un fitxer de mapeig.',
+      "Puja variables d'entorn d'un fitxer .env local al teu proveïdor al núvol utilitzant un fitxer de mapeig.",
     pushOptions: 'Opcions',
     pushExamples: 'Exemples',
     pushOptPush: 'Activa el mode push (requerit)',
     pushOptEnv: 'Ruta al teu fitxer .env local',
     pushOptMap: 'Ruta al JSON de mapeig de paràmetres',
     pushOptProvider: 'aws (per defecte) o azure',
-    pushOptVault: 'URL d\'Azure Key Vault',
+    pushOptVault: "URL d'Azure Key Vault",
     pushOptProfile: 'Perfil AWS CLI (només AWS)',
     pushCommentAws: '# Pujar a AWS SSM',
     pushCommentProfile: '# Amb perfil AWS',
@@ -518,29 +513,28 @@ export const ca: Translations = {
     pushCommentAzureFlags: '# Azure via flags CLI',
     pushSingleTitle: 'Pujar variable individual',
     pushSingleDesc:
-      'Puja una variable d\'entorn individual directament sense cap fitxer.',
+      "Puja una variable d'entorn individual directament sense cap fitxer.",
     pushSingleOptions: 'Opcions',
     pushSingleOptPush: 'Activa el mode push (requerit)',
-    pushSingleOptKey: 'Nom de la variable d\'entorn',
+    pushSingleOptKey: "Nom de la variable d'entorn",
     pushSingleOptValue: 'Valor a emmagatzemar',
     pushSingleOptPath: 'Ruta completa del secret al teu proveïdor al núvol',
     pushSingleOptProvider: 'aws (per defecte) o azure',
-    pushSingleOptVault: 'URL d\'Azure Key Vault',
+    pushSingleOptVault: "URL d'Azure Key Vault",
     pushSingleOptProfile: 'Perfil AWS CLI (només AWS)',
     ghaSetupTitle: 'Configuració de GitHub Action',
     ghaSetupDesc:
-      'La GitHub Action d\'Envilder obté secrets d\'AWS SSM o Azure Key Vault en fitxers .env durant el teu workflow CI/CD. No cal compilar — l\'action està pre-construïda i llesta per utilitzar des de GitHub Marketplace.',
+      "La GitHub Action d'Envilder obté secrets d'AWS SSM o Azure Key Vault en fitxers .env durant el teu workflow CI/CD. No cal compilar — l'action està pre-construïda i llesta per utilitzar des de GitHub Marketplace.",
     ghaPrerequisites: 'Prerequisits',
     ghaPrereqAws:
       'AWS: Configura credencials amb aws-actions/configure-aws-credentials',
     ghaPrereqAzure: 'Azure: Configura credencials amb azure/login',
     ghaPrereqMap: 'Un param-map.json al teu repositori',
-    ghaPullOnly:
-      'La GitHub Action només suporta el mode pull (sense push).',
+    ghaPullOnly: 'La GitHub Action només suporta el mode pull (sense push).',
     ghaBasicTitle: 'Exemple bàsic de workflow',
     ghaMultiEnvTitle: 'Workflow multi-entorn',
-    ghaAzureTitle: 'Workflow d\'Azure Key Vault',
-    ghaInputsTitle: 'Inputs i outputs de l\'Action',
+    ghaAzureTitle: "Workflow d'Azure Key Vault",
+    ghaInputsTitle: "Inputs i outputs de l'Action",
     ghaInputsSubtitle: 'Inputs',
     ghaOutputsSubtitle: 'Outputs',
     ghaInputRequired: 'Requerit',
@@ -555,7 +549,7 @@ export const ca: Translations = {
     ghaInputMap: 'Ruta al fitxer JSON de mapeig',
     ghaInputEnv: 'Ruta al fitxer .env a generar',
     ghaInputProvider: 'aws o azure',
-    ghaInputVault: 'URL d\'Azure Key Vault',
+    ghaInputVault: "URL d'Azure Key Vault",
     configPriorityTitle: 'Prioritat de configuració',
     configPriorityDesc:
       'Quan hi ha múltiples fonts de configuració, Envilder les resol en aquest ordre (el més alt guanya):',
@@ -564,8 +558,8 @@ export const ca: Translations = {
     configPriority3: 'Per defecte (AWS)',
     configPriorityExplain:
       'Això vol dir que --provider=azure a la CLI sobreescriurà "provider": "aws" a $config.',
-    azureSetupTitle: 'Configuració d\'Azure Key Vault',
-    azureSetupCheck: 'Comprova quin model d\'accés utilitza el teu vault:',
+    azureSetupTitle: "Configuració d'Azure Key Vault",
+    azureSetupCheck: "Comprova quin model d'accés utilitza el teu vault:",
     azureRbacTrue: 'true → Azure RBAC (recomanat)',
     azureRbacFalse: 'false / null → Vault Access Policy (clàssic)',
     azureOptionA: 'Opció A — Azure RBAC (recomanat)',

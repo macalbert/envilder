@@ -1,7 +1,7 @@
-import type { IDeploymentConfig } from '../../../../src/iac/domain/model/deploymentConfig';
-import { AppEnvironment } from '../../../../src/iac/domain/model/appEnvironment';
-import { ConfigValidator } from '../../../../src/iac/domain/validation/configValidator';
 import { ConfigValidationError } from '../../../../src/iac/domain/errors';
+import { AppEnvironment } from '../../../../src/iac/domain/model/appEnvironment';
+import type { IDeploymentConfig } from '../../../../src/iac/domain/model/deploymentConfig';
+import { ConfigValidator } from '../../../../src/iac/domain/validation/configValidator';
 
 describe('ConfigValidator', () => {
   let validator: ConfigValidator;

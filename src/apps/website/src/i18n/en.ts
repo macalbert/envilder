@@ -24,8 +24,7 @@ export const en: Translations = {
     descAws: 'AWS SSM',
     descAzure: 'Azure Key Vault',
     descOr: 'or',
-    descSuffix:
-      'as a single source of truth. No more copy-pasting secrets.',
+    descSuffix: 'as a single source of truth. No more copy-pasting secrets.',
     getStarted: '▶ Get Started',
     viewOnGithub: '★ View on GitHub',
     terminalComment1: '# 1. Define your mapping',
@@ -268,8 +267,7 @@ export const en: Translations = {
         status: 'done',
         label: '✅',
         title: 'Push mode (--push)',
-        description:
-          'Upload .env values or single secrets to cloud provider',
+        description: 'Upload .env values or single secrets to cloud provider',
       },
       {
         status: 'done',
@@ -287,8 +285,7 @@ export const en: Translations = {
         status: 'done',
         label: '📖',
         title: 'Documentation website',
-        description:
-          'Dedicated docs site with guides, examples, API reference',
+        description: 'Dedicated docs site with guides, examples, API reference',
       },
       {
         status: 'next',
@@ -399,8 +396,7 @@ export const en: Translations = {
       'Envilder uses your AWS CLI credentials. Set up the default profile:',
     credAwsProfile: 'Or use a named profile:',
     credAzureTitle: 'Azure Key Vault',
-    credAzureDesc:
-      'Envilder uses Azure Default Credentials. Log in with:',
+    credAzureDesc: 'Envilder uses Azure Default Credentials. Log in with:',
     credAzureVault:
       'Provide the vault URL via $config in your map file or the --vault-url flag.',
     permTitle: 'IAM permissions',
@@ -412,16 +408,14 @@ export const en: Translations = {
     permPush: 'Push',
     permPolicyExample: 'Example IAM policy:',
     permAzureTitle: 'Azure',
-    permAzureRbac:
-      'Recommended — assign Key Vault Secrets Officer via RBAC:',
+    permAzureRbac: 'Recommended — assign Key Vault Secrets Officer via RBAC:',
     permAzurePullNote:
       'For pull-only access, Key Vault Secrets User is sufficient.',
     mapTitle: 'Mapping file',
     mapIntro:
       "The mapping file (param-map.json) is the core of Envilder. It's a JSON file that maps environment variable names (keys) to secret paths (values) in your cloud provider.",
     mapCalloutStructure: 'Structure:',
-    mapCalloutKey:
-      'Each key becomes an env var name in your .env file.',
+    mapCalloutKey: 'Each key becomes an env var name in your .env file.',
     mapCalloutValue:
       'Each value is the path where the secret lives in your cloud provider.',
     mapBasicTitle: 'Basic format (AWS SSM — default)',
@@ -437,8 +431,7 @@ export const en: Translations = {
     mapThDefault: 'Default',
     mapThDescription: 'Description',
     mapProviderDesc: 'Cloud provider to use',
-    mapVaultUrlDesc:
-      'Azure Key Vault URL (required when provider is "azure")',
+    mapVaultUrlDesc: 'Azure Key Vault URL (required when provider is "azure")',
     mapProfileDesc: 'AWS CLI profile for multi-account setups (AWS only)',
     mapAwsProfileTitle: 'AWS SSM with profile',
     mapAwsProfileDesc:
@@ -473,8 +466,7 @@ export const en: Translations = {
     mapOverrideDesc:
       'CLI flags always take priority over $config values. This lets you set defaults in the file and override per invocation:',
     mapOverrideComment1: '# Uses $config from the map file as-is',
-    mapOverrideComment2:
-      '# Overrides provider and vault URL, ignoring $config',
+    mapOverrideComment2: '# Overrides provider and vault URL, ignoring $config',
     mapOverrideComment3: '# Overrides just the AWS profile',
     mapPriorityNote:
       'Priority order: CLI flags / GHA inputs → $config in map file → defaults (AWS).',
@@ -529,8 +521,7 @@ export const en: Translations = {
       'AWS: Configure credentials with aws-actions/configure-aws-credentials',
     ghaPrereqAzure: 'Azure: Configure credentials with azure/login',
     ghaPrereqMap: 'A param-map.json committed to your repository',
-    ghaPullOnly:
-      'The GitHub Action only supports pull mode (no push).',
+    ghaPullOnly: 'The GitHub Action only supports pull mode (no push).',
     ghaBasicTitle: 'Basic workflow example',
     ghaMultiEnvTitle: 'Multi-environment workflow',
     ghaAzureTitle: 'Azure Key Vault workflow',

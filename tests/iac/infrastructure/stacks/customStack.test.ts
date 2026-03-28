@@ -1,9 +1,9 @@
 import { App } from 'aws-cdk-lib';
+import { AppEnvironment } from '../../../../src/iac/domain/model/appEnvironment';
 import {
   CustomStack,
   type CustomStackProps,
 } from '../../../../src/iac/infrastructure/stacks/customStack';
-import { AppEnvironment } from '../../../../src/iac/domain/model/appEnvironment';
 
 describe('CustomStack', () => {
   function createCustomStackProps(): CustomStackProps {

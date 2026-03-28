@@ -24,57 +24,58 @@ html {
    * so it's comfortable to read on a modern screen.
    * Think Game Boy Pocket: same vibe, less eye-burn.
    */
-  --color-bg:          #1a2118;   /* very dark green-black */
-  --color-bg-alt:      #1f2a1d;   /* slightly lighter band */
-  --color-surface:     #253024;   /* card/panel background */
-  --color-surface-alt: #2a362a;   /* surface hover */
-  --color-border:      #3a4a38;   /* subtle green border */
-  --color-border-light:#4d5f4a;   /* lighter border */
+  --color-bg: #1a2118; /* very dark green-black */
+  --color-bg-alt: #1f2a1d; /* slightly lighter band */
+  --color-surface: #253024; /* card/panel background */
+  --color-surface-alt: #2a362a; /* surface hover */
+  --color-border: #3a4a38; /* subtle green border */
+  --color-border-light: #4d5f4a; /* lighter border */
 
-  --color-primary:     #8bac0f;   /* THE Game Boy green — used sparingly */
-  --color-primary-dim: #6d8a0c;   /* dimmed primary */
-  --color-secondary:   #7a9a3a;   /* softer secondary green */
-  --color-secondary-dim:#5a7a2a;  /* muted secondary */
-  --color-accent:      #9bbc0f;   /* full LCD green for highlights */
+  --color-primary: #8bac0f; /* THE Game Boy green — used sparingly */
+  --color-primary-dim: #6d8a0c; /* dimmed primary */
+  --color-secondary: #7a9a3a; /* softer secondary green */
+  --color-secondary-dim: #5a7a2a; /* muted secondary */
+  --color-accent: #9bbc0f; /* full LCD green for highlights */
 
-  --color-text:        #c2d1a0;   /* soft sage — easy on the eyes */
-  --color-text-muted:  #8a9a72;   /* muted green-grey */
-  --color-text-dim:    #5a6a4a;   /* hint text */
+  --color-text: #c2d1a0; /* soft sage — easy on the eyes */
+  --color-text-muted: #8a9a72; /* muted green-grey */
+  --color-text-dim: #5a6a4a; /* hint text */
 
-  --color-success:     #8bac0f;   /* GB green */
-  --color-warning:     #b8b060;   /* warm yellow-green */
-  --color-error:       #a06050;   /* muted red (small concession) */
+  --color-success: #8bac0f; /* GB green */
+  --color-warning: #b8b060; /* warm yellow-green */
+  --color-error: #a06050; /* muted red (small concession) */
 
-  --color-nav-bg:      rgba(26, 33, 24, 0.95);
-  --color-nav-mobile:  rgba(26, 33, 24, 0.98);
-  --color-btn-text:    #1a2118;   /* dark bg for button labels */
-  --color-code-bg:     #1c2127;   /* dark charcoal for code blocks */
-  --color-code-header:  #212830;  /* slightly lighter for headers */
+  --color-nav-bg: rgba(26, 33, 24, 0.95);
+  --color-nav-mobile: rgba(26, 33, 24, 0.98);
+  --color-btn-text: #1a2118; /* dark bg for button labels */
+  --color-code-bg: #1c2127; /* dark charcoal for code blocks */
+  --color-code-header: #212830; /* slightly lighter for headers */
 
   /* Typography */
-  --font-pixel:   'Press Start 2P', monospace;
-  --font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono:    'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --font-pixel: "Press Start 2P", monospace;
+  --font-body:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
 
   /* Spacing */
-  --space-xs:  0.25rem;
-  --space-sm:  0.5rem;
-  --space-md:  1rem;
-  --space-lg:  1.5rem;
-  --space-xl:  2rem;
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
   --space-2xl: 3rem;
   --space-3xl: 4rem;
   --space-4xl: 6rem;
 
   /* Layout */
-  --max-width:  1200px;
+  --max-width: 1200px;
   --nav-height: 64px;
 
   /* Effects */
   --pixel-shadow: 4px 4px 0 var(--color-border);
   --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);
   --glow-primary: 0 0 20px rgba(139, 172, 15, 0.15);
-  --glow-secondary: 0 0 12px rgba(155, 188, 15, 0.10);
+  --glow-secondary: 0 0 12px rgba(155, 188, 15, 0.1);
 
   /* Transitions */
   --transition-fast: 150ms ease;
@@ -83,32 +84,32 @@ html {
 
 /* ── Theme: light (clean white) ───────────────────────── */
 [data-theme="light"] {
-  --color-bg:          #f5f4f1;
-  --color-bg-alt:      #eceae6;
-  --color-surface:     #ffffff;
+  --color-bg: #f5f4f1;
+  --color-bg-alt: #eceae6;
+  --color-surface: #ffffff;
   --color-surface-alt: #f0eeea;
-  --color-border:      #d5d3cf;
-  --color-border-light:#c2c0bb;
+  --color-border: #d5d3cf;
+  --color-border-light: #c2c0bb;
 
-  --color-primary:     #6b6860;
+  --color-primary: #6b6860;
   --color-primary-dim: #565450;
-  --color-secondary:   #7e7b74;
-  --color-secondary-dim:#686660;
-  --color-accent:      #4a4844;
+  --color-secondary: #7e7b74;
+  --color-secondary-dim: #686660;
+  --color-accent: #4a4844;
 
-  --color-text:        #2c2b28;
-  --color-text-muted:  #6b6862;
-  --color-text-dim:    #9a9890;
+  --color-text: #2c2b28;
+  --color-text-muted: #6b6862;
+  --color-text-dim: #9a9890;
 
-  --color-success:     #6b7a5c;
-  --color-warning:     #a09040;
-  --color-error:       #a04848;
+  --color-success: #6b7a5c;
+  --color-warning: #a09040;
+  --color-error: #a04848;
 
-  --color-nav-bg:      rgba(245, 244, 241, 0.92);
-  --color-nav-mobile:  rgba(245, 244, 241, 0.98);
-  --color-btn-text:    #f5f4f1;
-  --color-code-bg:     #e4e2de;   /* darker grey for code blocks */
-  --color-code-header:  #dcdad6;  /* slightly darker for headers */
+  --color-nav-bg: rgba(245, 244, 241, 0.92);
+  --color-nav-mobile: rgba(245, 244, 241, 0.98);
+  --color-btn-text: #f5f4f1;
+  --color-code-bg: #e4e2de; /* darker grey for code blocks */
+  --color-code-header: #dcdad6; /* slightly darker for headers */
 
   --pixel-shadow: 4px 4px 0 var(--color-border);
   --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);
@@ -119,32 +120,32 @@ html {
 /* ── Auto system preference (no saved preference) ─────── */
 @media (prefers-color-scheme: light) {
   [data-theme="auto"] {
-    --color-bg:          #f5f5f0;
-    --color-bg-alt:      #eceee8;
-    --color-surface:     #ffffff;
+    --color-bg: #f5f5f0;
+    --color-bg-alt: #eceee8;
+    --color-surface: #ffffff;
     --color-surface-alt: #f0f2ec;
-    --color-border:      #d4d6d0;
-    --color-border-light:#c0c4bc;
+    --color-border: #d4d6d0;
+    --color-border-light: #c0c4bc;
 
-    --color-primary:     #5a7040;
+    --color-primary: #5a7040;
     --color-primary-dim: #486032;
-    --color-secondary:   #6e8858;
-    --color-secondary-dim:#5a7248;
-    --color-accent:      #3d5228;
+    --color-secondary: #6e8858;
+    --color-secondary-dim: #5a7248;
+    --color-accent: #3d5228;
 
-    --color-text:        #2a2e28;
-    --color-text-muted:  #5c605a;
-    --color-text-dim:    #8a8e88;
+    --color-text: #2a2e28;
+    --color-text-muted: #5c605a;
+    --color-text-dim: #8a8e88;
 
-    --color-success:     #5a7040;
-    --color-warning:     #a08420;
-    --color-error:       #b04040;
+    --color-success: #5a7040;
+    --color-warning: #a08420;
+    --color-error: #b04040;
 
-    --color-nav-bg:      rgba(245, 245, 240, 0.92);
-    --color-nav-mobile:  rgba(245, 245, 240, 0.98);
-    --color-btn-text:    #f5f5f0;
-    --color-code-bg:     #e4e2de;
-    --color-code-header:  #dcdad6;
+    --color-nav-bg: rgba(245, 245, 240, 0.92);
+    --color-nav-mobile: rgba(245, 245, 240, 0.98);
+    --color-btn-text: #f5f5f0;
+    --color-code-bg: #e4e2de;
+    --color-code-header: #dcdad6;
 
     --pixel-shadow: 4px 4px 0 var(--color-border);
     --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);
@@ -156,8 +157,10 @@ html {
 /* ── Theme transition ─────────────────────────────────── */
 html:not([data-no-transition]) body,
 html:not([data-no-transition]) .navbar {
-  transition: background-color 300ms ease, color 300ms ease,
-              border-color 300ms ease;
+  transition:
+    background-color 300ms ease,
+    color 300ms ease,
+    border-color 300ms ease;
 }
 
 /* ── Base ─────────────────────────────────────────────── */
@@ -171,19 +174,32 @@ body {
   cursor: default;
 }
 
-h1, h2, h3, h4, h5, h6,
-p, li, span, label,
-.pixel-card, .section-title,
-.step, .feature-card {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+li,
+span,
+label,
+.pixel-card,
+.section-title,
+.step,
+.feature-card {
   cursor: default;
 }
 
-code, pre, .codeblock {
+code,
+pre,
+.codeblock {
   cursor: text;
   user-select: text;
 }
 
-img, video {
+img,
+video {
   display: block;
   max-width: 100%;
   height: auto;
@@ -200,7 +216,10 @@ a:hover {
 }
 
 /* ── Typography ───────────────────────────────────────── */
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: var(--font-pixel);
   line-height: 1.6;
   letter-spacing: -0.01em;
@@ -332,7 +351,7 @@ code {
 
 /* corner notch decoration */
 .pixel-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -2px;
   right: -2px;
@@ -353,14 +372,16 @@ code {
   display: inline-block;
   image-rendering: pixelated;
   margin-bottom: var(--space-md);
-  filter: grayscale(100%) sepia(60%) saturate(400%) hue-rotate(50deg) brightness(0.9);
+  filter: grayscale(100%) sepia(60%) saturate(400%) hue-rotate(50deg)
+    brightness(0.9);
   text-shadow:
     1px 0 0 rgba(139, 172, 15, 0.25),
     0 1px 0 rgba(139, 172, 15, 0.25);
 }
 
 [data-theme="light"] .pixel-icon {
-  filter: grayscale(100%) sepia(40%) saturate(100%) brightness(0.7) contrast(1.1);
+  filter: grayscale(100%) sepia(40%) saturate(100%) brightness(0.7)
+    contrast(1.1);
   text-shadow:
     1px 0 0 rgba(107, 104, 96, 0.2),
     0 1px 0 rgba(107, 104, 96, 0.2);
@@ -395,7 +416,7 @@ code {
 }
 
 .scanlines::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background: repeating-linear-gradient(
@@ -429,14 +450,24 @@ code {
 }
 
 @media (min-width: 640px) {
-  .grid-2 { grid-template-columns: repeat(2, 1fr); }
-  .grid-3 { grid-template-columns: repeat(2, 1fr); }
-  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (min-width: 1024px) {
-  .grid-3 { grid-template-columns: repeat(3, 1fr); }
-  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 /* ── Divider (pixel style) ────────────────────────────── */

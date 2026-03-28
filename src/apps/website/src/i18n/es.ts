@@ -88,8 +88,7 @@ export const es: Translations = {
   howItWorks: {
     title: 'Cómo ',
     titleAccent: 'funciona',
-    subtitle:
-      'Tres pasos. De secretos dispersos a una única fuente de verdad.',
+    subtitle: 'Tres pasos. De secretos dispersos a una única fuente de verdad.',
     steps: [
       {
         title: 'Crea un archivo de mapeo',
@@ -256,8 +255,7 @@ export const es: Translations = {
   roadmap: {
     title: 'Qué viene ',
     titleAccent: 'ahora',
-    subtitle:
-      'Envilder se desarrolla activamente. Aquí es adónde vamos.',
+    subtitle: 'Envilder se desarrolla activamente. Aquí es adónde vamos.',
     upNext: 'Próximamente',
     items: [
       {
@@ -278,15 +276,13 @@ export const es: Translations = {
         status: 'done',
         label: '✅',
         title: 'GitHub Action',
-        description:
-          'Usa Envilder en workflows CI/CD de forma nativa',
+        description: 'Usa Envilder en workflows CI/CD de forma nativa',
       },
       {
         status: 'done',
         label: '✅',
         title: 'Multi-proveedor (AWS + Azure)',
-        description:
-          'Soporte de AWS SSM Parameter Store y Azure Key Vault',
+        description: 'Soporte de AWS SSM Parameter Store y Azure Key Vault',
       },
       {
         status: 'done',
@@ -299,8 +295,7 @@ export const es: Translations = {
         status: 'next',
         label: '⚡',
         title: 'Modo exec (--exec)',
-        description:
-          'Inyecta secretos en un proceso hijo sin escribir a disco',
+        description: 'Inyecta secretos en un proceso hijo sin escribir a disco',
       },
       {
         status: 'planned',
@@ -324,7 +319,8 @@ export const es: Translations = {
     prereqAzureNote: 'para Azure Key Vault',
     install: 'Instalar',
     quickStart: 'Inicio rápido',
-    step1: 'Crea un param-map.json que mapee variables de entorno a rutas de secretos',
+    step1:
+      'Crea un param-map.json que mapee variables de entorno a rutas de secretos',
     step2: 'Ejecuta envilder --map=param-map.json --envfile=.env',
     step3: 'Tu archivo .env está listo ✔',
     terminalTitle: 'Inicio rápido',
@@ -404,8 +400,7 @@ export const es: Translations = {
       'Envilder usa tus credenciales AWS CLI. Configura el perfil por defecto:',
     credAwsProfile: 'O usa un perfil con nombre:',
     credAzureTitle: 'Azure Key Vault',
-    credAzureDesc:
-      'Envilder usa Azure Default Credentials. Inicia sesión con:',
+    credAzureDesc: 'Envilder usa Azure Default Credentials. Inicia sesión con:',
     credAzureVault:
       'Proporciona la URL del vault vía $config en tu archivo de mapeo o el flag --vault-url.',
     permTitle: 'Permisos IAM',
@@ -417,8 +412,7 @@ export const es: Translations = {
     permPush: 'Push',
     permPolicyExample: 'Ejemplo de política IAM:',
     permAzureTitle: 'Azure',
-    permAzureRbac:
-      'Recomendado — asigna Key Vault Secrets Officer vía RBAC:',
+    permAzureRbac: 'Recomendado — asigna Key Vault Secrets Officer vía RBAC:',
     permAzurePullNote:
       'Para acceso solo de lectura, Key Vault Secrets User es suficiente.',
     mapTitle: 'Archivo de mapeo',
@@ -535,8 +529,7 @@ export const es: Translations = {
       'AWS: Configura credenciales con aws-actions/configure-aws-credentials',
     ghaPrereqAzure: 'Azure: Configura credenciales con azure/login',
     ghaPrereqMap: 'Un param-map.json en tu repositorio',
-    ghaPullOnly:
-      'La GitHub Action solo soporta el modo pull (sin push).',
+    ghaPullOnly: 'La GitHub Action solo soporta el modo pull (sin push).',
     ghaBasicTitle: 'Ejemplo básico de workflow',
     ghaMultiEnvTitle: 'Workflow multi-entorno',
     ghaAzureTitle: 'Workflow de Azure Key Vault',

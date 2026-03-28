@@ -1,9 +1,9 @@
 import type { Environment } from 'aws-cdk-lib';
 import { App } from 'aws-cdk-lib';
 import { DeployInfrastructureHandler } from '../../../src/iac/application/deployInfrastructureHandler';
-import type { IDeploymentConfig } from '../../../src/iac/domain/model/deploymentConfig';
-import { AppEnvironment } from '../../../src/iac/domain/model/appEnvironment';
 import { ConfigValidationError } from '../../../src/iac/domain/errors';
+import { AppEnvironment } from '../../../src/iac/domain/model/appEnvironment';
+import type { IDeploymentConfig } from '../../../src/iac/domain/model/deploymentConfig';
 import type { ILogger } from '../../../src/iac/domain/ports/iLogger';
 import type { IProjectPath } from '../../../src/iac/domain/ports/iProjectPath';
 

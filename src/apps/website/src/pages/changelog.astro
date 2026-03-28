@@ -1,10 +1,10 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Navbar from '../components/Navbar.astro';
-import Footer from '../components/Footer.astro';
-import { useTranslations, localizedPath } from '../i18n/utils';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import Footer from '../components/Footer.astro';
+import Navbar from '../components/Navbar.astro';
+import { localizedPath, useTranslations } from '../i18n/utils';
+import BaseLayout from '../layouts/BaseLayout.astro';
 
 const lang = 'en';
 const t = useTranslations(lang);
@@ -15,7 +15,8 @@ let changelogContent = '';
 try {
   changelogContent = await readFile(changelogPath, 'utf-8');
 } catch {
-  changelogContent = '# Changelog\n\nChangelog file not found. See [GitHub Releases](https://github.com/macalbert/envilder/releases).';
+  changelogContent =
+    '# Changelog\n\nChangelog file not found. See [GitHub Releases](https://github.com/macalbert/envilder/releases).';
 }
 
 // Simple markdown-to-HTML conversion for the changelog
@@ -27,7 +28,10 @@ function simpleMarkdownToHtml(md: string): string {
     .replace(/^# (.+)$/gm, '<h1>$1</h1>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
+    )
     .replace(/^- (.+)$/gm, '<li>$1</li>')
     .replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>')
     .replace(/^(?!<[hul]|<li|<strong)(.+)$/gm, '<p>$1</p>')

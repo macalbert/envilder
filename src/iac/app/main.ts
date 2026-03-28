@@ -1,9 +1,9 @@
 #!/usr/bin/env node
+import type { Environment } from 'aws-cdk-lib';
 /**
  * CDK Infrastructure Deployment Entry Point
  */
 import { App } from 'aws-cdk-lib';
-import type { Environment } from 'aws-cdk-lib';
 import { DeployInfrastructureHandler } from '../application/deployInfrastructureHandler';
 import { ConsoleLogger } from '../infrastructure/logging/consoleLogger';
 import { FileProjectPath } from '../infrastructure/path/fileProjectPath';

@@ -1,23 +1,23 @@
 {
-    "name": "@envilder/iac",
-    "version": "0.1.0",
-    "license": "UNLICENSED",
-    "scripts": {
-        "build": "tsc --build",
-        "watch": "tsc -w",
-        "cdk": "cdk",
-        "lint": "biome lint ./app ./domain ./application ./infrastructure",
-        "lint:fix": "biome lint --fix ./app ./domain ./application ./infrastructure",
-        "format": "biome format ./app ./domain ./application ./infrastructure",
-        "format:write": "biome format --write ./app ./domain ./application ./infrastructure"
-    },
-    "dependencies": {
-        "aws-cdk-lib": "^2.200.0",
-        "constructs": "^10.4.2"
-    },
-    "devDependencies": {
-        "aws-cdk": "^2.200.0",
-        "ts-node": "^10.9.2",
-        "typescript": "^5.9.3"
-    }
+  "name": "@envilder/iac",
+  "version": "0.1.0",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "tsc --build",
+    "watch": "tsc -w",
+    "cdk": "cdk",
+    "lint": "biome lint ./app ./domain ./application ./infrastructure",
+    "lint:fix": "biome lint --fix ./app ./domain ./application ./infrastructure",
+    "format": "biome format ./app ./domain ./application ./infrastructure",
+    "format:write": "biome format --write ./app ./domain ./application ./infrastructure"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.200.0",
+    "constructs": "^10.4.2"
+  },
+  "devDependencies": {
+    "aws-cdk": "^2.200.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
 }

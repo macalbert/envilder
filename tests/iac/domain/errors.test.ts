@@ -1,8 +1,8 @@
 import {
+  ConfigValidationError,
   DeploymentError,
   FileOperationError,
   StackBuildError,
-  ConfigValidationError,
 } from '../../../src/iac/domain/errors';
 
 describe('DeploymentError', () => {

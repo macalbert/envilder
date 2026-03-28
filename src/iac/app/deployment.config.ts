@@ -1,5 +1,5 @@
-import type { IDeploymentConfig } from '../domain/model/deploymentConfig';
 import { AppEnvironment } from '../domain/model/appEnvironment';
+import type { IDeploymentConfig } from '../domain/model/deploymentConfig';
 
 export const deploymentConfig: IDeploymentConfig = {
   repoName: 'envilder',

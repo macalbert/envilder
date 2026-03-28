@@ -3,12 +3,12 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { App, Stack } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
+import { AppEnvironment } from '../../../../src/iac/domain/model/appEnvironment';
+import type { DomainConfig } from '../../../../src/iac/infrastructure/stacks/customStack';
 import {
   StaticWebsiteStack,
   type StaticWebsiteStackProps,
 } from '../../../../src/iac/infrastructure/stacks/staticWebsiteStack';
-import type { DomainConfig } from '../../../../src/iac/infrastructure/stacks/customStack';
-import { AppEnvironment } from '../../../../src/iac/domain/model/appEnvironment';
 
 describe('Static website Stack', () => {
   const env = {

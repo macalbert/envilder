@@ -1,5 +1,5 @@
-import type { IDeploymentConfig } from '../model/deploymentConfig';
 import { ConfigValidationError } from '../errors';
+import type { IDeploymentConfig } from '../model/deploymentConfig';
 
 export class ConfigValidator {
   validate(config: IDeploymentConfig): void {

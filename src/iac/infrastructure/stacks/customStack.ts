@@ -1,7 +1,7 @@
 import { Stack, type StackProps, Tags } from 'aws-cdk-lib';
 import type { Construct } from 'constructs';
-import { formatRepoNameForCloudFormation } from '../utils/cloudFormationUtils';
 import type { AppEnvironment } from '../../domain/model/appEnvironment';
+import { formatRepoNameForCloudFormation } from '../utils/cloudFormationUtils';
 
 export interface DomainConfig {
   subdomain?: string;

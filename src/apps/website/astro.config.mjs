@@ -1,6 +1,6 @@
-import { defineConfig } from 'astro/config';
-import sitemap from '@astrojs/sitemap';
 import { readFileSync } from 'node:fs';
+import sitemap from '@astrojs/sitemap';
+import { defineConfig } from 'astro/config';
 
 const rootPkg = JSON.parse(
   readFileSync(new URL('../../../package.json', import.meta.url), 'utf-8'),
