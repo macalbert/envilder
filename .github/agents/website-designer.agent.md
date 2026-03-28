@@ -8,7 +8,7 @@ description: >
   Communicates Envilder's value proposition to developers, CTOs, and technical
   leaders. Builds pages using the Astro + pure CSS design system already
   established in the project.
-tools: [read, search, edit, execute, web, agent, todo]
+tools: [read, search, edit, execute, web, agent, todo, microsoft_pla/*]
 argument-hint: "page, section, or component to create/improve"
 agents: ['i18n Reviewer', 'Document Maintainer', 'Code Reviewer', 'Explore']
 user-invocable: true
@@ -184,19 +184,92 @@ Product names, CLI flags, code tokens, and acronyms stay in English:
 - Quantify impact: "onboard in 1 command instead of 12 manual steps"
 - Include trust signals: open-source, MIT license, hexagonal architecture
 
+## Dev Server
+
+Before making any changes, **start the Astro dev server** so every edit is
+reflected instantly in the browser:
+
+```bash
+cd src/apps/website && pnpm dev
+```
+
+This runs in the background on `http://localhost:4322/`. Keep it running
+throughout the entire session. After starting it, navigate the browser to
+`http://localhost:4322/` to verify it is ready.
+
+> **IMPORTANT**: Do NOT skip this step. The dev server enables hot-reload — you
+> will see your changes in the browser seconds after saving a file. Use it as
+> your primary feedback loop instead of running full builds after every change.
+
+If the dev server is already running (check terminal output), reuse it.
+
+## Visual Validation with Playwright
+
+You have access to the **MCP Playwright** browser tools. Use them to visually
+validate every change you make — never ship a component without checking it in
+the browser.
+
+### Validation Breakpoints
+
+After every meaningful change (new component, CSS update, layout modification),
+validate at all three breakpoints:
+
+| Breakpoint | Width × Height | What to check |
+|------------|---------------|---------------|
+| Mobile     | 375 × 812    | Single column, readable text, no overflow |
+| Tablet     | 768 × 1024   | 2-column grids, proper spacing |
+| Desktop    | 1440 × 900   | Full layout, max-width containment |
+
+### Validation Procedure
+
+For each breakpoint:
+
+1. **Resize** the browser to the target viewport.
+2. **Navigate** to the page being edited (or reload if already there).
+3. **Take a snapshot** to verify the accessibility tree and element structure.
+4. **Take a screenshot** to verify the visual result.
+5. **Toggle theme**: Click the theme switcher and repeat snapshot + screenshot
+   to verify both retro and light themes.
+
+### Playwright Tool Cheat Sheet
+
+| Action | Tool | Example |
+|--------|------|---------|
+| Navigate to page | `browser_navigate` | `http://localhost:4322/` |
+| Resize viewport | `browser_resize` | `{ width: 375, height: 812 }` |
+| Accessibility snapshot | `browser_snapshot` | Verify structure & text content |
+| Visual screenshot | `browser_take_screenshot` | Verify layout & styling |
+| Click element | `browser_click` | Toggle theme switcher |
+| Full-page screenshot | `browser_take_screenshot` | `{ fullPage: true }` |
+
+### When to Validate
+
+- **After creating a new component**: Full 3-breakpoint validation
+- **After CSS changes**: Full 3-breakpoint validation
+- **After i18n changes**: Navigate to each locale and verify text renders
+- **After layout modifications**: Full 3-breakpoint validation
+- **Before marking work as complete**: Final full validation pass
+
 ## Workflow
 
-1. **Read first**: Always read the relevant existing files before making changes.
+1. **Start dev server**: Run `cd src/apps/website && pnpm dev` in the
+   background (skip if already running).
+2. **Open browser**: Navigate to `http://localhost:4322/` using Playwright.
+3. **Read first**: Always read the relevant existing files before making changes.
    Understand current component structure, CSS classes, and i18n keys.
-2. **Plan with todos**: Break the work into trackable steps.
-3. **Build mobile-first**: Start with the mobile layout, then add tablet/desktop
+4. **Plan with todos**: Break the work into trackable steps.
+5. **Build mobile-first**: Start with the mobile layout, then add tablet/desktop
    media queries.
-4. **Theme-proof everything**: Test both retro and light themes by verifying all
-   colors use CSS variables.
-5. **i18n-proof everything**: Add translation keys to every active locale. After
+6. **Validate with Playwright**: After each meaningful edit, run the 3-breakpoint
+   validation procedure. Check both themes at each breakpoint.
+7. **Theme-proof everything**: Verify both retro and light themes using Playwright
+   screenshots — all colors must use CSS variables.
+8. **i18n-proof everything**: Add translation keys to every active locale. After
    creating/editing components, delegate to the **i18n Reviewer** agent to
    verify translations.
-6. **Validate**: Run `pnpm build:website` and check for Astro build errors.
+9. **Final validation**: Run the full 3-breakpoint validation once more as a
+   final pass before marking work as complete.
+10. **Build check**: Run `pnpm build:website` and check for Astro build errors.
 
 ## Delegation Rules
 

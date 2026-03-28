@@ -16,9 +16,7 @@ export const defaultLang = 'en';
 export type Lang = keyof typeof languages;
 
 function normalizeLang(lang: string): Lang {
-  return Object.prototype.hasOwnProperty.call(languages, lang)
-    ? (lang as Lang)
-    : defaultLang;
+  return Object.hasOwn(languages, lang) ? (lang as Lang) : defaultLang;
 }
 
 export function useTranslations(lang: string) {

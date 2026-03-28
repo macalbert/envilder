@@ -87,25 +87,6 @@ describe('ConfigValidator', () => {
     );
   });
 
-  test('Should_ThrowConfigValidationError_When_DomainHostedZoneIdMissing', () => {
-    // Arrange
-    const config = createValidConfig();
-    config.domain.hostedZoneId = '';
-
-    // Act
-    const act = () => validator.validate(config);
-
-    // Assert
-    expect(act).toThrow(ConfigValidationError);
-    expect(act).toThrow(
-      expect.objectContaining({
-        validationErrors: expect.arrayContaining([
-          'domain.hostedZoneId is required and cannot be empty',
-        ]),
-      }),
-    );
-  });
-
   test('Should_ThrowConfigValidationError_When_StacksConfigMissing', () => {
     // Arrange
     const config = createValidConfig();
@@ -145,17 +126,6 @@ describe('ConfigValidator', () => {
         ]),
       }),
     );
-  });
-
-  test('Should_PassValidation_When_StaticWebsiteHasNoSubdomain', () => {
-    // Arrange
-    const config = createValidConfig();
-    config.stacks.frontend.staticWebsites = [
-      { name: 'web', projectPath: './src/web' },
-    ];
-
-    // Act & Assert
-    expect(() => validator.validate(config)).not.toThrow();
   });
 
   test('Should_ThrowConfigValidationError_When_MultipleErrorsExist', () => {

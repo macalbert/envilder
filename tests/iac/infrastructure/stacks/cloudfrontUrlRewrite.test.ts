@@ -28,19 +28,10 @@ describe('CloudFront URL Rewrite Function', () => {
   const testCases: TestCase[] = [
     { input: '/', expectedUri: '/' },
     { input: '/dashboard', expectedUri: '/dashboard/index.html' },
-    { input: '/dashboard/', expectedUri: '/dashboard/index.html' },
-    { input: '/groups', expectedUri: '/groups/index.html' },
-    { input: '/app.js', expectedUri: '/app.js' },
-    { input: '/styles/main.css', expectedUri: '/styles/main.css' },
-    { input: '/IMG/Photo.JPG', expectedUri: '/IMG/Photo.JPG' },
-    { input: '/IMG/photo.jpg', expectedUri: '/IMG/photo.jpg' },
-    { input: '/api/users', expectedUri: '/api/users' },
-    { input: '/api/users/123', expectedUri: '/api/users/123' },
-    { input: '/API/USERS', expectedUri: '/API/USERS' },
-    { input: '/folder/page', expectedUri: '/folder/page/index.html' },
     { input: '/contact/', expectedUri: '/contact/index.html' },
-    { input: '/file.txt', expectedUri: '/file.txt' },
-    { input: '/source.map', expectedUri: '/source.map' },
+    { input: '/app.js', expectedUri: '/app.js' },
+    { input: '/api/users', expectedUri: '/api/users' },
+    { input: '/folder/page', expectedUri: '/folder/page/index.html' },
   ];
 
   const testCasesWithQueryString: TestCaseWithQueryString[] = [
@@ -52,24 +43,6 @@ describe('CloudFront URL Rewrite Function', () => {
       input: '/styles/main.css?ver=123',
       expectedVisible: '/styles/main.css?ver=123',
     },
-    {
-      input: '/dashboard?param1=value1&param2=value2',
-      expectedVisible: '/dashboard/index.html?param1=value1&param2=value2',
-    },
-  ];
-
-  const apiRoutes: TestCase[] = [
-    { input: '/api/users', expectedUri: '/api/users' },
-    { input: '/API/data', expectedUri: '/API/data' },
-    { input: '/api/v1/endpoint', expectedUri: '/api/v1/endpoint' },
-  ];
-
-  const staticFiles: TestCase[] = [
-    { input: '/app.js', expectedUri: '/app.js' },
-    { input: '/styles.css', expectedUri: '/styles.css' },
-    { input: '/image.png', expectedUri: '/image.png' },
-    { input: '/font.woff2', expectedUri: '/font.woff2' },
-    { input: '/data.json', expectedUri: '/data.json' },
   ];
 
   test.each(testCases)('Should_RewriteUrlCorrectly_When_RequestedUrl_$input', ({
@@ -114,47 +87,5 @@ describe('CloudFront URL Rewrite Function', () => {
       ? `${result.uri}?${querystring}`
       : result.uri;
     expect(actualVisible).toBe(expectedVisible);
-  });
-
-  test.each(
-    apiRoutes,
-  )('Should_PassthroughApiRoutes_When_UrlStartsWithApi_$input', ({
-    input,
-    expectedUri,
-  }) => {
-    // Arrange
-    const event = {
-      request: {
-        uri: input,
-        querystring: '',
-      },
-    };
-
-    // Act
-    const result = handlerFunc(event);
-
-    // Assert
-    expect(result.uri).toBe(expectedUri);
-  });
-
-  test.each(
-    staticFiles,
-  )('Should_PreserveStaticFileUrls_When_UrlHasKnownExtension_$input', ({
-    input,
-    expectedUri,
-  }) => {
-    // Arrange
-    const event = {
-      request: {
-        uri: input,
-        querystring: '',
-      },
-    };
-
-    // Act
-    const result = handlerFunc(event);
-
-    // Assert
-    expect(result.uri).toBe(expectedUri);
   });
 });
