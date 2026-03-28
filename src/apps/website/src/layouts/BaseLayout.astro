@@ -10,6 +10,8 @@ const {
   description = 'A CLI tool and GitHub Action that securely centralizes environment variables from AWS SSM Parameter Store or Azure Key Vault as a single source of truth.',
   lang = 'en',
 } = Astro.props;
+
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 ---
 
 <!doctype html>
@@ -25,7 +27,7 @@ const {
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content="https://envilder.com" />
+    <meta property="og:url" content={canonicalUrl} />
     <meta property="og:site_name" content="Envilder" />
 
     <!-- Twitter -->

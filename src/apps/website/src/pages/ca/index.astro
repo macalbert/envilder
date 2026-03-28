@@ -13,11 +13,17 @@ import Providers from '../../components/Providers.astro';
 import Roadmap from '../../components/Roadmap.astro';
 import TrustBadges from '../../components/TrustBadges.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { useTranslations } from '../../i18n/utils';
 
 const lang = 'ca';
+const t = useTranslations(lang);
 ---
 
-<BaseLayout lang={lang}>
+<BaseLayout
+  title={t.homeMeta.title}
+  description={t.homeMeta.description}
+  lang={lang}
+>
   <Navbar lang={lang} />
   <main>
     <Hero lang={lang} />

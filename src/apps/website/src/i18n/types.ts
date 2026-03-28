@@ -404,7 +404,13 @@ export interface DocsTranslations {
   azureAccessNote: string;
 }
 
+export interface HomeMetaTranslations {
+  title: string;
+  description: string;
+}
+
 export interface Translations {
+  homeMeta: HomeMetaTranslations;
   nav: NavLinks;
   theme: ThemeTranslations;
   hero: HeroTranslations;

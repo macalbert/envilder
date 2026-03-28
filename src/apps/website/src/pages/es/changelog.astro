@@ -5,6 +5,7 @@ import Footer from '../../components/Footer.astro';
 import Navbar from '../../components/Navbar.astro';
 import { localizedPath, useTranslations } from '../../i18n/utils';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { simpleMarkdownToHtml } from '../../utils/markdown';
 
 const lang = 'es';
 const t = useTranslations(lang);
@@ -16,24 +17,6 @@ try {
 } catch {
   changelogContent =
     '# Changelog\n\nChangelog file not found. See [GitHub Releases](https://github.com/macalbert/envilder/releases).';
-}
-
-function simpleMarkdownToHtml(md: string): string {
-  return md
-    .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(
-      /\[([^\]]+)\]\(([^)]+)\)/g,
-      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
-    )
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>')
-    .replace(/^(?!<[hul]|<li|<strong)(.+)$/gm, '<p>$1</p>')
-    .replace(/\n{2,}/g, '\n');
 }
 
 const changelogHtml = simpleMarkdownToHtml(changelogContent);

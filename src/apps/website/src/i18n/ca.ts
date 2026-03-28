@@ -1,6 +1,11 @@
 import type { Translations } from './types';
 
 export const ca: Translations = {
+  homeMeta: {
+    title: 'Envilder — Centralitza els teus secrets. Una comanda.',
+    description:
+      "Una eina CLI i GitHub Action que centralitza de forma segura les variables d'entorn des d'AWS SSM Parameter Store o Azure Key Vault com a font de veritat única.",
+  },
   nav: {
     features: 'Funcionalitats',
     howItWorks: 'Com funciona',

@@ -50,6 +50,7 @@ html {
   --color-btn-text: #1a2118; /* dark bg for button labels */
   --color-code-bg: #1c2127; /* dark charcoal for code blocks */
   --color-code-header: #212830; /* slightly lighter for headers */
+  --color-sponsor: #db61a2; /* GitHub sponsor pink */
 
   /* Typography */
   --font-pixel: "Press Start 2P", monospace;
@@ -110,48 +111,12 @@ html {
   --color-btn-text: #f5f4f1;
   --color-code-bg: #e4e2de; /* darker grey for code blocks */
   --color-code-header: #dcdad6; /* slightly darker for headers */
+  --color-sponsor: #c74b8e; /* GitHub sponsor pink — light */
 
   --pixel-shadow: 4px 4px 0 var(--color-border);
   --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);
   --glow-primary: 0 0 20px rgba(107, 104, 96, 0.12);
   --glow-secondary: 0 0 15px rgba(126, 123, 116, 0.08);
-}
-
-/* ── Auto system preference (no saved preference) ─────── */
-@media (prefers-color-scheme: light) {
-  [data-theme="auto"] {
-    --color-bg: #f5f5f0;
-    --color-bg-alt: #eceee8;
-    --color-surface: #ffffff;
-    --color-surface-alt: #f0f2ec;
-    --color-border: #d4d6d0;
-    --color-border-light: #c0c4bc;
-
-    --color-primary: #5a7040;
-    --color-primary-dim: #486032;
-    --color-secondary: #6e8858;
-    --color-secondary-dim: #5a7248;
-    --color-accent: #3d5228;
-
-    --color-text: #2a2e28;
-    --color-text-muted: #5c605a;
-    --color-text-dim: #8a8e88;
-
-    --color-success: #5a7040;
-    --color-warning: #a08420;
-    --color-error: #b04040;
-
-    --color-nav-bg: rgba(245, 245, 240, 0.92);
-    --color-nav-mobile: rgba(245, 245, 240, 0.98);
-    --color-btn-text: #f5f5f0;
-    --color-code-bg: #e4e2de;
-    --color-code-header: #dcdad6;
-
-    --pixel-shadow: 4px 4px 0 var(--color-border);
-    --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);
-    --glow-primary: 0 0 20px rgba(90, 112, 64, 0.15);
-    --glow-secondary: 0 0 15px rgba(110, 136, 88, 0.1);
-  }
 }
 
 /* ── Theme transition ─────────────────────────────────── */

@@ -1,6 +1,11 @@
 import type { Translations } from './types';
 
 export const en: Translations = {
+  homeMeta: {
+    title: 'Envilder — Centralize your secrets. One command.',
+    description:
+      'A CLI tool and GitHub Action that securely centralizes environment variables from AWS SSM Parameter Store or Azure Key Vault as a single source of truth.',
+  },
   nav: {
     features: 'Features',
     howItWorks: 'How it works',
