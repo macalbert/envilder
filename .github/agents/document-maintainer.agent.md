@@ -1,7 +1,7 @@
 ---
 name: Document Maintainer
 description: "Use when updating project documentation after code, dependency, release, or workflow changes. Keeps docs/CHANGELOG.md, README.md, and docs/* accurate and consistent with current behavior."
-tools: [read, search, edit, execute]
+tools: [read, search, edit, execute, agent]
 argument-hint: "doc file or change summary to sync"
 user-invocable: true
 ---
@@ -39,6 +39,21 @@ actual codebase and release state.
 5. Cross-check consistency across docs and command examples.
 6. Run `pnpm lint` to validate documentation and repository consistency.
 7. Provide a short summary listing updated files and what was synchronized.
+
+## Delegation Rules
+
+| Trigger | Delegate to | Why |
+|---------|-------------|-----|
+| Website pages or i18n strings need updating | `@Website Designer` | UI/UX and Astro component specialist |
+| Website translations need review after doc changes | `@i18n Reviewer` | Ensures linguistic quality across all locales |
+| Unsure if documented behavior matches actual code | `@Code Reviewer` | Read-only code analysis to verify claims |
+| Doc changes reveal a code bug or inconsistency | `@Bug Hunter` | Reproduce and fix via TDD |
+
+## Next Steps
+
+After documentation updates: "Run `/smart-commit` to commit, then `/pr-sync` to open a PR."
+
+If website content was updated: "Use `@i18n Reviewer` to verify translations are complete."
 
 ## Output Format
 

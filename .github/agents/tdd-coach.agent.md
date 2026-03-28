@@ -5,7 +5,7 @@ description: >
   specialized worker subagents. Plans the test strategy, tracks progress, and
   communicates with the user. Never writes code directly.
 tools: [read, search, agent]
-agents: ['TDD Red', 'TDD Green', 'TDD Refactor']
+agents: ['TDD Red', 'TDD Green', 'TDD Refactor', 'Code Reviewer', 'Document Maintainer']
 argument-hint: "feature, requirement, or behavior to implement"
 user-invocable: true
 ---
@@ -106,6 +106,17 @@ Remaining: {N} cycles
 - Mock at port boundaries using `vi.fn()`
 - Use `pnpm test` for verification
 
+## Delegation Rules
+
+| Trigger | Delegate to | Why |
+|---------|-------------|-----|
+| Implementation is complete, want quality review | `@Code Reviewer` | Multi-perspective read-only analysis |
+| New feature changes documented behavior or CLI flags | `@Document Maintainer` | Keep docs in sync |
+| Feature involves website components | `@Website Designer` | UI/UX and Astro specialist |
+| Feature adds/changes i18n strings | `@i18n Reviewer` | Linguistic and i18n correctness |
+
 ## Next Steps
 
 After all cycles complete: "Run `/smart-commit` to commit, then `/pr-sync` to open a PR."
+
+If implementation is non-trivial: "Use `@Code Reviewer` for a post-implementation review."
