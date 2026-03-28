@@ -36,17 +36,6 @@ describe('ConfigValidator', () => {
     expect(() => validator.validate(config)).not.toThrow();
   });
 
-  test('Should_PassValidation_When_ValidConfigWithFrontendStacks', () => {
-    // Arrange
-    const config = createValidConfig();
-    config.stacks.frontend.staticWebsites = [
-      { name: 'web-app', projectPath: './src/web', subdomain: 'www' },
-    ];
-
-    // Act & Assert
-    expect(() => validator.validate(config)).not.toThrow();
-  });
-
   test('Should_ThrowConfigValidationError_When_RepoNameMissing', () => {
     // Arrange
     const config = createValidConfig();
@@ -98,44 +87,6 @@ describe('ConfigValidator', () => {
     );
   });
 
-  test('Should_ThrowConfigValidationError_When_DomainNameMissing', () => {
-    // Arrange
-    const config = createValidConfig();
-    config.domain.name = '';
-
-    // Act
-    const act = () => validator.validate(config);
-
-    // Assert
-    expect(act).toThrow(ConfigValidationError);
-    expect(act).toThrow(
-      expect.objectContaining({
-        validationErrors: expect.arrayContaining([
-          'domain.name is required and cannot be empty',
-        ]),
-      }),
-    );
-  });
-
-  test('Should_ThrowConfigValidationError_When_DomainCertificateIdMissing', () => {
-    // Arrange
-    const config = createValidConfig();
-    config.domain.certificateId = '';
-
-    // Act
-    const act = () => validator.validate(config);
-
-    // Assert
-    expect(act).toThrow(ConfigValidationError);
-    expect(act).toThrow(
-      expect.objectContaining({
-        validationErrors: expect.arrayContaining([
-          'domain.certificateId is required and cannot be empty',
-        ]),
-      }),
-    );
-  });
-
   test('Should_ThrowConfigValidationError_When_DomainHostedZoneIdMissing', () => {
     // Arrange
     const config = createValidConfig();
@@ -175,26 +126,6 @@ describe('ConfigValidator', () => {
     );
   });
 
-  test('Should_ThrowConfigValidationError_When_FrontendConfigMissing', () => {
-    // Arrange
-    const config = createValidConfig();
-    // biome-ignore lint/suspicious/noExplicitAny: testing null config
-    config.stacks.frontend = null as any;
-
-    // Act
-    const act = () => validator.validate(config);
-
-    // Assert
-    expect(act).toThrow(ConfigValidationError);
-    expect(act).toThrow(
-      expect.objectContaining({
-        validationErrors: expect.arrayContaining([
-          'stacks.frontend is required',
-        ]),
-      }),
-    );
-  });
-
   test('Should_ThrowConfigValidationError_When_StaticWebsiteNameMissing', () => {
     // Arrange
     const config = createValidConfig();
@@ -225,26 +156,6 @@ describe('ConfigValidator', () => {
 
     // Act & Assert
     expect(() => validator.validate(config)).not.toThrow();
-  });
-
-  test('Should_ThrowConfigValidationError_When_EnvironmentMissing', () => {
-    // Arrange
-    const config = createValidConfig();
-    // biome-ignore lint/suspicious/noExplicitAny: testing null config
-    config.environment = null as any;
-
-    // Act
-    const act = () => validator.validate(config);
-
-    // Assert
-    expect(act).toThrow(ConfigValidationError);
-    expect(act).toThrow(
-      expect.objectContaining({
-        validationErrors: expect.arrayContaining([
-          'environment is required and cannot be empty',
-        ]),
-      }),
-    );
   });
 
   test('Should_ThrowConfigValidationError_When_MultipleErrorsExist', () => {

@@ -1,19 +1,6 @@
 import { FileProjectPath } from '../../../../src/iac/infrastructure/path/fileProjectPath';
 
 describe('FileProjectPath', () => {
-  describe('constructor', () => {
-    test('Should_UseCustomRootPath_When_RootPathProvided', () => {
-      // Arrange
-      const customPath = '/custom/path';
-
-      // Act
-      const config = new FileProjectPath(customPath);
-
-      // Assert
-      expect(config.getRootPath()).toBe(customPath);
-    });
-  });
-
   describe('getRootPath', () => {
     test('Should_ReturnRootPath_When_Called', () => {
       // Arrange

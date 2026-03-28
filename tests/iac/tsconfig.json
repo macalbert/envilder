@@ -7,15 +7,8 @@
     "noEmit": true,
     "declaration": false,
     "composite": false,
-    "types": [
-      "node"
-    ],
-    "typeRoots": [
-      "./node_modules/@types",
-      "../../node_modules/@types"
-    ]
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"]
   },
-  "include": [
-    "**/*.ts"
-  ]
+  "include": ["**/*.ts"]
 }

@@ -14,6 +14,7 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 /* ── CSS Custom Properties ────────────────────────────── */
@@ -242,6 +243,7 @@ pre code,
 
 .section {
   padding: var(--space-4xl) 0;
+  overflow: hidden;
 }
 
 .section-alt {
@@ -469,6 +471,15 @@ pre code,
 
   .section {
     padding: var(--space-3xl) 0;
+  }
+
+  .pixel-card::before {
+    display: none;
+  }
+
+  .pixel-card:hover {
+    transform: none;
+    box-shadow: var(--pixel-shadow-primary);
   }
 }
 

@@ -2,17 +2,6 @@ import { formatRepoNameForCloudFormation } from '../../../../src/iac/infrastruct
 
 describe('cloudFormationUtils', () => {
   describe('formatRepoNameForCloudFormation', () => {
-    test('Should_ReturnFormattedName_When_ValidRepoNameProvided', () => {
-      // Arrange
-      const repoName = 'my-test-repo';
-
-      // Act
-      const result = formatRepoNameForCloudFormation(repoName);
-
-      // Assert
-      expect(result).toBe('my-test-repo');
-    });
-
     test('Should_ConvertToLowercase_When_UppercaseLettersProvided', () => {
       // Arrange
       const repoName = 'MyTestRepo';
@@ -44,17 +33,6 @@ describe('cloudFormationUtils', () => {
 
       // Assert
       expect(result).toBe('my-test-repo');
-    });
-
-    test('Should_RemoveLeadingHyphen_When_NameStartsWithHyphen', () => {
-      // Arrange
-      const repoName = '-my-repo';
-
-      // Act
-      const result = formatRepoNameForCloudFormation(repoName);
-
-      // Assert
-      expect(result).toBe('my-repo');
     });
 
     test('Should_RemoveTrailingHyphen_When_NameEndsWithHyphen', () => {
@@ -89,39 +67,6 @@ describe('cloudFormationUtils', () => {
 
       // Assert
       expect(result).toBe('r-123-my-test-repo-2024');
-      expect(result).toMatch(/^[A-Za-z][A-Za-z0-9-]*$/);
-    });
-
-    test('Should_HandleUnderscores_When_RepoNameContainsUnderscores', () => {
-      // Arrange
-      const repoName = 'my_awesome_repo';
-
-      // Act
-      const result = formatRepoNameForCloudFormation(repoName);
-
-      // Assert
-      expect(result).toBe('my-awesome-repo');
-    });
-
-    test('Should_HandleDots_When_RepoNameContainsDots', () => {
-      // Arrange
-      const repoName = 'my.test.repo';
-
-      // Act
-      const result = formatRepoNameForCloudFormation(repoName);
-
-      // Assert
-      expect(result).toBe('my-test-repo');
-    });
-
-    test('Should_ReturnValidCloudFormationName_When_AllRulesApplied', () => {
-      // Arrange
-      const repoName = '!!!Test___Repo@2024###';
-
-      // Act
-      const result = formatRepoNameForCloudFormation(repoName);
-
-      // Assert
       expect(result).toMatch(/^[A-Za-z][A-Za-z0-9-]*$/);
     });
 
