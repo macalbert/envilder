@@ -1,6 +1,22 @@
 name: 🌍 Warp Zone Publisher
 
 on:
+  pull_request:
+    branches:
+      - "*"
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - "src/apps/website/**"
+      - "src/iac/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/publish-website.yml"
+            
   push:
     branches:
       - main
