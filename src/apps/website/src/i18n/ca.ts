@@ -4,7 +4,7 @@ export const ca: Translations = {
   homeMeta: {
     title: 'Envilder — Centralitza els teus secrets. Una comanda.',
     description:
-      "Una eina CLI i GitHub Action que centralitza de forma segura les variables d'entorn des d'AWS SSM Parameter Store o Azure Key Vault com a font de veritat única.",
+      "Una eina CLI i GitHub Action que centralitza de forma segura les variables d'entorn des d'AWS SSM, Azure Key Vault o GCP Secret Manager com a font de veritat única.",
   },
   nav: {
     features: 'Funcionalitats',
@@ -28,7 +28,9 @@ export const ca: Translations = {
       "Una eina CLI i GitHub Action que centralitza de forma segura les teves variables d'entorn des de",
     descAws: 'AWS SSM',
     descAzure: 'Azure Key Vault',
+    descGcp: 'GCP Secret Manager',
     descOr: 'o',
+    descComma: ',',
     descSuffix:
       'com a font de veritat única. Adéu a copiar i enganxar secrets.',
     getStarted: '▶ Comença',
@@ -126,7 +128,7 @@ export const ca: Translations = {
         icon: '☁️',
         title: 'Multi-Proveïdor',
         description:
-          'AWS SSM Parameter Store i Azure Key Vault. Tria amb --provider o $config al fitxer de mapeig.',
+          'AWS SSM, Azure Key Vault i GCP Secret Manager (pròximament). Tria amb --provider o $config al fitxer de mapeig.',
       },
       {
         icon: '🔄',
@@ -185,7 +187,7 @@ export const ca: Translations = {
     title: 'El teu núvol. ',
     titleAccent: 'La teva elecció.',
     subtitle:
-      'Envilder funciona amb AWS SSM Parameter Store i Azure Key Vault. Configura en línia o amb flags CLI.',
+      'Envilder funciona amb AWS SSM Parameter Store, Azure Key Vault i GCP Secret Manager (pròximament). Configura en línia o amb flags CLI.',
     awsTitle: 'AWS SSM Parameter Store',
     awsDefault: 'Proveïdor per defecte',
     awsFeatures: [
@@ -201,6 +203,14 @@ export const ca: Translations = {
       'Autenticació DefaultAzureCredential',
       "Control d'accés Azure RBAC",
       "Registre d'auditoria Azure Monitor",
+    ],
+    gcpTitle: 'GCP Secret Manager',
+    gcpBadge: 'Pròximament',
+    gcpFeatures: [
+      'Integració amb Google Cloud Secret Manager',
+      'Application Default Credentials (ADC)',
+      "Control d'accés basat en IAM",
+      'Cloud Audit Logs',
     ],
     configPriorityTitle: 'Prioritat de configuració',
     priorityHigh: 'Flags CLI / Inputs GHA',
@@ -304,10 +314,24 @@ export const ca: Translations = {
       },
       {
         status: 'planned',
-        label: '…',
-        title: 'I més',
+        label: '☁️',
+        title: 'GCP Secret Manager',
         description:
-          'Mode check/sync, auto-descobriment i altres funcionalitats en camí',
+          'Tercer proveïdor cloud — completa el trident multi-núvol',
+      },
+      {
+        status: 'planned',
+        label: '🔐',
+        title: 'AWS Secrets Manager',
+        description:
+          'Suport de secrets JSON junt amb SSM Parameter Store',
+      },
+      {
+        status: 'planned',
+        label: '✔️',
+        title: 'Mode check/sync (--check)',
+        description:
+          'Valida secrets al núvol vs .env local — falla CI si estan desincronitzats',
       },
     ],
   },
@@ -338,7 +362,7 @@ export const ca: Translations = {
   },
   footer: {
     tagline:
-      "Centralitza de forma segura les teves variables d'entorn des d'AWS SSM o Azure Key Vault.",
+      "Centralitza de forma segura les teves variables d'entorn des d'AWS SSM, Azure Key Vault o GCP Secret Manager.",
     project: 'Projecte',
     documentation: 'Documentació',
     community: 'Comunitat',

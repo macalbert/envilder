@@ -1,7 +1,8 @@
 # 🛣️ Envilder Roadmap
 
 Envilder aims to be the simplest, most reliable way to generate `.env` files from cloud secret stores
-(AWS SSM Parameter Store, Azure Key Vault) — for both local development and CI/CD pipelines.
+(AWS SSM Parameter Store, AWS Secrets Manager, Azure Key Vault, GCP Secret Manager) — for both local
+development and CI/CD pipelines.
 
 > **Note:** This roadmap contains ideas and potential features based on initial vision and community feedback.
 > Not all features are guaranteed to be implemented. Priorities may change based on user needs, feedback,
@@ -13,22 +14,36 @@ Envilder aims to be the simplest, most reliable way to generate `.env` files fro
 
 <!-- markdownlint-disable MD013 -->
 
-| Feature | Status | Priority | Notes |
-|---------|--------|----------|-------|
-| **Mapping-based resolution** | ✅ Implemented | - | Core functionality |
-| **`.env` file generation** | ✅ Implemented | - | Core functionality |
-| **AWS profile support** | ✅ Implemented | - | `--profile` flag |
-| **Push mode** (`--push`) | ✅ Implemented | - | [Guide](./docs/push-command.md) |
-| **GitHub Action** | ✅ Implemented | - | [Documentation](./github-action/README.md) |
-| **Onboarding documentation** | ✅ Implemented | - | [Setup guide](./docs/requirements-installation.md) |
-| **Plugin system / Multi-backend** | ✅ Implemented | - | Azure Key Vault support with `$config` map-file section ([#90](https://github.com/macalbert/envilder/pull/90)) |
-| **Exec mode** (`--exec`) | ❌ Planned | High | Inject secrets into child process env without writing to disk (`envilder exec -- node server.js`) |
-| **Check/sync mode** (`--check`) | ❌ Planned | High | Validate SSM vs `.env`, fail CI if out-of-sync |
-| **Documentation website** | ❌ Planned | Medium | Dedicated docs site with guides, examples, and API reference |
-| **Auto-discovery mode** (`--auto`) | ❌ Planned | Medium | Fetch all parameters with a given prefix |
-| **Exec with refresh** (`--refresh-interval`) | ❌ Future | Low | Kill & restart child process periodically with fresh secrets (requires `--exec`) |
-| **Webhook/Slack notifications** | ❌ Planned | Low | Notify on secret sync for audit/logging |
-| **Hierarchical mapping** | ❌ Future | Low | Per-environment `param-map.json` |
+### ✅ Shipped
+
+| Feature | Notes |
+|---------|-------|
+| **Mapping-based resolution** | Core functionality |
+| **`.env` file generation** | Core functionality |
+| **AWS SSM Parameter Store** | Default provider |
+| **AWS profile support** | `--profile` flag |
+| **Push mode** (`--push`) | [Guide](./docs/push-command.md) |
+| **GitHub Action** | [Documentation](./github-action/README.md) |
+| **Azure Key Vault** | Multi-backend via `$config` map-file section ([#90](https://github.com/macalbert/envilder/pull/90)) |
+| **Documentation website** | [envilder.com](https://envilder.com) |
+| **Onboarding documentation** | [Setup guide](./docs/requirements-installation.md) |
+
+### 🔥 Up Next
+
+| Feature | Priority | Notes |
+|---------|----------|-------|
+| **Exec mode** (`--exec`) | 🔴 High | Inject secrets into a child process env without writing to disk (`envilder exec -- node server.js`) |
+| **GCP Secret Manager** | 🔴 High | Third cloud provider — similar DX to AWS SSM. Completes the multi-cloud trident (AWS + Azure + GCP) |
+| **AWS Secrets Manager** | 🟡 Medium | Support AWS Secrets Manager alongside SSM Parameter Store for teams using JSON-structured secrets |
+| **Check/sync mode** (`--check`) | 🟡 Medium | Validate cloud secrets vs local `.env`, fail CI if out-of-sync |
+
+### 💡 Planned
+
+| Feature | Priority | Notes |
+|---------|----------|-------|
+| **Auto-discovery mode** (`--auto`) | Medium | Fetch all parameters matching a given prefix (e.g., `/my-app/prod/*`) |
+| **Exec with refresh** (`--refresh-interval`) | Low | Kill & restart child process periodically with fresh secrets (requires `--exec`) |
+| **Hierarchical mapping** | Low | Per-environment `param-map.json` with inheritance/overrides |
 
 <!-- markdownlint-enable MD013 -->
 

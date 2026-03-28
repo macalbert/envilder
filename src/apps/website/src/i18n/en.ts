@@ -4,7 +4,7 @@ export const en: Translations = {
   homeMeta: {
     title: 'Envilder — Centralize your secrets. One command.',
     description:
-      'A CLI tool and GitHub Action that securely centralizes environment variables from AWS SSM Parameter Store or Azure Key Vault as a single source of truth.',
+      'A CLI tool and GitHub Action that securely centralizes environment variables from AWS SSM, Azure Key Vault, or GCP Secret Manager as a single source of truth.',
   },
   nav: {
     features: 'Features',
@@ -28,7 +28,9 @@ export const en: Translations = {
       'A CLI tool and GitHub Action that securely centralizes your environment variables from',
     descAws: 'AWS SSM',
     descAzure: 'Azure Key Vault',
+    descGcp: 'GCP Secret Manager',
     descOr: 'or',
+    descComma: ',',
     descSuffix: 'as a single source of truth. No more copy-pasting secrets.',
     getStarted: '▶ Get Started',
     viewOnGithub: '★ View on GitHub',
@@ -126,7 +128,7 @@ export const en: Translations = {
         icon: '☁️',
         title: 'Multi-Provider',
         description:
-          'AWS SSM Parameter Store and Azure Key Vault. Choose with --provider or $config in your map file.',
+          'AWS SSM, Azure Key Vault, and GCP Secret Manager (coming soon). Choose with --provider or $config in your map file.',
       },
       {
         icon: '🔄',
@@ -185,7 +187,7 @@ export const en: Translations = {
     title: 'Your cloud. ',
     titleAccent: 'Your choice.',
     subtitle:
-      'Envilder works with AWS SSM Parameter Store and Azure Key Vault. Configure inline or via CLI flags.',
+      'Envilder works with AWS SSM Parameter Store, Azure Key Vault, and GCP Secret Manager (coming soon). Configure inline or via CLI flags.',
     awsTitle: 'AWS SSM Parameter Store',
     awsDefault: 'Default provider',
     awsFeatures: [
@@ -201,6 +203,14 @@ export const en: Translations = {
       'DefaultAzureCredential authentication',
       'Azure RBAC access control',
       'Azure Monitor audit logging',
+    ],
+    gcpTitle: 'GCP Secret Manager',
+    gcpBadge: 'Coming soon',
+    gcpFeatures: [
+      'Google Cloud Secret Manager integration',
+      'Application Default Credentials (ADC)',
+      'IAM-based access control',
+      'Cloud Audit Logs',
     ],
     configPriorityTitle: 'Configuration priority',
     priorityHigh: 'CLI flags / GHA inputs',
@@ -301,10 +311,24 @@ export const en: Translations = {
       },
       {
         status: 'planned',
-        label: '…',
-        title: 'And more',
+        label: '☁️',
+        title: 'GCP Secret Manager',
         description:
-          'Check/sync mode, auto-discovery, and other features on the way',
+          'Third cloud provider — completes the multi-cloud trident',
+      },
+      {
+        status: 'planned',
+        label: '🔐',
+        title: 'AWS Secrets Manager',
+        description:
+          'Support JSON-structured secrets alongside SSM Parameter Store',
+      },
+      {
+        status: 'planned',
+        label: '✔️',
+        title: 'Check/sync mode (--check)',
+        description:
+          'Validate cloud secrets vs local .env — fail CI if out-of-sync',
       },
     ],
   },
@@ -334,7 +358,7 @@ export const en: Translations = {
   },
   footer: {
     tagline:
-      'Securely centralize your environment variables from AWS SSM or Azure Key Vault.',
+      'Securely centralize your environment variables from AWS SSM, Azure Key Vault, or GCP Secret Manager.',
     project: 'Project',
     documentation: 'Documentation',
     community: 'Community',

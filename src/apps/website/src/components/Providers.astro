@@ -83,6 +83,39 @@ const t = useTranslations(lang);
           ))}
         </ul>
       </div>
+
+      <div class="provider-block provider-coming-soon">
+        <div class="provider-header">
+          <img class="pixel-icon provider-logo" src="/GCP.svg" alt="GCP" width="36" height="36" loading="lazy" />
+          <div>
+            <h3>{t.providers.gcpTitle}</h3>
+            <span class="badge">{t.providers.gcpBadge}</span>
+          </div>
+        </div>
+
+        <CodeBlock lang="json" filename="param-map.json">
+{`{
+  "$config": {
+    "provider": "gcp",
+    "projectId": "my-project-id"
+  },
+  "DB_PASSWORD": "my-app-prod-db-password",
+  "API_KEY": "my-app-prod-api-key"
+}`}
+        </CodeBlock>
+
+        <div class="provider-cmd">
+          <code>
+            <span class="prompt">$</span> envilder --provider=gcp --map=param-map.json --envfile=.env
+          </code>
+        </div>
+
+        <ul class="provider-features">
+          {t.providers.gcpFeatures.map((f) => (
+            <li>✔ {f}</li>
+          ))}
+        </ul>
+      </div>
     </div>
 
   </div>
@@ -93,7 +126,7 @@ const t = useTranslations(lang);
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--space-xl);
-    max-width: 960px;
+    max-width: 1100px;
     margin: 0 auto;
     justify-items: center;
   }
@@ -111,6 +144,11 @@ const t = useTranslations(lang);
     overflow: hidden;
   }
 
+  .provider-coming-soon {
+    border-style: dashed;
+    opacity: 0.85;
+  }
+
   @media (min-width: 768px) {
     .providers-grid {
       grid-template-columns: repeat(2, 1fr);
@@ -118,6 +156,12 @@ const t = useTranslations(lang);
 
     .provider-block {
       max-width: none;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .providers-grid {
+      grid-template-columns: repeat(3, 1fr);
     }
   }
 

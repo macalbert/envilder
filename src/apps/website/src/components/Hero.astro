@@ -27,7 +27,9 @@ const version = `v${__APP_VERSION__}`;
 
       <p class="hero-description">
         {t.hero.description}{' '}
-        <strong>{t.hero.descAws}</strong> {t.hero.descOr} <strong>{t.hero.descAzure}</strong>
+        <strong>{t.hero.descAws}</strong>{t.hero.descComma}{' '}
+        <strong>{t.hero.descAzure}</strong>{' '}{t.hero.descOr}{' '}
+        <strong>{t.hero.descGcp}</strong>
         {' '}{t.hero.descSuffix}
       </p>
 

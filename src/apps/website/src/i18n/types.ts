@@ -21,7 +21,9 @@ export interface HeroTranslations {
   description: string;
   descAws: string;
   descAzure: string;
+  descGcp: string;
   descOr: string;
+  descComma: string;
   descSuffix: string;
   getStarted: string;
   viewOnGithub: string;
@@ -100,6 +102,9 @@ export interface ProvidersTranslations {
   azureTitle: string;
   azureBadge: string;
   azureFeatures: string[];
+  gcpTitle: string;
+  gcpBadge: string;
+  gcpFeatures: string[];
   configPriorityTitle: string;
   priorityHigh: string;
   priorityMid: string;
