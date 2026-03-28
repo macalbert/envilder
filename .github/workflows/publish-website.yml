@@ -73,7 +73,9 @@ jobs:
 
       - name: 🌟 Warp to the Cloud (Deploy infrastructure)
         working-directory: src/iac
-        run: npx cdk deploy macalbert-envilder-website-production-stack --require-approval never
+        run: |
+          node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('cdk.json','utf8'));delete c.profile;fs.writeFileSync('cdk.json',JSON.stringify(c,null,2));"
+          npx cdk deploy macalbert-envilder-website-production-stack --require-approval never
 
       - name: 🏁 Flagpole Reached!
         run: echo "🎉 Yahoo! Website deployed successfully! ⭐"
