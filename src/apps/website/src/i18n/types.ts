@@ -238,6 +238,11 @@ export interface DocsTranslations {
   sidebarReference: string;
   sidebarConfigPriority: string;
   sidebarAzureSetup: string;
+  // Overview
+  overviewTitle: string;
+  overviewDesc: string;
+  overviewProblem: string;
+  overviewSolution: string;
   // Requirements
   reqTitle: string;
   reqNode: string;

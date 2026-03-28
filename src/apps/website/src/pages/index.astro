@@ -1,5 +1,4 @@
 ---
-import Changelog from '../components/Changelog.astro';
 import DemoVideo from '../components/DemoVideo.astro';
 import FeaturesGrid from '../components/FeaturesGrid.astro';
 import Footer from '../components/Footer.astro';
@@ -10,7 +9,6 @@ import HowItWorks from '../components/HowItWorks.astro';
 import Navbar from '../components/Navbar.astro';
 import ProblemSolution from '../components/ProblemSolution.astro';
 import Providers from '../components/Providers.astro';
-import Roadmap from '../components/Roadmap.astro';
 import TrustBadges from '../components/TrustBadges.astro';
 import { useTranslations } from '../i18n/utils';
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -34,8 +32,6 @@ const t = useTranslations(lang);
     <DemoVideo lang={lang} />
     <Providers lang={lang} />
     <GitHubAction lang={lang} />
-    <Changelog lang={lang} />
-    <Roadmap lang={lang} />
     <GetStarted lang={lang} />
   </main>
   <Footer lang={lang} />

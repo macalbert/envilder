@@ -19,6 +19,7 @@ const t = useTranslations(lang);
       <nav class="docs-nav">
         <p class="nav-section-title">{t.docs.sidebarGettingStarted}</p>
         <ul>
+          <li><a href="#overview">{t.docs.overviewTitle}</a></li>
           <li><a href="#requirements">{t.docs.sidebarRequirements}</a></li>
           <li><a href="#installation">{t.docs.sidebarInstallation}</a></li>
           <li><a href="#credentials">{t.docs.sidebarCredentials}</a></li>
@@ -61,6 +62,21 @@ const t = useTranslations(lang);
       </div>
 
       <!-- ───── GETTING STARTED ───── -->
+
+      <section id="overview" class="docs-section">
+        <h2>{t.docs.overviewTitle}</h2>
+        <p>{t.docs.overviewDesc}</p>
+        <div class="overview-cards">
+          <div class="overview-card overview-problem">
+            <span class="overview-icon">⚠️</span>
+            <p>{t.docs.overviewProblem}</p>
+          </div>
+          <div class="overview-card overview-solution">
+            <span class="overview-icon">✅</span>
+            <p>{t.docs.overviewSolution}</p>
+          </div>
+        </div>
+      </section>
 
       <section id="requirements" class="docs-section">
         <h2>{t.docs.reqTitle}</h2>
@@ -705,6 +721,41 @@ jobs:
   .docs-intro {
     font-size: 1rem;
     color: var(--color-text-muted);
+  }
+
+  /* ── Overview ── */
+  .overview-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+  }
+
+  @media (min-width: 640px) {
+    .overview-cards {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .overview-card {
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    padding: var(--space-lg);
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-start;
+  }
+
+  .overview-card p {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .overview-icon {
+    flex-shrink: 0;
+    font-size: 1.2rem;
   }
 
   .docs-section {
