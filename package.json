@@ -126,6 +126,7 @@
     "onlyBuiltDependencies": [
       "cpu-features",
       "esbuild",
+      "lefthook",
       "protobufjs",
       "sharp",
       "ssh2"

@@ -1,3 +1,4 @@
+import { releaseMetadata } from './releaseMetadata';
 import type { Translations } from './types';
 
 export const es: Translations = {
@@ -204,7 +205,7 @@ export const es: Translations = {
       'Registro de auditoría CloudTrail',
     ],
     azureTitle: 'Azure Key Vault',
-    azureBadge: 'Nuevo en v0.8',
+    azureBadge: `Nuevo en ${releaseMetadata.azureIntroVersion}`,
     azureFeatures: [
       'Auto-normaliza nombres de secretos (barras → guiones)',
       'Autenticación DefaultAzureCredential',
@@ -251,7 +252,13 @@ export const es: Translations = {
     subtitle:
       'Novedades de la última versión. El soporte multi-proveedor ya está aquí.',
     releaseTitle: 'Soporte Multi-Proveedor',
-    releaseDate: '22 de marzo de 2026',
+    releaseDate: new Date(
+      `${releaseMetadata.releaseDate}T00:00:00`,
+    ).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }),
     highlights: [
       {
         icon: '✨',
@@ -323,15 +330,13 @@ export const es: Translations = {
         status: 'planned',
         label: '☁️',
         title: 'GCP Secret Manager',
-        description:
-          'Tercer proveedor cloud — completa el tridente multi-nube',
+        description: 'Tercer proveedor cloud — completa el tridente multi-nube',
       },
       {
         status: 'planned',
         label: '🔐',
         title: 'AWS Secrets Manager',
-        description:
-          'Soporte de secretos JSON junto a SSM Parameter Store',
+        description: 'Soporte de secretos JSON junto a SSM Parameter Store',
       },
       {
         status: 'planned',
@@ -424,9 +429,12 @@ export const es: Translations = {
     sidebarConfigPriority: 'Prioridad de config',
     sidebarAzureSetup: 'Configuración Azure',
     overviewTitle: '¿Qué es Envilder?',
-    overviewDesc: 'Envilder es una herramienta CLI y GitHub Action que descarga variables de entorno de un almacén de secretos en la nube (AWS SSM Parameter Store o Azure Key Vault) y las escribe en un archivo .env local — o las sube de vuelta. Defines un simple mapeo JSON entre nombres de variables y rutas de secretos, y Envilder hace el resto.',
-    overviewProblem: 'Sin Envilder, los equipos copian secretos a mano, los guardan en archivos .env en texto plano en el repositorio, o mantienen scripts de shell frágiles por cada entorno. Esto lleva a credenciales filtradas, configuraciones inconsistentes e incorporaciones lentas.',
-    overviewSolution: 'Con Envilder, un archivo param-map.json es la fuente única de verdad. Los secretos no salen del almacén hasta el momento de ejecución, cada entorno usa el mismo mapeo, y un nuevo desarrollador está operativo con un solo comando.',
+    overviewDesc:
+      'Envilder es una herramienta CLI y GitHub Action que descarga variables de entorno de un almacén de secretos en la nube (AWS SSM Parameter Store o Azure Key Vault) y las escribe en un archivo .env local — o las sube de vuelta. Defines un simple mapeo JSON entre nombres de variables y rutas de secretos, y Envilder hace el resto.',
+    overviewProblem:
+      'Sin Envilder, los equipos copian secretos a mano, los guardan en archivos .env en texto plano en el repositorio, o mantienen scripts de shell frágiles por cada entorno. Esto lleva a credenciales filtradas, configuraciones inconsistentes e incorporaciones lentas.',
+    overviewSolution:
+      'Con Envilder, un archivo param-map.json es la fuente única de verdad. Los secretos no salen del almacén hasta el momento de ejecución, cada entorno usa el mismo mapeo, y un nuevo desarrollador está operativo con un solo comando.',
     reqTitle: 'Requisitos',
     reqNode: 'Node.js v20+',
     reqAws: 'AWS CLI',

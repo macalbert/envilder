@@ -3,40 +3,39 @@
  * Only handles the subset of markdown used in docs/CHANGELOG.md:
  * headings, bold, inline code, links, unordered lists, and horizontal rules.
  *
- * Strips non-user-facing sections ("How to Update…", "Maintenance",
- * markdown link references, and HTML comments).
+ * Strips HTML comments left over from markdownlint directives.
  */
 
-/** Remove maintenance / meta sections that don't belong on the website. */
-function stripNonUserSections(md: string): string {
-  return (
-    md
-      // Drop everything from "## How to Update This Changelog" to EOF
-      .replace(/^## How to Update This Changelog[\s\S]*$/m, '')
-      // Drop everything from "## Maintenance" to EOF
-      .replace(/^## Maintenance[\s\S]*$/m, '')
-      // Drop "## Changelog" meta paragraph (the mid-file one)
-      .replace(
-        /^## Changelog\n\nAll notable changes[\s\S]*?(?=\n## \[)/m,
-        '',
-      )
-      // Drop bottom link-reference definitions  [x.y.z]: https://...
-      .replace(/^\[[\d.]+\]:.*$/gm, '')
-      // Drop markdownlint HTML comments
-      .replace(/<!--[\s\S]*?-->/g, '')
-      // Drop the top-level "# Changelog" title (the page already has one)
-      .replace(/^# Changelog\s*/m, '')
-      // Collapse leftover blank lines
-      .replace(/\n{3,}/g, '\n\n')
-      .trim()
-  );
+/**
+ * Strip HTML comments completely, including malformed or nested fragments.
+ * Uses a loop to guarantee no `<!--` or `-->` sequences survive
+ * (avoids incomplete multi-character sanitization).
+ */
+function stripHtmlComments(text: string): string {
+  let result = text;
+  // First pass: remove well-formed comments
+  while (result.includes('<!--') && result.includes('-->')) {
+    result = result.replace(/<!--[\s\S]*?-->/g, '');
+  }
+  // Second pass: remove any residual opener/closer fragments
+  while (result.includes('<!--') || result.includes('-->')) {
+    result = result.replace(/<!--|-->/g, '');
+  }
+  return result;
+}
+
+/** Clean the raw changelog markdown for website rendering. */
+function cleanChangelog(md: string): string {
+  return stripHtmlComments(md)
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 /** Extract version entries as `{ tag, id, date }` for sidebar navigation. */
 export function extractVersions(
   md: string,
 ): { tag: string; id: string; date: string }[] {
-  const cleaned = stripNonUserSections(md);
+  const cleaned = cleanChangelog(md);
   const versions: { tag: string; id: string; date: string }[] = [];
   const re = /^## \[?([\d.]+)\]?.*?(?:[-–—]\s*)?(\d{4}-\d{2}-\d{2})?/gm;
   let m: RegExpExecArray | null;
@@ -61,7 +60,7 @@ function joinMultiLineListItems(md: string): string {
 
 /** Convert the cleaned markdown to HTML, adding `id` anchors on version headings. */
 export function changelogToHtml(md: string): string {
-  const cleaned = stripNonUserSections(md);
+  const cleaned = cleanChangelog(md);
   const joined = joinMultiLineListItems(cleaned);
   return (
     joined
@@ -90,7 +89,11 @@ export function changelogToHtml(md: string): string {
       // Horizontal rules
       .replace(/^---$/gm, '<hr />')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(
+        /`([^`]+)`/g,
+        (_m, code) =>
+          `<code>${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code>`,
+      )
       .replace(
         /\[([^\]]+)\]\(([^)]+)\)/g,
         '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
@@ -98,7 +101,7 @@ export function changelogToHtml(md: string): string {
       // Both * and - list items (including indented sub-items)
       .replace(/^\s*[*-] (.+)$/gm, '<li>$1</li>')
       .replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>')
-      .replace(/^(?!<[huplo]|<li|<strong|<hr|<pre|<code)(.+)$/gm, '<p>$1</p>')
+      .replace(/^(?!<[/huplo]|<li|<strong|<hr|<pre|<code)(.+)$/gm, '<p>$1</p>')
       .replace(/\n{2,}/g, '\n')
   );
 }

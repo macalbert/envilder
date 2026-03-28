@@ -1,3 +1,4 @@
+import { releaseMetadata } from './releaseMetadata';
 import type { Translations } from './types';
 
 export const en: Translations = {
@@ -204,7 +205,7 @@ export const en: Translations = {
       'CloudTrail audit logging',
     ],
     azureTitle: 'Azure Key Vault',
-    azureBadge: 'New in v0.8',
+    azureBadge: `New in ${releaseMetadata.azureIntroVersion}`,
     azureFeatures: [
       'Auto-normalizes secret names (slashes → hyphens)',
       'DefaultAzureCredential authentication',
@@ -249,7 +250,13 @@ export const en: Translations = {
     titleAccent: 'new',
     subtitle: 'Latest release highlights. Multi-provider support is here.',
     releaseTitle: 'Multi-Provider Support',
-    releaseDate: 'March 22, 2026',
+    releaseDate: new Date(
+      `${releaseMetadata.releaseDate}T00:00:00`,
+    ).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }),
     highlights: [
       {
         icon: '✨',
@@ -320,8 +327,7 @@ export const en: Translations = {
         status: 'planned',
         label: '☁️',
         title: 'GCP Secret Manager',
-        description:
-          'Third cloud provider — completes the multi-cloud trident',
+        description: 'Third cloud provider — completes the multi-cloud trident',
       },
       {
         status: 'planned',
@@ -420,9 +426,12 @@ export const en: Translations = {
     sidebarConfigPriority: 'Config priority',
     sidebarAzureSetup: 'Azure setup',
     overviewTitle: 'What is Envilder?',
-    overviewDesc: 'Envilder is a CLI tool and GitHub Action that pulls environment variables from a cloud vault (AWS SSM Parameter Store or Azure Key Vault) and writes them to a local .env file — or pushes them back. You define a simple JSON mapping between variable names and secret paths, and Envilder does the rest.',
-    overviewProblem: 'Without Envilder, teams copy secrets by hand, store them in plaintext .env files committed to repos, or maintain fragile shell scripts per environment. This leads to leaked credentials, inconsistent configurations, and slow onboarding.',
-    overviewSolution: 'With Envilder, one param-map.json file is the single source of truth. Secrets never leave the vault until runtime, every environment uses the same mapping, and a new developer is up and running in one command.',
+    overviewDesc:
+      'Envilder is a CLI tool and GitHub Action that pulls environment variables from a cloud vault (AWS SSM Parameter Store or Azure Key Vault) and writes them to a local .env file — or pushes them back. You define a simple JSON mapping between variable names and secret paths, and Envilder does the rest.',
+    overviewProblem:
+      'Without Envilder, teams copy secrets by hand, store them in plaintext .env files committed to repos, or maintain fragile shell scripts per environment. This leads to leaked credentials, inconsistent configurations, and slow onboarding.',
+    overviewSolution:
+      'With Envilder, one param-map.json file is the single source of truth. Secrets never leave the vault until runtime, every environment uses the same mapping, and a new developer is up and running in one command.',
     reqTitle: 'Requirements',
     reqNode: 'Node.js v20+',
     reqAws: 'AWS CLI',

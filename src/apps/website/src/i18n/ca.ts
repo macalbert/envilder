@@ -1,3 +1,4 @@
+import { releaseMetadata } from './releaseMetadata';
 import type { Translations } from './types';
 
 export const ca: Translations = {
@@ -204,7 +205,7 @@ export const ca: Translations = {
       "Registre d'auditoria CloudTrail",
     ],
     azureTitle: 'Azure Key Vault',
-    azureBadge: 'Nou a v0.8',
+    azureBadge: `Nou a ${releaseMetadata.azureIntroVersion}`,
     azureFeatures: [
       'Auto-normalitza noms de secrets (barres → guions)',
       'Autenticació DefaultAzureCredential',
@@ -251,7 +252,13 @@ export const ca: Translations = {
     subtitle:
       "Novetats de l'última versió. El suport multi-proveïdor ja és aquí.",
     releaseTitle: 'Suport Multi-Proveïdor',
-    releaseDate: '22 de març de 2026',
+    releaseDate: new Date(
+      `${releaseMetadata.releaseDate}T00:00:00`,
+    ).toLocaleDateString('ca-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }),
     highlights: [
       {
         icon: '✨',
@@ -323,15 +330,13 @@ export const ca: Translations = {
         status: 'planned',
         label: '☁️',
         title: 'GCP Secret Manager',
-        description:
-          'Tercer proveïdor cloud — completa el trident multi-núvol',
+        description: 'Tercer proveïdor cloud — completa el trident multi-núvol',
       },
       {
         status: 'planned',
         label: '🔐',
         title: 'AWS Secrets Manager',
-        description:
-          'Suport de secrets JSON junt amb SSM Parameter Store',
+        description: 'Suport de secrets JSON junt amb SSM Parameter Store',
       },
       {
         status: 'planned',
@@ -424,9 +429,12 @@ export const ca: Translations = {
     sidebarConfigPriority: 'Prioritat de config',
     sidebarAzureSetup: 'Configuració Azure',
     overviewTitle: 'Què és Envilder?',
-    overviewDesc: "Envilder és una eina CLI i GitHub Action que descarrega variables d'entorn d'un magatzem de secrets al núvol (AWS SSM Parameter Store o Azure Key Vault) i les escriu en un fitxer .env local — o les puja de tornada. Definiu un simple mapeig JSON entre noms de variables i rutes de secrets, i Envilder fa la resta.",
-    overviewProblem: "Sense Envilder, els equips copien secrets a mà, els guarden en fitxers .env en text pla al repositori, o mantenen scripts de shell fràgils per cada entorn. Això porta a credencials filtrades, configuracions inconsistents i incorporacions lentes.",
-    overviewSolution: "Amb Envilder, un fitxer param-map.json és la font única de veritat. Els secrets no surten del magatzem fins al moment d'execució, cada entorn utilitza el mateix mapeig, i un nou desenvolupador està operatiu amb una sola comanda.",
+    overviewDesc:
+      "Envilder és una eina CLI i GitHub Action que descarrega variables d'entorn d'un magatzem de secrets al núvol (AWS SSM Parameter Store o Azure Key Vault) i les escriu en un fitxer .env local — o les puja de tornada. Definiu un simple mapeig JSON entre noms de variables i rutes de secrets, i Envilder fa la resta.",
+    overviewProblem:
+      'Sense Envilder, els equips copien secrets a mà, els guarden en fitxers .env en text pla al repositori, o mantenen scripts de shell fràgils per cada entorn. Això porta a credencials filtrades, configuracions inconsistents i incorporacions lentes.',
+    overviewSolution:
+      "Amb Envilder, un fitxer param-map.json és la font única de veritat. Els secrets no surten del magatzem fins al moment d'execució, cada entorn utilitza el mateix mapeig, i un nou desenvolupador està operatiu amb una sola comanda.",
     reqTitle: 'Requisits',
     reqNode: 'Node.js v20+',
     reqAws: 'AWS CLI',
