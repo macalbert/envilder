@@ -8,7 +8,8 @@
     "lint": "biome lint ./application ./domain ./infrastructure --files-ignore-unknown=true",
     "lint:fix": "biome lint --fix ./application ./domain ./infrastructure --files-ignore-unknown=true",
     "format": "biome format ./application ./domain ./infrastructure --files-ignore-unknown=true",
-    "format:write": "biome format --write ./application ./domain ./infrastructure --files-ignore-unknown=true"
+    "format:write": "biome format --write ./application ./domain ./infrastructure --files-ignore-unknown=true",
+    "test": "cd ../.. && vitest run --reporter=verbose tests/iac/"
   },
   "devDependencies": {
     "aws-cdk-lib": "^2.200.0",

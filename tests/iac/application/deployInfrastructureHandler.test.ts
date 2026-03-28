@@ -21,6 +21,7 @@ describe('DeployInfrastructureHandler', () => {
     vi.clearAllMocks();
 
     app = new App({ outdir: '/tmp/cdk.out' });
+    // biome-ignore lint/suspicious/noExplicitAny: mock return value for CDK synth
     vi.spyOn(app, 'synth').mockImplementation(() => ({}) as any);
 
     envFromCli = {

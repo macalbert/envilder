@@ -113,12 +113,8 @@ html {
   --color-nav-bg: rgba(245, 244, 241, 0.92);
   --color-nav-mobile: rgba(245, 244, 241, 0.98);
   --color-btn-text: #f5f4f1;
-  --color-code-bg: #1c2127; /* keep dark terminal look in light theme */
-  --color-code-header: #212830; /* keep dark header in light theme */
-  --color-code-text: #c2d1a0; /* light text for dark code bg */
-  --color-code-text-muted: #8a9a72;
-  --color-code-text-dim: #5a6a4a;
-  --color-code-border: #3a4a38;
+  --color-code-bg: #e4e2de;
+  --color-code-header: #dcdad6;
   --color-sponsor: #c74b8e; /* GitHub sponsor pink — light */
 
   --pixel-shadow: 4px 4px 0 var(--color-border);
