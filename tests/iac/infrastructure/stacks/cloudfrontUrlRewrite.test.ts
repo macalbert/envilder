@@ -27,9 +27,9 @@ describe('CloudFront URL Rewrite Function', () => {
 
   const testCases: TestCase[] = [
     { input: '/', expectedUri: '/' },
-    { input: '/dashboard', expectedUri: '/dashboard.html' },
-    { input: '/dashboard/', expectedUri: '/dashboard.html' },
-    { input: '/groups', expectedUri: '/groups.html' },
+    { input: '/dashboard', expectedUri: '/dashboard/index.html' },
+    { input: '/dashboard/', expectedUri: '/dashboard/index.html' },
+    { input: '/groups', expectedUri: '/groups/index.html' },
     { input: '/app.js', expectedUri: '/app.js' },
     { input: '/styles/main.css', expectedUri: '/styles/main.css' },
     { input: '/IMG/Photo.JPG', expectedUri: '/IMG/Photo.JPG' },
@@ -37,8 +37,8 @@ describe('CloudFront URL Rewrite Function', () => {
     { input: '/api/users', expectedUri: '/api/users' },
     { input: '/api/users/123', expectedUri: '/api/users/123' },
     { input: '/API/USERS', expectedUri: '/API/USERS' },
-    { input: '/folder/page', expectedUri: '/folder/page.html' },
-    { input: '/contact/', expectedUri: '/contact.html' },
+    { input: '/folder/page', expectedUri: '/folder/page/index.html' },
+    { input: '/contact/', expectedUri: '/contact/index.html' },
     { input: '/file.txt', expectedUri: '/file.txt' },
     { input: '/source.map', expectedUri: '/source.map' },
   ];
@@ -46,7 +46,7 @@ describe('CloudFront URL Rewrite Function', () => {
   const testCasesWithQueryString: TestCaseWithQueryString[] = [
     {
       input: '/contact?utm_source=x',
-      expectedVisible: '/contact.html?utm_source=x',
+      expectedVisible: '/contact/index.html?utm_source=x',
     },
     {
       input: '/styles/main.css?ver=123',
@@ -54,7 +54,7 @@ describe('CloudFront URL Rewrite Function', () => {
     },
     {
       input: '/dashboard?param1=value1&param2=value2',
-      expectedVisible: '/dashboard.html?param1=value1&param2=value2',
+      expectedVisible: '/dashboard/index.html?param1=value1&param2=value2',
     },
   ];
 

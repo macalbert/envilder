@@ -872,11 +872,10 @@ function handler(event) {
     lower = uri.toLowerCase(); // recompute after modifying uri
   }
 
-  // Append .html if not homepage and no known extension
+  // Append /index.html if not homepage and no known extension
+  // Astro generates directory-based URLs: /docs → /docs/index.html
   if (uri !== '/' && !hasKnownExt(lower)) {
-    // For /folder/index.html instead of /folder.html, use:
-    // uri += '/index.html';
-    uri += '.html';
+    uri += '/index.html';
   }
 
   req.uri = uri;
