@@ -7,7 +7,7 @@ Azure Key Vault, GCP Secret Manager) — whether in local development, CI/CD pip
 or directly inside application code at runtime.
 
 > **Vision:** One map-file. Every cloud. Every language. Every runtime.
-
+>
 > **Note:** This roadmap contains ideas and potential features based on initial vision and community feedback.
 > Not all features are guaranteed to be implemented. Priorities may change based on user needs, feedback,
 > and real-world usage patterns. Your input matters—feel free to share your thoughts and suggestions!
@@ -64,7 +64,7 @@ or directly inside application code at runtime.
 
 All tools and SDKs live in a single monorepo and share the same map-file format:
 
-```
+```txt
 param-map.json (universal contract)
      │
      ├── envilder CLI            → generates .env files
