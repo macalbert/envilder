@@ -393,6 +393,7 @@ export const en: Translations = {
     intro: 'Complete release history. See also',
     githubReleases: 'GitHub Releases',
     versions: 'Versions',
+    backToTop: 'Back to top',
   },
   docs: {
     title: 'Documentation — Envilder',

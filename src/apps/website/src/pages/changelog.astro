@@ -1,6 +1,7 @@
 ---
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
+
 import { fileURLToPath } from 'node:url';
 import Footer from '../components/Footer.astro';
 import Navbar from '../components/Navbar.astro';
@@ -66,8 +67,21 @@ const versions = extractVersions(changelogContent);
 
     </div>
   </main>
+  <button class="back-to-top" id="backToTop" aria-label={t.changelogPage.backToTop} title={t.changelogPage.backToTop}>
+    <span aria-hidden="true">&uarr;</span>
+  </button>
   <Footer lang={lang} />
 </BaseLayout>
+
+<script>
+  const btn = document.getElementById('backToTop');
+  if (btn) {
+    const toggle = () => btn.classList.toggle('visible', window.scrollY > 400);
+    window.addEventListener('scroll', toggle, { passive: true });
+    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    toggle();
+  }
+</script>
 
 <style>
   .changelog-page {
@@ -295,5 +309,40 @@ const versions = extractVersions(changelogContent);
 
   .changelog-content :global(strong) {
     color: var(--color-text);
+  }
+
+  /* ── Back to top ── */
+  .back-to-top {
+    position: fixed;
+    bottom: var(--space-xl);
+    right: var(--space-xl);
+    z-index: 90;
+    width: 48px;
+    height: 48px;
+    border: 2px solid var(--color-primary);
+    background: var(--color-primary);
+    color: var(--color-bg);
+    font-family: var(--font-pixel);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+    transition: opacity 0.3s, transform 0.3s, box-shadow 0.15s;
+    box-shadow: 4px 4px 0 var(--color-border);
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    box-shadow: 2px 2px 0 var(--color-border);
+    transform: translateY(2px);
   }
 </style>

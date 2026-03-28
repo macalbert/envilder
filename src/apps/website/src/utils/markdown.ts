@@ -51,11 +51,20 @@ export function extractVersions(
   return versions;
 }
 
+/** Join continuation lines back into their parent list item. */
+function joinMultiLineListItems(md: string): string {
+  return md.replace(
+    /^([*-] .+)\n(?![\s]*[*-] |#{1,6} |```|---|\s*$)(.+)/gm,
+    '$1 $2',
+  );
+}
+
 /** Convert the cleaned markdown to HTML, adding `id` anchors on version headings. */
 export function changelogToHtml(md: string): string {
   const cleaned = stripNonUserSections(md);
+  const joined = joinMultiLineListItems(cleaned);
   return (
-    cleaned
+    joined
       // Version headings → h2 with id anchor
       .replace(
         /^## \[?([\d.]+)\]?.*?([-–—]\s*)?(\d{4}-\d{2}-\d{2})?\s*$/gm,
@@ -75,6 +84,8 @@ export function changelogToHtml(md: string): string {
       )
       .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      // Generic ## headings (non-version, e.g. "## Features")
+      .replace(/^## (.+)$/gm, '<h3>$1</h3>')
       .replace(/^# (.+)$/gm, '<h1>$1</h1>')
       // Horizontal rules
       .replace(/^---$/gm, '<hr />')
@@ -84,8 +95,8 @@ export function changelogToHtml(md: string): string {
         /\[([^\]]+)\]\(([^)]+)\)/g,
         '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
       )
-      // Both * and - list items
-      .replace(/^[*-] (.+)$/gm, '<li>$1</li>')
+      // Both * and - list items (including indented sub-items)
+      .replace(/^\s*[*-] (.+)$/gm, '<li>$1</li>')
       .replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>')
       .replace(/^(?!<[huplo]|<li|<strong|<hr|<pre|<code)(.+)$/gm, '<p>$1</p>')
       .replace(/\n{2,}/g, '\n')

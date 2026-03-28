@@ -397,6 +397,7 @@ export const ca: Translations = {
     intro: 'Historial complet de versions. Vegeu també',
     githubReleases: 'Versions a GitHub',
     versions: 'Versions',
+    backToTop: 'Tornar a dalt',
   },
   docs: {
     title: 'Documentació — Envilder',

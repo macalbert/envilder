@@ -20,37 +20,36 @@ html {
 /* ── CSS Custom Properties ────────────────────────────── */
 :root {
   /*
-   * Game Boy — softened LCD palette
-   * Keeps the unmistakable GB green tint but dialled back
-   * so it's comfortable to read on a modern screen.
-   * Think Game Boy Pocket: same vibe, less eye-burn.
+   * Game Boy — vibrant LCD palette
+   * Based on the classic Game Boy green phosphor screen.
+   * palette: #4caf50 · #77be48 · #a2cd41 · #cddc39
    */
-  --color-bg: #1a2118; /* very dark green-black */
-  --color-bg-alt: #1f2a1d; /* slightly lighter band */
-  --color-surface: #253024; /* card/panel background */
-  --color-surface-alt: #2a362a; /* surface hover */
-  --color-border: #3a4a38; /* subtle green border */
-  --color-border-light: #4d5f4a; /* lighter border */
+  --color-bg: #182016; /* very dark green-black */
+  --color-bg-alt: #1e281c; /* slightly lighter band */
+  --color-surface: #243022; /* card/panel background */
+  --color-surface-alt: #2a3828; /* surface hover */
+  --color-border: #3a5036; /* subtle green border */
+  --color-border-light: #4d6848; /* lighter border */
 
-  --color-primary: #8bac0f; /* THE Game Boy green — used sparingly */
-  --color-primary-dim: #6d8a0c; /* dimmed primary */
-  --color-secondary: #7a9a3a; /* softer secondary green */
-  --color-secondary-dim: #5a7a2a; /* muted secondary */
-  --color-accent: #9bbc0f; /* full LCD green for highlights */
+  --color-primary: #77be48; /* Game Boy mid-green — links, buttons */
+  --color-primary-dim: #4caf50; /* deeper GB green */
+  --color-secondary: #a2cd41; /* bright lime green */
+  --color-secondary-dim: #6da03a; /* muted secondary */
+  --color-accent: #cddc39; /* yellow-green LCD highlight */
 
-  --color-text: #c2d1a0; /* soft sage — easy on the eyes */
-  --color-text-muted: #8a9a72; /* muted green-grey */
-  --color-text-dim: #5a6a4a; /* hint text */
+  --color-text: #c8d8a8; /* soft sage — easy on the eyes */
+  --color-text-muted: #8ca870; /* muted green-grey */
+  --color-text-dim: #5a7248; /* hint text */
 
-  --color-success: #8bac0f; /* GB green */
-  --color-warning: #b8b060; /* warm yellow-green */
+  --color-success: #77be48; /* GB green */
+  --color-warning: #cddc39; /* lime-yellow */
   --color-error: #a06050; /* muted red (small concession) */
 
-  --color-nav-bg: rgba(26, 33, 24, 0.95);
-  --color-nav-mobile: rgba(26, 33, 24, 0.98);
-  --color-btn-text: #1a2118; /* dark bg for button labels */
-  --color-code-bg: #1c2127; /* dark charcoal for code blocks */
-  --color-code-header: #212830; /* slightly lighter for headers */
+  --color-nav-bg: rgba(24, 32, 22, 0.95);
+  --color-nav-mobile: rgba(24, 32, 22, 0.98);
+  --color-btn-text: #182016; /* dark bg for button labels */
+  --color-code-bg: #1a2418; /* dark green-tinted code blocks */
+  --color-code-header: #202c1e; /* slightly lighter for headers */
   --color-code-text: var(--color-text);
   --color-code-text-muted: var(--color-text-muted);
   --color-code-text-dim: var(--color-text-dim);
@@ -80,48 +79,55 @@ html {
   /* Effects */
   --pixel-shadow: 4px 4px 0 var(--color-border);
   --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);
-  --glow-primary: 0 0 20px rgba(139, 172, 15, 0.15);
-  --glow-secondary: 0 0 12px rgba(155, 188, 15, 0.1);
+  --glow-primary: 0 0 20px rgba(119, 190, 72, 0.18);
+  --glow-secondary: 0 0 12px rgba(162, 205, 65, 0.12);
 
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
 }
 
-/* ── Theme: light (clean white) ───────────────────────── */
+/* ── Theme: light (US Super Nintendo SNES) ────────────── */
+/*
+ * Inspired by the US SNES controller palette:
+ * #b5b6e4 · #4f43ae · #908a99 · #cec9cc · #211a21
+ * Violet (#4f43ae) is reserved for small accents:
+ * links, buttons, badges, and tiny section titles.
+ * The base is neutral grey-lavender for readability.
+ */
 [data-theme="light"] {
-  --color-bg: #f5f4f1;
-  --color-bg-alt: #eceae6;
-  --color-surface: #ffffff;
-  --color-surface-alt: #f0eeea;
-  --color-border: #d5d3cf;
-  --color-border-light: #c2c0bb;
+  --color-bg: #f0eff5; /* white with subtle lavender tint */
+  --color-bg-alt: #e8e6f0; /* soft lavender band */
+  --color-surface: #ffffff; /* pure white cards */
+  --color-surface-alt: #ecebf3; /* surface with violet hint */
+  --color-border: #cec9cc; /* SNES light grey */
+  --color-border-light: #b8b4b6; /* slightly deeper grey */
 
-  --color-primary: #6b6860;
-  --color-primary-dim: #565450;
-  --color-secondary: #7e7b74;
-  --color-secondary-dim: #686660;
-  --color-accent: #4a4844;
+  --color-primary: #4f43ae; /* SNES violet — links, buttons, small accents */
+  --color-primary-dim: #3d3490; /* dimmed violet */
+  --color-secondary: #908a99; /* SNES grey-mauve */
+  --color-secondary-dim: #7a7484; /* deeper mauve */
+  --color-accent: #b5b6e4; /* SNES lavender highlight */
 
-  --color-text: #2c2b28;
-  --color-text-muted: #6b6862;
-  --color-text-dim: #9a9890;
+  --color-text: #211a21; /* SNES near-black */
+  --color-text-muted: #5c5462; /* dark mauve-grey */
+  --color-text-dim: #908a99; /* SNES grey-mauve */
 
-  --color-success: #6b7a5c;
-  --color-warning: #a09040;
-  --color-error: #a04848;
+  --color-success: #4f7a5c; /* muted green */
+  --color-warning: #a09040; /* warm yellow */
+  --color-error: #a04848; /* muted red */
 
-  --color-nav-bg: rgba(245, 244, 241, 0.92);
-  --color-nav-mobile: rgba(245, 244, 241, 0.98);
-  --color-btn-text: #f5f4f1;
-  --color-code-bg: #e4e2de;
-  --color-code-header: #dcdad6;
+  --color-nav-bg: rgba(240, 239, 245, 0.92);
+  --color-nav-mobile: rgba(240, 239, 245, 0.98);
+  --color-btn-text: #ffffff; /* white text on violet buttons */
+  --color-code-bg: #e6e4ee; /* lavender-tinted code block */
+  --color-code-header: #dddae8; /* slightly deeper header */
   --color-sponsor: #c74b8e; /* GitHub sponsor pink — light */
 
   --pixel-shadow: 4px 4px 0 var(--color-border);
   --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);
-  --glow-primary: 0 0 20px rgba(107, 104, 96, 0.12);
-  --glow-secondary: 0 0 15px rgba(126, 123, 116, 0.08);
+  --glow-primary: 0 0 20px rgba(79, 67, 174, 0.12);
+  --glow-secondary: 0 0 15px rgba(181, 182, 228, 0.15);
 }
 
 /* ── Theme transition ─────────────────────────────────── */

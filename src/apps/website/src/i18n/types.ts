@@ -218,6 +218,7 @@ export interface ChangelogPageTranslations {
   intro: string;
   githubReleases: string;
   versions: string;
+  backToTop: string;
 }
 
 export interface DocsTranslations {
