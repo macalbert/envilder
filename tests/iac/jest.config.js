@@ -13,6 +13,7 @@ const config = {
 		],
 	},
 	collectCoverage: true,
+	coverageProvider: "v8",
 	coverageDirectory: "coverage",
 	verbose: false,
 	reporters: [

@@ -4,6 +4,11 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "biome lint ./application ./domain ./infrastructure --files-ignore-unknown=true",
+    "lint:fix": "biome lint --fix ./application ./domain ./infrastructure --files-ignore-unknown=true",
+    "format": "biome format ./application ./domain ./infrastructure --files-ignore-unknown=true",
+    "format:write": "biome format --write ./application ./domain ./infrastructure --files-ignore-unknown=true",
     "test": "jest --colors --seed=1",
     "test:update": "jest --colors --seed=1 --updateSnapshot --verbose",
     "test:ci": "jest --colors --seed=1 --ci --verbose",
