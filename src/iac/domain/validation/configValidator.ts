@@ -67,11 +67,6 @@ export class ConfigValidator {
             `frontend.staticWebsites[${index}].projectPath is required`,
           );
         }
-        if (!website.subdomain || website.subdomain.trim() === '') {
-          errors.push(
-            `frontend.staticWebsites[${index}].subdomain is required`,
-          );
-        }
       }
     }
   }

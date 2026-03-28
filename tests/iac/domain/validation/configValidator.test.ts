@@ -216,25 +216,15 @@ describe('ConfigValidator', () => {
     );
   });
 
-  test('Should_ThrowConfigValidationError_When_StaticWebsiteSubdomainMissing', () => {
+  test('Should_PassValidation_When_StaticWebsiteHasNoSubdomain', () => {
     // Arrange
     const config = createValidConfig();
     config.stacks.frontend.staticWebsites = [
-      { name: 'web', projectPath: './src/web', subdomain: '' },
+      { name: 'web', projectPath: './src/web' },
     ];
 
-    // Act
-    const act = () => validator.validate(config);
-
-    // Assert
-    expect(act).toThrow(ConfigValidationError);
-    expect(act).toThrow(
-      expect.objectContaining({
-        validationErrors: expect.arrayContaining([
-          'frontend.staticWebsites[0].subdomain is required',
-        ]),
-      }),
-    );
+    // Act & Assert
+    expect(() => validator.validate(config)).not.toThrow();
   });
 
   test('Should_ThrowConfigValidationError_When_MultipleErrorsExist', () => {

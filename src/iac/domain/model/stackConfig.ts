@@ -4,7 +4,7 @@ export interface ModulePathConfig {
 }
 
 export interface StaticWebsiteConfig extends ModulePathConfig {
-  subdomain: string;
+  subdomain?: string;
 }
 
 export interface FrontendStackConfig {

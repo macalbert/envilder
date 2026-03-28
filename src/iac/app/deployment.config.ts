@@ -15,7 +15,6 @@ export const deploymentConfig: IDeploymentConfig = {
       staticWebsites: [
         {
           name: 'Website',
-          subdomain: 'envilder',
           projectPath: 'envilder/src/apps/website/dist',
         },
       ],
