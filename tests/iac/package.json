@@ -5,11 +5,12 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "tsc --noEmit",
-    "lint": "biome lint ./application ./domain ./infrastructure --files-ignore-unknown=true",
-    "lint:fix": "biome lint --fix ./application ./domain ./infrastructure --files-ignore-unknown=true",
-    "format": "biome format ./application ./domain ./infrastructure --files-ignore-unknown=true",
-    "format:write": "biome format --write ./application ./domain ./infrastructure --files-ignore-unknown=true",
-    "test": "cd ../.. && vitest run --reporter=verbose tests/iac/"
+    "lint": "biome lint --config-path ./biome.jsonc ./bin ./lib --files-ignore-unknown=true",
+    "lint:fix": "biome lint --fix --config-path ./biome.jsonc ./bin ./lib --files-ignore-unknown=true",
+    "format": "biome format --config-path ./biome.jsonc ./bin ./lib --files-ignore-unknown=true",
+    "format:write": "biome format --write --config-path ./biome.jsonc ./bin ./lib --files-ignore-unknown=true",
+    "test": "cd ../.. && vitest run --reporter=verbose tests/iac/",
+    "test:update": "cd ../.. && vitest run --reporter=verbose --update tests/iac/"
   },
   "devDependencies": {
     "aws-cdk-lib": "^2.200.0",

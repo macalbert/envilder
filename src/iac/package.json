@@ -6,10 +6,10 @@
     "build": "tsc --build",
     "watch": "tsc -w",
     "cdk": "cdk",
-    "lint": "biome lint ./app ./domain ./application ./infrastructure",
-    "lint:fix": "biome lint --fix ./app ./domain ./application ./infrastructure",
-    "format": "biome format ./app ./domain ./application ./infrastructure",
-    "format:write": "biome format --write ./app ./domain ./application ./infrastructure"
+    "lint": "biome lint --config-path ./biome.jsonc ./bin ./lib",
+    "lint:fix": "biome lint --fix --config-path ./biome.jsonc ./bin ./lib",
+    "format": "biome format --config-path ./biome.jsonc ./bin ./lib",
+    "format:write": "biome format --write --config-path ./biome.jsonc ./bin ./lib"
   },
   "dependencies": {
     "aws-cdk-lib": "^2.200.0",
