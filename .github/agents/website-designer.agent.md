@@ -8,7 +8,7 @@ description: >
   Communicates Envilder's value proposition to developers, CTOs, and technical
   leaders. Builds pages using the Astro + pure CSS design system already
   established in the project.
-tools: [read, search, edit, execute, web, agent, todo, microsoft_pla/*]
+tools: [read, edit, search, execute, web, agent, todo, vscode/*, playwright/*]
 argument-hint: "page, section, or component to create/improve"
 agents: ['i18n Reviewer', 'Document Maintainer', 'Code Reviewer', 'Explore']
 user-invocable: true

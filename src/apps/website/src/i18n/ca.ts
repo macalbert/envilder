@@ -172,6 +172,13 @@ export const ca: Translations = {
         description:
           'Configuració multi-compte? Utilitza --profile per canviar entre perfils AWS CLI. Perfecte per a entorns multi-etapa.',
       },
+      {
+        icon: '🚀',
+        title: 'Mode Exec',
+        description:
+          'Injecta secrets directament en un procés fill sense escriure a disc. Zero fitxers .env, zero risc de fuites.',
+        badge: 'Pròximament',
+      },
     ],
   },
   demo: {
@@ -389,6 +396,7 @@ export const ca: Translations = {
     changelogAccent: 'canvis',
     intro: 'Historial complet de versions. Vegeu també',
     githubReleases: 'Versions a GitHub',
+    versions: 'Versions',
   },
   docs: {
     title: 'Documentació — Envilder',

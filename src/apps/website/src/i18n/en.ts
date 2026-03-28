@@ -172,6 +172,13 @@ export const en: Translations = {
         description:
           'Multi-account setups? Use --profile to switch between AWS CLI profiles. Perfect for multi-stage environments.',
       },
+      {
+        icon: '🚀',
+        title: 'Exec Mode',
+        description:
+          'Inject secrets directly into a child process without writing to disk. Zero .env files, zero risk of leaks.',
+        badge: 'Coming soon',
+      },
     ],
   },
   demo: {
@@ -385,6 +392,7 @@ export const en: Translations = {
     changelogAccent: 'Changelog',
     intro: 'Complete release history. See also',
     githubReleases: 'GitHub Releases',
+    versions: 'Versions',
   },
   docs: {
     title: 'Documentation — Envilder',

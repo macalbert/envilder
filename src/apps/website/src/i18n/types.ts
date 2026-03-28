@@ -74,6 +74,7 @@ export interface FeatureItem {
   icon: string;
   title: string;
   description: string;
+  badge?: string;
 }
 
 export interface FeaturesTranslations {
@@ -216,6 +217,7 @@ export interface ChangelogPageTranslations {
   changelogAccent: string;
   intro: string;
   githubReleases: string;
+  versions: string;
 }
 
 export interface DocsTranslations {
