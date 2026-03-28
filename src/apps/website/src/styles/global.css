@@ -48,8 +48,8 @@ html {
   --color-nav-bg:      rgba(26, 33, 24, 0.95);
   --color-nav-mobile:  rgba(26, 33, 24, 0.98);
   --color-btn-text:    #1a2118;   /* dark bg for button labels */
-  --color-code-bg:     #282c34;   /* neutral dark grey for code blocks */
-  --color-code-header:  #2e3340;  /* slightly lighter for headers */
+  --color-code-bg:     #1c2127;   /* dark charcoal for code blocks */
+  --color-code-header:  #212830;  /* slightly lighter for headers */
 
   /* Typography */
   --font-pixel:   'Press Start 2P', monospace;
