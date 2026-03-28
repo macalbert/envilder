@@ -19,10 +19,7 @@ describe('AppEnvironment', () => {
 
   test('Should_HaveAllSixValues_When_EnumIsChecked', () => {
     // Arrange
-    const expectedValues = [
-      'Production',
-      'Development'
-    ];
+    const expectedValues = ['Production', 'Development'];
 
     // Act
     const actualValues = Object.values(AppEnvironment);
