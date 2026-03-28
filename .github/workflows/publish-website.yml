@@ -1,0 +1,63 @@
+name: 🌍 Warp Zone Publisher
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/apps/website/**"
+      - "src/iac/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/publish-website.yml"
+
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: publish-website-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: 🧱 Enter the Pipe (Checkout)
+        uses: actions/checkout@v6
+
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: 🍄 Grab a Mushroom (Setup Node.js)
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.x"
+          cache: "pnpm"
+
+      - name: 🪙 Collect Coins (Configure AWS credentials)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: 📦 Open the ? Block (Install packages)
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗️ Build the Castle (Build website)
+        working-directory: src/apps/website
+        run: pnpm build
+
+      - name: 🌟 Warp to the Cloud (Deploy infrastructure)
+        working-directory: src/iac
+        run: npx cdk deploy macalbert-envilder-website-production-stack --require-approval never
+
+      - name: 🏁 Flagpole Reached!
+        run: echo "🎉 Yahoo! Website deployed successfully! ⭐"
