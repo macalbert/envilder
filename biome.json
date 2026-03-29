@@ -4,7 +4,7 @@
     "includes": [
       "**",
       "!!**/node_modules",
-        "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+      "!!**/lib",
       "!!**/dist",
       "!!**/coverage",
       "!!**/.lock",
