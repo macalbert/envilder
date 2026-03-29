@@ -1,0 +1,212 @@
+---
+import { useTranslations } from '../i18n/utils';
+import TerminalMockup from './TerminalMockup.astro';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+const version = `v${__APP_VERSION__}`;
+---
+
+<section class="hero scanlines" id="hero">
+  <div class="container hero-container">
+    <div class="hero-content">
+      <div class="hero-badges">
+        <span class="badge badge-primary">{version}</span>
+        <span class="badge">{t.hero.openSource}</span>
+      </div>
+
+      <h1 class="hero-title">
+        {t.hero.title1}<br />
+        {t.hero.title2}<br />
+        <span class="hero-accent">{t.hero.titleAccent}</span>
+      </h1>
+
+      <p class="hero-description">
+        {t.hero.description}{' '}
+        <strong>{t.hero.descAws}</strong>{t.hero.descComma}{' '}
+        <strong>{t.hero.descAzure}</strong>{' '}{t.hero.descOr}{' '}
+        <strong>{t.hero.descGcp}</strong>
+        {' '}{t.hero.descSuffix}
+      </p>
+
+      <div class="hero-actions">
+        <a href="#get-started" class="btn btn-primary">
+          {t.hero.getStarted}
+        </a>
+        <a
+          href="https://github.com/macalbert/envilder"
+          class="btn btn-outline"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t.hero.viewOnGithub}
+        </a>
+      </div>
+
+      <div class="hero-install">
+        <code class="install-cmd">
+          <span class="prompt">$</span> npm install -g envilder
+        </code>
+      </div>
+    </div>
+
+    <div class="hero-terminal">
+      <TerminalMockup title="envilder">
+        <span class="line">
+          <span class="comment">{t.hero.terminalComment1}</span>
+        </span>
+        <span class="line">
+          <span class="prompt">$</span>
+          <span class="command"> cat </span>
+          <span class="flag">param-map.json</span>
+        </span>
+        <span class="line">
+          <span class="output">{'{'}</span>
+        </span>
+        <span class="line">
+          <span class="output">  "DB_PASSWORD": "/app/prod/db-pass",</span>
+        </span>
+        <span class="line">
+          <span class="output">  "API_KEY":     "/app/prod/api-key"</span>
+        </span>
+        <span class="line">
+          <span class="output">{'}'}</span>
+        </span>
+        <span class="line">&nbsp;</span>
+        <span class="line">
+          <span class="comment">{t.hero.terminalComment2}</span>
+        </span>
+        <span class="line">
+          <span class="prompt">$</span>
+          <span class="command"> envilder</span>
+          <span class="flag"> --map</span>
+          <span class="command">=param-map.json</span>
+          <span class="flag"> --envfile</span>
+          <span class="command">=.env</span>
+        </span>
+        <span class="line">&nbsp;</span>
+        <span class="line">
+          <span class="highlight">✔</span>
+          <span class="output">{t.hero.terminalFetched1}</span>
+        </span>
+        <span class="line">
+          <span class="highlight">✔</span>
+          <span class="output">{t.hero.terminalFetched2}</span>
+        </span>
+        <span class="line">
+          <span class="highlight">✔</span>
+          <span class="output">{t.hero.terminalWritten}</span>
+        </span>
+        <span class="line">&nbsp;</span>
+        <span class="line">
+          <span class="prompt">$</span>
+          <span class="cursor"></span>
+        </span>
+      </TerminalMockup>
+    </div>
+  </div>
+
+  <div class="hero-gradient"></div>
+</section>
+
+<style>
+  .hero {
+    padding-top: calc(var(--nav-height) + var(--space-4xl));
+    padding-bottom: var(--space-4xl);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-gradient {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 600px;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(138, 154, 108, 0.08) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .hero-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3xl);
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .hero-badges {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+
+  .hero-title {
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    line-height: 1.5;
+  }
+
+  .hero-accent {
+    color: var(--color-primary);
+  }
+
+  .hero-description {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    max-width: 520px;
+  }
+
+  .hero-description strong {
+    color: var(--color-secondary);
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+  }
+
+  .hero-install {
+    margin-top: var(--space-sm);
+  }
+
+  .install-cmd {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    background: var(--color-code-bg);
+    border: 1px solid var(--color-border);
+    padding: var(--space-sm) var(--space-md);
+    display: inline-block;
+  }
+
+  .install-cmd .prompt {
+    color: var(--color-success);
+  }
+
+  .hero-terminal {
+    width: 100%;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-container {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

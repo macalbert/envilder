@@ -21,5 +21,6 @@
     "emitDecoratorMetadata": true,
     "types": ["node", "picocolors"]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["src/apps/website/**/*"]
 }

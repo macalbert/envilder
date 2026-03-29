@@ -1,0 +1,228 @@
+---
+import { useTranslations } from '../i18n/utils';
+import TerminalMockup from './TerminalMockup.astro';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="section" id="get-started">
+  <div class="container">
+    <div class="section-title">
+      <h2>{t.getStarted.title}<span>{t.getStarted.titleAccent}</span></h2>
+      <p class="section-subtitle">
+        {t.getStarted.subtitle}
+      </p>
+    </div>
+
+    <div class="getstarted-grid">
+      <div class="getstarted-steps">
+        <div class="gs-step">
+          <h3>{t.getStarted.prerequisites}</h3>
+          <ul>
+            <li><strong>{t.getStarted.prereqNode}</strong></li>
+            <li>{t.getStarted.prereqAws} <em>({t.getStarted.prereqAwsNote})</em></li>
+            <li>{t.getStarted.prereqAzure} <em>({t.getStarted.prereqAzureNote})</em></li>
+            <li>{t.getStarted.prereqIam} <code>ssm:GetParameter</code> / <code>ssm:PutParameter</code></li>
+          </ul>
+        </div>
+
+        <div class="gs-step">
+          <h3>{t.getStarted.install}</h3>
+          <div class="install-options">
+            <div class="install-option">
+              <span class="install-label">pnpm</span>
+              <code class="install-code">pnpm add -g envilder</code>
+            </div>
+            <div class="install-option">
+              <span class="install-label">npm</span>
+              <code class="install-code">npm install -g envilder</code>
+            </div>
+            <div class="install-option">
+              <span class="install-label">npx</span>
+              <code class="install-code">npx envilder --help</code>
+            </div>
+          </div>
+        </div>
+
+        <div class="gs-step">
+          <h3>{t.getStarted.quickStart}</h3>
+          <ol class="quick-steps">
+            <li>{t.getStarted.step1}</li>
+            <li>{t.getStarted.step2}</li>
+            <li>{t.getStarted.step3}</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="getstarted-terminal">
+        <TerminalMockup title={t.getStarted.terminalTitle}>
+          <span class="line">
+            <span class="comment">{t.getStarted.commentInstall}</span>
+          </span>
+          <span class="line">
+            <span class="prompt">$</span>
+            <span class="command"> npm install -g envilder</span>
+          </span>
+          <span class="line">&nbsp;</span>
+          <span class="line">
+            <span class="comment">{t.getStarted.commentCreate}</span>
+          </span>
+          <span class="line">
+            <span class="prompt">$</span>
+            <span class="command"> echo </span>
+            <span class="output">{`'{"API_KEY": "/app/api-key"}' `}</span>
+            <span class="command"> > param-map.json</span>
+          </span>
+          <span class="line">&nbsp;</span>
+          <span class="line">
+            <span class="comment">{t.getStarted.commentPull}</span>
+          </span>
+          <span class="line">
+            <span class="prompt">$</span>
+            <span class="command"> envilder</span>
+            <span class="flag"> --map</span>
+            <span class="command">=param-map.json</span>
+            <span class="flag"> --envfile</span>
+            <span class="command">=.env</span>
+          </span>
+          <span class="line">&nbsp;</span>
+          <span class="line">
+            <span class="highlight">✔</span>
+            <span class="output">{t.getStarted.doneMessage}</span>
+          </span>
+          <span class="line">&nbsp;</span>
+          <span class="line">
+            <span class="comment">{t.getStarted.commentPush}</span>
+          </span>
+          <span class="line">
+            <span class="prompt">$</span>
+            <span class="command"> envilder</span>
+            <span class="flag"> --push</span>
+            <span class="flag"> --key</span>
+            <span class="command">=API_KEY</span>
+            <span class="flag"> --value</span>
+            <span class="command">=sk_live_abc123</span>
+            <span class="flag"> --secret-path</span>
+            <span class="command">=/app/api-key</span>
+          </span>
+          <span class="line">&nbsp;</span>
+          <span class="line">
+            <span class="highlight">✔</span>
+            <span class="output">{t.getStarted.pushSuccess}</span>
+          </span>
+        </TerminalMockup>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .getstarted-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+
+  @media (min-width: 1024px) {
+    .getstarted-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .getstarted-steps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+  }
+
+  .gs-step h3 {
+    font-size: 0.7rem;
+    margin-bottom: var(--space-md);
+    color: var(--color-primary);
+  }
+
+  .gs-step ul,
+  .gs-step ol {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .gs-step ul li,
+  .gs-step ol li {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    padding-left: var(--space-md);
+    position: relative;
+  }
+
+  .gs-step ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--color-primary);
+    font-weight: bold;
+  }
+
+  .quick-steps {
+    counter-reset: step;
+  }
+
+  .quick-steps li {
+    counter-increment: step;
+  }
+
+  .quick-steps li::before {
+    content: counter(step) '.';
+    font-family: var(--font-pixel);
+    font-size: 0.55rem;
+    color: var(--color-primary);
+  }
+
+  .gs-step strong {
+    color: var(--color-text);
+  }
+
+  .gs-step em {
+    color: var(--color-text-dim);
+    font-style: normal;
+  }
+
+  .install-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .install-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .install-label {
+    font-family: var(--font-pixel);
+    font-size: 0.5rem;
+    color: var(--color-text-dim);
+    min-width: 40px;
+  }
+
+  .install-code {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--color-text);
+  }
+</style>

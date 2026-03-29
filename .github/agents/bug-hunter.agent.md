@@ -6,7 +6,7 @@ description: >
   when a bug is reported, a GitHub issue is referenced, or a reviewer describes
   incorrect behavior.
 tools: [read, search, execute, agent]
-agents: ['TDD Red', 'TDD Green', 'TDD Refactor']
+agents: ['TDD Red', 'TDD Green', 'TDD Refactor', 'Code Reviewer']
 argument-hint: "bug description or GitHub issue number (e.g. #42)"
 user-invocable: true
 ---
@@ -109,6 +109,15 @@ Delegate to `@TDD Refactor` with all changed files.
 **Tests:** pnpm test — {N} passed, 0 failed
 ```
 
+## Delegation Rules
+
+| Trigger | Delegate to | Why |
+|---------|-------------|-----|
+| Fix has wide blast radius or touches multiple layers | `@Code Reviewer` | Read-only impact analysis before committing |
+| Bug is in a website component or page | `@Website Designer` | UI/UX specialist for Astro components |
+| Bug involves translation or i18n strings | `@i18n Reviewer` | Linguistic and i18n correctness |
+| Post-fix docs are outdated (README, CHANGELOG) | `@Document Maintainer` | Keep docs in sync with fix |
+
 ## Rules
 
 - **Never fix without reproducing first**
@@ -116,7 +125,10 @@ Delegate to `@TDD Refactor` with all changed files.
 - **Present analysis before acting** — user validates understanding first
 - **Delegate all code writing** to TDD Red/Green/Refactor
 - **Report blockers immediately** — if reproduction fails, stop and explain
+- **Delegate to specialists** when the bug crosses into their domain
 
 ## Next Steps
 
 After the fix: "Run `/smart-commit` to commit the bug fix."
+
+If the fix changes observable behavior: "Use `@Code Reviewer` for a post-fix review."

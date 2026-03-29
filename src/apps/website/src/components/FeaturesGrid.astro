@@ -1,0 +1,67 @@
+---
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-title">
+      <h2>{t.features.title}<span>{t.features.titleAccent}</span></h2>
+      <p class="section-subtitle">
+        {t.features.subtitle}
+      </p>
+    </div>
+
+    <div class="grid-4 features-grid">
+      {t.features.features.map((f) => (
+        <div class:list={['pixel-card', 'feature-card', { 'feature-coming-soon': f.badge }]}>
+          <span class="pixel-icon">{f.icon}</span>
+          <div class="feature-title-row">
+            <h3>{f.title}</h3>
+            {f.badge && <span class="badge badge-small">{f.badge}</span>}
+          </div>
+          <p>{f.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .feature-card h3 {
+    margin-bottom: var(--space-sm);
+    color: var(--color-text);
+  }
+
+  .feature-card p {
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .feature-card .pixel-icon {
+    font-size: 1.5rem;
+  }
+
+  .feature-title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+
+  .feature-coming-soon {
+    border-style: dashed;
+    opacity: 0.85;
+  }
+
+  .badge-small {
+    font-size: 0.55rem;
+    padding: 2px 6px;
+  }
+</style>

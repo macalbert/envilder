@@ -1,0 +1,54 @@
+---
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="section section-alt" id="demo">
+  <div class="container">
+    <div class="section-title">
+      <h2>{t.demo.title}<span>{t.demo.titleAccent}</span></h2>
+      <p class="section-subtitle">
+        {t.demo.subtitle}
+      </p>
+    </div>
+
+    <div class="demo-wrapper">
+      <div class="demo-frame">
+        <img
+          src="https://github.com/user-attachments/assets/9f194143-117d-49f3-a6fb-f400040ea514"
+          alt={t.demo.cliDemo}
+          loading="lazy"
+        />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .demo-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .demo-frame {
+    border: 2px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: var(--pixel-shadow);
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+  }
+
+  .demo-frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+</style>

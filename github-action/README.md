@@ -1,7 +1,7 @@
 # 🗝️ Envilder GitHub Action 🏰
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/96bf1efa-7d21-440a-a414-3a20e7f9a1f1" alt="Envilder">
+  <img src="https://github.com/user-attachments/assets/8a7188ef-9d8d-45fb-8c37-3af718fb5103" alt="Envilder">
 </p>
 
 <p align="center">
@@ -36,7 +36,8 @@ source of truth. This GitHub Action makes it easy to:
 - ☁️ **Multi-provider** - Switch between AWS and Azure with a single input
 - 🎯 **Type-safe** - Full TypeScript support with IntelliSense
 
-> 💡 **Learn more:** Check out the [full documentation](https://github.com/macalbert/envilder/blob/main/README.md)
+> 💡 **Learn more:** Visit [envilder.com](https://envilder.com) for complete documentation,
+> or check the [GitHub README](https://github.com/macalbert/envilder/blob/main/README.md)
 > for CLI usage, advanced features, and more examples.
 
 ---
