@@ -22,6 +22,7 @@ on:
       - "github-action/action.yml"
       - "src/**"
       - "tests/**"
+      - "e2e/**"
       - "package.json"
       - "pnpm-lock.yaml"
       - "tsconfig.json"
