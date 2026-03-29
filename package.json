@@ -87,42 +87,39 @@
   ],
   "type": "module",
   "dependencies": {
-    "@aws-sdk/client-ssm": "^3.1014.0",
-    "@aws-sdk/credential-providers": "^3.1014.0",
-    "@azure/core-rest-pipeline": "^1.22.2",
-    "@azure/identity": "^4.13.0",
+    "@aws-sdk/client-ssm": "^3.1019.0",
+    "@aws-sdk/credential-providers": "^3.1019.0",
+    "@azure/core-rest-pipeline": "^1.23.0",
+    "@azure/identity": "^4.13.1",
     "@azure/keyvault-secrets": "^4.10.0",
-    "@types/node": "^25.3.3",
+    "@types/node": "catalog:",
     "commander": "^14.0.3",
     "dotenv": "^17.3.1",
-    "inversify": "^7.11.0",
+    "inversify": "^8.1.0",
     "picocolors": "^1.1.1",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.5",
-    "@commitlint/cli": "^20.4.3",
-    "@commitlint/config-conventional": "^20.4.3",
-    "@secretlint/secretlint-rule-preset-recommend": "^11.3.1",
-    "@testcontainers/localstack": "^11.12.0",
+    "@biomejs/biome": "catalog:",
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
+    "@secretlint/secretlint-rule-preset-recommend": "^11.4.0",
+    "@testcontainers/localstack": "^11.13.0",
     "@vercel/ncc": "^0.38.4",
-    "@vitest/coverage-v8": "^4.0.18",
+    "@vitest/coverage-v8": "catalog:",
     "glob": "^13.0.6",
     "lefthook": "^2.1.4",
-    "secretlint": "^11.3.1",
-    "testcontainers": "^11.12.0",
-    "ts-node": "^10.9.2",
+    "secretlint": "^11.4.0",
+    "testcontainers": "^11.13.0",
+    "ts-node": "catalog:",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "engines": {
     "node": ">=20.0.0"
   },
   "pnpm": {
-    "overrides": {
-      "minimatch": "^10.2.2"
-    },
     "onlyBuiltDependencies": [
       "cpu-features",
       "esbuild",

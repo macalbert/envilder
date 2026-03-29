@@ -12,12 +12,12 @@
     "format:write": "biome format --write --config-path ./biome.jsonc ./bin ./lib"
   },
   "dependencies": {
-    "aws-cdk-lib": "^2.200.0",
-    "constructs": "^10.4.2"
+    "aws-cdk-lib": "catalog:",
+    "constructs": "catalog:"
   },
   "devDependencies": {
-    "aws-cdk": "^2.200.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "aws-cdk": "^2.1114.1",
+    "ts-node": "catalog:",
+    "typescript": "catalog:"
   }
 }

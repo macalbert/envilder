@@ -4,7 +4,7 @@
     "includes": [
       "**",
       "!!**/node_modules",
-      "!!**/lib",
+        "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
       "!!**/dist",
       "!!**/coverage",
       "!!**/.lock",
@@ -37,7 +37,19 @@
       "unsafeParameterDecoratorsEnabled": true
     }
   },
-  "overrides": [],
+  "overrides": [
+    {
+      "includes": ["**/*.astro"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    }
+  ],
   "plugins": null,
   "root": true,
   "vcs": {

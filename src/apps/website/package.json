@@ -7,10 +7,17 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "format": "biome format",
+    "format:write": "biome format --write",
+    "lint": "biome check",
+    "lint:write": "biome check --write"
   },
   "dependencies": {
-    "astro": "^5.8.0",
-    "@astrojs/sitemap": "^3.3.1"
+    "@astrojs/sitemap": "^3.3.1",
+    "astro": "^6.1.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:"
   }
 }

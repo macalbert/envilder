@@ -38,14 +38,15 @@ export function extractVersions(
   const cleaned = cleanChangelog(md);
   const versions: { tag: string; id: string; date: string }[] = [];
   const re = /^## \[?([\d.]+)\]?.*?(?:[-–—]\s*)?(\d{4}-\d{2}-\d{2})?/gm;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(cleaned)) !== null) {
+  let m = re.exec(cleaned);
+  while (m !== null) {
     const tag = m[1];
     versions.push({
       tag: `v${tag}`,
       id: `v${tag.replace(/\./g, '')}`,
       date: m[2] ?? '',
     });
+    m = re.exec(cleaned);
   }
   return versions;
 }

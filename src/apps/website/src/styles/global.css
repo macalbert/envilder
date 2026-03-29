@@ -130,15 +130,6 @@ html {
   --glow-secondary: 0 0 15px rgba(181, 182, 228, 0.15);
 }
 
-/* ── Theme transition ─────────────────────────────────── */
-html:not([data-no-transition]) body,
-html:not([data-no-transition]) .navbar {
-  transition:
-    background-color 300ms ease,
-    color 300ms ease,
-    border-color 300ms ease;
-}
-
 /* ── Base ─────────────────────────────────────────────── */
 body {
   font-family: var(--font-body);
@@ -148,6 +139,15 @@ body {
   font-size: 1rem;
   overflow-x: hidden;
   cursor: default;
+}
+
+/* ── Theme transition ─────────────────────────────────── */
+html:not([data-no-transition]) body,
+html:not([data-no-transition]) .navbar {
+  transition:
+    background-color 300ms ease,
+    color 300ms ease,
+    border-color 300ms ease;
 }
 
 h1,

@@ -4,6 +4,16 @@ packages:
   - "src/iac"
   - "tests/iac"
 
+catalog:
+  '@biomejs/biome': ^2.4.9
+  typescript: ^6.0.2
+  ts-node: ^10.9.2
+  '@types/node': ^25.5.0
+  vitest: ^4.1.2
+  '@vitest/coverage-v8': ^4.1.2
+  aws-cdk-lib: ^2.245.0
+  constructs: ^10.4.2
+
 onlyBuiltDependencies:
   - cpu-features
   - esbuild

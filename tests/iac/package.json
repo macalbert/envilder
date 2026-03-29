@@ -13,8 +13,8 @@
     "test:update": "cd ../.. && vitest run --reporter=verbose --update tests/iac/"
   },
   "devDependencies": {
-    "aws-cdk-lib": "^2.200.0",
-    "constructs": "^10.4.2",
-    "typescript": "^5.9.3"
+    "aws-cdk-lib": "catalog:",
+    "constructs": "catalog:",
+    "typescript": "catalog:"
   }
 }
