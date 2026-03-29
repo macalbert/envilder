@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { execSync, spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { rm, unlink } from 'node:fs/promises';
+import { rm, unlink, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -56,21 +56,23 @@ describe('Envilder (E2E)', () => {
   const singleSsmPath = `${ssmPrefix}/SingleVariable`;
 
   beforeAll(async () => {
-    writeFileSync(
-      mapFilePath,
-      JSON.stringify({ TOKEN_SECRET: `${ssmPrefix}/Token` }, null, 2),
-    );
-    writeFileSync(
-      mapFileWithConfigPath,
-      JSON.stringify(
-        {
-          $config: { provider: 'aws' },
-          TOKEN_SECRET: `${ssmPrefix}/Token`,
-        },
-        null,
-        2,
+    await Promise.all([
+      writeFile(
+        mapFilePath,
+        JSON.stringify({ TOKEN_SECRET: `${ssmPrefix}/Token` }, null, 2),
       ),
-    );
+      writeFile(
+        mapFileWithConfigPath,
+        JSON.stringify(
+          {
+            $config: { provider: 'aws' },
+            TOKEN_SECRET: `${ssmPrefix}/Token`,
+          },
+          null,
+          2,
+        ),
+      ),
+    ]);
 
     await cleanUpSystem();
     execSync('pnpm build', { cwd: rootDir, stdio: 'inherit' });
@@ -92,11 +94,10 @@ describe('Envilder (E2E)', () => {
 
   afterAll(async () => {
     await cleanUpSystem();
-    for (const f of [mapFilePath, mapFileWithConfigPath]) {
-      if (existsSync(f)) {
-        await unlink(f);
-      }
-    }
+    await Promise.all([
+      rm(mapFilePath, { force: true }),
+      rm(mapFileWithConfigPath, { force: true }),
+    ]);
   }, 60_000);
 
   it('Should_PrintCorrectVersion_When_VersionFlagIsProvided', async () => {
