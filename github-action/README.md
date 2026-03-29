@@ -36,7 +36,8 @@ source of truth. This GitHub Action makes it easy to:
 - ☁️ **Multi-provider** - Switch between AWS and Azure with a single input
 - 🎯 **Type-safe** - Full TypeScript support with IntelliSense
 
-> 💡 **Learn more:** Check out the [full documentation](https://github.com/macalbert/envilder/blob/main/README.md)
+> 💡 **Learn more:** Visit [envilder.com](https://envilder.com) for complete documentation,
+> or check the [GitHub README](https://github.com/macalbert/envilder/blob/main/README.md)
 > for CLI usage, advanced features, and more examples.
 
 ---
