@@ -1,0 +1,306 @@
+---
+import { languages, localizedPath, useTranslations } from '../i18n/utils';
+import ThemeSwitcher from './ThemeSwitcher.astro';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+const version = `v${__APP_VERSION__}`;
+const currentYear = new Date().getFullYear();
+const currentPath = Astro.url.pathname;
+const nonDefaultLocales = Object.keys(languages).filter(
+  (code) => code !== 'en',
+);
+const localePrefixRegex =
+  nonDefaultLocales.length > 0
+    ? new RegExp(`^/(${nonDefaultLocales.join('|')})(?=/|$)`)
+    : null;
+const stripLocalePrefix = (path: string): string => {
+  if (!localePrefixRegex) {
+    return path || '/';
+  }
+  const strippedPath = path.replace(localePrefixRegex, '');
+  return strippedPath || '/';
+};
+
+const links = {
+  project: [
+    {
+      label: t.footer.linkGithub,
+      href: 'https://github.com/macalbert/envilder',
+    },
+    { label: t.footer.linkNpm, href: 'https://www.npmjs.com/package/envilder' },
+    { label: t.footer.linkChangelog, href: localizedPath(lang, '/changelog') },
+    {
+      label: t.footer.linkRoadmap,
+      href: 'https://github.com/macalbert/envilder/blob/main/ROADMAP.md',
+    },
+  ],
+  docs: [
+    {
+      label: t.footer.linkGettingStarted,
+      href: localizedPath(lang, '/#get-started'),
+    },
+    {
+      label: t.footer.linkPullCommand,
+      href: localizedPath(lang, '/docs#pull-command'),
+    },
+    {
+      label: t.footer.linkPushCommand,
+      href: localizedPath(lang, '/docs#push-command'),
+    },
+    {
+      label: t.footer.linkGithubAction,
+      href: localizedPath(lang, '/docs#gha-setup'),
+    },
+  ],
+  community: [
+    {
+      label: t.footer.linkIssues,
+      href: 'https://github.com/macalbert/envilder/issues',
+    },
+    {
+      label: t.footer.linkDiscussions,
+      href: 'https://github.com/macalbert/envilder/discussions',
+    },
+    {
+      label: t.footer.linkSecurity,
+      href: 'https://github.com/macalbert/envilder/blob/main/docs/SECURITY.md',
+    },
+    {
+      label: t.footer.linkSponsor,
+      href: 'https://github.com/sponsors/macalbert',
+    },
+  ],
+};
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href={localizedPath(lang, '/')} class="footer-logo">
+          <span class="logo-bracket">[</span>
+          <span class="logo-text">envilder</span>
+          <span class="logo-bracket">]</span>
+        </a>
+        <p class="footer-tagline">
+          {t.footer.tagline}
+        </p>
+        <div class="footer-badges">
+          <span class="badge">{t.footer.license}</span>
+          <span class="badge">{version}</span>
+        </div>
+      </div>
+
+      <div class="footer-links-group">
+        <h4>{t.footer.project}</h4>
+        <ul>
+          {links.project.map((l) => (
+            <li><a href={l.href}>{l.label}</a></li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="footer-links-group">
+        <h4>{t.footer.documentation}</h4>
+        <ul>
+          {links.docs.map((l) => (
+            <li><a href={l.href}>{l.label}</a></li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="footer-links-group">
+        <h4>{t.footer.community}</h4>
+        <ul>
+          {links.community.map((l) => (
+            <li><a href={l.href}>{l.label}</a></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-pixel-border"></div>
+      <div class="footer-bottom-row">
+        <div class="footer-preferences">
+          <div class="lang-switcher">
+            {Object.entries(languages).map(([code, _label]) => (
+              <a
+                href={code === 'en' ? stripLocalePrefix(currentPath) : `/${code}${stripLocalePrefix(currentPath)}`}
+                class:list={['lang-link', { active: code === lang }]}
+              >
+                {code.toUpperCase()}
+              </a>
+            ))}
+          </div>
+          <ThemeSwitcher lang={lang} />
+        </div>
+        <p class="footer-copy">
+          &copy; {currentYear} <a href="https://github.com/macalbert">Marçal Albert Castellví</a>.
+          {t.footer.builtWith}
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding: var(--space-3xl) 0 var(--space-xl);
+    border-top: 2px solid var(--color-border);
+    background: var(--color-bg-alt);
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl);
+  }
+
+  @media (min-width: 768px) {
+    .footer-grid {
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+    }
+  }
+
+  .footer-logo {
+    font-family: var(--font-pixel);
+    font-size: 0.7rem;
+    color: var(--color-text);
+    text-decoration: none;
+    display: inline-flex;
+    gap: 2px;
+    margin-bottom: var(--space-md);
+    transform: scaleY(1.3);
+  }
+
+  .footer-logo:hover {
+    color: var(--color-primary);
+  }
+
+  .logo-bracket {
+    color: var(--color-primary);
+  }
+
+  .footer-tagline {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin-bottom: var(--space-md);
+  }
+
+  .footer-badges {
+    display: flex;
+    gap: var(--space-sm);
+  }
+
+  .footer-links-group h4 {
+    font-family: var(--font-pixel);
+    font-size: 0.5rem;
+    color: var(--color-text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-md);
+  }
+
+  .footer-links-group ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .footer-links-group a {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
+
+  .footer-links-group a:hover {
+    color: var(--color-primary);
+  }
+
+  .footer-bottom {
+    margin-top: var(--space-2xl);
+  }
+
+  .footer-pixel-border {
+    height: 2px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--color-border) 0px,
+      var(--color-border) 8px,
+      transparent 8px,
+      transparent 12px
+    );
+    margin-bottom: var(--space-lg);
+  }
+
+  .footer-copy {
+    font-size: 0.82rem;
+    color: var(--color-text-dim);
+    text-align: center;
+  }
+
+  .footer-copy a {
+    color: var(--color-text-muted);
+  }
+
+  .footer-copy a:hover {
+    color: var(--color-primary);
+  }
+
+  .footer-bottom-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    align-items: flex-start;
+  }
+
+  @media (min-width: 768px) {
+    .footer-bottom-row {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  .footer-preferences {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .lang-switcher {
+    display: flex;
+    gap: 2px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    padding: 2px;
+  }
+
+  .lang-link {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--color-text-dim);
+    padding: 2px 6px;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+  }
+
+  .lang-link:hover {
+    color: var(--color-text);
+  }
+
+  .lang-link.active {
+    background: var(--color-primary);
+    color: var(--color-btn-text);
+  }
+</style>

@@ -547,9 +547,9 @@ async function cleanUpSystem() {
 
     // Uninstall global package (still sync, as pnpm API is not available async)
     try {
-      execSync('pnpm remove -g envilder 2>nul', {
-        stdio: 'inherit',
-        shell: 'cmd',
+      execSync('pnpm remove -g envilder', {
+        stdio: 'pipe',
+        shell: true,
       });
     } catch {
       // Ignore errors if not installed

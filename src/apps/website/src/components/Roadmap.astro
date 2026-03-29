@@ -1,0 +1,159 @@
+---
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="section section-alt" id="roadmap">
+  <div class="container">
+    <div class="section-title">
+      <h2>{t.roadmap.title}<span>{t.roadmap.titleAccent}</span></h2>
+      <p class="section-subtitle">
+        {t.roadmap.subtitle}
+      </p>
+    </div>
+
+    <div class="roadmap-timeline">
+      {t.roadmap.items.map((item, i) => {
+        const next = t.roadmap.items[i + 1];
+        const lineActive = item.status === 'done' && next?.status === 'done';
+        return (
+          <div class={`roadmap-item roadmap-${item.status}${lineActive ? ' roadmap-line-active' : ''}`}>
+            <div class="roadmap-marker">
+              <span class="roadmap-dot"></span>
+            </div>
+            <div class="roadmap-content">
+              <div class="roadmap-header">
+                <span class="roadmap-label">{item.label}</span>
+                <h3>{item.title}</h3>
+                {item.status === 'next' && (
+                  <span class="badge badge-primary">{t.roadmap.upNext}</span>
+                )}
+              </div>
+              <p>{item.description}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+</section>
+
+<style>
+  .roadmap-timeline {
+    max-width: 640px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  .roadmap-item {
+    display: flex;
+    gap: var(--space-lg);
+    padding: var(--space-md) 0;
+    position: relative;
+  }
+
+  .roadmap-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 24px;
+    position: relative;
+  }
+
+  .roadmap-dot {
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--color-border);
+    background: var(--color-bg);
+    position: relative;
+    z-index: 2;
+  }
+
+  .roadmap-done .roadmap-dot {
+    background: var(--color-success);
+    border-color: var(--color-success);
+  }
+
+  .roadmap-next .roadmap-dot {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 8px rgba(138, 154, 108, 0.5);
+  }
+
+  .roadmap-planned .roadmap-dot {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+  }
+
+  .roadmap-item:not(:last-child) .roadmap-marker::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: calc(100% + var(--space-md));
+    background: var(--color-border);
+    z-index: 1;
+  }
+
+  .roadmap-line-active:not(:last-child) .roadmap-marker::after {
+    background: var(--color-success);
+  }
+
+  .roadmap-content {
+    flex: 1;
+    padding-bottom: var(--space-md);
+  }
+
+  .roadmap-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-xs);
+  }
+
+  .roadmap-label {
+    font-size: 1rem;
+    filter: grayscale(100%) sepia(60%) saturate(400%) hue-rotate(50deg) brightness(0.9);
+    text-shadow:
+      1px 0 0 rgba(139, 172, 15, 0.25),
+      0 1px 0 rgba(139, 172, 15, 0.25);
+  }
+
+  :global([data-theme="light"]) .roadmap-label {
+    filter: grayscale(100%) sepia(40%) saturate(100%) brightness(0.7) contrast(1.1);
+    text-shadow:
+      1px 0 0 rgba(107, 104, 96, 0.2),
+      0 1px 0 rgba(107, 104, 96, 0.2);
+  }
+
+  .roadmap-header h3 {
+    font-size: 0.65rem;
+    color: var(--color-text);
+  }
+
+  .roadmap-content p {
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .roadmap-planned .roadmap-header h3 {
+    color: var(--color-text-dim);
+  }
+
+  .roadmap-planned p {
+    color: var(--color-text-dim);
+  }
+</style>

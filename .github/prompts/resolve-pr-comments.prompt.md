@@ -2,7 +2,7 @@
 name: "Resolve PR Comments"
 description: "Turn PR review comments into concrete code/doc/test updates with a reviewer-ready resolution summary."
 argument-hint: "PR number, comment list, or target files"
-agent: "PR Comment Resolver"
+agent: "PR Resolver"
 ---
 Resolve pull request comments end-to-end.
 

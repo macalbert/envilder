@@ -379,3 +379,11 @@ deactivate/
 
 # Rider
 .idea/
+
+# Playwright test results
+.playwright-mcp/
+
+dist/
+
+# Astro
+.astro/

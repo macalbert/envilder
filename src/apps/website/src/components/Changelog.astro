@@ -1,0 +1,151 @@
+---
+import { localizedPath, useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+const version = `v${__APP_VERSION__}`;
+---
+
+<section class="section" id="changelog">
+  <div class="container">
+    <div class="section-title">
+      <h2>{t.changelog.title}<span>{t.changelog.titleAccent}</span></h2>
+      <p class="section-subtitle">
+        {t.changelog.subtitle}
+      </p>
+    </div>
+
+    <div class="changelog-card">
+      <div class="release-header">
+        <div class="release-info">
+          <span class="badge badge-primary">{version}</span>
+          <h3>{t.changelog.releaseTitle}</h3>
+        </div>
+        <span class="release-date">{t.changelog.releaseDate}</span>
+      </div>
+
+      <ul class="release-list">
+        {t.changelog.highlights.map((h) => (
+          <li class={h.icon === '⚠️' ? 'breaking' : ''}>
+            <span class="release-icon">{h.icon}</span>
+            <span>{h.text}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div class="release-footer">
+        <a href={localizedPath(lang, '/changelog')} class="btn btn-outline">
+          {t.changelog.fullChangelog}
+        </a>
+        <a
+          href="https://github.com/macalbert/envilder/releases"
+          class="release-link"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t.changelog.viewReleases}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .changelog-card {
+    max-width: 720px;
+    margin: 0 auto;
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    padding: var(--space-xl);
+    box-shadow: var(--pixel-shadow);
+  }
+
+  .release-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-lg);
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  .release-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .release-info h3 {
+    font-size: 0.7rem;
+    color: var(--color-text);
+  }
+
+  .release-date {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-text-dim);
+  }
+
+  .release-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+  }
+
+  .release-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+  }
+
+  .release-list li.breaking {
+    color: var(--color-warning);
+  }
+
+  .release-icon {
+    flex-shrink: 0;
+    filter: grayscale(100%) sepia(60%) saturate(400%) hue-rotate(50deg) brightness(0.9);
+    text-shadow:
+      1px 0 0 rgba(139, 172, 15, 0.25),
+      0 1px 0 rgba(139, 172, 15, 0.25);
+  }
+
+  :global([data-theme="light"]) .release-icon {
+    filter: grayscale(100%) sepia(40%) saturate(100%) brightness(0.7) contrast(1.1);
+    text-shadow:
+      1px 0 0 rgba(107, 104, 96, 0.2),
+      0 1px 0 rgba(107, 104, 96, 0.2);
+  }
+
+  .release-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    padding-top: var(--space-lg);
+    border-top: 2px solid var(--color-border);
+  }
+
+  .release-link {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .release-link:hover {
+    color: var(--color-primary);
+  }
+</style>

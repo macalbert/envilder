@@ -1,0 +1,105 @@
+---
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="trust section-alt">
+  <div class="container">
+    <div class="trust-grid">
+
+      <div class="trust-item">
+        <img class="trust-logo" src="/AWS.svg" alt="AWS" width="24" height="24" loading="lazy" />
+        <span class="trust-name">AWS SSM</span>
+      </div>
+
+      <span class="trust-sep" aria-hidden="true">·</span>
+
+      <div class="trust-item">
+        <img class="trust-logo" src="/Azure.svg" alt="Azure" width="24" height="24" loading="lazy" />
+        <span class="trust-name">Azure Key Vault</span>
+      </div>
+
+      <span class="trust-sep" aria-hidden="true">·</span>
+
+      <div class="trust-item">
+        <img class="trust-logo" src="/GitHubActions.svg" alt="GitHub Actions" width="24" height="24" loading="lazy" />
+        <span class="trust-name">GitHub Actions</span>
+      </div>
+
+      <span class="trust-sep" aria-hidden="true">·</span>
+
+      <div class="trust-item">
+        <img class="trust-logo" src="/NPM.svg" alt="npm" width="24" height="24" loading="lazy" />
+        <span class="trust-name">npm</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .trust {
+    padding: var(--space-xl) 0;
+    border-top: 2px solid var(--color-border);
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  .trust-grid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-lg);
+  }
+
+  .trust-sep {
+    color: var(--color-border-light);
+    font-size: 1.2rem;
+    line-height: 1;
+    user-select: none;
+  }
+
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  .trust-logo {
+    width: 24px;
+    height: 24px;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    filter: grayscale(100%) sepia(60%) saturate(400%) hue-rotate(50deg) brightness(0.9);
+  }
+
+  .trust-item:hover .trust-logo {
+    opacity: 1;
+  }
+
+  :global([data-theme="light"]) .trust-logo {
+    filter: grayscale(100%) sepia(40%) saturate(100%) brightness(0.7) contrast(1.1);
+  }
+
+  .trust-name {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  @media (max-width: 640px) {
+    .trust-sep {
+      display: none;
+    }
+
+    .trust-grid {
+      gap: var(--space-md) var(--space-xl);
+    }
+  }
+</style>

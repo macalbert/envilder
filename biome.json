@@ -37,7 +37,19 @@
       "unsafeParameterDecoratorsEnabled": true
     }
   },
-  "overrides": [],
+  "overrides": [
+    {
+      "includes": ["**/*.astro"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    }
+  ],
   "plugins": null,
   "root": true,
   "vcs": {

@@ -1,0 +1,42 @@
+---
+import Changelog from '../components/Changelog.astro';
+import DemoVideo from '../components/DemoVideo.astro';
+import FeaturesGrid from '../components/FeaturesGrid.astro';
+import Footer from '../components/Footer.astro';
+import GetStarted from '../components/GetStarted.astro';
+import GitHubAction from '../components/GitHubAction.astro';
+import Hero from '../components/Hero.astro';
+import HowItWorks from '../components/HowItWorks.astro';
+import Navbar from '../components/Navbar.astro';
+import ProblemSolution from '../components/ProblemSolution.astro';
+import Providers from '../components/Providers.astro';
+import Roadmap from '../components/Roadmap.astro';
+import TrustBadges from '../components/TrustBadges.astro';
+import { useTranslations } from '../i18n/utils';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const lang = 'en';
+const t = useTranslations(lang);
+---
+
+<BaseLayout
+  title={t.homeMeta.title}
+  description={t.homeMeta.description}
+  lang={lang}
+>
+  <Navbar lang={lang} />
+  <main>
+    <Hero lang={lang} />
+    <TrustBadges lang={lang} />
+    <ProblemSolution lang={lang} />
+    <HowItWorks lang={lang} />
+    <FeaturesGrid lang={lang} />
+    <DemoVideo lang={lang} />
+    <Providers lang={lang} />
+    <GitHubAction lang={lang} />
+    <Changelog lang={lang} />
+    <Roadmap lang={lang} />
+    <GetStarted lang={lang} />
+  </main>
+  <Footer lang={lang} />
+</BaseLayout>

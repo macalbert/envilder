@@ -1,0 +1,222 @@
+---
+import { useTranslations } from '../i18n/utils';
+import CodeBlock from './CodeBlock.astro';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="section" id="providers">
+  <div class="container">
+    <div class="section-title">
+      <h2>{t.providers.title}<span>{t.providers.titleAccent}</span></h2>
+      <p class="section-subtitle">
+        {t.providers.subtitle}
+      </p>
+    </div>
+
+    <div class="providers-grid">
+      <div class="provider-block">
+        <div class="provider-header">
+          <img class="pixel-icon provider-logo" src="/AWS.svg" alt="AWS" width="36" height="36" loading="lazy" />
+          <div>
+            <h3>{t.providers.awsTitle}</h3>
+          </div>
+        </div>
+
+        <CodeBlock lang="json" filename="param-map.json">
+{`{
+  "$config": {
+    "provider": "aws",
+    "profile": "prod-account"
+  },
+  "DB_PASSWORD": "/my-app/prod/db-password",
+  "API_KEY": "/my-app/prod/api-key"
+}`}
+        </CodeBlock>
+
+        <div class="provider-cmd">
+          <code>
+            <span class="prompt">$</span> envilder --map=param-map.json --envfile=.env
+          </code>
+        </div>
+
+        <ul class="provider-features">
+          {t.providers.awsFeatures.map((f) => (
+            <li>✔ {f}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="provider-block">
+        <div class="provider-header">
+          <img class="pixel-icon provider-logo" src="/Azure.svg" alt="Azure" width="36" height="36" loading="lazy" />
+          <div>
+            <h3>{t.providers.azureTitle}</h3>
+          </div>
+        </div>
+
+        <CodeBlock lang="json" filename="param-map.json">
+{`{
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "DB_PASSWORD": "my-app-prod-db-password",
+  "API_KEY": "my-app-prod-api-key"
+}`}
+        </CodeBlock>
+
+        <div class="provider-cmd">
+          <code>
+            <span class="prompt">$</span> envilder --provider=azure --vault-url=https://my-vault.vault.azure.net --map=param-map.json --envfile=.env
+          </code>
+        </div>
+
+        <ul class="provider-features">
+          {t.providers.azureFeatures.map((f) => (
+            <li>✔ {f}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="provider-block provider-coming-soon">
+        <div class="provider-header">
+          <img class="pixel-icon provider-logo" src="/GCP.svg" alt="GCP" width="36" height="36" loading="lazy" />
+          <div>
+            <h3>{t.providers.gcpTitle}</h3>
+            <span class="badge">{t.providers.gcpBadge}</span>
+          </div>
+        </div>
+
+        <CodeBlock lang="json" filename="param-map.json">
+{`{
+  "$config": {
+    "provider": "gcp",
+    "projectId": "my-project-id"
+  },
+  "DB_PASSWORD": "my-app-prod-db-password",
+  "API_KEY": "my-app-prod-api-key"
+}`}
+        </CodeBlock>
+
+        <div class="provider-cmd">
+          <code>
+            <span class="prompt">$</span> envilder --provider=gcp --map=param-map.json --envfile=.env
+          </code>
+        </div>
+
+        <ul class="provider-features">
+          {t.providers.gcpFeatures.map((f) => (
+            <li>✔ {f}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .providers-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+    max-width: 1100px;
+    margin: 0 auto;
+    justify-items: center;
+  }
+
+  .provider-block {
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    padding: var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    width: 100%;
+    max-width: 520px;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .provider-coming-soon {
+    border-style: dashed;
+    opacity: 0.85;
+  }
+
+  @media (min-width: 768px) {
+    .providers-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .provider-block {
+      max-width: none;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .providers-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .provider-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .provider-header .pixel-icon {
+    font-size: 2rem;
+    margin-bottom: 0;
+  }
+
+  .provider-header h3 {
+    color: var(--color-text);
+    font-size: 0.7rem;
+  }
+
+  .provider-cmd {
+    background: var(--color-code-bg);
+    border: 1px solid var(--color-border);
+    padding: var(--space-sm) var(--space-md);
+    overflow-x: auto;
+  }
+
+  .provider-cmd code {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    background: transparent;
+    border: none;
+    padding: 0;
+    white-space: nowrap;
+    color: var(--color-text);
+  }
+
+  .provider-cmd .prompt {
+    color: var(--color-success);
+  }
+
+  .provider-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .provider-features li {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .provider-features code {
+    font-size: 0.78rem;
+  }
+
+</style>

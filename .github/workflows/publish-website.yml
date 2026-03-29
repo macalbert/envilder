@@ -1,0 +1,83 @@
+name: 🌍 Warp Zone Publisher
+
+on:
+  pull_request:
+    branches:
+      - "*"
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - "src/apps/website/**"
+      - "src/iac/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/publish-website.yml"
+            
+  push:
+    branches:
+      - main
+    paths:
+      - "src/apps/website/**"
+      - "src/iac/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/publish-website.yml"
+
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: publish-website-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: 🧱 Enter the Pipe (Checkout)
+        uses: actions/checkout@v6
+
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: 🍄 Grab a Mushroom (Setup Node.js)
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: 🪙 Collect Coins (Configure AWS credentials)
+        if: github.event_name != 'pull_request'
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: 📦 Open the ? Block (Install packages)
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗️ Build the Castle (Build website)
+        working-directory: src/apps/website
+        run: pnpm build
+
+      - name: 🌟 Warp to the Cloud (Deploy infrastructure)
+        if: github.event_name != 'pull_request'
+        working-directory: src/iac
+        run: |
+          node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('cdk.json','utf8'));delete c.profile;fs.writeFileSync('cdk.json',JSON.stringify(c,null,2));"
+          npx cdk deploy macalbert-envilder-website-production-stack --require-approval never
+
+      - name: 🏁 Flagpole Reached!
+        run: echo "🎉 Yahoo! Website deployed successfully! ⭐"
