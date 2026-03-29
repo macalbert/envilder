@@ -14,12 +14,19 @@
 function stripHtmlComments(text: string): string {
   let result = text;
   // First pass: remove well-formed comments
-  while (result.includes('<!--') && result.includes('-->')) {
-    result = result.replace(/<!--[\s\S]*?-->/g, '');
+  while (
+    result.includes('<!--') &&
+    (result.includes('-->') || result.includes('--!>'))
+  ) {
+    result = result.replace(/<!--[\s\S]*?--(?:>|!>)/g, '');
   }
   // Second pass: remove any residual opener/closer fragments
-  while (result.includes('<!--') || result.includes('-->')) {
-    result = result.replace(/<!--|-->/g, '');
+  while (
+    result.includes('<!--') ||
+    result.includes('-->') ||
+    result.includes('--!>')
+  ) {
+    result = result.replace(/<!--|--(?:>|!>)/g, '');
   }
   return result;
 }
