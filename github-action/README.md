@@ -1,7 +1,7 @@
 # 🗝️ Envilder GitHub Action 🏰
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/96bf1efa-7d21-440a-a414-3a20e7f9a1f1" alt="Envilder">
+  <img src="https://github.com/user-attachments/assets/8a7188ef-9d8d-45fb-8c37-3af718fb5103" alt="Envilder">
 </p>
 
 <p align="center">
