@@ -205,7 +205,7 @@ export const en: Translations = {
       'CloudTrail audit logging',
     ],
     azureTitle: 'Azure Key Vault',
-    azureBadge: `New in ${releaseMetadata.azureIntroVersion}`,
+    azureBadge: 'New in v0.8',
     azureFeatures: [
       'Auto-normalizes secret names (slashes → hyphens)',
       'DefaultAzureCredential authentication',

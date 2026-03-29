@@ -11,6 +11,20 @@ const t = useTranslations(lang);
 const version = `v${__APP_VERSION__}`;
 const currentYear = new Date().getFullYear();
 const currentPath = Astro.url.pathname;
+const nonDefaultLocales = Object.keys(languages).filter(
+  (code) => code !== 'en',
+);
+const localePrefixRegex =
+  nonDefaultLocales.length > 0
+    ? new RegExp(`^/(${nonDefaultLocales.join('|')})(?=/|$)`)
+    : null;
+const stripLocalePrefix = (path: string): string => {
+  if (!localePrefixRegex) {
+    return path || '/';
+  }
+  const strippedPath = path.replace(localePrefixRegex, '');
+  return strippedPath || '/';
+};
 
 const links = {
   project: [
@@ -117,7 +131,7 @@ const links = {
           <div class="lang-switcher">
             {Object.entries(languages).map(([code, _label]) => (
               <a
-                href={code === 'en' ? currentPath.replace(/^\/(ca|es)/, '') || '/' : `/${code}${currentPath.replace(/^\/(ca|es)/, '') || '/'}`}
+                href={code === 'en' ? stripLocalePrefix(currentPath) : `/${code}${stripLocalePrefix(currentPath)}`}
                 class:list={['lang-link', { active: code === lang }]}
               >
                 {code.toUpperCase()}

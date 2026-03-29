@@ -205,7 +205,7 @@ export const ca: Translations = {
       "Registre d'auditoria CloudTrail",
     ],
     azureTitle: 'Azure Key Vault',
-    azureBadge: `Nou a ${releaseMetadata.azureIntroVersion}`,
+    azureBadge: 'Nou a v0.8',
     azureFeatures: [
       'Auto-normalitza noms de secrets (barres → guions)',
       'Autenticació DefaultAzureCredential',

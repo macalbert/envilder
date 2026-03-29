@@ -59,6 +59,7 @@ jobs:
           cache: "pnpm"
 
       - name: 🪙 Collect Coins (Configure AWS credentials)
+        if: github.event_name != 'pull_request'
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
@@ -72,6 +73,7 @@ jobs:
         run: pnpm build
 
       - name: 🌟 Warp to the Cloud (Deploy infrastructure)
+        if: github.event_name != 'pull_request'
         working-directory: src/iac
         run: |
           node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('cdk.json','utf8'));delete c.profile;fs.writeFileSync('cdk.json',JSON.stringify(c,null,2));"

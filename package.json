@@ -1,7 +1,7 @@
 {
   "name": "envilder",
   "version": "0.9.0",
-  "description": "A CLI and GitHub Action that securely centralizes your environment variables from AWS SSM, AWS Secrets Manager, Azure Key Vault, or GCP Secret Manager as a single source of truth",
+  "description": "A CLI and GitHub Action that securely centralizes your environment variables from AWS SSM or Azure Key Vault as a single source of truth",
   "homepage": "https://envilder.com",
   "author": {
     "name": "Marçal Albert Castellví",
@@ -47,7 +47,6 @@
     "aws",
     "ssm",
     "parameter-store",
-    "aws-secrets-manager",
     "cli",
     "environment",
     "secrets",
@@ -65,9 +64,6 @@
     "azure",
     "key-vault",
     "azure-key-vault",
-    "gcp",
-    "gcp-secret-manager",
-    "google-cloud",
     "multi-cloud"
   ],
   "bugs": {
