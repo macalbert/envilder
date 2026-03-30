@@ -22,7 +22,7 @@ from Azure Key Vault ([#90](https://github.com/macalbert/envilder/pull/90))
 prints a warning. It will be removed in a future release.
 * `configureInfrastructureServices()` now receives a single `MapFileConfig` object instead of separate parameters
 * CLI and GHA entry points read `$config` from the map file and merge with CLI flags / GHA inputs
-* Extracted shared `ContainerConfiguration` module (`src/apps/shared/`) for DI setup reused by CLI and GitHub Action
+* Extracted shared `ContainerConfiguration` module (`src/envilder/apps/shared/`) for DI setup reused by CLI and GitHub Action
 * Both `Startup.ts` files (CLI and GHA) now delegate to shared `configureInfrastructureServices()` and `configureApplicationServices()`
 * Updated CLI description to include Azure Key Vault examples
 * Updated `action.yml` description and inputs to reflect multi-provider support

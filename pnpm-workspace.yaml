@@ -1,6 +1,6 @@
 packages:
   - "."
-  - "src/apps/website"
+  - "src/website"
   - "src/iac"
   - "tests/iac"
 

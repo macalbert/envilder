@@ -25,10 +25,10 @@ NOT be translated.
 
 **You do NOT assume a fixed set of languages.** At the start of every audit:
 
-1. **Scan** `src/apps/website/src/i18n/` for `*.ts` files (excluding `types.ts`
+1. **Scan** `src/website/src/i18n/` for `*.ts` files (excluding `types.ts`
    and `utils.ts`). Each file represents a supported locale (e.g. `en.ts` → EN,
    `ca.ts` → CA, `es.ts` → ES, `fr.ts` → FR).
-2. **Read** `src/apps/website/src/i18n/types.ts` to understand the translation
+2. **Read** `src/website/src/i18n/types.ts` to understand the translation
    key structure and which keys every locale must implement.
 3. **Identify the default locale** — the one served at `/` without a prefix
    (typically EN). Non-default locales are served under `/{locale}/` prefixes.
@@ -39,13 +39,13 @@ automatically covers it without any agent changes.
 
 ## Context
 
-- The website source lives under `src/apps/website/`
-- Translation strings are in `src/apps/website/src/i18n/{locale}.ts`
-- Type definitions: `src/apps/website/src/i18n/types.ts`
-- Astro components: `src/apps/website/src/components/*.astro`
-- Layouts: `src/apps/website/src/layouts/*.astro`
+- The website source lives under `src/website/`
+- Translation strings are in `src/website/src/i18n/{locale}.ts`
+- Type definitions: `src/website/src/i18n/types.ts`
+- Astro components: `src/website/src/components/*.astro`
+- Layouts: `src/website/src/layouts/*.astro`
 - The site runs at `http://localhost:4322/` with locale prefixes `/{locale}/`
-- Pages are discovered by scanning `src/apps/website/src/pages/`
+- Pages are discovered by scanning `src/website/src/pages/`
 
 ## Terms that MUST NOT be translated
 
@@ -141,7 +141,7 @@ When confirmed, delegate the implementation to a subagent:
    - Update the `.astro` component to use `t.newKey` instead of the hardcoded string
 2. **For translation errors**: The subagent updates the value in the
    corresponding locale file
-3. After all edits, rebuild the site to verify: `cd src/apps/website && pnpm build`
+3. After all edits, rebuild the site to verify: `cd src/website && pnpm build`
 
 When delegating, provide the subagent with:
 
@@ -151,7 +151,7 @@ When delegating, provide the subagent with:
 
 ## Constraints
 
-- DO NOT modify any code outside `src/apps/website/`
+- DO NOT modify any code outside `src/website/`
 - DO NOT translate CLI flags, product names, or code tokens listed above
 - DO NOT change the i18n architecture or type system structure
 - DO NOT add new i18n keys without also adding values for ALL detected locales

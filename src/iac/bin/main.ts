@@ -53,7 +53,7 @@ const config: DeploymentConfig = {
 			staticWebsites: [
 				{
 					name: "Website",
-					projectPath: "envilder/src/apps/website/dist",
+					projectPath: "envilder/src/website/dist",
 				},
 			],
 		},

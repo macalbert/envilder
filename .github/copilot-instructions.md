@@ -9,7 +9,7 @@ principles for testability and modularity.
 
 ## Architecture Layers
 
-### Domain Layer (`src/envilder/domain`)
+### Domain Layer (`src/envilder/core/domain`)
 
 **Pure business logic - NO external dependencies allowed.**
 
@@ -18,7 +18,7 @@ principles for testability and modularity.
 - **Errors**: Custom domain errors (`InvalidArgumentError`, `ParameterNotFoundError`, etc.) extend `DomainError`
 - **Value Objects**: `OperationMode` enum
 
-### Application Layer (`src/envilder/application`)
+### Application Layer (`src/envilder/core/application`)
 
 **Use case orchestration using Command/Handler pattern.**
 
@@ -27,7 +27,7 @@ principles for testability and modularity.
 - Handlers are `@injectable()` and inject dependencies via `@inject(TYPES.X)`
 - Commands have static `.create()` factory methods
 
-### Infrastructure Layer (`src/envilder/infrastructure`)
+### Infrastructure Layer (`src/envilder/core/infrastructure`)
 
 **Adapters implementing domain ports.**
 
@@ -36,7 +36,7 @@ principles for testability and modularity.
 - `FileVariableStore`: Implements `IVariableStore` for .env and mapping JSON files (supports `$config` section)
 - `ConsoleLogger`: Implements `ILogger` with colored output via `picocolors`
 
-### Apps Layer (`src/apps`)
+### Apps Layer (`src/envilder/apps`)
 
 **Entry points (CLI and GitHub Action).**
 
@@ -47,9 +47,9 @@ principles for testability and modularity.
 
 ## Dependency Injection (InversifyJS)
 
-**Symbol Registry**: `src/envilder/types.ts` exports `DOMAIN`, `APPLICATION`, and legacy `TYPES` objects.
+**Symbol Registry**: `src/envilder/core/types.ts` exports `DOMAIN`, `APPLICATION`, and legacy `TYPES` objects.
 
-**Container Setup Pattern** (see `src/apps/shared/ContainerConfiguration.ts`):
+**Container Setup Pattern** (see `src/envilder/apps/shared/ContainerConfiguration.ts`):
 
 ```typescript
 // Provider selection based on MapFileConfig
@@ -100,7 +100,7 @@ via Lowkey Vault (both via TestContainers). Run `pnpm build` + `pack-and-install
 
 1. **Command class**: Data container with validation via static `.create()` method
 2. **Handler class**: Decorated with `@injectable()`, injects ports via constructor
-3. **Registration**: Add symbol to `TYPES`, bind in `configureApplicationServices()` (`src/apps/shared/ContainerConfiguration.ts`)
+3. **Registration**: Add symbol to `TYPES`, bind in `configureApplicationServices()` (`src/envilder/apps/shared/ContainerConfiguration.ts`)
 4. **Routing**: Add case to `DispatchActionCommandHandler.handleCommand()` switch
 
 Example (PushSingle):
@@ -111,7 +111,7 @@ Example (PushSingle):
 
 ### Error Handling
 
-- **Throw custom errors**: Use `InvalidArgumentError`, `ParameterNotFoundError`, etc. from `src/envilder/domain/errors`
+- **Throw custom errors**: Use `InvalidArgumentError`, `ParameterNotFoundError`, etc. from `src/envilder/core/domain/errors`
 - **Never catch generically**: Let errors bubble to entry points (CLI/GHA handle exit codes)
 
 ### Logging
@@ -173,23 +173,23 @@ Example (PushSingle):
 
 ### Example: Add "validate" command to check SSM parameter existence without pulling
 
-1. **Domain**: Create `src/envilder/domain/OperationMode.ts` enum entry: `VALIDATE`
+1. **Domain**: Create `src/envilder/core/domain/OperationMode.ts` enum entry: `VALIDATE`
 2. **Application**:
-   - Create `src/envilder/application/validate/ValidateCommand.ts` with `.create()` factory
+   - Create `src/envilder/core/application/validate/ValidateCommand.ts` with `.create()` factory
    - Create `ValidateCommandHandler.ts`, inject `ISecretProvider` + `ILogger`
    - Add `ValidateCommandHandler: Symbol.for('ValidateCommandHandler')` to `APPLICATION` in `types.ts`
-3. **DI Setup**: In `configureApplicationServices()` (`src/apps/shared/ContainerConfiguration.ts`), bind handler with `.inTransientScope()`
+3. **DI Setup**: In `configureApplicationServices()` (`src/envilder/apps/shared/ContainerConfiguration.ts`), bind handler with `.inTransientScope()`
 4. **Routing**: Add `case OperationMode.VALIDATE:` to `DispatchActionCommandHandler`
 5. **CLI**: In `Cli.ts`, add `.option('--validate')` and map to `OperationMode.VALIDATE`
-6. **Tests**: Create `tests/envilder/application/validate/ValidateCommandHandler.test.ts`, mock ports with `vi.fn()`
+6. **Tests**: Create `tests/envilder/core/application/validate/ValidateCommandHandler.test.ts`, mock ports with `vi.fn()`
 7. **E2E**: Add test to `e2e/cli.test.ts` using LocalStack
 
 ## Extension Points
 
 **New Secret Provider** (e.g., HashiCorp Vault):
 
-1. Implement `ISecretProvider` interface in `src/envilder/infrastructure/vault/`
-2. Add a new case in `configureInfrastructureServices()` (`src/apps/shared/ContainerConfiguration.ts`)
+1. Implement `ISecretProvider` interface in `src/envilder/core/infrastructure/vault/`
+2. Add a new case in `configureInfrastructureServices()` (`src/envilder/apps/shared/ContainerConfiguration.ts`)
 3. No changes needed to application or domain layers
 
 **Multi-Backend Support**: Already implemented — `configureInfrastructureServices()` selects

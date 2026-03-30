@@ -42,8 +42,8 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 | Scope | Area |
 |-------|------|
-| `cli` | CLI entry point (`src/apps/cli/`) |
-| `gha` | GitHub Action (`src/apps/gha/`) |
+| `cli` | CLI entry point (`src/envilder/apps/cli/`) |
+| `gha` | GitHub Action (`src/envilder/apps/gha/`) |
 | `ssm` | AWS SSM provider |
 | `domain` | Domain entities, ports, errors |
 | `app` | Application layer handlers |

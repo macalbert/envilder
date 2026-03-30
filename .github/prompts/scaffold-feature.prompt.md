@@ -15,7 +15,7 @@ Scaffold the file structure for a new Envilder feature.
 
 For a feature named `{name}`:
 
-### 1. Command (`src/envilder/application/{name}/{Name}Command.ts`)
+### 1. Command (`src/envilder/core/application/{name}/{Name}Command.ts`)
 
 ```typescript
 export class {Name}Command {
@@ -28,7 +28,7 @@ export class {Name}Command {
 }
 ```
 
-### 2. Handler (`src/envilder/application/{name}/{Name}CommandHandler.ts`)
+### 2. Handler (`src/envilder/core/application/{name}/{Name}CommandHandler.ts`)
 
 ```typescript
 @injectable()
@@ -44,7 +44,7 @@ export class {Name}CommandHandler {
 }
 ```
 
-### 3. DI Symbol (`src/envilder/types.ts`)
+### 3. DI Symbol (`src/envilder/core/types.ts`)
 
 Add to `APPLICATION`:
 
@@ -52,7 +52,7 @@ Add to `APPLICATION`:
 {Name}CommandHandler: Symbol.for('{Name}CommandHandler'),
 ```
 
-### 4. Test (`tests/envilder/application/{name}/{Name}CommandHandler.test.ts`)
+### 4. Test (`tests/envilder/core/application/{name}/{Name}CommandHandler.test.ts`)
 
 ```typescript
 describe('{Name}CommandHandler', () => {
@@ -64,7 +64,7 @@ describe('{Name}CommandHandler', () => {
 });
 ```
 
-### 5. Dispatcher (`src/envilder/application/dispatch/DispatchActionCommandHandler.ts`)
+### 5. Dispatcher (`src/envilder/core/application/dispatch/DispatchActionCommandHandler.ts`)
 
 Add case to switch statement:
 

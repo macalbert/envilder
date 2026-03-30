@@ -120,5 +120,5 @@ control where it matters while automating mechanical steps.
 ### How do I extend with a new secret provider?
 
 No AI workflow changes needed. Implement `ISecretProvider` in
-`src/envilder/infrastructure/`, update `Startup.configureInfrastructure()`.
+`src/envilder/core/infrastructure/`, update `Startup.configureInfrastructure()`.
 The hexagonal architecture keeps the domain and application layers unchanged.

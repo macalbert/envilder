@@ -27,10 +27,10 @@ import {
   expect,
   it,
 } from 'vitest';
-import { Startup } from '../src/apps/gha/Startup';
-import { DispatchActionCommand } from '../src/envilder/application/dispatch/DispatchActionCommand';
-import type { DispatchActionCommandHandler } from '../src/envilder/application/dispatch/DispatchActionCommandHandler';
-import { TYPES } from '../src/envilder/types';
+import { Startup } from '../src/envilder/apps/gha/Startup';
+import { DispatchActionCommand } from '../src/envilder/core/application/dispatch/DispatchActionCommand';
+import type { DispatchActionCommandHandler } from '../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
+import { TYPES } from '../src/envilder/core/types';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
