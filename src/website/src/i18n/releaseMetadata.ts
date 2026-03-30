@@ -6,7 +6,7 @@ export const releaseMetadata = {
   /** Latest featured release version label */
   releaseVersion: __APP_VERSION__,
   /** ISO date of the featured release */
-  releaseDate: '2026-03-22',
+  releaseDate: '2026-03-30',
   /** Number of non-translatable highlight icons */
-  highlightIcons: ['✨', '✨', '✨', '✨', '⚠️'] as const,
+  highlightIcons: ['✨', '✨', '✨'] as const,
 };

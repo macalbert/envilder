@@ -250,8 +250,8 @@ export const ca: Translations = {
     title: 'Què hi ha de ',
     titleAccent: 'nou',
     subtitle:
-      "Novetats de l'última versió. El suport multi-proveïdor ja és aquí.",
-    releaseTitle: 'Suport Multi-Proveïdor',
+      "Novetats de l'última versió. El lloc de documentació ja és en línia.",
+    releaseTitle: 'Documentació i Estabilitat',
     releaseDate: new Date(
       `${releaseMetadata.releaseDate}T00:00:00`,
     ).toLocaleDateString('ca-ES', {
@@ -262,20 +262,15 @@ export const ca: Translations = {
     highlights: [
       {
         icon: '✨',
-        text: 'Secció $config als fitxers de mapeig — declara proveïdor i detalls de connexió en línia',
+        text: 'Web de documentació publicada a envilder.com — guies completes, historial i docs multilingüe',
       },
       {
         icon: '✨',
-        text: "Suport d'Azure Key Vault — paritat completa amb AWS SSM",
+        text: 'Corregit: @types/node mogut a devDependencies — sense dependències de runtime innecessàries',
       },
-      { icon: '✨', text: 'Flags CLI --vault-url i --provider' },
       {
         icon: '✨',
-        text: 'Normalització automàtica de noms de secrets per Azure (barres → guions)',
-      },
-      {
-        icon: '⚠️',
-        text: "Canvi incompatible: --ssm-path reanomenat a --secret-path (l'antic flag encara funciona com a àlies obsolet)",
+        text: 'Corregit: inestabilitat als tests e2e — rutes SSM úniques per execució eviten condicions de carrera',
       },
     ],
     fullChangelog: '📋 Historial complet',

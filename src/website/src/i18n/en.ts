@@ -248,8 +248,8 @@ export const en: Translations = {
   changelog: {
     title: "What's ",
     titleAccent: 'new',
-    subtitle: 'Latest release highlights. Multi-provider support is here.',
-    releaseTitle: 'Multi-Provider Support',
+    subtitle: 'Latest release highlights. Documentation website is live.',
+    releaseTitle: 'Documentation & Stability',
     releaseDate: new Date(
       `${releaseMetadata.releaseDate}T00:00:00`,
     ).toLocaleDateString('en-US', {
@@ -260,20 +260,15 @@ export const en: Translations = {
     highlights: [
       {
         icon: '✨',
-        text: '$config section in map files — declare provider and connection details inline',
+        text: 'Documentation website launched at envilder.com — full guides, changelog, and multi-language docs',
       },
       {
         icon: '✨',
-        text: 'Azure Key Vault support — full parity with AWS SSM',
+        text: 'Fixed: @types/node moved to devDependencies — no runtime bloat in installs',
       },
-      { icon: '✨', text: '--vault-url and --provider CLI flags' },
       {
         icon: '✨',
-        text: 'Automatic secret name normalization for Azure (slashes → hyphens)',
-      },
-      {
-        icon: '⚠️',
-        text: 'Breaking: --ssm-path renamed to --secret-path (old flag still works as deprecated alias)',
+        text: 'Fixed: e2e test flakiness — unique SSM paths per test run prevent race conditions',
       },
     ],
     fullChangelog: '📋 Full Changelog',

@@ -250,8 +250,8 @@ export const es: Translations = {
     title: 'Qué hay de ',
     titleAccent: 'nuevo',
     subtitle:
-      'Novedades de la última versión. El soporte multi-proveedor ya está aquí.',
-    releaseTitle: 'Soporte Multi-Proveedor',
+      'Novedades de la última versión. El sitio de documentación ya está en línea.',
+    releaseTitle: 'Documentación y Estabilidad',
     releaseDate: new Date(
       `${releaseMetadata.releaseDate}T00:00:00`,
     ).toLocaleDateString('es-ES', {
@@ -262,20 +262,15 @@ export const es: Translations = {
     highlights: [
       {
         icon: '✨',
-        text: 'Sección $config en archivos de mapeo — declara proveedor y detalles de conexión en línea',
+        text: 'Sitio de documentación publicado en envilder.com — guías completas, historial y docs multiidioma',
       },
       {
         icon: '✨',
-        text: 'Soporte de Azure Key Vault — paridad completa con AWS SSM',
+        text: 'Corregido: @types/node movido a devDependencies — sin dependencias de runtime innecesarias',
       },
-      { icon: '✨', text: 'Flags CLI --vault-url y --provider' },
       {
         icon: '✨',
-        text: 'Normalización automática de nombres de secretos para Azure (barras → guiones)',
-      },
-      {
-        icon: '⚠️',
-        text: 'Cambio incompatible: --ssm-path renombrado a --secret-path (el antiguo flag sigue funcionando como alias obsoleto)',
+        text: 'Corregido: inestabilidad en tests e2e — rutas SSM únicas por ejecución evitan condiciones de carrera',
       },
     ],
     fullChangelog: '📋 Historial completo',
