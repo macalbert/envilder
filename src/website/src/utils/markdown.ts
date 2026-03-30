@@ -74,13 +74,19 @@ export function changelogToHtml(md: string): string {
     joined
       // Version headings → h2 with id anchor
       .replace(
-        /^## \[?([\d.]+)\]?.*?([-–—]\s*)?(\d{4}-\d{2}-\d{2})?\s*$/gm,
-        (_match, ver, _sep, date) => {
+        /^## \[?([\d.]+)\]?(.*)$/gm,
+        (_match, ver, rest) => {
           const id = `v${ver.replace(/\./g, '')}`;
+          const dateMatch = rest.match(/(\d{4}-\d{2}-\d{2})/);
+          const date = dateMatch?.[1];
+          const deprecated = rest.includes('[DEPRECATED]');
           const dateHtml = date
             ? `<span class="release-date">${date}</span>`
             : '';
-          return `<h2 id="${id}"><span class="version-tag">v${ver}</span>${dateHtml}</h2>`;
+          const deprecatedHtml = deprecated
+            ? `<span class="badge badge-deprecated">DEPRECATED</span>`
+            : '';
+          return `<h2 id="${id}"><span class="version-tag">v${ver}</span>${dateHtml}${deprecatedHtml}</h2>`;
         },
       )
       // Fenced code blocks (```...```) → <pre><code>

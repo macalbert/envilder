@@ -395,6 +395,12 @@ pre code,
   color: var(--color-success);
 }
 
+.badge-deprecated {
+  border-color: var(--color-error);
+  color: var(--color-error);
+  opacity: 0.85;
+}
+
 /* ── Scanline overlay ─────────────────────────────────── */
 .scanlines {
   position: relative;

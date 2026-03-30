@@ -238,28 +238,29 @@ prints a warning. It will be removed in a future release.
 
 ---
 
-## [0.7.0](https://github.com/macalbert/envilder/compare/v0.6.6...v0.7.0) (2025-11-16)
+## [0.7.0] - 2025-11-16
 
-* ♻️ Move GitHub Action to github-action/ subfolder ([d9bf4d2](https://github.com/macalbert/envilder/commit/d9bf4d2e81acbb1ef2b4e0034c0b6aaa8b307ba3))
+### Added
 
-### Bug Fixes
+* **githubAction:** Add end-to-end tests for GitHub Actions simulation
+* **githubAction:** Update action paths and add new GitHub Action implementation
+* **packaging:** Add project build and uninstall functionality
 
-* **githubAction:** Correct author name in action.yml ([e964aff](https://github.com/macalbert/envilder/commit/e964affbca8410aada8494648dee62ab2a1ab5de))
-* **githubAction:** Correct build command from ppnpm to pnpm ([c9df0c4](https://github.com/macalbert/envilder/commit/c9df0c4cb612de0f2b6ab6406235c54fcb45d0c2))
-* **githubAction:** Correct path to GitHubAction.js in validation step ([94d1166](https://github.com/macalbert/envilder/commit/94d116632f4a6de656449f238ec007eeede2f5f2))
-* **githubAction:** Remove source map generation from build:gha script ([8989448](https://github.com/macalbert/envilder/commit/898944898cdea866f28f8874b714bfe3fd2dd88e))
-* **githubAction:** Update action references in documentation and code ([412601b](https://github.com/macalbert/envilder/commit/412601b7b56a90dd50e031addcaf192e2dec8ba3))
+### Fixed
 
-## Features
+* **githubAction:** Correct author name in action.yml
+* **githubAction:** Correct build command from `ppnpm` to `pnpm`
+* **githubAction:** Correct path to `GitHubAction.js` in validation step
+* **githubAction:** Remove source map generation from `build:gha` script
+* **githubAction:** Update action references in documentation and code
 
-* **githubAction:** Add end-to-end tests for GitHub Actions simulation ([29464a0](https://github.com/macalbert/envilder/commit/29464a016d0072cc728345400f68e0c62669579b))
-* **githubAction:** Update action paths and add new GitHub Action implementation ([4310e50](https://github.com/macalbert/envilder/commit/4310e5040fa4952c50e800578fb91e00cf2f7a36))
-* **githubAction:** Update action script paths and add entry point ([9f64e56](https://github.com/macalbert/envilder/commit/9f64e567d8c90832ee402accb6aba9264554a1e7))
-* **packaging:** Add project build and uninstall functionality ([70fc574](https://github.com/macalbert/envilder/commit/70fc5745c1490f33322f5fb8af1b68dd7e565fc1))
+### Changed
 
-### BREAKING CHANGES
+* Move GitHub Action to `github-action/` subfolder
 
-* Action path changed from macalbert/envilder@v1 to macalbert/envilder/github-action@v1
+### Breaking Changes
+
+* Action path changed from `macalbert/envilder@v1` to `macalbert/envilder/github-action@v1`
 
 ---
 
@@ -471,7 +472,7 @@ prints a warning. It will be removed in a future release.
 
 ---
 
-## [0.3.0] - 2025-05-09
+## [0.3.0] - 2025-05-09 [DEPRECATED]
 
 ### Added
 
@@ -485,7 +486,7 @@ prints a warning. It will be removed in a future release.
 * Bumped vite from 6.2.6 to 6.3.4
 * Bumped @aws-sdk/client-ssm from 3.787.0 to 3.799.0
 
-## [0.2.3] - 2025-04-12
+## [0.2.3] - 2025-04-12 [DEPRECATED]
 
 ### Changed
 
@@ -497,7 +498,7 @@ prints a warning. It will be removed in a future release.
   * @secretlint/secretlint-rule-preset-recommend from 8.5.0 to 9.0.0
   * secretlint from 8.5.0 to 9.0.0
 
-## [0.2.1] - 2024-10-16
+## [0.2.1] - 2024-10-16 [DEPRECATED]
 
 ### Added
 
@@ -509,6 +510,6 @@ prints a warning. It will be removed in a future release.
 
 * Updated README.md with improved documentation
 
-## [0.1.4] - 2024-10-01
+## [0.1.4] - 2024-10-01 [DEPRECATED]
 
 Initial public release of Envilder.
