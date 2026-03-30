@@ -426,7 +426,8 @@ export const es: Translations = {
     builtWith: 'Hecho con Astro. Código abierto en GitHub.',
   },
   changelogPage: {
-    title: 'Historial de cambios — Envilder',
+    title: 'Changelog Envilder | Versiones y actualizaciones',
+
     backToHome: '← Volver al inicio',
     fullChangelog: 'Historial de ',
     changelogAccent: 'cambios',
@@ -436,7 +437,8 @@ export const es: Translations = {
     backToTop: 'Volver arriba',
   },
   docs: {
-    title: 'Documentación — Envilder',
+    title: 'Docs Envilder | CLI, GitHub Action y AWS SSM',
+
     backToHome: '← Volver al inicio',
     pageTitle: 'Documentación',
     intro: 'Todo lo que necesitas para empezar con Envilder.',

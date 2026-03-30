@@ -422,7 +422,8 @@ export const en: Translations = {
     builtWith: 'Built with Astro. Open source on GitHub.',
   },
   changelogPage: {
-    title: 'Changelog — Envilder',
+    title: 'Envilder Changelog | Releases & Updates',
+
     backToHome: '← Back to home',
     fullChangelog: 'Full ',
     changelogAccent: 'Changelog',
@@ -432,7 +433,8 @@ export const en: Translations = {
     backToTop: 'Back to top',
   },
   docs: {
-    title: 'Documentation — Envilder',
+    title: 'Envilder Docs | CLI, GitHub Action & AWS SSM',
+
     backToHome: '← Back to home',
     pageTitle: 'Documentation',
     intro: 'Everything you need to get started with Envilder.',
