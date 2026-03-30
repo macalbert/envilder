@@ -11,6 +11,13 @@ const {
   lang = 'en',
 } = Astro.props;
 
+const skipLabel: Record<string, string> = {
+  en: 'Skip to main content',
+  es: 'Saltar al contenido principal',
+  ca: 'Saltar al contingut principal',
+};
+const skipText = skipLabel[lang] ?? skipLabel.en;
+
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 ---
 
@@ -88,6 +95,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
     </script>
   </head>
   <body>
+    <a href="#main-content" class="skip-link">{skipText}</a>
     <slot />
   </body>
 </html>

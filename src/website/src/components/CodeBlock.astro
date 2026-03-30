@@ -5,16 +5,17 @@ export interface Props {
 }
 
 const { lang = 'json', filename } = Astro.props;
+const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
 ---
 
-<div class="codeblock">
+<div class="codeblock" role="region" aria-label={ariaLabel}>
   {filename && (
     <div class="codeblock-header">
       <span class="codeblock-filename">{filename}</span>
       <span class="codeblock-lang">{lang}</span>
     </div>
   )}
-  <pre class="codeblock-body"><code><slot /></code></pre>
+  <pre class="codeblock-body" tabindex="0"><code><slot /></code></pre>
 </div>
 
 <style>

@@ -6,8 +6,12 @@ export interface Props {
 const { title = 'bash' } = Astro.props;
 ---
 
-<div class="terminal">
-  <div class="terminal-header">
+<figure
+  class="terminal"
+  role="region"
+  aria-label={title}
+>
+  <div class="terminal-header" aria-hidden="true">
     <div class="terminal-dots">
       <span class="dot dot-red"></span>
       <span class="dot dot-yellow"></span>
@@ -16,10 +20,10 @@ const { title = 'bash' } = Astro.props;
     <span class="terminal-title">{title}</span>
     <div class="terminal-spacer"></div>
   </div>
-  <div class="terminal-body">
+  <div class="terminal-body" tabindex="0" role="code">
     <slot />
   </div>
-</div>
+</figure>
 
 <style>
   .terminal {

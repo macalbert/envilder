@@ -22,6 +22,7 @@ const t = useTranslations(lang);
     <div class="steps">
       <div class="step">
         <div class="step-number">
+          <span class="step-label">STEP</span>
           <span>01</span>
         </div>
         <div class="step-content">
@@ -47,6 +48,7 @@ const t = useTranslations(lang);
 
       <div class="step">
         <div class="step-number">
+          <span class="step-label">STEP</span>
           <span>02</span>
         </div>
         <div class="step-content">
@@ -73,6 +75,7 @@ ${t.howItWorks.terminalWritten}`}
 
       <div class="step">
         <div class="step-number">
+          <span class="step-label">STEP</span>
           <span>03</span>
         </div>
         <div class="step-content">
@@ -107,23 +110,36 @@ SECRET_TOKEN=tok_prod_xyz789`}
     width: 100%;
     align-items: flex-start;
     min-width: 0;
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    padding: var(--space-lg);
   }
 
   .step-number {
     flex-shrink: 0;
-    width: 48px;
-    height: 48px;
+    width: 56px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 2px;
     background: var(--color-primary);
     border: 2px solid var(--color-primary);
     box-shadow: var(--pixel-shadow-primary);
+    padding: var(--space-sm) 0;
   }
 
-  .step-number span {
+  .step-label {
     font-family: var(--font-pixel);
-    font-size: 0.65rem;
+    font-size: 0.4rem;
+    color: var(--color-btn-text);
+    opacity: 0.75;
+    letter-spacing: 0.05em;
+  }
+
+  .step-number > span:not(.step-label) {
+    font-family: var(--font-pixel);
+    font-size: 0.75rem;
     color: var(--color-btn-text);
   }
 
@@ -137,7 +153,7 @@ SECRET_TOKEN=tok_prod_xyz789`}
 
   .step-content h3 {
     color: var(--color-text);
-    font-size: 0.75rem;
+    font-size: 1.1rem;
   }
 
   .step-content p {
@@ -149,14 +165,14 @@ SECRET_TOKEN=tok_prod_xyz789`}
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: var(--space-md) 0;
-    margin-left: 23px;
+    padding: var(--space-sm) 0;
+    margin-left: calc(var(--space-lg) + 28px);
     width: 2px;
   }
 
   .connector-line {
     width: 2px;
-    height: 16px;
+    height: 12px;
     background: var(--color-border);
   }
 
@@ -164,7 +180,7 @@ SECRET_TOKEN=tok_prod_xyz789`}
     font-family: var(--font-pixel);
     font-size: 0.5rem;
     color: var(--color-primary);
-    padding: var(--space-xs) 0;
+    padding: 2px 0;
   }
 
   @media (max-width: 640px) {

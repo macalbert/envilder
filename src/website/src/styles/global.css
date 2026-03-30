@@ -517,3 +517,87 @@ pre code,
   background: var(--color-primary);
   color: var(--color-btn-text);
 }
+
+/* ── Accessibility ─────────────────────────────────────── */
+
+/* Skip-to-content link — visible only on focus */
+.skip-link {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(-200%);
+  top: var(--space-md);
+  z-index: 9999;
+  background: var(--color-primary);
+  color: var(--color-btn-text);
+  padding: var(--space-sm) var(--space-xl);
+  font-family: var(--font-pixel);
+  font-size: 0.6rem;
+  text-decoration: none;
+  border: 2px solid var(--color-primary-dim);
+  white-space: nowrap;
+  transition: transform 0.15s ease;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Global keyboard focus ring */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Table horizontal-scroll wrapper */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--color-border);
+  margin-bottom: var(--space-xl);
+}
+
+.table-wrapper .docs-table {
+  margin-bottom: 0;
+}
+
+.table-wrapper:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ── Reduced motion ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── High contrast ──────────────────────────────────────── */
+@media (prefers-contrast: more) {
+  :root {
+    --color-border: #5a7a50;
+    --color-text-muted: #b0c890;
+    --color-text-dim: #8aaa60;
+  }
+
+  [data-theme="light"] {
+    --color-border: #7a749a;
+    --color-text-muted: #2a2230;
+    --color-text-dim: #4a4060;
+  }
+
+  :focus-visible {
+    outline-width: 3px;
+    outline-offset: 3px;
+  }
+}

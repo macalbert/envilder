@@ -11,7 +11,7 @@ const { lang = 'en' } = Astro.props;
 const t = useTranslations(lang);
 ---
 
-<main class="docs-page">
+<main class="docs-page" id="main-content">
   <div class="docs-layout">
 
     <!-- Sidebar navigation -->
@@ -1008,3 +1008,24 @@ jobs:
     }
   }
 </style>
+
+<script>
+  // Enhance table accessibility: scope="col" on all th, plus scrollable wrappers
+  document.querySelectorAll<HTMLTableElement>('.docs-table').forEach((table) => {
+    // Add scope="col" to all header cells
+    table.querySelectorAll('thead th').forEach((th) => {
+      th.setAttribute('scope', 'col');
+    });
+
+    // Wrap in a scrollable region for keyboard access (only if not already wrapped)
+    if (!table.parentElement?.classList.contains('table-wrapper')) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'table-wrapper';
+      wrapper.setAttribute('tabindex', '0');
+      wrapper.setAttribute('role', 'region');
+      wrapper.setAttribute('aria-label', table.querySelector('caption')?.textContent ?? 'data table');
+      table.parentNode!.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    }
+  });
+</script>

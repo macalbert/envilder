@@ -96,22 +96,22 @@ export const es: Translations = {
   howItWorks: {
     title: 'Cómo ',
     titleAccent: 'funciona',
-    subtitle: 'Tres pasos. De secretos dispersos a una única fuente de verdad.',
+    subtitle: 'Define. Descarga. Listo.',
     steps: [
       {
-        title: 'Crea un archivo de mapeo',
+        title: 'Escribe un param-map.json',
         description:
-          'Mapea los nombres de tus variables de entorno a sus rutas de secretos en AWS SSM o Azure Key Vault.',
+          'Un archivo JSON que mapea nombres de variables de entorno a sus rutas en SSM o nombres de secretos en Key Vault. Confírmalo. Revísalo en PRs. Diferéncialo entre entornos. Es la única configuración que necesitas.',
       },
       {
-        title: 'Ejecuta un comando',
+        title: 'Ejecuta envilder',
         description:
-          'Envilder obtiene cada secreto de tu proveedor en la nube y los escribe en un archivo .env local. Idempotente e instantáneo.',
+          'Un comando obtiene cada secreto de tu vault en la nube y los escribe en .env. Sin copiar manualmente. Sin desfases. Repetible en cualquier lugar — localmente, en CI o en una máquina nueva.',
       },
       {
-        title: 'Tu .env está listo',
+        title: '.env escrito. Los secretos se quedan en el vault.',
         description:
-          'Un archivo de entorno limpio y actualizado — generado desde la fuente de verdad. Úsalo localmente o inyéctalo en CI/CD con la GitHub Action.',
+          'Un archivo .env limpio, generado bajo demanda desde datos del vault en tiempo real. Úsalo localmente, descárgalo en el despliegue con la GitHub Action o evita el archivo con --exec.',
       },
     ],
     terminalFetched1: '✔ Obtenido DB_PASSWORD  → ···word',

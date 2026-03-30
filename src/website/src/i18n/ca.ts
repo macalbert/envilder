@@ -96,22 +96,22 @@ export const ca: Translations = {
   howItWorks: {
     title: 'Com ',
     titleAccent: 'funciona',
-    subtitle: 'Tres passos. De secrets dispersos a una única font de veritat.',
+    subtitle: 'Defineix. Descarrega. Fet.',
     steps: [
       {
-        title: 'Crea un fitxer de mapeig',
+        title: 'Escriu un param-map.json',
         description:
-          "Mapeja els noms de les teves variables d'entorn a les seves rutes de secrets a AWS SSM o Azure Key Vault.",
+          "Un fitxer JSON que mapeja noms de variables d'entorn a les seves rutes a SSM o noms de secrets a Key Vault. Fes-ne commit. Revisa'l en PRs. Difencia'l entre entorns. És l'única configuració que necessites.",
       },
       {
-        title: 'Executa una comanda',
+        title: 'Executa envilder',
         description:
-          'Envilder obté cada secret del teu proveïdor al núvol i els escriu en un fitxer .env local. Idempotent i instantani.',
+          "Una comanda obté cada secret del teu vault al núvol i els escriu a .env. Sense copiar manualment. Sense desfasaments. Repetible a qualsevol lloc — localment, en CI o en una màquina nova.",
       },
       {
-        title: 'El teu .env està llest',
+        title: '.env escrit. Els secrets es queden al vault.',
         description:
-          "Un fitxer d'entorn net i actualitzat — generat des de la font de veritat. Utilitza'l localment o injecta'l en CI/CD amb la GitHub Action.",
+          "Un fitxer .env net, generat sota demanda des de dades del vault en temps real. Utilitza'l localment, descarrega'l en el desplegament amb la GitHub Action o evita el fitxer amb --exec.",
       },
     ],
     terminalFetched1: '✔ Obtingut DB_PASSWORD  → ···word',

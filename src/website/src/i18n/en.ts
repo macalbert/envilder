@@ -95,23 +95,22 @@ export const en: Translations = {
   howItWorks: {
     title: 'How it ',
     titleAccent: 'works',
-    subtitle:
-      'Three steps. From scattered secrets to a single source of truth.',
+    subtitle: 'Define. Pull. Done.',
     steps: [
       {
-        title: 'Create a mapping file',
+        title: 'Write a param-map.json',
         description:
-          'Map your environment variable names to their secret paths in AWS SSM or Azure Key Vault.',
+          'A JSON file mapping env var names to their SSM paths or Key Vault secret names. Commit it. Review it in PRs. Diff it between environments. It is the only config you need.',
       },
       {
-        title: 'Run one command',
+        title: 'Run envilder',
         description:
-          'Envilder pulls each secret from your cloud provider and writes them to a local .env file. Idempotent and instant.',
+          'One command fetches every secret from your cloud vault and writes them to .env. No manual copying. No drift. Repeatable anywhere — locally, in CI, or on a new machine.',
       },
       {
-        title: 'Your .env is ready',
+        title: '.env written. Secrets stay in the vault.',
         description:
-          'A clean, up-to-date environment file — generated from the source of truth. Use it locally or inject it in CI/CD with the GitHub Action.',
+          'A clean .env file, generated on demand from live vault data. Use it locally, pull at deploy time with the GitHub Action, or skip the file entirely with --exec.',
       },
     ],
     terminalFetched1: '✔ Fetched DB_PASSWORD  → ···word',
