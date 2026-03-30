@@ -107,7 +107,7 @@ export const ca: Translations = {
       {
         title: 'Executa envilder',
         description:
-          "Una comanda obté cada secret del teu vault al núvol i els escriu a .env. Sense copiar manualment. Sense desfasaments. Repetible a qualsevol lloc — localment, en CI o en una màquina nova.",
+          'Una comanda obté cada secret del teu vault al núvol i els escriu a .env. Sense copiar manualment. Sense desfasaments. Repetible a qualsevol lloc — localment, en CI o en una màquina nova.',
       },
       {
         title: '.env escrit. Els secrets es queden al vault.',
