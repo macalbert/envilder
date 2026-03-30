@@ -254,7 +254,7 @@ export const ca: Translations = {
       "Novetats de l'última versió. El lloc de documentació ja és en línia.",
     releaseTitle: 'Documentació i Estabilitat',
     releaseDate: new Date(
-      `${releaseMetadata.releaseDate}T00:00:00`,
+      `${releaseMetadata.releaseDate}T00:00:00Z`,
     ).toLocaleDateString('ca-ES', {
       year: 'numeric',
       month: 'long',

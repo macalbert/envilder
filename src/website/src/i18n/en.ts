@@ -251,7 +251,7 @@ export const en: Translations = {
     subtitle: 'Latest release highlights. Documentation website is live.',
     releaseTitle: 'Documentation & Stability',
     releaseDate: new Date(
-      `${releaseMetadata.releaseDate}T00:00:00`,
+      `${releaseMetadata.releaseDate}T00:00:00Z`,
     ).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',

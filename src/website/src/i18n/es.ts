@@ -254,7 +254,7 @@ export const es: Translations = {
       'Novedades de la última versión. El sitio de documentación ya está en línea.',
     releaseTitle: 'Documentación y Estabilidad',
     releaseDate: new Date(
-      `${releaseMetadata.releaseDate}T00:00:00`,
+      `${releaseMetadata.releaseDate}T00:00:00Z`,
     ).toLocaleDateString('es-ES', {
       year: 'numeric',
       month: 'long',
