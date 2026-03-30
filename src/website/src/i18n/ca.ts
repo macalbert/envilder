@@ -97,6 +97,7 @@ export const ca: Translations = {
     title: 'Com ',
     titleAccent: 'funciona',
     subtitle: 'Defineix. Descarrega. Fet.',
+    stepLabel: 'PAS',
     steps: [
       {
         title: 'Escriu un param-map.json',

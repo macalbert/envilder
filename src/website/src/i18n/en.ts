@@ -96,6 +96,7 @@ export const en: Translations = {
     title: 'How it ',
     titleAccent: 'works',
     subtitle: 'Define. Pull. Done.',
+    stepLabel: 'STEP',
     steps: [
       {
         title: 'Write a param-map.json',

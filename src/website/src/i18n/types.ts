@@ -63,6 +63,7 @@ export interface HowItWorksTranslations {
   title: string;
   titleAccent: string;
   subtitle: string;
+  stepLabel: string;
   steps: StepItem[];
   terminalFetched1: string;
   terminalFetched2: string;
