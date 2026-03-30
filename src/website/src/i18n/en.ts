@@ -174,10 +174,10 @@ export const en: Translations = {
           'Multi-account setups? Use --profile to switch between AWS CLI profiles. Perfect for multi-stage environments.',
       },
       {
-        icon: '🚀',
-        title: 'Exec Mode',
+        icon: '🔌',
+        title: 'Runtime SDKs',
         description:
-          'Inject secrets directly into a child process without writing to disk. Zero .env files, zero risk of leaks.',
+          'Load secrets directly into your app at startup — TypeScript, Python, Go, .NET, Java. No .env files, no intermediaries.',
         badge: 'Coming soon',
       },
     ],

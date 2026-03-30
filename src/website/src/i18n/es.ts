@@ -174,10 +174,10 @@ export const es: Translations = {
           '¿Configuración multi-cuenta? Usa --profile para cambiar entre perfiles AWS CLI. Perfecto para entornos multi-etapa.',
       },
       {
-        icon: '🚀',
-        title: 'Modo Exec',
+        icon: '🔌',
+        title: 'SDKs en tiempo real',
         description:
-          'Inyecta secretos directamente en un proceso hijo sin escribir a disco. Cero archivos .env, cero riesgo de fugas.',
+          'Carga secretos directamente en tu app al iniciar — TypeScript, Python, Go, .NET, Java. Sin archivos .env, sin intermediarios.',
         badge: 'Próximamente',
       },
     ],
