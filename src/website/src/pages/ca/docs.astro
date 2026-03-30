@@ -1,6 +1,7 @@
 ---
 import DocsContent from '../../components/DocsContent.astro';
 import Navbar from '../../components/Navbar.astro';
+import BackToTop from '../../components/BackToTop.astro';
 import { useTranslations } from '../../i18n/utils';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
@@ -14,4 +15,5 @@ const t = useTranslations(lang);
 >
   <Navbar lang={lang} />
   <DocsContent lang={lang} />
+  <BackToTop label={t.changelogPage.backToTop} />
 </BaseLayout>

@@ -756,12 +756,24 @@ jobs:
   .overview-icon {
     flex-shrink: 0;
     font-size: 1.2rem;
+    filter: grayscale(100%) sepia(60%) saturate(400%) hue-rotate(50deg) brightness(0.9);
+    text-shadow:
+      1px 0 0 rgba(139, 172, 15, 0.25),
+      0 1px 0 rgba(139, 172, 15, 0.25);
+  }
+
+  :global([data-theme="light"]) .overview-icon {
+    filter: grayscale(100%) sepia(40%) saturate(100%) brightness(0.7) contrast(1.1);
+    text-shadow:
+      1px 0 0 rgba(107, 104, 96, 0.2),
+      0 1px 0 rgba(107, 104, 96, 0.2);
   }
 
   .docs-section {
     margin-bottom: var(--space-3xl);
     padding-top: var(--space-lg);
     border-top: 1px solid var(--color-border);
+    scroll-margin-top: calc(var(--nav-height) + var(--space-xl));
   }
 
   .docs-section h2 {

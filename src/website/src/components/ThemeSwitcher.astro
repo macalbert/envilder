@@ -73,15 +73,14 @@ const t = useTranslations(lang);
 </style>
 
 <script>
+  let osThemeListener: (() => void) | null = null;
+
   function initThemeSwitcher() {
     const buttons = document.querySelectorAll<HTMLButtonElement>(
       '.theme-btn[data-theme-value]',
     );
-    const stored = localStorage.getItem('envilder-theme');
 
-    function applyTheme(theme: string) {
-      document.documentElement.setAttribute('data-theme', theme);
-      localStorage.setItem('envilder-theme', theme);
+    function syncButtons(theme: string) {
       buttons.forEach((btn) => {
         const isActive = btn.dataset.themeValue === theme;
         btn.classList.toggle('active', isActive);
@@ -89,17 +88,39 @@ const t = useTranslations(lang);
       });
     }
 
-    // set initial active state from current data-theme
+    // persist=true only when user explicitly clicks
+    function applyTheme(theme: string, persist = true) {
+      document.documentElement.setAttribute('data-theme', theme);
+      syncButtons(theme);
+      if (persist) localStorage.setItem('envilder-theme', theme);
+    }
+
+    const stored = localStorage.getItem('envilder-theme');
+    // Sync buttons to the theme already applied by the inline script
     const current =
       stored ||
       document.documentElement.getAttribute('data-theme') ||
       'retro';
-    applyTheme(current);
+    applyTheme(current, false); // never store on auto-init
+
+    // React to OS theme changes when the user hasn't explicitly chosen
+    if (osThemeListener) {
+      window
+        .matchMedia('(prefers-color-scheme: light)')
+        .removeEventListener('change', osThemeListener);
+    }
+    const mq = window.matchMedia('(prefers-color-scheme: light)');
+    osThemeListener = (e: Event) => {
+      if (!localStorage.getItem('envilder-theme')) {
+        applyTheme((e as MediaQueryListEvent).matches ? 'light' : 'retro', false);
+      }
+    };
+    mq.addEventListener('change', osThemeListener);
 
     buttons.forEach((btn) => {
       btn.addEventListener('click', () => {
         const theme = btn.dataset.themeValue;
-        if (theme) applyTheme(theme);
+        if (theme) applyTheme(theme, true); // explicit user choice → persist
       });
     });
   }

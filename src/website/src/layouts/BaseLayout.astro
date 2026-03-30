@@ -59,6 +59,33 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
         }
       })();
     </script>
+
+    <!-- Language: redirect to detected locale on first visit per session -->
+    <script is:inline>
+      (function() {
+        // Only redirect once per browser session to avoid loops
+        if (sessionStorage.getItem('envilder-lang-checked')) return;
+        sessionStorage.setItem('envilder-lang-checked', '1');
+
+        // Only redirect from default (English) paths
+        var path = window.location.pathname;
+        if (/^\/(es|ca)(\/?$|\/)/.test(path)) return;
+
+        var lang = (navigator.language ||
+          (navigator.languages && navigator.languages[0]) ||
+          'en').toLowerCase();
+
+        var locale = null;
+        if (lang.startsWith('ca') || lang === 'val-es') locale = 'ca';
+        else if (lang.startsWith('es')) locale = 'es';
+
+        if (locale) {
+          // Preserve sub-path (e.g. /docs → /es/docs)
+          var newPath = '/' + locale + (path === '/' ? '/' : path);
+          window.location.replace(newPath);
+        }
+      })();
+    </script>
   </head>
   <body>
     <slot />
