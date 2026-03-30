@@ -63,22 +63,22 @@ three key problems for engineering teams:
 | Styling   | Pure CSS design system (no Tailwind)|
 | Fonts     | Press Start 2P (pixel), Inter (body), JetBrains Mono (code) |
 | Themes    | Retro (Game Boy green) + Light      |
-| i18n      | Custom TS system (see `src/apps/website/src/i18n/`) |
+| i18n      | Custom TS system (see `src/website/src/i18n/`) |
 | Hosting   | Static site on AWS (CDK infra)      |
 
 ### File Locations
 
 | What                 | Where                                          |
 |----------------------|------------------------------------------------|
-| Pages                | `src/apps/website/src/pages/`                  |
-| Components           | `src/apps/website/src/components/*.astro`       |
-| Layout               | `src/apps/website/src/layouts/BaseLayout.astro` |
-| Global CSS           | `src/apps/website/src/styles/global.css`        |
-| Translations         | `src/apps/website/src/i18n/*.ts` (one file per locale) |
-| Translation types    | `src/apps/website/src/i18n/types.ts`            |
-| i18n utilities       | `src/apps/website/src/i18n/utils.ts`            |
-| Astro config         | `src/apps/website/astro.config.mjs`             |
-| Website package.json | `src/apps/website/package.json`                 |
+| Pages                | `src/website/src/pages/`                  |
+| Components           | `src/website/src/components/*.astro`       |
+| Layout               | `src/website/src/layouts/BaseLayout.astro` |
+| Global CSS           | `src/website/src/styles/global.css`        |
+| Translations         | `src/website/src/i18n/*.ts` (one file per locale) |
+| Translation types    | `src/website/src/i18n/types.ts`            |
+| i18n utilities       | `src/website/src/i18n/utils.ts`            |
+| Astro config         | `src/website/astro.config.mjs`             |
+| Website package.json | `src/website/package.json`                 |
 
 ## Design System Rules
 
@@ -142,8 +142,8 @@ Every user-visible string MUST go through the i18n system. Never hardcode text.
 
 ### Adding new translations
 
-1. **Define the type** in `src/apps/website/src/i18n/types.ts`
-2. **Add strings** to every locale file in `src/apps/website/src/i18n/` (one `*.ts` per locale)
+1. **Define the type** in `src/website/src/i18n/types.ts`
+2. **Add strings** to every locale file in `src/website/src/i18n/` (one `*.ts` per locale)
 3. **Use in component** via the `t` object passed as prop:
 
    ```astro
@@ -156,8 +156,8 @@ Every user-visible string MUST go through the i18n system. Never hardcode text.
    ```
 
 4. **Localized pages**: Create one page per locale. The default locale lives
-   at the root (`src/apps/website/src/pages/new-page.astro`); every other
-   locale gets a subdirectory (`src/apps/website/src/pages/<locale>/new-page.astro`).
+   at the root (`src/website/src/pages/new-page.astro`); every other
+   locale gets a subdirectory (`src/website/src/pages/<locale>/new-page.astro`).
    Check `astro.config.mjs` → `i18n.locales` to discover all active locales.
 
 ### Terms that MUST NOT be translated
@@ -190,7 +190,7 @@ Before making any changes, **start the Astro dev server** so every edit is
 reflected instantly in the browser:
 
 ```bash
-cd src/apps/website && pnpm dev
+cd src/website && pnpm dev
 ```
 
 This runs in the background on `http://localhost:4322/`. Keep it running
@@ -252,7 +252,7 @@ For each breakpoint:
 
 ## Workflow
 
-1. **Start dev server**: Run `cd src/apps/website && pnpm dev` in the
+1. **Start dev server**: Run `cd src/website && pnpm dev` in the
    background (skip if already running).
 2. **Open browser**: Navigate to `http://localhost:4322/` using Playwright.
 3. **Read first**: Always read the relevant existing files before making changes.
@@ -306,6 +306,6 @@ When creating or modifying a page/component:
 
 1. The component `.astro` file(s)
 2. Any new CSS added to `global.css` or scoped `<style>` blocks
-3. Translation keys added to `types.ts` and every locale file in `src/apps/website/src/i18n/`
+3. Translation keys added to `types.ts` and every locale file in `src/website/src/i18n/`
 4. Localized page variants if a new page was created
 5. Brief summary of responsive behavior at each breakpoint

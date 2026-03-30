@@ -1,0 +1,126 @@
+---
+export interface Props {
+  title?: string;
+}
+
+const { title = 'bash' } = Astro.props;
+---
+
+<figure
+  class="terminal"
+  role="region"
+  aria-label={title}
+>
+  <div class="terminal-header" aria-hidden="true">
+    <div class="terminal-dots">
+      <span class="dot dot-red"></span>
+      <span class="dot dot-yellow"></span>
+      <span class="dot dot-green"></span>
+    </div>
+    <span class="terminal-title">{title}</span>
+    <div class="terminal-spacer"></div>
+  </div>
+  <div class="terminal-body" tabindex="0" role="code">
+    <slot />
+  </div>
+</figure>
+
+<style>
+  .terminal {
+    background: var(--color-code-bg);
+    border: 2px solid var(--color-code-border, var(--color-border));
+    overflow: hidden;
+    box-shadow: var(--pixel-shadow);
+    width: 100%;
+    color: var(--color-code-text, var(--color-text));
+  }
+
+  .terminal-header {
+    background: var(--color-code-header);
+    padding: var(--space-sm) var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    border-bottom: 2px solid var(--color-code-border, var(--color-border));
+  }
+
+  .terminal-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 0;
+  }
+
+  .dot-red    { background: var(--color-error); }
+  .dot-yellow { background: var(--color-warning); }
+  .dot-green  { background: var(--color-success); }
+
+  .terminal-title {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-code-text-dim, var(--color-text-dim));
+  }
+
+  .terminal-spacer {
+    flex: 1;
+  }
+
+  .terminal-body {
+    padding: var(--space-lg);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+
+  .terminal-body :global(.line) {
+    display: block;
+  }
+
+  .terminal-body :global(.prompt) {
+    color: var(--color-success);
+  }
+
+  .terminal-body :global(.command) {
+    color: var(--color-code-text, var(--color-text));
+  }
+
+  .terminal-body :global(.flag) {
+    color: var(--color-secondary);
+  }
+
+  .terminal-body :global(.output) {
+    color: var(--color-code-text-muted, var(--color-text-muted));
+  }
+
+  .terminal-body :global(.comment) {
+    color: var(--color-code-text-dim, var(--color-text-dim));
+  }
+
+  .terminal-body :global(.highlight) {
+    color: var(--color-primary);
+  }
+
+  .terminal-body :global(.cursor) {
+    display: inline-block;
+    width: 8px;
+    height: 1.1em;
+    background: var(--color-primary);
+    vertical-align: text-bottom;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .terminal-body :global(.cursor) {
+      animation: none;
+    }
+  }
+</style>

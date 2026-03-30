@@ -22,5 +22,5 @@
     "types": ["node", "picocolors"]
   },
   "include": ["src/**/*"],
-  "exclude": ["src/apps/website/**/*"]
+  "exclude": ["src/website/**/*"]
 }

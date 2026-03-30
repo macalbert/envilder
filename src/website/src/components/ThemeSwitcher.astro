@@ -1,0 +1,133 @@
+---
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<div class="theme-switcher" role="radiogroup" aria-label="Theme">
+  <button
+    class="theme-btn"
+    data-theme-value="retro"
+    title={t.theme.retro}
+    aria-label={t.theme.retro}
+    role="radio"
+    aria-checked="false"
+  >
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+      <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" fill="none"/>
+      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+    </svg>
+  </button>
+  <button
+    class="theme-btn"
+    data-theme-value="light"
+    title={t.theme.light}
+    aria-label={t.theme.light}
+    role="radio"
+    aria-checked="false"
+  >
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+      <circle cx="8" cy="8" r="4" fill="currentColor"/>
+      <line x1="8" y1="1" x2="8" y2="3" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="8" y1="13" x2="8" y2="15" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="1" y1="8" x2="3" y2="8" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="13" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+  </button>
+</div>
+
+<style>
+  .theme-switcher {
+    display: flex;
+    gap: 2px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    padding: 2px;
+  }
+
+  .theme-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 5px;
+    background: none;
+    border: none;
+    color: var(--color-text-dim);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .theme-btn:hover {
+    color: var(--color-text);
+  }
+
+  .theme-btn.active {
+    background: var(--color-primary);
+    color: var(--color-btn-text);
+  }
+</style>
+
+<script>
+  let osThemeListener: (() => void) | null = null;
+
+  function initThemeSwitcher() {
+    const buttons = document.querySelectorAll<HTMLButtonElement>(
+      '.theme-btn[data-theme-value]',
+    );
+
+    function syncButtons(theme: string) {
+      buttons.forEach((btn) => {
+        const isActive = btn.dataset.themeValue === theme;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-checked', String(isActive));
+      });
+    }
+
+    // persist=true only when user explicitly clicks
+    function applyTheme(theme: string, persist = true) {
+      document.documentElement.setAttribute('data-theme', theme);
+      syncButtons(theme);
+      if (persist) localStorage.setItem('envilder-theme', theme);
+    }
+
+    const stored = localStorage.getItem('envilder-theme');
+    // Sync buttons to the theme already applied by the inline script
+    const current =
+      stored ||
+      document.documentElement.getAttribute('data-theme') ||
+      'retro';
+    applyTheme(current, false); // never store on auto-init
+
+    // React to OS theme changes when the user hasn't explicitly chosen
+    if (osThemeListener) {
+      window
+        .matchMedia('(prefers-color-scheme: light)')
+        .removeEventListener('change', osThemeListener);
+    }
+    const mq = window.matchMedia('(prefers-color-scheme: light)');
+    osThemeListener = (e: Event) => {
+      if (!localStorage.getItem('envilder-theme')) {
+        applyTheme((e as MediaQueryListEvent).matches ? 'light' : 'retro', false);
+      }
+    };
+    mq.addEventListener('change', osThemeListener);
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.themeValue;
+        if (theme) applyTheme(theme, true); // explicit user choice → persist
+      });
+    });
+  }
+
+  // Run on initial load
+  initThemeSwitcher();
+
+  // Re-run after Astro client-side navigation
+  document.addEventListener('astro:after-swap', initThemeSwitcher);
+</script>

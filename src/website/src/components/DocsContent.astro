@@ -1,0 +1,1031 @@
+---
+import { localizedPath, useTranslations } from '../i18n/utils';
+import CodeBlock from './CodeBlock.astro';
+import Footer from './Footer.astro';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<main class="docs-page" id="main-content">
+  <div class="docs-layout">
+
+    <!-- Sidebar navigation -->
+    <aside class="docs-sidebar">
+      <nav class="docs-nav">
+        <p class="nav-section-title">{t.docs.sidebarGettingStarted}</p>
+        <ul>
+          <li><a href="#overview">{t.docs.overviewTitle}</a></li>
+          <li><a href="#requirements">{t.docs.sidebarRequirements}</a></li>
+          <li><a href="#installation">{t.docs.sidebarInstallation}</a></li>
+          <li><a href="#credentials">{t.docs.sidebarCredentials}</a></li>
+          <li><a href="#permissions">{t.docs.sidebarPermissions}</a></li>
+        </ul>
+
+        <p class="nav-section-title">{t.docs.sidebarCli}</p>
+        <ul>
+          <li><a href="#mapping-file">{t.docs.sidebarMappingFile}</a></li>
+          <li><a href="#pull-command">{t.docs.sidebarPullCommand}</a></li>
+          <li><a href="#push-command">{t.docs.sidebarPushCommand}</a></li>
+          <li><a href="#push-single">{t.docs.sidebarPushSingle}</a></li>
+        </ul>
+
+        <p class="nav-section-title">{t.docs.sidebarGha}</p>
+        <ul>
+          <li><a href="#gha-setup">{t.docs.sidebarGhaSetup}</a></li>
+          <li><a href="#gha-basic">{t.docs.sidebarGhaBasic}</a></li>
+          <li><a href="#gha-multi-env">{t.docs.sidebarGhaMultiEnv}</a></li>
+          <li><a href="#gha-azure">{t.docs.sidebarGhaAzure}</a></li>
+          <li><a href="#gha-inputs">{t.docs.sidebarGhaInputs}</a></li>
+        </ul>
+
+        <p class="nav-section-title">{t.docs.sidebarReference}</p>
+        <ul>
+          <li><a href="#config-priority">{t.docs.sidebarConfigPriority}</a></li>
+          <li><a href="#azure-setup">{t.docs.sidebarAzureSetup}</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <div class="docs-content">
+      <div class="docs-header">
+        <a href={localizedPath(lang, '/')} class="back-link">{t.docs.backToHome}</a>
+        <h1><span class="accent">{t.docs.pageTitle}</span></h1>
+        <p class="docs-intro">
+          {t.docs.intro}
+        </p>
+      </div>
+
+      <!-- ───── GETTING STARTED ───── -->
+
+      <section id="overview" class="docs-section">
+        <h2>{t.docs.overviewTitle}</h2>
+        <p>{t.docs.overviewDesc}</p>
+        <div class="overview-cards">
+          <div class="overview-card overview-problem">
+            <span class="overview-icon">⚠️</span>
+            <p>{t.docs.overviewProblem}</p>
+          </div>
+          <div class="overview-card overview-solution">
+            <span class="overview-icon">✅</span>
+            <p>{t.docs.overviewSolution}</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="requirements" class="docs-section">
+        <h2>{t.docs.reqTitle}</h2>
+        <ul class="docs-list">
+          <li><strong>{t.docs.reqNode}</strong> — <a href="https://nodejs.org/" target="_blank" rel="noopener noreferrer">{t.docs.reqDownload}</a></li>
+          <li><strong>{t.docs.reqAws}</strong> <em>({t.docs.reqAwsNote})</em> — <a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html" target="_blank" rel="noopener noreferrer">{t.docs.reqInstallGuide}</a></li>
+          <li><strong>{t.docs.reqAzure}</strong> <em>({t.docs.reqAzureNote})</em> — <a href="https://learn.microsoft.com/en-us/cli/azure/install-azure-cli" target="_blank" rel="noopener noreferrer">{t.docs.reqInstallGuide}</a></li>
+        </ul>
+      </section>
+
+      <section id="installation" class="docs-section">
+        <h2>{t.docs.installTitle}</h2>
+        <div class="install-options">
+          <div class="install-option">
+            <span class="install-label">pnpm</span>
+            <CodeBlock lang="bash">pnpm add -g envilder</CodeBlock>
+          </div>
+          <div class="install-option">
+            <span class="install-label">npm</span>
+            <CodeBlock lang="bash">npm install -g envilder</CodeBlock>
+          </div>
+          <div class="install-option">
+            <span class="install-label">npx</span>
+            <CodeBlock lang="bash">npx envilder --help</CodeBlock>
+          </div>
+        </div>
+      </section>
+
+      <section id="credentials" class="docs-section">
+        <h2>{t.docs.credTitle}</h2>
+
+        <h3>{t.docs.credAwsTitle}</h3>
+        <p>{t.docs.credAwsDesc}</p>
+        <CodeBlock lang="bash">aws configure</CodeBlock>
+        <p>{t.docs.credAwsProfile}</p>
+        <CodeBlock lang="bash">{`aws configure --profile dev-account
+
+# Then pass it to envilder
+envilder --map=param-map.json --envfile=.env --profile=dev-account`}</CodeBlock>
+
+        <h3>{t.docs.credAzureTitle}</h3>
+        <p>{t.docs.credAzureDesc}</p>
+        <CodeBlock lang="bash">az login</CodeBlock>
+        <p>{t.docs.credAzureVault}</p>
+      </section>
+
+      <section id="permissions" class="docs-section">
+        <h2>{t.docs.permTitle}</h2>
+
+        <h3>{t.docs.permAwsTitle}</h3>
+        <p>{t.docs.permAwsDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.permOperation}</th><th>{t.docs.permPermission}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>{t.docs.permPull}</td><td><code>ssm:GetParameter</code></td></tr>
+            <tr><td>{t.docs.permPush}</td><td><code>ssm:PutParameter</code></td></tr>
+          </tbody>
+        </table>
+        <p>{t.docs.permPolicyExample}</p>
+        <CodeBlock lang="json">{`{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": ["ssm:GetParameter", "ssm:PutParameter"],
+    "Resource": "arn:aws:ssm:us-east-1:123456789012:parameter/myapp/*"
+  }]
+}`}</CodeBlock>
+
+        <h3>{t.docs.permAzureTitle}</h3>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.permOperation}</th><th>{t.docs.permPermission}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>{t.docs.permPull}</td><td><strong>Get</strong></td></tr>
+            <tr><td>{t.docs.permPush}</td><td><strong>Set</strong></td></tr>
+          </tbody>
+        </table>
+        <p>{t.docs.permAzureRbac}</p>
+        <CodeBlock lang="bash">{`az role assignment create \\
+  --role "Key Vault Secrets Officer" \\
+  --assignee <YOUR_OBJECT_ID> \\
+  --scope /subscriptions/<SUB>/resourceGroups/<RG>/providers/Microsoft.KeyVault/vaults/<VAULT>`}</CodeBlock>
+        <p class="note">{t.docs.permAzurePullNote}</p>
+      </section>
+
+      <!-- ───── CLI ───── -->
+
+      <section id="mapping-file" class="docs-section">
+        <h2>{t.docs.mapTitle}</h2>
+        <p>{t.docs.mapIntro}</p>
+
+        <div class="callout">
+          <span class="callout-icon">📄</span>
+          <div>
+            <strong>{t.docs.mapCalloutStructure}</strong> {t.docs.mapCalloutKey}
+            {t.docs.mapCalloutValue}
+          </div>
+        </div>
+
+        <h3>{t.docs.mapBasicTitle}</h3>
+        <p>{t.docs.mapBasicDesc}</p>
+        <CodeBlock lang="json" filename="param-map.json">{`{
+  "API_KEY": "/myapp/prod/api-key",
+  "DB_PASSWORD": "/myapp/prod/db-password",
+  "SECRET_TOKEN": "/myapp/prod/secret-token"
+}`}</CodeBlock>
+        <p>{t.docs.mapBasicGenerates}</p>
+        <CodeBlock lang="dotenv" filename=".env">{`API_KEY=<value from /myapp/prod/api-key>
+DB_PASSWORD=<value from /myapp/prod/db-password>
+SECRET_TOKEN=<value from /myapp/prod/secret-token>`}</CodeBlock>
+
+        <h3>{t.docs.mapConfigTitle}</h3>
+        <p>{t.docs.mapConfigDesc}</p>
+
+        <h4>{t.docs.mapConfigOptionsTitle}</h4>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.mapThKey}</th><th>{t.docs.mapThType}</th><th>{t.docs.mapThDefault}</th><th>{t.docs.mapThDescription}</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>provider</code></td>
+              <td><code>"aws"</code> | <code>"azure"</code></td>
+              <td><code>"aws"</code></td>
+              <td>{t.docs.mapProviderDesc}</td>
+            </tr>
+            <tr>
+              <td><code>vaultUrl</code></td>
+              <td><code>string</code></td>
+              <td>—</td>
+              <td>{t.docs.mapVaultUrlDesc}</td>
+            </tr>
+            <tr>
+              <td><code>profile</code></td>
+              <td><code>string</code></td>
+              <td>—</td>
+              <td>{t.docs.mapProfileDesc}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>{t.docs.mapAwsProfileTitle}</h3>
+        <p>{t.docs.mapAwsProfileDesc}</p>
+        <CodeBlock lang="json" filename="param-map.json">{`{
+  "$config": {
+    "provider": "aws",
+    "profile": "prod-account"
+  },
+  "API_KEY": "/myapp/prod/api-key",
+  "DB_PASSWORD": "/myapp/prod/db-password"
+}`}</CodeBlock>
+        <p>{t.docs.mapAwsProfileExplain}</p>
+
+        <h3>{t.docs.mapAzureTitle}</h3>
+        <p>{t.docs.mapAzureDesc}</p>
+        <CodeBlock lang="json" filename="param-map.json">{`{
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "API_KEY": "myapp-prod-api-key",
+  "DB_PASSWORD": "myapp-prod-db-password"
+}`}</CodeBlock>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>
+            <strong>{t.docs.mapAzureWarningTitle}</strong> {t.docs.mapAzureWarningDesc}
+          </div>
+        </div>
+
+        <h3>{t.docs.mapDifferencesTitle}</h3>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.mapThEmpty}</th><th>{t.docs.mapThAwsSsm}</th><th>{t.docs.mapThAzureKv}</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>{t.docs.mapSecretPathFormat}</strong></td>
+              <td>{t.docs.mapAwsPathFormat}<br/><code>/myapp/prod/api-key</code></td>
+              <td>{t.docs.mapAzurePathFormat}<br/><code>myapp-prod-api-key</code></td>
+            </tr>
+            <tr>
+              <td><strong>{t.docs.mapRequiredConfig}</strong></td>
+              <td>{t.docs.mapAwsRequiredConfig}</td>
+              <td><code>{t.docs.mapAzureRequiredConfig}</code></td>
+            </tr>
+            <tr>
+              <td><strong>{t.docs.mapOptionalConfig}</strong></td>
+              <td><code>profile</code></td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td><strong>{t.docs.mapAuthentication}</strong></td>
+              <td>{t.docs.mapAwsAuth}</td>
+              <td>{t.docs.mapAzureAuth}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>{t.docs.mapMultiEnvTitle}</h3>
+        <p>{t.docs.mapMultiEnvDesc}</p>
+        <div class="multi-env-grid">
+          <CodeBlock lang="json" filename="config/dev/param-map.json">{`{
+  "$config": {
+    "provider": "aws",
+    "profile": "dev-account"
+  },
+  "API_KEY": "/myapp/dev/api-key",
+  "DB_PASSWORD": "/myapp/dev/db-password"
+}`}</CodeBlock>
+          <CodeBlock lang="json" filename="config/prod/param-map.json">{`{
+  "$config": {
+    "provider": "aws",
+    "profile": "prod-account"
+  },
+  "API_KEY": "/myapp/prod/api-key",
+  "DB_PASSWORD": "/myapp/prod/db-password"
+}`}</CodeBlock>
+        </div>
+        <p>{t.docs.mapMultiEnvThenPull}</p>
+        <CodeBlock lang="bash">{`# Development
+envilder --map=config/dev/param-map.json --envfile=.env.dev
+
+# Production
+envilder --map=config/prod/param-map.json --envfile=.env.prod`}</CodeBlock>
+
+        <h3>{t.docs.mapOverrideTitle}</h3>
+        <p>{t.docs.mapOverrideDesc}</p>
+        <CodeBlock lang="bash">{`# Uses $config from the map file as-is
+envilder --map=param-map.json --envfile=.env
+
+# Overrides provider and vault URL, ignoring $config
+envilder --provider=azure \\
+  --vault-url=https://other-vault.vault.azure.net \\
+  --map=param-map.json --envfile=.env
+
+# Overrides just the AWS profile
+envilder --map=param-map.json --envfile=.env --profile=staging-account`}</CodeBlock>
+
+        <p class="note">{t.docs.mapPriorityNote}</p>
+      </section>
+
+      <section id="pull-command" class="docs-section">
+        <h2>{t.docs.pullTitle}</h2>
+        <p>{t.docs.pullDesc}</p>
+
+        <CodeBlock lang="bash">envilder --map=param-map.json --envfile=.env</CodeBlock>
+
+        <h3>{t.docs.pullOptions}</h3>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.optionHeader}</th><th>{t.docs.mapThDescription}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>--map</code></td><td>{t.docs.pullOptMap}</td></tr>
+            <tr><td><code>--envfile</code></td><td>{t.docs.pullOptEnv}</td></tr>
+            <tr><td><code>--provider</code></td><td>{t.docs.pullOptProvider}</td></tr>
+            <tr><td><code>--vault-url</code></td><td>{t.docs.pullOptVault}</td></tr>
+            <tr><td><code>--profile</code></td><td>{t.docs.pullOptProfile}</td></tr>
+          </tbody>
+        </table>
+
+        <h3>{t.docs.pullExamples}</h3>
+        <CodeBlock lang="bash">{`# Default (AWS SSM)
+envilder --map=param-map.json --envfile=.env
+
+# With AWS profile
+envilder --map=param-map.json --envfile=.env --profile=prod-account
+
+# Azure via $config in map file
+envilder --map=azure-param-map.json --envfile=.env
+
+# Azure via CLI flags
+envilder --provider=azure \\
+  --vault-url=https://my-vault.vault.azure.net \\
+  --map=param-map.json --envfile=.env`}</CodeBlock>
+
+        <h3>{t.docs.pullOutputTitle}</h3>
+        <CodeBlock lang="dotenv" filename=".env">{`# Generated by Envilder
+API_KEY=abc123
+DB_PASSWORD=secret456`}</CodeBlock>
+      </section>
+
+      <section id="push-command" class="docs-section">
+        <h2>{t.docs.pushTitle}</h2>
+        <p>{t.docs.pushDesc}</p>
+
+        <CodeBlock lang="bash">envilder --push --envfile=.env --map=param-map.json</CodeBlock>
+
+        <h3>{t.docs.pushOptions}</h3>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.optionHeader}</th><th>{t.docs.mapThDescription}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>--push</code></td><td>{t.docs.pushOptPush}</td></tr>
+            <tr><td><code>--envfile</code></td><td>{t.docs.pushOptEnv}</td></tr>
+            <tr><td><code>--map</code></td><td>{t.docs.pushOptMap}</td></tr>
+            <tr><td><code>--provider</code></td><td>{t.docs.pushOptProvider}</td></tr>
+            <tr><td><code>--vault-url</code></td><td>{t.docs.pushOptVault}</td></tr>
+            <tr><td><code>--profile</code></td><td>{t.docs.pushOptProfile}</td></tr>
+          </tbody>
+        </table>
+
+        <h3>{t.docs.pushExamples}</h3>
+        <CodeBlock lang="bash">{`# Push to AWS SSM
+envilder --push --envfile=.env --map=param-map.json
+
+# With AWS profile
+envilder --push --envfile=.env.prod --map=param-map.json --profile=prod-account
+
+# Azure via $config in map file
+envilder --push --envfile=.env --map=azure-param-map.json
+
+# Azure via CLI flags
+envilder --push --provider=azure \\
+  --vault-url=https://my-vault.vault.azure.net \\
+  --envfile=.env --map=param-map.json`}</CodeBlock>
+      </section>
+
+      <section id="push-single" class="docs-section">
+        <h2>{t.docs.pushSingleTitle}</h2>
+        <p>{t.docs.pushSingleDesc}</p>
+
+        <CodeBlock lang="bash">{`envilder --push --key=API_KEY --value=<SECRET> --secret-path=/myapp/api/key`}</CodeBlock>
+
+        <h3>{t.docs.pushSingleOptions}</h3>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.optionHeader}</th><th>{t.docs.mapThDescription}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>--push</code></td><td>{t.docs.pushSingleOptPush}</td></tr>
+            <tr><td><code>--key</code></td><td>{t.docs.pushSingleOptKey}</td></tr>
+            <tr><td><code>--value</code></td><td>{t.docs.pushSingleOptValue}</td></tr>
+            <tr><td><code>--secret-path</code></td><td>{t.docs.pushSingleOptPath}</td></tr>
+            <tr><td><code>--provider</code></td><td>{t.docs.pushSingleOptProvider}</td></tr>
+            <tr><td><code>--vault-url</code></td><td>{t.docs.pushSingleOptVault}</td></tr>
+            <tr><td><code>--profile</code></td><td>{t.docs.pushSingleOptProfile}</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ───── GITHUB ACTION ───── -->
+
+      <section id="gha-setup" class="docs-section">
+        <h2>{t.docs.ghaSetupTitle}</h2>
+        <p>{t.docs.ghaSetupDesc}</p>
+
+        <h3>{t.docs.ghaPrerequisites}</h3>
+        <ul class="docs-list">
+          <li>{t.docs.ghaPrereqAws}</li>
+          <li>{t.docs.ghaPrereqAzure}</li>
+          <li>{t.docs.ghaPrereqMap}</li>
+        </ul>
+
+        <p class="note">{t.docs.ghaPullOnly}</p>
+      </section>
+
+      <section id="gha-basic" class="docs-section">
+        <h2>{t.docs.ghaBasicTitle}</h2>
+        <CodeBlock lang="yaml" filename=".github/workflows/deploy.yml">{`name: Deploy Application
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: \${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: us-east-1
+
+      - name: Pull Secrets from AWS SSM
+        uses: macalbert/envilder/github-action@v0
+        with:
+          map-file: config/param-map.json
+          env-file: .env
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20.x"
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm deploy`}</CodeBlock>
+      </section>
+
+      <section id="gha-multi-env" class="docs-section">
+        <h2>{t.docs.ghaMultiEnvTitle}</h2>
+        <CodeBlock lang="yaml" filename=".github/workflows/deploy-env.yml">{`name: Deploy to Environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options: [dev, staging, production]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    environment: \${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: \${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: us-east-1
+
+      - name: Pull \${{ inputs.environment }} secrets
+        uses: macalbert/envilder/github-action@v0
+        with:
+          map-file: config/\${{ inputs.environment }}/param-map.json
+          env-file: .env
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20.x"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm deploy`}</CodeBlock>
+      </section>
+
+      <section id="gha-azure" class="docs-section">
+        <h2>{t.docs.ghaAzureTitle}</h2>
+        <CodeBlock lang="yaml" filename=".github/workflows/deploy-azure.yml">{`name: Deploy with Azure Key Vault
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: \${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: \${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: \${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Pull Secrets from Azure Key Vault
+        uses: macalbert/envilder/github-action@v0
+        with:
+          map-file: config/param-map.json
+          env-file: .env
+          provider: azure
+          vault-url: https://my-vault.vault.azure.net
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20.x"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm deploy`}</CodeBlock>
+      </section>
+
+      <section id="gha-inputs" class="docs-section">
+        <h2>{t.docs.ghaInputsTitle}</h2>
+
+        <h3>{t.docs.ghaInputsSubtitle}</h3>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.ghaThInput}</th><th>{t.docs.ghaThRequired}</th><th>{t.docs.mapThDefault}</th><th>{t.docs.mapThDescription}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>map-file</code></td><td>{t.docs.ghaYes}</td><td>—</td><td>{t.docs.ghaInputMap}</td></tr>
+            <tr><td><code>env-file</code></td><td>{t.docs.ghaYes}</td><td>—</td><td>{t.docs.ghaInputEnv}</td></tr>
+            <tr><td><code>provider</code></td><td>{t.docs.ghaNo}</td><td><code>aws</code></td><td>{t.docs.ghaInputProvider}</td></tr>
+            <tr><td><code>vault-url</code></td><td>{t.docs.ghaNo}</td><td>—</td><td>{t.docs.ghaInputVault}</td></tr>
+          </tbody>
+        </table>
+
+        <h3>{t.docs.ghaOutputsSubtitle}</h3>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.ghaThOutput}</th><th>{t.docs.mapThDescription}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>env-file-path</code></td><td>{t.docs.ghaOutputEnvPath}</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ───── REFERENCE ───── -->
+
+      <section id="config-priority" class="docs-section">
+        <h2>{t.docs.configPriorityTitle}</h2>
+        <p>{t.docs.configPriorityDesc}</p>
+        <div class="priority-stack">
+          <div class="priority-item priority-1">1. {t.docs.configPriority1}</div>
+          <div class="priority-item priority-2">2. {t.docs.configPriority2}</div>
+          <div class="priority-item priority-3">3. {t.docs.configPriority3}</div>
+        </div>
+        <p>{t.docs.configPriorityExplain}</p>
+      </section>
+
+      <section id="azure-setup" class="docs-section">
+        <h2>{t.docs.azureSetupTitle}</h2>
+        <p>{t.docs.azureSetupCheck}</p>
+        <CodeBlock lang="bash">{`az keyvault show --name <VAULT_NAME> \\
+  --query properties.enableRbacAuthorization`}</CodeBlock>
+        <ul class="docs-list">
+          <li><code>true</code> → <strong>{t.docs.azureRbacTrue}</strong></li>
+          <li><code>false</code> / <code>null</code> → <strong>{t.docs.azureRbacFalse}</strong></li>
+        </ul>
+
+        <h3>{t.docs.azureOptionA}</h3>
+        <CodeBlock lang="bash">{`az role assignment create \\
+  --role "Key Vault Secrets Officer" \\
+  --assignee <YOUR_OBJECT_ID> \\
+  --scope /subscriptions/<SUB>/resourceGroups/<RG>/providers/Microsoft.KeyVault/vaults/<VAULT>`}</CodeBlock>
+
+        <h3>{t.docs.azureOptionB}</h3>
+        <CodeBlock lang="bash">{`az keyvault set-policy \\
+  --name <VAULT_NAME> \\
+  --object-id <YOUR_OBJECT_ID> \\
+  --secret-permissions get set list`}</CodeBlock>
+        <p class="note">{t.docs.azureAccessNote}</p>
+      </section>
+
+    </div>
+  </div>
+</main>
+<Footer lang={lang} />
+
+<style>
+  .docs-page {
+    padding-top: calc(var(--nav-height) + var(--space-xl));
+    padding-bottom: var(--space-4xl);
+  }
+
+  .docs-layout {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: var(--space-2xl);
+  }
+
+  /* ── Sidebar ── */
+  .docs-sidebar {
+    position: sticky;
+    top: calc(var(--nav-height) + var(--space-lg));
+    height: fit-content;
+    max-height: calc(100vh - var(--nav-height) - var(--space-xl));
+    overflow-y: auto;
+    padding-right: var(--space-md);
+    border-right: 1px solid var(--color-border);
+  }
+
+  .docs-nav ul {
+    list-style: none;
+    margin-bottom: var(--space-lg);
+  }
+
+  .nav-section-title {
+    font-family: var(--font-pixel);
+    font-size: 0.5rem;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: var(--space-sm);
+    margin-top: var(--space-lg);
+  }
+
+  .nav-section-title:first-child {
+    margin-top: 0;
+  }
+
+  .docs-nav a {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    padding: 3px 0;
+    border-left: 2px solid transparent;
+    padding-left: var(--space-sm);
+    transition: all var(--transition-fast);
+  }
+
+  .docs-nav a:hover {
+    color: var(--color-text);
+    border-left-color: var(--color-primary);
+  }
+
+  /* ── Content ── */
+  .docs-content {
+    min-width: 0;
+  }
+
+  .docs-header {
+    margin-bottom: var(--space-3xl);
+  }
+
+  .back-link {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    display: inline-block;
+    margin-bottom: var(--space-lg);
+  }
+
+  .back-link:hover {
+    color: var(--color-primary);
+  }
+
+  .accent {
+    color: var(--color-primary);
+  }
+
+  .docs-intro {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+  }
+
+  /* ── Overview ── */
+  .overview-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+  }
+
+  @media (min-width: 640px) {
+    .overview-cards {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .overview-card {
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    padding: var(--space-lg);
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-start;
+  }
+
+  .overview-card p {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .overview-icon {
+    flex-shrink: 0;
+    font-size: 1.2rem;
+    filter: grayscale(100%) sepia(60%) saturate(400%) hue-rotate(50deg) brightness(0.9);
+    text-shadow:
+      1px 0 0 rgba(139, 172, 15, 0.25),
+      0 1px 0 rgba(139, 172, 15, 0.25);
+  }
+
+  :global([data-theme="light"]) .overview-icon {
+    filter: grayscale(100%) sepia(40%) saturate(100%) brightness(0.7) contrast(1.1);
+    text-shadow:
+      1px 0 0 rgba(107, 104, 96, 0.2),
+      0 1px 0 rgba(107, 104, 96, 0.2);
+  }
+
+  .docs-section {
+    margin-bottom: var(--space-3xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--color-border);
+    scroll-margin-top: calc(var(--nav-height) + var(--space-xl));
+  }
+
+  .docs-section h2 {
+    font-size: 0.75rem;
+    margin-bottom: var(--space-lg);
+  }
+
+  .docs-section h3 {
+    font-size: 0.6rem;
+    color: var(--color-text);
+    margin-top: var(--space-2xl);
+    margin-bottom: var(--space-md);
+  }
+
+  .docs-section p {
+    font-size: 0.92rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-lg);
+    line-height: 1.7;
+  }
+
+  /* Spacing for code blocks inside docs */
+  .docs-section :global(.codeblock) {
+    margin-bottom: var(--space-lg);
+  }
+
+  /* ── Lists ── */
+  .docs-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+  }
+
+  .docs-list li {
+    font-size: 0.92rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+  }
+
+  .docs-list li strong {
+    color: var(--color-text);
+  }
+
+  .docs-list li a {
+    color: var(--color-primary);
+  }
+
+  /* ── Tables ── */
+  .docs-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--space-xl);
+    font-size: 0.85rem;
+  }
+
+  .docs-table th {
+    font-family: var(--font-pixel);
+    font-size: 0.5rem;
+    color: var(--color-primary);
+    text-align: left;
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 2px solid var(--color-border);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .docs-table td {
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    vertical-align: top;
+  }
+
+  .docs-table code {
+    font-size: 0.82rem;
+    background: var(--color-surface);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ── Install options ── */
+  .install-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+  }
+
+  .install-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .install-label {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-primary);
+    min-width: 50px;
+    font-weight: 600;
+  }
+
+  .install-option :global(.codeblock) {
+    flex: 1;
+    margin-bottom: 0;
+  }
+
+  /* ── Callouts ── */
+  .callout {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-primary);
+    border-radius: 4px;
+    margin-bottom: var(--space-xl);
+  }
+
+  .callout-warning {
+    border-left-color: var(--color-warning);
+  }
+
+  .callout-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    filter: grayscale(100%) sepia(60%) saturate(400%) hue-rotate(50deg) brightness(0.9);
+    text-shadow:
+      1px 0 0 rgba(139, 172, 15, 0.25),
+      0 1px 0 rgba(139, 172, 15, 0.25);
+  }
+
+  :global([data-theme="light"]) .callout-icon {
+    filter: grayscale(100%) sepia(40%) saturate(100%) brightness(0.7) contrast(1.1);
+    text-shadow:
+      1px 0 0 rgba(107, 104, 96, 0.2),
+      0 1px 0 rgba(107, 104, 96, 0.2);
+  }
+
+  .callout div {
+    font-size: 0.88rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+  }
+
+  .callout strong {
+    color: var(--color-text);
+  }
+
+  /* ── Note ── */
+  .docs-section p.note {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+    padding-left: var(--space-md);
+    border-left: 2px solid var(--color-border);
+  }
+
+  /* ── Multi-env grid ── */
+  .multi-env-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+
+  .multi-env-grid :global(.codeblock) {
+    margin-bottom: 0;
+  }
+
+  /* ── Priority stack ── */
+  .priority-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+  }
+
+  .priority-item {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: 4px;
+    border-left: 3px solid;
+  }
+
+  .priority-1 {
+    background: rgba(138, 154, 108, 0.15);
+    border-left-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  .priority-2 {
+    background: rgba(138, 154, 108, 0.08);
+    border-left-color: var(--color-text-muted);
+    color: var(--color-text-muted);
+  }
+
+  .priority-3 {
+    background: rgba(138, 154, 108, 0.04);
+    border-left-color: var(--color-border);
+    color: var(--color-text-muted);
+    opacity: 0.7;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .docs-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .docs-sidebar {
+      position: static;
+      max-height: none;
+      border-right: none;
+      border-bottom: 1px solid var(--color-border);
+      padding-right: 0;
+      padding-bottom: var(--space-lg);
+      margin-bottom: var(--space-lg);
+    }
+
+    .docs-table {
+      display: block;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .multi-env-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // Enhance table accessibility: scope="col" on all th, plus scrollable wrappers
+  document.querySelectorAll<HTMLTableElement>('.docs-table').forEach((table) => {
+    // Add scope="col" to all header cells
+    table.querySelectorAll('thead th').forEach((th) => {
+      th.setAttribute('scope', 'col');
+    });
+
+    // Wrap in a scrollable region for keyboard access (only if not already wrapped)
+    if (!table.parentElement?.classList.contains('table-wrapper')) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'table-wrapper';
+      wrapper.setAttribute('tabindex', '0');
+      wrapper.setAttribute('role', 'region');
+      wrapper.setAttribute('aria-label', table.querySelector('caption')?.textContent ?? 'data table');
+      table.parentNode!.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    }
+  });
+</script>

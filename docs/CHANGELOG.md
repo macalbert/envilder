@@ -1,3 +1,25 @@
+## [0.9.1] - 2026-03-30
+
+### Added
+
+* **Documentation website** — Full Astro-based docs site deployed at [envilder.com](https://envilder.com), with multi-language support (EN, ES, CA), dark/retro and light themes, and a dedicated changelog page
+
+### Changed
+
+* Updated Envilder logo in README
+
+### Fixed
+
+* **deps:** Move `@types/node` from `dependencies` to `devDependencies` to prevent it from being bundled as a runtime dependency
+* **e2e:** Use unique SSM paths per CLI test run to prevent race conditions between parallel test executions
+
+### Dependencies
+
+* Bump `brace-expansion` from 5.0.4 to 5.0.5 (security patch)
+* Bump `@azure/core-rest-pipeline` and `@azure/identity` group updates
+
+---
+
 ## [0.8.0] - 2026-03-22
 
 ### Added
@@ -22,7 +44,7 @@ from Azure Key Vault ([#90](https://github.com/macalbert/envilder/pull/90))
 prints a warning. It will be removed in a future release.
 * `configureInfrastructureServices()` now receives a single `MapFileConfig` object instead of separate parameters
 * CLI and GHA entry points read `$config` from the map file and merge with CLI flags / GHA inputs
-* Extracted shared `ContainerConfiguration` module (`src/apps/shared/`) for DI setup reused by CLI and GitHub Action
+* Extracted shared `ContainerConfiguration` module (`src/envilder/apps/shared/`) for DI setup reused by CLI and GitHub Action
 * Both `Startup.ts` files (CLI and GHA) now delegate to shared `configureInfrastructureServices()` and `configureApplicationServices()`
 * Updated CLI description to include Azure Key Vault examples
 * Updated `action.yml` description and inputs to reflect multi-provider support
@@ -39,6 +61,94 @@ prints a warning. It will be removed in a future release.
 * Updated architecture diagrams and DI code snippets
 * Updated GitHub Action examples to use `vault-url` input
 * Updated ROADMAP to mark Azure Key Vault as fully implemented
+
+---
+
+## [0.7.12] - 2026-03-22
+
+### Fixed
+
+* **ssm:** Upgrade AWS SDK to resolve fast-xml-parser CVEs ([#128](https://github.com/macalbert/envilder/pull/128))
+
+### Changed
+
+* **ci:** Upgrade `dorny/test-reporter` to v3 for Node.js 24 support ([#127](https://github.com/macalbert/envilder/pull/127))
+* **dx:** Add AI workflow agents, prompts, and lefthook pre-commit hook ([#125](https://github.com/macalbert/envilder/pull/125))
+
+### Dependencies
+
+* Bump `undici` from 7.22.0 to 7.24.1 ([#126](https://github.com/macalbert/envilder/pull/126))
+
+---
+
+## [0.7.11] - 2026-03-08
+
+### Security
+
+* Bump AWS SDK packages to resolve `fast-xml-parser` vulnerability ([#124](https://github.com/macalbert/envilder/pull/124))
+
+---
+
+## [0.7.10] - 2026-03-02
+
+### Changed
+
+* **ci:** Update CI configuration for improved build reliability
+* Bump AWS SDK SSM to 3.1000.0 and align CI/publish workflows ([#123](https://github.com/macalbert/envilder/pull/123))
+
+### Dependencies
+
+* Bump `@aws-sdk/credential-providers` from 3.995.0 to 3.1000.0 ([#122](https://github.com/macalbert/envilder/pull/122))
+* Bump `@types/node` from 25.3.0 to 25.3.3 ([#121](https://github.com/macalbert/envilder/pull/121))
+* Bump `minimatch` ([#119](https://github.com/macalbert/envilder/pull/119))
+
+---
+
+## [0.7.9] - 2026-02-22
+
+### Fixed
+
+* **security:** Patch transitive dependency vulnerabilities ([#118](https://github.com/macalbert/envilder/pull/118))
+* **ci:** Simplify npm publish command in workflow
+
+### Documentation
+
+* Updated GitHub Action docs to reference v0.7.9
+
+---
+
+## [0.7.8] - 2026-02-05
+
+### Fixed
+
+* **deps:** Upgrade AWS SDK to resolve `fast-xml-parser` DoS vulnerability ([#116](https://github.com/macalbert/envilder/pull/116))
+
+### Dependencies
+
+* Bump `@isaacs/brace-expansion` ([#115](https://github.com/macalbert/envilder/pull/115))
+* Bump `@secretlint/secretlint-rule-preset-recommend` ([#114](https://github.com/macalbert/envilder/pull/114))
+* Bump `commander` from 14.0.2 to 14.0.3 ([#113](https://github.com/macalbert/envilder/pull/113))
+* Bump `@aws-sdk/client-ssm` from 3.958.0 to 3.980.0 ([#112](https://github.com/macalbert/envilder/pull/112))
+* Bump `secretlint` from 11.2.5 to 11.3.1 ([#110](https://github.com/macalbert/envilder/pull/110))
+* Bump `@commitlint/cli` from 20.3.0 to 20.4.0 ([#111](https://github.com/macalbert/envilder/pull/111))
+
+---
+
+## [0.7.7] - 2026-01-27
+
+### Added
+
+* **push:** AWS throttling retry logic and duplicate SSM path validation ([#109](https://github.com/macalbert/envilder/pull/109))
+
+### Fixed
+
+* **ci:** Streamline `npm publish` workflow to prevent failures ([#106](https://github.com/macalbert/envilder/pull/106))
+* **ci-publish:** Update publish command in workflow
+
+### Dependencies
+
+* Bump `lodash` ([#108](https://github.com/macalbert/envilder/pull/108))
+* Bump `diff` ([#107](https://github.com/macalbert/envilder/pull/107))
 
 ---
 
@@ -91,16 +201,7 @@ prints a warning. It will be removed in a future release.
 
 ---
 
-## [0.7.3] - 2025-12-06
-
-### Dependencies
-
-* Bump actions/checkout from 5 to 6 ([#98](https://github.com/macalbert/envilder/pull/98))
-* Bump glob from 11.1.0 to 13.0.0 ([#97](https://github.com/macalbert/envilder/pull/97))
-
----
-
-## [0.7.2] - 2025-11-29
+## [0.7.3] - 2025-11-29
 
 ### Changed
 
@@ -111,6 +212,8 @@ prints a warning. It will be removed in a future release.
 
 ### Dependencies
 
+* Bump actions/checkout from 5 to 6 ([#98](https://github.com/macalbert/envilder/pull/98))
+* Bump glob from 11.1.0 to 13.0.0 ([#97](https://github.com/macalbert/envilder/pull/97))
 * Bump pnpm/action-setup from 2 to 4 ([#92](https://github.com/macalbert/envilder/pull/92))
 * Bump @commitlint/cli from 19.8.1 to 20.1.0 ([#94](https://github.com/macalbert/envilder/pull/94))
 * Bump glob in the npm_and_yarn group ([#96](https://github.com/macalbert/envilder/pull/96))
@@ -135,28 +238,29 @@ prints a warning. It will be removed in a future release.
 
 ---
 
-## [0.7.0](https://github.com/macalbert/envilder/compare/v0.6.6...v0.7.0) (2025-11-16)
+## [0.7.0] - 2025-11-16
 
-* ♻️ Move GitHub Action to github-action/ subfolder ([d9bf4d2](https://github.com/macalbert/envilder/commit/d9bf4d2e81acbb1ef2b4e0034c0b6aaa8b307ba3))
+### Added
 
-### Bug Fixes
+* **githubAction:** Add end-to-end tests for GitHub Actions simulation
+* **githubAction:** Update action paths and add new GitHub Action implementation
+* **packaging:** Add project build and uninstall functionality
 
-* **githubAction:** Correct author name in action.yml ([e964aff](https://github.com/macalbert/envilder/commit/e964affbca8410aada8494648dee62ab2a1ab5de))
-* **githubAction:** Correct build command from ppnpm to pnpm ([c9df0c4](https://github.com/macalbert/envilder/commit/c9df0c4cb612de0f2b6ab6406235c54fcb45d0c2))
-* **githubAction:** Correct path to GitHubAction.js in validation step ([94d1166](https://github.com/macalbert/envilder/commit/94d116632f4a6de656449f238ec007eeede2f5f2))
-* **githubAction:** Remove source map generation from build:gha script ([8989448](https://github.com/macalbert/envilder/commit/898944898cdea866f28f8874b714bfe3fd2dd88e))
-* **githubAction:** Update action references in documentation and code ([412601b](https://github.com/macalbert/envilder/commit/412601b7b56a90dd50e031addcaf192e2dec8ba3))
+### Fixed
 
-## Features
+* **githubAction:** Correct author name in action.yml
+* **githubAction:** Correct build command from `ppnpm` to `pnpm`
+* **githubAction:** Correct path to `GitHubAction.js` in validation step
+* **githubAction:** Remove source map generation from `build:gha` script
+* **githubAction:** Update action references in documentation and code
 
-* **githubAction:** Add end-to-end tests for GitHub Actions simulation ([29464a0](https://github.com/macalbert/envilder/commit/29464a016d0072cc728345400f68e0c62669579b))
-* **githubAction:** Update action paths and add new GitHub Action implementation ([4310e50](https://github.com/macalbert/envilder/commit/4310e5040fa4952c50e800578fb91e00cf2f7a36))
-* **githubAction:** Update action script paths and add entry point ([9f64e56](https://github.com/macalbert/envilder/commit/9f64e567d8c90832ee402accb6aba9264554a1e7))
-* **packaging:** Add project build and uninstall functionality ([70fc574](https://github.com/macalbert/envilder/commit/70fc5745c1490f33322f5fb8af1b68dd7e565fc1))
+### Changed
 
-### BREAKING CHANGES
+* Move GitHub Action to `github-action/` subfolder
 
-* Action path changed from macalbert/envilder@v1 to macalbert/envilder/github-action@v1
+### Breaking Changes
+
+* Action path changed from `macalbert/envilder@v1` to `macalbert/envilder/github-action@v1`
 
 ---
 
@@ -214,8 +318,17 @@ prints a warning. It will be removed in a future release.
 
 ### Changed
 
-* Implemented .NET-Style DIP Startup Pattern for dependency injection
-* Improved separation of concerns in dependency configuration
+* Bump version to 0.6.3 in package.json
+
+---
+
+## [0.6.2] - 2025-07-20
+
+### Changed
+
+* **di:** Implement .NET-Style DIP Startup Pattern for dependency injection — improved separation of concerns in DI configuration ([#59](https://github.com/macalbert/envilder/pull/59))
+
+---
 
 ## [0.6.1] - 2025-07-13
 
@@ -245,6 +358,16 @@ prints a warning. It will be removed in a future release.
 * Added comprehensive examples for all new Push Mode commands
 * Created visual diagrams explaining Push Mode data flow
 * Documented options and parameters for Push Mode operations
+
+---
+
+## [0.6.0] - 2025-07-13
+
+### Added
+
+* **push:** Introduced Push Mode — sync local `.env` variables to AWS SSM Parameter Store ([#57](https://github.com/macalbert/envilder/pull/57))
+
+---
 
 ## [0.5.6] - 2025-07-06
 
@@ -342,7 +465,14 @@ prints a warning. It will be removed in a future release.
 * CLI command not recognized after global install (`npm install -g envilder`)
 * Fixed missing compiled `lib/` files in published package
 
-## [0.3.0] - 2025-05-09
+---
+
+> **Note:** Versions below 0.5.1 are deprecated on npm and no longer supported.
+> They are preserved here for historical reference only.
+
+---
+
+## [0.3.0] - 2025-05-09 [DEPRECATED]
 
 ### Added
 
@@ -356,7 +486,7 @@ prints a warning. It will be removed in a future release.
 * Bumped vite from 6.2.6 to 6.3.4
 * Bumped @aws-sdk/client-ssm from 3.787.0 to 3.799.0
 
-## [0.2.3] - 2025-04-12
+## [0.2.3] - 2025-04-12 [DEPRECATED]
 
 ### Changed
 
@@ -368,7 +498,7 @@ prints a warning. It will be removed in a future release.
   * @secretlint/secretlint-rule-preset-recommend from 8.5.0 to 9.0.0
   * secretlint from 8.5.0 to 9.0.0
 
-## [0.2.1] - 2024-10-16
+## [0.2.1] - 2024-10-16 [DEPRECATED]
 
 ### Added
 
@@ -380,6 +510,6 @@ prints a warning. It will be removed in a future release.
 
 * Updated README.md with improved documentation
 
-## [0.1.4] - 2024-10-01
+## [0.1.4] - 2024-10-01 [DEPRECATED]
 
 Initial public release of Envilder.

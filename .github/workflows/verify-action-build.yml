@@ -3,7 +3,7 @@ name: 🔍 Verify Action Build
 on:
   pull_request:
     paths:
-      - "src/apps/gha/**"
+      - "src/envilder/apps/gha/**"
       - "github-action/**"
       - ".github/workflows/verify-action-build.yml"
 

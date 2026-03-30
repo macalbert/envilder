@@ -18,8 +18,8 @@ on:
     paths:
       - ".github/workflows/test-action.yml"
       - "github-action/action.yml"
-      - "src/apps/gha/**"
-      - "tests/apps/gha/**"
+      - "src/envilder/apps/gha/**"
+      - "tests/envilder/apps/gha/**"
       - "e2e/github-action.test.ts"
 
 concurrency:

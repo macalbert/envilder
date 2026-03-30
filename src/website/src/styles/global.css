@@ -1,0 +1,603 @@
+/* ── Envilder Design System ─────────────────────────────── */
+/* Retro Game Boy · Pixel accents · Professional             */
+
+/* ── Reset ────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ── CSS Custom Properties ────────────────────────────── */
+:root {
+  /*
+   * Game Boy — vibrant LCD palette
+   * Based on the classic Game Boy green phosphor screen.
+   * palette: #4caf50 · #77be48 · #a2cd41 · #cddc39
+   */
+  --color-bg: #182016; /* very dark green-black */
+  --color-bg-alt: #1e281c; /* slightly lighter band */
+  --color-surface: #243022; /* card/panel background */
+  --color-surface-alt: #2a3828; /* surface hover */
+  --color-border: #3a5036; /* subtle green border */
+  --color-border-light: #4d6848; /* lighter border */
+
+  --color-primary: #77be48; /* Game Boy mid-green — links, buttons */
+  --color-primary-dim: #4caf50; /* deeper GB green */
+  --color-secondary: #a2cd41; /* bright lime green */
+  --color-secondary-dim: #6da03a; /* muted secondary */
+  --color-accent: #cddc39; /* yellow-green LCD highlight */
+
+  --color-text: #c8d8a8; /* soft sage — easy on the eyes */
+  --color-text-muted: #8ca870; /* muted green-grey */
+  --color-text-dim: #5a7248; /* hint text */
+
+  --color-success: #77be48; /* GB green */
+  --color-warning: #cddc39; /* lime-yellow */
+  --color-error: #a06050; /* muted red (small concession) */
+
+  --color-nav-bg: rgba(24, 32, 22, 0.95);
+  --color-nav-mobile: rgba(24, 32, 22, 0.98);
+  --color-btn-text: #182016; /* dark bg for button labels */
+  --color-code-bg: #1a2418; /* dark green-tinted code blocks */
+  --color-code-header: #202c1e; /* slightly lighter for headers */
+  --color-code-text: var(--color-text);
+  --color-code-text-muted: var(--color-text-muted);
+  --color-code-text-dim: var(--color-text-dim);
+  --color-code-border: var(--color-border);
+  --color-sponsor: #db61a2; /* GitHub sponsor pink */
+
+  /* Typography */
+  --font-pixel: "Press Start 2P", monospace;
+  --font-body:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+  --space-4xl: 6rem;
+
+  /* Layout */
+  --max-width: 1200px;
+  --nav-height: 64px;
+
+  /* Effects */
+  --pixel-shadow: 4px 4px 0 var(--color-border);
+  --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);
+  --glow-primary: 0 0 20px rgba(119, 190, 72, 0.18);
+  --glow-secondary: 0 0 12px rgba(162, 205, 65, 0.12);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+}
+
+/* ── Theme: light (US Super Nintendo SNES) ────────────── */
+/*
+ * Inspired by the US SNES controller palette:
+ * #b5b6e4 · #4f43ae · #908a99 · #cec9cc · #211a21
+ * Violet (#4f43ae) is reserved for small accents:
+ * links, buttons, badges, and tiny section titles.
+ * The base is neutral grey-lavender for readability.
+ */
+[data-theme="light"] {
+  --color-bg: #f0eff5; /* white with subtle lavender tint */
+  --color-bg-alt: #e8e6f0; /* soft lavender band */
+  --color-surface: #ffffff; /* pure white cards */
+  --color-surface-alt: #ecebf3; /* surface with violet hint */
+  --color-border: #cec9cc; /* SNES light grey */
+  --color-border-light: #b8b4b6; /* slightly deeper grey */
+
+  --color-primary: #4f43ae; /* SNES violet — links, buttons, small accents */
+  --color-primary-dim: #3d3490; /* dimmed violet */
+  --color-secondary: #908a99; /* SNES grey-mauve */
+  --color-secondary-dim: #7a7484; /* deeper mauve */
+  --color-accent: #b5b6e4; /* SNES lavender highlight */
+
+  --color-text: #211a21; /* SNES near-black */
+  --color-text-muted: #5c5462; /* dark mauve-grey */
+  --color-text-dim: #908a99; /* SNES grey-mauve */
+
+  --color-success: #4f7a5c; /* muted green */
+  --color-warning: #a09040; /* warm yellow */
+  --color-error: #a04848; /* muted red */
+
+  --color-nav-bg: rgba(240, 239, 245, 0.92);
+  --color-nav-mobile: rgba(240, 239, 245, 0.98);
+  --color-btn-text: #ffffff; /* white text on violet buttons */
+  --color-code-bg: #e6e4ee; /* lavender-tinted code block */
+  --color-code-header: #dddae8; /* slightly deeper header */
+  --color-sponsor: #c74b8e; /* GitHub sponsor pink — light */
+
+  --pixel-shadow: 4px 4px 0 var(--color-border);
+  --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);
+  --glow-primary: 0 0 20px rgba(79, 67, 174, 0.12);
+  --glow-secondary: 0 0 15px rgba(181, 182, 228, 0.15);
+}
+
+/* ── Base ─────────────────────────────────────────────── */
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.7;
+  font-size: 1rem;
+  overflow-x: hidden;
+  cursor: default;
+}
+
+/* ── Theme transition ─────────────────────────────────── */
+html:not([data-no-transition]) body,
+html:not([data-no-transition]) .navbar {
+  transition:
+    background-color 300ms ease,
+    color 300ms ease,
+    border-color 300ms ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+li,
+.pixel-card,
+.section-title,
+.step,
+.feature-card {
+  cursor: default;
+}
+
+code,
+pre,
+.codeblock {
+  cursor: text;
+  user-select: text;
+}
+
+img,
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-accent);
+}
+
+/* ── Typography ───────────────────────────────────────── */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-pixel);
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  color: var(--color-text);
+}
+
+h2 {
+  font-size: clamp(0.9rem, 2vw, 1.2rem);
+  color: var(--color-text);
+  margin-bottom: var(--space-lg);
+}
+
+h3 {
+  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+  color: var(--color-text-muted);
+}
+
+p {
+  color: var(--color-text-muted);
+  max-width: 65ch;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--color-surface);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  border: 1px solid var(--color-border);
+}
+
+/* Reset inline-code styling inside code blocks / terminals */
+pre code,
+.codeblock code,
+.terminal code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+}
+
+/* ── Layout Utilities ─────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.section {
+  padding: var(--space-4xl) 0;
+  overflow: hidden;
+}
+
+.section-alt {
+  background: var(--color-bg-alt);
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: var(--space-3xl);
+}
+
+.section-title span {
+  color: var(--color-primary);
+}
+
+.section-subtitle {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+  max-width: 600px;
+  margin: var(--space-md) auto 0;
+  text-align: center;
+  font-weight: 400;
+}
+
+/* ── Buttons ──────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-pixel);
+  font-size: 0.65rem;
+  padding: var(--space-md) var(--space-xl);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  position: relative;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-btn-text);
+  border-color: var(--color-primary);
+  box-shadow: var(--pixel-shadow-primary);
+}
+
+.btn-primary:hover {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.btn-outline {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border-light);
+  box-shadow: var(--pixel-shadow);
+}
+
+.btn-outline:hover {
+  background: var(--color-surface-alt);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+/* ── Cards (pixel-bordered) ───────────────────────────── */
+.pixel-card {
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  padding: var(--space-xl);
+  position: relative;
+  transition: all var(--transition-base);
+}
+
+.pixel-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--pixel-shadow-primary);
+  transform: translate(-2px, -2px);
+}
+
+/* corner notch decoration */
+.pixel-card::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  background: var(--color-bg);
+  border-left: 2px solid var(--color-border);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.pixel-card:hover::before {
+  border-color: var(--color-primary);
+}
+
+/* ── Pixel icon (8-bit style emoji replacement) ───────── */
+.pixel-icon {
+  font-size: 1.8rem;
+  display: inline-block;
+  image-rendering: pixelated;
+  margin-bottom: var(--space-md);
+  filter: grayscale(100%) sepia(60%) saturate(400%) hue-rotate(50deg)
+    brightness(0.9);
+  text-shadow:
+    1px 0 0 rgba(139, 172, 15, 0.25),
+    0 1px 0 rgba(139, 172, 15, 0.25);
+}
+
+[data-theme="light"] .pixel-icon {
+  filter: grayscale(100%) sepia(40%) saturate(100%) brightness(0.7)
+    contrast(1.1);
+  text-shadow:
+    1px 0 0 rgba(107, 104, 96, 0.2),
+    0 1px 0 rgba(107, 104, 96, 0.2);
+}
+
+/* ── Badge / Tag ──────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+}
+
+.badge-primary {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.badge-success {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.badge-deprecated {
+  border-color: var(--color-error);
+  color: var(--color-error);
+  opacity: 0.85;
+}
+
+/* ── Scanline overlay ─────────────────────────────────── */
+.scanlines {
+  position: relative;
+}
+
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Grid helpers ─────────────────────────────────────── */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xl);
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xl);
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+}
+
+@media (min-width: 640px) {
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ── Divider (pixel style) ────────────────────────────── */
+.pixel-divider {
+  border: none;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-border) 0px,
+    var(--color-border) 8px,
+    transparent 8px,
+    transparent 12px
+  );
+  margin: var(--space-3xl) 0;
+}
+
+/* ── Responsive ───────────────────────────────────────── */
+@media (max-width: 640px) {
+  .container {
+    padding: 0 var(--space-md);
+  }
+
+  .section {
+    padding: var(--space-3xl) 0;
+  }
+
+  .pixel-card::before {
+    display: none;
+  }
+
+  .pixel-card:hover {
+    transform: none;
+    box-shadow: var(--pixel-shadow-primary);
+  }
+}
+
+/* ── Scrollbar ────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-light);
+}
+
+/* ── Selection ────────────────────────────────────────── */
+::selection {
+  background: var(--color-primary);
+  color: var(--color-btn-text);
+}
+
+/* ── Accessibility ─────────────────────────────────────── */
+
+/* Skip-to-content link — visible only on focus */
+.skip-link {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(-200%);
+  top: var(--space-md);
+  z-index: 9999;
+  background: var(--color-primary);
+  color: var(--color-btn-text);
+  padding: var(--space-sm) var(--space-xl);
+  font-family: var(--font-pixel);
+  font-size: 0.6rem;
+  text-decoration: none;
+  border: 2px solid var(--color-primary-dim);
+  white-space: nowrap;
+  transition: transform 0.15s ease;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Global keyboard focus ring */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Table horizontal-scroll wrapper */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--color-border);
+  margin-bottom: var(--space-xl);
+}
+
+.table-wrapper .docs-table {
+  margin-bottom: 0;
+}
+
+.table-wrapper:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ── Reduced motion ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── High contrast ──────────────────────────────────────── */
+@media (prefers-contrast: more) {
+  :root {
+    --color-border: #5a7a50;
+    --color-text-muted: #b0c890;
+    --color-text-dim: #8aaa60;
+  }
+
+  [data-theme="light"] {
+    --color-border: #7a749a;
+    --color-text-muted: #2a2230;
+    --color-text-dim: #4a4060;
+  }
+
+  :focus-visible {
+    outline-width: 3px;
+    outline-offset: 3px;
+  }
+}

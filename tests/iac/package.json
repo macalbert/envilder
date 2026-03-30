@@ -2,7 +2,7 @@
   "name": "@envilder/iac-tests",
   "version": "0.1.0",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "build": "tsc --noEmit",
     "lint": "biome lint --config-path ./biome.jsonc ./bin ./lib --files-ignore-unknown=true",

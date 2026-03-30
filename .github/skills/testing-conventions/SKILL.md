@@ -80,8 +80,8 @@ confidence level across unit, integration, and e2e coverage.
 
 ## Quick Prompt Examples
 
-- "Use testing-conventions for `PullSsmToEnvCommandHandler` and add missing error-path tests."
-- "Apply testing-conventions to review `tests/apps/gha/Gha.test.ts` for naming and AAA compliance."
+- "Use testing-conventions for `PullSecretsToEnvCommandHandler` and add missing error-path tests."
+- "Apply testing-conventions to review `tests/envilder/apps/gha/Gha.test.ts` for naming and AAA compliance."
 - "Use testing-conventions to design e2e coverage for SSM not-found behavior."
 
 ## Anti-Pattern: Duplicate Act/Assert Blocks

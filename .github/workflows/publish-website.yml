@@ -10,7 +10,7 @@ on:
       - synchronize
       - ready_for_review
     paths:
-      - "src/apps/website/**"
+      - "src/website/**"
       - "src/iac/**"
       - "package.json"
       - "pnpm-lock.yaml"
@@ -21,7 +21,7 @@ on:
     branches:
       - main
     paths:
-      - "src/apps/website/**"
+      - "src/website/**"
       - "src/iac/**"
       - "package.json"
       - "pnpm-lock.yaml"
@@ -69,7 +69,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: 🏗️ Build the Castle (Build website)
-        working-directory: src/apps/website
+        working-directory: src/website
         run: pnpm build
 
       - name: 🌟 Warp to the Cloud (Deploy infrastructure)

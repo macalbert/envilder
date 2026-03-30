@@ -1,0 +1,19 @@
+---
+import BackToTop from '../../components/BackToTop.astro';
+import DocsContent from '../../components/DocsContent.astro';
+import Navbar from '../../components/Navbar.astro';
+import { useTranslations } from '../../i18n/utils';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const lang = 'es';
+const t = useTranslations(lang);
+---
+
+<BaseLayout
+  title={t.docs.title}
+  lang={lang}
+>
+  <Navbar lang={lang} />
+  <DocsContent lang={lang} />
+  <BackToTop label={t.changelogPage.backToTop} />
+</BaseLayout>
