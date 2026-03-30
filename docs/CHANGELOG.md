@@ -64,6 +64,94 @@ prints a warning. It will be removed in a future release.
 
 ---
 
+## [0.7.12] - 2026-03-22
+
+### Fixed
+
+* **ssm:** Upgrade AWS SDK to resolve fast-xml-parser CVEs ([#128](https://github.com/macalbert/envilder/pull/128))
+
+### Changed
+
+* **ci:** Upgrade `dorny/test-reporter` to v3 for Node.js 24 support ([#127](https://github.com/macalbert/envilder/pull/127))
+* **dx:** Add AI workflow agents, prompts, and lefthook pre-commit hook ([#125](https://github.com/macalbert/envilder/pull/125))
+
+### Dependencies
+
+* Bump `undici` from 7.22.0 to 7.24.1 ([#126](https://github.com/macalbert/envilder/pull/126))
+
+---
+
+## [0.7.11] - 2026-03-08
+
+### Security
+
+* Bump AWS SDK packages to resolve `fast-xml-parser` vulnerability ([#124](https://github.com/macalbert/envilder/pull/124))
+
+---
+
+## [0.7.10] - 2026-03-02
+
+### Changed
+
+* **ci:** Update CI configuration for improved build reliability
+* Bump AWS SDK SSM to 3.1000.0 and align CI/publish workflows ([#123](https://github.com/macalbert/envilder/pull/123))
+
+### Dependencies
+
+* Bump `@aws-sdk/credential-providers` from 3.995.0 to 3.1000.0 ([#122](https://github.com/macalbert/envilder/pull/122))
+* Bump `@types/node` from 25.3.0 to 25.3.3 ([#121](https://github.com/macalbert/envilder/pull/121))
+* Bump `minimatch` ([#119](https://github.com/macalbert/envilder/pull/119))
+
+---
+
+## [0.7.9] - 2026-02-22
+
+### Fixed
+
+* **security:** Patch transitive dependency vulnerabilities ([#118](https://github.com/macalbert/envilder/pull/118))
+* **ci:** Simplify npm publish command in workflow
+
+### Documentation
+
+* Updated GitHub Action docs to reference v0.7.9
+
+---
+
+## [0.7.8] - 2026-02-05
+
+### Fixed
+
+* **deps:** Upgrade AWS SDK to resolve `fast-xml-parser` DoS vulnerability ([#116](https://github.com/macalbert/envilder/pull/116))
+
+### Dependencies
+
+* Bump `@isaacs/brace-expansion` ([#115](https://github.com/macalbert/envilder/pull/115))
+* Bump `@secretlint/secretlint-rule-preset-recommend` ([#114](https://github.com/macalbert/envilder/pull/114))
+* Bump `commander` from 14.0.2 to 14.0.3 ([#113](https://github.com/macalbert/envilder/pull/113))
+* Bump `@aws-sdk/client-ssm` from 3.958.0 to 3.980.0 ([#112](https://github.com/macalbert/envilder/pull/112))
+* Bump `secretlint` from 11.2.5 to 11.3.1 ([#110](https://github.com/macalbert/envilder/pull/110))
+* Bump `@commitlint/cli` from 20.3.0 to 20.4.0 ([#111](https://github.com/macalbert/envilder/pull/111))
+
+---
+
+## [0.7.7] - 2026-01-27
+
+### Added
+
+* **push:** AWS throttling retry logic and duplicate SSM path validation ([#109](https://github.com/macalbert/envilder/pull/109))
+
+### Fixed
+
+* **ci:** Streamline `npm publish` workflow to prevent failures ([#106](https://github.com/macalbert/envilder/pull/106))
+* **ci-publish:** Update publish command in workflow
+
+### Dependencies
+
+* Bump `lodash` ([#108](https://github.com/macalbert/envilder/pull/108))
+* Bump `diff` ([#107](https://github.com/macalbert/envilder/pull/107))
+
+---
+
 ## [0.7.6] - 2026-01-16
 
 ### Fixed
@@ -113,16 +201,7 @@ prints a warning. It will be removed in a future release.
 
 ---
 
-## [0.7.3] - 2025-12-06
-
-### Dependencies
-
-* Bump actions/checkout from 5 to 6 ([#98](https://github.com/macalbert/envilder/pull/98))
-* Bump glob from 11.1.0 to 13.0.0 ([#97](https://github.com/macalbert/envilder/pull/97))
-
----
-
-## [0.7.2] - 2025-11-29
+## [0.7.3] - 2025-11-29
 
 ### Changed
 
@@ -133,6 +212,8 @@ prints a warning. It will be removed in a future release.
 
 ### Dependencies
 
+* Bump actions/checkout from 5 to 6 ([#98](https://github.com/macalbert/envilder/pull/98))
+* Bump glob from 11.1.0 to 13.0.0 ([#97](https://github.com/macalbert/envilder/pull/97))
 * Bump pnpm/action-setup from 2 to 4 ([#92](https://github.com/macalbert/envilder/pull/92))
 * Bump @commitlint/cli from 19.8.1 to 20.1.0 ([#94](https://github.com/macalbert/envilder/pull/94))
 * Bump glob in the npm_and_yarn group ([#96](https://github.com/macalbert/envilder/pull/96))
@@ -236,8 +317,17 @@ prints a warning. It will be removed in a future release.
 
 ### Changed
 
-* Implemented .NET-Style DIP Startup Pattern for dependency injection
-* Improved separation of concerns in dependency configuration
+* Bump version to 0.6.3 in package.json
+
+---
+
+## [0.6.2] - 2025-07-20
+
+### Changed
+
+* **di:** Implement .NET-Style DIP Startup Pattern for dependency injection — improved separation of concerns in DI configuration ([#59](https://github.com/macalbert/envilder/pull/59))
+
+---
 
 ## [0.6.1] - 2025-07-13
 
@@ -267,6 +357,16 @@ prints a warning. It will be removed in a future release.
 * Added comprehensive examples for all new Push Mode commands
 * Created visual diagrams explaining Push Mode data flow
 * Documented options and parameters for Push Mode operations
+
+---
+
+## [0.6.0] - 2025-07-13
+
+### Added
+
+* **push:** Introduced Push Mode — sync local `.env` variables to AWS SSM Parameter Store ([#57](https://github.com/macalbert/envilder/pull/57))
+
+---
 
 ## [0.5.6] - 2025-07-06
 
@@ -363,6 +463,13 @@ prints a warning. It will be removed in a future release.
 
 * CLI command not recognized after global install (`npm install -g envilder`)
 * Fixed missing compiled `lib/` files in published package
+
+---
+
+> **Note:** Versions below 0.5.1 are deprecated on npm and no longer supported.
+> They are preserved here for historical reference only.
+
+---
 
 ## [0.3.0] - 2025-05-09
 
