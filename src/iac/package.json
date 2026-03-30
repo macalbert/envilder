@@ -1,7 +1,7 @@
 {
   "name": "@envilder/iac",
   "version": "0.1.0",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "build": "tsc --build",
     "watch": "tsc -w",

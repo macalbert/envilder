@@ -3,6 +3,7 @@ packages:
   - "src/website"
   - "src/iac"
   - "tests/iac"
+  - "tests/website"
 
 catalog:
   '@biomejs/biome': ^2.4.9

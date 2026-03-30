@@ -159,6 +159,12 @@ importers:
         specifier: 'catalog:'
         version: 6.0.2
 
+  tests/website:
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.2
+
 packages:
 
   '@astrojs/compiler@3.0.1':

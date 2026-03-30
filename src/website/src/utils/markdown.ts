@@ -44,7 +44,7 @@ export function extractVersions(
 ): { tag: string; id: string; date: string }[] {
   const cleaned = cleanChangelog(md);
   const versions: { tag: string; id: string; date: string }[] = [];
-  const re = /^## \[?([\d.]+)\]?.*?(?:[-–—]\s*)?(\d{4}-\d{2}-\d{2})?/gm;
+  const re = /^## \[?([\d.]+)\]?(?:\s*[-–—]+\s*(\d{4}-\d{2}-\d{2}))?/gm;
   let m = re.exec(cleaned);
   while (m !== null) {
     const tag = m[1];
