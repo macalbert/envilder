@@ -321,35 +321,35 @@ export const es: Translations = {
         label: '📦',
         title: 'TypeScript SDK (@envilder/sdk)',
         description:
-          'Librería nativa de ejecución — carga secretos directamente en process.env desde un map-file. Publicado en npm',
+          'Librería nativa de ejecución — cargará secretos directamente en process.env desde un map-file. Se publicará en npm',
       },
       {
         status: 'next',
         label: '🐍',
         title: 'Python SDK (envilder)',
         description:
-          'Librería para Django/FastAPI/pipelines de datos. Publicado en PyPI',
+          'Librería para Django/FastAPI/pipelines de datos. Se publicará en PyPI',
       },
       {
         status: 'next',
         label: '🐹',
         title: 'Go SDK (envilder)',
         description:
-          'Librería para apps cloud-native y herramientas Kubernetes. Publicado como módulo Go',
+          'Librería para apps cloud-native y herramientas Kubernetes. Se publicará como módulo Go',
       },
       {
         status: 'next',
         label: '🔵',
         title: '.NET SDK (Envilder)',
         description:
-          'Librería para apps enterprise y Azure-native. Publicado en NuGet',
+          'Librería para apps enterprise y Azure-native. Se publicará en NuGet',
       },
       {
         status: 'next',
         label: '☕',
         title: 'Java SDK (envilder)',
         description:
-          'Librería para Spring Boot y backends Android. Publicado en Maven Central',
+          'Librería para Spring Boot y backends Android. Se publicará en Maven Central',
       },
       {
         status: 'planned',

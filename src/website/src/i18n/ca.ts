@@ -321,35 +321,35 @@ export const ca: Translations = {
         label: '📦',
         title: 'TypeScript SDK (@envilder/sdk)',
         description:
-          'Biblioteca nativa de runtime — carrega secrets directament a process.env des d’un map-file. Publicat a npm',
+          'Biblioteca nativa de runtime — carregarà secrets directament a process.env des d’un map-file. Es publicarà a npm',
       },
       {
         status: 'next',
         label: '🐍',
         title: 'Python SDK (envilder)',
         description:
-          'Biblioteca per a Django/FastAPI/pipelines de dades. Publicat a PyPI',
+          'Biblioteca per a Django/FastAPI/pipelines de dades. Es publicarà a PyPI',
       },
       {
         status: 'next',
         label: '🐹',
         title: 'Go SDK (envilder)',
         description:
-          'Biblioteca per a apps cloud-native i eines Kubernetes. Publicat com a mòdul Go',
+          'Biblioteca per a apps cloud-native i eines Kubernetes. Es publicarà com a mòdul Go',
       },
       {
         status: 'next',
         label: '🔵',
         title: '.NET SDK (Envilder)',
         description:
-          'Biblioteca per a apps enterprise i Azure-native. Publicat a NuGet',
+          'Biblioteca per a apps enterprise i Azure-native. Es publicarà a NuGet',
       },
       {
         status: 'next',
         label: '☕',
         title: 'Java SDK (envilder)',
         description:
-          'Biblioteca per a Spring Boot i backends Android. Publicat a Maven Central',
+          'Biblioteca per a Spring Boot i backends Android. Es publicarà a Maven Central',
       },
       {
         status: 'planned',

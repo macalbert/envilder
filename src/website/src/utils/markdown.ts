@@ -34,6 +34,7 @@ function stripHtmlComments(text: string): string {
 /** Clean the raw changelog markdown for website rendering. */
 function cleanChangelog(md: string): string {
   return stripHtmlComments(md)
+    .replace(/\r\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }

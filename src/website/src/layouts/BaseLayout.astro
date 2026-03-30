@@ -87,8 +87,9 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
         else if (lang.startsWith('es')) locale = 'es';
 
         if (locale) {
-          // Preserve sub-path (e.g. /docs → /es/docs)
-          var newPath = '/' + locale + (path === '/' ? '/' : path);
+          // Preserve sub-path, query, and hash
+          var suffix = window.location.search + window.location.hash;
+          var newPath = '/' + locale + (path === '/' ? '/' : path) + suffix;
           window.location.replace(newPath);
         }
       })();
