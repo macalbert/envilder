@@ -1,14 +1,5 @@
 ## [0.9.1] - 2026-03-30
 
-### Fixed
-
-* **deps:** Move `@types/node` from `dependencies` to `devDependencies` to prevent it from being bundled as a runtime dependency
-* **e2e:** Use unique SSM paths per CLI test run to prevent race conditions between parallel test executions
-
----
-
-## [0.9.0] - 2026-03-29
-
 ### Added
 
 * **Documentation website** — Full Astro-based docs site deployed at [envilder.com](https://envilder.com), with multi-language support (EN, ES, CA), dark/retro and light themes, and a dedicated changelog page
@@ -16,6 +7,11 @@
 ### Changed
 
 * Updated Envilder logo in README
+
+### Fixed
+
+* **deps:** Move `@types/node` from `dependencies` to `devDependencies` to prevent it from being bundled as a runtime dependency
+* **e2e:** Use unique SSM paths per CLI test run to prevent race conditions between parallel test executions
 
 ### Dependencies
 
