@@ -22,7 +22,7 @@ principles for testability and modularity.
 
 **Use case orchestration using Command/Handler pattern.**
 
-- Each feature = `*Command` + `*CommandHandler` pair (e.g., `PullSsmToEnvCommand`, `PullSsmToEnvCommandHandler`)
+- Each feature = `*Command` + `*CommandHandler` pair (e.g., `PullSecretsToEnvCommand`, `PullSecretsToEnvCommandHandler`)
 - `DispatchActionCommandHandler` routes between pull/push modes via switch statement
 - Handlers are `@injectable()` and inject dependencies via `@inject(TYPES.X)`
 - Commands have static `.create()` factory methods
@@ -161,7 +161,7 @@ Example (PushSingle):
 1. User runs `envilder --map=map.json --envfile=.env`
 2. `Cli.ts` parses options, reads `$config` from map file, merges with CLI flags into `MapFileConfig`
 3. `Startup` builds DI container via shared `ContainerConfiguration` (selects provider from config)
-4. Dispatcher creates `PullSsmToEnvCommand` → invokes `PullSsmToEnvCommandHandler`
+4. Dispatcher creates `PullSecretsToEnvCommand` → invokes `PullSecretsToEnvCommandHandler`
 5. Handler loads mapping via `IVariableStore.getMapping()` → gets `{"DB_URL": "/app/db"}`
 6. For each mapping, handler calls `ISecretProvider.getSecret("/app/db")`
 7. Provider adapter fetches the secret (AWS: `GetParameterCommand` with `WithDecryption: true`;

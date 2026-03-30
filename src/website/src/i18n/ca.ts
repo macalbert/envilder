@@ -177,7 +177,7 @@ export const ca: Translations = {
         icon: '🔌',
         title: 'SDKs en temps real',
         description:
-          'Carrega secrets directament a la teva app a l\'inici — TypeScript, Python, Go, .NET, Java. Sense fitxers .env, sense intermediaris.',
+          "Carrega secrets directament a la teva app a l'inici — TypeScript, Python, Go, .NET, Java. Sense fitxers .env, sense intermediaris.",
         badge: 'Pròximament',
       },
     ],

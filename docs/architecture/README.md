@@ -38,8 +38,8 @@ style INFRA fill:#C62828,stroke:#C62828,color:#FFFFFF
 subgraph APP["Application Layer"]
     direction LR
     DISPATCH[DispatchActionCommandHandler]
-    PULL[PullSsmToEnv]
-    PUSH[PushEnvToSsm]
+    PULL[PullSecretsToEnv]
+    PUSH[PushEnvToSecrets]
     SINGLE[PushSingle]
 end
 class DISPATCH,PULL,PUSH,SINGLE node
@@ -129,8 +129,8 @@ Responsibilities:
 Handlers:
 
 * `DispatchActionCommandHandler`
-* `PullSsmToEnvCommandHandler`
-* `PushEnvToSsmCommandHandler`
+* `PullSecretsToEnvCommandHandler`
+* `PushEnvToSecretsCommandHandler`
 * `PushSingleCommandHandler`
 
 ---
@@ -178,14 +178,14 @@ sequenceDiagram
     actor User
     participant CLI as CLI/GHA
     participant Dispatch as DispatchActionCommandHandler
-    participant Pull as PullSsmToEnvCommandHandler
+    participant Pull as PullSecretsToEnvCommandHandler
     participant FileStore as FileVariableStore
     participant AWS as AwsSsmSecretProvider
     participant SSM as AWS SSM
 
     User->>CLI: envilder --map=map.json --envfile=.env
     CLI->>Dispatch: handleCommand(command)
-    Dispatch->>Pull: handle(PullSsmToEnvCommand)
+    Dispatch->>Pull: handle(PullSecretsToEnvCommand)
     
     Pull->>FileStore: getMapping(map.json)
     FileStore-->>Pull: {"DB_URL": "/app/db-url"}
@@ -216,14 +216,14 @@ sequenceDiagram
     actor User
     participant CLI as CLI/GHA
     participant Dispatch as DispatchActionCommandHandler
-    participant Pull as PullSsmToEnvCommandHandler
+    participant Pull as PullSecretsToEnvCommandHandler
     participant FileStore as FileVariableStore
     participant AZ as AzureKeyVaultSecretProvider
     participant KV as Azure Key Vault
 
     User->>CLI: envilder --map=map.json --envfile=.env
     CLI->>Dispatch: handleCommand(command)
-    Dispatch->>Pull: handle(PullSsmToEnvCommand)
+    Dispatch->>Pull: handle(PullSecretsToEnvCommand)
     
     Pull->>FileStore: getMapping(map.json)
     FileStore-->>Pull: {"DB_URL": "app-db-url"}
@@ -258,14 +258,14 @@ sequenceDiagram
     actor User
     participant CLI as CLI/GHA
     participant Dispatch as DispatchActionCommandHandler
-    participant Push as PushEnvToSsmCommandHandler
+    participant Push as PushEnvToSecretsCommandHandler
     participant FileStore as FileVariableStore
     participant AWS as AwsSsmSecretProvider
     participant SSM as AWS SSM
 
     User->>CLI: envilder --push --map=map.json --envfile=.env
     CLI->>Dispatch: handleCommand(command)
-    Dispatch->>Push: handle(PushEnvToSsmCommand)
+    Dispatch->>Push: handle(PushEnvToSecretsCommand)
     
     Push->>FileStore: getMapping(map.json)
     FileStore-->>Push: {"DB_URL": "/app/db-url"}
@@ -292,14 +292,14 @@ sequenceDiagram
     actor User
     participant CLI as CLI/GHA
     participant Dispatch as DispatchActionCommandHandler
-    participant Push as PushEnvToSsmCommandHandler
+    participant Push as PushEnvToSecretsCommandHandler
     participant FileStore as FileVariableStore
     participant AZ as AzureKeyVaultSecretProvider
     participant KV as Azure Key Vault
 
     User->>CLI: envilder --push --map=map.json --envfile=.env
     CLI->>Dispatch: handleCommand(command)
-    Dispatch->>Push: handle(PushEnvToSsmCommand)
+    Dispatch->>Push: handle(PushEnvToSecretsCommand)
     
     Push->>FileStore: getMapping(map.json)
     FileStore-->>Push: {"DB_URL": "app-db-url"}
@@ -351,10 +351,10 @@ function configureInfrastructureServices(
 function configureApplicationServices(container: Container) {
   container.bind(TYPES.DispatchActionCommandHandler)
     .to(DispatchActionCommandHandler).inTransientScope();
-  container.bind(TYPES.PullSsmToEnvCommandHandler)
-    .to(PullSsmToEnvCommandHandler).inTransientScope();
-  container.bind(TYPES.PushEnvToSsmCommandHandler)
-    .to(PushEnvToSsmCommandHandler).inTransientScope();
+  container.bind(TYPES.PullSecretsToEnvCommandHandler)
+    .to(PullSecretsToEnvCommandHandler).inTransientScope();
+  container.bind(TYPES.PushEnvToSecretsCommandHandler)
+    .to(PushEnvToSecretsCommandHandler).inTransientScope();
   container.bind(TYPES.PushSingleCommandHandler)
     .to(PushSingleCommandHandler).inTransientScope();
 }

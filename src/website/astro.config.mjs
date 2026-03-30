@@ -6,6 +6,16 @@ const rootPkg = JSON.parse(
   readFileSync(new URL('../../package.json', import.meta.url), 'utf-8'),
 );
 
+let changelogContent = '';
+try {
+  changelogContent = readFileSync(
+    new URL('../../docs/CHANGELOG.md', import.meta.url),
+    'utf-8',
+  );
+} catch {
+  // fallback: changelog not found at build time
+}
+
 export default defineConfig({
   site: 'https://envilder.com',
   output: 'static',
@@ -20,6 +30,7 @@ export default defineConfig({
   vite: {
     define: {
       __APP_VERSION__: JSON.stringify(rootPkg.version),
+      __CHANGELOG_CONTENT__: JSON.stringify(changelogContent),
     },
   },
   build: {

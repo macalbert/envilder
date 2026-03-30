@@ -1,7 +1,4 @@
 ---
-import { readFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import Footer from '../../components/Footer.astro';
 import Navbar from '../../components/Navbar.astro';
 import { localizedPath, useTranslations } from '../../i18n/utils';
@@ -11,18 +8,11 @@ import { changelogToHtml, extractVersions } from '../../utils/markdown';
 const lang = 'ca';
 const t = useTranslations(lang);
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const changelogPath = resolve(__dirname, '../../../../../../docs/CHANGELOG.md');
-let changelogContent = '';
-try {
-  changelogContent = await readFile(changelogPath, 'utf-8');
-} catch {
-  changelogContent =
-    '# Changelog\n\nChangelog file not found. See [GitHub Releases](https://github.com/macalbert/envilder/releases).';
-}
-
-const changelogHtml = changelogToHtml(changelogContent);
-const versions = extractVersions(changelogContent);
+const rawContent: string =
+  __CHANGELOG_CONTENT__ ||
+  '# Changelog\n\nChangelog not available. See [GitHub Releases](https://github.com/macalbert/envilder/releases).';
+const changelogHtml = changelogToHtml(rawContent);
+const versions = extractVersions(rawContent);
 ---
 
 <BaseLayout
