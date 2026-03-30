@@ -36,22 +36,22 @@ or directly inside application code at runtime.
 
 | Feature | Priority | Notes |
 |---------|----------|-------|
-| **Exec mode** (`--exec`) | 🔴 High | Inject secrets into a child process env without writing to disk (`envilder exec -- node server.js`) |
 | **TypeScript SDK** (`@envilder/sdk`) | 🔴 High | Native runtime library — load secrets directly into `process.env` from a map-file. No `.env` file needed. Published to npm |
-| **GCP Secret Manager** | 🔴 High | Third cloud provider — similar DX to AWS SSM. Completes the multi-cloud trident (AWS + Azure + GCP) |
+| **Python SDK** (`envilder`) | 🔴 High | Runtime library for Python — Django/FastAPI/data pipelines. Published to PyPI |
+| **Go SDK** (`envilder`) | 🔴 High | Runtime library for Go — cloud-native apps, Kubernetes tooling. Published as Go module |
+| **.NET SDK** (`Envilder`) | 🔴 High | Runtime library for .NET — enterprise apps, Azure-native shops. Published to NuGet |
+| **Java SDK** (`envilder`) | 🔴 High | Runtime library for Java/Kotlin — Spring Boot, Android backends. Published to Maven Central |
 | **Map-file JSON Schema** | 🔴 High | Formal spec for the map-file format at `spec/` — serves as the contract between all SDKs and tools |
+| **SDK conformance tests** | 🔴 High | Language-agnostic test fixtures (JSON input → expected output) that all SDKs must pass |
+| **Exec mode** (`--exec`) | 🟡 Medium | Inject secrets into a child process env without writing to disk (`envilder exec -- node server.js`) |
+| **GCP Secret Manager** | 🟡 Medium | Third cloud provider — similar DX to AWS SSM. Completes the multi-cloud trident (AWS + Azure + GCP) |
 | **AWS Secrets Manager** | 🟡 Medium | Support AWS Secrets Manager alongside SSM Parameter Store for teams using JSON-structured secrets |
-| **Python SDK** (`envilder`) | 🟡 Medium | Runtime library for Python — Django/FastAPI/data pipelines. Published to PyPI |
 | **Check/sync mode** (`--check`) | 🟡 Medium | Validate cloud secrets vs local `.env`, fail CI if out-of-sync |
 
 ### 💡 Planned
 
 | Feature | Priority | Notes |
 |---------|----------|-------|
-| **Go SDK** (`envilder`) | Medium | Runtime library for Go — cloud-native apps, Kubernetes tooling. Published as Go module |
-| **.NET SDK** (`Envilder`) | Medium | Runtime library for .NET — enterprise apps, Azure-native shops. Published to NuGet |
-| **Java SDK** (`envilder`) | Medium | Runtime library for Java/Kotlin — Spring Boot, Android backends. Published to Maven Central |
-| **SDK conformance tests** | Medium | Language-agnostic test fixtures (JSON input → expected output) that all SDKs must pass |
 | **Auto-discovery mode** (`--auto`) | Medium | Fetch all parameters matching a given prefix (e.g., `/my-app/prod/*`) |
 | **Exec with refresh** (`--refresh-interval`) | Low | Kill & restart child process periodically with fresh secrets (requires `--exec`) |
 | **Hierarchical mapping** | Low | Per-environment `param-map.json` with inheritance/overrides |
@@ -76,13 +76,17 @@ param-map.json (universal contract)
      └── envilder (Maven)        → Java / Kotlin runtime
 ```
 
-### SDK Rollout Phases
+### SDK Rollout
 
-| Phase | Scope | Rationale |
-|-------|-------|-----------|
-| **Phase 1** | TypeScript SDK | Core already exists in TypeScript — refactor + package |
-| **Phase 2** | Python SDK | Massive adoption in data engineering, ML, and scripting where secrets are critical |
-| **Phase 3** | Go, .NET, Java SDKs | Enterprise reach and cloud-native coverage, prioritized by community demand |
+All five SDKs are developed **in parallel** — same map-file contract, same conformance tests, shipped simultaneously:
+
+| SDK | Package | Registry |
+|-----|---------|----------|
+| **TypeScript** | `@envilder/sdk` | npm |
+| **Python** | `envilder` | PyPI |
+| **Go** | `envilder` | Go module |
+| **.NET** | `Envilder` | NuGet |
+| **Java** | `envilder` | Maven Central |
 
 ### Monorepo Principles
 

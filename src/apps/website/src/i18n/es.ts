@@ -322,6 +322,41 @@ export const es: Translations = {
       },
       {
         status: 'next',
+        label: '📦',
+        title: 'TypeScript SDK (@envilder/sdk)',
+        description:
+          'Librería nativa de ejecución — carga secretos directamente en process.env desde un map-file. Publicado en npm',
+      },
+      {
+        status: 'next',
+        label: '🐍',
+        title: 'Python SDK (envilder)',
+        description:
+          'Librería para Django/FastAPI/pipelines de datos. Publicado en PyPI',
+      },
+      {
+        status: 'next',
+        label: '🐹',
+        title: 'Go SDK (envilder)',
+        description:
+          'Librería para apps cloud-native y herramientas Kubernetes. Publicado como módulo Go',
+      },
+      {
+        status: 'next',
+        label: '🔵',
+        title: '.NET SDK (Envilder)',
+        description:
+          'Librería para apps enterprise y Azure-native. Publicado en NuGet',
+      },
+      {
+        status: 'next',
+        label: '☕',
+        title: 'Java SDK (envilder)',
+        description:
+          'Librería para Spring Boot y backends Android. Publicado en Maven Central',
+      },
+      {
+        status: 'planned',
         label: '⚡',
         title: 'Modo exec (--exec)',
         description: 'Inyecta secretos en un proceso hijo sin escribir a disco',

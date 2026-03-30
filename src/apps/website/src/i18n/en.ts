@@ -318,6 +318,41 @@ export const en: Translations = {
       },
       {
         status: 'next',
+        label: '📦',
+        title: 'TypeScript SDK (@envilder/sdk)',
+        description:
+          'Native runtime library — load secrets directly into process.env from a map-file. Published to npm',
+      },
+      {
+        status: 'next',
+        label: '🐍',
+        title: 'Python SDK (envilder)',
+        description:
+          'Runtime library for Django/FastAPI/data pipelines. Published to PyPI',
+      },
+      {
+        status: 'next',
+        label: '🐹',
+        title: 'Go SDK (envilder)',
+        description:
+          'Runtime library for cloud-native apps and Kubernetes tooling. Published as Go module',
+      },
+      {
+        status: 'next',
+        label: '🔵',
+        title: '.NET SDK (Envilder)',
+        description:
+          'Runtime library for enterprise apps and Azure-native shops. Published to NuGet',
+      },
+      {
+        status: 'next',
+        label: '☕',
+        title: 'Java SDK (envilder)',
+        description:
+          'Runtime library for Spring Boot and Android backends. Published to Maven Central',
+      },
+      {
+        status: 'planned',
         label: '⚡',
         title: 'Exec mode (--exec)',
         description:

@@ -322,6 +322,41 @@ export const ca: Translations = {
       },
       {
         status: 'next',
+        label: '📦',
+        title: 'TypeScript SDK (@envilder/sdk)',
+        description:
+          'Biblioteca nativa de runtime — carrega secrets directament a process.env des d’un map-file. Publicat a npm',
+      },
+      {
+        status: 'next',
+        label: '🐍',
+        title: 'Python SDK (envilder)',
+        description:
+          'Biblioteca per a Django/FastAPI/pipelines de dades. Publicat a PyPI',
+      },
+      {
+        status: 'next',
+        label: '🐹',
+        title: 'Go SDK (envilder)',
+        description:
+          'Biblioteca per a apps cloud-native i eines Kubernetes. Publicat com a mòdul Go',
+      },
+      {
+        status: 'next',
+        label: '🔵',
+        title: '.NET SDK (Envilder)',
+        description:
+          'Biblioteca per a apps enterprise i Azure-native. Publicat a NuGet',
+      },
+      {
+        status: 'next',
+        label: '☕',
+        title: 'Java SDK (envilder)',
+        description:
+          'Biblioteca per a Spring Boot i backends Android. Publicat a Maven Central',
+      },
+      {
+        status: 'planned',
         label: '⚡',
         title: 'Mode exec (--exec)',
         description: 'Injecta secrets en un procés fill sense escriure a disc',
