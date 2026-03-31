@@ -40,14 +40,12 @@ jobs:
         id: version-check
         run: |
           CURRENT_VERSION=$(node -p "require('./package.json').version")
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          LAST_TAG_VERSION=${LAST_TAG#v}
+          PUBLISHED_VERSION=$(npm view envilder version 2>/dev/null || echo "0.0.0")
 
-          echo "Current version: $CURRENT_VERSION, Last tag version: $LAST_TAG_VERSION"
+          echo "Current version: $CURRENT_VERSION, Published version: $PUBLISHED_VERSION"
 
-          # Check if the current version is greater than the last tagged version
-          if [ "$CURRENT_VERSION" != "$LAST_TAG_VERSION" ]; then
-            echo "Version has been bumped from $LAST_TAG_VERSION to $CURRENT_VERSION"
+          if [ "$CURRENT_VERSION" != "$PUBLISHED_VERSION" ]; then
+            echo "Version has been bumped from $PUBLISHED_VERSION to $CURRENT_VERSION"
             echo "version_changed=true" >> $GITHUB_OUTPUT
             echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           else
