@@ -495,10 +495,11 @@ All help is welcome — PRs, issues, ideas!
 
 <p align="center">
   <a href="https://localstack.cloud" target="_blank" rel="noopener noreferrer">
-    <img src="./src/website/public/localstack-logo-horizontal-Dark.svg#gh-light-mode-only"
-      alt="LocalStack" height="40">
-    <img src="./src/website/public/localstack-logo-horizontal-Light.svg#gh-dark-mode-only"
-      alt="LocalStack" height="40">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="./src/website/public/localstack-logo-horizontal-Light.svg">
+      <source media="(prefers-color-scheme: light)" srcset="./src/website/public/localstack-logo-horizontal-Dark.svg">
+      <img src="./src/website/public/localstack-logo-horizontal-Dark.svg" alt="LocalStack" height="40">
+    </picture>
   </a>
 </p>
 
