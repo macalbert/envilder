@@ -84,6 +84,7 @@ and streamline onboarding and CI/CD workflows.
   - [🏁 Roadmap](#-roadmap)
   - [🤝 Contributing](#-contributing)
   - [💜 Sponsors](#-sponsors)
+  - [📜 License](#-license)
 
 ---
 
@@ -506,6 +507,8 @@ All help is welcome — PRs, issues, ideas!
 </p>
 
 ---
+
+## 📜 License
 
 MIT © [Marçal Albert](https://github.com/macalbert)  
 See [LICENSE](./LICENSE) | [CHANGELOG](./docs/CHANGELOG.md) | [Security Policy](./docs/SECURITY.md)
