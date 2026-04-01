@@ -46,7 +46,7 @@ export const ca: Translations = {
     label: 'COMPATIBLE AMB',
   },
   sponsors: {
-    title: 'Amb el suport de',
+    title: 'Sponsors',
     localstackAlt: 'LocalStack',
   },
   problemSolution: {

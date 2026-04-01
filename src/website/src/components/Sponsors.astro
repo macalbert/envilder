@@ -19,30 +19,16 @@ const t = useTranslations(lang);
       class="sponsor-link"
     >
       <img
-        id="sponsor-logo"
-        class="sponsor-logo"
-        src="/localstack-on-dark.svg"
+        class="sponsor-logo logo-dark"
+        src="/localstack-logo-horizontal-Light.svg"
         alt={t.sponsors.localstackAlt}
-        loading="lazy"
+      />
+      <img
+        class="sponsor-logo logo-light"
+        src="/localstack-logo-horizontal-Dark.svg"
+        alt={t.sponsors.localstackAlt}
       />
     </a>
-    <script>
-      (function () {
-        const logo = document.getElementById('sponsor-logo') as HTMLImageElement;
-        if (!logo) return;
-        const update = () => {
-          const isLight = document.documentElement.dataset.theme === 'light';
-          logo.src = isLight
-            ? '/localstack-on-light.svg'
-            : '/localstack-on-dark.svg';
-        };
-        update();
-        new MutationObserver(update).observe(document.documentElement, {
-          attributes: true,
-          attributeFilter: ['data-theme'],
-        });
-      })();
-    </script>
   </div>
 </section>
 
@@ -84,6 +70,12 @@ const t = useTranslations(lang);
     max-width: 160px;
     height: auto;
   }
+
+  /* Show correct logo per theme — no JS needed */
+  :global([data-theme="light"]) .logo-dark { display: none; }
+  :global([data-theme="retro"]) .logo-light { display: none; }
+  /* Default (retro) before JS sets data-theme */
+  :global(:root:not([data-theme])) .logo-light { display: none; }
 
   @media (min-width: 640px) {
     .sponsor-logo {

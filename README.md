@@ -495,9 +495,9 @@ All help is welcome — PRs, issues, ideas!
 
 <p align="center">
   <a href="https://localstack.cloud" target="_blank" rel="noopener noreferrer">
-    <img src="./src/website/public/localstack-on-light.svg#gh-light-mode-only"
+    <img src="./src/website/public/localstack-logo-horizontal-Dark.svg#gh-light-mode-only"
       alt="LocalStack" height="40">
-    <img src="./src/website/public/localstack-on-dark.svg#gh-dark-mode-only"
+    <img src="./src/website/public/localstack-logo-horizontal-Light.svg#gh-dark-mode-only"
       alt="LocalStack" height="40">
   </a>
 </p>

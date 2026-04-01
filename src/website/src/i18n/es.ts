@@ -46,7 +46,7 @@ export const es: Translations = {
     label: 'COMPATIBLE CON',
   },
   sponsors: {
-    title: 'Con el apoyo de',
+    title: 'Sponsors',
     localstackAlt: 'LocalStack',
   },
   problemSolution: {

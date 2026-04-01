@@ -45,7 +45,7 @@ export const en: Translations = {
     label: 'WORKS WITH',
   },
   sponsors: {
-    title: 'Proudly supported by',
+    title: 'Sponsors',
     localstackAlt: 'LocalStack',
   },
   problemSolution: {
