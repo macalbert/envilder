@@ -1,4 +1,4 @@
-﻿name: 🌍 World 1-1 Website CI
+name: 🌍 World 1-1 Website CI
 
 on:
   workflow_dispatch:
