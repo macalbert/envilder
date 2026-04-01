@@ -1,6 +1,15 @@
 {
-	"extends": "//",
-	"files": {
-		"includes": ["**"]
-	}
+  "extends": "//",
+  "files": {
+    "includes": ["**"]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  }
 }

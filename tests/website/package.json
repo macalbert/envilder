@@ -1,18 +1,18 @@
 {
-	"name": "@envilder/website-tests",
-	"version": "0.1.0",
-	"private": true,
-	"license": "UNLICENSED",
-	"scripts": {
-		"build": "tsc --noEmit",
-		"lint": "biome lint --config-path ./biome.jsonc . --files-ignore-unknown=true",
-		"lint:fix": "biome lint --fix --config-path ./biome.jsonc . --files-ignore-unknown=true",
-		"format": "biome format --config-path ./biome.jsonc . --files-ignore-unknown=true",
-		"format:write": "biome format --write --config-path ./biome.jsonc . --files-ignore-unknown=true",
-		"test": "cd ../.. && vitest run --reporter=verbose tests/website/",
-		"test:update": "cd ../.. && vitest run --reporter=verbose --update tests/website/"
-	},
-	"devDependencies": {
-		"typescript": "catalog:"
-	}
+  "name": "@envilder/website-tests",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "biome lint --config-path ./biome.jsonc . --files-ignore-unknown=true",
+    "lint:fix": "biome lint --fix --config-path ./biome.jsonc . --files-ignore-unknown=true",
+    "format": "biome format --config-path ./biome.jsonc . --files-ignore-unknown=true",
+    "format:write": "biome format --write --config-path ./biome.jsonc . --files-ignore-unknown=true",
+    "test": "cd ../.. && vitest run --reporter=verbose tests/website/",
+    "test:update": "cd ../.. && vitest run --reporter=verbose --update tests/website/"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
 }
