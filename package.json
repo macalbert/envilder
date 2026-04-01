@@ -1,6 +1,6 @@
 {
   "name": "envilder",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "A CLI and GitHub Action that securely centralizes your environment variables from AWS SSM or Azure Key Vault as a single source of truth",
   "homepage": "https://envilder.com",
   "author": {

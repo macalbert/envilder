@@ -423,12 +423,18 @@ export interface HomeMetaTranslations {
   description: string;
 }
 
+export interface SponsorsTranslations {
+  title: string;
+  localstackAlt: string;
+}
+
 export interface Translations {
   homeMeta: HomeMetaTranslations;
   nav: NavLinks;
   theme: ThemeTranslations;
   hero: HeroTranslations;
   trust: TrustTranslations;
+  sponsors: SponsorsTranslations;
   problemSolution: ProblemSolutionTranslations;
   howItWorks: HowItWorksTranslations;
   features: FeaturesTranslations;

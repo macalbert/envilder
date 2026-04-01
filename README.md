@@ -83,6 +83,7 @@ and streamline onboarding and CI/CD workflows.
     - [Where Envilder fits best](#where-envilder-fits-best)
   - [🏁 Roadmap](#-roadmap)
   - [🤝 Contributing](#-contributing)
+  - [💜 Sponsors](#-sponsors)
   - [📜 License](#-license)
 
 ---
@@ -487,6 +488,23 @@ All help is welcome — PRs, issues, ideas!
 - 💬 Feedback and discussion welcome
 - 🏗️ Check our [Architecture Documentation](./docs/architecture/README.md)
 - 🔒 Review our [Security Policy](./docs/SECURITY.md)
+
+---
+
+## 💜 Sponsors
+
+<p align="center">
+  <a href="https://localstack.cloud" target="_blank" rel="noopener noreferrer">
+    <img src="./src/website/public/localstack-logo-horizontal-Dark.svg#gh-light-mode-only"
+      alt="LocalStack" height="40">
+    <img src="./src/website/public/localstack-logo-horizontal-Light.svg#gh-dark-mode-only"
+      alt="LocalStack" height="40">
+  </a>
+</p>
+
+<p align="center">
+  Proudly supported by <a href="https://localstack.cloud">LocalStack</a> — powering Envilder's integration tests.
+</p>
 
 ---
 

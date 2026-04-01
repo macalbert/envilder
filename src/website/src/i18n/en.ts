@@ -44,6 +44,10 @@ export const en: Translations = {
   trust: {
     label: 'WORKS WITH',
   },
+  sponsors: {
+    title: 'Sponsors',
+    localstackAlt: 'LocalStack',
+  },
   problemSolution: {
     title: 'The ',
     titleAccent: 'problem',

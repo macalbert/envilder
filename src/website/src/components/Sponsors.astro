@@ -1,0 +1,85 @@
+---
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="sponsors">
+  <div class="container">
+    <p class="sponsors-label">{t.sponsors.title}</p>
+    <a
+      href="https://localstack.cloud"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="sponsor-link"
+    >
+      <img
+        class="sponsor-logo logo-dark"
+        src="/localstack-logo-horizontal-Light.svg"
+        alt={t.sponsors.localstackAlt}
+      />
+      <img
+        class="sponsor-logo logo-light"
+        src="/localstack-logo-horizontal-Dark.svg"
+        alt={t.sponsors.localstackAlt}
+      />
+    </a>
+  </div>
+</section>
+
+<style>
+  .sponsors {
+    padding: var(--space-xl) 0;
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  .sponsors .container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xl);
+    flex-wrap: wrap;
+  }
+
+  .sponsors-label {
+    font-family: var(--font-pixel);
+    font-size: clamp(0.75rem, 1.2vw, 0.85rem);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin: 0;
+  }
+
+  .sponsor-link {
+    display: flex;
+    align-items: center;
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+  }
+
+  .sponsor-link:hover {
+    opacity: 1;
+  }
+
+  .sponsor-logo {
+    max-width: 160px;
+    height: auto;
+  }
+
+  /* Show correct logo per theme — no JS needed */
+  :global([data-theme="light"]) .logo-dark { display: none; }
+  :global([data-theme="retro"]) .logo-light { display: none; }
+  /* Default (retro) before JS sets data-theme */
+  :global(:root:not([data-theme])) .logo-light { display: none; }
+
+  @media (min-width: 640px) {
+    .sponsor-logo {
+      max-width: 200px;
+    }
+  }
+</style>
