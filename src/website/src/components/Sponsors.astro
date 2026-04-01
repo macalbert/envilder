@@ -19,29 +19,36 @@ const t = useTranslations(lang);
       class="sponsor-link"
     >
       <img
-        class="sponsor-logo sponsor-logo--dark-bg"
+        id="sponsor-logo"
+        class="sponsor-logo"
         src="/localstack-on-dark.svg"
         alt={t.sponsors.localstackAlt}
-        width="228"
-        height="137"
-        loading="lazy"
-      />
-      <img
-        class="sponsor-logo sponsor-logo--light-bg"
-        src="/localstack-on-light.svg"
-        alt={t.sponsors.localstackAlt}
-        width="380"
-        height="89"
         loading="lazy"
       />
     </a>
+    <script>
+      (function () {
+        const logo = document.getElementById('sponsor-logo') as HTMLImageElement;
+        if (!logo) return;
+        const update = () => {
+          const isLight = document.documentElement.dataset.theme === 'light';
+          logo.src = isLight
+            ? '/localstack-on-light.svg'
+            : '/localstack-on-dark.svg';
+        };
+        update();
+        new MutationObserver(update).observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ['data-theme'],
+        });
+      })();
+    </script>
   </div>
 </section>
 
 <style>
   .sponsors {
     padding: var(--space-xl) 0;
-    border-top: 2px solid var(--color-border);
     border-bottom: 2px solid var(--color-border);
   }
 
@@ -76,24 +83,6 @@ const t = useTranslations(lang);
   .sponsor-logo {
     max-width: 160px;
     height: auto;
-  }
-
-  /* Retro/dark theme: show white version, hide color version */
-  .sponsor-logo--dark-bg {
-    display: block;
-  }
-
-  .sponsor-logo--light-bg {
-    display: none;
-  }
-
-  /* Light theme: show color version, hide white version */
-  :global([data-theme='light']) .sponsor-logo--dark-bg {
-    display: none;
-  }
-
-  :global([data-theme='light']) .sponsor-logo--light-bg {
-    display: block;
   }
 
   @media (min-width: 640px) {
