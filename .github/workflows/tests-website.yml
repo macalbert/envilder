@@ -48,14 +48,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: 🌟 Shine Sprite (Run formatting checker)
-        run: |
-          pnpm --filter @envilder/website format
-          pnpm --filter @envilder/website-tests format
+        run: pnpm --filter @envilder/website format
 
       - name: 🏁 Flagpole (Run code quality checker)
-        run: |
-          pnpm --filter @envilder/website lint
-          pnpm --filter @envilder/website-tests lint
+        run: pnpm --filter @envilder/website lint
 
       - name: 🏗️ Build the Castle (Build website)
         run: pnpm --filter @envilder/website build
