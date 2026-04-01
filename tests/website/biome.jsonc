@@ -1,6 +1,6 @@
 {
-	"extends": "//",
-	"files": {
-		"includes": ["**"]
-	}
+  "extends": "//",
+  "files": {
+    "includes": ["**"]
+  }
 }

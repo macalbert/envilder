@@ -1,11 +1,11 @@
 {
-	"extends": "../../tsconfig.json",
-	"compilerOptions": {
-		"rootDir": "../..",
-		"noEmit": true,
-		"module": "esnext",
-		"moduleResolution": "bundler"
-	},
-	"include": ["./**/*.ts", "../../src/website/src/**/*.ts"],
-	"exclude": []
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "../..",
+    "noEmit": true,
+    "module": "esnext",
+    "moduleResolution": "bundler"
+  },
+  "include": ["./**/*.ts", "../../src/website/src/**/*.ts"],
+  "exclude": []
 }
