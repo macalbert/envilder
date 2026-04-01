@@ -45,6 +45,10 @@ export const es: Translations = {
   trust: {
     label: 'COMPATIBLE CON',
   },
+  sponsors: {
+    title: 'Con el apoyo de',
+    localstackAlt: 'LocalStack',
+  },
   problemSolution: {
     title: 'El ',
     titleAccent: 'problema',

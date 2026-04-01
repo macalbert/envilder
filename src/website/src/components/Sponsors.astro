@@ -1,0 +1,105 @@
+---
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="sponsors">
+  <div class="container">
+    <p class="sponsors-label">{t.sponsors.title}</p>
+    <a
+      href="https://localstack.cloud"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="sponsor-link"
+      aria-label={t.sponsors.localstackAlt}
+    >
+      <img
+        class="sponsor-logo sponsor-logo--dark-bg"
+        src="/localstack-on-dark.svg"
+        alt={t.sponsors.localstackAlt}
+        width="228"
+        height="137"
+        loading="lazy"
+      />
+      <img
+        class="sponsor-logo sponsor-logo--light-bg"
+        src="/localstack-on-light.svg"
+        alt={t.sponsors.localstackAlt}
+        width="380"
+        height="89"
+        loading="lazy"
+      />
+    </a>
+  </div>
+</section>
+
+<style>
+  .sponsors {
+    padding: var(--space-xl) 0;
+    border-top: 2px solid var(--color-border);
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  .sponsors .container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xl);
+    flex-wrap: wrap;
+  }
+
+  .sponsors-label {
+    font-family: var(--font-pixel);
+    font-size: clamp(0.45rem, 1.2vw, 0.6rem);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin: 0;
+  }
+
+  .sponsor-link {
+    display: flex;
+    align-items: center;
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+  }
+
+  .sponsor-link:hover {
+    opacity: 1;
+  }
+
+  .sponsor-logo {
+    max-width: 160px;
+    height: auto;
+  }
+
+  /* Retro/dark theme: show white version, hide color version */
+  .sponsor-logo--dark-bg {
+    display: block;
+  }
+
+  .sponsor-logo--light-bg {
+    display: none;
+  }
+
+  /* Light theme: show color version, hide white version */
+  :global([data-theme='light']) .sponsor-logo--dark-bg {
+    display: none;
+  }
+
+  :global([data-theme='light']) .sponsor-logo--light-bg {
+    display: block;
+  }
+
+  @media (min-width: 640px) {
+    .sponsor-logo {
+      max-width: 200px;
+    }
+  }
+</style>

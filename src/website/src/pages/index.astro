@@ -11,6 +11,7 @@ import Navbar from '../components/Navbar.astro';
 import ProblemSolution from '../components/ProblemSolution.astro';
 import Providers from '../components/Providers.astro';
 import Roadmap from '../components/Roadmap.astro';
+import Sponsors from '../components/Sponsors.astro';
 import TrustBadges from '../components/TrustBadges.astro';
 import { useTranslations } from '../i18n/utils';
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -28,6 +29,7 @@ const t = useTranslations(lang);
   <main id="main-content">
     <Hero lang={lang} />
     <TrustBadges lang={lang} />
+    <Sponsors lang={lang} />
     <ProblemSolution lang={lang} />
     <FeaturesGrid lang={lang} />
     <HowItWorks lang={lang} />

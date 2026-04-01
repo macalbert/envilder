@@ -83,7 +83,7 @@ and streamline onboarding and CI/CD workflows.
     - [Where Envilder fits best](#where-envilder-fits-best)
   - [🏁 Roadmap](#-roadmap)
   - [🤝 Contributing](#-contributing)
-  - [📜 License](#-license)
+  - [💜 Sponsors](#-sponsors)
 
 ---
 
@@ -490,7 +490,22 @@ All help is welcome — PRs, issues, ideas!
 
 ---
 
-## 📜 License
+## 💜 Sponsors
+
+<p align="center">
+  <a href="https://localstack.cloud" target="_blank" rel="noopener noreferrer">
+    <img src="https://raw.githubusercontent.com/macalbert/envilder/main/src/website/public/localstack-on-light.svg#gh-light-mode-only"
+      alt="LocalStack" height="40">
+    <img src="https://raw.githubusercontent.com/macalbert/envilder/main/src/website/public/localstack-on-dark.svg#gh-dark-mode-only"
+      alt="LocalStack" height="40">
+  </a>
+</p>
+
+<p align="center">
+  Proudly supported by <a href="https://localstack.cloud">LocalStack</a> — powering Envilder's integration tests.
+</p>
+
+---
 
 MIT © [Marçal Albert](https://github.com/macalbert)  
 See [LICENSE](./LICENSE) | [CHANGELOG](./docs/CHANGELOG.md) | [Security Policy](./docs/SECURITY.md)
