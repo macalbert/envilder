@@ -575,9 +575,13 @@ pre code,
   *,
   *::before,
   *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: required for prefers-reduced-motion accessibility override */
     animation-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: required for prefers-reduced-motion accessibility override */
     animation-iteration-count: 1 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: required for prefers-reduced-motion accessibility override */
     transition-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: required for prefers-reduced-motion accessibility override */
     scroll-behavior: auto !important;
   }
 }
