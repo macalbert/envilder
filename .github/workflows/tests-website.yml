@@ -1,0 +1,64 @@
+﻿name: 🌍 World 1-1 Website CI
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+    branches:
+      - "*"
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - ".github/workflows/tests-website.yml"
+      - "src/website/**"
+      - "tests/website/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  website-ci:
+    runs-on: ubuntu-24.04
+    if: ${{ !github.event.pull_request.draft }}
+    timeout-minutes: 15
+
+    steps:
+      - name: 🧱 Enter the Pipe (Checkout)
+        uses: actions/checkout@v6
+
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: 🍄 Grab a Mushroom (Setup Node.js with Cache)
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: 📦 Open the ? Block (Install packages)
+        run: pnpm install --frozen-lockfile
+
+      - name: 🌟 Shine Sprite (Run formatting checker)
+        run: |
+          pnpm --filter @envilder/website format
+          pnpm --filter @envilder/website-tests format
+
+      - name: 🏁 Flagpole (Run code quality checker)
+        run: |
+          pnpm --filter @envilder/website lint
+          pnpm --filter @envilder/website-tests lint
+
+      - name: 🏗️ Build the Castle (Build website)
+        run: pnpm --filter @envilder/website build
+
+      - name: 🏎️ Race Through the Track (Run website tests)
+        run: pnpm --filter @envilder/website-tests test
