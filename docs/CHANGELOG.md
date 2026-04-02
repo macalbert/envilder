@@ -1,3 +1,38 @@
+## [0.9.2] - 2026-04-02
+
+### Added
+
+* **LocalStack sponsor section** — Added sponsor section to website homepage and README with LocalStack logos (dark, light, color variants) and a new `Sponsors.astro` component ([#136](https://github.com/macalbert/envilder/pull/136))
+* **SDK platform scaffolding** — Added placeholder structure under `src/sdks/` for future .NET, Go, Java, Python, and TypeScript SDK implementations
+* **Website test suite** — Added `tests/website/` with Vitest coverage for i18n utilities and Markdown helpers (`utils.test.ts`, `markdown.test.ts`)
+* **`BackToTop` component** — New scroll-to-top button component for the documentation website
+
+### Changed
+
+* **Project layout restructured for SDK platform readiness** ([#134](https://github.com/macalbert/envilder/pull/134)):
+  * Core domain layer moved from `src/envilder/` to `src/envilder/core/`
+  * Website moved from `src/apps/website/` to `src/website/`
+  * All imports, `tsconfig.json`, `package.json`, and workspace config updated accordingly
+* **Website UX improvements** — `DocsContent`, `HowItWorks`, `ThemeSwitcher`, `TerminalMockup`, and `BaseLayout` components updated; global CSS expanded; i18n keys added for new content
+
+### Fixed
+
+* **README:** Replace `#gh-light-mode-only` / `#gh-dark-mode-only` image fragments with a `<picture>` element using `prefers-color-scheme` media queries for reliable dark/light theme logo switching
+* **ci:** Update version check in publish workflow to use published version from npm
+
+### Dependencies
+
+* Bump `@aws-sdk/client-ssm` from 3.1019.0 to 3.1021.0 ([#140](https://github.com/macalbert/envilder/pull/140))
+* Bump `@aws-sdk/credential-providers` from 3.1019.0 to 3.1021.0 ([#142](https://github.com/macalbert/envilder/pull/142))
+* Bump `secretlint` from 11.4.0 to 11.4.1 ([#141](https://github.com/macalbert/envilder/pull/141))
+* Bump `@secretlint/secretlint-rule-preset-recommend` from 11.4.0 to 11.4.1 ([#144](https://github.com/macalbert/envilder/pull/144))
+* Bump `astro` from 6.1.1 to 6.1.2 ([#143](https://github.com/macalbert/envilder/pull/143))
+* Bump `actions/configure-pages` from 5 to 6 ([#139](https://github.com/macalbert/envilder/pull/139))
+* Bump `actions/deploy-pages` from 4 to 5 ([#138](https://github.com/macalbert/envilder/pull/138))
+* Bump `pnpm/action-setup` from 4 to 5 ([#137](https://github.com/macalbert/envilder/pull/137))
+
+---
+
 ## [0.9.1] - 2026-03-30
 
 ### Added
