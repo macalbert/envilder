@@ -4,18 +4,21 @@ import { resolve } from 'node:path';
 
 /**
  * Global setup for Vitest - runs once before all tests (separate process).
- * Ensures .env exists by fetching secrets via envilder if missing.
- * Builds the GitHub Action bundle afterwards.
+ * - Local: generates .env via envilder if missing, then builds GHA bundle.
+ * - CI: secrets come from GitHub Actions environment, skips envilder call.
  */
 export async function setup() {
-  const envFilePath = resolve(process.cwd(), '.env');
+  const isCI = process.env.CI === 'true';
 
-  if (!existsSync(envFilePath) && !process.env.LOCALSTACK_AUTH_TOKEN) {
-    console.log('⚙️  .env not found — fetching secrets via envilder...');
-    execSync(
-      `npx envilder --map=secrets-map.json --envfile=.env`,
-      { cwd: process.cwd(), stdio: 'inherit' },
-    );
+  if (!isCI) {
+    const envFilePath = resolve(process.cwd(), '.env');
+    if (!existsSync(envFilePath)) {
+      console.log('⚙️  .env not found — fetching secrets via envilder...');
+      execSync(`npx envilder --map=secrets-map.json --envfile=.env`, {
+        cwd: process.cwd(),
+        stdio: 'inherit',
+      });
+    }
   }
 
   console.log('🏗️ Building GitHub Action bundle...');
