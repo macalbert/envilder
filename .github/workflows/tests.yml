@@ -73,6 +73,8 @@ jobs:
 
       - name: 🏎️ Race Through the Track (Run unit-test)
         run: pnpm test:ci
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
 
       - name: 🍄 Reveal the Power-Up (Test core results)
         uses: dorny/test-reporter@v3
