@@ -14,7 +14,7 @@ services:
     ports:
       - "4566:4566"
     environment:
-      LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
+      LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN:?LOCALSTACK_AUTH_TOKEN is required — run pnpx envilder to generate .env}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
       interval: 5s
