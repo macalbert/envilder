@@ -125,6 +125,10 @@
       "protobufjs",
       "sharp",
       "ssh2"
-    ]
+    ],
+    "overrides": {
+      "defu": ">=6.1.5",
+      "lodash": ">=4.18.0"
+    }
   }
 }
