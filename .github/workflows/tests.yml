@@ -37,6 +37,8 @@ jobs:
     runs-on: ubuntu-24.04
     if: ${{ !github.event.pull_request.draft }}
     timeout-minutes: 30
+    env:
+      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
 
     steps:
       - name: 🧱 Enter the Pipe (Checkout)

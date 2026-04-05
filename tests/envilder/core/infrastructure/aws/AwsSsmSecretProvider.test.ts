@@ -145,10 +145,15 @@ describe('AwsSsmSecretProvider (integration with LocalStack)', () => {
   let ssmClient: SSM;
 
   beforeAll(async () => {
+    if (!process.env.LOCALSTACK_AUTH_TOKEN) {
+      throw new Error(
+        'LOCALSTACK_AUTH_TOKEN is required. Run `pnpx envilder` to populate .env',
+      );
+    }
     container = await new LocalstackContainer(LOCALSTACK_IMAGE)
       .withName(`localstack-ssm-${randomUUID().slice(0, 8)}`)
       .withEnvironment({
-        LOCALSTACK_ACKNOWLEDGE_ACCOUNT_REQUIREMENT: '1',
+        LOCALSTACK_AUTH_TOKEN: process.env.LOCALSTACK_AUTH_TOKEN,
       })
       .start();
     endpoint = container.getConnectionUri();
