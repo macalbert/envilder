@@ -148,7 +148,7 @@ describe('AwsSsmSecretProvider (integration with LocalStack)', () => {
     container = await new LocalstackContainer(LOCALSTACK_IMAGE)
       .withName(`localstack-ssm-${randomUUID().slice(0, 8)}`)
       .withEnvironment({
-        LOCALSTACK_ACKNOWLEDGE_ACCOUNT_REQUIREMENT: '1',
+        LOCALSTACK_AUTH_TOKEN: process.env.LOCALSTACK_AUTH_TOKEN ?? '',
       })
       .start();
     endpoint = container.getConnectionUri();

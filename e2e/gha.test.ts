@@ -60,7 +60,7 @@ describe('GitHub Action (E2E)', () => {
     localstackContainer = await new LocalstackContainer(LOCALSTACK_IMAGE)
       .withName(`localstack-gha-${randomUUID().slice(0, 8)}`)
       .withEnvironment({
-        LOCALSTACK_ACKNOWLEDGE_ACCOUNT_REQUIREMENT: '1',
+        LOCALSTACK_AUTH_TOKEN: process.env.LOCALSTACK_AUTH_TOKEN ?? '',
       })
       .start();
     localstackEndpoint = localstackContainer.getConnectionUri();
