@@ -38,7 +38,7 @@
     "release-major": "pnpm version major",
     "release-prerelease": "pnpm version prerelease",
     "dev:run": "node --env-file=dev.env --import tsx src/envilder/apps/cli/Index.ts",
-    "docker:up": "npx envilder --map=secrets-map.json --envfile=.env && docker compose -f docker-compose.yml up -d",
+    "docker:up": "pnpx envilder --map=secrets-map.json --envfile=.env && docker compose -f docker-compose.yml up -d",
     "docker:down": "docker compose -f docker-compose.yml down"
   },
   "keywords": [
