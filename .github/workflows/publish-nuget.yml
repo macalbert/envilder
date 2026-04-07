@@ -9,6 +9,7 @@ on:
       - ".github/workflows/publish-nuget.yml"
 
 permissions:
+  id-token: write
   contents: write
 
 jobs:
@@ -60,9 +61,16 @@ jobs:
         if: steps.version-check.outputs.version_changed == 'true'
         run: dotnet pack -c Release --no-build -o ./nupkg
 
+      - name: � NuGet login (OIDC)
+        if: steps.version-check.outputs.version_changed == 'true'
+        uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: 🚩 Publish to NuGet
         if: steps.version-check.outputs.version_changed == 'true'
-        run: dotnet nuget push ./nupkg/Envilder.${{ steps.version-check.outputs.current_version }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push ./nupkg/Envilder.${{ steps.version-check.outputs.current_version }}.nupkg --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
 
       - name: 🏁 Create version tag
         if: steps.version-check.outputs.version_changed == 'true'
