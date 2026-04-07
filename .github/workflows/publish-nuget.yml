@@ -1,0 +1,94 @@
+name: 📦 Publish NuGet Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump type"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
+
+permissions:
+  contents: write
+
+jobs:
+  publish-nuget:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: src/sdks/dotnet
+
+    steps:
+      - name: 🧱 Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: 🛠️ Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.x"
+
+      - name: 🔢 Calculate next version
+        id: version-check
+        run: |
+          PUBLISHED=$(dotnet package search Envilder --source https://api.nuget.org/v3/index.json --exact-match --format json 2>/dev/null | jq -r '.searchResult[0].packages[0].latestVersion // "0.0.0"')
+          echo "Published version: $PUBLISHED"
+
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$PUBLISHED"
+
+          case "${{ inputs.bump }}" in
+            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH + 1)) ;;
+          esac
+
+          NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "Next version: $NEXT_VERSION"
+          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          echo "should_publish=true" >> $GITHUB_OUTPUT
+
+      - name: 🔧 Set version in csproj
+        if: steps.version-check.outputs.should_publish == 'true'
+        run: |
+          sed -i "s|<Version>.*</Version>|<Version>${{ steps.version-check.outputs.next_version }}</Version>|" Envilder.csproj
+
+      - name: 🏗️ Build
+        if: steps.version-check.outputs.should_publish == 'true'
+        run: dotnet build -c Release
+
+      - name: 🍄 Run tests
+        if: steps.version-check.outputs.should_publish == 'true'
+        run: dotnet test ../../../tests/sdks/dotnet/ -c Release --filter "FullyQualifiedName!~Acceptance" --verbosity normal
+
+      - name: 📦 Pack
+        if: steps.version-check.outputs.should_publish == 'true'
+        run: dotnet pack -c Release --no-build -o ./nupkg
+
+      - name: 🚩 Publish to NuGet
+        if: steps.version-check.outputs.should_publish == 'true'
+        run: dotnet nuget push ./nupkg/Envilder.${{ steps.version-check.outputs.next_version }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+
+      - name: 🏁 Create version tag
+        if: steps.version-check.outputs.should_publish == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "sdk-dotnet/v${{ steps.version-check.outputs.next_version }}" -m "Release Envilder .NET SDK v${{ steps.version-check.outputs.next_version }}"
+          git push origin "sdk-dotnet/v${{ steps.version-check.outputs.next_version }}"
+
+      - name: 🏰 Create Release
+        if: steps.version-check.outputs.should_publish == 'true'
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "sdk-dotnet/v${{ steps.version-check.outputs.next_version }}"
+          name: "📦 Envilder .NET SDK v${{ steps.version-check.outputs.next_version }}"
+          generateReleaseNotes: true
+          token: ${{ secrets.GITHUB_TOKEN }}
