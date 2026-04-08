@@ -46,4 +46,33 @@ public class ServiceCollectionExtensionsTests : IDisposable
         client.Should().NotBeNull();
         client.Should().BeOfType<EnvilderClient>();
     }
+
+    [Fact]
+    public void Should_ThrowFileNotFoundException_When_MapFileDoesNotExist()
+    {
+        // Arrange
+        var secretProvider = Substitute.For<ISecretProvider>();
+        var services = new ServiceCollection();
+
+        // Act
+        var act = () => services.AddEnvilder("/nonexistent/path/map.json", secretProvider);
+
+        // Assert
+        act.Should().Throw<FileNotFoundException>();
+    }
+
+    [Fact]
+    public void Should_ThrowArgumentException_When_MapFilePathIsEmpty()
+    {
+        // Arrange
+        var secretProvider = Substitute.For<ISecretProvider>();
+        var services = new ServiceCollection();
+
+        // Act
+        var act = () => services.AddEnvilder("", secretProvider);
+
+        // Assert
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("mapFilePath");
+    }
 }

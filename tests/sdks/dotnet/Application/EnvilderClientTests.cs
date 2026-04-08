@@ -47,15 +47,13 @@ public class EnvilderClientTests : IDisposable
         secretProvider.GetSecretAsync("/App/DbPassword", Arg.Any<CancellationToken>())
             .Returns("db-password");
 
-        var mapFile = new ParsedMapFile
-        {
-            Config = new MapFileConfig(),
-            Mappings = new Dictionary<string, string>
+        var mapFile = new ParsedMapFile(
+            new MapFileConfig(),
+            new Dictionary<string, string>
             {
                 ["TOKEN_SECRET"] = "/Test/Token",
                 ["DB_PASSWORD"] = "/App/DbPassword",
-            },
-        };
+            });
 
         var sut = new EnvilderClient(secretProvider);
 
@@ -78,15 +76,13 @@ public class EnvilderClientTests : IDisposable
         secretProvider.GetSecretAsync("/Missing/Secret", Arg.Any<CancellationToken>())
             .Returns((string)null!);
 
-        var mapFile = new ParsedMapFile
-        {
-            Config = new MapFileConfig(),
-            Mappings = new Dictionary<string, string>
+        var mapFile = new ParsedMapFile(
+            new MapFileConfig(),
+            new Dictionary<string, string>
             {
                 ["DB_PASSWORD"] = "/App/DbPassword",
                 ["MISSING_KEY"] = "/Missing/Secret",
-            },
-        };
+            });
 
         var sut = new EnvilderClient(secretProvider);
 

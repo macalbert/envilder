@@ -15,12 +15,20 @@ public class EnvilderConfigurationProvider : ConfigurationProvider
         _mapFile = mapFile;
     }
 
+    // ConfigurationProvider.Load() is synchronous by design.
+    // ResolveSecretsAsync uses ConfigureAwait(false) throughout to avoid deadlocks.
     public override void Load()
     {
-        var secrets = _client.ResolveSecretsAsync(_mapFile).GetAwaiter().GetResult();
+        var secrets = _client.ResolveSecretsAsync(_mapFile).ConfigureAwait(false).GetAwaiter().GetResult();
         foreach (var kvp in secrets)
         {
-            Data[kvp.Key] = kvp.Value;
+            var key = NormalizeKey(kvp.Key);
+            Data[key] = kvp.Value;
         }
+    }
+
+    private static string NormalizeKey(string key)
+    {
+        return key.Replace("/", ConfigurationPath.KeyDelimiter);
     }
 }

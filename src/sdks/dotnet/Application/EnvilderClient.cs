@@ -50,7 +50,7 @@ public class EnvilderClient
 
         foreach (var entry in mapFile.Mappings)
         {
-            var secretValue = await _secretProvider.GetSecretAsync(entry.Value, cancellationToken);
+            var secretValue = await _secretProvider.GetSecretAsync(entry.Value, cancellationToken).ConfigureAwait(false);
             if (secretValue is not null)
             {
                 result[entry.Key] = secretValue;

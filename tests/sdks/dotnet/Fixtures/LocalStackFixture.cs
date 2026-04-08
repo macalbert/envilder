@@ -3,6 +3,7 @@ namespace Envilder.Tests.Fixtures;
 using Amazon.SimpleSystemsManagement;
 using DotNet.Testcontainers.Builders;
 using Envilder.Application;
+using Envilder.Infrastructure;
 using Envilder.Infrastructure.Aws;
 using Envilder.Tests.Infrastructure.Aws;
 using Testcontainers.LocalStack;

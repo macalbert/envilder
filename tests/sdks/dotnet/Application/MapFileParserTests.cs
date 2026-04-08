@@ -103,4 +103,26 @@ public class MapFileParserTests
         actual.Mappings.Should().HaveCount(1);
         actual.Mappings["TOKEN_SECRET"].Should().Be("/Test/Token");
     }
+
+    [Fact]
+    public void Should_SkipNonStringValues_When_MapFileContainsNonStringEntries()
+    {
+        // Arrange
+        var json = """
+            {
+                "TOKEN_SECRET": "/Test/Token",
+                "NUMERIC_VALUE": 42,
+                "NULL_VALUE": null,
+                "OBJECT_VALUE": { "nested": true }
+            }
+            """;
+        var sut = new MapFileParser();
+
+        // Act
+        var actual = sut.Parse(json);
+
+        // Assert
+        actual.Mappings.Should().HaveCount(1);
+        actual.Mappings["TOKEN_SECRET"].Should().Be("/Test/Token");
+    }
 }

@@ -24,18 +24,16 @@ public class AzureKeyVaultAcceptanceTests
 
         var provider = new AzureKeyVaultSecretProvider(_lowkeyVault.SecretClient);
         var sut = new EnvilderClient(provider);
-        var mapFile = new ParsedMapFile
-        {
-            Config = new MapFileConfig
+        var mapFile = new ParsedMapFile(
+            new MapFileConfig
             {
                 Provider = SecretProviderType.Azure,
                 VaultUrl = _lowkeyVault.VaultUrl,
             },
-            Mappings = new Dictionary<string, string>
+            new Dictionary<string, string>
             {
                 ["VAULT_SECRET"] = "test-secret",
-            },
-        };
+            });
 
         // Act
         var actual = await sut.ResolveSecretsAsync(mapFile);
@@ -51,18 +49,16 @@ public class AzureKeyVaultAcceptanceTests
         // Arrange
         var provider = new AzureKeyVaultSecretProvider(_lowkeyVault.SecretClient);
         var client = new EnvilderClient(provider);
-        var mapFile = new ParsedMapFile
-        {
-            Config = new MapFileConfig
+        var mapFile = new ParsedMapFile(
+            new MapFileConfig
             {
                 Provider = SecretProviderType.Azure,
                 VaultUrl = _lowkeyVault.VaultUrl,
             },
-            Mappings = new Dictionary<string, string>
+            new Dictionary<string, string>
             {
                 ["MISSING"] = "nonexistent-secret",
-            },
-        };
+            });
 
         // Act
         var actual = await client.ResolveSecretsAsync(mapFile);

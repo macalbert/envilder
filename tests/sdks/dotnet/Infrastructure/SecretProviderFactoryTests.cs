@@ -1,8 +1,8 @@
-namespace Envilder.Tests.Application;
+namespace Envilder.Tests.Infrastructure;
 
 using AwesomeAssertions;
-using Envilder.Application;
 using Envilder.Domain;
+using Envilder.Infrastructure;
 using Envilder.Infrastructure.Aws;
 using Envilder.Infrastructure.Azure;
 

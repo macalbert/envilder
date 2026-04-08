@@ -29,14 +29,12 @@ public class AwsSsmAcceptanceTests
         });
 
         var sut = new EnvilderClient(_localStack.CreateProvider());
-        var mapFile = new ParsedMapFile
-        {
-            Config = new(),
-            Mappings = new()
+        var mapFile = new ParsedMapFile(
+            new(),
+            new()
             {
                 ["MY_SECRET"] = "/Test/MySecret",
-            },
-        };
+            });
 
         // Act
         var actual = await sut.ResolveSecretsAsync(mapFile);
@@ -51,14 +49,12 @@ public class AwsSsmAcceptanceTests
     {
         // Arrange
         var sut = new EnvilderClient(_localStack.CreateProvider());
-        var mapFile = new ParsedMapFile
-        {
-            Config = new(),
-            Mappings = new()
+        var mapFile = new ParsedMapFile(
+            new(),
+            new()
             {
                 ["NONEXISTENT"] = "/Test/DoesNotExist",
-            },
-        };
+            });
 
         // Act
         var actual = await sut.ResolveSecretsAsync(mapFile);

@@ -44,13 +44,14 @@ public class MapFileParser
                 continue;
             }
 
+            if (property.Value.ValueKind != JsonValueKind.String)
+            {
+                continue;
+            }
+
             mappings[property.Name] = property.Value.GetString()!;
         }
 
-        return new ParsedMapFile
-        {
-            Config = config,
-            Mappings = mappings,
-        };
+        return new ParsedMapFile(config, mappings);
     }
 }

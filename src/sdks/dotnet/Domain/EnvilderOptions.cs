@@ -20,9 +20,4 @@ public class EnvilderOptions
     /// Override the AWS named profile defined in the map file.
     /// </summary>
     public string? Profile { get; set; }
-
-    /// <summary>
-    /// AWS region to use (e.g. <c>eu-west-1</c>).
-    /// </summary>
-    public string? Region { get; set; }
 }

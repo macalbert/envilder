@@ -20,15 +20,13 @@ public class EnvilderConfigurationProviderTests
             .Returns("db-pass");
 
         var client = new EnvilderClient(secretProvider);
-        var mapFile = new ParsedMapFile
-        {
-            Config = new MapFileConfig(),
-            Mappings = new Dictionary<string, string>
+        var mapFile = new ParsedMapFile(
+            new MapFileConfig(),
+            new Dictionary<string, string>
             {
                 ["TOKEN"] = "/Test/Token",
                 ["DB_PASS"] = "/App/Db",
-            },
-        };
+            });
 
         var sut = new EnvilderConfigurationProvider(client, mapFile);
 
