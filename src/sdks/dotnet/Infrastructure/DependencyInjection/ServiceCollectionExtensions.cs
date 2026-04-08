@@ -25,10 +25,9 @@ public static class ServiceCollectionExtensions
     /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
     /// <exception cref="ArgumentException"><paramref name="mapFilePath"/> is null or empty.</exception>
     /// <exception cref="FileNotFoundException">The map file does not exist on disk.</exception>
-    public static IServiceCollection AddEnvilder(
-        this IServiceCollection services,
-        string mapFilePath,
-        ISecretProvider secretProvider)
+    public static IServiceCollection AddEnvilder(this IServiceCollection services,
+                                                 string mapFilePath,
+                                                 ISecretProvider secretProvider)
     {
         if (string.IsNullOrWhiteSpace(mapFilePath))
         {
@@ -41,10 +40,10 @@ public static class ServiceCollectionExtensions
         }
 
         var json = File.ReadAllText(mapFilePath);
-        var mapFile = new MapFileParser().Parse(json);
 
-        services.AddSingleton(mapFile);
+        //services.AddSingleton(new MapFileParser().Parse(json));
         services.AddSingleton(new EnvilderClient(secretProvider));
+
         return services;
     }
 }

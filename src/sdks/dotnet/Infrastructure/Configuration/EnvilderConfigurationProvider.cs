@@ -19,7 +19,11 @@ public class EnvilderConfigurationProvider : ConfigurationProvider
     // ResolveSecretsAsync uses ConfigureAwait(false) throughout to avoid deadlocks.
     public override void Load()
     {
-        var secrets = _client.ResolveSecretsAsync(_mapFile).ConfigureAwait(false).GetAwaiter().GetResult();
+        var secrets = _client.ResolveSecretsAsync(_mapFile)
+            .ConfigureAwait(false)
+            .GetAwaiter()
+            .GetResult();
+
         foreach (var kvp in secrets)
         {
             var key = NormalizeKey(kvp.Key);

@@ -39,8 +39,9 @@ public class MapFileParser
                 if (property.Value.ValueKind == JsonValueKind.Object)
                 {
                     config = JsonSerializer.Deserialize<MapFileConfig>(property.Value.GetRawText(), SerializerOptions)
-                        ?? new MapFileConfig();
+                        ?? new();
                 }
+
                 continue;
             }
 
@@ -52,6 +53,6 @@ public class MapFileParser
             mappings[property.Name] = property.Value.GetString()!;
         }
 
-        return new ParsedMapFile(config, mappings);
+        return new(config, mappings);
     }
 }

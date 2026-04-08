@@ -1,7 +1,6 @@
 namespace Envilder.Tests.EndToEnd;
 
 using Amazon.SimpleSystemsManagement;
-using Amazon.SimpleSystemsManagement.Model;
 using AwesomeAssertions;
 using Envilder.Domain;
 using Envilder.Infrastructure;
@@ -18,19 +17,23 @@ public class ConsumerExperienceTests : IAsyncLifetime
 {
     private readonly LocalStackFixture _localStack;
     private readonly LowkeyVaultFixture _lowkeyVault;
+
+    private readonly AwsSsmSecretProvider _awsProvider;
+    private readonly AzureKeyVaultSecretProvider _azureProvider;
     private readonly List<string> _tempFiles = [];
 
-    public ConsumerExperienceTests(
-        LocalStackFixture localStack,
-        LowkeyVaultFixture lowkeyVault)
+    public ConsumerExperienceTests(LocalStackFixture localStack,
+                                   LowkeyVaultFixture lowkeyVault)
     {
         _localStack = localStack;
         _lowkeyVault = lowkeyVault;
+        _awsProvider = _localStack.CreateProvider();
+        _azureProvider = new(_lowkeyVault.SecretClient);
     }
 
     public async Task InitializeAsync()
     {
-        await SeedTestDataAsync();
+        await Task.CompletedTask;
     }
 
     public async Task DisposeAsync()
@@ -47,108 +50,114 @@ public class ConsumerExperienceTests : IAsyncLifetime
     }
 
     [Fact]
-    public void Should_ExposeAwsSecretsViaIConfiguration_When_MapFileUsesDefaultAwsProvider()
+    public async Task Should_ExposeAwsSecretsViaIConfiguration_When_MapFileUsesDefaultAwsProvider()
     {
         // Arrange
-        var mapFilePath = WriteTempMapFile("""
+        var apikeyName = "/e2e/api-key";
+        var expectedApikey = "sk-test-12345";
+        await PutAwsParameterAsync(apikeyName, expectedApikey);
+        var connectionStringName = "/e2e/db-url";
+        var expectedConnectionString = "postgres://localhost:5432/mydb";
+        await PutAwsParameterAsync(connectionStringName, expectedConnectionString);
+
+        var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "aws" },
-                "DB_URL": "/e2e/db-url",
-                "API_KEY": "/e2e/api-key"
+                "DB_URL": "{{connectionStringName}}",
+                "API_KEY": "{{apikeyName}}"
             }
             """);
 
-        var provider = CreateLocalStackSsmProvider();
-
         // Act
-        var config = new ConfigurationBuilder()
-            .AddEnvilder(mapFilePath, provider)
+        var actual = new ConfigurationBuilder()
+            .AddEnvilder(mapFilePath, _awsProvider)
             .Build();
 
         // Assert
-        config["DB_URL"].Should().Be("postgres://localhost:5432/mydb");
-        config["API_KEY"].Should().Be("sk-test-12345");
+        actual["DB_URL"].Should().Be(expectedConnectionString);
+        actual["API_KEY"].Should().Be(expectedApikey);
     }
 
     [Fact]
-    public void Should_ExposeAwsSecretsViaIConfiguration_When_MapFileIncludesProfileConfig()
+    public async Task Should_ExposeAwsSecretsViaIConfiguration_When_MapFileIncludesProfileConfig()
     {
         // Arrange
-        var mapFilePath = WriteTempMapFile("""
+        var connectionStringName = "/e2e/db2-url";
+        var expectedConnectionString = "postgres://localhost:5432/mydb2";
+        await PutAwsParameterAsync(connectionStringName, expectedConnectionString);
+
+        var mapFilePath = await WriteTempMapFileAsync($$"""
             {
-                "$config": { "provider": "aws", "profile": "production" },
-                "DB_URL": "/e2e/db-url"
+                "$config": { "provider": "aws",  "profile": "production" },
+                "DB_URL": "{{connectionStringName}}"
             }
             """);
 
-        var provider = CreateLocalStackSsmProvider();
-
         // Act
         var config = new ConfigurationBuilder()
-            .AddEnvilder(mapFilePath, provider)
+            .AddEnvilder(mapFilePath, _awsProvider)
             .Build();
 
         // Assert
-        config["DB_URL"].Should().Be("postgres://localhost:5432/mydb");
+        config["DB_URL"].Should().Be(expectedConnectionString);
     }
 
     [Fact]
-    public void Should_ExposeAzureSecretsViaIConfiguration_When_MapFileUsesAzureProvider()
+    public async Task Should_ExposeAzureSecretsViaIConfiguration_When_MapFileUsesAzureProvider()
     {
         // Arrange
-        var mapFilePath = WriteTempMapFile($$"""
+        var name = "e2e-vault-secret";
+        var expectedSecret = "azure-e2e-value";
+        await _lowkeyVault.SecretClient.SetSecretAsync(name, expectedSecret);
+
+        var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "azure", "vaultUrl": "{{_lowkeyVault.VaultUrl}}" },
-                "VAULT_SECRET": "e2e-secret"
+                "VAULT_SECRET": "{{name}}"
             }
             """);
-
-        var provider = new AzureKeyVaultSecretProvider(_lowkeyVault.SecretClient);
 
         // Act
         var config = new ConfigurationBuilder()
-            .AddEnvilder(mapFilePath, provider)
+            .AddEnvilder(mapFilePath, _azureProvider)
             .Build();
 
         // Assert
-        config["VAULT_SECRET"].Should().Be("azure-e2e-value");
+        config["VAULT_SECRET"].Should().Be(expectedSecret);
     }
 
     [Fact]
-    public void Should_ResolveSecretsViaHostBuilder_When_UsingConfigurationIntegration()
+    public async Task Should_ResolveSecretsViaHostBuilder_When_UsingConfigurationIntegration()
     {
         // Arrange
-        var mapFilePath = WriteTempMapFile("""
+        var name = "/e2e/db4-url";
+        var expectedValue = "postgres://localhost:5432/mydb4";
+        await PutAwsParameterAsync(name, expectedValue);
+
+        var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "aws" },
-                "DB_URL": "/e2e/db-url",
-                "API_KEY": "/e2e/api-key"
+                "DB_URL": "{{name}}"
             }
             """);
 
-        var provider = CreateLocalStackSsmProvider();
-
         var builder = Host.CreateApplicationBuilder();
-        builder.Configuration.AddEnvilder(mapFilePath, provider);
+        builder.Configuration.AddEnvilder(mapFilePath, _awsProvider);
+        using var host = builder.Build();
 
         // Act
-        using var host = builder.Build();
         var config = host.Services.GetRequiredService<IConfiguration>();
 
         // Assert
-        config["DB_URL"].Should().Be("postgres://localhost:5432/mydb");
-        config["API_KEY"].Should().Be("sk-test-12345");
+        config["DB_URL"].Should().Be(expectedValue);
     }
 
     [Fact]
     public void Should_ThrowFileNotFoundException_When_MapFileDoesNotExist()
     {
-        // Arrange
-        var provider = CreateLocalStackSsmProvider();
-
         // Act
         var act = () => new ConfigurationBuilder()
-            .AddEnvilder("/nonexistent/secrets-map.json", provider)
+            .AddEnvilder("/nonexistent/secrets-map.json", _awsProvider)
             .Build();
 
         // Assert
@@ -159,12 +168,9 @@ public class ConsumerExperienceTests : IAsyncLifetime
     [Fact]
     public void Should_ThrowArgumentException_When_MapFilePathIsEmpty()
     {
-        // Arrange
-        var provider = CreateLocalStackSsmProvider();
-
         // Act
         var act = () => new ConfigurationBuilder()
-            .AddEnvilder("", provider)
+            .AddEnvilder("", _awsProvider)
             .Build();
 
         // Assert
@@ -190,57 +196,45 @@ public class ConsumerExperienceTests : IAsyncLifetime
     public async Task Should_OmitMissingSecrets_When_SomeParametersDoNotExistInStore()
     {
         // Arrange
-        var mapFilePath = WriteTempMapFile("""
+        var name = "/e2e/db3-url";
+        var expectedValue = "postgres://localhost:5432/mydb3";
+        await PutAwsParameterAsync(name, expectedValue);
+
+        var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "aws" },
-                "DB_URL": "/e2e/db-url",
+                "DB_URL": "{{name}}",
                 "MISSING_KEY": "/e2e/does-not-exist"
             }
             """);
 
-        var provider = CreateLocalStackSsmProvider();
-
         // Act
         var config = new ConfigurationBuilder()
-            .AddEnvilder(mapFilePath, provider)
+            .AddEnvilder(mapFilePath, _awsProvider)
             .Build();
 
         // Assert
-        config["DB_URL"].Should().Be("postgres://localhost:5432/mydb");
+        config["DB_URL"].Should().Be(expectedValue);
         config["MISSING_KEY"].Should().BeNull();
-
-        await Task.CompletedTask;
     }
 
-    private AwsSsmSecretProvider CreateLocalStackSsmProvider() =>
-        _localStack.CreateProvider();
-
-    private string WriteTempMapFile(string json)
+    private async Task<string> WriteTempMapFileAsync(string json)
     {
-        var path = Path.Combine(Path.GetTempPath(), $"envilder-e2e-{Guid.NewGuid():N}.json");
-        File.WriteAllText(path, json);
+        var path = Path.Combine(Path.GetTempPath(), $"envilder-{Guid.NewGuid():N}.json");
+        await File.WriteAllTextAsync(path, json);
         _tempFiles.Add(path);
+
         return path;
     }
 
-    private async Task SeedTestDataAsync()
+    private async Task PutAwsParameterAsync(string name, string value)
     {
-        await _localStack.SsmClient.PutParameterAsync(new PutParameterRequest
+        await _localStack.SsmClient.PutParameterAsync(new()
         {
-            Name = "/e2e/db-url",
-            Value = "postgres://localhost:5432/mydb",
+            Name = name,
+            Value = value,
             Type = ParameterType.SecureString,
             Overwrite = true,
         });
-
-        await _localStack.SsmClient.PutParameterAsync(new PutParameterRequest
-        {
-            Name = "/e2e/api-key",
-            Value = "sk-test-12345",
-            Type = ParameterType.SecureString,
-            Overwrite = true,
-        });
-
-        await _lowkeyVault.SecretClient.SetSecretAsync("e2e-secret", "azure-e2e-value");
     }
 }
