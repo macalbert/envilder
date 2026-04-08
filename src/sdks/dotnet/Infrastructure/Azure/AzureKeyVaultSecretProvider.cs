@@ -3,6 +3,7 @@ namespace Envilder.Infrastructure.Azure;
 using Envilder.Domain.Ports;
 using global::Azure;
 using global::Azure.Security.KeyVault.Secrets;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,7 +21,7 @@ public class AzureKeyVaultSecretProvider : ISecretProvider
     /// <param name="secretClient">A configured <see cref="SecretClient"/> instance.</param>
     public AzureKeyVaultSecretProvider(SecretClient secretClient)
     {
-        _secretClient = secretClient;
+        _secretClient = secretClient ?? throw new ArgumentNullException(nameof(secretClient));
     }
 
     /// <inheritdoc />

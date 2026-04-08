@@ -28,6 +28,8 @@ public class ConfigurationBuilderExtensionsTests : IDisposable
         {
             File.Delete(_mapFilePath);
         }
+
+        GC.SuppressFinalize(this);
     }
 
     [Fact]

@@ -27,6 +27,11 @@ public static class ConfigurationBuilderExtensions
                                                     string mapFilePath,
                                                     ISecretProvider secretProvider)
     {
+        if (secretProvider is null)
+        {
+            throw new ArgumentNullException(nameof(secretProvider));
+        }
+
         if (string.IsNullOrWhiteSpace(mapFilePath))
         {
             throw new ArgumentException("Map file path cannot be null or empty.", nameof(mapFilePath));

@@ -3,6 +3,7 @@ namespace Envilder.Infrastructure.Configuration;
 using Envilder.Application;
 using Envilder.Domain;
 using Microsoft.Extensions.Configuration;
+using System;
 
 public class EnvilderConfigurationProvider : ConfigurationProvider
 {
@@ -11,8 +12,8 @@ public class EnvilderConfigurationProvider : ConfigurationProvider
 
     public EnvilderConfigurationProvider(EnvilderClient client, ParsedMapFile mapFile)
     {
-        _client = client;
-        _mapFile = mapFile;
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+        _mapFile = mapFile ?? throw new ArgumentNullException(nameof(mapFile));
     }
 
     // ConfigurationProvider.Load() is synchronous by design.

@@ -3,6 +3,7 @@ namespace Envilder.Infrastructure.Aws;
 using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
 using Envilder.Domain.Ports;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,7 +22,7 @@ public class AwsSsmSecretProvider : ISecretProvider
     /// <param name="ssmClient">A configured <see cref="IAmazonSimpleSystemsManagement"/> instance.</param>
     public AwsSsmSecretProvider(IAmazonSimpleSystemsManagement ssmClient)
     {
-        _ssmClient = ssmClient;
+        _ssmClient = ssmClient ?? throw new ArgumentNullException(nameof(ssmClient));
     }
 
     /// <inheritdoc />

@@ -28,6 +28,8 @@ public class ServiceCollectionExtensionsTests : IDisposable
         {
             File.Delete(_mapFilePath);
         }
+
+        GC.SuppressFinalize(this);
     }
 
     [Fact]

@@ -66,8 +66,6 @@ internal sealed class LocalStackHealthCheck : IWaitUntil
         }
         catch (Exception)
         {
-            //logger.LogError(ex, "Error from: {enpoint}_localstack/init/ready", endpoint);
-
             return false;
         }
     }

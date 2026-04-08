@@ -15,7 +15,7 @@ public class AwsSsmSecretProviderTests
         // Arrange
         var ssmClient = Substitute.For<IAmazonSimpleSystemsManagement>();
         ssmClient.GetParameterAsync(
-                Arg.Is<GetParameterRequest>(r => r.Name == "/Test/Token" && r.WithDecryption),
+                Arg.Is<GetParameterRequest>(r => r.Name == "/Test/Token" && r.WithDecryption == true),
                 Arg.Any<CancellationToken>())
             .Returns(new GetParameterResponse
             {

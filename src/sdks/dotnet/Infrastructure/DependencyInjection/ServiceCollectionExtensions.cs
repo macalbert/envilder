@@ -39,9 +39,15 @@ public static class ServiceCollectionExtensions
             throw new FileNotFoundException("Map file not found.", mapFilePath);
         }
 
-        var json = File.ReadAllText(mapFilePath);
+        if (secretProvider is null)
+        {
+            throw new ArgumentNullException(nameof(secretProvider));
+        }
 
-        //services.AddSingleton(new MapFileParser().Parse(json));
+        var json = File.ReadAllText(mapFilePath);
+        var mapFile = new MapFileParser().Parse(json);
+
+        services.AddSingleton(mapFile);
         services.AddSingleton(new EnvilderClient(secretProvider));
 
         return services;

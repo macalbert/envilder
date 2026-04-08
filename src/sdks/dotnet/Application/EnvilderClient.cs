@@ -21,7 +21,7 @@ public class EnvilderClient
     /// <param name="secretProvider">The secret store to resolve values from.</param>
     public EnvilderClient(ISecretProvider secretProvider)
     {
-        _secretProvider = secretProvider;
+        _secretProvider = secretProvider ?? throw new ArgumentNullException(nameof(secretProvider));
     }
 
     /// <summary>

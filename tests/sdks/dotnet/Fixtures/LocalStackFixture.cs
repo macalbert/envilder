@@ -54,7 +54,11 @@ public sealed class LocalStackFixture : IAsyncLifetime
     public async Task DisposeAsync()
     {
         SsmClient?.Dispose();
-        await _container.DisposeAsync();
+
+        if (_container is not null)
+        {
+            await _container.DisposeAsync();
+        }
     }
 
     private static async Task<IReadOnlyDictionary<string, string>>
@@ -66,7 +70,9 @@ public sealed class LocalStackFixture : IAsyncLifetime
         var resourceName = $"{assembly.GetName().Name}.{filename}";
 
         using var stream =
-            assembly.GetManifestResourceStream(resourceName)!;
+            assembly.GetManifestResourceStream(resourceName)
+            ?? throw new InvalidOperationException(
+                $"Embedded resource '{resourceName}' not found in assembly '{assembly.FullName}'.");
         using var reader = new StreamReader(stream);
         var json = await reader.ReadToEndAsync();
 

@@ -7,6 +7,7 @@ using Envilder.Domain.Ports;
 using Envilder.Infrastructure.Aws;
 using Envilder.Infrastructure.Azure;
 using global::Azure.Identity;
+using global::Azure.Security.KeyVault.Secrets;
 using System;
 
 /// <summary>
@@ -28,6 +29,11 @@ public static class SecretProviderFactory
     /// </exception>
     public static ISecretProvider Create(MapFileConfig config, EnvilderOptions? options = null)
     {
+        if (config is null)
+        {
+            throw new ArgumentNullException(nameof(config));
+        }
+
         var provider = options?.Provider ?? config.Provider;
 
         return provider switch
@@ -42,7 +48,8 @@ public static class SecretProviderFactory
         var vaultUrl = (options?.VaultUrl ?? config.VaultUrl)
             ?? throw new InvalidOperationException("Vault URL must be provided for Azure Key Vault provider.");
 
-        return new(new(new(vaultUrl), new DefaultAzureCredential()));
+        var secretClient = new SecretClient(new Uri(vaultUrl), new DefaultAzureCredential());
+        return new(secretClient);
     }
 
     private static AwsSsmSecretProvider CreateAwsSecretProvider(MapFileConfig config, EnvilderOptions? options)
@@ -56,6 +63,9 @@ public static class SecretProviderFactory
             {
                 return new(new AmazonSimpleSystemsManagementClient(credentials));
             }
+
+            throw new InvalidOperationException(
+                $"AWS profile '{profile}' was not found in the credential store.");
         }
 
         return new(new AmazonSimpleSystemsManagementClient());

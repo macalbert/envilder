@@ -66,6 +66,36 @@ public class SecretProviderFactoryTests
         var act = () => SecretProviderFactory.Create(config);
 
         // Assert
-        act.Should().Throw<InvalidOperationException>();
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*Vault URL*");
+    }
+
+    [Fact]
+    public void Should_ThrowArgumentNullException_When_ConfigIsNull()
+    {
+        // Act
+        var act = () => SecretProviderFactory.Create(null!);
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>()
+            .And.ParamName.Should().Be("config");
+    }
+
+    [Fact]
+    public void Should_ThrowInvalidOperationException_When_AwsProfileNotFound()
+    {
+        // Arrange
+        var config = new MapFileConfig
+        {
+            Provider = SecretProviderType.Aws,
+            Profile = "nonexistent-profile-12345",
+        };
+
+        // Act
+        var act = () => SecretProviderFactory.Create(config);
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*profile*nonexistent-profile-12345*");
     }
 }

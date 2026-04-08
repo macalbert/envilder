@@ -28,7 +28,7 @@ public class MapFileParser
     /// <returns>A <see cref="ParsedMapFile"/> ready for secret resolution.</returns>
     public ParsedMapFile Parse(string json)
     {
-        var document = JsonDocument.Parse(json);
+        using var document = JsonDocument.Parse(json);
         var mappings = new Dictionary<string, string>();
         var config = new MapFileConfig();
 

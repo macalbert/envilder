@@ -31,12 +31,12 @@ public class ConsumerExperienceTests : IAsyncLifetime
         _azureProvider = new(_lowkeyVault.SecretClient);
     }
 
-    public async Task InitializeAsync()
+    public Task InitializeAsync()
     {
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
-    public async Task DisposeAsync()
+    public Task DisposeAsync()
     {
         foreach (var file in _tempFiles)
         {
@@ -46,7 +46,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
             }
         }
 
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
     [Fact]

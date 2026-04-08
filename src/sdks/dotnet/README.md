@@ -30,7 +30,10 @@ services.AddEnvilder("secrets-map.json", secretProvider);
 ### Direct usage
 
 ```csharp
-var client = new EnvilderClient(secretProvider);
+var json = File.ReadAllText("secrets-map.json");
+var mapFile = new MapFileParser().Parse(json);
+var provider = SecretProviderFactory.Create(mapFile.Config);
+var client = new EnvilderClient(provider);
 var secrets = await client.ResolveSecretsAsync(mapFile);
 EnvilderClient.InjectIntoEnvironment(secrets);
 ```

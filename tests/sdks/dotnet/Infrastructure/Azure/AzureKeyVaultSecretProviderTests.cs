@@ -44,4 +44,20 @@ public class AzureKeyVaultSecretProviderTests
         // Assert
         actual.Should().BeNull();
     }
+
+    [Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
+    public async Task Should_ThrowRequestFailedException_When_AzureKeyVaultReturnsNon404Error()
+    {
+        // Arrange
+        var secretClient = Substitute.For<SecretClient>();
+        secretClient.GetSecretAsync("forbidden-secret", Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .ThrowsAsync(new RequestFailedException(403, "Forbidden"));
+        var sut = new AzureKeyVaultSecretProvider(secretClient);
+
+        // Act
+        var act = () => sut.GetSecretAsync("forbidden-secret");
+
+        // Assert
+        await act.Should().ThrowAsync<RequestFailedException>();
+    }
 }
