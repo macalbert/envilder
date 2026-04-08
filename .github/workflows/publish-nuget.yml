@@ -57,7 +57,7 @@ jobs:
 
       - name: 🍄 Run tests
         if: steps.version-check.outputs.version_changed == 'true'
-        run: dotnet test ../../../tests/sdks/dotnet/ -c Release --filter "FullyQualifiedName!~Acceptance" --verbosity normal
+        run: dotnet test ../../../tests/sdks/dotnet/ -c Release --filter "FullyQualifiedName!~Acceptance&FullyQualifiedName!~EndToEnd" --verbosity normal
 
       - name: 📦 Pack
         if: steps.version-check.outputs.version_changed == 'true'

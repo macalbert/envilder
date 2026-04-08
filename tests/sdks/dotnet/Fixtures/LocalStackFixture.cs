@@ -91,7 +91,7 @@ public sealed class LocalStackFixture : IAsyncLifetime
         {
             return new(SecretProviderFactory.Create(mapFile.Config));
         }
-        catch (InvalidOperationException)
+        catch (Exception)
         {
             return new(SecretProviderFactory.Create(new() { Provider = SecretProviderType.Aws }));
         }

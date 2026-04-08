@@ -16,6 +16,8 @@ using System;
 /// </summary>
 public static class SecretProviderFactory
 {
+    private static readonly Amazon.RegionEndpoint DefaultRegion = Amazon.RegionEndpoint.USEast1;
+
     /// <summary>
     /// Creates an <see cref="ISecretProvider"/> for the provider specified in
     /// <paramref name="config"/>. When <paramref name="options"/> is provided,
@@ -65,13 +67,16 @@ public static class SecretProviderFactory
             var chain = new CredentialProfileStoreChain();
             if (chain.TryGetAWSCredentials(profile, out var credentials))
             {
-                return new(new AmazonSimpleSystemsManagementClient(credentials));
+                return new(new AmazonSimpleSystemsManagementClient(credentials, DefaultRegion));
             }
 
             throw new InvalidOperationException(
                 $"AWS profile '{profile}' was not found in the credential store.");
         }
 
-        return new(new AmazonSimpleSystemsManagementClient());
+        return new(new AmazonSimpleSystemsManagementClient(new AmazonSimpleSystemsManagementConfig
+        {
+            RegionEndpoint = DefaultRegion,
+        }));
     }
 }
