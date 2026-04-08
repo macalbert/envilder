@@ -1,6 +1,5 @@
 namespace Envilder.Infrastructure.Configuration;
 
-using System;
 using Envilder.Application;
 using Envilder.Domain;
 using Microsoft.Extensions.Configuration;

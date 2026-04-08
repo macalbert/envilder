@@ -1,11 +1,11 @@
 namespace Envilder.Tests.Infrastructure.Configuration;
 
-using System.IO;
-using Microsoft.Extensions.Configuration;
 using AwesomeAssertions;
 using Envilder.Domain.Ports;
 using Envilder.Infrastructure.Configuration;
+using Microsoft.Extensions.Configuration;
 using NSubstitute;
+using System.IO;
 
 public class ConfigurationBuilderExtensionsTests : IDisposable
 {

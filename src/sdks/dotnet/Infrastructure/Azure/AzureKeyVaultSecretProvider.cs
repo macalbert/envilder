@@ -1,21 +1,29 @@
 namespace Envilder.Infrastructure.Azure;
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+using Envilder.Domain.Ports;
 using global::Azure;
 using global::Azure.Security.KeyVault.Secrets;
-using Envilder.Domain.Ports;
+using System.Threading;
+using System.Threading.Tasks;
 
+/// <summary>
+/// <see cref="ISecretProvider"/> backed by Azure Key Vault.
+/// Secrets that return HTTP 404 are treated as missing and yield <see langword="null"/>.
+/// </summary>
 public class AzureKeyVaultSecretProvider : ISecretProvider
 {
     private readonly SecretClient _secretClient;
 
+    /// <summary>
+    /// Initializes a new instance using the supplied Key Vault client.
+    /// </summary>
+    /// <param name="secretClient">A configured <see cref="SecretClient"/> instance.</param>
     public AzureKeyVaultSecretProvider(SecretClient secretClient)
     {
         _secretClient = secretClient;
     }
 
+    /// <inheritdoc />
     public async Task<string?> GetSecretAsync(string name, CancellationToken cancellationToken = default)
     {
         try

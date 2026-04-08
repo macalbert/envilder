@@ -1,12 +1,12 @@
 namespace Envilder.Tests.Infrastructure.DependencyInjection;
 
-using System.IO;
-using Microsoft.Extensions.DependencyInjection;
 using AwesomeAssertions;
 using Envilder.Application;
 using Envilder.Domain.Ports;
 using Envilder.Infrastructure.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using System.IO;
 
 public class ServiceCollectionExtensionsTests : IDisposable
 {

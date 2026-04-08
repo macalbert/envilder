@@ -1,10 +1,14 @@
 namespace Envilder.Application;
 
+using Envilder.Domain;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Envilder.Domain;
 
+/// <summary>
+/// Parses a JSON map file into a <see cref="ParsedMapFile"/> containing
+/// provider configuration (<c>$config</c>) and environment variable mappings.
+/// </summary>
 public class MapFileParser
 {
     private const string ConfigKey = "$config";
@@ -15,6 +19,13 @@ public class MapFileParser
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
     };
 
+    /// <summary>
+    /// Parses raw JSON into a <see cref="ParsedMapFile"/>.
+    /// The optional <c>$config</c> object is extracted as <see cref="MapFileConfig"/>;
+    /// all other top-level string properties become secret mappings.
+    /// </summary>
+    /// <param name="json">Raw JSON content of the map file.</param>
+    /// <returns>A <see cref="ParsedMapFile"/> ready for secret resolution.</returns>
     public ParsedMapFile Parse(string json)
     {
         var document = JsonDocument.Parse(json);
