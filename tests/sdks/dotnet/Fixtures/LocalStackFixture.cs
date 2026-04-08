@@ -19,11 +19,7 @@ public sealed class LocalStackFixture : IAsyncLifetime
     public IAmazonSimpleSystemsManagement SsmClient { get; private set; } = null!;
 
     public AwsSsmSecretProvider CreateProvider() =>
-        new(new AmazonSimpleSystemsManagementClient(
-            new AmazonSimpleSystemsManagementConfig
-            {
-                ServiceURL = ServiceUrl,
-            }));
+        new(SsmClient);
 
     public async Task InitializeAsync()
     {

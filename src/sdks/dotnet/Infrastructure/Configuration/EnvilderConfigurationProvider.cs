@@ -25,6 +25,8 @@ public class EnvilderConfigurationProvider : ConfigurationProvider
             .GetAwaiter()
             .GetResult();
 
+        Data.Clear();
+
         foreach (var kvp in secrets)
         {
             var key = NormalizeKey(kvp.Key);

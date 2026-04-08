@@ -77,4 +77,18 @@ public class ServiceCollectionExtensionsTests : IDisposable
         act.Should().Throw<ArgumentException>()
             .WithParameterName("mapFilePath");
     }
+
+    [Fact]
+    public void Should_ThrowArgumentNullException_When_SecretProviderIsNull()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+
+        // Act
+        var act = () => services.AddEnvilder(_mapFilePath, null!);
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>()
+            .WithParameterName("secretProvider");
+    }
 }

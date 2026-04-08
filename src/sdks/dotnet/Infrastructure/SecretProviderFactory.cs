@@ -45,8 +45,12 @@ public static class SecretProviderFactory
 
     private static AzureKeyVaultSecretProvider CreateAzureSecretProvider(MapFileConfig config, EnvilderOptions? options)
     {
-        var vaultUrl = (options?.VaultUrl ?? config.VaultUrl)
-            ?? throw new InvalidOperationException("Vault URL must be provided for Azure Key Vault provider.");
+        var vaultUrl = options?.VaultUrl ?? config.VaultUrl;
+
+        if (string.IsNullOrWhiteSpace(vaultUrl))
+        {
+            throw new InvalidOperationException("Vault URL must be provided for Azure Key Vault provider.");
+        }
 
         var secretClient = new SecretClient(new Uri(vaultUrl), new DefaultAzureCredential());
         return new(secretClient);
