@@ -1,32 +1,48 @@
 namespace Envilder.Application;
 
-using System;
+using Amazon.Runtime.CredentialManagement;
 using Amazon.SimpleSystemsManagement;
 using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
 using Envilder.Domain;
 using Envilder.Domain.Ports;
 using Envilder.Infrastructure.Aws;
 using Envilder.Infrastructure.Azure;
+using System;
 
-public class SecretProviderFactory
+public static class SecretProviderFactory
 {
-    public ISecretProvider Create(MapFileConfig config, EnvilderOptions? options = null)
+    public static ISecretProvider Create(MapFileConfig config, EnvilderOptions? options = null)
     {
         var provider = options?.Provider ?? config.Provider;
-        var vaultUrl = options?.VaultUrl ?? config.VaultUrl;
 
-        if (string.Equals(provider, "azure", StringComparison.OrdinalIgnoreCase))
+        return provider switch
         {
-            if (string.IsNullOrWhiteSpace(vaultUrl))
-            {
-                throw new InvalidOperationException("VaultUrl is required when using the Azure provider.");
-            }
+            SecretProviderType.Azure => CreateAzureSecretProvider(config, options),
+            _ => CreateAwsSecretProvider(config, options),
+        };
+    }
 
-            var client = new SecretClient(new Uri(vaultUrl), new DefaultAzureCredential());
-            return new AzureKeyVaultSecretProvider(client);
+    private static AzureKeyVaultSecretProvider CreateAzureSecretProvider(MapFileConfig config, EnvilderOptions? options)
+    {
+        var vaultUrl = (options?.VaultUrl ?? config.VaultUrl)
+            ?? throw new InvalidOperationException("Vault URL must be provided for Azure Key Vault provider.");
+
+        return new(new(new(vaultUrl), new DefaultAzureCredential()));
+    }
+
+    private static AwsSsmSecretProvider CreateAwsSecretProvider(MapFileConfig config, EnvilderOptions? options)
+    {
+        var profile = options?.Profile ?? config.Profile;
+
+        if (!string.IsNullOrWhiteSpace(profile))
+        {
+            var chain = new CredentialProfileStoreChain();
+            if (chain.TryGetAWSCredentials(profile, out var credentials))
+            {
+                return new(new AmazonSimpleSystemsManagementClient(credentials));
+            }
         }
 
-        return new AwsSsmSecretProvider(new AmazonSimpleSystemsManagementClient());
+        return new(new AmazonSimpleSystemsManagementClient());
     }
 }

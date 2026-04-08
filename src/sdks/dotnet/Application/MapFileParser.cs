@@ -2,6 +2,7 @@ namespace Envilder.Application;
 
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Envilder.Domain;
 
 public class MapFileParser
@@ -11,6 +12,7 @@ public class MapFileParser
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
     };
 
     public ParsedMapFile Parse(string json)

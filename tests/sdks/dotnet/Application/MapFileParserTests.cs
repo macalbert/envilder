@@ -2,6 +2,7 @@ namespace Envilder.Tests.Application;
 
 using AwesomeAssertions;
 using Envilder.Application;
+using Envilder.Domain;
 
 public class MapFileParserTests
 {
@@ -47,7 +48,7 @@ public class MapFileParserTests
         var actual = sut.Parse(json);
 
         // Assert
-        actual.Config.Provider.Should().Be("aws");
+        actual.Config.Provider.Should().Be(SecretProviderType.Aws);
         actual.Config.VaultUrl.Should().BeNull();
         actual.Config.Profile.Should().BeNull();
         actual.Mappings.Should().HaveCount(1);
@@ -73,7 +74,7 @@ public class MapFileParserTests
         var actual = sut.Parse(json);
 
         // Assert
-        actual.Config.Provider.Should().Be("azure");
+        actual.Config.Provider.Should().Be(SecretProviderType.Azure);
         actual.Config.VaultUrl.Should().Be("https://my-vault.vault.azure.net");
         actual.Config.Profile.Should().BeNull();
         actual.Mappings.Should().HaveCount(1);

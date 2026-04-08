@@ -1,17 +1,16 @@
 namespace Envilder.Infrastructure.Configuration;
 
-using System;
-using System.IO;
 using Envilder.Application;
 using Envilder.Domain.Ports;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.IO;
 
 public static class ConfigurationBuilderExtensions
 {
-    public static IConfigurationBuilder AddEnvilder(
-        this IConfigurationBuilder builder,
-        string mapFilePath,
-        ISecretProvider secretProvider)
+    public static IConfigurationBuilder AddEnvilder(this IConfigurationBuilder builder,
+                                                    string mapFilePath,
+                                                    ISecretProvider secretProvider)
     {
         if (string.IsNullOrWhiteSpace(mapFilePath))
         {

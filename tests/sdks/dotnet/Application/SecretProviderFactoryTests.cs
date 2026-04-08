@@ -13,10 +13,9 @@ public class SecretProviderFactoryTests
     {
         // Arrange
         var config = new MapFileConfig();
-        var sut = new SecretProviderFactory();
 
         // Act
-        var actual = sut.Create(config);
+        var actual = SecretProviderFactory.Create(config);
 
         // Assert
         actual.Should().BeOfType<AwsSsmSecretProvider>();
@@ -28,13 +27,12 @@ public class SecretProviderFactoryTests
         // Arrange
         var config = new MapFileConfig
         {
-            Provider = "azure",
+            Provider = SecretProviderType.Azure,
             VaultUrl = "https://my-vault.vault.azure.net",
         };
-        var sut = new SecretProviderFactory();
 
         // Act
-        var actual = sut.Create(config);
+        var actual = SecretProviderFactory.Create(config);
 
         // Assert
         actual.Should().BeOfType<AzureKeyVaultSecretProvider>();
@@ -44,16 +42,15 @@ public class SecretProviderFactoryTests
     public void Should_OverrideConfigWithOptions_When_BothProvided()
     {
         // Arrange
-        var config = new MapFileConfig { Provider = "aws" };
+        var config = new MapFileConfig { Provider = SecretProviderType.Aws };
         var options = new EnvilderOptions
         {
-            Provider = "azure",
+            Provider = SecretProviderType.Azure,
             VaultUrl = "https://override-vault.vault.azure.net",
         };
-        var sut = new SecretProviderFactory();
 
         // Act
-        var actual = sut.Create(config, options);
+        var actual = SecretProviderFactory.Create(config, options);
 
         // Assert
         actual.Should().BeOfType<AzureKeyVaultSecretProvider>();
@@ -63,11 +60,10 @@ public class SecretProviderFactoryTests
     public void Should_RequireVaultUrl_When_AzureProviderSelected()
     {
         // Arrange
-        var config = new MapFileConfig { Provider = "azure" };
-        var sut = new SecretProviderFactory();
+        var config = new MapFileConfig { Provider = SecretProviderType.Azure };
 
         // Act
-        var act = () => sut.Create(config);
+        var act = () => SecretProviderFactory.Create(config);
 
         // Assert
         act.Should().Throw<InvalidOperationException>();

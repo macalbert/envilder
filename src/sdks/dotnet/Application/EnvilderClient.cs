@@ -1,11 +1,11 @@
 namespace Envilder.Application;
 
+using Envilder.Domain;
+using Envilder.Domain.Ports;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Envilder.Domain;
-using Envilder.Domain.Ports;
 
 public class EnvilderClient
 {
@@ -24,9 +24,8 @@ public class EnvilderClient
         }
     }
 
-    public async Task<IDictionary<string, string>> ResolveSecretsAsync(
-        ParsedMapFile mapFile,
-        CancellationToken cancellationToken = default)
+    public async Task<IDictionary<string, string>> ResolveSecretsAsync(ParsedMapFile mapFile,
+                                                                       CancellationToken cancellationToken = default)
     {
         var result = new Dictionary<string, string>();
 

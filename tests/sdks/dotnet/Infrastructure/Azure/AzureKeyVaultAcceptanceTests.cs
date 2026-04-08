@@ -1,14 +1,15 @@
 namespace Envilder.Tests.Infrastructure.Azure;
 
-using System.Net.Http;
-using global::Azure.Identity;
-using global::Azure.Security.KeyVault.Secrets;
 using AwesomeAssertions;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using Envilder.Application;
 using Envilder.Domain;
 using Envilder.Infrastructure.Azure;
+using global::Azure.Core.Pipeline;
+using global::Azure.Identity;
+using global::Azure.Security.KeyVault.Secrets;
+using System.Net.Http;
 
 public class AzureKeyVaultAcceptanceTests : IAsyncLifetime
 {
@@ -42,7 +43,7 @@ public class AzureKeyVaultAcceptanceTests : IAsyncLifetime
 
         var clientOptions = new SecretClientOptions(SecretClientOptions.ServiceVersion.V7_2)
         {
-            Transport = new global::Azure.Core.Pipeline.HttpClientTransport(new HttpClient(httpHandler)),
+            Transport = new HttpClientTransport(new HttpClient(httpHandler)),
             DisableChallengeResourceVerification = true,
         };
 
@@ -75,7 +76,7 @@ public class AzureKeyVaultAcceptanceTests : IAsyncLifetime
         {
             Config = new MapFileConfig
             {
-                Provider = "azure",
+                Provider = SecretProviderType.Azure,
                 VaultUrl = _vaultUrl,
             },
             Mappings = new Dictionary<string, string>
@@ -102,7 +103,7 @@ public class AzureKeyVaultAcceptanceTests : IAsyncLifetime
         {
             Config = new MapFileConfig
             {
-                Provider = "azure",
+                Provider = SecretProviderType.Azure,
                 VaultUrl = _vaultUrl,
             },
             Mappings = new Dictionary<string, string>
