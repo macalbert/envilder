@@ -3,6 +3,7 @@ namespace Envilder.Tests.Fixtures;
 using Amazon.SimpleSystemsManagement;
 using DotNet.Testcontainers.Builders;
 using Envilder.Application;
+using Envilder.Domain;
 using Envilder.Infrastructure;
 using Envilder.Infrastructure.Aws;
 using Envilder.Tests.Infrastructure.Aws;
@@ -74,10 +75,25 @@ public sealed class LocalStackFixture : IAsyncLifetime
 
         var parser = new MapFileParser();
         var mapFile = parser.Parse(json);
-        var client =
-            new EnvilderClient(SecretProviderFactory.Create(mapFile.Config));
+        var client = ResolveClient(mapFile);
         var secrets = await client.ResolveSecretsAsync(mapFile);
 
         return secrets.AsReadOnly();
+    }
+
+    // Workaround: CI/CD pipelines may not have credentials configured for the
+    // provider declared in the map file's $config section (e.g. Azure Key Vault).
+    // When the configured provider cannot be created, fall back to AWS so the
+    // integration tests can still run against LocalStack.
+    private static EnvilderClient ResolveClient(ParsedMapFile mapFile)
+    {
+        try
+        {
+            return new(SecretProviderFactory.Create(mapFile.Config));
+        }
+        catch (InvalidOperationException)
+        {
+            return new(SecretProviderFactory.Create(new() { Provider = SecretProviderType.Aws }));
+        }
     }
 }
