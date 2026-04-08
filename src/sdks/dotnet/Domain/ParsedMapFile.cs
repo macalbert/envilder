@@ -11,11 +11,11 @@ public class ParsedMapFile
     /// <summary>
     /// Provider configuration read from the <c>$config</c> section.
     /// </summary>
-    public MapFileConfig Config { get; init; } = null!;
+    public MapFileConfig Config { get; set; } = null!;
 
     /// <summary>
     /// Dictionary mapping environment variable names to secret paths/names
     /// (e.g. <c>"DB_URL" → "/app/db-url"</c>).
     /// </summary>
-    public Dictionary<string, string> Mappings { get; init; } = null!;
+    public Dictionary<string, string> Mappings { get; set; } = null!;
 }
