@@ -48,7 +48,7 @@ jobs:
         with:
           dotnet-version: '10.x'
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj', '**/*.sln') }}
@@ -86,7 +86,7 @@ jobs:
         if: steps.run-tests.outcome == 'success'
         run: echo "status=success" >> $GITHUB_OUTPUT
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: success() || failure()
         with:
           name: test-results
@@ -115,14 +115,14 @@ jobs:
 
       - uses: actions/checkout@v6
 
-      - uses: actions/download-artifact@v6.0.0
+      - uses: actions/download-artifact@v7
         with:
           merge-multiple: true
           path: .
           pattern: test-results*
 
       - name: 📊 Generating Tests Results Reporter
-        uses: dorny/test-reporter@v2
+        uses: dorny/test-reporter@v3
         with:
           name: Backend Results
           path: "**/test-results*.trx"

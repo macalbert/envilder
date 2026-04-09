@@ -68,7 +68,7 @@ public static class SecretProviderFactory
             var chain = new CredentialProfileStoreChain();
             if (chain.TryGetAWSCredentials(profile, out var credentials))
             {
-                var region = ResolveProfileRegion(chain, profile);
+                var region = ResolveProfileRegion(chain, profile!);
                 return new(new AmazonSimpleSystemsManagementClient(credentials, region));
             }
 
