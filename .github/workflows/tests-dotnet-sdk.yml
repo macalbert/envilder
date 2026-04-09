@@ -113,7 +113,7 @@ jobs:
           echo "- status = ${{needs.test-dotnet-sdk.outputs.status}}"
           echo "::endgroup::"
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: actions/download-artifact@v6.0.0
         with:
