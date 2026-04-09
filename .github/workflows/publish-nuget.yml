@@ -8,6 +8,7 @@ on:
       - main
     paths:
       - "src/sdks/dotnet/**"
+      - "tests/sdks/dotnet/**"
       - ".github/workflows/publish-nuget.yml"
 
 permissions:
@@ -34,6 +35,12 @@ jobs:
         with:
           dotnet-version: "10.x"
 
+      - name: 🪙 Collect Coins (Configure AWS credentials)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          
       - name: 👑 Detect version bump
         id: version-check
         run: |
@@ -57,13 +64,13 @@ jobs:
 
       - name: 🍄 Run tests
         if: steps.version-check.outputs.version_changed == 'true'
-        run: dotnet test ../../../tests/sdks/dotnet/ -c Release --filter "FullyQualifiedName!~Acceptance" --verbosity normal
+        run: dotnet test ../../../tests/sdks/dotnet/ -c Release --verbosity normal
 
       - name: 📦 Pack
         if: steps.version-check.outputs.version_changed == 'true'
         run: dotnet pack -c Release --no-build -o ./nupkg
 
-      - name: � NuGet login (OIDC)
+      - name: 💉 NuGet login (OIDC)
         if: steps.version-check.outputs.version_changed == 'true'
         uses: NuGet/login@v1
         id: nuget-login

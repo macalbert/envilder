@@ -31,6 +31,7 @@ or directly inside application code at runtime.
 | **Azure Key Vault** | Multi-backend via `$config` map-file section ([#90](https://github.com/macalbert/envilder/pull/90)) |
 | **Documentation website** | [envilder.com](https://envilder.com) |
 | **Onboarding documentation** | [Setup guide](./docs/requirements-installation.md) |
+| **.NET SDK** (`Envilder`) | First runtime SDK — load secrets into `IConfiguration` or `EnvilderClient`. AWS SSM + Azure Key Vault. [Documentation](./src/sdks/dotnet/README.md) |
 
 ### 🔥 Up Next
 
@@ -39,7 +40,6 @@ or directly inside application code at runtime.
 | **TypeScript SDK** (`@envilder/sdk`) | 🔴 High | Native runtime library — load secrets directly into `process.env` from a map-file. No `.env` file needed. Published to npm |
 | **Python SDK** (`envilder`) | 🔴 High | Runtime library for Python — Django/FastAPI/data pipelines. Published to PyPI |
 | **Go SDK** (`envilder`) | 🔴 High | Runtime library for Go — cloud-native apps, Kubernetes tooling. Published as Go module |
-| **.NET SDK** (`Envilder`) | 🔴 High | Runtime library for .NET — enterprise apps, Azure-native shops. Published to NuGet |
 | **Java SDK** (`envilder`) | 🔴 High | Runtime library for Java/Kotlin — Spring Boot, Android backends. Published to Maven Central |
 | **Map-file JSON Schema** | 🔴 High | Formal spec for the map-file format at `spec/` — serves as the contract between all SDKs and tools |
 | **SDK conformance tests** | 🔴 High | Language-agnostic test fixtures (JSON input → expected output) that all SDKs must pass |

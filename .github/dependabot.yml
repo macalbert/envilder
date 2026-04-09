@@ -20,6 +20,91 @@ updates:
   assignees:
   - macalbert
     
+- package-ecosystem: nuget
+  directories:
+  - "/src/sdks/dotnet"
+  - "/tests/sdks/dotnet"
+  pull-request-branch-name:
+    separator: "/"
+  schedule:
+    interval: monthly
+    day: monday
+    time: "10:00"
+    timezone: Europe/Madrid
+  labels:
+  - "nuget"
+  - "dependencies"
+  assignees:
+  - macalbert
+
+- package-ecosystem: gomod
+  directories:
+  - "/src/sdks/go"
+  - "/tests/sdks/go"
+  pull-request-branch-name:
+    separator: "/"
+  schedule:
+    interval: monthly
+    day: monday
+    time: "10:00"
+    timezone: Europe/Madrid
+  labels:
+  - "go"
+  - "dependencies"
+  assignees:
+  - macalbert
+
+- package-ecosystem: maven
+  directories:
+  - "/src/sdks/java"
+  - "/tests/sdks/java"
+  pull-request-branch-name:
+    separator: "/"
+  schedule:
+    interval: monthly
+    day: monday
+    time: "10:00"
+    timezone: Europe/Madrid
+  labels:
+  - "maven"
+  - "dependencies"
+  assignees:
+  - macalbert
+
+- package-ecosystem: pip
+  directories:
+  - "/src/sdks/python"
+  - "/tests/sdks/python"
+  pull-request-branch-name:
+    separator: "/"
+  schedule:
+    interval: monthly
+    day: monday
+    time: "10:00"
+    timezone: Europe/Madrid
+  labels:
+  - "pip"
+  - "dependencies"
+  assignees:
+  - macalbert
+
+- package-ecosystem: npm
+  directories:
+  - "/src/sdks/typescript"
+  - "/tests/sdks/typescript"
+  pull-request-branch-name:
+    separator: "/"
+  schedule:
+    interval: monthly
+    day: monday
+    time: "10:00"
+    timezone: Europe/Madrid
+  labels:
+  - "npm"
+  - "dependencies"
+  assignees:
+  - macalbert
+
 - package-ecosystem: github-actions
   directory: "/"
   pull-request-branch-name:

@@ -1,5 +1,6 @@
 namespace Envilder.Tests.Fixtures;
 
+using Amazon.Runtime;
 using Amazon.SimpleSystemsManagement;
 using DotNet.Testcontainers.Builders;
 using Envilder.Application;
@@ -91,7 +92,7 @@ public sealed class LocalStackFixture : IAsyncLifetime
         {
             return new(SecretProviderFactory.Create(mapFile.Config));
         }
-        catch (InvalidOperationException)
+        catch (Exception ex) when (ex is InvalidOperationException or AmazonServiceException)
         {
             return new(SecretProviderFactory.Create(new() { Provider = SecretProviderType.Aws }));
         }

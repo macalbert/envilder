@@ -195,3 +195,33 @@ Example (PushSingle):
 **Multi-Backend Support**: Already implemented — `configureInfrastructureServices()` selects
 provider based on `MapFileConfig.provider` (`aws` or `azure`). To add more providers, extend
 the provider selection logic in `ContainerConfiguration.ts`.
+
+## Runtime SDKs (`src/sdks/`)
+
+Independent secret-loading libraries for different runtimes. SDKs share the map-file format
+but have **no code dependency** on the TypeScript core.
+
+### .NET SDK (`src/sdks/dotnet/`)
+
+**Architecture**: Layered (Domain → Application → Infrastructure), no DI framework.
+
+- **Domain** (`Domain/`): `ISecretProvider` port, `MapFileConfig`, `EnvilderOptions`, `ParsedMapFile`, `SecretProviderType` enum
+- **Application** (`Application/`): `MapFileParser` (parses `$config` + mappings), `EnvilderClient` (resolves secrets, injects into env)
+- **Infrastructure** (`Infrastructure/`): `SecretProviderFactory`, `AwsSsmSecretProvider`, `AzureKeyVaultSecretProvider`, `IConfiguration` extensions, `IServiceCollection` extensions
+
+**Key patterns**:
+
+- Factory pattern (`SecretProviderFactory.Create()`) instead of DI container
+- Pull-only — SDKs do not support push mode
+- `ISecretProvider.GetSecretAsync()` returns `null` for missing secrets (no exceptions)
+- `EnvilderClient.ResolveSecretsAsync()` silently omits missing secrets
+
+**Tests** (`tests/sdks/dotnet/`): xUnit + NSubstitute + AwesomeAssertions + AutoFixture.
+Acceptance tests use TestContainers (LocalStack for AWS, Lowkey Vault for Azure).
+Naming: `Should_<Expected>_When_<Condition>`. AAA pattern with comment markers.
+
+**Build & test**:
+
+- `dotnet build src/sdks/dotnet/Envilder.sln`
+- `dotnet test tests/sdks/dotnet/` (requires Docker for acceptance tests)
+- `dotnet format src/sdks/dotnet/Envilder.sln --verify-no-changes` (formatting check)

@@ -101,6 +101,30 @@ gh api repos/{owner}/{repo}/pulls/comments/{id} -X PATCH -f body='**Resolved.** 
 gh api ... -X PATCH -f body="**Resolved.** Updated references from \`v0.7.11\` to \`v0.7.12\`."
 ```
 
+## Comment Resolution Protocol
+
+After applying fixes, **always** reply to each inline review comment and resolve
+the thread — do not just summarize in the chat output.
+
+For each addressed comment:
+
+1. **Reply** to the comment thread via `gh api repos/{owner}/{repo}/pulls/{pr}/comments/{id}/replies`
+   with a Markdown body summarising the action, changed files, and evidence.
+2. **Resolve** the thread via GraphQL `resolveReviewThread` mutation using the
+   thread's node ID (obtainable from `pullRequest.reviewThreads`).
+
+Multiple threads can be resolved in a single GraphQL call using aliases:
+
+```graphql
+mutation {
+  t1: resolveReviewThread(input: {threadId: "<ID1>"}) { thread { isResolved } }
+  t2: resolveReviewThread(input: {threadId: "<ID2>"}) { thread { isResolved } }
+}
+```
+
+Do **not** create new top-level PR comments. Always reply inside the existing
+review thread so context stays grouped.
+
 ## Next Steps
 
 After all comments resolved: "Run `/smart-commit` to commit the fixes, then push."

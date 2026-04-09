@@ -169,6 +169,38 @@ Components:
 
 ---
 
+## 🧩 Runtime SDKs
+
+Envilder runtime SDKs are **independent implementations** that load secrets directly into application
+code at startup. They share the same map-file format as the CLI but have no code dependency on the
+TypeScript core.
+
+### SDK Architecture (.NET)
+
+```txt
+src/sdks/dotnet/
+├── Domain/              ← Ports (ISecretProvider), value objects (MapFileConfig, EnvilderOptions)
+├── Application/         ← MapFileParser, EnvilderClient
+└── Infrastructure/      ← SecretProviderFactory, AWS/Azure adapters, IConfiguration + DI extensions
+```
+
+**Key differences from the TypeScript core:**
+
+* No DI framework — lightweight factory pattern (`SecretProviderFactory.Create()`)
+* Pull-only — SDKs do not support push mode
+* Silent by default — no logging unless the consumer configures it
+* `IConfiguration` integration — secrets can be bound to .NET configuration sections
+* `IServiceCollection` integration — one-line DI registration via `services.AddEnvilder()`
+
+**Data flow (SDK):**
+
+1. Consumer calls `MapFileParser.Parse(json)` → extracts `$config` + mappings
+2. `SecretProviderFactory.Create(config)` → selects AWS or Azure adapter
+3. `EnvilderClient.ResolveSecretsAsync(mapFile)` → resolves each mapping via `ISecretProvider`
+4. Secrets are available via `IConfiguration`, `IDictionary`, or injected into `Environment`
+
+---
+
 ## 🔄 Data Flow: Pull Operation
 
 ### AWS SSM Path (flow)

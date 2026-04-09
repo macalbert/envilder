@@ -192,10 +192,28 @@ Follow Option A or B above to grant access, then retry.
 
 ## Verifying Installation
 
+### CLI
+
 Check that Envilder is installed and available:
 
 ```bash
 envilder --help
 ```
+
+### .NET SDK
+
+For the .NET SDK, install and verify via NuGet:
+
+```bash
+dotnet add package Envilder
+```
+
+Requirements:
+
+- .NET Standard 2.0 compatible runtime (.NET 6+, .NET Framework 4.6.1+)
+- **AWS provider**: AWS credentials configured via CLI, environment variables, or IAM role
+- **Azure provider**: Azure credentials via `az login`, managed identity, or environment variables
+
+📖 **[Full .NET SDK documentation](../src/sdks/dotnet/README.md)**
 
 If you see the CLI help output, you're ready to use Envilder!
