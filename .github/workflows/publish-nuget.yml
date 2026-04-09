@@ -8,6 +8,7 @@ on:
       - main
     paths:
       - "src/sdks/dotnet/**"
+      - "tests/sdks/dotnet/**"
       - ".github/workflows/publish-nuget.yml"
 
 permissions:
