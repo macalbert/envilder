@@ -1,3 +1,20 @@
+## [0.10.0] - 2026-04-09
+
+### Added
+
+* **.NET SDK** (`Envilder` NuGet package) — First runtime SDK for loading secrets from AWS SSM Parameter Store or Azure Key Vault directly into .NET applications. Supports `IConfiguration`, `IServiceCollection`, and direct `EnvilderClient` usage. Includes `SecretProviderFactory`, `MapFileParser`, and `ISecretProvider` port with AWS and Azure adapters ([#147](https://github.com/macalbert/envilder/pull/147))
+* **.NET SDK CI workflow** — Dedicated `tests-dotnet-sdk.yml` runs unit tests, acceptance tests (LocalStack + Lowkey Vault via TestContainers), and end-to-end consumer experience tests
+
+### Documentation
+
+* Updated README with .NET SDK installation, quick start, and feature status
+* Updated ROADMAP to mark .NET SDK as shipped
+* Added SDK architecture section to architecture docs
+* Added .NET SDK prerequisites to requirements & installation guide
+* Updated copilot instructions with SDK layer conventions
+
+---
+
 ## [0.9.2] - 2026-04-02
 
 ### Added

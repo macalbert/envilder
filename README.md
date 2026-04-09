@@ -48,6 +48,7 @@ and streamline onboarding and CI/CD workflows.
 - 👥 Simplifies onboarding and internal rotations
 - 🚀 Enables cloud-native, infrastructure-as-code secret management
 - 🤖 Perfect for DevOps, CI/CD, and team sync
+- 📦 **Runtime SDKs** — load secrets directly into your app without `.env` files ([.NET SDK](./src/sdks/dotnet/README.md))
 
 ---
 
@@ -73,6 +74,8 @@ and streamline onboarding and CI/CD workflows.
     - [With `$config` (explicit provider)](#with-config-explicit-provider)
     - [`$config` Options](#config-options)
     - [Configuration Priority](#configuration-priority)
+  - [🧩 Runtime SDKs](#-runtime-sdks)
+    - [.NET SDK](#net-sdk)
   - [🛠️ How it works](#️-how-it-works)
   - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
   - [🔍 Envilder vs. Alternatives](#-envilder-vs-alternatives)
@@ -103,6 +106,7 @@ and streamline onboarding and CI/CD workflows.
 - 📤 **Push & Pull** — Bidirectional sync between local `.env` and your cloud provider
 - ☁️ **Multi-provider** — AWS SSM Parameter Store and Azure Key Vault
 - 🎯 **AWS Profile support** — Use `--profile` flag for multi-account setups
+- 🧩 **.NET SDK** — [Load secrets at runtime via `IConfiguration`](./src/sdks/dotnet/README.md)
 
 ---
 
@@ -336,6 +340,45 @@ envilder --provider=azure --vault-url=https://other-vault.vault.azure.net --map=
 
 ---
 
+## 🧩 Runtime SDKs
+
+Beyond the CLI and GitHub Action, Envilder provides **runtime SDKs** that load secrets
+directly into your application — no `.env` file needed. SDKs use the same map-file format
+as the CLI.
+
+### .NET SDK
+
+Install via NuGet:
+
+```bash
+dotnet add package Envilder
+```
+
+Load secrets into `IConfiguration`:
+
+```csharp
+var mapFile = new MapFileParser().Parse(File.ReadAllText("secrets-map.json"));
+var provider = SecretProviderFactory.Create(mapFile.Config);
+
+var config = new ConfigurationBuilder()
+    .AddEnvilder("secrets-map.json", provider)
+    .Build();
+
+var dbPassword = config["DB_PASSWORD"];
+```
+
+Or inject directly into process environment variables:
+
+```csharp
+var client = new EnvilderClient(provider);
+var secrets = await client.ResolveSecretsAsync(mapFile);
+EnvilderClient.InjectIntoEnvironment(secrets);
+```
+
+📖 **[View full .NET SDK documentation](./src/sdks/dotnet/README.md)**
+
+---
+
 ## 🛠️ How it works
 
 ```mermaid
@@ -389,6 +432,11 @@ A: Any environment supported by your cloud provider—dev, test, staging, produc
 **Q: Is Envilder open source?**  
 A: Yes, licensed under MIT.
 
+**Q: Can I use Envilder without generating `.env` files?**  
+A: Yes! The runtime SDKs (starting with [.NET](./src/sdks/dotnet/README.md)) load secrets directly into
+your application at startup — no `.env` file needed. Use the CLI for local dev and CI/CD, and the SDK for
+production runtime.
+
 ---
 
 ## 🔍 Envilder vs. Alternatives
@@ -410,6 +458,7 @@ These tools manage secrets as data and project them into `.env` or runtime:
 | **Declarative mapping** | ✅ JSON mapping | ❌ | ❌ |
 | **Multi-provider (AWS + Azure)** | ✅ | ❌ | ⚠️ (primarily its own backend) |
 | **Local `.env` generation** | ✅ | ✅ | ✅ |
+| **Runtime SDKs** | ✅ (.NET) | ❌ | ❌ |
 | **CI/CD integration** | ✅ Native GitHub Action | Manual | ✅ Native |
 | **Requires SaaS** | ❌ | ✅ | Optional |
 | **Self-hosted** | N/A (no server needed) | ❌ | ✅ |
@@ -459,8 +508,9 @@ For **production runtime**, container orchestrators (ECS, Kubernetes) and platfo
 (Vercel, Fly.io) can inject secrets directly as environment variables — no `.env` file needed.
 In those cases, prefer native secret injection over writing secrets to disk.
 
-> **Coming soon:** An `--exec` mode is planned to inject secrets directly into a child process
-> without writing to disk (e.g., `envilder exec -- node server.js`). See the [Roadmap](./ROADMAP.md).
+> **Runtime SDKs:** The [.NET SDK](./src/sdks/dotnet/README.md) can load secrets directly into
+> your application at startup. More SDKs (TypeScript, Python, Go, Java) are coming next.
+> See the [Roadmap](./ROADMAP.md).
 
 ---
 
@@ -469,11 +519,12 @@ In those cases, prefer native secret injection over writing secrets to disk.
 We're continuously improving Envilder based on community feedback. Upcoming features include:
 
 - ✅ **Azure Key Vault support** — now available alongside AWS SSM
-- � **Exec mode** — inject secrets into a child process without writing to disk
+- ✅ **.NET SDK** — load secrets at runtime via `IConfiguration` or `EnvilderClient`
+- 🔜 **More runtime SDKs** — TypeScript, Python, Go, Java
+- 🔜 **Exec mode** — inject secrets into a child process without writing to disk
 - 🔍 **Check/sync mode** for drift detection
-- 🌐 **Documentation website** — dedicated docs site with guides and examples
 - 🧠 **Auto-discovery** for bulk parameter fetching
-- 🔌 **More backends** (HashiCorp Vault, GCP Secret Manager, etc.)
+- 🔌 **More backends** (GCP Secret Manager, AWS Secrets Manager, etc.)
 
 👉 **[View full roadmap with priorities](./ROADMAP.md)**
 
