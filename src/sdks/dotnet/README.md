@@ -59,6 +59,8 @@ EnvilderClient.InjectIntoEnvironment(secrets);
 Override the map file's `$config` at runtime — useful for switching providers per environment:
 
 ```csharp
+var json = File.ReadAllText("secrets-map.json");
+var mapFile = new MapFileParser().Parse(json);
 var options = new EnvilderOptions
 {
     Provider = SecretProviderType.Azure,
