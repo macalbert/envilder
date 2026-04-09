@@ -6,7 +6,6 @@ using Envilder.Application;
 using Envilder.Domain;
 using Envilder.Infrastructure;
 using Envilder.Infrastructure.Aws;
-using Envilder.Tests.Infrastructure.Aws;
 using Testcontainers.LocalStack;
 
 public sealed class LocalStackFixture : IAsyncLifetime

@@ -16,14 +16,14 @@ using System;
 /// </summary>
 public static class SecretProviderFactory
 {
-    private static readonly Amazon.RegionEndpoint DefaultRegion = Amazon.RegionEndpoint.USEast1;
+    private static readonly Amazon.RegionEndpoint FallbackRegion = Amazon.RegionEndpoint.USEast1;
 
     /// <summary>
     /// Creates an <see cref="ISecretProvider"/> for the provider specified in
     /// <paramref name="config"/>. When <paramref name="options"/> is provided,
     /// its values take precedence over <paramref name="config"/>.
     /// </summary>
-    /// <param name="config">Configuration from the <c>$config</c> section of a map file.</param>
+    /// <param name="config">Configuration from the <c></c> section of a map file.</param>
     /// <param name="options">Optional runtime overrides (e.g. CLI flags).</param>
     /// <returns>A ready-to-use secret provider.</returns>
     /// <exception cref="InvalidOperationException">
@@ -67,7 +67,7 @@ public static class SecretProviderFactory
             var chain = new CredentialProfileStoreChain();
             if (chain.TryGetAWSCredentials(profile, out var credentials))
             {
-                return new(new AmazonSimpleSystemsManagementClient(credentials, DefaultRegion));
+                return new(new AmazonSimpleSystemsManagementClient(credentials, ResolveRegion()));
             }
 
             throw new InvalidOperationException(
@@ -76,7 +76,21 @@ public static class SecretProviderFactory
 
         return new(new AmazonSimpleSystemsManagementClient(new AmazonSimpleSystemsManagementConfig
         {
-            RegionEndpoint = DefaultRegion,
+            RegionEndpoint = ResolveRegion(),
         }));
+    }
+
+    /// <summary>
+    /// Resolves the AWS region from environment variables (<c>AWS_REGION</c> or
+    /// <c>AWS_DEFAULT_REGION</c>), falling back to <c>us-east-1</c> when neither is set.
+    /// </summary>
+    private static Amazon.RegionEndpoint ResolveRegion()
+    {
+        var regionName = Environment.GetEnvironmentVariable("AWS_REGION")
+            ?? Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION");
+
+        return string.IsNullOrWhiteSpace(regionName)
+            ? FallbackRegion
+            : Amazon.RegionEndpoint.GetBySystemName(regionName);
     }
 }
