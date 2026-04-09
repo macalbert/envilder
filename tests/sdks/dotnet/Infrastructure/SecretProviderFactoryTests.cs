@@ -5,8 +5,9 @@ using Envilder.Domain;
 using Envilder.Infrastructure;
 using Envilder.Infrastructure.Aws;
 using Envilder.Infrastructure.Azure;
+using Envilder.Tests.Fixtures;
 
-[Collection("EnvironmentTests")]
+[Collection(nameof(ContainersCollection))]
 public class SecretProviderFactoryTests
 {
     [Fact]
