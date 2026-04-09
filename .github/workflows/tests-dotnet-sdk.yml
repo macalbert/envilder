@@ -1,5 +1,9 @@
 name: 🧪 .NET SDK Tests
 
+permissions:
+  id-token: write
+  contents: read
+
 on:
   workflow_dispatch:
 
@@ -44,7 +48,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
-          
+
       - name: 🏗️ Build
         run: dotnet build Envilder.sln -c Release
 
