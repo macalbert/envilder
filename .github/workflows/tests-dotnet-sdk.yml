@@ -71,6 +71,7 @@ jobs:
         run: dotnet build Envilder.sln -c Release
 
       - name: 🍄 Run tests
+        id: run-tests
         run: |
           dotnet test Envilder.sln --no-build --configuration Release \
             --logger "trx;LogFileName=test-results.trx" \
@@ -82,7 +83,7 @@ jobs:
 
       - name: 💾 Save status
         id: set-output
-        if: success()
+        if: steps.run-tests.outcome == 'success'
         run: echo "status=success" >> $GITHUB_OUTPUT
 
       - uses: actions/upload-artifact@v5
