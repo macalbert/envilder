@@ -39,6 +39,12 @@ jobs:
         with:
           dotnet-version: '10.x'
 
+      - name: 🪙 Collect Coins (Configure AWS credentials)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          
       - name: 🏗️ Build
         run: dotnet build Envilder.sln -c Release
 
@@ -46,4 +52,4 @@ jobs:
         run: dotnet format Envilder.sln --verify-no-changes --verbosity normal
 
       - name: 🍄 Run tests
-        run: dotnet test ../../../tests/sdks/dotnet/ -c Release --no-build --filter "FullyQualifiedName!~Acceptance&FullyQualifiedName!~EndToEnd" --verbosity normal
+        run: dotnet test ../../../tests/sdks/dotnet/ -c Release --no-build --verbosity normal
