@@ -32,6 +32,9 @@ jobs:
     env:
       LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
 
+    outputs:
+      status: ${{ steps.set-output.outputs.status }}
+
     defaults:
       run:
         working-directory: src/sdks/dotnet
@@ -45,17 +48,88 @@ jobs:
         with:
           dotnet-version: '10.x'
 
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj', '**/*.sln') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: 🪙 Collect Coins (Configure AWS credentials)
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: 🏗️ Build
-        run: dotnet build Envilder.sln -c Release
-
+      - name: ♻️ Restore dependencies
+        run: dotnet restore Envilder.sln -v q --nologo
+          
       - name: 🌟 Format check
         run: dotnet format Envilder.sln --verify-no-changes --verbosity normal
 
+      - name: 🏗️ Build
+        run: dotnet build Envilder.sln -c Release
+
       - name: 🍄 Run tests
-        run: dotnet test ../../../tests/sdks/dotnet/ -c Release --no-build --verbosity normal
+        run: |
+          dotnet test Envilder.sln --no-build --configuration Release \
+            --logger "trx;LogFileName=test-results.trx" \
+            --logger:"console;verbosity=detailed" --verbosity:detailed
+        continue-on-error: true
+        env:
+          TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
+          DOCKER_HOST: unix:///var/run/docker.sock
+
+      - name: 💾 Save status
+        id: set-output
+        if: success()
+        run: echo "status=success" >> $GITHUB_OUTPUT
+
+      - uses: actions/upload-artifact@v5
+        if: success() || failure()
+        with:
+          name: test-results
+          path: |
+            **/*.trx
+          retention-days: 1
+
+  test-dotnet-sdk-report:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    needs: [test-dotnet-sdk]
+
+    if: ${{ success() || failure() }}
+
+    env:
+      SUCCESS_CONDITIONS: >
+        ${{ needs.test-dotnet-sdk.outputs.status == 'success'}}
+
+    steps:
+      - name: 👁️ Show status
+        run: |
+          echo "::group::Status"
+          echo "The global status of tests is = $SUCCESS_CONDITIONS"
+          echo "- status = ${{needs.test-dotnet-sdk.outputs.status}}"
+          echo "::endgroup::"
+
+      - uses: actions/checkout@v5
+
+      - uses: actions/download-artifact@v6.0.0
+        with:
+          merge-multiple: true
+          path: .
+          pattern: test-results*
+
+      - name: 📊 Generating Tests Results Reporter
+        uses: dorny/test-reporter@v2
+        with:
+          name: Backend Results
+          path: "**/test-results*.trx"
+          path-replace-backslashes: "false"
+          reporter: dotnet-trx
+          only-summary: "false"
+          list-suites: "all"
+          list-tests: "all"
+          max-annotations: "10"
+          fail-on-error: "true"
+          working-directory: ""

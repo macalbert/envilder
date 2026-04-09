@@ -1,4 +1,4 @@
-﻿namespace Envilder.Tests.Infrastructure.Aws;
+﻿namespace Envilder.Tests.Fixtures;
 
 using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
