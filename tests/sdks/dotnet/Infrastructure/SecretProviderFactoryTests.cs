@@ -6,6 +6,7 @@ using Envilder.Infrastructure;
 using Envilder.Infrastructure.Aws;
 using Envilder.Infrastructure.Azure;
 
+[Collection("EnvironmentTests")]
 public class SecretProviderFactoryTests
 {
     [Fact]
@@ -131,7 +132,8 @@ public class SecretProviderFactoryTests
             var act = () => SecretProviderFactory.Create(config);
 
             // Assert
-            act.Should().NotThrow();
+            act.Should().NotThrow()
+                .Subject.Should().BeOfType<AwsSsmSecretProvider>();
         }
         finally
         {
