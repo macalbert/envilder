@@ -135,9 +135,12 @@ class TestMapFileParser:
         # Arrange
         sut = MapFileParser()
 
-        # Act & Assert
+        # Act
+        action = lambda: sut.parse('["Test/Token"]')
+
+        # Assert
         with pytest.raises(ValueError, match="must be a JSON object"):
-            sut.parse('["/Test/Token"]')
+            action()
 
     def Should_ParseProvider_When_ProviderIsMixedCase(self) -> None:
         # Arrange
@@ -166,6 +169,9 @@ class TestMapFileParser:
         }"""
         sut = MapFileParser()
 
-        # Act & Assert
+        # Act
+        action = lambda: sut.parse(json_content)
+
+        # Assert
         with pytest.raises(ValueError, match="Unsupported provider"):
-            sut.parse(json_content)
+            action()

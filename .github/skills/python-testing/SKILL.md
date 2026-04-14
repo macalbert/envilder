@@ -55,7 +55,12 @@ class TestUserService:
 
 * Each phase **MUST** be separated with comments
 * **Never mix phases**
-* For exception testing, extract the action before asserting
+* **Each comment (`# Arrange`, `# Act`, `# Assert`) appears AT MOST ONCE per test** — if you need two actions
+or two asserts, write two tests
+* **No `if`, `switch`, or conditional logic** inside Arrange, Act, or Assert blocks
+* **No `try/catch/finally`** inside tests — use pytest fixtures with `yield` for teardown/cleanup
+* **No `# Act & Assert` combined blocks** — Act and Assert are ALWAYS separate
+* For exception testing, extract the action into a `lambda` before asserting
 * If no Arrange is needed, omit it
 * If there is no Assert, the test is invalid
 
@@ -151,6 +156,10 @@ async def Should_ReturnUser_When_UserExists(
 
 ## Exception Testing
 
+**Act and Assert MUST be separate.** Extract the action into a `lambda` in the Act phase.
+
+#### ✅ CORRECT — separate Act and Assert
+
 ```python
 def Should_RaiseValueError_When_NameIsEmpty(sut: GroupService) -> None:
     # Arrange
@@ -162,6 +171,62 @@ def Should_RaiseValueError_When_NameIsEmpty(sut: GroupService) -> None:
     # Assert
     with pytest.raises(ValueError, match="Group name is required"):
         action()
+```
+
+#### ❌ FORBIDDEN — combined Act & Assert
+
+```python
+def Should_RaiseValueError_When_NameIsEmpty(sut: GroupService) -> None:
+    # Arrange
+    request = CreateGroupRequest(name="", type=GroupType.RECURRING)
+
+    # Act & Assert   ← NEVER DO THIS
+    with pytest.raises(ValueError, match="Group name is required"):
+        sut.create_group(request)
+```
+
+---
+
+## Teardown & Cleanup (MANDATORY pattern)
+
+**Never use `try/finally` in tests.** Use pytest fixtures with `yield` for cleanup.
+
+#### ✅ CORRECT — fixture with yield
+
+```python
+@pytest.fixture()
+def env_cleanup() -> Generator[list[str], None, None]:
+    keys: list[str] = []
+    yield keys
+    for key in keys:
+        os.environ.pop(key, None)
+
+
+class TestEnvilderClient:
+    def Should_SetEnvVars_When_InjectCalled(
+        self, env_cleanup: list[str]
+    ) -> None:
+        # Arrange
+        secrets = {"MY_TOKEN": "token-123"}
+        env_cleanup.extend(secrets.keys())
+
+        # Act
+        EnvilderClient.inject_into_environment(secrets)
+
+        # Assert
+        assert os.environ["MY_TOKEN"] == "token-123"
+```
+
+#### ❌ FORBIDDEN — try/finally in test
+
+```python
+def Should_SetEnvVars_When_InjectCalled(self) -> None:
+    secrets = {"MY_TOKEN": "token-123"}
+    try:
+        EnvilderClient.inject_into_environment(secrets)
+        assert os.environ["MY_TOKEN"] == "token-123"
+    finally:
+        os.environ.pop("MY_TOKEN", None)
 ```
 
 ---
@@ -286,6 +351,32 @@ def Should_SaveGroup_When_Valid(sut: GroupService):
 ```python
 def should_create_group_successfully():
     ...
+```
+
+### ❌ Combined Act & Assert
+
+```python
+# Act & Assert   ← FORBIDDEN, always separate
+with pytest.raises(ValueError):
+    sut.do_something()
+```
+
+### ❌ try/catch/finally in tests
+
+```python
+try:
+    sut.inject(secrets)
+    assert os.environ["KEY"] == "value"
+finally:
+    os.environ.pop("KEY", None)
+```
+
+### ❌ Conditional logic (if/switch) in Arrange, Act, or Assert
+
+```python
+# Assert
+if result is not None:   # ← FORBIDDEN, split into separate tests
+    assert result.name == "Test"
 ```
 
 ---

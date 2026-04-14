@@ -51,15 +51,21 @@ class TestAzureKeyVaultSecretProvider:
         )
         sut = AzureKeyVaultSecretProvider(secret_client)
 
-        # Act & Assert
+        # Act
+        action = lambda: sut.get_secret("forbidden-secret")
+
+        # Assert
         with pytest.raises(HttpResponseError):
-            sut.get_secret("forbidden-secret")
+            action()
 
     def Should_RaiseValueError_When_NameIsEmpty(self) -> None:
         # Arrange
         secret_client = Mock()
         sut = AzureKeyVaultSecretProvider(secret_client)
 
-        # Act & Assert
+        # Act
+        action = lambda: sut.get_secret("")
+
+        # Assert
         with pytest.raises(ValueError, match="cannot be null or empty"):
-            sut.get_secret("")
+            action()

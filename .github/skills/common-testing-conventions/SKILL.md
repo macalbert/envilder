@@ -67,8 +67,10 @@ public async Task Should_CreateGroup_When_RequestIsValid()
 - Each section clearly separated by comments
 - Never mix phases
 - **No `if`, `switch`, or conditional logic** inside Arrange, Act, or Assert blocks
-- **No `try/catch`** inside Arrange, Act, or Assert blocks
-- For exceptions, use `AwesomeAssertions` `.Should().ThrowAsync<T>()` or Jest `expect(...).rejects.toThrow()`
+- **No `try/catch/finally`** inside tests — use framework teardown (`IAsyncLifetime`, `[ClassCleanup]`, pytest `yield` fixtures)
+- **No `// Act & Assert` combined blocks** — Act and Assert are ALWAYS separate phases
+- For exceptions: C# → `AwesomeAssertions` `.Should().ThrowAsync<T>()` | Python → `lambda` + `pytest.raises()` | Jest
+ → `expect(...).rejects.toThrow()`
 - Omit comment if section is empty
 - If a test needs branching, split it into separate test methods (one per scenario)
 

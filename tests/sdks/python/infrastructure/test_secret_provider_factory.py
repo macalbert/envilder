@@ -80,11 +80,17 @@ class TestSecretProviderFactory:
             provider=SecretProviderType.AZURE,
         )
 
-        # Act & Assert
+        # Act
+        action = lambda: SecretProviderFactory.create(config)
+
+        # Assert
         with pytest.raises(ValueError, match="Vault URL"):
-            SecretProviderFactory.create(config)
+            action()
 
     def Should_RaiseValueError_When_ConfigIsNone(self) -> None:
-        # Act & Assert
+        # Act
+        action = lambda: SecretProviderFactory.create(None)
+
+        # Assert
         with pytest.raises(ValueError, match="config cannot be None"):
-            SecretProviderFactory.create(None)
+            action()
