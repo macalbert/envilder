@@ -3,11 +3,11 @@ from __future__ import annotations
 from typing import Generator
 
 import pytest
+from containers.localstack_container import LocalStackContainer
+
 from envilder.infrastructure.aws.aws_ssm_secret_provider import (
     AwsSsmSecretProvider,
 )
-
-from containers.localstack_container import LocalStackContainer
 
 
 @pytest.fixture(scope="session")

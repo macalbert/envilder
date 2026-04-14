@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+
 from envilder.domain.envilder_options import EnvilderOptions
 from envilder.domain.map_file_config import MapFileConfig
 from envilder.domain.secret_provider_type import SecretProviderType
@@ -17,9 +18,7 @@ from envilder.infrastructure.secret_provider_factory import (
 
 class TestSecretProviderFactory:
     @patch("envilder.infrastructure.secret_provider_factory.boto3")
-    def Should_SelectAwsProvider_When_NoProviderSpecified(
-        self, mock_boto3
-    ) -> None:
+    def Should_SelectAwsProvider_When_NoProviderSpecified(self, mock_boto3) -> None:
         # Arrange
         mock_session = Mock()
         mock_boto3.Session.return_value = mock_session
@@ -34,9 +33,7 @@ class TestSecretProviderFactory:
         mock_boto3.Session.assert_called_once()
 
     @patch("envilder.infrastructure.secret_provider_factory.SecretClient")
-    @patch(
-        "envilder.infrastructure.secret_provider_factory.DefaultAzureCredential"
-    )
+    @patch("envilder.infrastructure.secret_provider_factory.DefaultAzureCredential")
     def Should_SelectAzureProvider_When_ConfigSpecifiesAzure(
         self, mock_credential, mock_secret_client
     ) -> None:
@@ -55,9 +52,7 @@ class TestSecretProviderFactory:
         mock_secret_client.assert_called_once()
 
     @patch("envilder.infrastructure.secret_provider_factory.SecretClient")
-    @patch(
-        "envilder.infrastructure.secret_provider_factory.DefaultAzureCredential"
-    )
+    @patch("envilder.infrastructure.secret_provider_factory.DefaultAzureCredential")
     def Should_OverrideConfigWithOptions_When_BothProvided(
         self, mock_credential, mock_secret_client
     ) -> None:

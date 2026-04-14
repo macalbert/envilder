@@ -2,6 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
+
 from envilder.infrastructure.azure.azure_key_vault_secret_provider import (
     AzureKeyVaultSecretProvider,
 )
@@ -30,9 +31,7 @@ class TestAzureKeyVaultSecretProvider:
     ) -> None:
         # Arrange
         secret_client = Mock()
-        secret_client.get_secret.side_effect = ResourceNotFoundError(
-            "Secret not found"
-        )
+        secret_client.get_secret.side_effect = ResourceNotFoundError("Secret not found")
         sut = AzureKeyVaultSecretProvider(secret_client)
 
         # Act

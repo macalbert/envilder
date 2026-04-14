@@ -1,4 +1,5 @@
 import pytest
+
 from envilder.application.map_file_parser import MapFileParser
 from envilder.domain.secret_provider_type import SecretProviderType
 

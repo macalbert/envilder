@@ -4,11 +4,11 @@ from typing import Generator
 
 import pytest
 from azure.keyvault.secrets import SecretClient
+from containers.lowkey_vault_container import LowkeyVaultContainer
+
 from envilder.infrastructure.azure.azure_key_vault_secret_provider import (
     AzureKeyVaultSecretProvider,
 )
-
-from containers.lowkey_vault_container import LowkeyVaultContainer
 
 
 @pytest.fixture(scope="session")

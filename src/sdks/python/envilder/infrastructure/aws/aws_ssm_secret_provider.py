@@ -21,9 +21,7 @@ class AwsSsmSecretProvider(ISecretProvider):
             raise ValueError("Secret name cannot be null or whitespace.")
 
         try:
-            response = self._ssm_client.get_parameter(
-                Name=name, WithDecryption=True
-            )
+            response = self._ssm_client.get_parameter(Name=name, WithDecryption=True)
             param = response.get("Parameter")
             value = param.get("Value") if param else None
             return str(value) if value is not None else None

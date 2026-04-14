@@ -27,11 +27,7 @@ class SecretProviderFactory:
         if config is None:
             raise ValueError("config cannot be None")
 
-        provider = (
-            options.provider
-            if options and options.provider
-            else config.provider
-        )
+        provider = options.provider if options and options.provider else config.provider
 
         match provider:
             case SecretProviderType.AZURE:
@@ -43,16 +39,10 @@ class SecretProviderFactory:
 def _create_azure_provider(
     config: MapFileConfig, options: EnvilderOptions | None
 ) -> AzureKeyVaultSecretProvider:
-    vault_url = (
-        options.vault_url
-        if options and options.vault_url
-        else config.vault_url
-    )
+    vault_url = options.vault_url if options and options.vault_url else config.vault_url
 
     if not vault_url or not vault_url.strip():
-        raise ValueError(
-            "Vault URL must be provided for Azure Key Vault" " provider."
-        )
+        raise ValueError("Vault URL must be provided for Azure Key Vault" " provider.")
 
     credential = DefaultAzureCredential()
     secret_client = SecretClient(vault_url=vault_url, credential=credential)
@@ -62,9 +52,7 @@ def _create_azure_provider(
 def _create_aws_provider(
     config: MapFileConfig, options: EnvilderOptions | None
 ) -> AwsSsmSecretProvider:
-    profile = (
-        options.profile if options and options.profile else config.profile
-    )
+    profile = options.profile if options and options.profile else config.profile
 
     if profile:
         try:
@@ -77,14 +65,11 @@ def _create_aws_provider(
             ssm_client = session.client("ssm")
         except Exception as e:
             raise ValueError(
-                f"Failed to create AWS session with profile"
-                f" '{profile}': {e}"
+                f"Failed to create AWS session with profile" f" '{profile}': {e}"
             ) from e
     else:
         region = _resolve_region_from_env()
-        session = (
-            boto3.Session(region_name=region) if region else boto3.Session()
-        )
+        session = boto3.Session(region_name=region) if region else boto3.Session()
         ssm_client = session.client("ssm")
 
     return AwsSsmSecretProvider(ssm_client)
