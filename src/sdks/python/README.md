@@ -91,3 +91,42 @@ For Azure, add `vaultUrl`:
 ## License
 
 MIT
+
+## Development
+
+### Setup
+
+```bash
+# From the repo root
+make install-sdk-python
+```
+
+### Quality checks
+
+```bash
+make check-sdk-python    # black + isort + mypy (no changes)
+make format-sdk-python   # auto-format
+```
+
+### Running tests
+
+Unit tests run without any external dependencies:
+
+```bash
+cd tests/sdks/python
+python -m pytest -v -m "not acceptance"
+```
+
+Acceptance tests require **Docker** and a **LocalStack auth token**:
+
+```bash
+export LOCALSTACK_AUTH_TOKEN=<your-token>
+cd tests/sdks/python
+python -m pytest -v -m acceptance
+```
+
+All tests:
+
+```bash
+make test-sdk-python
+```

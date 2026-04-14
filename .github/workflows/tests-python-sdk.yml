@@ -53,13 +53,23 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: ♻️ Install dependencies
-        run: make install-sdk-python
+        run: uv pip install --system -e "src/sdks/python[dev]"
 
-      - name: 🌟 Format + type check
-        run: make check-sdk-python
+      - name: 🔀 Import sorting check
+        run: |
+          cd src/sdks/python && python -m isort --check-only envilder/
+          cd tests/sdks/python && python -m isort --check-only .
+
+      - name: 🎨 Format check
+        run: |
+          cd src/sdks/python && python -m black --check envilder/
+          cd tests/sdks/python && python -m black --check .
+
+      - name: 🔍 Type check
+        run: cd src/sdks/python && python -m mypy envilder/
 
       - name: 🍄 Run tests
-        run: make test-sdk-python
+        run: cd tests/sdks/python && python -m pytest -v --junitxml=test-results.xml
         env:
           TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
           DOCKER_HOST: unix:///var/run/docker.sock
