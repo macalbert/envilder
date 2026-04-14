@@ -68,11 +68,14 @@ def _create_aws_provider(
         options.profile if options and options.profile else config.profile
     )
 
-    region = _resolve_region()
-
     if profile:
         try:
-            session = boto3.Session(profile_name=profile, region_name=region)
+            region = _resolve_region_from_env()
+            session = (
+                boto3.Session(profile_name=profile, region_name=region)
+                if region
+                else boto3.Session(profile_name=profile)
+            )
             ssm_client = session.client("ssm")
         except Exception as e:
             raise ValueError(
@@ -80,15 +83,12 @@ def _create_aws_provider(
                 " credential store."
             ) from e
     else:
+        region = _resolve_region_from_env() or _FALLBACK_REGION
         session = boto3.Session(region_name=region)
         ssm_client = session.client("ssm")
 
     return AwsSsmSecretProvider(ssm_client)
 
 
-def _resolve_region() -> str:
-    return (
-        os.environ.get("AWS_REGION")
-        or os.environ.get("AWS_DEFAULT_REGION")
-        or _FALLBACK_REGION
-    )
+def _resolve_region_from_env() -> str | None:
+    return os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION")

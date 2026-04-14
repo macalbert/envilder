@@ -29,8 +29,6 @@ jobs:
     runs-on: ubuntu-24.04
     if: ${{ !github.event.pull_request.draft }}
     timeout-minutes: 10
-    env:
-      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
 
     outputs:
       status: ${{ steps.set-output.outputs.status }}
