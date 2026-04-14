@@ -2,7 +2,6 @@ from unittest.mock import Mock
 
 import pytest
 from botocore.exceptions import ClientError
-
 from envilder.infrastructure.aws.aws_ssm_secret_provider import (
     AwsSsmSecretProvider,
 )

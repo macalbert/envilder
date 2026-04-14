@@ -3,7 +3,6 @@ from typing import Generator
 from unittest.mock import Mock
 
 import pytest
-
 from envilder.application.envilder_client import EnvilderClient
 from envilder.domain.map_file_config import MapFileConfig
 from envilder.domain.parsed_map_file import ParsedMapFile

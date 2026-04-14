@@ -1,13 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from botocore.exceptions import ClientError
+from mypy_boto3_ssm import SSMClient
 
 from envilder.domain.ports.secret_provider import ISecretProvider
-
-if TYPE_CHECKING:
-    from mypy_boto3_ssm import SSMClient
 
 
 class AwsSsmSecretProvider(ISecretProvider):
@@ -21,7 +17,9 @@ class AwsSsmSecretProvider(ISecretProvider):
             raise ValueError("Secret name cannot be null or whitespace.")
 
         try:
-            response = self._ssm_client.get_parameter(Name=name, WithDecryption=True)
+            response = self._ssm_client.get_parameter(
+                Name=name, WithDecryption=True
+            )
             param = response.get("Parameter")
             value = param.get("Value") if param else None
             return str(value) if value is not None else None

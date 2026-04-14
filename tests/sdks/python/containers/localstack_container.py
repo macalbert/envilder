@@ -1,13 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 import boto3
-from testcontainers.localstack import (
-    LocalStackContainer as BaseLocalStackContainer,
-)
-
 from envilder.application.envilder_client import EnvilderClient
 from envilder.application.map_file_parser import MapFileParser
 from envilder.domain.map_file_config import MapFileConfig
@@ -17,6 +12,10 @@ from envilder.infrastructure.aws.aws_ssm_secret_provider import (
 )
 from envilder.infrastructure.secret_provider_factory import (
     SecretProviderFactory,
+)
+from mypy_boto3_ssm import SSMClient
+from testcontainers.localstack import (
+    LocalStackContainer as BaseLocalStackContainer,
 )
 
 _SECRETS_MAP = Path(__file__).resolve().parent.parent / "secrets-map.json"
@@ -33,10 +32,13 @@ class LocalStackContainer:
         environment = self._load_environment()
         if not environment.get("LOCALSTACK_AUTH_TOKEN"):
             raise EnvironmentError(
-                "LOCALSTACK_AUTH_TOKEN could not be resolved" " from secrets-map.json"
+                "LOCALSTACK_AUTH_TOKEN could not be resolved"
+                " from secrets-map.json"
             )
 
-        self._container = BaseLocalStackContainer("localstack/localstack:stable")
+        self._container = BaseLocalStackContainer(
+            "localstack/localstack:stable"
+        )
         for key, value in environment.items():
             self._container.with_env(key, value)
 
@@ -55,7 +57,7 @@ class LocalStackContainer:
     def get_endpoint_url(self) -> str:
         return self._endpoint_url
 
-    def get_ssm_client(self) -> Any:
+    def get_ssm_client(self) -> SSMClient:
         return boto3.client(
             "ssm",
             endpoint_url=self._endpoint_url,

@@ -1,5 +1,4 @@
 import pytest
-
 from envilder.application.envilder_client import EnvilderClient
 from envilder.domain.map_file_config import MapFileConfig
 from envilder.domain.parsed_map_file import ParsedMapFile

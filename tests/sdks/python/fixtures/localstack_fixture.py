@@ -3,11 +3,12 @@ from __future__ import annotations
 from typing import Generator
 
 import pytest
-from containers.localstack_container import LocalStackContainer
-
 from envilder.infrastructure.aws.aws_ssm_secret_provider import (
     AwsSsmSecretProvider,
 )
+from mypy_boto3_ssm import SSMClient
+
+from containers.localstack_container import LocalStackContainer
 
 
 @pytest.fixture(scope="session")
@@ -18,7 +19,7 @@ def localstack_container() -> Generator[LocalStackContainer, None, None]:
 
 
 @pytest.fixture(scope="session")
-def ssm_client(localstack_container: LocalStackContainer):  # type: ignore[type-arg]
+def ssm_client(localstack_container: LocalStackContainer) -> SSMClient:
     return localstack_container.get_ssm_client()
 
 

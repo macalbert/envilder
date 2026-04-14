@@ -6,11 +6,10 @@ import time
 import requests
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
-from testcontainers.core.container import DockerContainer
-
 from envilder.infrastructure.azure.azure_key_vault_secret_provider import (
     AzureKeyVaultSecretProvider,
 )
+from testcontainers.core.container import DockerContainer
 
 _IMAGE = "nagyesta/lowkey-vault:7.1.32"
 _HTTPS_PORT = 8443
