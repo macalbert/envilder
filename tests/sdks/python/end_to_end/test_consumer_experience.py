@@ -12,11 +12,14 @@ pytestmark = pytest.mark.acceptance
 
 
 @pytest.fixture()
-def env_cleanup() -> Generator[list[str], None, None]:
-    keys: list[str] = []
-    yield keys
-    for key in keys:
-        os.environ.pop(key, None)
+def env_cleanup() -> Generator[dict[str, str | None], None, None]:
+    original_values: dict[str, str | None] = {}
+    yield original_values
+    for key, previous in original_values.items():
+        if previous is None:
+            os.environ.pop(key, None)
+        else:
+            os.environ[key] = previous
 
 
 class TestConsumerExperience:
@@ -104,7 +107,10 @@ class TestConsumerExperience:
         assert "MISSING_KEY" not in actual
 
     def Should_InjectSecretsIntoEnvironment_When_ResolvedFromAws(
-        self, ssm_client, aws_provider, env_cleanup: list[str]
+        self,
+        ssm_client,
+        aws_provider,
+        env_cleanup: dict[str, str | None],
     ) -> None:
         # Arrange
         ssm_client.put_parameter(
@@ -119,7 +125,8 @@ class TestConsumerExperience:
         )
         sut = EnvilderClient(aws_provider)
         secrets = sut.resolve_secrets(map_file)
-        env_cleanup.extend(secrets.keys())
+        for key in secrets:
+            env_cleanup.setdefault(key, os.environ.get(key))
 
         # Act
         EnvilderClient.inject_into_environment(secrets)

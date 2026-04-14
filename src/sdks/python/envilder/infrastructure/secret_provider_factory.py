@@ -36,8 +36,10 @@ class SecretProviderFactory:
         match provider:
             case SecretProviderType.AZURE:
                 return _create_azure_provider(config, options)
-            case _:
+            case SecretProviderType.AWS | None:
                 return _create_aws_provider(config, options)
+            case _:
+                raise ValueError(f"Unsupported secret provider: {provider!r}")
 
 
 def _create_azure_provider(

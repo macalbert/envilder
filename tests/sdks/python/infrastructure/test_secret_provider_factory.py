@@ -99,3 +99,16 @@ class TestSecretProviderFactory:
         # Assert
         with pytest.raises(ValueError, match="config cannot be None"):
             action()
+
+    def Should_RaiseValueError_When_UnsupportedProviderSpecified(
+        self,
+    ) -> None:
+        # Arrange
+        config = MapFileConfig(provider="gcp")
+
+        # Act
+        action = lambda: SecretProviderFactory.create(config)
+
+        # Assert
+        with pytest.raises(ValueError, match="Unsupported secret provider"):
+            action()
