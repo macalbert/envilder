@@ -2,12 +2,10 @@
 # Envilder SDK — Makefile
 # =============================================================================
 # Targets follow the pattern: <action>-sdk-<stack>
-#   check  → format/lint verification (no changes)
+#   check  → format/lint/type verification (no changes)
 #   format → auto-fix formatting
-#   build  → compile / type-check
-#   test   → unit tests only (no Docker)
-#   test-acceptance → acceptance tests (requires Docker)
-#   test-all → unit + acceptance
+#   build  → compile (stacks that need it)
+#   test   → run all tests
 # =============================================================================
 
 .DEFAULT_GOAL := help
@@ -49,8 +47,7 @@ test-all-sdk-dotnet: test-sdk-dotnet ## Run all .NET tests
 # ---------------------------------------------------------------------------
 # Python SDK
 # ---------------------------------------------------------------------------
-.PHONY: install-sdk-python check-sdk-python format-sdk-python build-sdk-python \
-        test-sdk-python test-acceptance-sdk-python test-all-sdk-python
+.PHONY: install-sdk-python check-sdk-python format-sdk-python test-sdk-python
 
 install-sdk-python: ## Install Python SDK in editable mode with dev deps
 	uv pip install --system -e "$(PYTHON_SRC)[dev]"
@@ -66,28 +63,18 @@ format-sdk-python: ## Auto-format Python code (black + isort)
 	cd $(PYTHON_SRC) && python -m black envilder/ && python -m isort envilder/
 	cd $(PYTHON_TEST) && python -m black . && python -m isort .
 
-build-sdk-python: ## Type-check Python SDK (mypy strict)
-	cd $(PYTHON_SRC) && python -m mypy envilder/
-
-test-sdk-python: ## Run Python unit tests (no Docker)
-	cd $(PYTHON_TEST) && python -m pytest -m "not acceptance" -v
-
-test-acceptance-sdk-python: ## Run Python acceptance tests (Docker)
-	cd $(PYTHON_TEST) && python -m pytest -m "acceptance" -v
-
-test-all-sdk-python: ## Run all Python tests
+test-sdk-python: ## Run all Python tests
 	cd $(PYTHON_TEST) && python -m pytest -v
 
 # ---------------------------------------------------------------------------
 # All SDKs
 # ---------------------------------------------------------------------------
-.PHONY: check-sdk format-sdk build-sdk test-sdk test-all-sdk
+.PHONY: check-sdk format-sdk build-sdk test-sdk
 
 check-sdk: check-sdk-dotnet check-sdk-python ## Verify all SDKs
 format-sdk: format-sdk-dotnet format-sdk-python ## Format all SDKs
-build-sdk: build-sdk-dotnet build-sdk-python ## Build all SDKs
-test-sdk: test-sdk-dotnet test-sdk-python ## Test all SDKs (unit only)
-test-all-sdk: test-all-sdk-dotnet test-all-sdk-python ## Test all SDKs (all)
+build-sdk: build-sdk-dotnet ## Build all SDKs
+test-sdk: test-sdk-dotnet test-sdk-python ## Test all SDKs
 
 # ---------------------------------------------------------------------------
 # Help
@@ -107,14 +94,10 @@ help: ## Show this help
 	@echo "    install-sdk-python          Install Python SDK (editable + dev)"
 	@echo "    check-sdk-python            Verify Python formatting + types"
 	@echo "    format-sdk-python           Auto-format Python code"
-	@echo "    build-sdk-python            Type-check Python SDK (mypy)"
-	@echo "    test-sdk-python             Run Python unit tests"
-	@echo "    test-acceptance-sdk-python  Run Python acceptance tests"
-	@echo "    test-all-sdk-python         Run all Python tests"
+	@echo "    test-sdk-python             Run all Python tests"
 	@echo ""
 	@echo "  All SDKs"
 	@echo "    check-sdk                   Verify all SDKs"
 	@echo "    format-sdk                  Format all SDKs"
-	@echo "    build-sdk                   Build all SDKs"
-	@echo "    test-sdk                    Test all SDKs (unit only)"
-	@echo "    test-all-sdk                Test all SDKs (all)"
+	@echo "    build-sdk                   Build all SDKs (.NET only)"
+	@echo "    test-sdk                    Test all SDKs"
