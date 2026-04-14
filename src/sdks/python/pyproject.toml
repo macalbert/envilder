@@ -7,7 +7,7 @@ name = "envilder"
 version = "0.1.0"
 description = "Securely load environment variables from AWS SSM Parameter Store or Azure Key Vault."
 readme = "README.md"
-license = "MIT"
+license = { text = "MIT" }
 requires-python = ">=3.10"
 authors = [{ name = "macalbert" }]
 keywords = ["secrets", "environment", "aws", "ssm", "azure", "keyvault", "envilder"]
