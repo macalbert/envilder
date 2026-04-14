@@ -17,8 +17,6 @@ from envilder.infrastructure.azure.azure_key_vault_secret_provider import (
     AzureKeyVaultSecretProvider,
 )
 
-_FALLBACK_REGION = "us-east-1"
-
 
 class SecretProviderFactory:
     @staticmethod

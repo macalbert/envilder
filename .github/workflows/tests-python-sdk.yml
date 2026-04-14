@@ -57,13 +57,13 @@ jobs:
 
       - name: 🔀 Import sorting check
         run: |
-          cd src/sdks/python && python -m isort --check-only envilder/
-          cd tests/sdks/python && python -m isort --check-only .
+          (cd src/sdks/python && python -m isort --check-only envilder/)
+          (cd tests/sdks/python && python -m isort --check-only .)
 
       - name: 🎨 Format check
         run: |
-          cd src/sdks/python && python -m black --check envilder/
-          cd tests/sdks/python && python -m black --check .
+          (cd src/sdks/python && python -m black --check envilder/)
+          (cd tests/sdks/python && python -m black --check .)
 
       - name: 🔍 Type check
         run: cd src/sdks/python && python -m mypy envilder/
@@ -104,7 +104,7 @@ jobs:
         uses: dorny/test-reporter@v3
         with:
           name: Python SDK Test Results
-          path: "**/test-results.xml"
+          path: "**/test-results*.xml"
           path-replace-backslashes: "false"
           reporter: java-junit
           only-summary: "false"
