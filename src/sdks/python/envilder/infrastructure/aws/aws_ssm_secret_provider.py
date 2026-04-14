@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from botocore.exceptions import ClientError
 
-from envilder.domain.ports import ISecretProvider
+from envilder.domain.i_secret_provider import ISecretProvider
 
 if TYPE_CHECKING:
     from mypy_boto3_ssm import SSMClient
@@ -27,9 +27,6 @@ class AwsSsmSecretProvider(ISecretProvider):
             param = response.get("Parameter")
             value = param.get("Value") if param else None
             return str(value) if value is not None else None
-        except ClientError as e:
-            error = e.response.get("Error", {})
-            if error.get("Code")not None else None
         except ClientError as e:
             error = e.response.get("Error", {})
             if error.get("Code") == "ParameterNotFound":

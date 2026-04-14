@@ -3,7 +3,7 @@ from __future__ import annotations
 from azure.core.exceptions import ResourceNotFoundError
 from azure.keyvault.secrets import SecretClient
 
-from envilder.domain.ports import ISecretProvider
+from envilder.domain.i_secret_provider import ISecretProvider
 
 
 class AzureKeyVaultSecretProvider(ISecretProvider):
