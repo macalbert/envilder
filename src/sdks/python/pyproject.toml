@@ -45,6 +45,17 @@ dev = [
   "boto3-stubs[ssm]>=1.26",
 ]
 
+[dependency-groups]
+dev = [
+  "pytest>=8.0",
+  "testcontainers[localstack]>=4.0",
+  "requests>=2.31",
+  "mypy>=1.10",
+  "black>=24.0",
+  "isort>=5.13",
+  "boto3-stubs[ssm]>=1.26",
+]
+
 [tool.black]
 line-length = 79
 target-version = ["py310"]

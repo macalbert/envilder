@@ -42,22 +42,22 @@ test-sdk-dotnet: build-sdk-dotnet ## Run all .NET tests
 # ---------------------------------------------------------------------------
 .PHONY: install-sdk-python check-sdk-python format-sdk-python test-sdk-python
 
-install-sdk-python: ## Install Python SDK in editable mode with dev deps
-	uv pip install --system -e "$(PYTHON_SRC)[dev]"
+install-sdk-python: ## Install Python SDK in project-local venv
+	cd $(PYTHON_SRC) && uv sync --all-extras
 
 check-sdk-python: ## Verify Python formatting + types (no changes)
-	cd $(PYTHON_SRC) && python -m black --check envilder/
-	cd $(PYTHON_SRC) && python -m isort --check-only envilder/
-	cd $(PYTHON_SRC) && python -m mypy envilder/
-	cd $(PYTHON_TEST) && python -m black --check .
-	cd $(PYTHON_TEST) && python -m isort --check-only .
+	uv run --project $(PYTHON_SRC) black --check $(PYTHON_SRC)/envilder/
+	uv run --project $(PYTHON_SRC) isort --check-only $(PYTHON_SRC)/envilder/
+	uv run --project $(PYTHON_SRC) mypy $(PYTHON_SRC)/envilder/
+	uv run --project $(PYTHON_SRC) black --check $(PYTHON_TEST)/
+	uv run --project $(PYTHON_SRC) isort --check-only $(PYTHON_TEST)/
 
 format-sdk-python: ## Auto-format Python code (black + isort)
-	cd $(PYTHON_SRC) && python -m black envilder/ && python -m isort envilder/
-	cd $(PYTHON_TEST) && python -m black . && python -m isort .
+	uv run --project $(PYTHON_SRC) black $(PYTHON_SRC)/envilder/ $(PYTHON_TEST)/
+	uv run --project $(PYTHON_SRC) isort $(PYTHON_SRC)/envilder/ $(PYTHON_TEST)/
 
 test-sdk-python: ## Run all Python tests
-	cd $(PYTHON_TEST) && python -m pytest -v --junitxml=test-results.xml
+	uv run --project $(PYTHON_SRC) pytest $(PYTHON_TEST)/ -v --junitxml=$(PYTHON_TEST)/test-results.xml
 
 # ---------------------------------------------------------------------------
 # All SDKs

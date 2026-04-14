@@ -248,9 +248,9 @@ Container wrappers follow xxtemplatexx pattern with explicit `start()`/`stop()` 
 Acceptance tests use TestContainers (LocalStack for AWS, Lowkey Vault for Azure).
 AAA pattern with comment markers.
 
-**Build & test** (via Makefile):
+**Build & test** (via Makefile, uses `uv run` with project-local `.venv`):
 
-- `make install-sdk-python` (editable install with dev deps via uv)
+- `make install-sdk-python` (creates `.venv` and syncs all deps via `uv sync`)
 - `make check-sdk-python` (black + isort + mypy strict)
 - `make format-sdk-python` (auto-format)
 - `make test-sdk-python` (all tests, requires Docker for acceptance)
