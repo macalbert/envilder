@@ -60,18 +60,12 @@ jobs:
       - name: ♻️ Install dependencies
         run: make install-sdk-python
 
-      - name: 🌟 Format check (black + isort)
+      - name: 🌟 Format + type check
         run: make check-sdk-python
 
-      - name: 🏗️ Type check (mypy)
-        run: make build-sdk-python
-
-      - name: 🍄 Run unit tests
-        run: make test-sdk-python
-
-      - name: 🐳 Run acceptance tests
+      - name: 🍄 Run tests
         id: run-tests
-        run: make test-acceptance-sdk-python
+        run: make test-sdk-python
         continue-on-error: true
         env:
           TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
