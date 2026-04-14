@@ -20,10 +20,6 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
 
-    environment:
-      name: pypi
-      url: https://pypi.org/p/envilder
-
     defaults:
       run:
         working-directory: src/sdks/python
