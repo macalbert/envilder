@@ -69,7 +69,7 @@ jobs:
         run: cd src/sdks/python && python -m mypy envilder/
 
       - name: 🍄 Run tests
-        run: cd tests/sdks/python && python -m pytest -v --junitxml=test-results.xml
+        run: cd tests/sdks/python && python -m pytest -v --junitxml=test-results-${{ matrix.python-version }}.xml
         env:
           TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
           DOCKER_HOST: unix:///var/run/docker.sock
@@ -79,7 +79,7 @@ jobs:
         with:
           name: python-test-results-${{ matrix.python-version }}
           path: |
-            tests/sdks/python/test-results.xml
+            tests/sdks/python/test-results-${{ matrix.python-version }}.xml
           retention-days: 1
 
   test-python-sdk-report:

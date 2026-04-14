@@ -154,3 +154,17 @@ class TestMapFileParser:
 
         # Assert
         assert actual.config.provider == SecretProviderType.AZURE
+
+    def Should_RaiseValueError_When_ProviderIsUnsupported(self) -> None:
+        # Arrange
+        json_content = """{
+            "$config": {
+                "provider": "azuer"
+            },
+            "TOKEN_SECRET": "/Test/Token"
+        }"""
+        sut = MapFileParser()
+
+        # Act & Assert
+        with pytest.raises(ValueError, match="Unsupported provider"):
+            sut.parse(json_content)

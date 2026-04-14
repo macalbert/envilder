@@ -38,11 +38,17 @@ class MapFileParser:
 
 def _deserialize_config(raw: dict[str, object]) -> MapFileConfig:
     provider_raw = raw.get("provider")
-    provider = (
-        _PROVIDER_MAP.get(provider_raw.lower())
-        if isinstance(provider_raw, str)
-        else None
-    )
+    provider = None
+    if provider_raw is not None:
+        if not isinstance(provider_raw, str):
+            raise ValueError("Provider must be a string.")
+        normalized = provider_raw.strip().lower()
+        provider = _PROVIDER_MAP.get(normalized)
+        if provider is None:
+            raise ValueError(
+                f"Unsupported provider '{provider_raw}'."
+                " Expected one of: aws, azure."
+            )
 
     vault_url = raw.get("vaultUrl")
     profile = raw.get("profile")

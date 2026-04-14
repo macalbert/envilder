@@ -83,8 +83,10 @@ def _create_aws_provider(
                 f" '{profile}': {e}"
             ) from e
     else:
-        region = _resolve_region_from_env() or _FALLBACK_REGION
-        session = boto3.Session(region_name=region)
+        region = _resolve_region_from_env()
+        session = (
+            boto3.Session(region_name=region) if region else boto3.Session()
+        )
         ssm_client = session.client("ssm")
 
     return AwsSsmSecretProvider(ssm_client)
