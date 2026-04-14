@@ -28,6 +28,12 @@ dependencies = [
   "azure-keyvault-secrets>=4.7",
 ]
 
+[project.urls]
+Homepage = "https://github.com/macalbert/envilder"
+Repository = "https://github.com/macalbert/envilder"
+Documentation = "https://github.com/macalbert/envilder/tree/main/src/sdks/python"
+Issues = "https://github.com/macalbert/envilder/issues"
+
 [project.optional-dependencies]
 dev = [
   "pytest>=8.0",
