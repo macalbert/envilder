@@ -48,7 +48,8 @@ and streamline onboarding and CI/CD workflows.
 - 👥 Simplifies onboarding and internal rotations
 - 🚀 Enables cloud-native, infrastructure-as-code secret management
 - 🤖 Perfect for DevOps, CI/CD, and team sync
-- 📦 **Runtime SDKs** — load secrets directly into your app without `.env` files ([.NET SDK](./src/sdks/dotnet/README.md))
+- 📦 **Runtime SDKs** — load secrets directly into your app without `.env` files ([.NET SDK](./src/sdks/dotnet/README.md),
+ [Python SDK](./src/sdks/python/README.md))
 
 ---
 
@@ -76,6 +77,7 @@ and streamline onboarding and CI/CD workflows.
     - [Configuration Priority](#configuration-priority)
   - [🧩 Runtime SDKs](#-runtime-sdks)
     - [.NET SDK](#net-sdk)
+    - [Python SDK](#python-sdk)
   - [🛠️ How it works](#️-how-it-works)
   - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
   - [🔍 Envilder vs. Alternatives](#-envilder-vs-alternatives)
@@ -107,6 +109,7 @@ and streamline onboarding and CI/CD workflows.
 - ☁️ **Multi-provider** — AWS SSM Parameter Store and Azure Key Vault
 - 🎯 **AWS Profile support** — Use `--profile` flag for multi-account setups
 - 🧩 **.NET SDK** — [Load secrets at runtime via `IConfiguration`](./src/sdks/dotnet/README.md)
+- 🐍 **Python SDK** — [Load secrets at runtime via `EnvilderClient`](./src/sdks/python/README.md)
 
 ---
 
@@ -377,6 +380,36 @@ EnvilderClient.InjectIntoEnvironment(secrets);
 
 📖 **[View full .NET SDK documentation](./src/sdks/dotnet/README.md)**
 
+### Python SDK
+
+Install via pip:
+
+```bash
+pip install envilder
+```
+
+Load secrets into your application:
+
+```python
+from envilder import EnvilderClient, MapFileParser, SecretProviderFactory
+
+json_content = open('secrets-map.json').read()
+map_file = MapFileParser().parse(json_content)
+provider = SecretProviderFactory.create(map_file.config)
+client = EnvilderClient(provider)
+secrets = client.resolve_secrets(map_file)
+
+db_password = secrets['DB_PASSWORD']
+```
+
+Or inject directly into `os.environ`:
+
+```python
+EnvilderClient.inject_into_environment(secrets)
+```
+
+📖 **[View full Python SDK documentation](./src/sdks/python/README.md)**
+
 ---
 
 ## 🛠️ How it works
@@ -433,9 +466,9 @@ A: Any environment supported by your cloud provider—dev, test, staging, produc
 A: Yes, licensed under MIT.
 
 **Q: Can I use Envilder without generating `.env` files?**  
-A: Yes! The runtime SDKs (starting with [.NET](./src/sdks/dotnet/README.md)) load secrets directly into
-your application at startup — no `.env` file needed. Use the CLI for local dev and CI/CD, and the SDK for
-production runtime.
+A: Yes! The runtime SDKs ([.NET](./src/sdks/dotnet/README.md), [Python](./src/sdks/python/README.md))
+load secrets directly into your application at startup — no `.env` file needed. Use the CLI for local dev
+and CI/CD, and the SDK for production runtime.
 
 ---
 
@@ -458,7 +491,7 @@ These tools manage secrets as data and project them into `.env` or runtime:
 | **Declarative mapping** | ✅ JSON mapping | ❌ | ❌ |
 | **Multi-provider (AWS + Azure)** | ✅ | ❌ | ⚠️ (primarily its own backend) |
 | **Local `.env` generation** | ✅ | ✅ | ✅ |
-| **Runtime SDKs** | ✅ (.NET) | ❌ | ❌ |
+| **Runtime SDKs** | ✅ (.NET, Python) | ❌ | ❌ |
 | **CI/CD integration** | ✅ Native GitHub Action | Manual | ✅ Native |
 | **Requires SaaS** | ❌ | ✅ | Optional |
 | **Self-hosted** | N/A (no server needed) | ❌ | ✅ |
@@ -508,8 +541,8 @@ For **production runtime**, container orchestrators (ECS, Kubernetes) and platfo
 (Vercel, Fly.io) can inject secrets directly as environment variables — no `.env` file needed.
 In those cases, prefer native secret injection over writing secrets to disk.
 
-> **Runtime SDKs:** The [.NET SDK](./src/sdks/dotnet/README.md) can load secrets directly into
-> your application at startup. More SDKs (TypeScript, Python, Go, Java) are coming next.
+> **Runtime SDKs:** The [.NET SDK](./src/sdks/dotnet/README.md) and [Python SDK](./src/sdks/python/README.md)
+> can load secrets directly into your application at startup. More SDKs (TypeScript, Go, Java) are coming next.
 > See the [Roadmap](./ROADMAP.md).
 
 ---
@@ -520,7 +553,8 @@ We're continuously improving Envilder based on community feedback. Upcoming feat
 
 - ✅ **Azure Key Vault support** — now available alongside AWS SSM
 - ✅ **.NET SDK** — load secrets at runtime via `IConfiguration` or `EnvilderClient`
-- 🔜 **More runtime SDKs** — TypeScript, Python, Go, Java
+- ✅ **Python SDK** — load secrets at runtime via `EnvilderClient`
+- 🔜 **More runtime SDKs** — TypeScript, Go, Java
 - 🔜 **Exec mode** — inject secrets into a child process without writing to disk
 - 🔍 **Check/sync mode** for drift detection
 - 🧠 **Auto-discovery** for bulk parameter fetching
