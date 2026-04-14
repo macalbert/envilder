@@ -74,22 +74,20 @@ test-sdk: test-sdk-dotnet test-sdk-python ## Test all SDKs
 # ---------------------------------------------------------------------------
 .PHONY: help
 help: ## Show this help
-	@echo "Available targets:"
-	@echo ""
-	@echo "  .NET SDK"
-	@echo "    check-sdk-dotnet            Verify .NET formatting"
-	@echo "    format-sdk-dotnet           Auto-format .NET code"
-	@echo "    build-sdk-dotnet            Build .NET SDK"
-	@echo "    test-sdk-dotnet             Run all .NET tests"
-	@echo ""
-	@echo "  Python SDK"
-	@echo "    install-sdk-python          Install Python SDK (editable + dev)"
-	@echo "    check-sdk-python            Verify Python formatting + types"
-	@echo "    format-sdk-python           Auto-format Python code"
-	@echo "    test-sdk-python             Run all Python tests"
-	@echo ""
-	@echo "  All SDKs"
-	@echo "    check-sdk                   Verify all SDKs"
-	@echo "    format-sdk                  Format all SDKs"
-	@echo "    build-sdk                   Build all SDKs (.NET only)"
-	@echo "    test-sdk                    Test all SDKs"
+	@echo Available targets:
+	@echo   .NET SDK
+	@echo     check-sdk-dotnet            Verify .NET formatting
+	@echo     format-sdk-dotnet           Auto-format .NET code
+	@echo     build-sdk-dotnet            Build .NET SDK
+	@echo     test-sdk-dotnet             Run .NET unit tests
+	@echo     test-acceptance-sdk-dotnet  Run .NET acceptance tests
+	@echo   Python SDK
+	@echo     install-sdk-python          Install Python SDK (editable + dev)
+	@echo     check-sdk-python            Verify Python formatting + types
+	@echo     format-sdk-python           Auto-format Python code
+	@echo     test-sdk-python             Run all Python tests
+	@echo   All SDKs
+	@echo     check-sdk                   Verify all SDKs
+	@echo     format-sdk                  Format all SDKs
+	@echo     build-sdk                   Build all SDKs (.NET only)
+	@echo     test-sdk                    Test all SDKs

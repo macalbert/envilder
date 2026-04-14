@@ -1,5 +1,6 @@
 import json
 import os
+from typing import Generator
 
 import pytest
 from envilder.application.envilder_client import EnvilderClient
@@ -8,6 +9,14 @@ from envilder.domain.map_file_config import MapFileConfig
 from envilder.domain.parsed_map_file import ParsedMapFile
 
 pytestmark = pytest.mark.acceptance
+
+
+@pytest.fixture()
+def env_cleanup() -> Generator[list[str], None, None]:
+    keys: list[str] = []
+    yield keys
+    for key in keys:
+        os.environ.pop(key, None)
 
 
 class TestConsumerExperience:
@@ -95,7 +104,7 @@ class TestConsumerExperience:
         assert "MISSING_KEY" not in actual
 
     def Should_InjectSecretsIntoEnvironment_When_ResolvedFromAws(
-        self, ssm_client, aws_provider
+        self, ssm_client, aws_provider, env_cleanup: list[str]
     ) -> None:
         # Arrange
         ssm_client.put_parameter(
@@ -110,12 +119,10 @@ class TestConsumerExperience:
         )
         sut = EnvilderClient(aws_provider)
         secrets = sut.resolve_secrets(map_file)
+        env_cleanup.extend(secrets.keys())
 
-        try:
-            # Act
-            EnvilderClient.inject_into_environment(secrets)
+        # Act
+        EnvilderClient.inject_into_environment(secrets)
 
-            # Assert
-            assert os.environ["E2E_INJECT_TEST"] == "injected-value"
-        finally:
-            os.environ.pop("E2E_INJECT_TEST", None)
+        # Assert
+        assert os.environ["E2E_INJECT_TEST"] == "injected-value"

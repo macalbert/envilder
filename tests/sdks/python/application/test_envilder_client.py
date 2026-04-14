@@ -1,4 +1,5 @@
 import os
+from typing import Generator
 from unittest.mock import Mock
 
 import pytest
@@ -7,26 +8,31 @@ from envilder.domain.map_file_config import MapFileConfig
 from envilder.domain.parsed_map_file import ParsedMapFile
 
 
+@pytest.fixture()
+def env_cleanup() -> Generator[list[str], None, None]:
+    keys: list[str] = []
+    yield keys
+    for key in keys:
+        os.environ.pop(key, None)
+
+
 class TestEnvilderClient:
     def Should_SetEnvironmentVariables_When_InjectIntoEnvironmentCalled(
-        self,
+        self, env_cleanup: list[str]
     ) -> None:
         # Arrange
         secrets = {
             "INJECT_TEST_MY_TOKEN": "token-123",
             "INJECT_TEST_MY_DB": "conn-string",
         }
+        env_cleanup.extend(secrets.keys())
 
-        try:
-            # Act
-            EnvilderClient.inject_into_environment(secrets)
+        # Act
+        EnvilderClient.inject_into_environment(secrets)
 
-            # Assert
-            assert os.environ["INJECT_TEST_MY_TOKEN"] == "token-123"
-            assert os.environ["INJECT_TEST_MY_DB"] == "conn-string"
-        finally:
-            for key in secrets:
-                os.environ.pop(key, None)
+        # Assert
+        assert os.environ["INJECT_TEST_MY_TOKEN"] == "token-123"
+        assert os.environ["INJECT_TEST_MY_DB"] == "conn-string"
 
     def Should_ResolveAllSecrets_When_MapFileHasMultipleMappings(
         self,
