@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "envilder"
+version = "0.1.0"
+description = "Securely load environment variables from AWS SSM Parameter Store or Azure Key Vault."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "macalbert" }]
+keywords = ["secrets", "environment", "aws", "ssm", "azure", "keyvault", "envilder"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Typing :: Typed",
+]
+dependencies = [
+  "boto3>=1.26",
+  "azure-identity>=1.14",
+  "azure-keyvault-secrets>=4.7",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "testcontainers[localstack]>=4.0",
+  "requests>=2.31",
+  "mypy>=1.10",
+  "black>=24.0",
+  "isort>=5.13",
+  "boto3-stubs[ssm]>=1.26",
+]
+
+[tool.black]
+line-length = 79
+target-version = ["py310"]
+
+[tool.isort]
+profile = "black"
+line_length = 79
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+

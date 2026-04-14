@@ -1,0 +1,115 @@
+name: 🐍 Python SDK Tests
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+    branches:
+      - '*'
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - '.github/workflows/tests-python-sdk.yml'
+      - 'src/sdks/python/**'
+      - 'tests/sdks/python/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  test-python-sdk:
+    runs-on: ubuntu-24.04
+    if: ${{ !github.event.pull_request.draft }}
+    timeout-minutes: 10
+    env:
+      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+
+    outputs:
+      status: ${{ steps.set-output.outputs.status }}
+
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.13']
+
+    steps:
+      - name: 🧱 Checkout repository
+        uses: actions/checkout@v6
+
+      - name: 🐍 Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: 📦 Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: 🪙 Collect Coins (Configure AWS credentials)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: ♻️ Install dependencies
+        run: make install-sdk-python
+
+      - name: 🌟 Format check (black + isort)
+        run: make check-sdk-python
+
+      - name: 🏗️ Type check (mypy)
+        run: make build-sdk-python
+
+      - name: 🍄 Run unit tests
+        run: make test-sdk-python
+
+      - name: 🐳 Run acceptance tests
+        id: run-tests
+        run: make test-acceptance-sdk-python
+        continue-on-error: true
+        env:
+          TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
+          DOCKER_HOST: unix:///var/run/docker.sock
+
+      - name: 💾 Save status
+        id: set-output
+        if: steps.run-tests.outcome == 'success'
+        run: echo "status=success" >> $GITHUB_OUTPUT
+
+      - uses: actions/upload-artifact@v7
+        if: success() || failure()
+        with:
+          name: python-test-results-${{ matrix.python-version }}
+          path: |
+            tests/sdks/python/.pytest_cache/
+            tests/sdks/python/**/*.xml
+          retention-days: 1
+
+  test-python-sdk-report:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    needs: [test-python-sdk]
+
+    if: ${{ success() || failure() }}
+
+    env:
+      SUCCESS_CONDITIONS: >
+        ${{ needs.test-python-sdk.outputs.status == 'success' }}
+
+    steps:
+      - name: 👁️ Show status
+        run: |
+          echo "::group::Status"
+          echo "The global status of tests is = $SUCCESS_CONDITIONS"
+          echo "- status = ${{ needs.test-python-sdk.outputs.status }}"
+          echo "::endgroup::"
+
+      - name: ❌ Fail if tests did not pass
+        if: ${{ needs.test-python-sdk.outputs.status != 'success' }}
+        run: exit 1
