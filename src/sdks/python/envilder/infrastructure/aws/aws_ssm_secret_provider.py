@@ -24,8 +24,11 @@ class AwsSsmSecretProvider(ISecretProvider):
             response = self._ssm_client.get_parameter(
                 Name=name, WithDecryption=True
             )
-            return str(response["Parameter"]["Value"])
+            param = response.get("Parameter")
+            value = param.get("Value") if param else None
+            return str(value) if value is not None else None
         except ClientError as e:
-            if e.response["Error"]["Code"] == "ParameterNotFound":
+            error = e.response.get("Error", {})
+            if error.get("Code") == "ParameterNotFound":
                 return None
             raise
