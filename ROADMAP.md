@@ -32,13 +32,13 @@ or directly inside application code at runtime.
 | **Documentation website** | [envilder.com](https://envilder.com) |
 | **Onboarding documentation** | [Setup guide](./docs/requirements-installation.md) |
 | **.NET SDK** (`Envilder`) | First runtime SDK — load secrets into `IConfiguration` or `EnvilderClient`. AWS SSM + Azure Key Vault. [Documentation](./src/sdks/dotnet/README.md) |
+| **Python SDK** (`envilder`) | Runtime library for Python — Django, FastAPI, data pipelines. Sync API with `EnvilderClient`, `MapFileParser`, `SecretProviderFactory`. AWS SSM + Azure Key Vault. Published to PyPI. [Documentation](./src/sdks/python/README.md) |
 
 ### 🔥 Up Next
 
 | Feature | Priority | Notes |
 |---------|----------|-------|
 | **TypeScript SDK** (`@envilder/sdk`) | 🔴 High | Native runtime library — load secrets directly into `process.env` from a map-file. No `.env` file needed. Published to npm |
-| **Python SDK** (`envilder`) | 🔴 High | Runtime library for Python — Django/FastAPI/data pipelines. Published to PyPI |
 | **Go SDK** (`envilder`) | 🔴 High | Runtime library for Go — cloud-native apps, Kubernetes tooling. Published as Go module |
 | **Java SDK** (`envilder`) | 🔴 High | Runtime library for Java/Kotlin — Spring Boot, Android backends. Published to Maven Central |
 | **Map-file JSON Schema** | 🔴 High | Formal spec for the map-file format at `spec/` — serves as the contract between all SDKs and tools |

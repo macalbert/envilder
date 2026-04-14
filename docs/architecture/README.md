@@ -199,6 +199,30 @@ src/sdks/dotnet/
 3. `EnvilderClient.ResolveSecretsAsync(mapFile)` → resolves each mapping via `ISecretProvider`
 4. Secrets are available via `IConfiguration`, `IDictionary`, or injected into `Environment`
 
+### SDK Architecture (Python)
+
+```txt
+src/sdks/python/envilder/
+├── domain/              ← Ports (ISecretProvider protocol), value objects (MapFileConfig, EnvilderOptions)
+├── application/         ← MapFileParser, EnvilderClient
+└── infrastructure/      ← SecretProviderFactory, AwsSsmSecretProvider, AzureKeyVaultSecretProvider
+```
+
+**Key differences from the .NET SDK:**
+
+* Synchronous API — uses `boto3` natively (no async/await)
+* Protocol-based ports — Python `Protocol` instead of .NET interfaces
+* Factory pattern — `SecretProviderFactory.create(config, options)` with optional runtime overrides
+* `inject_into_environment()` — sets secrets directly into `os.environ`
+* Strict typing — `py.typed` marker, mypy strict mode
+
+**Data flow (SDK):**
+
+1. Consumer calls `MapFileParser().parse(json)` → extracts `$config` + mappings
+2. `SecretProviderFactory.create(config)` → selects AWS or Azure adapter
+3. `EnvilderClient(provider).resolve_secrets(map_file)` → resolves each mapping via `ISecretProvider`
+4. Secrets are available via `dict[str, str]` or injected into `os.environ`
+
 ---
 
 ## 🔄 Data Flow: Pull Operation

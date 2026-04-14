@@ -216,4 +216,27 @@ Requirements:
 
 📖 **[Full .NET SDK documentation](../src/sdks/dotnet/README.md)**
 
+### Python SDK
+
+For the Python SDK, install and verify via pip:
+
+```bash
+pip install envilder
+```
+
+Requirements:
+
+- Python 3.10+
+- **AWS provider**: AWS credentials configured via CLI, environment variables, or IAM role (`boto3` resolves credentials automatically)
+- **Azure provider**: Azure credentials via `az login`, managed identity, or environment variables
+
+Verify:
+
+```python
+from envilder import EnvilderClient, MapFileParser, SecretProviderFactory
+print("Envilder Python SDK installed successfully")
+```
+
+📖 **[Full Python SDK documentation](../src/sdks/python/README.md)**
+
 If you see the CLI help output, you're ready to use Envilder!

@@ -1,3 +1,22 @@
+## [0.11.0] - 2026-04-14
+
+### Added
+
+* **Python SDK** (`envilder` PyPI package) — Runtime library for loading secrets from AWS SSM Parameter Store or Azure Key Vault directly into Python applications. Sync API with `EnvilderClient`, `MapFileParser`, `SecretProviderFactory`. Supports runtime overrides via `EnvilderOptions`. Python 3.10+, typed (`py.typed`), strict mypy ([#157](https://github.com/macalbert/envilder/pull/157))
+* **Python SDK CI workflow** — `tests-python-sdk.yml` runs format check (black + isort), type check (mypy strict), unit tests, and acceptance tests (LocalStack + Lowkey Vault via TestContainers) across Python 3.10 and 3.13
+* **PyPI publish workflow** — `publish-pypi.yml` with trusted publisher (OIDC), version bump detection, and automatic `sdk-python/vX.Y.Z` tagging
+* **Makefile SDK targets** — Root Makefile with per-stack targets (`check-sdk-python`, `format-sdk-python`, `test-sdk-python`, `install-sdk-python`) and composite targets for all SDKs
+
+### Documentation
+
+* Updated README with Python SDK installation, quick start, and feature status
+* Updated ROADMAP to mark Python SDK as shipped
+* Added Python SDK section to architecture docs
+* Added Python SDK prerequisites to requirements & installation guide
+* Updated copilot instructions with Python SDK conventions
+
+---
+
 ## [0.10.0] - 2026-04-09
 
 ### Added

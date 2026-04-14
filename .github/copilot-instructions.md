@@ -225,3 +225,32 @@ Naming: `Should_<Expected>_When_<Condition>`. AAA pattern with comment markers.
 - `dotnet build src/sdks/dotnet/Envilder.sln`
 - `dotnet test tests/sdks/dotnet/` (requires Docker for acceptance tests)
 - `dotnet format src/sdks/dotnet/Envilder.sln --verify-no-changes` (formatting check)
+
+### Python SDK (`src/sdks/python/`)
+
+**Architecture**: Layered (Domain → Application → Infrastructure), no DI framework.
+
+- **Domain** (`domain/`): `ISecretProvider` Protocol, `MapFileConfig`, `EnvilderOptions`, `ParsedMapFile` dataclasses, `SecretProviderType` enum
+- **Application** (`application/`): `MapFileParser` (parses `$config` + mappings), `EnvilderClient` (resolves secrets, injects into `os.environ`)
+- **Infrastructure** (`infrastructure/`): `SecretProviderFactory`, `AwsSsmSecretProvider` (boto3), `AzureKeyVaultSecretProvider`
+
+**Key patterns**:
+
+- Synchronous API — uses `boto3` natively (no async/await)
+- Protocol-based ports — Python `Protocol` instead of ABC
+- Factory pattern (`SecretProviderFactory.create()`) with optional `EnvilderOptions` overrides
+- `ISecretProvider.get_secret()` returns `None` for missing secrets (no exceptions)
+- `EnvilderClient.resolve_secrets()` silently omits missing secrets
+- `inject_into_environment()` static method sets secrets into `os.environ`
+
+**Tests** (`tests/sdks/python/`): pytest with `Should_<Expected>_When_<Condition>` naming.
+Container wrappers follow xxtemplatexx pattern with explicit `start()`/`stop()` lifecycle.
+Acceptance tests use TestContainers (LocalStack for AWS, Lowkey Vault for Azure).
+AAA pattern with comment markers.
+
+**Build & test** (via Makefile):
+
+- `make install-sdk-python` (editable install with dev deps via uv)
+- `make check-sdk-python` (black + isort + mypy strict)
+- `make format-sdk-python` (auto-format)
+- `make test-sdk-python` (all tests, requires Docker for acceptance)
