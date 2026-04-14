@@ -80,7 +80,6 @@ help: ## Show this help
 	@echo     format-sdk-dotnet           Auto-format .NET code
 	@echo     build-sdk-dotnet            Build .NET SDK
 	@echo     test-sdk-dotnet             Run .NET unit tests
-	@echo     test-acceptance-sdk-dotnet  Run .NET acceptance tests
 	@echo   Python SDK
 	@echo     install-sdk-python          Install Python SDK (editable + dev)
 	@echo     check-sdk-python            Verify Python formatting + types
