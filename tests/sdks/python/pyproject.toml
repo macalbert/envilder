@@ -1,5 +1,5 @@
 [tool.pytest.ini_options]
-pythonpath = ["../../../src/sdks/python"]
+pythonpath = ["../../../src/sdks/python", "."]
 testpaths = ["."]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
@@ -7,6 +7,10 @@ python_functions = ["Should_*"]
 markers = [
   "acceptance: marks tests as acceptance tests (require Docker)",
   "unit: marks tests as unit tests (fast, no dependencies)",
+]
+filterwarnings = [
+  "ignore::DeprecationWarning:testcontainers",
+  "ignore::urllib3.exceptions.InsecureRequestWarning",
 ]
 
 [tool.black]

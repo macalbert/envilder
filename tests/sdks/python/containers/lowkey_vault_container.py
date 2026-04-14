@@ -1,0 +1,102 @@
+from __future__ import annotations
+
+import os
+import ssl
+import time
+
+import requests
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
+from envilder.infrastructure.azure.azure_key_vault_secret_provider import (
+    AzureKeyVaultSecretProvider,
+)
+from testcontainers.core.container import DockerContainer
+
+_IMAGE = "nagyesta/lowkey-vault:7.1.32"
+_HTTPS_PORT = 8443
+_HTTP_PORT = 8080
+
+
+class LowkeyVaultContainer:
+    def __init__(self) -> None:
+        self._container: DockerContainer | None = None
+        self._vault_url: str = ""
+        self._token_url: str = ""
+
+    def start(self) -> "LowkeyVaultContainer":
+        print("\n[LowkeyVault] Starting container...")
+
+        self._container = (
+            DockerContainer(_IMAGE)
+            .with_exposed_ports(_HTTPS_PORT, _HTTP_PORT)
+            .with_env(
+                "LOWKEY_ARGS",
+                "--server.port=8443" " --LOWKEY_VAULT_RELAXED_PORTS=true",
+            )
+        )
+        self._container.start()
+
+        host = self._container.get_container_host_ip()
+        https_port = self._container.get_exposed_port(_HTTPS_PORT)
+        http_port = self._container.get_exposed_port(_HTTP_PORT)
+
+        self._vault_url = f"https://{host}:{https_port}"
+        self._token_url = (
+            f"http://{host}:{http_port}" "/metadata/identity/oauth2/token"
+        )
+
+        self._wait_until_ready()
+
+        os.environ["IDENTITY_ENDPOINT"] = self._token_url
+        os.environ["IDENTITY_HEADER"] = "dummy"
+
+        print(f"[LowkeyVault] Ready at: {self._vault_url}")
+        return self
+
+    def stop(self) -> None:
+        if self._container:
+            print("[LowkeyVault] Stopping container...")
+            self._container.stop()
+            self._container = None
+
+        os.environ.pop("IDENTITY_ENDPOINT", None)
+        os.environ.pop("IDENTITY_HEADER", None)
+
+    @property
+    def vault_url(self) -> str:
+        return self._vault_url
+
+    def create_secret_client(self) -> SecretClient:
+        return SecretClient(
+            vault_url=self._vault_url,
+            credential=DefaultAzureCredential(),
+            connection_verify=False,
+            verify_challenge_resource=False,
+        )
+
+    def create_provider(self) -> AzureKeyVaultSecretProvider:
+        return AzureKeyVaultSecretProvider(self.create_secret_client())
+
+    def _wait_until_ready(
+        self,
+        max_retries: int = 30,
+        delay: float = 1.0,
+    ) -> None:
+        url = f"{self._vault_url}/ping"
+        for attempt in range(max_retries):
+            try:
+                response = requests.get(url, timeout=2, verify=False)
+                if response.status_code == 200:
+                    return
+            except (
+                requests.RequestException,
+                ConnectionError,
+            ):
+                if attempt < max_retries - 1:
+                    time.sleep(delay)
+                    continue
+                raise
+
+        raise TimeoutError(
+            "LowkeyVault did not become ready after" f" {max_retries} attempts"
+        )
