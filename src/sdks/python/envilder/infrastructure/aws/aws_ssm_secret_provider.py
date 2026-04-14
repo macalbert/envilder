@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from botocore.exceptions import ClientError
 
-from envilder.domain.i_secret_provider import ISecretProvider
+from envilder.domain.ports.secret_provider import ISecretProvider
 
 if TYPE_CHECKING:
     from mypy_boto3_ssm import SSMClient

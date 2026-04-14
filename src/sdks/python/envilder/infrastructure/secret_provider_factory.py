@@ -7,8 +7,8 @@ from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 
 from envilder.domain.envilder_options import EnvilderOptions
-from envilder.domain.i_secret_provider import ISecretProvider
 from envilder.domain.map_file_config import MapFileConfig
+from envilder.domain.ports.secret_provider import ISecretProvider
 from envilder.domain.secret_provider_type import SecretProviderType
 from envilder.infrastructure.aws.aws_ssm_secret_provider import (
     AwsSsmSecretProvider,

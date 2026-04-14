@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import os
 
-from envilder.domain.i_secret_provider import ISecretProvider
 from envilder.domain.parsed_map_file import ParsedMapFile
+from envilder.domain.ports.secret_provider import ISecretProvider
 
 
 class EnvilderClient:
