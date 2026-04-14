@@ -1,18 +1,11 @@
 import json
 import os
-import tempfile
 
 import pytest
 from envilder.application.envilder_client import EnvilderClient
 from envilder.application.map_file_parser import MapFileParser
 from envilder.domain.map_file_config import MapFileConfig
 from envilder.domain.parsed_map_file import ParsedMapFile
-from envilder.infrastructure.aws.aws_ssm_secret_provider import (
-    AwsSsmSecretProvider,
-)
-from envilder.infrastructure.azure.azure_key_vault_secret_provider import (
-    AzureKeyVaultSecretProvider,
-)
 
 pytestmark = pytest.mark.acceptance
 

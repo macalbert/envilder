@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import ssl
 import time
 
 import requests
@@ -88,15 +87,15 @@ class LowkeyVaultContainer:
                 response = requests.get(url, timeout=2, verify=False)
                 if response.status_code == 200:
                     return
-            except (
-                requests.RequestException,
-                ConnectionError,
-            ):
+            except requests.RequestException as e:
                 if attempt < max_retries - 1:
                     time.sleep(delay)
                     continue
-                raise
+                raise TimeoutError(
+                    "LowkeyVault did not become ready"
+                    f" after {max_retries} attempts"
+                ) from e
 
         raise TimeoutError(
-            "LowkeyVault did not become ready after" f" {max_retries} attempts"
+            "LowkeyVault did not become ready" f" after {max_retries} attempts"
         )

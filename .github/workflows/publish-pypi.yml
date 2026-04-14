@@ -38,12 +38,6 @@ jobs:
       - name: 📦 Install uv
         uses: astral-sh/setup-uv@v6
 
-      - name: 🪙 Collect Coins (Configure AWS credentials)
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
       - name: 👑 Detect version bump
         id: version-check
         run: |
@@ -60,6 +54,13 @@ jobs:
             echo "Version not changed. Will not publish."
             echo "version_changed=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: 🪙 Collect Coins (Configure AWS credentials)
+        if: steps.version-check.outputs.version_changed == 'true'
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: ♻️ Install dependencies
         if: steps.version-check.outputs.version_changed == 'true'

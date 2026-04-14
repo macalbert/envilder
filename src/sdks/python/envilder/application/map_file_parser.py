@@ -17,6 +17,10 @@ _PROVIDER_MAP = {
 class MapFileParser:
     def parse(self, json_content: str) -> ParsedMapFile:
         document = json.loads(json_content)
+
+        if not isinstance(document, dict):
+            raise ValueError("Map file must be a JSON object.")
+
         mappings: dict[str, str] = {}
         config = MapFileConfig()
 
@@ -35,7 +39,7 @@ class MapFileParser:
 def _deserialize_config(raw: dict[str, object]) -> MapFileConfig:
     provider_raw = raw.get("provider")
     provider = (
-        _PROVIDER_MAP.get(provider_raw)
+        _PROVIDER_MAP.get(provider_raw.lower())
         if isinstance(provider_raw, str)
         else None
     )

@@ -50,12 +50,9 @@ class TestAwsSsmSecretProvider:
         ssm_client = Mock()
         sut = AwsSsmSecretProvider(ssm_client)
 
-        # Act
-        action = lambda: sut.get_secret("")
-
-        # Assert
+        # Act & Assert
         with pytest.raises(ValueError, match="cannot be null"):
-            action()
+            sut.get_secret("")
 
     def Should_ReraisClientError_When_NotParameterNotFound(
         self,

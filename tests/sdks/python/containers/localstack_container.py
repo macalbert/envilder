@@ -84,6 +84,6 @@ class LocalStackContainer:
         try:
             provider = SecretProviderFactory.create(config)
             return EnvilderClient(provider)
-        except (ValueError, Exception):
+        except Exception:
             fallback = MapFileConfig(provider=SecretProviderType.AWS)
             return EnvilderClient(SecretProviderFactory.create(fallback))

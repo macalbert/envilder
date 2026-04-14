@@ -129,3 +129,28 @@ class TestMapFileParser:
         assert actual.config.provider == SecretProviderType.AWS
         assert actual.config.profile == "production"
         assert len(actual.mappings) == 1
+
+    def Should_RaiseValueError_When_JsonIsNotAnObject(self) -> None:
+        # Arrange
+        sut = MapFileParser()
+
+        # Act & Assert
+        with pytest.raises(ValueError, match="must be a JSON object"):
+            sut.parse('["/Test/Token"]')
+
+    def Should_ParseProvider_When_ProviderIsMixedCase(self) -> None:
+        # Arrange
+        json_content = """{
+            "$config": {
+                "provider": "Azure",
+                "vaultUrl": "https://my-vault.vault.azure.net"
+            },
+            "TOKEN_SECRET": "test-secret"
+        }"""
+        sut = MapFileParser()
+
+        # Act
+        actual = sut.parse(json_content)
+
+        # Assert
+        assert actual.config.provider == SecretProviderType.AZURE

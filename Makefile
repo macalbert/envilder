@@ -22,8 +22,7 @@ PYTHON_TEST := tests/sdks/python
 # ---------------------------------------------------------------------------
 # .NET SDK
 # ---------------------------------------------------------------------------
-.PHONY: check-sdk-dotnet format-sdk-dotnet build-sdk-dotnet \
-        test-sdk-dotnet test-acceptance-sdk-dotnet test-all-sdk-dotnet
+.PHONY: check-sdk-dotnet format-sdk-dotnet build-sdk-dotnet test-sdk-dotnet
 
 check-sdk-dotnet: ## Verify .NET formatting (no changes)
 	dotnet format $(DOTNET_SRC)/Envilder.sln --verify-no-changes --verbosity normal
@@ -34,15 +33,9 @@ format-sdk-dotnet: ## Auto-format .NET code
 build-sdk-dotnet: ## Build .NET SDK
 	dotnet build $(DOTNET_SRC)/Envilder.sln -c Release
 
-test-sdk-dotnet: build-sdk-dotnet ## Run .NET unit tests
+test-sdk-dotnet: build-sdk-dotnet ## Run all .NET tests
 	dotnet test $(DOTNET_SRC)/Envilder.sln --no-build -c Release \
 		--logger:"console;verbosity=detailed"
-
-test-acceptance-sdk-dotnet: build-sdk-dotnet ## Run .NET acceptance tests (Docker)
-	dotnet test $(DOTNET_SRC)/Envilder.sln --no-build -c Release \
-		--logger:"console;verbosity=detailed"
-
-test-all-sdk-dotnet: test-sdk-dotnet ## Run all .NET tests
 
 # ---------------------------------------------------------------------------
 # Python SDK
@@ -87,8 +80,7 @@ help: ## Show this help
 	@echo "    check-sdk-dotnet            Verify .NET formatting"
 	@echo "    format-sdk-dotnet           Auto-format .NET code"
 	@echo "    build-sdk-dotnet            Build .NET SDK"
-	@echo "    test-sdk-dotnet             Run .NET unit tests"
-	@echo "    test-acceptance-sdk-dotnet  Run .NET acceptance tests"
+	@echo "    test-sdk-dotnet             Run all .NET tests"
 	@echo ""
 	@echo "  Python SDK"
 	@echo "    install-sdk-python          Install Python SDK (editable + dev)"

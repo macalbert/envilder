@@ -13,6 +13,9 @@ class AzureKeyVaultSecretProvider(ISecretProvider):
         self._secret_client = secret_client
 
     def get_secret(self, name: str) -> str | None:
+        if not name or not name.strip():
+            raise ValueError("Secret name cannot be null or empty.")
+
         try:
             response = self._secret_client.get_secret(name)
             value: str | None = response.value

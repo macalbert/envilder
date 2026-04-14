@@ -79,8 +79,8 @@ def _create_aws_provider(
             ssm_client = session.client("ssm")
         except Exception as e:
             raise ValueError(
-                f"AWS profile '{profile}' was not found in the"
-                " credential store."
+                f"Failed to create AWS session with profile"
+                f" '{profile}': {e}"
             ) from e
     else:
         region = _resolve_region_from_env() or _FALLBACK_REGION
