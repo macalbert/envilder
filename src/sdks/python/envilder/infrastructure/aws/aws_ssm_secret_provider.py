@@ -29,6 +29,9 @@ class AwsSsmSecretProvider(ISecretProvider):
             return str(value) if value is not None else None
         except ClientError as e:
             error = e.response.get("Error", {})
+            if error.get("Code")not None else None
+        except ClientError as e:
+            error = e.response.get("Error", {})
             if error.get("Code") == "ParameterNotFound":
                 return None
             raise

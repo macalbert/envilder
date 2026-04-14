@@ -57,7 +57,7 @@ format-sdk-python: ## Auto-format Python code (black + isort)
 	cd $(PYTHON_TEST) && python -m black . && python -m isort .
 
 test-sdk-python: ## Run all Python tests
-	cd $(PYTHON_TEST) && python -m pytest -v
+	cd $(PYTHON_TEST) && python -m pytest -v --junitxml=test-results.xml
 
 # ---------------------------------------------------------------------------
 # All SDKs

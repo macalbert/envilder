@@ -48,7 +48,8 @@ and streamline onboarding and CI/CD workflows.
 - 👥 Simplifies onboarding and internal rotations
 - 🚀 Enables cloud-native, infrastructure-as-code secret management
 - 🤖 Perfect for DevOps, CI/CD, and team sync
-- 📦 **Runtime SDKs** — load secrets directly into your app without `.env` files ([.NET SDK](./src/sdks/dotnet/README.md), [Python SDK](./src/sdks/python/README.md))
+- 📦 **Runtime SDKs** — load secrets directly into your app without `.env` files ([.NET SDK](./src/sdks/dotnet/README.md),
+ [Python SDK](./src/sdks/python/README.md))
 
 ---
 

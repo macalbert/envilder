@@ -69,30 +69,37 @@ jobs:
         with:
           name: python-test-results-${{ matrix.python-version }}
           path: |
-            tests/sdks/python/.pytest_cache/
-            tests/sdks/python/**/*.xml
+            tests/sdks/python/test-results.xml
           retention-days: 1
 
   test-python-sdk-report:
     permissions:
+      checks: write
       contents: read
     runs-on: ubuntu-latest
     needs: [test-python-sdk]
 
     if: ${{ success() || failure() }}
 
-    env:
-      SUCCESS_CONDITIONS: >-
-        ${{ !contains(needs.test-python-sdk.result, 'failure') && needs.test-python-sdk.result == 'success' }}
-
     steps:
-      - name: 👁️ Show status
-        run: |
-          echo "::group::Status"
-          echo "The global status of tests is = $SUCCESS_CONDITIONS"
-          echo "- status = ${{ needs.test-python-sdk.outputs.status }}"
-          echo "::endgroup::"
+      - uses: actions/checkout@v6
 
-      - name: ❌ Fail if tests did not pass
-        if: ${{ needs.test-python-sdk.result != 'success' }}
-        run: exit 1
+      - uses: actions/download-artifact@v8
+        with:
+          merge-multiple: true
+          path: .
+          pattern: python-test-results-*
+
+      - name: 📊 Generating Tests Results Reporter
+        uses: dorny/test-reporter@v3
+        with:
+          name: Python SDK Test Results
+          path: "**/test-results.xml"
+          path-replace-backslashes: "false"
+          reporter: java-junit
+          only-summary: "false"
+          list-suites: "all"
+          list-tests: "all"
+          max-annotations: "10"
+          fail-on-error: "true"
+          working-directory: ""
