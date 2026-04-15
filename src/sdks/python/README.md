@@ -1,5 +1,9 @@
 # Envilder Python SDK
 
+[![Coverage Report](https://img.shields.io/badge/coverage-report-green.svg)](https://macalbert.github.io/envilder/)
+[![PyPI version](https://img.shields.io/pypi/v/envilder.svg)](https://pypi.org/project/envilder/)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/macalbert/envilder/blob/main/LICENSE)
+
 Securely load environment variables from **AWS SSM Parameter Store** or **Azure Key Vault** directly into your Python application.
 Zero vendor lock-in — secrets stay in your cloud.
 
@@ -19,45 +23,72 @@ pip install envilder
 
 ## Quick Start
 
-### Direct usage
+### One-liner
 
 ```python
-from envilder import (
-    EnvilderClient,
-    MapFileParser,
-    SecretProviderFactory,
-)
+from envilder import Envilder
 
-json_content = open('secrets-map.json').read()
-map_file = MapFileParser().parse(json_content)
-provider = SecretProviderFactory.create(map_file.config)
-client = EnvilderClient(provider)
-secrets = client.resolve_secrets(map_file)
-
-print(secrets['DB_PASSWORD'])
-```
-
-### Inject into environment
-
-```python
-EnvilderClient.inject_into_environment(secrets)
+# Resolve secrets and inject into os.environ
+Envilder.load('secrets-map.json')
 
 import os
 print(os.environ['DB_PASSWORD'])
 ```
 
-### With runtime overrides (EnvilderOptions)
-
-Override the map file's `$config` at runtime — useful for switching providers per environment:
+### Resolve without injecting
 
 ```python
-from envilder import EnvilderOptions, SecretProviderType
+secrets = Envilder.resolve_file('secrets-map.json')
+print(secrets['DB_PASSWORD'])
+```
 
+### Fluent builder (with overrides)
+
+Override the map file's `$config` at runtime — useful for switching providers,
+profiles, or vault URLs per environment:
+
+```python
+from envilder import Envilder, SecretProviderType
+
+# Override provider + vault URL
+secrets = Envilder.from_file('secrets-map.json') \
+    .with_provider(SecretProviderType.AZURE) \
+    .with_vault_url('https://my-vault.vault.azure.net') \
+    .resolve()
+
+# Override AWS profile and inject
+Envilder.from_file('secrets-map.json') \
+    .with_profile('staging') \
+    .inject()
+```
+
+### Advanced usage
+
+For full control over parsing, provider creation, and secret resolution:
+
+```python
+from envilder import (
+    EnvilderClient,
+    EnvilderOptions,
+    MapFileParser,
+    SecretProviderFactory,
+    SecretProviderType,
+)
+
+json_content = open('secrets-map.json').read()
+map_file = MapFileParser().parse(json_content)
+
+# Optional: override config at runtime
 options = EnvilderOptions(
     provider=SecretProviderType.AZURE,
     vault_url='https://my-vault.vault.azure.net',
 )
 provider = SecretProviderFactory.create(map_file.config, options)
+
+client = EnvilderClient(provider)
+secrets = client.resolve_secrets(map_file)
+
+EnvilderClient.inject_into_environment(secrets)
 ```
 
 ## Map File Format
