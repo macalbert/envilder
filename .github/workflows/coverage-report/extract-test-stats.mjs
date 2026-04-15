@@ -28,6 +28,7 @@ const outputFile = resolve(process.argv[3]);
 const runner = process.argv[4] ?? 'auto';
 
 function stripAnsi(raw) {
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: intentional ESC for ANSI stripping
   return raw.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
 }
 
@@ -152,7 +153,7 @@ function normalizeDuration(raw) {
     seconds += parseFloat(msMatch[1]) / 1000;
   }
   if (minMatch) {
-    seconds += parseInt(minMatch[1]) * 60;
+    seconds += parseInt(minMatch[1], 10) * 60;
   }
   if (secMatch) {
     seconds += parseFloat(secMatch[1]);

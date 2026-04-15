@@ -279,7 +279,7 @@ function parseDurationToSeconds(str) {
     seconds += parseFloat(msMatch[1]) / 1000;
   }
   if (minMatch) {
-    seconds += parseInt(minMatch[1]) * 60;
+    seconds += parseInt(minMatch[1], 10) * 60;
   }
   if (secMatch) {
     seconds += parseFloat(secMatch[1]);
