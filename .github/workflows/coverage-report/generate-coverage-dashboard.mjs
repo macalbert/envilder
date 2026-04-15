@@ -624,11 +624,11 @@ function buildCard(stack, { history, config }) {
     );
     if (ts.duration) {
       statsItems.push(
-        `<div class="card-stat"><span class="card-stat-value">${ts.duration}</span><span class="card-stat-label">Duration</span></div>`,
+        `<div class="card-stat"><span class="card-stat-value">${escapeHtml(String(ts.duration))}</span><span class="card-stat-label">Duration</span></div>`,
       );
     }
     statsItems.push(
-      `<div class="card-stat"><span class="card-stat-value">${ts.skipped ?? 0}</span><span class="card-stat-label">Skipped</span></div>`,
+      `<div class="card-stat"><span class="card-stat-value">${escapeHtml(String(ts.skipped ?? 0))}</span><span class="card-stat-label">Skipped</span></div>`,
     );
   }
   statsItems.push(
