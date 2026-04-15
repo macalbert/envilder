@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-import os
-
 from envilder.application.envilder_client import EnvilderClient
 from envilder.application.map_file_parser import MapFileParser
 from envilder.domain.envilder_options import EnvilderOptions
+from envilder.domain.parsed_map_file import ParsedMapFile
 from envilder.domain.secret_provider_type import SecretProviderType
 from envilder.infrastructure.secret_provider_factory import (
     SecretProviderFactory,
@@ -56,7 +55,7 @@ class Envilder:
         EnvilderClient.inject_into_environment(secrets)
         return secrets
 
-    def _parse_file(self):
+    def _parse_file(self) -> ParsedMapFile:
         with open(self._file_path) as f:
             json_content = f.read()
         return MapFileParser().parse(json_content)

@@ -53,8 +53,10 @@ check-sdk-python: ## Verify Python formatting + types (no changes)
 	uv run --project $(PYTHON_SRC) isort --check-only $(PYTHON_TEST)/
 
 format-sdk-python: ## Auto-format Python code (black + isort)
-	uv run --project $(PYTHON_SRC) black $(PYTHON_SRC)/envilder/ $(PYTHON_TEST)/
-	uv run --project $(PYTHON_SRC) isort $(PYTHON_SRC)/envilder/ $(PYTHON_TEST)/
+	uv run --project $(PYTHON_SRC) black $(PYTHON_SRC)/envilder/
+	uv run --project $(PYTHON_SRC) black $(PYTHON_TEST)/
+	uv run --project $(PYTHON_SRC) isort $(PYTHON_SRC)/envilder/
+	uv run --project $(PYTHON_SRC) isort $(PYTHON_TEST)/
 
 test-sdk-python: ## Run all Python tests
 	uv run --project $(PYTHON_SRC) pytest $(PYTHON_TEST)/ -v --junitxml=$(PYTHON_TEST)/test-results.xml
