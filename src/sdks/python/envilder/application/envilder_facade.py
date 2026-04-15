@@ -56,7 +56,7 @@ class Envilder:
         return secrets
 
     def _parse_file(self) -> ParsedMapFile:
-        with open(self._file_path) as f:
+        with open(self._file_path, encoding="utf-8") as f:
             json_content = f.read()
         return MapFileParser().parse(json_content)
 

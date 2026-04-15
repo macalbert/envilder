@@ -38,6 +38,8 @@ print(os.environ['DB_PASSWORD'])
 ### Resolve without injecting
 
 ```python
+from envilder import Envilder
+
 secrets = Envilder.resolve_file('secrets-map.json')
 print(secrets['DB_PASSWORD'])
 ```
@@ -51,15 +53,19 @@ profiles, or vault URLs per environment:
 from envilder import Envilder, SecretProviderType
 
 # Override provider + vault URL
-secrets = Envilder.from_file('secrets-map.json') \
-    .with_provider(SecretProviderType.AZURE) \
-    .with_vault_url('https://my-vault.vault.azure.net') \
+secrets = (
+    Envilder.from_file('secrets-map.json')
+    .with_provider(SecretProviderType.AZURE)
+    .with_vault_url('https://my-vault.vault.azure.net')
     .resolve()
+)
 
 # Override AWS profile and inject
-Envilder.from_file('secrets-map.json') \
-    .with_profile('staging') \
+(
+    Envilder.from_file('secrets-map.json')
+    .with_profile('staging')
     .inject()
+)
 ```
 
 ### Advanced usage
@@ -75,7 +81,8 @@ from envilder import (
     SecretProviderType,
 )
 
-json_content = open('secrets-map.json').read()
+with open('secrets-map.json', encoding='utf-8') as file:
+    json_content = file.read()
 map_file = MapFileParser().parse(json_content)
 
 # Optional: override config at runtime

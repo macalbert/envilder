@@ -32,8 +32,7 @@ class LocalStackContainer:
         environment = self._load_environment()
         if not environment.get("LOCALSTACK_AUTH_TOKEN"):
             raise EnvironmentError(
-                "LOCALSTACK_AUTH_TOKEN could not be resolved"
-                " from secrets-map.json"
+                "LOCALSTACK_AUTH_TOKEN could not be resolved from secrets-map.json"
             )
 
         self._container = BaseLocalStackContainer(
