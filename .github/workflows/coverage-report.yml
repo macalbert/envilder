@@ -311,6 +311,11 @@ jobs:
         with:
           sparse-checkout: .github/workflows/coverage-report
 
+      - name: � Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: 📥 Download all coverage reports
         uses: actions/download-artifact@v8
         with:
@@ -318,7 +323,7 @@ jobs:
 
       - name: 📥 Fetch coverage history
         run: |
-          curl -sSfL https://macalbert.github.io/envilder/history.json \
+          curl -sSfL "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/history.json" \
             -o coveragereport/history.json || echo '{"runs":[]}' > coveragereport/history.json
 
       - name: 📋 Generate coverage dashboard

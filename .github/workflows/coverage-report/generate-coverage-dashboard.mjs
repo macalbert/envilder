@@ -425,12 +425,13 @@ function getOverallDelta(history, metric) {
 // ─── Sparkline SVG generation ───────────────────────────────────────────────
 
 function generateSparkline(values, colorName = "green") {
-  if (!values || values.length < 2) {
+  const numeric = (values ?? []).filter(
+    (v) => v !== null && v !== undefined,
+  );
+  if (numeric.length < 2) {
     return "";
   }
-  const clean = values.map((v) =>
-    v === null || v === undefined ? 0 : v,
-  );
+  const clean = numeric;
   const width = 200;
   const height = 28;
   const padding = 2;
@@ -458,12 +459,13 @@ function generateSparkline(values, colorName = "green") {
 }
 
 function generateHeroSparkline(values) {
-  if (!values || values.length < 2) {
+  const numeric = (values ?? []).filter(
+    (v) => v !== null && v !== undefined,
+  );
+  if (numeric.length < 2) {
     return "";
   }
-  const clean = values.map((v) =>
-    v === null || v === undefined ? 0 : v,
-  );
+  const clean = numeric;
   const width = 300;
   const height = 50;
   const padding = 2;
@@ -484,12 +486,12 @@ function generateHeroSparkline(values) {
 
   return `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
       <defs><linearGradient id="heroGrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#60a5fa" stop-opacity=".3"/>
-        <stop offset="100%" stop-color="#60a5fa" stop-opacity="0"/>
+        <stop offset="0%" stop-color="#77be48" stop-opacity=".3"/>
+        <stop offset="100%" stop-color="#77be48" stop-opacity="0"/>
       </linearGradient></defs>
       <polygon points="${areaPoints}" fill="url(#heroGrad)" opacity=".3"/>
-      <polyline points="${polyline}" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="${last.x}" cy="${last.y}" r="3.5" fill="#a78bfa" style="filter:drop-shadow(0 0 4px rgba(167,139,250,.5))"/>
+      <polyline points="${polyline}" fill="none" stroke="#77be48" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${last.x}" cy="${last.y}" r="3.5" fill="#a2cd41" style="filter:drop-shadow(0 0 4px rgba(119,190,72,.5))"/>
     </svg>`;
 }
 

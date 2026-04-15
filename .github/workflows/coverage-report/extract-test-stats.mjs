@@ -16,6 +16,13 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+if (!process.argv[2] || !process.argv[3]) {
+  console.error(
+    "Usage: node extract-test-stats.mjs <test-output.txt> <output.json> [runner]",
+  );
+  process.exit(1);
+}
+
 const inputFile = resolve(process.argv[2]);
 const outputFile = resolve(process.argv[3]);
 const runner = process.argv[4] ?? "auto";
