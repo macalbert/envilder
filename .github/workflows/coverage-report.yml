@@ -194,6 +194,7 @@ jobs:
           mkdir -p output
           cd tests/sdks/python && python -m pytest -v \
             --cov=envilder \
+            --cov-branch \
             --cov-report=xml:../../../output/python-coverage.xml \
             --tb=short 2>&1 | tee ../../../output/test-output.txt
         env:
