@@ -45,7 +45,7 @@ jobs:
         id: version-check
         run: |
           CURRENT_VERSION=$(grep -oP '<Version>\K[^<]+' Envilder.csproj)
-          PUBLISHED_VERSION=$(dotnet package search Envilder --source https://api.nuget.org/v3/index.json --exact-match --format json 2>/dev/null | jq -r '.searchResult[0].packages[0].latestVersion // "0.0.0"')
+          PUBLISHED_VERSION=$(curl -sf "https://api.nuget.org/v3-flatcontainer/envilder/index.json" | jq -r '.versions[-1] // "0.0.0"' || echo "0.0.0")
 
           echo "Current version: $CURRENT_VERSION, Published version: $PUBLISHED_VERSION"
 
