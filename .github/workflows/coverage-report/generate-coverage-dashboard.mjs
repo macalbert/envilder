@@ -839,13 +839,13 @@ function generateDashboardHtml(
     .hero-gauge-text{width:120px;height:120px;font-size:1.5rem;font-family:var(--font-mono);font-weight:700}
 
     .hero-trend{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:8px;width:100%}
-    .hero-trend-label{font-size:.7rem;color:var(--color-text-dim);text-transform:uppercase;letter-spacing:1px;font-family:var(--font-pixel)}
+    .hero-trend-label{font-size:.7rem;color:var(--color-text-dim);text-transform:uppercase;letter-spacing:1px;font-family:var(--font-mono);font-weight:600}
     .hero-sparkline-wide svg{width:100%;max-width:600px;height:60px}
 
     .hero-stats{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;margin-top:4px}
     .hero-stat{display:flex;flex-direction:column;align-items:center;gap:2px}
     .hero-stat-value{font-size:1.1rem;font-weight:700;color:var(--color-text);font-family:var(--font-mono)}
-    .hero-stat-label{font-size:.6rem;color:var(--color-text-dim);text-transform:uppercase;letter-spacing:.5px;font-family:var(--font-pixel)}
+    .hero-stat-label{font-size:.65rem;color:var(--color-text-dim);text-transform:uppercase;letter-spacing:.5px;font-family:var(--font-mono);font-weight:600}
 
     .section-title{font-family:var(--font-pixel);font-size:.65rem;color:var(--color-text-dim);text-transform:uppercase;letter-spacing:2px;font-weight:600;margin:36px 0 16px;padding-left:4px}
 
@@ -867,7 +867,7 @@ function generateDashboardHtml(
     .gauge-bg{fill:none;stroke:var(--color-border);stroke-width:6}
     .gauge-fill{fill:none;stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .8s ease}
     .gauge-text{position:absolute;top:0;left:0;width:90px;height:90px;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;font-family:var(--font-mono)}
-    .gauge-label{font-size:.6rem;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.5px;font-weight:500;font-family:var(--font-pixel)}
+    .gauge-label{font-size:.65rem;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;font-family:var(--font-mono)}
 
     .delta{font-family:var(--font-mono);font-size:.72rem;font-weight:600;padding:2px 7px;border-radius:0;margin-top:-2px;border:1px solid}
     .delta-up{background:rgba(119,190,72,.1);color:var(--color-success);border-color:var(--color-success)}
@@ -888,7 +888,7 @@ function generateDashboardHtml(
     .card-stats{display:flex;gap:16px;justify-content:center;width:100%;padding:8px 0 0;border-top:1px solid var(--color-border)}
     .card-stat{display:flex;flex-direction:column;align-items:center;gap:1px}
     .card-stat-value{font-size:.85rem;font-weight:700;color:var(--color-text);font-family:var(--font-mono)}
-    .card-stat-label{font-size:.55rem;color:var(--color-text-dim);text-transform:uppercase;letter-spacing:.5px;font-family:var(--font-pixel)}
+    .card-stat-label{font-size:.65rem;color:var(--color-text-dim);text-transform:uppercase;letter-spacing:.5px;font-family:var(--font-mono);font-weight:600}
 
     .card-links{display:flex;gap:10px;margin-top:4px}
     .card-link{font-family:var(--font-mono);font-size:.78rem;color:var(--color-text-muted);text-decoration:none;padding:5px 12px;border:2px solid var(--color-border);transition:color .2s,border-color .2s,background .2s}
