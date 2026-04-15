@@ -299,9 +299,15 @@ jobs:
         with:
           path: coveragereport
 
+      - name: � Fetch history from previous Pages deployment
+        run: |
+          curl -sSfL https://macalbert.github.io/envilder/history.json \
+            -o coveragereport/history.json || echo '{"runs":[]}' > coveragereport/history.json
+
       - name: 📋 Generate coverage dashboard
         run: |
           node .github/workflows/coverage-report/generate-coverage-dashboard.mjs coveragereport \
+            --history coveragereport/history.json \
             --config .github/workflows/coverage-report/coverage-config.json
 
       - name: 🚨 Fail workflow if any test job failed
