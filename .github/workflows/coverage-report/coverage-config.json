@@ -1,0 +1,19 @@
+{
+  "gates": {
+    "default": {
+      "line": 80
+    },
+    "core": {
+      "line": 80
+    },
+    "dotnet": {
+      "line": 80
+    },
+    "python": {
+      "line": 80
+    },
+    "iac": {
+      "line": 70
+    }
+  }
+}
