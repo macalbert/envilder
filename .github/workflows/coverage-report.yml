@@ -13,7 +13,7 @@ on:
     paths:
       - ".github/workflows/coverage-report.yml"
       - "src/**"
-      - "test/**"
+      - "tests/**"
 
 concurrency:
   group: "pages"
@@ -31,6 +31,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     if: ${{ !github.event.pull_request.draft }}
+    env:
+      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
     steps:
       - name: 👾 Check if PR is created by a Goomba (Dependabot)
         id: dependabot-check
