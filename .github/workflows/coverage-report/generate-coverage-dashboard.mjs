@@ -250,6 +250,18 @@ function displayValue(pct) {
   return pct ?? "N/A";
 }
 
+function escapeHtml(str) {
+  if (typeof str !== "string") {
+    return str;
+  }
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function formatNumber(n) {
   if (n === null || n === undefined) {
     return "—";
@@ -262,8 +274,12 @@ function parseDurationToSeconds(str) {
     return 0;
   }
   let seconds = 0;
-  const minMatch = str.match(/(\d+)\s*m/i);
-  const secMatch = str.match(/([\d.]+)\s*s/i);
+  const msMatch = str.match(/([\d.]+)\s*ms/i);
+  const minMatch = str.match(/(\d+)\s*m(?!s)/i);
+  const secMatch = str.match(/([\d.]+)\s*s(?!.*ms)/i);
+  if (msMatch) {
+    seconds += parseFloat(msMatch[1]) / 1000;
+  }
   if (minMatch) {
     seconds += parseInt(minMatch[1]) * 60;
   }
@@ -620,15 +636,15 @@ function buildCard(stack, { history, config }) {
 
   const links = stack.hasReport
     ? `<div class="card-links">
-            <a class="card-link" href="${stack.name}/index.html">📊 HTML</a>
-            <a class="card-link" href="${stack.name}/SummaryGithub.md">📝 Markdown</a>
+            <a class="card-link" href="${escapeHtml(stack.name)}/index.html">📊 HTML</a>
+            <a class="card-link" href="${escapeHtml(stack.name)}/SummaryGithub.md">📝 Markdown</a>
           </div>`
     : `<div class="card-links"><span class="card-link muted">No report</span></div>`;
 
   return `
         <div class="card">
           <div class="card-header">
-            <div class="card-title">${stack.icon} ${stack.title}</div>
+            <div class="card-title">${escapeHtml(stack.icon)} ${escapeHtml(stack.title)}</div>
             ${gateBadge}
           </div>
           <div class="gauges">
@@ -787,7 +803,7 @@ function generateDashboardHtml(
     .hero-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(99,102,241,.08) 0%,transparent 70%);pointer-events:none}
     .hero-title{font-size:1.3rem;font-weight:700;letter-spacing:-.3px;text-align:center}
     .hero-gauges{display:flex;gap:48px;justify-content:center;align-items:center;flex-wrap:wrap}
-    .hero-gauge svg.ring{width:120px;height:120px}
+    .hero-gauge svg{width:120px;height:120px}
     .hero-gauge-text{width:120px;height:120px;font-size:1.5rem}
 
     .hero-trend{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:8px;width:100%}

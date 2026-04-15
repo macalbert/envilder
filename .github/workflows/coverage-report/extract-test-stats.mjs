@@ -90,7 +90,7 @@ function parseVitest(text) {
   const skipped = +(testsMatch[3] ?? 0);
 
   const durationMatch = text.match(
-    /Duration\s+([\d.]+(?:m)?s?)\s*(?:\(|$)/m,
+    /Duration\s+([\d.]+(?:m\s*)?[\d.]*s?)\s*(?:\(|$)/m,
   );
   let durationRaw = null;
   if (durationMatch) {
@@ -137,9 +137,13 @@ function normalizeDuration(raw) {
   }
 
   let seconds = 0;
-  const minMatch = raw.match(/(\d+)\s*m/);
-  const secMatch = raw.match(/([\d.]+)\s*s/);
+  const msMatch = raw.match(/([\d.]+)\s*ms/);
+  const minMatch = raw.match(/(\d+)\s*m(?!s)/);
+  const secMatch = raw.match(/([\d.]+)\s*s(?!.*ms)/);
 
+  if (msMatch) {
+    seconds += parseFloat(msMatch[1]) / 1000;
+  }
   if (minMatch) {
     seconds += parseInt(minMatch[1]) * 60;
   }
