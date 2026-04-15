@@ -114,6 +114,9 @@ const DEFAULT_GATE_THRESHOLD = 80;
 // ─── Discover stacks ────────────────────────────────────────────────────────
 
 function discoverStacks(dir) {
+  if (!existsSync(dir)) {
+    return [];
+  }
   const entries = readdirSync(dir, { withFileTypes: true });
   return entries
     .filter((e) => e.isDirectory())
@@ -932,11 +935,12 @@ function main() {
   for (const s of stacks) {
     const threshold = getGateThreshold(config, s.name);
     const linePct = pctToNumber(s.coverage.line);
+    const lineDisplay = linePct === null ? "N/A" : `${linePct}%`;
     const passed = evaluateGate(linePct, threshold);
     const status =
       passed === null ? "⚠️  N/A" : passed ? "✅ Pass" : "❌ Fail";
     console.log(
-      `  🚦 Gate ${s.name}: ${status} (${linePct ?? "N/A"}% ≥ ${threshold}%)`,
+      `  🚦 Gate ${s.name}: ${status} (${lineDisplay} ≥ ${threshold}%)`,
     );
     if (passed === false) {
       allGatesPassed = false;

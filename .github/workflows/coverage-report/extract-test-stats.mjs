@@ -77,10 +77,6 @@ function parseJest(text) {
 }
 
 function parseVitest(text) {
-  const filesMatch = text.match(
-    /Test Files\s+(?:(\d+)\s+failed\s+\|?\s*)?(\d+)\s+passed(?:\s+\|?\s*(\d+)\s+skipped)?\s+\((\d+)\)/,
-  );
-
   const testsMatch = text.match(
     /Tests\s+(?:(\d+)\s+failed\s+\|?\s*)?(\d+)\s+passed(?:\s+\|?\s*(\d+)\s+skipped)?\s+\((\d+)\)/,
   );

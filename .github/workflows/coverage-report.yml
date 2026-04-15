@@ -18,8 +18,8 @@ on:
       - "main"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # ────────────────────────────────────────────────────────────────────────────
@@ -282,7 +282,7 @@ jobs:
   # ────────────────────────────────────────────────────────────────────────────
   publish-report:
     needs: [test-core, test-dotnet, test-python, test-iac]
-    if: ${{ always() && !github.event.pull_request.draft }}
+    if: ${{ always() && github.ref == 'refs/heads/main' && github.event_name == 'push' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     environment:
@@ -307,13 +307,13 @@ jobs:
       - name: 🚨 Fail workflow if any test job failed
         run: |
           failed=""
-          [ "${{ needs.test-core.result }}" = "failure" ] && failed="$failed core"
-          [ "${{ needs.test-dotnet.result }}" = "failure" ] && failed="$failed dotnet"
-          [ "${{ needs.test-python.result }}" = "failure" ] && failed="$failed python"
-          [ "${{ needs.test-iac.result }}" = "failure" ] && failed="$failed iac"
+          [ "${{ needs.test-core.result }}" != "success" ] && failed="$failed core"
+          [ "${{ needs.test-dotnet.result }}" != "success" ] && failed="$failed dotnet"
+          [ "${{ needs.test-python.result }}" != "success" ] && failed="$failed python"
+          [ "${{ needs.test-iac.result }}" != "success" ] && failed="$failed iac"
 
           if [ -n "$failed" ]; then
-            echo "::error::Test suites failed:$failed"
+            echo "::error::Test suites did not succeed:$failed"
             exit 1
           fi
           echo "All test suites passed"
