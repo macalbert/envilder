@@ -47,7 +47,7 @@ const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.32';
 const LOWKEY_VAULT_PORT = 8443;
 
 describe('GitHub Action (E2E)', () => {
-  const envFilePath = join(rootDir, 'e2e', 'sample', 'cli-validation.env');
+  const envFilePath = join(rootDir, 'e2e', 'sample', 'gha-validation.env');
   const mapFilePath = join(rootDir, 'e2e', 'sample', 'param-map.json');
   const mapFileWithConfigPath = join(
     rootDir,
