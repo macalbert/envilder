@@ -255,7 +255,7 @@ jobs:
       - name: 🏎️ Run tests with coverage
         run: |
           mkdir -p output
-          pnpm vitest run --reporter=verbose --coverage --coverage.reporter=lcov --coverage.reporter=text --coverage.reportsDirectory=coverage-iac --coverage.include='src/iac/**' tests/iac/ 2>&1 | tee output/test-output.txt
+          pnpm vitest run --reporter=verbose --coverage --coverage.reporter=lcov --coverage.reporter=text --coverage.reportsDirectory=coverage-iac --coverage.include='src/iac/**/*.ts' tests/iac/ 2>&1 | tee output/test-output.txt
 
       - name: 📋 Generate coverage report
         if: always()
