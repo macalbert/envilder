@@ -13,25 +13,26 @@
  *   { "total": 196, "passed": 196, "failed": 0, "skipped": 0, "duration": "1m 3s" }
  */
 
-import { readFileSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 if (!process.argv[2] || !process.argv[3]) {
   console.error(
-    "Usage: node extract-test-stats.mjs <test-output.txt> <output.json> [runner]",
+    'Usage: node extract-test-stats.mjs <test-output.txt> <output.json> [runner]',
   );
   process.exit(1);
 }
 
 const inputFile = resolve(process.argv[2]);
 const outputFile = resolve(process.argv[3]);
-const runner = process.argv[4] ?? "auto";
+const runner = process.argv[4] ?? 'auto';
 
 function stripAnsi(raw) {
-  return raw.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, "");
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: intentional ESC for ANSI stripping
+  return raw.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
 }
 
-const text = stripAnsi(readFileSync(inputFile, "utf8"));
+const text = stripAnsi(readFileSync(inputFile, 'utf8'));
 
 function parseDotnet(text) {
   const match = text.match(
@@ -152,7 +153,7 @@ function normalizeDuration(raw) {
     seconds += parseFloat(msMatch[1]) / 1000;
   }
   if (minMatch) {
-    seconds += parseInt(minMatch[1]) * 60;
+    seconds += parseInt(minMatch[1], 10) * 60;
   }
   if (secMatch) {
     seconds += parseFloat(secMatch[1]);
@@ -196,8 +197,8 @@ const parsers = {
 const stats = (parsers[runner] ?? autoDetect)(text);
 
 if (stats) {
-  writeFileSync(outputFile, JSON.stringify(stats, null, 2), "utf8");
+  writeFileSync(outputFile, JSON.stringify(stats, null, 2), 'utf8');
   console.log(`📊 Test stats extracted: ${JSON.stringify(stats)}`);
 } else {
-  console.warn("⚠️  Could not extract test stats from output");
+  console.warn('⚠️  Could not extract test stats from output');
 }

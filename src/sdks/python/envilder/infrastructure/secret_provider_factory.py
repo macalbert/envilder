@@ -53,7 +53,7 @@ def _create_azure_provider(
 
     if not vault_url or not vault_url.strip():
         raise ValueError(
-            "Vault URL must be provided for Azure Key Vault" " provider."
+            "Vault URL must be provided for Azure Key Vault provider."
         )
 
     credential = DefaultAzureCredential()
@@ -79,8 +79,7 @@ def _create_aws_provider(
             ssm_client = session.client("ssm")
         except Exception as e:
             raise ValueError(
-                f"Failed to create AWS session with profile"
-                f" '{profile}': {e}"
+                f"Failed to create AWS session with profile '{profile}': {e}"
             ) from e
     else:
         region = _resolve_region_from_env()

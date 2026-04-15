@@ -1,4 +1,5 @@
 from envilder.application.envilder_client import EnvilderClient
+from envilder.application.envilder_facade import Envilder
 from envilder.application.map_file_parser import MapFileParser
 from envilder.domain.envilder_options import EnvilderOptions
 from envilder.domain.map_file_config import MapFileConfig
@@ -18,6 +19,7 @@ from envilder.infrastructure.secret_provider_factory import (
 __all__ = [
     "AwsSsmSecretProvider",
     "AzureKeyVaultSecretProvider",
+    "Envilder",
     "EnvilderClient",
     "EnvilderOptions",
     "ISecretProvider",
