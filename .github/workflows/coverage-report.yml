@@ -285,7 +285,7 @@ jobs:
   # ────────────────────────────────────────────────────────────────────────────
   publish-report:
     needs: [test-core, test-dotnet, test-python, test-iac]
-    if: ${{ always() && github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     environment:
