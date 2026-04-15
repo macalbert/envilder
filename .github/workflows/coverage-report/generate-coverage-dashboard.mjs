@@ -32,13 +32,13 @@ import {
   readFileSync,
   statSync,
   writeFileSync,
-} from "node:fs";
-import { dirname, join, resolve } from "node:path";
+} from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 
 // ─── CLI args ────────────────────────────────────────────────────────────────
 
 const args = process.argv.slice(2);
-const artifactsDir = resolve(args[0] ?? "coveragereport");
+const artifactsDir = resolve(args[0] ?? 'coveragereport');
 
 function flagValue(name) {
   const idx = args.indexOf(name);
@@ -46,23 +46,23 @@ function flagValue(name) {
 }
 
 function deriveProjectTitle() {
-  const explicit = flagValue("--title");
+  const explicit = flagValue('--title');
   if (explicit) {
     return explicit;
   }
   const repo = process.env.GITHUB_REPOSITORY;
   if (repo) {
     return repo
-      .split("/")
+      .split('/')
       .pop()
-      .replace(/[-_]/g, " ")
+      .replace(/[-_]/g, ' ')
       .replace(/\b\w/g, (c) => c.toUpperCase());
   }
-  return "Coverage";
+  return 'Coverage';
 }
 
 function deriveRepoUrl() {
-  const explicit = flagValue("--repo-url");
+  const explicit = flagValue('--repo-url');
   if (explicit) {
     return explicit;
   }
@@ -70,43 +70,43 @@ function deriveRepoUrl() {
   if (repo) {
     return `https://github.com/${repo}/actions`;
   }
-  return "#";
+  return '#';
 }
 
 const projectTitle = deriveProjectTitle();
 const repoUrl = deriveRepoUrl();
-const historyPath = flagValue("--history");
-const configPath = flagValue("--config");
+const historyPath = flagValue('--history');
+const configPath = flagValue('--config');
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const STACK_ICONS = {
-  core: "🎮",
-  cli: "🎮",
-  dotnet: "⚙️",
-  python: "🐍",
-  iac: "☁️",
-  typescript: "📦",
-  go: "🦫",
-  java: "☕",
-  backend: "⚙️",
-  frontend: "🌐",
-  ml: "🧠",
-  infra: "🏗️",
-  api: "🔌",
-  worker: "⚡",
-  shared: "📚",
-  e2e: "🧪",
+  core: '🎮',
+  cli: '🎮',
+  dotnet: '⚙️',
+  python: '🐍',
+  iac: '☁️',
+  typescript: '📦',
+  go: '🦫',
+  java: '☕',
+  backend: '⚙️',
+  frontend: '🌐',
+  ml: '🧠',
+  infra: '🏗️',
+  api: '🔌',
+  worker: '⚡',
+  shared: '📚',
+  e2e: '🧪',
 };
 
-const DEFAULT_ICON = "📦";
+const DEFAULT_ICON = '📦';
 
 const COLOR_HEX = {
-  green: "#77be48",
-  yellow: "#cddc39",
-  red: "#a06050",
-  blue: "#a2cd41",
-  muted: "#3a5036",
+  green: '#77be48',
+  yellow: '#cddc39',
+  red: '#a06050',
+  blue: '#a2cd41',
+  muted: '#3a5036',
 };
 
 const DEFAULT_GATE_THRESHOLD = 80;
@@ -122,8 +122,8 @@ function discoverStacks(dir) {
     .filter((e) => e.isDirectory())
     .map((e) => {
       const stackDir = join(dir, e.name);
-      const summaryPath = join(stackDir, "SummaryGithub.md");
-      const hasReport = safeExists(join(stackDir, "index.html"));
+      const summaryPath = join(stackDir, 'SummaryGithub.md');
+      const hasReport = safeExists(join(stackDir, 'index.html'));
       const summary = parseSummary(summaryPath);
       const icon = resolveIcon(e.name);
       const title = summary.title ?? formatTitle(e.name);
@@ -152,9 +152,9 @@ function safeExists(path) {
 // ─── Parse test-stats.json ──────────────────────────────────────────────────
 
 function parseTestStats(stackDir) {
-  const statsPath = join(stackDir, "test-stats.json");
+  const statsPath = join(stackDir, 'test-stats.json');
   try {
-    const content = readFileSync(statsPath, "utf8");
+    const content = readFileSync(statsPath, 'utf8');
     const data = JSON.parse(content);
     return {
       total: data.total ?? null,
@@ -172,7 +172,7 @@ function parseTestStats(stackDir) {
 
 function parseSummary(path) {
   try {
-    const content = readFileSync(path, "utf8");
+    const content = readFileSync(path, 'utf8');
     return {
       title: extractTitle(content),
       line: extractPercentage(
@@ -212,30 +212,28 @@ function resolveIcon(name) {
 }
 
 function formatTitle(name) {
-  return name
-    .replace(/[-_]/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return name.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function pctToNumber(pct) {
   if (!pct) {
     return null;
   }
-  return parseFloat(pct.replace("%", ""));
+  return parseFloat(pct.replace('%', ''));
 }
 
 function colorClass(pct) {
   const n = pctToNumber(pct);
   if (n === null) {
-    return "muted";
+    return 'muted';
   }
   if (n >= 80) {
-    return "green";
+    return 'green';
   }
   if (n >= 60) {
-    return "yellow";
+    return 'yellow';
   }
-  return "red";
+  return 'red';
 }
 
 function gaugeOffset(pct) {
@@ -247,26 +245,26 @@ function gaugeOffset(pct) {
 }
 
 function displayValue(pct) {
-  return pct ?? "N/A";
+  return pct ?? 'N/A';
 }
 
 function escapeHtml(str) {
-  if (typeof str !== "string") {
+  if (typeof str !== 'string') {
     return str;
   }
   return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function formatNumber(n) {
   if (n === null || n === undefined) {
-    return "—";
+    return '—';
   }
-  return n.toLocaleString("en-US");
+  return n.toLocaleString('en-US');
 }
 
 function parseDurationToSeconds(str) {
@@ -291,7 +289,7 @@ function parseDurationToSeconds(str) {
 
 function formatDuration(seconds) {
   if (seconds <= 0) {
-    return "—";
+    return '—';
   }
   if (seconds < 60) {
     return `${Math.round(seconds)}s`;
@@ -316,7 +314,7 @@ function loadHistory(path) {
     return { runs: [] };
   }
   try {
-    const content = readFileSync(path, "utf8");
+    const content = readFileSync(path, 'utf8');
     const data = JSON.parse(content);
     return { runs: Array.isArray(data.runs) ? data.runs : [] };
   } catch {
@@ -332,14 +330,14 @@ function saveHistory(path, history) {
   if (!existsSync(dir)) {
     mkdirSync(dir, { recursive: true });
   }
-  writeFileSync(path, JSON.stringify(history, null, 2), "utf8");
+  writeFileSync(path, JSON.stringify(history, null, 2), 'utf8');
 }
 
 function appendCurrentRun(history, stacks, overall) {
   const run = {
     date: new Date().toISOString(),
-    sha: process.env.GITHUB_SHA?.slice(0, 7) ?? "local",
-    runNumber: parseInt(process.env.GITHUB_RUN_NUMBER ?? "0", 10),
+    sha: process.env.GITHUB_SHA?.slice(0, 7) ?? 'local',
+    runNumber: parseInt(process.env.GITHUB_RUN_NUMBER ?? '0', 10),
     overall: {
       line: pctToNumber(overall.line),
       branch: pctToNumber(overall.branch),
@@ -384,10 +382,10 @@ function computeDelta(current, previous) {
 
 function formatDelta(delta) {
   if (delta === null) {
-    return "";
+    return '';
   }
   const abs = Math.abs(delta);
-  const value = abs < 0.05 ? "0.0%" : `${abs.toFixed(1)}%`;
+  const value = abs < 0.05 ? '0.0%' : `${abs.toFixed(1)}%`;
   if (abs < 0.05) {
     return `<span class="delta delta-flat">— 0.0%</span>`;
   }
@@ -424,12 +422,10 @@ function getOverallDelta(history, metric) {
 
 // ─── Sparkline SVG generation ───────────────────────────────────────────────
 
-function generateSparkline(values, colorName = "green") {
-  const numeric = (values ?? []).filter(
-    (v) => v !== null && v !== undefined,
-  );
+function generateSparkline(values, colorName = 'green') {
+  const numeric = (values ?? []).filter((v) => v !== null && v !== undefined);
   if (numeric.length < 2) {
-    return "";
+    return '';
   }
   const clean = numeric;
   const width = 200;
@@ -441,12 +437,10 @@ function generateSparkline(values, colorName = "green") {
 
   const coords = clean.map((v, i) => ({
     x: parseFloat(((i / (clean.length - 1)) * width).toFixed(1)),
-    y: parseFloat(
-      (height - ((v - min) / range) * height).toFixed(1),
-    ),
+    y: parseFloat((height - ((v - min) / range) * height).toFixed(1)),
   }));
 
-  const polyline = coords.map((p) => `${p.x},${p.y}`).join(" ");
+  const polyline = coords.map((p) => `${p.x},${p.y}`).join(' ');
   const areaPoints = `0,${height} ${polyline} ${width},${height}`;
   const last = coords[coords.length - 1];
   const dotFill = COLOR_HEX[colorName] ?? COLOR_HEX.green;
@@ -459,11 +453,9 @@ function generateSparkline(values, colorName = "green") {
 }
 
 function generateHeroSparkline(values) {
-  const numeric = (values ?? []).filter(
-    (v) => v !== null && v !== undefined,
-  );
+  const numeric = (values ?? []).filter((v) => v !== null && v !== undefined);
   if (numeric.length < 2) {
-    return "";
+    return '';
   }
   const clean = numeric;
   const width = 300;
@@ -475,12 +467,10 @@ function generateHeroSparkline(values) {
 
   const coords = clean.map((v, i) => ({
     x: parseFloat(((i / (clean.length - 1)) * width).toFixed(1)),
-    y: parseFloat(
-      (height - ((v - min) / range) * height).toFixed(1),
-    ),
+    y: parseFloat((height - ((v - min) / range) * height).toFixed(1)),
   }));
 
-  const polyline = coords.map((p) => `${p.x},${p.y}`).join(" ");
+  const polyline = coords.map((p) => `${p.x},${p.y}`).join(' ');
   const areaPoints = `0,${height} ${polyline} ${width},${height}`;
   const last = coords[coords.length - 1];
 
@@ -510,7 +500,7 @@ function loadConfig(path) {
     return { gates: {} };
   }
   try {
-    const content = readFileSync(path, "utf8");
+    const content = readFileSync(path, 'utf8');
     return JSON.parse(content);
   } catch {
     return { gates: {} };
@@ -534,7 +524,7 @@ function evaluateGate(linePct, threshold) {
 
 function gateBadgeHtml(passed) {
   if (passed === null) {
-    return "";
+    return '';
   }
   if (passed) {
     return `<span class="gate-badge gate-pass">✓ Pass</span>`;
@@ -546,20 +536,20 @@ function gateBadgeHtml(passed) {
 
 function badgeColor(pct) {
   if (pct >= 80) {
-    return "#4c1";
+    return '#4c1';
   }
   if (pct >= 60) {
-    return "#dfb317";
+    return '#dfb317';
   }
-  return "#e05d44";
+  return '#e05d44';
 }
 
 function escapeXml(text) {
   return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function generateBadgeSvg(label, value, color) {
@@ -606,15 +596,15 @@ function buildCard(stack, { history, config }) {
   const gateResult = evaluateGate(linePct, threshold);
   const gateBadge = gateBadgeHtml(gateResult);
 
-  const lineDelta = getStackDelta(history, stack.name, "line");
-  const branchDelta = getStackDelta(history, stack.name, "branch");
+  const lineDelta = getStackDelta(history, stack.name, 'line');
+  const branchDelta = getStackDelta(history, stack.name, 'branch');
 
   const lineHistory = getStackLineHistory(history, stack.name);
   const sparkColor = colorClass(stack.coverage.line);
   const sparkSvg = generateSparkline(lineHistory, sparkColor);
   const sparkHtml = sparkSvg
     ? `<div class="card-sparkline">${sparkSvg}</div>`
-    : "";
+    : '';
 
   const ts = stack.testStats;
   const statsItems = [];
@@ -634,7 +624,7 @@ function buildCard(stack, { history, config }) {
   statsItems.push(
     `<div class="card-stat"><span class="card-stat-value">≥${threshold}%</span><span class="card-stat-label">Gate</span></div>`,
   );
-  const statsHtml = `<div class="card-stats">${statsItems.join("")}</div>`;
+  const statsHtml = `<div class="card-stats">${statsItems.join('')}</div>`;
 
   const links = stack.hasReport
     ? `<div class="card-links">
@@ -702,7 +692,7 @@ function buildHeroStatsHtml(stacks, runsTracked) {
     `<div class="hero-stat"><span class="hero-stat-value">${runsTracked}</span><span class="hero-stat-label">Runs tracked</span></div>`,
   );
 
-  return items.join("\n          ");
+  return items.join('\n          ');
 }
 
 function buildHeroCard(avgLine, avgBranch, { history, stacks }) {
@@ -713,8 +703,8 @@ function buildHeroCard(avgLine, avgBranch, { history, stacks }) {
   const lt = displayValue(avgLine);
   const bt = displayValue(avgBranch);
 
-  const lineDelta = getOverallDelta(history, "line");
-  const branchDelta = getOverallDelta(history, "branch");
+  const lineDelta = getOverallDelta(history, 'line');
+  const branchDelta = getOverallDelta(history, 'branch');
 
   const overallHistory = getOverallLineHistory(history);
   const sparkSvg = generateHeroSparkline(overallHistory);
@@ -725,7 +715,7 @@ function buildHeroCard(avgLine, avgBranch, { history, stacks }) {
             <span class="hero-trend-label">Line coverage — all ${runsTracked} runs</span>
             <div class="hero-sparkline-wide">${sparkSvg}</div>
           </div>`
-    : "";
+    : '';
 
   return `
       <div class="hero-card">
@@ -761,11 +751,9 @@ function generateDashboardHtml(
     history,
     stacks,
   });
-  const cards = stacks
-    .map((s) => buildCard(s, { history, config }))
-    .join("\n");
-  const sha = process.env.GITHUB_SHA?.slice(0, 7) ?? "";
-  const runNumber = process.env.GITHUB_RUN_NUMBER ?? "";
+  const cards = stacks.map((s) => buildCard(s, { history, config })).join('\n');
+  const sha = process.env.GITHUB_SHA?.slice(0, 7) ?? '';
+  const runNumber = process.env.GITHUB_RUN_NUMBER ?? '';
 
   const footerParts = [`Last updated: ${timestamp}`];
   if (runNumber) {
@@ -774,11 +762,10 @@ function generateDashboardHtml(
   if (sha) {
     footerParts.push(`<code>${sha}</code>`);
   }
-  const safeRepoUrl =
-    /^https:\/\/github\.com\//.test(repoUrl) ? escapeHtml(repoUrl) : '#';
-  footerParts.push(
-    `Generated by <a href="${safeRepoUrl}">GitHub Actions</a>`,
-  );
+  const safeRepoUrl = /^https:\/\/github\.com\//.test(repoUrl)
+    ? escapeHtml(repoUrl)
+    : '#';
+  footerParts.push(`Generated by <a href="${safeRepoUrl}">GitHub Actions</a>`);
 
   return `<!doctype html>
 <html lang="en">
@@ -928,7 +915,7 @@ ${heroCard}
 ${cards}
     </div>
     <footer>
-      <p>${footerParts.join(" · ")}</p>
+      <p>${footerParts.join(' · ')}</p>
     </footer>
   </div>
 </body>
@@ -942,18 +929,16 @@ function main() {
   const stacks = discoverStacks(artifactsDir);
 
   if (stacks.length === 0) {
-    console.warn(
-      "No stack directories found — generating empty dashboard.",
-    );
+    console.warn('No stack directories found — generating empty dashboard.');
   }
 
   console.log(
-    `Found ${stacks.length} stack(s): ${stacks.map((s) => s.name).join(", ")}`,
+    `Found ${stacks.length} stack(s): ${stacks.map((s) => s.name).join(', ')}`,
   );
 
   for (const s of stacks) {
-    const line = s.coverage.line ?? "N/A";
-    const branch = s.coverage.branch ?? "N/A";
+    const line = s.coverage.line ?? 'N/A';
+    const branch = s.coverage.branch ?? 'N/A';
     console.log(`  ${s.icon} ${s.title}: line=${line}, branch=${branch}`);
   }
 
@@ -963,7 +948,7 @@ function main() {
   };
 
   console.log(
-    `  🏆 Overall: line=${overall.line ?? "N/A"}, branch=${overall.branch ?? "N/A"}`,
+    `  🏆 Overall: line=${overall.line ?? 'N/A'}, branch=${overall.branch ?? 'N/A'}`,
   );
 
   // Load history and config
@@ -971,19 +956,17 @@ function main() {
   const config = loadConfig(configPath);
   const previousRunCount = history.runs.length;
 
-  console.log(
-    `  📈 History: ${previousRunCount} previous run(s) loaded`,
-  );
+  console.log(`  📈 History: ${previousRunCount} previous run(s) loaded`);
 
   // Append current run to history
   appendCurrentRun(history, stacks, overall);
 
   // Log deltas
   if (previousRunCount > 0) {
-    const lineDelta = getOverallDelta(history, "line");
-    const branchDelta = getOverallDelta(history, "branch");
+    const lineDelta = getOverallDelta(history, 'line');
+    const branchDelta = getOverallDelta(history, 'branch');
     const fmtDelta = (d) =>
-      d === null ? "N/A" : `${d > 0 ? "+" : ""}${d.toFixed(1)}%`;
+      d === null ? 'N/A' : `${d > 0 ? '+' : ''}${d.toFixed(1)}%`;
     console.log(
       `  📊 Delta: line=${fmtDelta(lineDelta)}, branch=${fmtDelta(branchDelta)}`,
     );
@@ -994,10 +977,9 @@ function main() {
   for (const s of stacks) {
     const threshold = getGateThreshold(config, s.name);
     const linePct = pctToNumber(s.coverage.line);
-    const lineDisplay = linePct === null ? "N/A" : `${linePct}%`;
+    const lineDisplay = linePct === null ? 'N/A' : `${linePct}%`;
     const passed = evaluateGate(linePct, threshold);
-    const status =
-      passed === null ? "⚠️  N/A" : passed ? "✅ Pass" : "❌ Fail";
+    const status = passed === null ? '⚠️  N/A' : passed ? '✅ Pass' : '❌ Fail';
     console.log(
       `  🚦 Gate ${s.name}: ${status} (${lineDisplay} ≥ ${threshold}%)`,
     );
@@ -1016,51 +998,43 @@ function main() {
 
   // Combined badge (average line coverage)
   const combinedPct = pctToNumber(overall.line);
-  let combinedLabel = "N/A";
-  let combinedColor = "#9f9f9f";
+  let combinedLabel = 'N/A';
+  let combinedColor = '#9f9f9f';
 
   if (combinedPct !== null) {
     combinedLabel = `${combinedPct.toFixed(1)}%`;
     combinedColor = badgeColor(combinedPct);
   }
 
-  const badgeSvg = generateBadgeSvg(
-    "coverage",
-    combinedLabel,
-    combinedColor,
-  );
-  const badgePath = join(artifactsDir, "badge_combined.svg");
-  writeFileSync(badgePath, badgeSvg, "utf8");
+  const badgeSvg = generateBadgeSvg('coverage', combinedLabel, combinedColor);
+  const badgePath = join(artifactsDir, 'badge_combined.svg');
+  writeFileSync(badgePath, badgeSvg, 'utf8');
   console.log(`Badge written: ${badgePath} (${combinedLabel})`);
 
   // Per-stack badges
   for (const s of stacks) {
     const pct = pctToNumber(s.coverage.line);
-    const value = pct !== null ? `${pct.toFixed(1)}%` : "N/A";
-    const color = pct !== null ? badgeColor(pct) : "#9f9f9f";
+    const value = pct !== null ? `${pct.toFixed(1)}%` : 'N/A';
+    const color = pct !== null ? badgeColor(pct) : '#9f9f9f';
     const svg = generateBadgeSvg(s.name, value, color);
-    const svgPath = join(artifactsDir, s.name, "badge_named.svg");
-    writeFileSync(svgPath, svg, "utf8");
+    const svgPath = join(artifactsDir, s.name, 'badge_named.svg');
+    writeFileSync(svgPath, svg, 'utf8');
     console.log(`Badge written: ${svgPath} (${s.title}: ${value})`);
   }
 
   // Dashboard HTML
-  const timestamp = new Date()
-    .toUTCString()
-    .replace(/\s*GMT$/, " UTC");
+  const timestamp = new Date().toUTCString().replace(/\s*GMT$/, ' UTC');
   const html = generateDashboardHtml(stacks, overall, timestamp, {
     history,
     config,
   });
-  const htmlPath = join(artifactsDir, "index.html");
-  writeFileSync(htmlPath, html, "utf8");
+  const htmlPath = join(artifactsDir, 'index.html');
+  writeFileSync(htmlPath, html, 'utf8');
   console.log(`Dashboard written: ${htmlPath}`);
 
   // Report gate status
   if (!allGatesPassed) {
-    console.warn(
-      "\n⚠️  One or more coverage gates failed. See details above.",
-    );
+    console.warn('\n⚠️  One or more coverage gates failed. See details above.');
   }
 }
 

@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Generator
 from unittest.mock import Mock, patch
 
 import pytest
 from envilder.application.envilder_facade import Envilder
 from envilder.domain.secret_provider_type import SecretProviderType
+
+_TEST_DIR = Path(__file__).resolve().parent.parent
 
 
 @pytest.fixture()
@@ -28,7 +31,7 @@ def mock_provider() -> Mock:
     return provider
 
 
-MAP_FILE = "tests/sdks/python/secrets-map.json"
+MAP_FILE = str(_TEST_DIR / "secrets-map.json")
 
 
 class TestEnvilderResolve:
