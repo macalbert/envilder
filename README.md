@@ -14,12 +14,12 @@
 [![npm version](https://img.shields.io/npm/v/envilder.svg)](https://www.npmjs.com/package/envilder)
 [![npm downloads](https://img.shields.io/npm/dm/envilder.svg)](https://npmcharts.com/compare/envilder)
 [![CI Tests](https://github.com/macalbert/envilder/actions/workflows/tests.yml/badge.svg)](https://github.com/macalbert/envilder/actions/workflows/tests.yml)
-[![Coverage](https://macalbert.github.io/envilder/badge_combined.svg)](https://macalbert.github.io/envilder/)
+[![Overall Coverage](https://macalbert.github.io/envilder/badge_combined.svg)](https://macalbert.github.io/envilder/)
 
-[![Core](https://macalbert.github.io/envilder/core/badge_named.svg)](https://macalbert.github.io/envilder/core/index.html)
-[![.NET](https://macalbert.github.io/envilder/dotnet/badge_named.svg)](https://macalbert.github.io/envilder/dotnet/index.html)
-[![Python](https://macalbert.github.io/envilder/python/badge_named.svg)](https://macalbert.github.io/envilder/python/index.html)
-[![IaC](https://macalbert.github.io/envilder/iac/badge_named.svg)](https://macalbert.github.io/envilder/iac/index.html)
+[![Core Coverage](https://macalbert.github.io/envilder/core/badge_named.svg)](https://macalbert.github.io/envilder/core/index.html)
+[![.NET Coverage](https://macalbert.github.io/envilder/dotnet/badge_named.svg)](https://macalbert.github.io/envilder/dotnet/index.html)
+[![Python Coverage](https://macalbert.github.io/envilder/python/badge_named.svg)](https://macalbert.github.io/envilder/python/index.html)
+[![IaC Coverage](https://macalbert.github.io/envilder/iac/badge_named.svg)](https://macalbert.github.io/envilder/iac/index.html)
 
 [![Known Vulnerabilities](https://snyk.io/test/github/macalbert/envilder/badge.svg)](https://snyk.io/test/github/macalbert/envilder)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
