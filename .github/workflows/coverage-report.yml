@@ -1,58 +1,37 @@
 name: 🏰 Star Castle Coverage
 
-on:
-  workflow_dispatch:
-
-  pull_request:
-    paths:
-      - ".github/workflows/coverage-report.yml"
-
-  push:
-    branches:
-      - "main"
-    paths:
-      - ".github/workflows/coverage-report.yml"
-      - "src/**"
-      - "tests/**"
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 permissions:
   id-token: write
   contents: read
   pages: write
 
+on:
+  workflow_dispatch: {}
+
+  pull_request:
+    paths:
+      - ".github/workflows/coverage-report.yml"
+      - ".github/workflows/coverage-report/**"
+
+  push:
+    branches:
+      - "main"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
 jobs:
-  shine-sprite-coverage:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+  # ────────────────────────────────────────────────────────────────────────────
+  # 🎮 Core — TypeScript CLI + GHA + unit tests
+  # ────────────────────────────────────────────────────────────────────────────
+  test-core:
     if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     env:
       LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
     steps:
-      - name: 👾 Check if PR is created by a Goomba (Dependabot)
-        id: dependabot-check
-        run: |
-          if [[ "${{ github.actor }}" == *dependabot* ]]; then
-            echo "is_dependabot=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "is_dependabot=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: 🪙 Collect Coins (Configure AWS credentials)
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Check if the workflow should run
-        if: ${{ steps.dependabot-check.outputs.is_dependabot == 'false' }}
-        run: echo "The workflow is allowed to run for this PR"
-
       - name: 🧲 Checkout
         uses: actions/checkout@v6
 
@@ -61,7 +40,206 @@ jobs:
         with:
           version: 10
 
-      - name: 🛠️ Setup Node.js with Cache
+      - name: 🛠️ Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.x"
+          cache: "pnpm"
+
+      - name: 🪙 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏎️ Run tests with coverage
+        run: |
+          mkdir -p output
+          pnpm vitest run --reporter=verbose --coverage --coverage.reporter=lcov --coverage.reporter=text --coverage.reportsDirectory=coverage 2>&1 | tee output/test-output.txt
+
+      - name: 📋 Generate coverage report
+        if: always()
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.4
+        with:
+          reports: coverage/lcov.info
+          sourcedirs: src/envilder
+          targetdir: report
+          reporttypes: Html;MarkdownSummaryGithub;Badges
+          filefilters: +*src/envilder/*;-*node_modules/*;-*tests/*
+          title: "Envilder Core (TypeScript)"
+
+      - name: 📊 Extract test stats
+        if: always()
+        run: node .github/workflows/coverage-report/extract-test-stats.mjs output/test-output.txt report/test-stats.json vitest
+
+      - name: 📤 Upload report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: core
+          path: report/
+          retention-days: 1
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # ⚙️ .NET SDK
+  # ────────────────────────────────────────────────────────────────────────────
+  test-dotnet:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+    steps:
+      - name: 🧲 Checkout
+        uses: actions/checkout@v6
+
+      - uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj', '**/*.sln') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: 🛠️ Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.x"
+
+      - name: Install dotnet-coverage
+        run: dotnet tool install --global dotnet-coverage
+
+      - name: 🛠️ Setup Node.js (for extract-test-stats)
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.x"
+
+      - name: 🪙 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: 🏎️ Run tests with coverage
+        run: |
+          mkdir -p output
+          dotnet-coverage collect \
+            "dotnet test src/sdks/dotnet/Envilder.sln --configuration Release --logger:console;verbosity=detailed" \
+            --output output/dotnet.cobertura.xml \
+            --output-format cobertura 2>&1 | tee output/test-output.txt
+        env:
+          TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
+          DOCKER_HOST: unix:///var/run/docker.sock
+
+      - name: 📋 Generate coverage report
+        if: always()
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.4
+        with:
+          reports: output/dotnet.cobertura.xml
+          sourcedirs: src/sdks/dotnet
+          targetdir: report
+          reporttypes: Html;MarkdownSummaryGithub;Badges
+          filefilters: +*src/sdks/dotnet/*;-*obj/*;-*bin/*;-*.g.cs;-*.generated.*
+          title: "Envilder .NET SDK"
+
+      - name: 📊 Extract test stats
+        if: always()
+        run: node .github/workflows/coverage-report/extract-test-stats.mjs output/test-output.txt report/test-stats.json dotnet
+
+      - name: 📤 Upload report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: dotnet
+          path: report/
+          retention-days: 1
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # 🐍 Python SDK
+  # ────────────────────────────────────────────────────────────────────────────
+  test-python:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: 🧲 Checkout
+        uses: actions/checkout@v6
+
+      - name: 🐍 Setup Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: 📦 Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: 🛠️ Setup Node.js (for extract-test-stats)
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.x"
+
+      - name: 🪙 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: ♻️ Install dependencies
+        run: uv pip install --system -e "src/sdks/python[dev]" pytest-cov
+
+      - name: 🏎️ Run tests with coverage
+        run: |
+          mkdir -p output
+          cd tests/sdks/python && python -m pytest -v \
+            --cov=envilder \
+            --cov-report=xml:../../../output/python-coverage.xml \
+            --tb=short 2>&1 | tee ../../../output/test-output.txt
+        env:
+          TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
+          DOCKER_HOST: unix:///var/run/docker.sock
+
+      - name: 📋 Generate coverage report
+        if: always()
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.4
+        with:
+          reports: output/python-coverage.xml
+          sourcedirs: src/sdks/python
+          targetdir: report
+          reporttypes: Html;MarkdownSummaryGithub;Badges
+          filefilters: +*src/sdks/python/envilder/*;-*__init__.py
+          title: "Envilder Python SDK"
+
+      - name: 📊 Extract test stats
+        if: always()
+        run: node .github/workflows/coverage-report/extract-test-stats.mjs output/test-output.txt report/test-stats.json pytest
+
+      - name: 📤 Upload report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: python
+          path: report/
+          retention-days: 1
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # ☁️ IaC (CDK)
+  # ────────────────────────────────────────────────────────────────────────────
+  test-iac:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: 🧲 Checkout
+        uses: actions/checkout@v6
+
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
+
+      - name: 🛠️ Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: "20.x"
@@ -70,17 +248,83 @@ jobs:
       - name: 📦 Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: 🔥 Run tests and collect coverage
-        run: pnpm test
+      - name: 🏎️ Run tests with coverage
+        run: |
+          mkdir -p output
+          pnpm vitest run --reporter=verbose --coverage --coverage.reporter=lcov --coverage.reporter=text --coverage.reportsDirectory=coverage-iac --coverage.include='src/iac/**' tests/iac/ 2>&1 | tee output/test-output.txt
 
-      - name: Setup Pages
+      - name: 📋 Generate coverage report
+        if: always()
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.4
+        with:
+          reports: coverage-iac/lcov.info
+          sourcedirs: src/iac
+          targetdir: report
+          reporttypes: Html;MarkdownSummaryGithub;Badges
+          filefilters: +*src/iac/*;-*node_modules/*;-*tests/*
+          title: "Envilder IaC (CDK)"
+
+      - name: 📊 Extract test stats
+        if: always()
+        run: node .github/workflows/coverage-report/extract-test-stats.mjs output/test-output.txt report/test-stats.json vitest
+
+      - name: 📤 Upload report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: iac
+          path: report/
+          retention-days: 1
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # 📊 Publish aggregated dashboard
+  # ────────────────────────────────────────────────────────────────────────────
+  publish-report:
+    needs: [test-core, test-dotnet, test-python, test-iac]
+    if: ${{ always() && !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 🧲 Checkout
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: .github/workflows/coverage-report
+
+      - name: 📥 Download all coverage reports
+        uses: actions/download-artifact@v8
+        with:
+          path: coveragereport
+
+      - name: 📋 Generate coverage dashboard
+        run: |
+          node .github/workflows/coverage-report/generate-coverage-dashboard.mjs coveragereport \
+            --config .github/workflows/coverage-report/coverage-config.json
+
+      - name: 🚨 Fail workflow if any test job failed
+        run: |
+          failed=""
+          [ "${{ needs.test-core.result }}" = "failure" ] && failed="$failed core"
+          [ "${{ needs.test-dotnet.result }}" = "failure" ] && failed="$failed dotnet"
+          [ "${{ needs.test-python.result }}" = "failure" ] && failed="$failed python"
+          [ "${{ needs.test-iac.result }}" = "failure" ] && failed="$failed iac"
+
+          if [ -n "$failed" ]; then
+            echo "::error::Test suites failed:$failed"
+            exit 1
+          fi
+          echo "All test suites passed"
+
+      - name: 📄 Setup Pages
         uses: actions/configure-pages@v6
 
-      - name: Upload artifact
+      - name: 📤 Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: "./coverage"
+          path: coveragereport
 
-      - name: Deploy to GitHub Pages
+      - name: 🚀 Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
