@@ -643,6 +643,9 @@ jobs:
       <section id="sdk-dotnet" class="docs-section">
         <h2>{t.docs.sdkDotnetTitle}</h2>
         <p>{t.docs.sdkDotnetDesc}</p>
+        <div class="sdk-badges">
+          <a class="sdk-badge" href="https://www.nuget.org/packages/Envilder" target="_blank" rel="noopener noreferrer">📦 NuGet v0.1.0</a>
+        </div>
 
         <h3>{t.docs.sdkDotnetInstall}</h3>
         <CodeBlock lang="bash" code="dotnet add package Envilder" />
@@ -671,6 +674,9 @@ EnvilderClient.InjectIntoEnvironment(secrets);`} />
       <section id="sdk-python" class="docs-section">
         <h2>{t.docs.sdkPythonTitle}</h2>
         <p>{t.docs.sdkPythonDesc}</p>
+        <div class="sdk-badges">
+          <a class="sdk-badge" href="https://pypi.org/project/envilder/" target="_blank" rel="noopener noreferrer">📦 PyPI v0.2.0</a>
+        </div>
 
         <h3>{t.docs.sdkPythonInstall}</h3>
         <CodeBlock lang="bash" code={`uv add envilder\n# or\npip install envilder`} />
@@ -1017,6 +1023,33 @@ secrets = (
     font-style: italic;
     padding-left: var(--space-md);
     border-left: 2px solid var(--color-border);
+  }
+
+  /* ── SDK badges ── */
+  .sdk-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+  }
+
+  .sdk-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-primary);
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    padding: 2px var(--space-sm);
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+    box-shadow: 2px 2px 0 var(--color-border);
+    white-space: nowrap;
+  }
+
+  .sdk-badge:hover {
+    background: var(--color-surface-alt);
+    border-color: var(--color-primary);
   }
 
   /* ── Multi-env grid ── */
