@@ -68,6 +68,43 @@ secrets = (
 )
 ```
 
+### Environment-based loading
+
+Route secret loading based on your current environment. Each environment
+maps to its own secrets file (or `None` to skip loading):
+
+```python
+from envilder import Envilder
+import os
+
+env = os.getenv('APP_ENV', 'development')
+
+# Resolve + inject into os.environ
+Envilder.load(env, {
+    'production': 'prod-secrets.json',
+    'development': 'dev-secrets.json',
+    'test': None,  # no secrets loaded
+})
+```
+
+Resolve without injecting:
+
+```python
+secrets = Envilder.resolve_file(env, {
+    'production': 'prod-secrets.json',
+    'development': 'dev-secrets.json',
+    'test': None,
+})
+```
+
+Behaviour:
+
+- If the environment maps to a file path, secrets are loaded from that file.
+- If the environment maps to `None` or is not in the mapping, an empty dict
+  is returned silently — no errors, no output.
+- The environment name is stripped of leading/trailing whitespace before lookup.
+- Empty or whitespace-only environment names raise `ValueError`.
+
 ### Advanced usage
 
 For full control over parsing, provider creation, and secret resolution:

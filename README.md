@@ -394,24 +394,25 @@ Install via pip:
 pip install envilder
 ```
 
-Load secrets into your application:
+Load secrets into your application with a single line:
 
 ```python
-from envilder import EnvilderClient, MapFileParser, SecretProviderFactory
+from envilder import Envilder
 
-json_content = open('secrets-map.json').read()
-map_file = MapFileParser().parse(json_content)
-provider = SecretProviderFactory.create(map_file.config)
-client = EnvilderClient(provider)
-secrets = client.resolve_secrets(map_file)
-
-db_password = secrets['DB_PASSWORD']
+# Resolve + inject into os.environ
+Envilder.load('secrets-map.json')
 ```
 
-Or inject directly into `os.environ`:
+Or route by environment — each environment points to its own map file:
 
 ```python
-EnvilderClient.inject_into_environment(secrets)
+from envilder import Envilder
+
+Envilder.load('production', {
+    'production': 'prod-secrets.json',
+    'development': 'dev-secrets.json',
+    'test': None,  # no secrets loaded
+})
 ```
 
 📖 **[View full Python SDK documentation](./src/sdks/python/README.md)**
