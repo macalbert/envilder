@@ -388,10 +388,10 @@ EnvilderClient.InjectIntoEnvironment(secrets);
 
 ### Python SDK
 
-Install via pip:
+Install via uv:
 
 ```bash
-pip install envilder
+uv add envilder
 ```
 
 Load secrets into your application with a single line:

@@ -18,7 +18,7 @@ Part of the [Envilder](https://github.com/macalbert/envilder) project.
 ## Install
 
 ```bash
-pip install envilder
+uv add envilder
 ```
 
 ## Quick Start

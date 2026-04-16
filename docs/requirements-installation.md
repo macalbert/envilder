@@ -218,10 +218,10 @@ Requirements:
 
 ### Python SDK
 
-For the Python SDK, install and verify via pip:
+For the Python SDK, install and verify via uv:
 
 ```bash
-pip install envilder
+uv add envilder
 ```
 
 Requirements:
