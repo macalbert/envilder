@@ -30,13 +30,11 @@ const t = useTranslations(lang);
           <p>
             {t.howItWorks.steps[0].description}
           </p>
-          <CodeBlock lang="json" filename="param-map.json">
-{`{
+          <CodeBlock lang="json" filename="param-map.json" code={`{
   "DB_PASSWORD": "/my-app/prod/db-password",
   "API_KEY":     "/my-app/prod/api-key",
   "SECRET_TOKEN": "/my-app/prod/secret-token"
-}`}
-          </CodeBlock>
+}`} />
         </div>
       </div>
 
@@ -56,14 +54,12 @@ const t = useTranslations(lang);
           <p>
             {t.howItWorks.steps[1].description}
           </p>
-          <CodeBlock lang="bash" filename="terminal">
-{`$ envilder --map=param-map.json --envfile=.env
+          <CodeBlock lang="bash" filename="terminal" code={`$ envilder --map=param-map.json --envfile=.env
 
 ${t.howItWorks.terminalFetched1}
 ${t.howItWorks.terminalFetched2}
 ${t.howItWorks.terminalFetched3}
-${t.howItWorks.terminalWritten}`}
-          </CodeBlock>
+${t.howItWorks.terminalWritten}`} />
         </div>
       </div>
 
@@ -83,11 +79,9 @@ ${t.howItWorks.terminalWritten}`}
           <p>
             {t.howItWorks.steps[2].description}
           </p>
-          <CodeBlock lang="bash" filename=".env">
-{`DB_PASSWORD=my-super-secret-password
+          <CodeBlock lang="bash" filename=".env" code={`DB_PASSWORD=my-super-secret-password
 API_KEY=sk_live_abc123def456
-SECRET_TOKEN=tok_prod_xyz789`}
-          </CodeBlock>
+SECRET_TOKEN=tok_prod_xyz789`} />
         </div>
       </div>
     </div>

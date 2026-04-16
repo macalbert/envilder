@@ -1,10 +1,13 @@
 ---
+import { Code } from 'astro:components';
+
 export interface Props {
   lang?: string;
   filename?: string;
+  code: string;
 }
 
-const { lang = 'json', filename } = Astro.props;
+const { lang = 'json', filename, code } = Astro.props;
 const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
 ---
 
@@ -15,7 +18,14 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
       <span class="codeblock-lang">{lang}</span>
     </div>
   )}
-  <pre class="codeblock-body" tabindex="0"><code><slot /></code></pre>
+  <div class="codeblock-body">
+    <Code
+      code={code}
+      lang={lang}
+      themes={{ dark: 'github-dark', light: 'github-light' }}
+      defaultColor="dark"
+    />
+  </div>
 </div>
 
 <style>
@@ -25,7 +35,6 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
     overflow: hidden;
     box-shadow: var(--pixel-shadow);
     max-width: 100%;
-    color: var(--color-code-text, var(--color-text));
   }
 
   .codeblock-header {
@@ -57,13 +66,23 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
     line-height: 1.8;
     letter-spacing: -0.02em;
     overflow-x: auto;
-    color: var(--color-code-text, var(--color-text));
     margin: 0;
-    white-space: pre;
   }
 
-  .codeblock-body code {
+  .codeblock-body :global(pre) {
+    background: transparent !important;
+    margin: 0;
+    padding: 0;
     font: inherit;
-    color: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+  }
+
+  .codeblock-body :global(code) {
+    font: inherit;
+  }
+
+  :global([data-theme="light"]) .codeblock-body :global(span) {
+    color: var(--shiki-light) !important;
   }
 </style>
