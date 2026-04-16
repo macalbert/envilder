@@ -182,18 +182,22 @@ class Envilder:
         return Envilder(file_path_or_env).resolve()
 
     def with_provider(self, provider: SecretProviderType) -> Envilder:
+        """Override the secret provider (AWS or Azure)."""
         self._options.provider = provider
         return self
 
     def with_vault_url(self, vault_url: str) -> Envilder:
+        """Override the Azure Key Vault URL."""
         self._options.vault_url = vault_url
         return self
 
     def with_profile(self, profile: str) -> Envilder:
+        """Override the AWS named profile."""
         self._options.profile = profile
         return self
 
     def resolve(self) -> dict[str, str]:
+        """Resolve secrets and return them as a dict."""
         map_file = self._parse_file()
         options = self._build_options()
         provider = SecretProviderFactory.create(
@@ -203,6 +207,7 @@ class Envilder:
         return client.resolve_secrets(map_file)
 
     def inject(self) -> dict[str, str]:
+        """Resolve secrets, inject into ``os.environ``, and return them."""
         secrets = self.resolve()
         EnvilderClient.inject_into_environment(secrets)
         return secrets
@@ -227,4 +232,14 @@ class Envilder:
     ) -> str | None:
         if not env or not env.strip():
             raise ValueError("env cannot be empty.")
-        return env_mapping.get(env.strip())
+        normalized = env.strip()
+        source = env_mapping.get(normalized)
+        if source is not None:
+            stripped = source.strip()
+            if not stripped:
+                raise ValueError(
+                    "env_mapping contains an empty file path"
+                    f" for environment '{normalized}'."
+                )
+            return stripped
+        return None

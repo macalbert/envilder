@@ -177,6 +177,25 @@ class TestEnvilderLoadWithEnvMapping:
         # Assert
         assert actual["LOCALSTACK_AUTH_TOKEN"] == "test-auth-token"
 
+    def Should_ReturnSecrets_When_EnvironmentHasSurroundingWhitespace(
+        self, mock_provider: Mock
+    ) -> None:
+        # Arrange
+        env_mapping: dict[str, str | None] = {
+            "production": MAP_FILE,
+            "test": None,
+        }
+
+        # Act
+        with patch(
+            "envilder.application.envilder_facade.SecretProviderFactory.create",
+            return_value=mock_provider,
+        ):
+            actual = Envilder.load(" production ", env_mapping)
+
+        # Assert
+        assert actual["LOCALSTACK_AUTH_TOKEN"] == "test-auth-token"
+
     def Should_InjectIntoEnvironment_When_EnvironmentHasValidSource(
         self, mock_provider: Mock, env_cleanup: list[str]
     ) -> None:
@@ -233,6 +252,19 @@ class TestEnvilderLoadWithEnvMapping:
 
         # Assert
         with pytest.raises(ValueError, match="env"):
+            action()
+
+    def Should_RaiseValueError_When_MappingContainsEmptyFilePath(
+        self,
+    ) -> None:
+        # Arrange
+        env_mapping: dict[str, str | None] = {"production": "  "}
+
+        # Act
+        action = lambda: Envilder.load("production", env_mapping)
+
+        # Assert
+        with pytest.raises(ValueError, match="empty file path"):
             action()
 
 
