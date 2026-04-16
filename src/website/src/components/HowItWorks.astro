@@ -1,6 +1,7 @@
 ---
 import { useTranslations } from '../i18n/utils';
 import CodeBlock from './CodeBlock.astro';
+import TabbedCodeBlock from './TabbedCodeBlock.astro';
 
 interface Props {
   lang?: string;
@@ -8,6 +9,36 @@ interface Props {
 
 const { lang = 'en' } = Astro.props;
 const t = useTranslations(lang);
+
+const sdkTabs = [
+  {
+    label: t.howItWorks.sdkTabPython,
+    lang: 'python',
+    filename: 'settings.py',
+    code: `from envilder import Envilder
+
+# One-liner: load secrets into os.environ
+Envilder.load("param-map.json")
+
+# Or resolve as a dict without injecting
+secrets = Envilder.from_file("param-map.json").resolve()`,
+  },
+  {
+    label: t.howItWorks.sdkTabDotnet,
+    lang: 'csharp',
+    filename: 'Program.cs',
+    code: `using Envilder;
+
+// Load into IConfiguration
+builder.Configuration.AddEnvilder("param-map.json");
+
+// Or resolve + inject into environment
+var client = new EnvilderClient();
+var parsed = MapFileParser.Parse("param-map.json");
+var secrets = await client.ResolveSecretsAsync(parsed);
+EnvilderClient.InjectIntoEnvironment(secrets);`,
+  },
+];
 ---
 
 <section class="section section-alt" id="how-it-works">
@@ -79,9 +110,50 @@ ${t.howItWorks.terminalWritten}`} />
           <p>
             {t.howItWorks.steps[2].description}
           </p>
-          <CodeBlock lang="bash" filename=".env" code={`DB_PASSWORD=my-super-secret-password
-API_KEY=sk_live_abc123def456
-SECRET_TOKEN=tok_prod_xyz789`} />
+          <TabbedCodeBlock tabs={sdkTabs} />
+        </div>
+      </div>
+
+      <div class="step-connector">
+        <span class="connector-line"></span>
+        <span class="connector-arrow">▼</span>
+        <span class="connector-line"></span>
+      </div>
+
+      <div class="step">
+        <div class="step-number">
+          <span class="step-label">{t.howItWorks.stepLabel}</span>
+          <span>04</span>
+        </div>
+        <div class="step-content">
+          <h3>{t.howItWorks.steps[3].title}</h3>
+          <p>
+            {t.howItWorks.steps[3].description}
+          </p>
+          <CodeBlock lang="bash" filename="terminal" code={`$ envilder --push --envfile=.env --map=param-map.json
+
+${t.howItWorks.pushTerminalPushed1}
+${t.howItWorks.pushTerminalPushed2}
+${t.howItWorks.pushTerminalPushed3}`} />
+        </div>
+      </div>
+
+      <div class="step-connector">
+        <span class="connector-line"></span>
+        <span class="connector-arrow">▼</span>
+        <span class="connector-line"></span>
+      </div>
+
+      <div class="step step-final">
+        <div class="step-number">
+          <span class="step-label">{t.howItWorks.stepLabel}</span>
+          <span>05</span>
+        </div>
+        <div class="step-content">
+          <h3>{t.howItWorks.steps[4].title}</h3>
+          <p>
+            {t.howItWorks.steps[4].description}
+          </p>
         </div>
       </div>
     </div>
@@ -196,5 +268,9 @@ SECRET_TOKEN=tok_prod_xyz789`} />
       width: 16px;
       height: 2px;
     }
+  }
+
+  .step-final {
+    border-color: var(--color-primary);
   }
 </style>

@@ -1,0 +1,122 @@
+---
+import CodeBlock from './CodeBlock.astro';
+
+export interface TabItem {
+  label: string;
+  lang: string;
+  filename: string;
+  code: string;
+}
+
+interface Props {
+  tabs: TabItem[];
+}
+
+const { tabs } = Astro.props;
+---
+
+<div class="tabbed-code">
+  <div class="tabbed-code-tabs" role="tablist">
+    {tabs.map((tab, i) => (
+      <button
+        role="tab"
+        class:list={['tabbed-code-tab', { active: i === 0 }]}
+        aria-selected={i === 0 ? 'true' : 'false'}
+        data-tab-index={i}
+        type="button"
+      >
+        {tab.label}
+      </button>
+    ))}
+  </div>
+  <div class="tabbed-code-panels">
+    {tabs.map((tab, i) => (
+      <div
+        role="tabpanel"
+        class:list={['tabbed-code-panel', { active: i === 0 }]}
+        data-panel-index={i}
+      >
+        <CodeBlock lang={tab.lang} filename={tab.filename} code={tab.code} />
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .tabbed-code {
+    width: 100%;
+  }
+
+  .tabbed-code-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--color-border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tabbed-code-tab {
+    font-family: var(--font-pixel);
+    font-size: 0.55rem;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    border: 2px solid var(--color-border);
+    border-bottom: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s, background 0.15s;
+    position: relative;
+    top: 2px;
+  }
+
+  .tabbed-code-tab:hover {
+    color: var(--color-text);
+    background: var(--color-surface-alt);
+  }
+
+  .tabbed-code-tab.active {
+    color: var(--color-primary);
+    background: var(--color-code-bg);
+    border-color: var(--color-primary);
+    border-bottom: 2px solid var(--color-code-bg);
+  }
+
+  .tabbed-code-panel {
+    display: none;
+  }
+
+  .tabbed-code-panel.active {
+    display: block;
+  }
+
+  .tabbed-code-panel :global(.codeblock) {
+    border-top: none;
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.tabbed-code').forEach((block) => {
+    const tabs = block.querySelectorAll<HTMLButtonElement>('.tabbed-code-tab');
+    const panels = block.querySelectorAll<HTMLElement>('.tabbed-code-panel');
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const index = tab.getAttribute('data-tab-index');
+
+        tabs.forEach((t) => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        panels.forEach((p) => p.classList.remove('active'));
+
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        const panel = block.querySelector(
+          `[data-panel-index="${index}"]`,
+        );
+        if (panel) panel.classList.add('active');
+      });
+    });
+  });
+</script>

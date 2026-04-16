@@ -73,6 +73,12 @@ export interface HowItWorksTranslations {
   terminalFetched2: string;
   terminalFetched3: string;
   terminalWritten: string;
+  sdkTabPython: string;
+  sdkTabDotnet: string;
+  sdkTabTypescript: string;
+  pushTerminalPushed1: string;
+  pushTerminalPushed2: string;
+  pushTerminalPushed3: string;
 }
 
 export interface FeatureItem {

@@ -94,6 +94,15 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
         }
       })();
     </script>
+
+    <!-- Google Analytics (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2SXP5HBC4M" is:inline></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-2SXP5HBC4M');
+    </script>
   </head>
   <body>
     <a href="#main-content" class="skip-link">{skipText}</a>

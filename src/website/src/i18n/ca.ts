@@ -3,9 +3,9 @@ import type { Translations } from './types';
 
 export const ca: Translations = {
   homeMeta: {
-    title: 'Envilder — Centralitza els teus secrets. Una comanda.',
+    title: 'Envilder — Un model per resoldre secrets a cada entorn i runtime.',
     description:
-      "Una eina CLI i GitHub Action que centralitza de forma segura les variables d'entorn des d'AWS SSM, Azure Key Vault o GCP Secret Manager com a font de veritat única.",
+      "Un sistema de resolució de configuració basat en un model. Defineix els mapeigs de secrets una vegada i resol-los de forma consistent — CLI, CI/CD o runtime d'aplicació. Basat en AWS SSM, Azure Key Vault i GCP Secret Manager.",
   },
   nav: {
     features: 'Funcionalitats',
@@ -26,22 +26,21 @@ export const ca: Translations = {
   },
   hero: {
     openSource: 'Codi obert · MIT',
-    title1: 'Els teus secrets.',
-    title2: 'Una comanda.',
-    titleAccent: 'Cada entorn.',
+    title1: 'Un model.',
+    title2: 'Els teus secrets.',
+    titleAccent: 'Cada runtime.',
     description:
-      "Una eina CLI i GitHub Action que centralitza de forma segura les teves variables d'entorn des de",
+      'Defineix els mapeigs de secrets una vegada i resol-los de forma consistent des de',
     descAws: 'AWS SSM',
     descAzure: 'Azure Key Vault',
     descGcp: 'GCP Secret Manager',
     descOr: 'o',
     descComma: ',',
-    descSuffix:
-      'com a font de veritat única. Adéu a copiar i enganxar secrets.',
+    descSuffix: "— localment amb la CLI, en CI/CD amb la GitHub Action o a l'inici de l'app amb SDKs de runtime.",
     getStarted: '▶ Comença',
     viewOnGithub: '★ Veure a GitHub',
-    terminalComment1: '# 1. Defineix el mapeig',
-    terminalComment2: '# 2. Descarrega secrets → genera .env',
+    terminalComment1: '# 1. Un model de mapeig per a cada entorn',
+    terminalComment2: '# 2. Resol secrets amb la CLI',
     terminalFetched1: ' Obtingut DB_PASSWORD → ···pass',
     terminalFetched2: ' Obtingut API_KEY     → ···key',
     terminalWritten: " Fitxer d'entorn escrit a .env",
@@ -54,109 +53,137 @@ export const ca: Translations = {
     localstackAlt: 'LocalStack',
   },
   problemSolution: {
-    title: 'El ',
-    titleAccent: 'problema',
-    titleSuffix: ' amb fitxers .env',
+    title: 'Per què la gestió de secrets ',
+    titleAccent: 'està trencada',
+    titleSuffix: '',
     subtitle:
-      "Gestionar secrets manualment no escala. És insegur, propens a errors i crea fricció per a tot l'equip.",
+      "Cada equip, cada etapa, cada runtime gestiona els secrets de forma diferent. Sense estàndard. Sense consistència. Sense confiança.",
     problems: [
       {
         icon: '💀',
-        title: 'Desincronització entre entorns',
+        title: 'Fragmentada entre eines',
         description:
-          'Dev, staging i prod tenen secrets diferents. Els desplegaments fallen. Ningú sap quin .env és el correcte.',
+          "L'entorn local utilitza fitxers .env. CI/CD llegeix d'integracions amb vaults. Producció té el seu propi mètode. Mateixa app, diferents fluxos de configuració a tot arreu.",
       },
       {
         icon: '📨',
-        title: 'Secrets compartits per Slack/email',
+        title: 'Secrets compartits per canals insegurs',
         description:
-          'Claus API enviades en text pla per xat. Sense traçabilitat. Sense rotació. Un incident de seguretat esperant a passar.',
+          'Claus API enviades per Slack, fitxers .env als repositoris, pàgines wiki amb credencials en text pla. Un incident de seguretat esperant a passar.',
       },
       {
         icon: '🐌',
-        title: 'Onboarding i rotacions lentes',
+        title: 'El desfasament de configuració és inevitable',
         description:
-          "Un nou membre s'uneix a l'equip? Copia i enganxa un .env de la màquina d'algú. Algú rota? Espera que tothom actualitzi manualment.",
+          "Sense una font única de veritat sobre quins secrets necessita una app. Dev, staging i producció es desincronitzen. Els desplegaments fallen. Ningú sap quina config és la correcta.",
       },
     ],
     arrowText: '▼ envilder ho soluciona ▼',
     solutions: [
       {
         icon: '🛡️',
-        title: 'Font de veritat al núvol',
+        title: 'Un model, una font de veritat',
         description:
-          'Tots els secrets viuen a AWS SSM o Azure Key Vault. IAM/RBAC controla qui pot llegir què. Cada accés queda registrat.',
+          'Un únic fitxer de mapeig defineix quins secrets necessita la teva app. Versionat a Git. Revisable en PRs. El mateix contracte a cada entorn.',
       },
       {
         icon: '⚡',
-        title: 'Una comanda, sempre sincronitzat',
+        title: 'Resolució consistent a tot arreu',
         description:
-          'Executa envilder i el teu .env es regenera des de la font de veritat. Idempotent. Instantani. Sense marge per al desfasament.',
+          "CLI per a desenvolupament local, GitHub Action per a CI/CD, SDKs de runtime per a l'inici de l'app. Mateix mapeig, mateix comportament, mateix resultat.",
       },
       {
         icon: '🤖',
-        title: 'Automatitzat en CI/CD',
+        title: 'El teu núvol, sense intermediaris',
         description:
-          'Utilitza la GitHub Action per obtenir secrets en el moment del desplegament. Sense secrets als repos. Sense passos manuals als pipelines.',
+          "AWS SSM, Azure Key Vault o GCP. Sense proxy SaaS. Els secrets es queden a la teva infraestructura. Control d'accés natiu IAM/RBAC.",
       },
     ],
   },
   howItWorks: {
     title: 'Com ',
     titleAccent: 'funciona',
-    subtitle: 'Defineix. Descarrega. Fet.',
+    subtitle: 'Defineix. Resol. Desplega.',
     stepLabel: 'PAS',
     steps: [
       {
-        title: 'Escriu un param-map.json',
+        title: 'Defineix el model de mapeig',
         description:
-          "Un fitxer JSON que mapeja noms de variables d'entorn a les seves rutes a SSM o noms de secrets a Key Vault. Fes-ne commit. Revisa'l en PRs. Difencia'l entre entorns. És l'única configuració que necessites.",
+          'Un fitxer JSON que mapeja noms de variables d\'entorn a rutes de secrets al núvol. Fes-ne commit. Revisa\'l en PRs. Compara entre entorns. Un model per a cada etapa i runtime.',
       },
       {
-        title: 'Executa envilder',
+        title: 'Resol amb la CLI',
         description:
-          'Una comanda obté cada secret del teu vault al núvol i els escriu a .env. Sense copiar manualment. Sense desfasaments. Repetible a qualsevol lloc — localment, en CI o en una màquina nova.',
+          'Una comanda obté cada secret del teu vault al núvol i els escriu a .env. Utilitza\'l localment o en scripts. Mateix mapeig, mateix comportament.',
       },
       {
-        title: '.env escrit. Els secrets es queden al vault.',
+        title: 'Carrega en runtime amb SDKs',
         description:
-          "Un fitxer .env net, generat sota demanda des de dades del vault en temps real. Utilitza'l localment, descarrega'l en el desplegament amb la GitHub Action o evita el fitxer amb --exec.",
+          "Salta't el fitxer .env completament. Carrega secrets directament a la teva aplicació a l'inici amb SDKs natius — Python, .NET, TypeScript i més.",
+      },
+      {
+        title: 'Push des de dev al vault',
+        description:
+          'Necessites afegir o rotar un secret? Puja valors des del teu entorn local al proveïdor al núvol. Sense necessitat de consola.',
+      },
+      {
+        title: 'Els secrets es queden al teu vault',
+        description:
+          "Sense intermediaris. El teu núvol gestiona l'emmagatzematge, la rotació i el control d'accés. Envilder resol — mai emmagatzema.",
       },
     ],
     terminalFetched1: '✔ Obtingut DB_PASSWORD  → ···word',
     terminalFetched2: '✔ Obtingut API_KEY      → ···key',
     terminalFetched3: '✔ Obtingut SECRET_TOKEN → ···oken',
     terminalWritten: "✔ Fitxer d'entorn escrit a .env",
+    sdkTabPython: 'Python',
+    sdkTabDotnet: '.NET',
+    sdkTabTypescript: 'TypeScript',
+    pushTerminalPushed1: '✔ Pujat DB_PASSWORD  → /my-app/prod/db-password',
+    pushTerminalPushed2: '✔ Pujat API_KEY      → /my-app/prod/api-key',
+    pushTerminalPushed3: '✔ Pujat SECRET_TOKEN → /my-app/prod/secret-token',
   },
   features: {
     title: 'Fet per a ',
     titleAccent: 'equips reals',
     subtitle:
-      "Tot el que necessites per gestionar secrets d'entorn de forma segura i a escala.",
+      "Un sistema de resolució de configuració dissenyat per a seguretat, consistència i execució multi-runtime.",
     features: [
+      {
+        icon: '📋',
+        title: 'Model de mapeig únic',
+        description:
+          'Un contracte JSON defineix tots els secrets. Versionat a Git, revisable en PRs, comparable entre entorns. El model és el producte.',
+      },
+      {
+        icon: '🔌',
+        title: 'SDKs de runtime',
+        description:
+          "Carrega secrets directament a memòria a l'inici de l'app — Python, .NET, TypeScript, Go, Java. Sense fitxers .env a disc. Sense secrets residuals.",
+      },
       {
         icon: '☁️',
         title: 'Multi-Proveïdor',
         description:
-          'AWS SSM, Azure Key Vault i GCP Secret Manager (pròximament). Tria amb --provider o $config al fitxer de mapeig.',
-      },
-      {
-        icon: '🔄',
-        title: 'Sincronització bidireccional',
-        description:
-          "Obté secrets a fitxers .env o puja valors .env al teu proveïdor al núvol. Suport complet d'anada i tornada.",
+          'AWS SSM, Azure Key Vault i GCP Secret Manager (pròximament). El teu núvol, les teves regles. Sense dependència de proveïdor.',
       },
       {
         icon: '⚙️',
         title: 'GitHub Action',
         description:
-          'Action per als teus workflows CI/CD. Obté secrets en el moment del desplegament sense intervenció manual.',
+          'Obté secrets en workflows CI/CD. Mateix mapeig, zero intervenció manual. Integració directa.',
+      },
+      {
+        icon: '🔄',
+        title: 'Sincronització bidireccional',
+        description:
+          "Obté secrets a fitxers .env o puja valors .env al teu proveïdor al núvol. Suport complet d'anada i tornada via CLI.",
       },
       {
         icon: '🔒',
         title: 'Accés IAM i RBAC',
         description:
-          "Aprofita el control d'accés natiu del núvol. Les polítiques IAM d'AWS o RBAC d'Azure defineixen qui llegeix què, per entorn.",
+          "Control d'accés natiu del núvol. Les polítiques IAM d'AWS o RBAC d'Azure defineixen qui llegeix què. Sense capa d'auth extra.",
       },
       {
         icon: '📊',
@@ -165,28 +192,16 @@ export const ca: Translations = {
           'Cada lectura i escriptura queda registrada a AWS CloudTrail o Azure Monitor. Traçabilitat completa de qui ha accedit a què i quan.',
       },
       {
-        icon: '🔁',
-        title: 'Sincronització idempotent',
-        description:
-          "Només s'actualitza el que hi ha al teu mapeig. Res més es toca. Executa'l deu vegades — mateix resultat, zero efectes secundaris.",
-      },
-      {
         icon: '🧱',
         title: 'Zero infraestructura',
         description:
-          'Construït sobre serveis natius del núvol. Sense Lambdas, sense servidors, sense infraestructura extra per gestionar o pagar.',
+          'Sense servidors, sense proxies, sense SaaS. Construït sobre serveis natius del núvol que ja utilitzes i pagues.',
       },
       {
         icon: '👤',
         title: 'Suport de perfils AWS',
         description:
           'Configuració multi-compte? Utilitza --profile per canviar entre perfils AWS CLI. Perfecte per a entorns multi-etapa.',
-      },
-      {
-        icon: '🔌',
-        title: 'SDKs en temps real',
-        description:
-          "Carrega secrets directament a la teva app a l'inici — TypeScript, Python, Go, .NET, Java. Sense fitxers .env, sense intermediaris.",
       },
     ],
   },
@@ -412,7 +427,7 @@ export const ca: Translations = {
   },
   footer: {
     tagline:
-      "Centralitza de forma segura les teves variables d'entorn des d'AWS SSM, Azure Key Vault o GCP Secret Manager.",
+      "Un model de configuració per resoldre secrets de forma consistent a tots els entorns i runtimes. Basat en la teva infraestructura cloud existent.",
     project: 'Projecte',
     documentation: 'Documentació',
     community: 'Comunitat',
@@ -470,11 +485,11 @@ export const ca: Translations = {
     sidebarAzureSetup: 'Configuració Azure',
     overviewTitle: 'Què és Envilder?',
     overviewDesc:
-      "Envilder és una eina CLI i GitHub Action que descarrega variables d'entorn d'un magatzem de secrets al núvol (AWS SSM Parameter Store o Azure Key Vault) i les escriu en un fitxer .env local — o les puja de tornada. Definiu un simple mapeig JSON entre noms de variables i rutes de secrets, i Envilder fa la resta.",
+      "Envilder és un sistema de resolució de configuració basat en un model. Defineixes un mapeig JSON entre noms de variables i rutes de secrets al núvol, i Envilder els resol de forma consistent — via la CLI per a desenvolupament local, la GitHub Action per a CI/CD o els SDKs de runtime per a l'inici de l'aplicació. Funciona amb AWS SSM Parameter Store i Azure Key Vault.",
     overviewProblem:
-      'Sense Envilder, els equips copien secrets a mà, els guarden en fitxers .env en text pla al repositori, o mantenen scripts de shell fràgils per cada entorn. Això porta a credencials filtrades, configuracions inconsistents i incorporacions lentes.',
+      "Sense Envilder, els equips fragmenten la gestió de secrets entre eines i etapes. L'entorn local utilitza fitxers .env, CI/CD llegeix d'integracions amb vaults, producció té el seu propi mètode. Això provoca desfasament de configuració, credencials filtrades i incorporacions lentes.",
     overviewSolution:
-      "Amb Envilder, un fitxer param-map.json és la font única de veritat. Els secrets no surten del magatzem fins al moment d'execució, cada entorn utilitza el mateix mapeig, i un nou desenvolupador està operatiu amb una sola comanda.",
+      "Amb Envilder, un model de mapeig és la font única de veritat. Els secrets es resolen des del teu vault al núvol sota demanda — mateix contracte, mateix comportament, ja sigui executant la CLI localment, la GitHub Action en CI o un SDK a l'inici de l'app.",
     reqTitle: 'Requisits',
     reqNode: 'Node.js v20+',
     reqAws: 'AWS CLI',
