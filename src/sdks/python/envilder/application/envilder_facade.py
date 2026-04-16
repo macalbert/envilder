@@ -29,6 +29,30 @@ class Envilder:
     def resolve_file(file_path: str) -> dict[str, str]:
         return Envilder(file_path).resolve()
 
+    @staticmethod
+    def load_from_dict(
+        env: str,
+        env_mapping: dict[str, str | None],
+    ) -> dict[str, str]:
+        if not env or not env.strip():
+            raise ValueError("env cannot be empty.")
+        source = env_mapping.get(env)
+        if source is not None:
+            return Envilder.load(source)
+        return {}
+
+    @staticmethod
+    def resolve_from_dict(
+        env: str,
+        env_mapping: dict[str, str | None],
+    ) -> dict[str, str]:
+        if not env or not env.strip():
+            raise ValueError("env cannot be empty.")
+        source = env_mapping.get(env)
+        if source is not None:
+            return Envilder.resolve_file(source)
+        return {}
+
     def with_provider(self, provider: SecretProviderType) -> Envilder:
         self._options.provider = provider
         return self
