@@ -9,7 +9,7 @@ const { lang = 'en' } = Astro.props;
 const t = useTranslations(lang);
 ---
 
-<div class="theme-switcher" role="radiogroup" aria-label="Theme">
+<div class="theme-switcher" role="radiogroup" aria-label={t.theme.ariaTheme}>
   <button
     class="theme-btn"
     data-theme-value="retro"

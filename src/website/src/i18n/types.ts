@@ -6,11 +6,15 @@ export interface NavLinks {
   changelog: string;
   docs: string;
   getStarted: string;
+  ariaGithub: string;
+  ariaSponsor: string;
+  ariaToggleMenu: string;
 }
 
 export interface ThemeTranslations {
   retro: string;
   light: string;
+  ariaTheme: string;
 }
 
 export interface HeroTranslations {

@@ -15,10 +15,14 @@ export const es: Translations = {
     changelog: 'Cambios',
     docs: 'Docs',
     getStarted: 'Empezar',
+    ariaGithub: 'GitHub',
+    ariaSponsor: 'Patrocinar',
+    ariaToggleMenu: 'Abrir menú',
   },
   theme: {
     retro: 'Retro',
     light: 'Claro',
+    ariaTheme: 'Tema',
   },
   hero: {
     openSource: 'Código abierto · MIT',
@@ -183,7 +187,6 @@ export const es: Translations = {
         title: 'SDKs en tiempo real',
         description:
           'Carga secretos directamente en tu app al iniciar — TypeScript, Python, Go, .NET, Java. Sin archivos .env, sin intermediarios.',
-        badge: 'Próximamente',
       },
     ],
   },
@@ -328,11 +331,11 @@ export const es: Translations = {
           'Librería nativa de ejecución — cargará secretos directamente en process.env desde un map-file. Se publicará en npm',
       },
       {
-        status: 'next',
-        label: '🐍',
+        status: 'done',
+        label: '✅',
         title: 'Python SDK (envilder)',
         description:
-          'Librería para Django/FastAPI/pipelines de datos. Se publicará en PyPI',
+          'Librería para Django/FastAPI/pipelines de datos. Publicado en PyPI',
       },
       {
         status: 'next',
@@ -342,11 +345,11 @@ export const es: Translations = {
           'Librería para apps cloud-native y herramientas Kubernetes. Se publicará como módulo Go',
       },
       {
-        status: 'next',
-        label: '🔵',
+        status: 'done',
+        label: '✅',
         title: '.NET SDK (Envilder)',
         description:
-          'Librería para apps enterprise y Azure-native. Se publicará en NuGet',
+          'Librería para apps enterprise y Azure-native. Publicado en NuGet',
       },
       {
         status: 'next',

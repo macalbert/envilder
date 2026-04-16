@@ -15,10 +15,14 @@ export const en: Translations = {
     changelog: 'Changelog',
     docs: 'Docs',
     getStarted: 'Get Started',
+    ariaGithub: 'GitHub',
+    ariaSponsor: 'Sponsor',
+    ariaToggleMenu: 'Toggle menu',
   },
   theme: {
     retro: 'Retro',
     light: 'Light',
+    ariaTheme: 'Theme',
   },
   hero: {
     openSource: 'Open Source · MIT',
@@ -182,7 +186,6 @@ export const en: Translations = {
         title: 'Runtime SDKs',
         description:
           'Load secrets directly into your app at startup — TypeScript, Python, Go, .NET, Java. No .env files, no intermediaries.',
-        badge: 'Coming soon',
       },
     ],
   },
@@ -323,8 +326,8 @@ export const en: Translations = {
           'Native runtime library — load secrets directly into process.env from a map-file. Published to npm',
       },
       {
-        status: 'next',
-        label: '🐍',
+        status: 'done',
+        label: '✅',
         title: 'Python SDK (envilder)',
         description:
           'Runtime library for Django/FastAPI/data pipelines. Published to PyPI',
@@ -337,8 +340,8 @@ export const en: Translations = {
           'Runtime library for cloud-native apps and Kubernetes tooling. Published as Go module',
       },
       {
-        status: 'next',
-        label: '🔵',
+        status: 'done',
+        label: '✅',
         title: '.NET SDK (Envilder)',
         description:
           'Runtime library for enterprise apps and Azure-native shops. Published to NuGet',

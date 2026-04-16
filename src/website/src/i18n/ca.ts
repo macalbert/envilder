@@ -15,10 +15,14 @@ export const ca: Translations = {
     changelog: 'Canvis',
     docs: 'Docs',
     getStarted: 'Comença',
+    ariaGithub: 'GitHub',
+    ariaSponsor: 'Patrocina',
+    ariaToggleMenu: 'Obre el menú',
   },
   theme: {
     retro: 'Retro',
     light: 'Clar',
+    ariaTheme: 'Tema',
   },
   hero: {
     openSource: 'Codi obert · MIT',
@@ -183,7 +187,6 @@ export const ca: Translations = {
         title: 'SDKs en temps real',
         description:
           "Carrega secrets directament a la teva app a l'inici — TypeScript, Python, Go, .NET, Java. Sense fitxers .env, sense intermediaris.",
-        badge: 'Pròximament',
       },
     ],
   },
@@ -328,11 +331,11 @@ export const ca: Translations = {
           'Biblioteca nativa de runtime — carregarà secrets directament a process.env des d’un map-file. Es publicarà a npm',
       },
       {
-        status: 'next',
-        label: '🐍',
+        status: 'done',
+        label: '✅',
         title: 'Python SDK (envilder)',
         description:
-          'Biblioteca per a Django/FastAPI/pipelines de dades. Es publicarà a PyPI',
+          'Biblioteca per a Django/FastAPI/pipelines de dades. Publicat a PyPI',
       },
       {
         status: 'next',
@@ -342,11 +345,11 @@ export const ca: Translations = {
           'Biblioteca per a apps cloud-native i eines Kubernetes. Es publicarà com a mòdul Go',
       },
       {
-        status: 'next',
-        label: '🔵',
+        status: 'done',
+        label: '✅',
         title: '.NET SDK (Envilder)',
         description:
-          'Biblioteca per a apps enterprise i Azure-native. Es publicarà a NuGet',
+          'Biblioteca per a apps enterprise i Azure-native. Publicat a NuGet',
       },
       {
         status: 'next',
