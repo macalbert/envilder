@@ -157,7 +157,7 @@ class TestEnvilderValidation:
             action()
 
 
-class TestEnvilderLoadFromDict:
+class TestEnvilderLoadWithEnvMapping:
     def Should_ReturnSecrets_When_EnvironmentHasValidSource(
         self, mock_provider: Mock
     ) -> None:
@@ -172,7 +172,7 @@ class TestEnvilderLoadFromDict:
             "envilder.application.envilder_facade.SecretProviderFactory.create",
             return_value=mock_provider,
         ):
-            actual = Envilder.load_from_dict("production", env_mapping)
+            actual = Envilder.load("production", env_mapping)
 
         # Assert
         assert actual["LOCALSTACK_AUTH_TOKEN"] == "test-auth-token"
@@ -191,7 +191,7 @@ class TestEnvilderLoadFromDict:
             "envilder.application.envilder_facade.SecretProviderFactory.create",
             return_value=mock_provider,
         ):
-            Envilder.load_from_dict("production", env_mapping)
+            Envilder.load("production", env_mapping)
 
         # Assert
         assert os.environ["LOCALSTACK_AUTH_TOKEN"] == "test-auth-token"
@@ -203,7 +203,7 @@ class TestEnvilderLoadFromDict:
         env_mapping: dict[str, str | None] = {"test": None}
 
         # Act
-        actual = Envilder.load_from_dict("test", env_mapping)
+        actual = Envilder.load("test", env_mapping)
 
         # Assert
         assert actual == {}
@@ -217,7 +217,7 @@ class TestEnvilderLoadFromDict:
         }
 
         # Act
-        actual = Envilder.load_from_dict("staging", env_mapping)
+        actual = Envilder.load("staging", env_mapping)
 
         # Assert
         assert actual == {}
@@ -229,14 +229,14 @@ class TestEnvilderLoadFromDict:
         env_mapping: dict[str, str | None] = {"production": "prod.json"}
 
         # Act
-        action = lambda: Envilder.load_from_dict("", env_mapping)
+        action = lambda: Envilder.load("", env_mapping)
 
         # Assert
         with pytest.raises(ValueError, match="env"):
             action()
 
 
-class TestEnvilderResolveFromDict:
+class TestEnvilderResolveWithEnvMapping:
     def Should_ReturnSecrets_When_EnvironmentHasValidSource(
         self, mock_provider: Mock
     ) -> None:
@@ -251,7 +251,7 @@ class TestEnvilderResolveFromDict:
             "envilder.application.envilder_facade.SecretProviderFactory.create",
             return_value=mock_provider,
         ):
-            actual = Envilder.resolve_from_dict("production", env_mapping)
+            actual = Envilder.resolve_file("production", env_mapping)
 
         # Assert
         assert actual["LOCALSTACK_AUTH_TOKEN"] == "test-auth-token"
@@ -263,7 +263,7 @@ class TestEnvilderResolveFromDict:
         env_mapping: dict[str, str | None] = {"test": None}
 
         # Act
-        actual = Envilder.resolve_from_dict("test", env_mapping)
+        actual = Envilder.resolve_file("test", env_mapping)
 
         # Assert
         assert actual == {}
@@ -277,7 +277,7 @@ class TestEnvilderResolveFromDict:
         }
 
         # Act
-        actual = Envilder.resolve_from_dict("staging", env_mapping)
+        actual = Envilder.resolve_file("staging", env_mapping)
 
         # Assert
         assert actual == {}
@@ -296,7 +296,7 @@ class TestEnvilderResolveFromDict:
             "envilder.application.envilder_facade.SecretProviderFactory.create",
             return_value=mock_provider,
         ):
-            Envilder.resolve_from_dict("production", env_mapping)
+            Envilder.resolve_file("production", env_mapping)
 
         # Assert
         assert "LOCALSTACK_AUTH_TOKEN" not in os.environ
