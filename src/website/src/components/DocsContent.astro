@@ -9,6 +9,21 @@ interface Props {
 
 const { lang = 'en' } = Astro.props;
 const t = useTranslations(lang);
+
+const azRbacAssign = `az role assignment create \\
+  --role "Key Vault Secrets Officer" \\
+  --assignee {YOUR_OBJECT_ID} \\
+  --scope /subscriptions/{SUB}/resourceGroups/{RG}/providers/Microsoft.KeyVault/vaults/{VAULT}`;
+
+const azVaultShow = `az keyvault show --name {VAULT_NAME} \\
+  --query properties.enableRbacAuthorization`;
+
+const azVaultPolicy = `az keyvault set-policy \\
+  --name {VAULT_NAME} \\
+  --object-id {YOUR_OBJECT_ID} \\
+  --secret-permissions get set list`;
+
+const pushSingleCmd = 'envilder --push --key=API_KEY --value={SECRET} --secret-path=/myapp/api/key';
 ---
 
 <main class="docs-page" id="main-content">
@@ -164,10 +179,7 @@ envilder --map=param-map.json --envfile=.env --profile=dev-account`} />
           </tbody>
         </table>
         <p>{t.docs.permAzureRbac}</p>
-        <CodeBlock lang="bash" code={`az role assignment create \\
-  --role "Key Vault Secrets Officer" \\
-  --assignee <YOUR_OBJECT_ID> \\
-  --scope /subscriptions/<SUB>/resourceGroups/<RG>/providers/Microsoft.KeyVault/vaults/<VAULT>`} />
+        <CodeBlock lang="bash" code={azRbacAssign} />
         <p class="note">{t.docs.permAzurePullNote}</p>
       </section>
 
@@ -193,9 +205,9 @@ envilder --map=param-map.json --envfile=.env --profile=dev-account`} />
   "SECRET_TOKEN": "/myapp/prod/secret-token"
 }`} />
         <p>{t.docs.mapBasicGenerates}</p>
-        <CodeBlock lang="dotenv" filename=".env" code={`API_KEY=<value from /myapp/prod/api-key>
-DB_PASSWORD=<value from /myapp/prod/db-password>
-SECRET_TOKEN=<value from /myapp/prod/secret-token>`} />
+        <CodeBlock lang="dotenv" filename=".env" code={`API_KEY={value from /myapp/prod/api-key}
+DB_PASSWORD={value from /myapp/prod/db-password}
+SECRET_TOKEN={value from /myapp/prod/secret-token}`} />
 
         <h3>{t.docs.mapConfigTitle}</h3>
         <p>{t.docs.mapConfigDesc}</p>
@@ -411,7 +423,7 @@ envilder --push --provider=azure \\
         <h2>{t.docs.pushSingleTitle}</h2>
         <p>{t.docs.pushSingleDesc}</p>
 
-        <CodeBlock lang="bash" code={`envilder --push --key=API_KEY --value=<SECRET> --secret-path=/myapp/api/key`} />
+        <CodeBlock lang="bash" code={pushSingleCmd} />
 
         <h3>{t.docs.pushSingleOptions}</h3>
         <table class="docs-table">
@@ -612,24 +624,17 @@ jobs:
       <section id="azure-setup" class="docs-section">
         <h2>{t.docs.azureSetupTitle}</h2>
         <p>{t.docs.azureSetupCheck}</p>
-        <CodeBlock lang="bash" code={`az keyvault show --name <VAULT_NAME> \\
-  --query properties.enableRbacAuthorization`} />
+        <CodeBlock lang="bash" code={azVaultShow} />
         <ul class="docs-list">
           <li><code>true</code> → <strong>{t.docs.azureRbacTrue}</strong></li>
           <li><code>false</code> / <code>null</code> → <strong>{t.docs.azureRbacFalse}</strong></li>
         </ul>
 
         <h3>{t.docs.azureOptionA}</h3>
-        <CodeBlock lang="bash" code={`az role assignment create \\
-  --role "Key Vault Secrets Officer" \\
-  --assignee <YOUR_OBJECT_ID> \\
-  --scope /subscriptions/<SUB>/resourceGroups/<RG>/providers/Microsoft.KeyVault/vaults/<VAULT>`} />
+        <CodeBlock lang="bash" code={azRbacAssign} />
 
         <h3>{t.docs.azureOptionB}</h3>
-        <CodeBlock lang="bash" code={`az keyvault set-policy \\
-  --name <VAULT_NAME> \\
-  --object-id <YOUR_OBJECT_ID> \\
-  --secret-permissions get set list`} />
+        <CodeBlock lang="bash" code={azVaultPolicy} />
         <p class="note">{t.docs.azureAccessNote}</p>
       </section>
 
