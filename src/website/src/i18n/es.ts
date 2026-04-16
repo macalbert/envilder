@@ -324,13 +324,6 @@ export const es: Translations = {
           'Web de docs dedicada con guías, ejemplos y referencia API',
       },
       {
-        status: 'next',
-        label: '📦',
-        title: 'TypeScript SDK (@envilder/sdk)',
-        description:
-          'Librería nativa de ejecución — cargará secretos directamente en process.env desde un map-file. Se publicará en npm',
-      },
-      {
         status: 'done',
         label: '✅',
         title: 'Python SDK (envilder)',
@@ -338,18 +331,25 @@ export const es: Translations = {
           'Librería para Django/FastAPI/pipelines de datos. Publicado en PyPI',
       },
       {
-        status: 'next',
-        label: '🐹',
-        title: 'Go SDK (envilder)',
-        description:
-          'Librería para apps cloud-native y herramientas Kubernetes. Se publicará como módulo Go',
-      },
-      {
         status: 'done',
         label: '✅',
         title: '.NET SDK (Envilder)',
         description:
           'Librería para apps enterprise y Azure-native. Publicado en NuGet',
+      },
+      {
+        status: 'next',
+        label: '📦',
+        title: 'TypeScript SDK (@envilder/sdk)',
+        description:
+          'Librería nativa de ejecución — cargará secretos directamente en process.env desde un map-file. Se publicará en npm',
+      },
+      {
+        status: 'next',
+        label: '🐹',
+        title: 'Go SDK (envilder)',
+        description:
+          'Librería para apps cloud-native y herramientas Kubernetes. Se publicará como módulo Go',
       },
       {
         status: 'next',
