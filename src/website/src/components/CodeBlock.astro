@@ -49,6 +49,8 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
     overflow: hidden;
     box-shadow: var(--pixel-shadow);
     max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .codeblock-header {
@@ -80,7 +82,6 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
     font-size: 0.82rem;
     line-height: 1.8;
     letter-spacing: -0.02em;
-    overflow-x: auto;
     margin: 0;
   }
 
@@ -121,6 +122,8 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
     font: inherit;
     line-height: inherit;
     letter-spacing: inherit;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .codeblock-body :global(code) {
@@ -129,6 +132,18 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
 
   :global([data-theme="light"]) .codeblock-body :global(span) {
     color: var(--shiki-light) !important;
+  }
+
+  @media (max-width: 640px) {
+    .codeblock-body {
+      padding: var(--space-md);
+      font-size: 0.72rem;
+      line-height: 1.6;
+    }
+
+    .copy-btn {
+      opacity: 1;
+    }
   }
 </style>
 
