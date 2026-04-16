@@ -416,6 +416,30 @@ export interface DocsTranslations {
   azureOptionA: string;
   azureOptionB: string;
   azureAccessNote: string;
+  // SDKs
+  sidebarSdks: string;
+  sidebarSdkDotnet: string;
+  sidebarSdkPython: string;
+  sdkDotnetTitle: string;
+  sdkDotnetDesc: string;
+  sdkDotnetInstall: string;
+  sdkDotnetQuickStartConfig: string;
+  sdkDotnetQuickStartConfigDesc: string;
+  sdkDotnetQuickStartResolve: string;
+  sdkDotnetQuickStartResolveDesc: string;
+  sdkDotnetFullDocs: string;
+  sdkPythonTitle: string;
+  sdkPythonDesc: string;
+  sdkPythonInstall: string;
+  sdkPythonQuickStart: string;
+  sdkPythonQuickStartDesc: string;
+  sdkPythonEnvLoading: string;
+  sdkPythonEnvLoadingDesc: string;
+  sdkPythonResolve: string;
+  sdkPythonResolveDesc: string;
+  sdkPythonFluent: string;
+  sdkPythonFluentDesc: string;
+  sdkPythonFullDocs: string;
 }
 
 export interface HomeMetaTranslations {

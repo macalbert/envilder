@@ -652,5 +652,37 @@ export const es: Translations = {
     azureOptionB: 'Opción B — Vault Access Policy',
     azureAccessNote:
       'Para acceso solo de lectura, get list es suficiente. Añade set para push.',
+    // SDKs
+    sidebarSdks: 'SDKs',
+    sidebarSdkDotnet: '.NET SDK',
+    sidebarSdkPython: 'Python SDK',
+    sdkDotnetTitle: '.NET SDK',
+    sdkDotnetDesc:
+      'Carga secretos directamente en tu aplicación .NET al inicio. Se integra con IConfiguration o resuelve secretos de forma programática.',
+    sdkDotnetInstall: 'Instalación',
+    sdkDotnetQuickStartConfig: 'Inicio rápido — cargar en IConfiguration',
+    sdkDotnetQuickStartConfigDesc:
+      'Añade Envilder como fuente de configuración en tu aplicación ASP.NET:',
+    sdkDotnetQuickStartResolve: 'Inicio rápido — resolver + inyectar en el entorno',
+    sdkDotnetQuickStartResolveDesc:
+      'Analiza el archivo de mapeo, resuelve secretos e inyéctalos en las variables de entorno:',
+    sdkDotnetFullDocs: 'Documentación completa →',
+    sdkPythonTitle: 'Python SDK',
+    sdkPythonDesc:
+      'Carga secretos directamente en tu aplicación Python al inicio. Configuración en una línea o control detallado con el constructor fluido.',
+    sdkPythonInstall: 'Instalación',
+    sdkPythonQuickStart: 'Inicio rápido — una línea',
+    sdkPythonQuickStartDesc:
+      'Carga secretos desde un archivo de mapeo e inyéctalos en el entorno:',
+    sdkPythonEnvLoading: 'Carga basada en entorno',
+    sdkPythonEnvLoadingDesc:
+      'Recomendado para aplicaciones multi-entorno. Mapea cada entorno a su archivo de secretos:',
+    sdkPythonResolve: 'Resolver sin inyectar',
+    sdkPythonResolveDesc:
+      'Obtén secretos como un diccionario sin modificar el entorno:',
+    sdkPythonFluent: 'Constructor fluido con sobreescrituras',
+    sdkPythonFluentDesc:
+      'Sobreescribe la configuración del proveedor de forma programática con la API fluida:',
+    sdkPythonFullDocs: 'Documentación completa →',
   },
 };

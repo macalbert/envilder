@@ -653,5 +653,37 @@ export const ca: Translations = {
     azureOptionB: 'Opció B — Vault Access Policy',
     azureAccessNote:
       'Per accés només de lectura, get list és suficient. Afegeix set per push.',
+    // SDKs
+    sidebarSdks: 'SDKs',
+    sidebarSdkDotnet: '.NET SDK',
+    sidebarSdkPython: 'Python SDK',
+    sdkDotnetTitle: '.NET SDK',
+    sdkDotnetDesc:
+      "Carrega secrets directament a la teva aplicació .NET a l'inici. S'integra amb IConfiguration o resol secrets de manera programàtica.",
+    sdkDotnetInstall: 'Instal·lació',
+    sdkDotnetQuickStartConfig: 'Inici ràpid — carregar a IConfiguration',
+    sdkDotnetQuickStartConfigDesc:
+      'Afegeix Envilder com a font de configuració a la teva aplicació ASP.NET:',
+    sdkDotnetQuickStartResolve: "Inici ràpid — resoldre + injectar a l'entorn",
+    sdkDotnetQuickStartResolveDesc:
+      "Analitza el fitxer de mapeig, resol secrets i injecta'ls a les variables d'entorn:",
+    sdkDotnetFullDocs: 'Documentació completa →',
+    sdkPythonTitle: 'Python SDK',
+    sdkPythonDesc:
+      "Carrega secrets directament a la teva aplicació Python a l'inici. Configuració en una línia o control detallat amb el constructor fluent.",
+    sdkPythonInstall: 'Instal·lació',
+    sdkPythonQuickStart: 'Inici ràpid — una línia',
+    sdkPythonQuickStartDesc:
+      "Carrega secrets des d'un fitxer de mapeig i injecta'ls a l'entorn:",
+    sdkPythonEnvLoading: 'Càrrega basada en entorn',
+    sdkPythonEnvLoadingDesc:
+      'Recomanat per a aplicacions multi-entorn. Mapeja cada entorn al seu fitxer de secrets:',
+    sdkPythonResolve: 'Resoldre sense injectar',
+    sdkPythonResolveDesc:
+      "Obté secrets com un diccionari sense modificar l'entorn:",
+    sdkPythonFluent: 'Constructor fluent amb sobreescriptures',
+    sdkPythonFluentDesc:
+      "Sobreescriu la configuració del proveïdor de manera programàtica amb l'API fluent:",
+    sdkPythonFullDocs: 'Documentació completa →',
   },
 };

@@ -48,6 +48,12 @@ const t = useTranslations(lang);
           <li><a href="#config-priority">{t.docs.sidebarConfigPriority}</a></li>
           <li><a href="#azure-setup">{t.docs.sidebarAzureSetup}</a></li>
         </ul>
+
+        <p class="nav-section-title">{t.docs.sidebarSdks}</p>
+        <ul>
+          <li><a href="#sdk-dotnet">{t.docs.sidebarSdkDotnet}</a></li>
+          <li><a href="#sdk-python">{t.docs.sidebarSdkPython}</a></li>
+        </ul>
       </nav>
     </aside>
 
@@ -625,6 +631,80 @@ jobs:
   --object-id <YOUR_OBJECT_ID> \\
   --secret-permissions get set list`}</CodeBlock>
         <p class="note">{t.docs.azureAccessNote}</p>
+      </section>
+
+      <!-- ───── SDKs ───── -->
+
+      <section id="sdk-dotnet" class="docs-section">
+        <h2>{t.docs.sdkDotnetTitle}</h2>
+        <p>{t.docs.sdkDotnetDesc}</p>
+
+        <h3>{t.docs.sdkDotnetInstall}</h3>
+        <CodeBlock lang="bash">dotnet add package Envilder</CodeBlock>
+
+        <h3>{t.docs.sdkDotnetQuickStartConfig}</h3>
+        <p>{t.docs.sdkDotnetQuickStartConfigDesc}</p>
+        <CodeBlock lang="csharp">{`using Envilder;
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddEnvilder("secrets-map.json");
+var app = builder.Build();`}</CodeBlock>
+
+        <h3>{t.docs.sdkDotnetQuickStartResolve}</h3>
+        <p>{t.docs.sdkDotnetQuickStartResolveDesc}</p>
+        <CodeBlock lang="csharp">{`using Envilder;
+
+var mapFile = new MapFileParser().Parse(File.ReadAllText("secrets-map.json"));
+var provider = SecretProviderFactory.Create(mapFile.Config);
+var client = new EnvilderClient(provider);
+var secrets = await client.ResolveSecretsAsync(mapFile);
+EnvilderClient.InjectIntoEnvironment(secrets);`}</CodeBlock>
+
+        <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/dotnet" target="_blank" rel="noopener noreferrer">{t.docs.sdkDotnetFullDocs}</a></p>
+      </section>
+
+      <section id="sdk-python" class="docs-section">
+        <h2>{t.docs.sdkPythonTitle}</h2>
+        <p>{t.docs.sdkPythonDesc}</p>
+
+        <h3>{t.docs.sdkPythonInstall}</h3>
+        <CodeBlock lang="bash">pip install envilder</CodeBlock>
+
+        <h3>{t.docs.sdkPythonQuickStart}</h3>
+        <p>{t.docs.sdkPythonQuickStartDesc}</p>
+        <CodeBlock lang="python">{`from envilder import Envilder
+
+Envilder.load('secrets-map.json')`}</CodeBlock>
+
+        <h3>{t.docs.sdkPythonEnvLoading}</h3>
+        <p>{t.docs.sdkPythonEnvLoadingDesc}</p>
+        <CodeBlock lang="python">{`from envilder import Envilder
+import os
+
+env = os.getenv('APP_ENV', 'development')
+
+Envilder.load(env, {
+    'production': 'prod-secrets.json',
+    'development': 'dev-secrets.json',
+    'test': None,
+})`}</CodeBlock>
+
+        <h3>{t.docs.sdkPythonResolve}</h3>
+        <p>{t.docs.sdkPythonResolveDesc}</p>
+        <CodeBlock lang="python">{`secrets = Envilder.resolve_file('secrets-map.json')`}</CodeBlock>
+
+        <h3>{t.docs.sdkPythonFluent}</h3>
+        <p>{t.docs.sdkPythonFluentDesc}</p>
+        <CodeBlock lang="python">{`from envilder import Envilder, SecretProviderType
+
+secrets = (
+    Envilder.from_file('secrets-map.json')
+    .with_provider(SecretProviderType.AZURE)
+    .with_vault_url('https://my-vault.vault.azure.net')
+    .resolve()
+)`}</CodeBlock>
+
+        <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/python" target="_blank" rel="noopener noreferrer">{t.docs.sdkPythonFullDocs}</a></p>
       </section>
 
     </div>

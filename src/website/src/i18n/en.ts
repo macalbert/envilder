@@ -644,5 +644,37 @@ export const en: Translations = {
     azureOptionB: 'Option B — Vault Access Policy',
     azureAccessNote:
       'For pull-only access, get list is enough. Add set for push.',
+    // SDKs
+    sidebarSdks: 'SDKs',
+    sidebarSdkDotnet: '.NET SDK',
+    sidebarSdkPython: 'Python SDK',
+    sdkDotnetTitle: '.NET SDK',
+    sdkDotnetDesc:
+      'Load secrets directly into your .NET application at startup. Integrates with IConfiguration or resolves secrets programmatically.',
+    sdkDotnetInstall: 'Install',
+    sdkDotnetQuickStartConfig: 'Quick start — load into IConfiguration',
+    sdkDotnetQuickStartConfigDesc:
+      'Add Envilder as a configuration source in your ASP.NET application:',
+    sdkDotnetQuickStartResolve: 'Quick start — resolve + inject into environment',
+    sdkDotnetQuickStartResolveDesc:
+      'Parse the map file, resolve secrets, and inject them into environment variables:',
+    sdkDotnetFullDocs: 'Full documentation →',
+    sdkPythonTitle: 'Python SDK',
+    sdkPythonDesc:
+      'Load secrets directly into your Python application at startup. One-liner setup or fine-grained control with the fluent builder.',
+    sdkPythonInstall: 'Install',
+    sdkPythonQuickStart: 'Quick start — one-liner',
+    sdkPythonQuickStartDesc:
+      'Load secrets from a map file and inject them into the environment:',
+    sdkPythonEnvLoading: 'Environment-based loading',
+    sdkPythonEnvLoadingDesc:
+      'Recommended for multi-environment apps. Map each environment to its own secrets file:',
+    sdkPythonResolve: 'Resolve without injecting',
+    sdkPythonResolveDesc:
+      'Get secrets as a dictionary without modifying the environment:',
+    sdkPythonFluent: 'Fluent builder with overrides',
+    sdkPythonFluentDesc:
+      'Override provider settings programmatically using the fluent API:',
+    sdkPythonFullDocs: 'Full documentation →',
   },
 };
