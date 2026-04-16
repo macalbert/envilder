@@ -282,11 +282,25 @@ class TestEnvilderResolveWithEnvMapping:
         # Assert
         assert actual == {}
 
+    def Should_RaiseValueError_When_EnvironmentIsEmpty(
+        self,
+    ) -> None:
+        # Arrange
+        env_mapping: dict[str, str | None] = {"production": "prod.json"}
+
+        # Act
+        action = lambda: Envilder.resolve_file("", env_mapping)
+
+        # Assert
+        with pytest.raises(ValueError, match="env"):
+            action()
+
     def Should_NotInjectIntoEnvironment_When_Called(
         self, mock_provider: Mock, env_cleanup: list[str]
     ) -> None:
         # Arrange
         env_cleanup.append("LOCALSTACK_AUTH_TOKEN")
+        os.environ.pop("LOCALSTACK_AUTH_TOKEN", None)
         env_mapping: dict[str, str | None] = {
             "production": MAP_FILE,
         }

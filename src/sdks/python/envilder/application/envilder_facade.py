@@ -112,9 +112,9 @@ class Envilder:
             })
         """
         if env_mapping is not None:
-            if not file_path_or_env or not file_path_or_env.strip():
-                raise ValueError("env cannot be empty.")
-            source = env_mapping.get(file_path_or_env)
+            source = Envilder._resolve_env_source(
+                file_path_or_env, env_mapping
+            )
             if source is not None:
                 return Envilder(source).inject()
             return {}
@@ -173,9 +173,9 @@ class Envilder:
             })
         """
         if env_mapping is not None:
-            if not file_path_or_env or not file_path_or_env.strip():
-                raise ValueError("env cannot be empty.")
-            source = env_mapping.get(file_path_or_env)
+            source = Envilder._resolve_env_source(
+                file_path_or_env, env_mapping
+            )
             if source is not None:
                 return Envilder(source).resolve()
             return {}
@@ -219,3 +219,12 @@ class Envilder:
             or self._options.profile is not None
         )
         return self._options if has_overrides else None
+
+    @staticmethod
+    def _resolve_env_source(
+        env: str,
+        env_mapping: dict[str, str | None],
+    ) -> str | None:
+        if not env or not env.strip():
+            raise ValueError("env cannot be empty.")
+        return env_mapping.get(env.strip())
