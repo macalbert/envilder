@@ -106,7 +106,7 @@ A configuration resolution system designed for security, consistency, and multi-
 
 | Feature | Description |
 |---------|-------------|
-| 📋 **Single Mapping Model** | One JSON contract defines all secrets. Git-versioned, PR-reviewable, diff-able across environments |
+| 📋 **Single Mapping Model** | One JSON contract defines all secrets. Git-versioned, PR-reviewable, diff-able |
 | 🔌 **Runtime SDKs** | Load secrets into memory at app startup — [.NET](./src/sdks/dotnet/README.md), [Python](./src/sdks/python/README.md). No `.env` on disk |
 | ☁️ **Multi-Provider** | AWS SSM, Azure Key Vault, GCP Secret Manager (coming soon). No vendor lock-in |
 | ⚙️ **GitHub Action** | Pull secrets in CI/CD workflows. Same mapping, zero manual intervention |

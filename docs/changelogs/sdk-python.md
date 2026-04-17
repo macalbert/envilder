@@ -2,9 +2,14 @@
 
 ### Added
 
-* **Environment-based loading** — `Envilder.load(env, env_mapping)` and `Envilder.resolve_file(env, env_mapping)` accept a dictionary mapping environment names to secrets-map file paths (or `None` to skip). Enables environment-aware secret loading without external branching logic ([#163](https://github.com/macalbert/envilder/pull/163))
-* **Facade docstrings** — All public methods on the `Envilder` facade now have docstrings with usage examples, improving IDE tooltips and `help()` output for external consumers
-* **Source validation** — Empty or whitespace-only file paths in `env_mapping` now raise `ValueError` with a descriptive message including the environment key
+* **Environment-based loading** — `Envilder.load(env, env_mapping)` and
+  `Envilder.resolve_file(env, env_mapping)` accept a dictionary mapping environment names to
+  secrets-map file paths (or `None` to skip). Enables environment-aware secret loading without
+  external branching logic ([#163](https://github.com/macalbert/envilder/pull/163))
+* **Facade docstrings** — All public methods on the `Envilder` facade now have docstrings with
+  usage examples, improving IDE tooltips and `help()` output for external consumers
+* **Source validation** — Empty or whitespace-only file paths in `env_mapping` now raise
+  `ValueError` with a descriptive message including the environment key
 
 ---
 
@@ -12,7 +17,9 @@
 
 ### Added
 
-* **Initial release** — Runtime library for loading secrets from AWS SSM Parameter Store or Azure Key Vault directly into Python applications ([#157](https://github.com/macalbert/envilder/pull/157))
+* **Initial release** — Runtime library for loading secrets from AWS SSM Parameter Store or
+  Azure Key Vault directly into Python applications
+  ([#157](https://github.com/macalbert/envilder/pull/157))
 * `Envilder` facade — High-level entry point with `load()`, `resolve_file()`, and `from_file()` methods
 * `EnvilderClient` — Resolves secrets from a map-file and injects them into `os.environ`
 * `MapFileParser` — Parses `param-map.json` files with `$config` section and variable mappings

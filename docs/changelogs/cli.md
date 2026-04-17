@@ -2,7 +2,9 @@
 
 ### Added
 
-* **LocalStack sponsor section** — Added sponsor section to website homepage and README with LocalStack logos (dark, light, color variants) and a new `Sponsors.astro` component ([#136](https://github.com/macalbert/envilder/pull/136))
+* **LocalStack sponsor section** — Added sponsor section to website homepage and README with LocalStack logos
+  (dark, light, color variants) and a new `Sponsors.astro` component
+  ([#136](https://github.com/macalbert/envilder/pull/136))
 * **Website test suite** — Added `tests/website/` with Vitest coverage for i18n utilities and Markdown helpers
 * **`BackToTop` component** — New scroll-to-top button component for the documentation website
 
@@ -12,11 +14,13 @@
   * Core domain layer moved from `src/envilder/` to `src/envilder/core/`
   * Website moved from `src/apps/website/` to `src/website/`
   * All imports, `tsconfig.json`, `package.json`, and workspace config updated accordingly
-* **Website UX improvements** — `DocsContent`, `HowItWorks`, `ThemeSwitcher`, `TerminalMockup`, and `BaseLayout` components updated; global CSS expanded; i18n keys added for new content
+* **Website UX improvements** — `DocsContent`, `HowItWorks`, `ThemeSwitcher`, `TerminalMockup`, and
+  `BaseLayout` components updated; global CSS expanded; i18n keys added for new content
 
 ### Fixed
 
-* **README:** Replace `#gh-light-mode-only` / `#gh-dark-mode-only` image fragments with a `<picture>` element using `prefers-color-scheme` media queries
+* **README:** Replace `#gh-light-mode-only` / `#gh-dark-mode-only` image fragments with a `<picture>`
+  element using `prefers-color-scheme` media queries
 * **ci:** Update version check in publish workflow to use published version from npm
 
 ### Dependencies
@@ -36,7 +40,8 @@
 
 ### Added
 
-* **Documentation website** — Full Astro-based docs site deployed at [envilder.com](https://envilder.com), with multi-language support (EN, ES, CA), dark/retro and light themes, and a dedicated changelog page
+* **Documentation website** — Full Astro-based docs site deployed at [envilder.com](https://envilder.com),
+  with multi-language support (EN, ES, CA), dark/retro and light themes, and a dedicated changelog page
 
 ### Changed
 
@@ -58,7 +63,9 @@
 
 ### Added
 
-* **`$config` section in map files** — Map files now support an optional `$config` key to declare provider and connection details inline (e.g., `"provider": "azure"`, `"vaultUrl": "https://..."`, `"profile": "dev-account"`)
+* **`$config` section in map files** — Map files now support an optional `$config` key to declare provider
+  and connection details inline (e.g., `"provider": "azure"`, `"vaultUrl": "https://..."`,
+  `"profile": "dev-account"`)
 * New CLI flag `--vault-url <url>` — Azure Key Vault URL, overrides `$config.vaultUrl` in the map file
 * Precedence chain: CLI flags > `$config` in map file > defaults
 * Backward compatible: existing map files without `$config` continue to work (defaults to AWS provider)
@@ -69,7 +76,8 @@
 
 ### Changed
 
-* **CLI flag `--ssm-path` renamed to `--secret-path`** — The old flag is still accepted as a deprecated alias and prints a warning. It will be removed in a future release.
+* **CLI flag `--ssm-path` renamed to `--secret-path`** — The old flag is still accepted as a deprecated
+  alias and prints a warning. It will be removed in a future release.
 * `configureInfrastructureServices()` now receives a single `MapFileConfig` object instead of separate parameters
 * CLI reads `$config` from the map file and merges with CLI flags
 * Extracted shared `ContainerConfiguration` module for DI setup reused by CLI and GitHub Action
