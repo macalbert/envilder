@@ -731,5 +731,7 @@ export const ca: Translations = {
     sdkPythonFluentDesc:
       "Sobreescriu la configuració del proveïdor de manera programàtica amb l'API fluent:",
     sdkPythonFullDocs: 'Documentació completa →',
+    pagerPrev: 'Anterior',
+    pagerNext: 'Següent',
   },
 };

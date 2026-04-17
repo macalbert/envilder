@@ -24,6 +24,27 @@ const azVaultPolicy = `az keyvault set-policy \\
   --secret-permissions get set list`;
 
 const pushSingleCmd = 'envilder --push --key=API_KEY --value={SECRET} --secret-path=/myapp/api/key';
+
+const sectionOrder = [
+  { id: 'overview', label: t.docs.overviewTitle },
+  { id: 'requirements', label: t.docs.sidebarRequirements },
+  { id: 'installation', label: t.docs.sidebarInstallation },
+  { id: 'credentials', label: t.docs.sidebarCredentials },
+  { id: 'permissions', label: t.docs.sidebarPermissions },
+  { id: 'mapping-file', label: t.docs.sidebarMappingFile },
+  { id: 'pull-command', label: t.docs.sidebarPullCommand },
+  { id: 'push-command', label: t.docs.sidebarPushCommand },
+  { id: 'push-single', label: t.docs.sidebarPushSingle },
+  { id: 'sdk-dotnet', label: t.docs.sidebarSdkDotnet },
+  { id: 'sdk-python', label: t.docs.sidebarSdkPython },
+  { id: 'gha-setup', label: t.docs.sidebarGhaSetup },
+  { id: 'gha-basic', label: t.docs.sidebarGhaBasic },
+  { id: 'gha-multi-env', label: t.docs.sidebarGhaMultiEnv },
+  { id: 'gha-azure', label: t.docs.sidebarGhaAzure },
+  { id: 'gha-inputs', label: t.docs.sidebarGhaInputs },
+  { id: 'config-priority', label: t.docs.sidebarConfigPriority },
+  { id: 'azure-setup', label: t.docs.sidebarAzureSetup },
+];
 ---
 
 <main class="docs-page" id="main-content">
@@ -45,6 +66,10 @@ const pushSingleCmd = 'envilder --push --key=API_KEY --value={SECRET} --secret-p
           <option value="push-command">{t.docs.sidebarPushCommand}</option>
           <option value="push-single">{t.docs.sidebarPushSingle}</option>
         </optgroup>
+        <optgroup label={t.docs.sidebarSdks}>
+          <option value="sdk-dotnet">{t.docs.sidebarSdkDotnet}</option>
+          <option value="sdk-python">{t.docs.sidebarSdkPython}</option>
+        </optgroup>
         <optgroup label={t.docs.sidebarGha}>
           <option value="gha-setup">{t.docs.sidebarGhaSetup}</option>
           <option value="gha-basic">{t.docs.sidebarGhaBasic}</option>
@@ -55,10 +80,6 @@ const pushSingleCmd = 'envilder --push --key=API_KEY --value={SECRET} --secret-p
         <optgroup label={t.docs.sidebarReference}>
           <option value="config-priority">{t.docs.sidebarConfigPriority}</option>
           <option value="azure-setup">{t.docs.sidebarAzureSetup}</option>
-        </optgroup>
-        <optgroup label={t.docs.sidebarSdks}>
-          <option value="sdk-dotnet">{t.docs.sidebarSdkDotnet}</option>
-          <option value="sdk-python">{t.docs.sidebarSdkPython}</option>
         </optgroup>
       </select>
     </div>
@@ -83,6 +104,12 @@ const pushSingleCmd = 'envilder --push --key=API_KEY --value={SECRET} --secret-p
           <li><a href="#push-single" data-section="push-single">{t.docs.sidebarPushSingle}</a></li>
         </ul>
 
+        <p class="nav-section-title">{t.docs.sidebarSdks}</p>
+        <ul>
+          <li><a href="#sdk-dotnet" data-section="sdk-dotnet">{t.docs.sidebarSdkDotnet}</a></li>
+          <li><a href="#sdk-python" data-section="sdk-python">{t.docs.sidebarSdkPython}</a></li>
+        </ul>
+
         <p class="nav-section-title">{t.docs.sidebarGha}</p>
         <ul>
           <li><a href="#gha-setup" data-section="gha-setup">{t.docs.sidebarGhaSetup}</a></li>
@@ -96,12 +123,6 @@ const pushSingleCmd = 'envilder --push --key=API_KEY --value={SECRET} --secret-p
         <ul>
           <li><a href="#config-priority" data-section="config-priority">{t.docs.sidebarConfigPriority}</a></li>
           <li><a href="#azure-setup" data-section="azure-setup">{t.docs.sidebarAzureSetup}</a></li>
-        </ul>
-
-        <p class="nav-section-title">{t.docs.sidebarSdks}</p>
-        <ul>
-          <li><a href="#sdk-dotnet" data-section="sdk-dotnet">{t.docs.sidebarSdkDotnet}</a></li>
-          <li><a href="#sdk-python" data-section="sdk-python">{t.docs.sidebarSdkPython}</a></li>
         </ul>
       </nav>
     </aside>
@@ -476,6 +497,86 @@ envilder --push --provider=azure \\
         </table>
       </section>
 
+      <!-- ───── SDKs ───── -->
+
+      <section id="sdk-dotnet" class="docs-section">
+        <h2>{t.docs.sdkDotnetTitle}</h2>
+        <p>{t.docs.sdkDotnetDesc}</p>
+        <div class="sdk-badges">
+          <a class="sdk-badge" href="https://www.nuget.org/packages/Envilder" target="_blank" rel="noopener noreferrer">📦 NuGet v0.1.0</a>
+        </div>
+
+        <h3>{t.docs.sdkDotnetInstall}</h3>
+        <CodeBlock lang="bash" code="dotnet add package Envilder" />
+
+        <h3>{t.docs.sdkDotnetQuickStartConfig}</h3>
+        <p>{t.docs.sdkDotnetQuickStartConfigDesc}</p>
+        <CodeBlock lang="csharp" code={`using Envilder;
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddEnvilder("secrets-map.json");
+var app = builder.Build();`} />
+
+        <h3>{t.docs.sdkDotnetQuickStartResolve}</h3>
+        <p>{t.docs.sdkDotnetQuickStartResolveDesc}</p>
+        <CodeBlock lang="csharp" code={`using Envilder;
+
+var mapFile = new MapFileParser().Parse(File.ReadAllText("secrets-map.json"));
+var provider = SecretProviderFactory.Create(mapFile.Config);
+var client = new EnvilderClient(provider);
+var secrets = await client.ResolveSecretsAsync(mapFile);
+EnvilderClient.InjectIntoEnvironment(secrets);`} />
+
+        <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/dotnet" target="_blank" rel="noopener noreferrer">{t.docs.sdkDotnetFullDocs}</a></p>
+      </section>
+
+      <section id="sdk-python" class="docs-section">
+        <h2>{t.docs.sdkPythonTitle}</h2>
+        <p>{t.docs.sdkPythonDesc}</p>
+        <div class="sdk-badges">
+          <a class="sdk-badge" href="https://pypi.org/project/envilder/" target="_blank" rel="noopener noreferrer">📦 PyPI v0.2.0</a>
+        </div>
+
+        <h3>{t.docs.sdkPythonInstall}</h3>
+        <CodeBlock lang="bash" code={`uv add envilder\n# or\npip install envilder`} />
+
+        <h3>{t.docs.sdkPythonQuickStart}</h3>
+        <p>{t.docs.sdkPythonQuickStartDesc}</p>
+        <CodeBlock lang="python" code={`from envilder import Envilder
+
+Envilder.load('secrets-map.json')`} />
+
+        <h3>{t.docs.sdkPythonEnvLoading}</h3>
+        <p>{t.docs.sdkPythonEnvLoadingDesc}</p>
+        <CodeBlock lang="python" code={`from envilder import Envilder
+import os
+
+env = os.getenv('APP_ENV', 'development')
+
+Envilder.load(env, {
+    'production': 'prod-secrets.json',
+    'development': 'dev-secrets.json',
+    'test': None,
+})`} />
+
+        <h3>{t.docs.sdkPythonResolve}</h3>
+        <p>{t.docs.sdkPythonResolveDesc}</p>
+        <CodeBlock lang="python" code={`secrets = Envilder.resolve_file('secrets-map.json')`} />
+
+        <h3>{t.docs.sdkPythonFluent}</h3>
+        <p>{t.docs.sdkPythonFluentDesc}</p>
+        <CodeBlock lang="python" code={`from envilder import Envilder, SecretProviderType
+
+secrets = (
+    Envilder.from_file('secrets-map.json')
+    .with_provider(SecretProviderType.AZURE)
+    .with_vault_url('https://my-vault.vault.azure.net')
+    .resolve()
+)`} />
+
+        <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/python" target="_blank" rel="noopener noreferrer">{t.docs.sdkPythonFullDocs}</a></p>
+      </section>
+
       <!-- ───── GITHUB ACTION ───── -->
 
       <section id="gha-setup" class="docs-section">
@@ -672,85 +773,20 @@ jobs:
         <p class="note">{t.docs.azureAccessNote}</p>
       </section>
 
-      <!-- ───── SDKs ───── -->
-
-      <section id="sdk-dotnet" class="docs-section">
-        <h2>{t.docs.sdkDotnetTitle}</h2>
-        <p>{t.docs.sdkDotnetDesc}</p>
-        <div class="sdk-badges">
-          <a class="sdk-badge" href="https://www.nuget.org/packages/Envilder" target="_blank" rel="noopener noreferrer">📦 NuGet v0.1.0</a>
-        </div>
-
-        <h3>{t.docs.sdkDotnetInstall}</h3>
-        <CodeBlock lang="bash" code="dotnet add package Envilder" />
-
-        <h3>{t.docs.sdkDotnetQuickStartConfig}</h3>
-        <p>{t.docs.sdkDotnetQuickStartConfigDesc}</p>
-        <CodeBlock lang="csharp" code={`using Envilder;
-
-var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddEnvilder("secrets-map.json");
-var app = builder.Build();`} />
-
-        <h3>{t.docs.sdkDotnetQuickStartResolve}</h3>
-        <p>{t.docs.sdkDotnetQuickStartResolveDesc}</p>
-        <CodeBlock lang="csharp" code={`using Envilder;
-
-var mapFile = new MapFileParser().Parse(File.ReadAllText("secrets-map.json"));
-var provider = SecretProviderFactory.Create(mapFile.Config);
-var client = new EnvilderClient(provider);
-var secrets = await client.ResolveSecretsAsync(mapFile);
-EnvilderClient.InjectIntoEnvironment(secrets);`} />
-
-        <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/dotnet" target="_blank" rel="noopener noreferrer">{t.docs.sdkDotnetFullDocs}</a></p>
-      </section>
-
-      <section id="sdk-python" class="docs-section">
-        <h2>{t.docs.sdkPythonTitle}</h2>
-        <p>{t.docs.sdkPythonDesc}</p>
-        <div class="sdk-badges">
-          <a class="sdk-badge" href="https://pypi.org/project/envilder/" target="_blank" rel="noopener noreferrer">📦 PyPI v0.2.0</a>
-        </div>
-
-        <h3>{t.docs.sdkPythonInstall}</h3>
-        <CodeBlock lang="bash" code={`uv add envilder\n# or\npip install envilder`} />
-
-        <h3>{t.docs.sdkPythonQuickStart}</h3>
-        <p>{t.docs.sdkPythonQuickStartDesc}</p>
-        <CodeBlock lang="python" code={`from envilder import Envilder
-
-Envilder.load('secrets-map.json')`} />
-
-        <h3>{t.docs.sdkPythonEnvLoading}</h3>
-        <p>{t.docs.sdkPythonEnvLoadingDesc}</p>
-        <CodeBlock lang="python" code={`from envilder import Envilder
-import os
-
-env = os.getenv('APP_ENV', 'development')
-
-Envilder.load(env, {
-    'production': 'prod-secrets.json',
-    'development': 'dev-secrets.json',
-    'test': None,
-})`} />
-
-        <h3>{t.docs.sdkPythonResolve}</h3>
-        <p>{t.docs.sdkPythonResolveDesc}</p>
-        <CodeBlock lang="python" code={`secrets = Envilder.resolve_file('secrets-map.json')`} />
-
-        <h3>{t.docs.sdkPythonFluent}</h3>
-        <p>{t.docs.sdkPythonFluentDesc}</p>
-        <CodeBlock lang="python" code={`from envilder import Envilder, SecretProviderType
-
-secrets = (
-    Envilder.from_file('secrets-map.json')
-    .with_provider(SecretProviderType.AZURE)
-    .with_vault_url('https://my-vault.vault.azure.net')
-    .resolve()
-)`} />
-
-        <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/python" target="_blank" rel="noopener noreferrer">{t.docs.sdkPythonFullDocs}</a></p>
-      </section>
+      <!-- Prev/Next pager -->
+      <nav class="docs-pager" aria-label="Page navigation"
+           data-prev-label={t.docs.pagerPrev}
+           data-next-label={t.docs.pagerNext}
+           data-sections={JSON.stringify(sectionOrder)}>
+        <a href="#" class="pager-link pager-prev" id="pagerPrev" style="visibility:hidden">
+          <span class="pager-dir">← {t.docs.pagerPrev}</span>
+          <span class="pager-title" id="pagerPrevTitle"></span>
+        </a>
+        <a href="#" class="pager-link pager-next" id="pagerNext" style="visibility:hidden">
+          <span class="pager-dir">{t.docs.pagerNext} →</span>
+          <span class="pager-title" id="pagerNextTitle"></span>
+        </a>
+      </nav>
 
     </div>
   </div>
@@ -1160,6 +1196,50 @@ secrets = (
     opacity: 0.7;
   }
 
+  /* ── Pager ── */
+  .docs-pager {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-lg);
+    margin-top: var(--space-3xl);
+    padding-top: var(--space-xl);
+    border-top: 2px solid var(--color-border);
+  }
+
+  .pager-link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    text-decoration: none;
+    transition: border-color var(--transition-fast);
+    max-width: 45%;
+  }
+
+  .pager-link:hover {
+    border-color: var(--color-primary);
+  }
+
+  .pager-next {
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .pager-dir {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+  }
+
+  .pager-title {
+    font-family: var(--font-pixel);
+    font-size: 0.5rem;
+    color: var(--color-primary);
+    line-height: 1.4;
+  }
+
   /* ── Responsive ── */
   @media (max-width: 768px) {
     .docs-layout {
@@ -1193,6 +1273,38 @@ secrets = (
     const sidebarLinks = document.querySelectorAll<HTMLAnchorElement>('.docs-nav a[data-section]');
     const mobileSelect = document.getElementById('docs-section-select') as HTMLSelectElement | null;
 
+    // Pager elements
+    const pagerNav = document.querySelector<HTMLElement>('.docs-pager');
+    const pagerPrev = document.getElementById('pagerPrev') as HTMLAnchorElement | null;
+    const pagerNext = document.getElementById('pagerNext') as HTMLAnchorElement | null;
+    const pagerPrevTitle = document.getElementById('pagerPrevTitle');
+    const pagerNextTitle = document.getElementById('pagerNextTitle');
+    const sectionOrderData: { id: string; label: string }[] = pagerNav
+      ? JSON.parse(pagerNav.dataset.sections || '[]')
+      : [];
+
+    function updatePager(sectionId: string) {
+      const idx = sectionOrderData.findIndex((s) => s.id === sectionId);
+      if (pagerPrev && pagerPrevTitle) {
+        if (idx > 0) {
+          pagerPrev.style.visibility = 'visible';
+          pagerPrev.dataset.target = sectionOrderData[idx - 1].id;
+          pagerPrevTitle.textContent = sectionOrderData[idx - 1].label;
+        } else {
+          pagerPrev.style.visibility = 'hidden';
+        }
+      }
+      if (pagerNext && pagerNextTitle) {
+        if (idx < sectionOrderData.length - 1) {
+          pagerNext.style.visibility = 'visible';
+          pagerNext.dataset.target = sectionOrderData[idx + 1].id;
+          pagerNextTitle.textContent = sectionOrderData[idx + 1].label;
+        } else {
+          pagerNext.style.visibility = 'hidden';
+        }
+      }
+    }
+
     function showSection(sectionId: string) {
       sections.forEach((s) => {
         s.classList.toggle('active', s.id === sectionId);
@@ -1201,6 +1313,7 @@ secrets = (
         a.classList.toggle('active', a.dataset.section === sectionId);
       });
       if (mobileSelect) mobileSelect.value = sectionId;
+      updatePager(sectionId);
       history.replaceState(null, '', `#${sectionId}`);
       // Scroll content area to top
       document.querySelector('.docs-content')?.scrollTo(0, 0);
@@ -1213,6 +1326,15 @@ secrets = (
         e.preventDefault();
         const id = link.dataset.section;
         if (id) showSection(id);
+      });
+    });
+
+    // Pager click
+    [pagerPrev, pagerNext].forEach((btn) => {
+      btn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = btn.dataset.target;
+        if (target) showSection(target);
       });
     });
 

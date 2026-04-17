@@ -730,5 +730,7 @@ export const es: Translations = {
     sdkPythonFluentDesc:
       'Sobreescribe la configuración del proveedor de forma programática con la API fluida:',
     sdkPythonFullDocs: 'Documentación completa →',
+    pagerPrev: 'Anterior',
+    pagerNext: 'Siguiente',
   },
 };

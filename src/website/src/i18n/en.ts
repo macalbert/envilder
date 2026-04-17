@@ -723,5 +723,7 @@ export const en: Translations = {
     sdkPythonFluentDesc:
       'Override provider settings programmatically using the fluent API:',
     sdkPythonFullDocs: 'Full documentation →',
+    pagerPrev: 'Previous',
+    pagerNext: 'Next',
   },
 };

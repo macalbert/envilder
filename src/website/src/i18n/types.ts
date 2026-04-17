@@ -478,6 +478,9 @@ export interface DocsTranslations {
   sdkPythonFluent: string;
   sdkPythonFluentDesc: string;
   sdkPythonFullDocs: string;
+  // Pager
+  pagerPrev: string;
+  pagerNext: string;
 }
 
 export interface HomeMetaTranslations {

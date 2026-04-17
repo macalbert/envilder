@@ -12,16 +12,16 @@ const navLinks = [
   { label: t.nav.features, href: localizedPath(lang, '/#features') },
   { label: t.nav.howItWorks, href: localizedPath(lang, '/#how-it-works') },
   { label: t.nav.providers, href: localizedPath(lang, '/#providers') },
-  { label: t.nav.githubAction, href: localizedPath(lang, '/#github-action') },
   { label: t.nav.sdks, href: localizedPath(lang, '/#sdks') },
+  { label: t.nav.githubAction, href: localizedPath(lang, '/#github-action') },
   { label: t.nav.changelog, href: localizedPath(lang, '/changelog') },
 ];
 
 const docsDropdown = [
   { label: t.nav.docsGettingStarted, hash: 'overview' },
   { label: t.nav.docsCli, hash: 'mapping-file' },
-  { label: t.nav.docsGha, hash: 'gha-setup' },
   { label: t.nav.docsSdks, hash: 'sdk-dotnet' },
+  { label: t.nav.docsGha, hash: 'gha-setup' },
   { label: t.nav.docsReference, hash: 'config-priority' },
 ];
 ---
@@ -42,9 +42,9 @@ const docsDropdown = [
           </li>
         ))}
         <li class="nav-dropdown">
-          <button class="nav-link nav-dropdown-btn" aria-expanded="false">
+          <a href={localizedPath(lang, '/docs')} class="nav-link nav-dropdown-btn" role="button" aria-expanded="false">
             {t.nav.docs} <span class="dropdown-chevron">›</span>
-          </button>
+          </a>
           <ul class="nav-dropdown-menu">
             {docsDropdown.map((item) => (
               <li>
@@ -143,6 +143,7 @@ const docsDropdown = [
     list-style: none;
     gap: var(--space-lg);
     flex: 1;
+    align-items: center;
   }
 
   .nav-link {
@@ -163,19 +164,15 @@ const docsDropdown = [
   }
 
   .nav-dropdown-btn {
-    background: none;
-    border: none;
     cursor: pointer;
-    display: flex;
-    align-items: center;
+    display: inline-flex;
+    align-items: baseline;
     gap: 4px;
-    padding: 0;
   }
 
   .dropdown-chevron {
-    font-size: 0.7rem;
+    font-size: 0.65em;
     transition: transform 0.2s;
-    display: inline-block;
   }
 
   .nav-dropdown-btn[aria-expanded='true'] .dropdown-chevron {
@@ -361,6 +358,7 @@ const docsDropdown = [
   const dropdown = document.querySelector('.nav-dropdown');
   if (dropdownBtn && dropdown) {
     dropdownBtn.addEventListener('click', (e) => {
+      e.preventDefault();
       e.stopPropagation();
       const isOpen = dropdown.classList.toggle('open');
       dropdownBtn.setAttribute('aria-expanded', String(isOpen));
