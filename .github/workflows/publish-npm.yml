@@ -1,23 +1,27 @@
 name: 📦 Publish NPM Package
 
 on:
+  workflow_dispatch:
+
   push:
     branches:
       - main
     paths:
-      - "src/**"
+      - "src/envilder/**"
+      - "tests/envilder/**"
+      - "e2e/**"
       - "package.json"
       - ".github/workflows/publish-npm.yml"
 
-# Add explicit permissions for the GITHUB_TOKEN
 permissions:
-  id-token: write # Required for OIDC
+  id-token: write
   contents: write
   packages: write
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: 🧱 Checkout repository
         uses: actions/checkout@v6
@@ -40,7 +44,19 @@ jobs:
         id: version-check
         run: |
           CURRENT_VERSION=$(node -p "require('./package.json').version")
-          PUBLISHED_VERSION=$(npm view envilder version 2>/dev/null || echo "0.0.0")
+
+          HTTP_CODE=$(curl -s -o /tmp/npm-response.json -w '%{http_code}' \
+            "https://registry.npmjs.org/envilder/latest")
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            PUBLISHED_VERSION=$(jq -r '.version // "0.0.0"' /tmp/npm-response.json)
+          elif [ "$HTTP_CODE" = "404" ]; then
+            echo "Package not found on npm — first publish."
+            PUBLISHED_VERSION="0.0.0"
+          else
+            echo "::error::npm registry returned unexpected HTTP $HTTP_CODE"
+            exit 1
+          fi
 
           echo "Current version: $CURRENT_VERSION, Published version: $PUBLISHED_VERSION"
 
