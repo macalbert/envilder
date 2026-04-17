@@ -120,7 +120,7 @@ For Azure, add `vaultUrl`:
 ## Links
 
 - [Changelog](https://github.com/macalbert/envilder/blob/main/docs/changelogs/sdk-dotnet.md)
-- [Official Website](https://envilder.dev)
+- [Official Website](https://envilder.com)
 
 ## License
 
