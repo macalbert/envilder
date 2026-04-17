@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from botocore.exceptions import ClientError
-from mypy_boto3_ssm import SSMClient
 
 from envilder.domain.ports.secret_provider import ISecretProvider
+
+if TYPE_CHECKING:
+    from mypy_boto3_ssm import SSMClient
 
 
 class AwsSsmSecretProvider(ISecretProvider):

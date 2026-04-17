@@ -1,3 +1,15 @@
+## [0.3.1] - 2026-04-17
+
+### Fixed
+
+* **Remove `mypy-boto3-ssm` runtime dependency** — `AwsSsmSecretProvider` imported
+  `mypy_boto3_ssm.SSMClient` at runtime, but the package is a dev-only type stub.
+  Consumers installing `envilder` from PyPI got `ModuleNotFoundError`. Replaced with
+  `botocore.client.BaseClient` which is already bundled with `boto3`
+  ([#165](https://github.com/macalbert/envilder/pull/165))
+
+---
+
 ## [0.3.0] - 2026-04-17
 
 ### Added
