@@ -1,5 +1,4 @@
 // Resolve secrets from a map file and print them
-#:package AWSSDK.SimpleSystemsManagement@4.*
 #:package Envilder@0.*
 #:property PublishAot=false
 

@@ -8,7 +8,7 @@ from envilder import Envilder, SecretProviderType
 secrets = (
     Envilder.from_file("../../../secrets-map.json")
     .with_provider(SecretProviderType.AWS)
-    .with_profile("my-profile")
+    .with_profile("mac")
     .resolve()
 )
 

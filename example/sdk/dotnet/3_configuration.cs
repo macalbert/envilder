@@ -1,5 +1,4 @@
 // Use Envilder as an IConfiguration source
-#:package AWSSDK.SimpleSystemsManagement@4.*
 #:package Microsoft.Extensions.Configuration@10.*
 #:package Envilder@0.*
 #:property PublishAot=false
