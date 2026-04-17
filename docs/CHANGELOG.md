@@ -8,7 +8,8 @@
   **.NET** ([NuGet](https://www.nuget.org/packages/Envilder)):
 
   ```csharp
-  Envilder.Load("secrets-map.json");
+  builder.Configuration.AddEnvilder(
+      "secrets-map.json", provider);
   ```
 
   **Python** ([PyPI](https://pypi.org/project/envilder)):
