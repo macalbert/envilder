@@ -18,7 +18,7 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
       <span class="codeblock-lang">{lang}</span>
     </div>
   )}
-  <div class="codeblock-body">
+  <div class="codeblock-body" tabindex="0">
     <button
       class="copy-btn"
       data-code={code}
@@ -148,35 +148,42 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
 </style>
 
 <script>
-  document.querySelectorAll<HTMLButtonElement>('.copy-btn').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const code = btn.getAttribute('data-code');
-      if (!code) return;
+  function initCopyButtons() {
+    document.querySelectorAll<HTMLButtonElement>('.copy-btn').forEach((btn) => {
+      if (btn.dataset.copyInit) return;
+      btn.dataset.copyInit = 'true';
+      btn.addEventListener('click', async () => {
+        const code = btn.getAttribute('data-code');
+        if (!code) return;
 
-      try {
-        await navigator.clipboard.writeText(code);
-      } catch {
-        return;
-      }
+        try {
+          await navigator.clipboard.writeText(code);
+        } catch {
+          return;
+        }
 
-      if (typeof window.gtag === 'function') {
-        window.gtag('event', 'copy_code', {
-          event_category: 'engagement',
-          event_label: code.substring(0, 80),
-        });
-      }
+        if (typeof window.gtag === 'function') {
+          window.gtag('event', 'copy_code', {
+            event_category: 'engagement',
+            event_label: code.substring(0, 80),
+          });
+        }
 
-      const copyIcon = btn.querySelector<SVGElement>('.copy-icon');
-      const checkIcon = btn.querySelector<SVGElement>('.check-icon');
-      if (copyIcon) copyIcon.style.display = 'none';
-      if (checkIcon) checkIcon.style.display = 'block';
-      btn.classList.add('copied');
+        const copyIcon = btn.querySelector<SVGElement>('.copy-icon');
+        const checkIcon = btn.querySelector<SVGElement>('.check-icon');
+        if (copyIcon) copyIcon.style.display = 'none';
+        if (checkIcon) checkIcon.style.display = 'block';
+        btn.classList.add('copied');
 
-      setTimeout(() => {
-        if (copyIcon) copyIcon.style.display = 'block';
-        if (checkIcon) checkIcon.style.display = 'none';
-        btn.classList.remove('copied');
-      }, 2000);
+        setTimeout(() => {
+          if (copyIcon) copyIcon.style.display = 'block';
+          if (checkIcon) checkIcon.style.display = 'none';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
     });
-  });
+  }
+
+  initCopyButtons();
+  document.addEventListener('astro:after-swap', initCopyButtons);
 </script>

@@ -328,11 +328,12 @@ class TestEnvilderResolveWithEnvMapping:
             action()
 
     def Should_NotInjectIntoEnvironment_When_Called(
-        self, mock_provider: Mock, env_cleanup: list[str]
+        self,
+        mock_provider: Mock,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         # Arrange
-        env_cleanup.append("LOCALSTACK_AUTH_TOKEN")
-        os.environ.pop("LOCALSTACK_AUTH_TOKEN", None)
+        monkeypatch.delenv("LOCALSTACK_AUTH_TOKEN", raising=False)
         env_mapping: dict[str, str | None] = {
             "production": MAP_FILE,
         }

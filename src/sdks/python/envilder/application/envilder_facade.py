@@ -100,7 +100,10 @@ class Envilder:
             A dict of resolved secrets (``{VAR_NAME: value}``).
 
         Raises:
-            ValueError: If the first argument is empty.
+            ValueError: If the first argument is empty, or if
+                ``env_mapping`` contains an empty or
+                whitespace-only file path for the matched
+                environment.
 
         Examples::
 
@@ -118,7 +121,12 @@ class Envilder:
             if source is not None:
                 return Envilder(source).inject()
             return {}
-        return Envilder(file_path_or_env).inject()
+        file_path = file_path_or_env.strip()
+        if not file_path:
+            raise ValueError(
+                "file_path_or_env must not be empty" " or whitespace only."
+            )
+        return Envilder(file_path).inject()
 
     @overload
     @staticmethod
@@ -161,7 +169,10 @@ class Envilder:
             A dict of resolved secrets (``{VAR_NAME: value}``).
 
         Raises:
-            ValueError: If the first argument is empty.
+            ValueError: If the first argument is empty, or if
+                ``env_mapping`` contains an empty or
+                whitespace-only file path for the matched
+                environment.
 
         Examples::
 
@@ -179,7 +190,12 @@ class Envilder:
             if source is not None:
                 return Envilder(source).resolve()
             return {}
-        return Envilder(file_path_or_env).resolve()
+        file_path = file_path_or_env.strip()
+        if not file_path:
+            raise ValueError(
+                "file_path_or_env must not be empty" " or whitespace only."
+            )
+        return Envilder(file_path).resolve()
 
     def with_provider(self, provider: SecretProviderType) -> Envilder:
         """Override the secret provider (AWS or Azure)."""
