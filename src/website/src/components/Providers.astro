@@ -28,16 +28,14 @@ const t = useTranslations(lang);
           </div>
         </div>
 
-        <CodeBlock lang="json" filename="param-map.json">
-{`{
+        <CodeBlock lang="json" filename="param-map.json" code={`{
   "$config": {
     "provider": "aws",
     "profile": "prod-account"
   },
   "DB_PASSWORD": "/my-app/prod/db-password",
   "API_KEY": "/my-app/prod/api-key"
-}`}
-        </CodeBlock>
+}`} />
 
         <div class="provider-cmd">
           <code>
@@ -60,16 +58,14 @@ const t = useTranslations(lang);
           </div>
         </div>
 
-        <CodeBlock lang="json" filename="param-map.json">
-{`{
+        <CodeBlock lang="json" filename="param-map.json" code={`{
   "$config": {
     "provider": "azure",
     "vaultUrl": "https://my-vault.vault.azure.net"
   },
   "DB_PASSWORD": "my-app-prod-db-password",
   "API_KEY": "my-app-prod-api-key"
-}`}
-        </CodeBlock>
+}`} />
 
         <div class="provider-cmd">
           <code>
@@ -93,16 +89,14 @@ const t = useTranslations(lang);
           </div>
         </div>
 
-        <CodeBlock lang="json" filename="param-map.json">
-{`{
+        <CodeBlock lang="json" filename="param-map.json" code={`{
   "$config": {
     "provider": "gcp",
     "projectId": "my-project-id"
   },
   "DB_PASSWORD": "my-app-prod-db-password",
   "API_KEY": "my-app-prod-api-key"
-}`}
-        </CodeBlock>
+}`} />
 
         <div class="provider-cmd">
           <code>

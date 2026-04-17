@@ -18,6 +18,11 @@ These are **rules**, not guidelines.
 * **Do NOT write comments** except for AAA markers (`# Arrange`, `# Act`, `# Assert`)
 * The test name `Should_X_When_Y` already documents the intent
 
+**Exception — SDK public API:** Code under `src/sdks/*/` that is consumed by
+external developers (e.g. facade classes, public entry points) **SHOULD** have
+docstrings with usage examples. External users rely on IDE tooltips and `help()`.
+This exception does **not** apply to tests or internal helpers.
+
 #### ❌ FORBIDDEN
 
 ```python

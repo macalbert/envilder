@@ -94,6 +94,24 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
         }
       })();
     </script>
+
+    <!-- Google Analytics (gtag.js) — only in production -->
+    <script is:inline>
+      (function() {
+        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') return;
+
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-2SXP5HBC4M';
+        document.head.appendChild(s);
+
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        window.gtag = gtag;
+        gtag('js', new Date());
+        gtag('config', 'G-2SXP5HBC4M', { anonymize_ip: true });
+      })();
+    </script>
   </head>
   <body>
     <a href="#main-content" class="skip-link">{skipText}</a>

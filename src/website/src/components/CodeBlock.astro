@@ -1,10 +1,13 @@
 ---
+import { Code } from 'astro:components';
+
 export interface Props {
   lang?: string;
   filename?: string;
+  code: string;
 }
 
-const { lang = 'json', filename } = Astro.props;
+const { lang = 'json', filename, code } = Astro.props;
 const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
 ---
 
@@ -15,7 +18,28 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
       <span class="codeblock-lang">{lang}</span>
     </div>
   )}
-  <pre class="codeblock-body" tabindex="0"><code><slot /></code></pre>
+  <div class="codeblock-body" tabindex="0">
+    <button
+      class="copy-btn"
+      data-code={code}
+      aria-label="Copy code to clipboard"
+      type="button"
+    >
+      <svg class="copy-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="5.5" y="5.5" width="8" height="8" rx="1" />
+        <path d="M10.5 5.5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2" />
+      </svg>
+      <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+        <path d="M3 8.5l3.5 3.5 6.5-7" />
+      </svg>
+    </button>
+    <Code
+      code={code}
+      lang={lang}
+      themes={{ dark: 'github-dark', light: 'github-light' }}
+      defaultColor="dark"
+    />
+  </div>
 </div>
 
 <style>
@@ -25,7 +49,8 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
     overflow: hidden;
     box-shadow: var(--pixel-shadow);
     max-width: 100%;
-    color: var(--color-code-text, var(--color-text));
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .codeblock-header {
@@ -51,19 +76,114 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
   }
 
   .codeblock-body {
+    position: relative;
     padding: var(--space-lg);
     font-family: var(--font-mono);
     font-size: 0.82rem;
     line-height: 1.8;
     letter-spacing: -0.02em;
-    overflow-x: auto;
-    color: var(--color-code-text, var(--color-text));
     margin: 0;
-    white-space: pre;
   }
 
-  .codeblock-body code {
+  .copy-btn {
+    position: absolute;
+    top: var(--space-sm);
+    right: var(--space-sm);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    padding: 4px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, color 0.2s, background 0.2s;
+    z-index: 1;
+    line-height: 0;
+  }
+
+  .codeblock:hover .copy-btn,
+  .copy-btn:focus-visible {
+    opacity: 1;
+  }
+
+  .copy-btn:hover {
+    color: var(--color-primary);
+    background: var(--color-surface-alt);
+  }
+
+  .copy-btn.copied {
+    color: var(--color-success);
+    opacity: 1;
+  }
+
+  .codeblock-body :global(pre) {
+    background: transparent !important;
+    margin: 0;
+    padding: 0;
     font: inherit;
-    color: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .codeblock-body :global(code) {
+    font: inherit;
+  }
+
+  :global([data-theme="light"]) .codeblock-body :global(span) {
+    color: var(--shiki-light) !important;
+  }
+
+  @media (max-width: 640px) {
+    .codeblock-body {
+      padding: var(--space-md);
+      font-size: 0.72rem;
+      line-height: 1.6;
+    }
+
+    .copy-btn {
+      opacity: 1;
+    }
   }
 </style>
+
+<script>
+  function initCopyButtons() {
+    document.querySelectorAll<HTMLButtonElement>('.copy-btn').forEach((btn) => {
+      if (btn.dataset.copyInit) return;
+      btn.dataset.copyInit = 'true';
+      btn.addEventListener('click', async () => {
+        const code = btn.getAttribute('data-code');
+        if (!code) return;
+
+        try {
+          await navigator.clipboard.writeText(code);
+        } catch {
+          return;
+        }
+
+        if (typeof window.gtag === 'function') {
+          window.gtag('event', 'copy_code', {
+            event_category: 'engagement',
+            event_label: code.substring(0, 80),
+          });
+        }
+
+        const copyIcon = btn.querySelector<SVGElement>('.copy-icon');
+        const checkIcon = btn.querySelector<SVGElement>('.check-icon');
+        if (copyIcon) copyIcon.style.display = 'none';
+        if (checkIcon) checkIcon.style.display = 'block';
+        btn.classList.add('copied');
+
+        setTimeout(() => {
+          if (copyIcon) copyIcon.style.display = 'block';
+          if (checkIcon) checkIcon.style.display = 'none';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    });
+  }
+
+  initCopyButtons();
+  document.addEventListener('astro:after-swap', initCopyButtons);
+</script>

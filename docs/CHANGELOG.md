@@ -1,3 +1,20 @@
+## [0.12.0] - 2026-04-16
+
+### Added
+
+* **Python SDK: environment-based loading** — `Envilder.load(env, env_mapping)` and `Envilder.resolve_file(env, env_mapping)` accept a dictionary mapping environment names to secrets-map file paths (or `None` to skip). Enables environment-aware secret loading without external branching logic ([#163](https://github.com/macalbert/envilder/pull/163))
+* **Python SDK: facade docstrings** — All public methods on the `Envilder` facade now have docstrings with usage examples, improving IDE tooltips and `help()` output for external consumers
+* **Python SDK: source validation** — Empty or whitespace-only file paths in `env_mapping` now raise `ValueError` with a descriptive message including the environment key
+
+### Documentation
+
+* Updated root README Python SDK section with simplified `Envilder.load()` facade and env-mapping example
+* Added "Environment-based loading" section to Python SDK README with `load`/`resolve_file` overloads, behaviour notes, and `os.getenv` pattern
+* Updated python-testing skill with SDK public API docstring exception
+* Added SDK documentation pages to the official website (installation and usage for .NET and Python SDKs)
+
+---
+
 ## [0.11.0] - 2026-04-14
 
 ### Added

@@ -9,7 +9,7 @@ const { lang = 'en' } = Astro.props;
 const t = useTranslations(lang);
 ---
 
-<div class="theme-switcher" role="radiogroup" aria-label="Theme">
+<div class="theme-switcher" role="radiogroup" aria-label={t.theme.ariaTheme}>
   <button
     class="theme-btn"
     data-theme-value="retro"
@@ -120,7 +120,15 @@ const t = useTranslations(lang);
     buttons.forEach((btn) => {
       btn.addEventListener('click', () => {
         const theme = btn.dataset.themeValue;
-        if (theme) applyTheme(theme, true); // explicit user choice → persist
+        if (theme) {
+          applyTheme(theme, true); // explicit user choice → persist
+          if (typeof window.gtag === 'function') {
+            window.gtag('event', 'switch_theme', {
+              event_category: 'engagement',
+              event_label: theme,
+            });
+          }
+        }
       });
     });
   }

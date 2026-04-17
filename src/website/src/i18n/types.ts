@@ -3,14 +3,24 @@ export interface NavLinks {
   howItWorks: string;
   providers: string;
   githubAction: string;
+  sdks: string;
   changelog: string;
   docs: string;
+  docsGettingStarted: string;
+  docsCli: string;
+  docsGha: string;
+  docsSdks: string;
+  docsReference: string;
   getStarted: string;
+  ariaGithub: string;
+  ariaSponsor: string;
+  ariaToggleMenu: string;
 }
 
 export interface ThemeTranslations {
   retro: string;
   light: string;
+  ariaTheme: string;
 }
 
 export interface HeroTranslations {
@@ -69,6 +79,12 @@ export interface HowItWorksTranslations {
   terminalFetched2: string;
   terminalFetched3: string;
   terminalWritten: string;
+  sdkTabPython: string;
+  sdkTabDotnet: string;
+  sdkTabTypescript: string;
+  pushTerminalPushed1: string;
+  pushTerminalPushed2: string;
+  pushTerminalPushed3: string;
 }
 
 export interface FeatureItem {
@@ -131,6 +147,23 @@ export interface GhaTranslations {
   outputDesc: string;
   yes: string;
   no: string;
+}
+
+export interface SdksTranslations {
+  title: string;
+  subtitle: string;
+  pythonTitle: string;
+  pythonDesc: string;
+  dotnetTitle: string;
+  dotnetDesc: string;
+  goTitle: string;
+  goDesc: string;
+  javaTitle: string;
+  javaDesc: string;
+  install: string;
+  available: string;
+  planned: string;
+  docsLink: string;
 }
 
 export interface ChangelogHighlight {
@@ -220,6 +253,11 @@ export interface ChangelogPageTranslations {
   githubReleases: string;
   versions: string;
   backToTop: string;
+  categoryCli: string;
+  categoryGha: string;
+  categorySdks: string;
+  categorySdkDotnet: string;
+  categorySdkPython: string;
 }
 
 export interface DocsTranslations {
@@ -416,6 +454,33 @@ export interface DocsTranslations {
   azureOptionA: string;
   azureOptionB: string;
   azureAccessNote: string;
+  // SDKs
+  sidebarSdks: string;
+  sidebarSdkDotnet: string;
+  sidebarSdkPython: string;
+  sdkDotnetTitle: string;
+  sdkDotnetDesc: string;
+  sdkDotnetInstall: string;
+  sdkDotnetQuickStartConfig: string;
+  sdkDotnetQuickStartConfigDesc: string;
+  sdkDotnetQuickStartResolve: string;
+  sdkDotnetQuickStartResolveDesc: string;
+  sdkDotnetFullDocs: string;
+  sdkPythonTitle: string;
+  sdkPythonDesc: string;
+  sdkPythonInstall: string;
+  sdkPythonQuickStart: string;
+  sdkPythonQuickStartDesc: string;
+  sdkPythonEnvLoading: string;
+  sdkPythonEnvLoadingDesc: string;
+  sdkPythonResolve: string;
+  sdkPythonResolveDesc: string;
+  sdkPythonFluent: string;
+  sdkPythonFluentDesc: string;
+  sdkPythonFullDocs: string;
+  // Pager
+  pagerPrev: string;
+  pagerNext: string;
 }
 
 export interface HomeMetaTranslations {
@@ -441,6 +506,7 @@ export interface Translations {
   demo: DemoTranslations;
   providers: ProvidersTranslations;
   gha: GhaTranslations;
+  sdks: SdksTranslations;
   changelog: ChangelogTranslations;
   roadmap: RoadmapTranslations;
   getStarted: GetStartedTranslations;

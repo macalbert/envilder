@@ -1,0 +1,199 @@
+---
+import { localizedPath, useTranslations } from '../i18n/utils';
+import CodeBlock from './CodeBlock.astro';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+
+const sdkCards = [
+  {
+    title: t.sdks.pythonTitle,
+    desc: t.sdks.pythonDesc,
+    icon: '🐍',
+    install: 'pip install envilder',
+    status: 'available' as const,
+    pkg: 'https://pypi.org/project/envilder/',
+    docsHash: 'sdk-python',
+  },
+  {
+    title: t.sdks.dotnetTitle,
+    desc: t.sdks.dotnetDesc,
+    icon: '🟣',
+    install: 'dotnet add package Envilder',
+    status: 'available' as const,
+    pkg: 'https://www.nuget.org/packages/Envilder',
+    docsHash: 'sdk-dotnet',
+  },
+  {
+    title: t.sdks.goTitle,
+    desc: t.sdks.goDesc,
+    icon: '🔵',
+    install: '',
+    status: 'planned' as const,
+    pkg: '',
+    docsHash: '',
+  },
+  {
+    title: t.sdks.javaTitle,
+    desc: t.sdks.javaDesc,
+    icon: '☕',
+    install: '',
+    status: 'planned' as const,
+    pkg: '',
+    docsHash: '',
+  },
+];
+---
+
+<section class="section" id="sdks">
+  <div class="container">
+    <div class="section-title">
+      <h2><span>{t.sdks.title}</span></h2>
+      <p class="section-subtitle">{t.sdks.subtitle}</p>
+    </div>
+
+    <div class="sdks-grid">
+      {sdkCards.map((sdk) => (
+        <div class={`sdk-card ${sdk.status === 'planned' ? 'sdk-planned' : ''}`}>
+          <div class="sdk-header">
+            <span class="sdk-icon pixel-icon">{sdk.icon}</span>
+            <h3>{sdk.title}</h3>
+            <span class={`badge ${sdk.status === 'available' ? 'badge-primary' : 'badge-muted'}`}>
+              {sdk.status === 'available' ? t.sdks.available : t.sdks.planned}
+            </span>
+          </div>
+          <p class="sdk-desc">{sdk.desc}</p>
+          {sdk.status === 'available' && (
+            <div class="sdk-install">
+              <CodeBlock lang="bash" code={sdk.install} />
+            </div>
+          )}
+          {sdk.status === 'available' && (
+            <div class="sdk-links">
+              <a href={`${localizedPath(lang, '/docs')}#${sdk.docsHash}`} class="sdk-docs-link">
+                {t.sdks.docsLink} →
+              </a>
+              <a href={sdk.pkg} target="_blank" rel="noopener noreferrer" class="sdk-pkg-link">
+                📦
+              </a>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .sdks-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+
+  @media (min-width: 640px) {
+    .sdks-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .sdks-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .sdk-card {
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    transition: border-color var(--transition-fast);
+  }
+
+  .sdk-card:hover {
+    border-color: var(--color-primary);
+  }
+
+  .sdk-planned {
+    opacity: 0.5;
+  }
+
+  .sdk-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+
+  .sdk-header h3 {
+    font-size: 0.65rem;
+    margin: 0;
+    flex: 1;
+  }
+
+  .sdk-icon {
+    font-size: 1.2rem;
+  }
+
+  .badge-muted {
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    padding: 1px var(--space-xs);
+  }
+
+  .sdk-desc {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin: 0;
+    flex: 1;
+  }
+
+  .sdk-install {
+    margin-top: auto;
+  }
+
+  .sdk-install :global(.codeblock) {
+    margin-bottom: 0;
+  }
+
+  .sdk-links {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+  }
+
+  .sdk-docs-link {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: opacity var(--transition-fast);
+  }
+
+  .sdk-docs-link:hover {
+    opacity: 0.7;
+  }
+
+  .sdk-pkg-link {
+    font-size: 0.9rem;
+    text-decoration: none;
+    opacity: 0.5;
+    transition: opacity var(--transition-fast);
+  }
+
+  .sdk-pkg-link:hover {
+    opacity: 1;
+  }
+</style>

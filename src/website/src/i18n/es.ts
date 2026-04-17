@@ -3,41 +3,52 @@ import type { Translations } from './types';
 
 export const es: Translations = {
   homeMeta: {
-    title: 'Envilder — Centraliza tus secretos. Un comando.',
+    title:
+      'Envilder — Un modelo para resolver secretos en cada entorno y runtime.',
     description:
-      'Una herramienta CLI y GitHub Action que centraliza de forma segura las variables de entorno desde AWS SSM, Azure Key Vault o GCP Secret Manager como fuente única de verdad.',
+      'Un sistema de resolución de configuración basado en un modelo. Define los mapeos de secretos una vez y resuélvelos de forma consistente — CLI, CI/CD o runtime de aplicación. Basado en AWS SSM, Azure Key Vault y GCP Secret Manager.',
   },
   nav: {
     features: 'Funcionalidades',
     howItWorks: 'Cómo funciona',
     providers: 'Proveedores',
     githubAction: 'GitHub Action',
+    sdks: 'SDKs',
     changelog: 'Cambios',
     docs: 'Docs',
+    docsGettingStarted: 'Primeros pasos',
+    docsCli: 'CLI',
+    docsGha: 'GitHub Action',
+    docsSdks: 'SDKs',
+    docsReference: 'Referencia',
     getStarted: 'Empezar',
+    ariaGithub: 'GitHub',
+    ariaSponsor: 'Patrocinar',
+    ariaToggleMenu: 'Abrir menú',
   },
   theme: {
     retro: 'Retro',
     light: 'Claro',
+    ariaTheme: 'Tema',
   },
   hero: {
     openSource: 'Código abierto · MIT',
-    title1: 'Tus secretos.',
-    title2: 'Un comando.',
-    titleAccent: 'Cada entorno.',
+    title1: 'Un modelo.',
+    title2: 'Tus secretos.',
+    titleAccent: 'Cada runtime.',
     description:
-      'Una herramienta CLI y GitHub Action que centraliza de forma segura tus variables de entorno desde',
+      'Define los mapeos de secretos una vez y resuélvelos de forma consistente desde',
     descAws: 'AWS SSM',
     descAzure: 'Azure Key Vault',
     descGcp: 'GCP Secret Manager',
     descOr: 'o',
     descComma: ',',
     descSuffix:
-      'como fuente única de verdad. Se acabó copiar y pegar secretos.',
+      '— localmente con la CLI, en CI/CD con la GitHub Action o al iniciar la app con SDKs de runtime.',
     getStarted: '▶ Empezar',
     viewOnGithub: '★ Ver en GitHub',
-    terminalComment1: '# 1. Define tu mapeo',
-    terminalComment2: '# 2. Descarga secretos → genera .env',
+    terminalComment1: '# 1. Un modelo de mapeo para cada entorno',
+    terminalComment2: '# 2. Resuelve secretos con la CLI',
     terminalFetched1: ' Obtenido DB_PASSWORD → ···pass',
     terminalFetched2: ' Obtenido API_KEY     → ···key',
     terminalWritten: ' Archivo de entorno escrito en .env',
@@ -50,109 +61,137 @@ export const es: Translations = {
     localstackAlt: 'LocalStack',
   },
   problemSolution: {
-    title: 'El ',
-    titleAccent: 'problema',
-    titleSuffix: ' con archivos .env',
+    title: 'Por qué la gestión de secretos ',
+    titleAccent: 'está rota',
+    titleSuffix: '',
     subtitle:
-      'Gestionar secretos manualmente no escala. Es inseguro, propenso a errores y crea fricción para todo el equipo.',
+      'Cada equipo, cada etapa, cada runtime gestiona los secretos de forma diferente. Sin estándar. Sin consistencia. Sin confianza.',
     problems: [
       {
         icon: '💀',
-        title: 'Desincronización entre entornos',
+        title: 'Fragmentada entre herramientas',
         description:
-          'Dev, staging y prod tienen secretos diferentes. Los despliegues fallan. Nadie sabe qué .env es el correcto.',
+          'El entorno local usa archivos .env. CI/CD lee de integraciones con vaults. Producción tiene su propio método. Misma app, diferentes flujos de configuración.',
       },
       {
         icon: '📨',
-        title: 'Secretos compartidos por Slack/email',
+        title: 'Secretos compartidos por canales inseguros',
         description:
-          'Claves API enviadas en texto plano por chat. Sin trazabilidad. Sin rotación. Un incidente de seguridad esperando a ocurrir.',
+          'Claves API enviadas por Slack, archivos .env en repositorios, páginas wiki con credenciales en texto plano. Un incidente de seguridad esperando a ocurrir.',
       },
       {
         icon: '🐌',
-        title: 'Onboarding y rotaciones lentas',
+        title: 'El desfase de configuración es inevitable',
         description:
-          '¿Un nuevo miembro se une al equipo? Copia y pega un .env de la máquina de alguien. ¿Alguien rota? Espera que todos actualicen manualmente.',
+          'Sin una fuente única de verdad sobre qué secretos necesita una app. Dev, staging y producción se desincronizan. Los despliegues fallan. Nadie sabe qué config es la correcta.',
       },
     ],
     arrowText: '▼ envilder lo soluciona ▼',
     solutions: [
       {
         icon: '🛡️',
-        title: 'Fuente de verdad en la nube',
+        title: 'Un modelo, una fuente de verdad',
         description:
-          'Todos los secretos viven en AWS SSM o Azure Key Vault. IAM/RBAC controla quién puede leer qué. Cada acceso queda registrado.',
+          'Un único archivo de mapeo define qué secretos necesita tu app. Versionado en Git. Revisable en PRs. El mismo contrato en cada entorno.',
       },
       {
         icon: '⚡',
-        title: 'Un comando, siempre sincronizado',
+        title: 'Resolución consistente en todas partes',
         description:
-          'Ejecuta envilder y tu .env se regenera desde la fuente de verdad. Idempotente. Instantáneo. Sin margen para el desfase.',
+          'CLI para desarrollo local, GitHub Action para CI/CD, SDKs de runtime para el inicio de la app. Mismo mapeo, mismo comportamiento, mismo resultado.',
       },
       {
         icon: '🤖',
-        title: 'Automatizado en CI/CD',
+        title: 'Tu nube, sin intermediarios',
         description:
-          'Usa la GitHub Action para obtener secretos en el momento del despliegue. Sin secretos en los repos. Sin pasos manuales en los pipelines.',
+          'AWS SSM, Azure Key Vault o GCP. Sin proxy SaaS. Los secretos se quedan en tu infraestructura. Control de acceso nativo IAM/RBAC.',
       },
     ],
   },
   howItWorks: {
     title: 'Cómo ',
     titleAccent: 'funciona',
-    subtitle: 'Define. Descarga. Listo.',
+    subtitle: 'Define. Resuelve. Despliega.',
     stepLabel: 'PASO',
     steps: [
       {
-        title: 'Escribe un param-map.json',
+        title: 'Define el modelo de mapeo',
         description:
-          'Un archivo JSON que mapea nombres de variables de entorno a sus rutas en SSM o nombres de secretos en Key Vault. Confírmalo. Revísalo en PRs. Diferéncialo entre entornos. Es la única configuración que necesitas.',
+          'Un archivo JSON que mapea nombres de variables de entorno a rutas de secretos en la nube. Haz commit. Revísalo en PRs. Compara entre entornos. Un modelo para cada etapa y runtime.',
       },
       {
-        title: 'Ejecuta envilder',
+        title: 'Resuelve con la CLI',
         description:
-          'Un comando obtiene cada secreto de tu vault en la nube y los escribe en .env. Sin copiar manualmente. Sin desfases. Repetible en cualquier lugar — localmente, en CI o en una máquina nueva.',
+          'Un comando obtiene cada secreto de tu vault en la nube y los escribe en .env. Úsalo localmente o en scripts. Mismo mapeo, mismo comportamiento.',
       },
       {
-        title: '.env escrito. Los secretos se quedan en el vault.',
+        title: 'Carga en runtime con SDKs',
         description:
-          'Un archivo .env limpio, generado bajo demanda desde datos del vault en tiempo real. Úsalo localmente, descárgalo en el despliegue con la GitHub Action o evita el archivo con --exec.',
+          'Sáltate el archivo .env por completo. Carga secretos directamente en tu aplicación al iniciar con SDKs nativos — Python, .NET, TypeScript y más.',
+      },
+      {
+        title: 'Push desde dev al vault',
+        description:
+          '¿Necesitas añadir o rotar un secreto? Sube valores desde tu entorno local al proveedor en la nube. Sin necesidad de consola.',
+      },
+      {
+        title: 'Los secretos se quedan en tu vault',
+        description:
+          'Sin intermediarios. Tu nube gestiona el almacenamiento, la rotación y el control de acceso. Envilder resuelve — nunca almacena.',
       },
     ],
     terminalFetched1: '✔ Obtenido DB_PASSWORD  → ···word',
     terminalFetched2: '✔ Obtenido API_KEY      → ···key',
     terminalFetched3: '✔ Obtenido SECRET_TOKEN → ···oken',
     terminalWritten: '✔ Archivo de entorno escrito en .env',
+    sdkTabPython: 'Python',
+    sdkTabDotnet: '.NET',
+    sdkTabTypescript: 'TypeScript',
+    pushTerminalPushed1: '✔ Subido DB_PASSWORD  → /my-app/prod/db-password',
+    pushTerminalPushed2: '✔ Subido API_KEY      → /my-app/prod/api-key',
+    pushTerminalPushed3: '✔ Subido SECRET_TOKEN → /my-app/prod/secret-token',
   },
   features: {
     title: 'Hecho para ',
     titleAccent: 'equipos reales',
     subtitle:
-      'Todo lo que necesitas para gestionar secretos de entorno de forma segura y a escala.',
+      'Un sistema de resolución de configuración diseñado para seguridad, consistencia y ejecución multi-runtime.',
     features: [
+      {
+        icon: '📋',
+        title: 'Modelo de mapeo único',
+        description:
+          'Un contrato JSON define todos los secretos. Versionado en Git, revisable en PRs, comparable entre entornos. El modelo es el producto.',
+      },
+      {
+        icon: '🔌',
+        title: 'SDKs de runtime',
+        description:
+          'Carga secretos directamente en memoria al iniciar la app — Python, .NET, TypeScript, Go, Java. Sin archivos .env en disco. Sin secretos residuales.',
+      },
       {
         icon: '☁️',
         title: 'Multi-Proveedor',
         description:
-          'AWS SSM, Azure Key Vault y GCP Secret Manager (próximamente). Elige con --provider o $config en tu archivo de mapeo.',
-      },
-      {
-        icon: '🔄',
-        title: 'Sincronización bidireccional',
-        description:
-          'Obtén secretos en archivos .env o sube valores .env a tu proveedor en la nube. Soporte completo de ida y vuelta.',
+          'AWS SSM, Azure Key Vault y GCP Secret Manager (próximamente). Tu nube, tus reglas. Sin dependencia de proveedor.',
       },
       {
         icon: '⚙️',
         title: 'GitHub Action',
         description:
-          'Action para tus workflows CI/CD. Obtén secretos en el momento del despliegue sin intervención manual.',
+          'Obtiene secretos en workflows CI/CD. Mismo mapeo, cero intervención manual. Integración directa.',
+      },
+      {
+        icon: '🔄',
+        title: 'Sincronización bidireccional',
+        description:
+          'Obtiene secretos en archivos .env o sube valores .env a tu proveedor en la nube. Soporte completo de ida y vuelta vía CLI.',
       },
       {
         icon: '🔒',
         title: 'Acceso IAM y RBAC',
         description:
-          'Aprovecha el control de acceso nativo de la nube. Las políticas IAM de AWS o RBAC de Azure definen quién lee qué, por entorno.',
+          'Control de acceso nativo de la nube. Las políticas IAM de AWS o RBAC de Azure definen quién lee qué. Sin capa de auth extra.',
       },
       {
         icon: '📊',
@@ -161,29 +200,16 @@ export const es: Translations = {
           'Cada lectura y escritura queda registrada en AWS CloudTrail o Azure Monitor. Trazabilidad completa de quién accedió a qué y cuándo.',
       },
       {
-        icon: '🔁',
-        title: 'Sincronización idempotente',
-        description:
-          'Solo se actualiza lo que hay en tu mapeo. Nada más se toca. Ejecútalo diez veces — mismo resultado, cero efectos secundarios.',
-      },
-      {
         icon: '🧱',
         title: 'Cero infraestructura',
         description:
-          'Construido sobre servicios nativos de la nube. Sin Lambdas, sin servidores, sin infraestructura extra que gestionar o pagar.',
+          'Sin servidores, sin proxies, sin SaaS. Construido sobre servicios nativos de la nube que ya usas y pagas.',
       },
       {
         icon: '👤',
         title: 'Soporte de perfiles AWS',
         description:
           '¿Configuración multi-cuenta? Usa --profile para cambiar entre perfiles AWS CLI. Perfecto para entornos multi-etapa.',
-      },
-      {
-        icon: '🔌',
-        title: 'SDKs en tiempo real',
-        description:
-          'Carga secretos directamente en tu app al iniciar — TypeScript, Python, Go, .NET, Java. Sin archivos .env, sin intermediarios.',
-        badge: 'Próximamente',
       },
     ],
   },
@@ -250,6 +276,25 @@ export const es: Translations = {
     outputDesc: 'Ruta al archivo .env generado',
     yes: 'Sí',
     no: 'No',
+  },
+  sdks: {
+    title: 'SDKs en tiempo de ejecución',
+    subtitle:
+      'Carga secretos directamente en tu aplicación al arrancar. Sin archivos .env, sin intermediarios — solo tu vault en la nube y tu código.',
+    pythonTitle: 'Python',
+    pythonDesc:
+      'Carga secretos con una línea. Compatible con AWS SSM y Azure Key Vault.',
+    dotnetTitle: '.NET',
+    dotnetDesc:
+      'Integración nativa con IConfiguration. Resuelve secretos al arrancar.',
+    goTitle: 'Go',
+    goDesc: 'Carga ligera de secretos para servicios Go.',
+    javaTitle: 'Java',
+    javaDesc: 'Soporte para Spring Boot y Java standalone.',
+    install: 'Instalar',
+    available: 'Disponible',
+    planned: 'Planificado',
+    docsLink: 'Ver docs',
   },
   changelog: {
     title: 'Qué hay de ',
@@ -321,18 +366,25 @@ export const es: Translations = {
           'Web de docs dedicada con guías, ejemplos y referencia API',
       },
       {
+        status: 'done',
+        label: '✅',
+        title: 'Python SDK (envilder)',
+        description:
+          'Librería para Django/FastAPI/pipelines de datos. Publicado en PyPI',
+      },
+      {
+        status: 'done',
+        label: '✅',
+        title: '.NET SDK (Envilder)',
+        description:
+          'Librería para apps enterprise y Azure-native. Publicado en NuGet',
+      },
+      {
         status: 'next',
         label: '📦',
         title: 'TypeScript SDK (@envilder/sdk)',
         description:
           'Librería nativa de ejecución — cargará secretos directamente en process.env desde un map-file. Se publicará en npm',
-      },
-      {
-        status: 'next',
-        label: '🐍',
-        title: 'Python SDK (envilder)',
-        description:
-          'Librería para Django/FastAPI/pipelines de datos. Se publicará en PyPI',
       },
       {
         status: 'next',
@@ -343,13 +395,6 @@ export const es: Translations = {
       },
       {
         status: 'next',
-        label: '🔵',
-        title: '.NET SDK (Envilder)',
-        description:
-          'Librería para apps enterprise y Azure-native. Se publicará en NuGet',
-      },
-      {
-        status: 'next',
         label: '☕',
         title: 'Java SDK (envilder)',
         description:
@@ -357,15 +402,15 @@ export const es: Translations = {
       },
       {
         status: 'planned',
-        label: '⚡',
-        title: 'Modo exec (--exec)',
-        description: 'Inyecta secretos en un proceso hijo sin escribir a disco',
-      },
-      {
-        status: 'planned',
         label: '☁️',
         title: 'GCP Secret Manager',
         description: 'Tercer proveedor cloud — completa el tridente multi-nube',
+      },
+      {
+        status: 'planned',
+        label: '⚡',
+        title: 'Modo exec (--exec)',
+        description: 'Inyecta secretos en un proceso hijo sin escribir a disco',
       },
       {
         status: 'planned',
@@ -409,7 +454,7 @@ export const es: Translations = {
   },
   footer: {
     tagline:
-      'Centraliza de forma segura tus variables de entorno desde AWS SSM, Azure Key Vault o GCP Secret Manager.',
+      'Un modelo de configuración para resolver secretos de forma consistente en todos los entornos y runtimes. Basado en tu infraestructura cloud existente.',
     project: 'Proyecto',
     documentation: 'Documentación',
     community: 'Comunidad',
@@ -439,6 +484,11 @@ export const es: Translations = {
     githubReleases: 'Versiones en GitHub',
     versions: 'Versiones',
     backToTop: 'Volver arriba',
+    categoryCli: 'CLI',
+    categoryGha: 'GitHub Action',
+    categorySdks: 'SDKs',
+    categorySdkDotnet: '.NET',
+    categorySdkPython: 'Python',
   },
   docs: {
     title: 'Docs Envilder | CLI, GitHub Action y AWS SSM',
@@ -467,11 +517,11 @@ export const es: Translations = {
     sidebarAzureSetup: 'Configuración Azure',
     overviewTitle: '¿Qué es Envilder?',
     overviewDesc:
-      'Envilder es una herramienta CLI y GitHub Action que descarga variables de entorno de un almacén de secretos en la nube (AWS SSM Parameter Store o Azure Key Vault) y las escribe en un archivo .env local — o las sube de vuelta. Defines un simple mapeo JSON entre nombres de variables y rutas de secretos, y Envilder hace el resto.',
+      'Envilder es un sistema de resolución de configuración basado en un modelo. Defines un mapeo JSON entre nombres de variables y rutas de secretos en la nube, y Envilder los resuelve de forma consistente — vía la CLI para desarrollo local, la GitHub Action para CI/CD o los SDKs de runtime para el inicio de la aplicación. Funciona con AWS SSM Parameter Store y Azure Key Vault.',
     overviewProblem:
-      'Sin Envilder, los equipos copian secretos a mano, los guardan en archivos .env en texto plano en el repositorio, o mantienen scripts de shell frágiles por cada entorno. Esto lleva a credenciales filtradas, configuraciones inconsistentes e incorporaciones lentas.',
+      'Sin Envilder, los equipos fragmentan la gestión de secretos entre herramientas y etapas. El entorno local usa archivos .env, CI/CD lee de integraciones con vaults, producción tiene su propio método. Esto provoca desfase de configuración, credenciales filtradas e incorporaciones lentas.',
     overviewSolution:
-      'Con Envilder, un archivo param-map.json es la fuente única de verdad. Los secretos no salen del almacén hasta el momento de ejecución, cada entorno usa el mismo mapeo, y un nuevo desarrollador está operativo con un solo comando.',
+      'Con Envilder, un modelo de mapeo es la fuente única de verdad. Los secretos se resuelven desde tu vault en la nube bajo demanda — mismo contrato, mismo comportamiento, ya sea ejecutando la CLI localmente, la GitHub Action en CI o un SDK al iniciar la app.',
     reqTitle: 'Requisitos',
     reqNode: 'Node.js v20+',
     reqAws: 'AWS CLI',
@@ -652,5 +702,40 @@ export const es: Translations = {
     azureOptionB: 'Opción B — Vault Access Policy',
     azureAccessNote:
       'Para acceso solo de lectura, get list es suficiente. Añade set para push.',
+    // SDKs
+    sidebarSdks: 'SDKs',
+    sidebarSdkDotnet: '.NET SDK',
+    sidebarSdkPython: 'Python SDK',
+    sdkDotnetTitle: '.NET SDK',
+    sdkDotnetDesc:
+      'Carga secretos directamente en tu aplicación .NET al inicio. Se integra con IConfiguration o resuelve secretos de forma programática.',
+    sdkDotnetInstall: 'Instalación',
+    sdkDotnetQuickStartConfig: 'Inicio rápido — cargar en IConfiguration',
+    sdkDotnetQuickStartConfigDesc:
+      'Añade Envilder como fuente de configuración en tu aplicación ASP.NET:',
+    sdkDotnetQuickStartResolve:
+      'Inicio rápido — resolver + inyectar en el entorno',
+    sdkDotnetQuickStartResolveDesc:
+      'Analiza el archivo de mapeo, resuelve secretos e inyéctalos en las variables de entorno:',
+    sdkDotnetFullDocs: 'Documentación completa →',
+    sdkPythonTitle: 'Python SDK',
+    sdkPythonDesc:
+      'Carga secretos directamente en tu aplicación Python al inicio. Configuración en una línea o control detallado con el constructor fluido.',
+    sdkPythonInstall: 'Instalación',
+    sdkPythonQuickStart: 'Inicio rápido — una línea',
+    sdkPythonQuickStartDesc:
+      'Carga secretos desde un archivo de mapeo e inyéctalos en el entorno:',
+    sdkPythonEnvLoading: 'Carga basada en entorno',
+    sdkPythonEnvLoadingDesc:
+      'Recomendado para aplicaciones multi-entorno. Mapea cada entorno a su archivo de secretos:',
+    sdkPythonResolve: 'Resolver sin inyectar',
+    sdkPythonResolveDesc:
+      'Obtén secretos como un diccionario sin modificar el entorno:',
+    sdkPythonFluent: 'Constructor fluido con sobreescrituras',
+    sdkPythonFluentDesc:
+      'Sobreescribe la configuración del proveedor de forma programática con la API fluida:',
+    sdkPythonFullDocs: 'Documentación completa →',
+    pagerPrev: 'Anterior',
+    pagerNext: 'Siguiente',
   },
 };

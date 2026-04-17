@@ -9,11 +9,38 @@ import { changelogToHtml, extractVersions } from '../../utils/markdown';
 const lang = 'es';
 const t = useTranslations(lang);
 
-const rawContent: string =
-  __CHANGELOG_CONTENT__ ||
-  '# Changelog\n\nChangelog not available. See [GitHub Releases](https://github.com/macalbert/envilder/releases).';
-const changelogHtml = changelogToHtml(rawContent);
-const versions = extractVersions(rawContent);
+const fallback = '# Changelog\n\nNo releases yet.';
+
+const products = [
+  {
+    id: 'cli',
+    label: t.changelogPage.categoryCli,
+    raw: __CHANGELOG_CLI__ || fallback,
+  },
+  {
+    id: 'sdk-dotnet',
+    label: t.changelogPage.categorySdkDotnet,
+    raw: __CHANGELOG_SDK_DOTNET__ || fallback,
+    group: 'sdks',
+  },
+  {
+    id: 'sdk-python',
+    label: t.changelogPage.categorySdkPython,
+    raw: __CHANGELOG_SDK_PYTHON__ || fallback,
+    group: 'sdks',
+  },
+  {
+    id: 'gha',
+    label: t.changelogPage.categoryGha,
+    raw: __CHANGELOG_GHA__ || fallback,
+  },
+];
+
+const parsed = products.map((p) => ({
+  ...p,
+  html: changelogToHtml(p.raw),
+  versions: extractVersions(p.raw),
+}));
 ---
 
 <BaseLayout
@@ -26,17 +53,112 @@ const versions = extractVersions(rawContent);
 
       <aside class="changelog-sidebar">
         <nav class="version-nav">
-          <p class="nav-section-title">{t.changelogPage.versions}</p>
-          <ul>
-            {versions.map((v) => (
-              <li>
-                <a href={`#${v.id}`}>
-                  <span class="version-link-tag">{v.tag}</span>
-                  {v.date && <span class="version-link-date">{v.date}</span>}
-                </a>
-              </li>
-            ))}
-          </ul>
+          {/* ── Mobile product selector ── */}
+          <div class="product-selector-mobile">
+            <select id="product-select-mobile" aria-label={t.changelogPage.versions}>
+              {parsed.map((p) => (
+                <option value={p.id}>
+                  {p.group === 'sdks' ? `SDK → ${p.label}` : p.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* ── Desktop sidebar ── */}
+          <div class="product-nav-desktop">
+            {/* CLI */}
+            <p class="nav-group-title nav-group-first">{t.changelogPage.categoryCli}</p>
+            <button
+              class="nav-product-btn nav-product-nested active"
+              data-product="cli"
+              aria-pressed="true"
+              aria-expanded="true"
+            >
+              <span class="nav-product-chevron">›</span>
+              {t.changelogPage.versions}
+              <span class="nav-product-count">{parsed[0].versions.length}</span>
+            </button>
+            <ul class="version-list" data-versions="cli">
+              {parsed[0].versions.map((v) => (
+                <li>
+                  <a href={`#cli-${v.id}`} data-product="cli">
+                    <span class="version-link-tag">{v.tag}</span>
+                    {v.date && <span class="version-link-date">{v.date}</span>}
+                  </a>
+                </li>
+              ))}
+            </ul>
+
+            {/* SDKs group */}
+            <p class="nav-group-title">{t.changelogPage.categorySdks}</p>
+
+            {/* .NET */}
+            <button
+              class="nav-product-btn nav-product-nested"
+              data-product="sdk-dotnet"
+              aria-pressed="false"
+              aria-expanded="false"
+            >
+              <span class="nav-product-chevron">›</span>
+              {t.changelogPage.categorySdkDotnet}
+              <span class="nav-product-count">{parsed[1].versions.length}</span>
+            </button>
+            <ul class="version-list collapsed" data-versions="sdk-dotnet">
+              {parsed[1].versions.map((v) => (
+                <li>
+                  <a href={`#sdk-dotnet-${v.id}`} data-product="sdk-dotnet">
+                    <span class="version-link-tag">{v.tag}</span>
+                    {v.date && <span class="version-link-date">{v.date}</span>}
+                  </a>
+                </li>
+              ))}
+            </ul>
+
+            {/* Python */}
+            <button
+              class="nav-product-btn nav-product-nested"
+              data-product="sdk-python"
+              aria-pressed="false"
+              aria-expanded="false"
+            >
+              <span class="nav-product-chevron">›</span>
+              {t.changelogPage.categorySdkPython}
+              <span class="nav-product-count">{parsed[2].versions.length}</span>
+            </button>
+            <ul class="version-list collapsed" data-versions="sdk-python">
+              {parsed[2].versions.map((v) => (
+                <li>
+                  <a href={`#sdk-python-${v.id}`} data-product="sdk-python">
+                    <span class="version-link-tag">{v.tag}</span>
+                    {v.date && <span class="version-link-date">{v.date}</span>}
+                  </a>
+                </li>
+              ))}
+            </ul>
+
+            {/* GHA */}
+            <p class="nav-group-title">{t.changelogPage.categoryGha}</p>
+            <button
+              class="nav-product-btn nav-product-nested"
+              data-product="gha"
+              aria-pressed="false"
+              aria-expanded="false"
+            >
+              <span class="nav-product-chevron">›</span>
+              {t.changelogPage.versions}
+              <span class="nav-product-count">{parsed[3].versions.length}</span>
+            </button>
+            <ul class="version-list collapsed" data-versions="gha">
+              {parsed[3].versions.map((v) => (
+                <li>
+                  <a href={`#gha-${v.id}`} data-product="gha">
+                    <span class="version-link-tag">{v.tag}</span>
+                    {v.date && <span class="version-link-date">{v.date}</span>}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </nav>
       </aside>
 
@@ -51,7 +173,15 @@ const versions = extractVersions(rawContent);
             </a>.
           </p>
         </div>
-        <article class="changelog-content" set:html={changelogHtml} />
+
+        {parsed.map((p, i) => (
+          <article
+            class="changelog-content"
+            data-changelog={p.id}
+            style={i > 0 ? 'display:none' : ''}
+            set:html={p.html}
+          />
+        ))}
       </div>
 
     </div>
@@ -60,12 +190,62 @@ const versions = extractVersions(rawContent);
   <Footer lang={lang} />
 </BaseLayout>
 
+<script>
+  function initChangelogNav() {
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.nav-product-btn');
+    const articles = document.querySelectorAll<HTMLElement>('.changelog-content[data-changelog]');
+    const versionLists = document.querySelectorAll<HTMLElement>('.version-list[data-versions]');
+    const mobileSelect = document.getElementById('product-select-mobile') as HTMLSelectElement | null;
+
+    function switchProduct(productId: string) {
+      buttons.forEach((btn) => {
+        const isActive = btn.dataset.product === productId;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-pressed', String(isActive));
+        btn.setAttribute('aria-expanded', String(isActive));
+      });
+
+      versionLists.forEach((ul) => {
+        ul.classList.toggle('collapsed', ul.dataset.versions !== productId);
+      });
+
+      articles.forEach((article) => {
+        article.style.display = article.dataset.changelog === productId ? '' : 'none';
+      });
+
+      if (mobileSelect && mobileSelect.value !== productId) {
+        mobileSelect.value = productId;
+      }
+    }
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (btn.dataset.product) switchProduct(btn.dataset.product);
+      });
+    });
+
+    mobileSelect?.addEventListener('change', () => {
+      switchProduct(mobileSelect.value);
+    });
+
+    // Handle version link clicks — ensure correct product is active
+    document.querySelectorAll<HTMLAnchorElement>('.version-list a[data-product]').forEach((link) => {
+      link.addEventListener('click', () => {
+        if (link.dataset.product) switchProduct(link.dataset.product);
+      });
+    });
+  }
+
+  initChangelogNav();
+  document.addEventListener('astro:after-swap', initChangelogNav);
+</script>
 <style>
   .changelog-page {
     padding-top: calc(var(--nav-height) + var(--space-3xl));
     padding-bottom: var(--space-4xl);
   }
 
+  /* ── Two-column layout ── */
   .changelog-layout {
     display: grid;
     grid-template-columns: 1fr;
@@ -74,17 +254,44 @@ const versions = extractVersions(rawContent);
 
   @media (min-width: 900px) {
     .changelog-layout {
-      grid-template-columns: 200px 1fr;
+      grid-template-columns: 220px 1fr;
     }
   }
 
+  /* ── Sidebar ── */
   .changelog-sidebar {
+    /* Mobile: show the dropdown selector only */
+  }
+
+  .product-selector-mobile {
+    margin-bottom: var(--space-lg);
+  }
+
+  .product-selector-mobile select {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    cursor: pointer;
+  }
+
+  .product-nav-desktop {
     display: none;
   }
 
   @media (min-width: 900px) {
-    .changelog-sidebar {
+    .product-selector-mobile {
+      display: none;
+    }
+
+    .product-nav-desktop {
       display: block;
+    }
+
+    .changelog-sidebar {
       position: sticky;
       top: calc(var(--nav-height) + var(--space-xl));
       align-self: start;
@@ -94,38 +301,123 @@ const versions = extractVersions(rawContent);
     }
   }
 
-  .nav-section-title {
+  /* ── Product nav buttons ── */
+  .nav-product-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-left: 3px solid transparent;
+    padding: var(--space-sm) var(--space-md);
     font-family: var(--font-pixel);
-    font-size: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--color-text-dim);
-    margin-bottom: var(--space-md);
+    font-size: 0.55rem;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    letter-spacing: 0.05em;
   }
 
-  .version-nav ul {
+  .nav-product-chevron {
+    display: inline-block;
+    font-size: 0.7rem;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+    width: 0.7rem;
+    text-align: center;
+  }
+
+  .nav-product-btn.active .nav-product-chevron {
+    transform: rotate(90deg);
+  }
+
+  .nav-product-count {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--color-text-dim);
+    opacity: 0.6;
+  }
+
+  .nav-product-btn:hover {
+    color: var(--color-primary);
+    border-left-color: var(--color-primary);
+    background: var(--color-surface);
+  }
+
+  .nav-product-btn.active {
+    color: var(--color-primary);
+    border-left-color: var(--color-primary);
+    background: var(--color-surface);
+  }
+
+  .nav-product-nested {
+    padding-left: calc(var(--space-md) + var(--space-sm));
+    font-size: 0.5rem;
+  }
+
+  /* ── Group title (SDKs) ── */
+  .nav-group-title {
+    font-family: var(--font-pixel);
+    font-size: 0.45rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-primary);
+    margin-top: var(--space-lg);
+    margin-bottom: var(--space-xs);
+    padding: var(--space-xs) var(--space-md) var(--space-sm);
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  .nav-group-first {
+    margin-top: 0;
+  }
+
+  /* ── Version lists ── */
+  .version-list {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
+    margin-bottom: var(--space-xs);
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: max-height 0.25s ease, opacity 0.2s ease, margin 0.25s ease;
+    opacity: 1;
   }
 
-  .version-nav a {
+  .version-list.collapsed {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    margin-bottom: 0;
+  }
+
+  .version-list li {
+    display: flex;
+    align-items: baseline;
+  }
+
+  .version-list a {
     display: flex;
     align-items: baseline;
     gap: var(--space-sm);
     padding: var(--space-xs) var(--space-sm);
+    padding-left: calc(var(--space-md) + var(--space-sm));
     font-family: var(--font-mono);
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     color: var(--color-text-muted);
     text-decoration: none;
-    border-left: 2px solid transparent;
     transition: all var(--transition-fast);
+    flex: 1;
+    min-width: 0;
   }
 
-  .version-nav a:hover {
+  .version-list a:hover {
     color: var(--color-primary);
-    border-left-color: var(--color-primary);
     background: var(--color-surface);
   }
 
@@ -134,10 +426,11 @@ const versions = extractVersions(rawContent);
   }
 
   .version-link-date {
-    font-size: 0.68rem;
+    font-size: 0.62rem;
     color: var(--color-text-dim);
   }
 
+  /* ── Header ── */
   .changelog-header {
     margin-bottom: var(--space-3xl);
   }
@@ -171,6 +464,7 @@ const versions = extractVersions(rawContent);
     color: var(--color-secondary);
   }
 
+  /* ── Article content ── */
   .changelog-content {
     max-width: 800px;
   }
@@ -245,7 +539,7 @@ const versions = extractVersions(rawContent);
   }
 
   .changelog-content :global(li::before) {
-    content: '\203A';
+    content: '›';
     position: absolute;
     left: var(--space-sm);
     color: var(--color-primary);

@@ -1,6 +1,6 @@
 # Envilder Python SDK
 
-[![Coverage Report](https://img.shields.io/badge/coverage-report-green.svg)](https://macalbert.github.io/envilder/)
+[![Coverage Report](https://img.shields.io/badge/coverage-report-green.svg)](https://macalbert.github.io/envilder/python/)
 [![PyPI version](https://img.shields.io/pypi/v/envilder.svg)](https://pypi.org/project/envilder/)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/macalbert/envilder/blob/main/LICENSE)
 
@@ -18,6 +18,8 @@ Part of the [Envilder](https://github.com/macalbert/envilder) project.
 ## Install
 
 ```bash
+uv add envilder
+# or
 pip install envilder
 ```
 
@@ -67,6 +69,43 @@ secrets = (
     .inject()
 )
 ```
+
+### Environment-based loading
+
+Route secret loading based on your current environment. Each environment
+maps to its own secrets file (or `None` to skip loading):
+
+```python
+from envilder import Envilder
+import os
+
+env = os.getenv('APP_ENV', 'development')
+
+# Resolve + inject into os.environ
+Envilder.load(env, {
+    'production': 'prod-secrets.json',
+    'development': 'dev-secrets.json',
+    'test': None,  # no secrets loaded
+})
+```
+
+Resolve without injecting:
+
+```python
+secrets = Envilder.resolve_file(env, {
+    'production': 'prod-secrets.json',
+    'development': 'dev-secrets.json',
+    'test': None,
+})
+```
+
+Behaviour:
+
+- If the environment maps to a file path, secrets are loaded from that file.
+- If the environment maps to `None` or is not in the mapping, an empty dict
+  is returned silently — no errors, no output.
+- The environment name is stripped of leading/trailing whitespace before lookup.
+- Empty or whitespace-only environment names raise `ValueError`.
 
 ### Advanced usage
 
@@ -125,6 +164,11 @@ For Azure, add `vaultUrl`:
   "API_KEY": "api-key"
 }
 ```
+
+## Links
+
+- [Changelog](https://github.com/macalbert/envilder/blob/main/docs/changelogs/sdk-python.md)
+- [Official Website](https://envilder.com)
 
 ## License
 

@@ -155,3 +155,195 @@ class TestEnvilderValidation:
         # Assert
         with pytest.raises(ValueError, match="file_path"):
             action()
+
+
+class TestEnvilderLoadWithEnvMapping:
+    def Should_ReturnSecrets_When_EnvironmentHasValidSource(
+        self, mock_provider: Mock
+    ) -> None:
+        # Arrange
+        env_mapping: dict[str, str | None] = {
+            "production": MAP_FILE,
+            "test": None,
+        }
+
+        # Act
+        with patch(
+            "envilder.application.envilder_facade.SecretProviderFactory.create",
+            return_value=mock_provider,
+        ):
+            actual = Envilder.load("production", env_mapping)
+
+        # Assert
+        assert actual["LOCALSTACK_AUTH_TOKEN"] == "test-auth-token"
+
+    def Should_ReturnSecrets_When_EnvironmentHasSurroundingWhitespace(
+        self, mock_provider: Mock
+    ) -> None:
+        # Arrange
+        env_mapping: dict[str, str | None] = {
+            "production": MAP_FILE,
+            "test": None,
+        }
+
+        # Act
+        with patch(
+            "envilder.application.envilder_facade.SecretProviderFactory.create",
+            return_value=mock_provider,
+        ):
+            actual = Envilder.load(" production ", env_mapping)
+
+        # Assert
+        assert actual["LOCALSTACK_AUTH_TOKEN"] == "test-auth-token"
+
+    def Should_InjectIntoEnvironment_When_EnvironmentHasValidSource(
+        self, mock_provider: Mock, env_cleanup: list[str]
+    ) -> None:
+        # Arrange
+        env_cleanup.append("LOCALSTACK_AUTH_TOKEN")
+        env_mapping: dict[str, str | None] = {
+            "production": MAP_FILE,
+        }
+
+        # Act
+        with patch(
+            "envilder.application.envilder_facade.SecretProviderFactory.create",
+            return_value=mock_provider,
+        ):
+            Envilder.load("production", env_mapping)
+
+        # Assert
+        assert os.environ["LOCALSTACK_AUTH_TOKEN"] == "test-auth-token"
+
+    def Should_ReturnEmptyDict_When_EnvironmentMapsToNone(
+        self,
+    ) -> None:
+        # Arrange
+        env_mapping: dict[str, str | None] = {"test": None}
+
+        # Act
+        actual = Envilder.load("test", env_mapping)
+
+        # Assert
+        assert actual == {}
+
+    def Should_ReturnEmptyDict_When_EnvironmentNotInMapping(
+        self,
+    ) -> None:
+        # Arrange
+        env_mapping: dict[str, str | None] = {
+            "production": "prod.json",
+        }
+
+        # Act
+        actual = Envilder.load("staging", env_mapping)
+
+        # Assert
+        assert actual == {}
+
+    def Should_RaiseValueError_When_EnvironmentIsEmpty(
+        self,
+    ) -> None:
+        # Arrange
+        env_mapping: dict[str, str | None] = {"production": "prod.json"}
+
+        # Act
+        action = lambda: Envilder.load("", env_mapping)
+
+        # Assert
+        with pytest.raises(ValueError, match="env"):
+            action()
+
+    def Should_RaiseValueError_When_MappingContainsEmptyFilePath(
+        self,
+    ) -> None:
+        # Arrange
+        env_mapping: dict[str, str | None] = {"production": "  "}
+
+        # Act
+        action = lambda: Envilder.load("production", env_mapping)
+
+        # Assert
+        with pytest.raises(ValueError, match="empty file path"):
+            action()
+
+
+class TestEnvilderResolveWithEnvMapping:
+    def Should_ReturnSecrets_When_EnvironmentHasValidSource(
+        self, mock_provider: Mock
+    ) -> None:
+        # Arrange
+        env_mapping: dict[str, str | None] = {
+            "production": MAP_FILE,
+            "test": None,
+        }
+
+        # Act
+        with patch(
+            "envilder.application.envilder_facade.SecretProviderFactory.create",
+            return_value=mock_provider,
+        ):
+            actual = Envilder.resolve_file("production", env_mapping)
+
+        # Assert
+        assert actual["LOCALSTACK_AUTH_TOKEN"] == "test-auth-token"
+
+    def Should_ReturnEmptyDict_When_EnvironmentMapsToNone(
+        self,
+    ) -> None:
+        # Arrange
+        env_mapping: dict[str, str | None] = {"test": None}
+
+        # Act
+        actual = Envilder.resolve_file("test", env_mapping)
+
+        # Assert
+        assert actual == {}
+
+    def Should_ReturnEmptyDict_When_EnvironmentNotInMapping(
+        self,
+    ) -> None:
+        # Arrange
+        env_mapping: dict[str, str | None] = {
+            "production": "prod.json",
+        }
+
+        # Act
+        actual = Envilder.resolve_file("staging", env_mapping)
+
+        # Assert
+        assert actual == {}
+
+    def Should_RaiseValueError_When_EnvironmentIsEmpty(
+        self,
+    ) -> None:
+        # Arrange
+        env_mapping: dict[str, str | None] = {"production": "prod.json"}
+
+        # Act
+        action = lambda: Envilder.resolve_file("", env_mapping)
+
+        # Assert
+        with pytest.raises(ValueError, match="env"):
+            action()
+
+    def Should_NotInjectIntoEnvironment_When_Called(
+        self,
+        mock_provider: Mock,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        # Arrange
+        monkeypatch.delenv("LOCALSTACK_AUTH_TOKEN", raising=False)
+        env_mapping: dict[str, str | None] = {
+            "production": MAP_FILE,
+        }
+
+        # Act
+        with patch(
+            "envilder.application.envilder_facade.SecretProviderFactory.create",
+            return_value=mock_provider,
+        ):
+            Envilder.resolve_file("production", env_mapping)
+
+        # Assert
+        assert "LOCALSTACK_AUTH_TOKEN" not in os.environ

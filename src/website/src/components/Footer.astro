@@ -304,3 +304,23 @@ const links = {
     color: var(--color-btn-text);
   }
 </style>
+
+<script>
+  function initFooterTracking() {
+    document
+      .querySelectorAll<HTMLAnchorElement>('.footer a[href*="github.com"]')
+      .forEach((link) => {
+        link.addEventListener('click', () => {
+          if (typeof window.gtag === 'function') {
+            window.gtag('event', 'click_github', {
+              event_category: 'outbound',
+              event_label: link.href,
+            });
+          }
+        });
+      });
+  }
+
+  initFooterTracking();
+  document.addEventListener('astro:after-swap', initFooterTracking);
+</script>
