@@ -1,3 +1,7 @@
+# /// script
+# dependencies = ["envilder>=0.3.1"]
+# ///
+
 # Environment-based routing: pick a different map file per environment
 from envilder import Envilder
 

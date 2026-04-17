@@ -1,3 +1,7 @@
+# /// script
+# dependencies = ["envilder>=0.3.1"]
+# ///
+
 # Fluent builder: override provider, profile, or vault URL
 from envilder import Envilder, SecretProviderType
 
