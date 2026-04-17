@@ -20,7 +20,7 @@ public sealed class LowkeyVaultFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _container = new ContainerBuilder("nagyesta/lowkey-vault:7.1.32")
+        _container = new ContainerBuilder("nagyesta/lowkey-vault:7.1.61")
             .WithName($"lowkey-vault-{Guid.CreateVersion7()}")
             .WithPortBinding(VaultPort, true)
             .WithPortBinding(TokenPort, true)

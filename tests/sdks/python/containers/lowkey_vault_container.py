@@ -11,7 +11,7 @@ from envilder.infrastructure.azure.azure_key_vault_secret_provider import (
 )
 from testcontainers.core.container import DockerContainer
 
-_IMAGE = "nagyesta/lowkey-vault:7.1.32"
+_IMAGE = "nagyesta/lowkey-vault:7.1.61"
 _HTTPS_PORT = 8443
 _HTTP_PORT = 8080
 

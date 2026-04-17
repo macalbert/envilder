@@ -43,7 +43,7 @@ let localstackEndpoint: string;
 let ssmClient: SSMClient;
 
 // Lowkey Vault (Azure Key Vault test double)
-const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.32';
+const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.61';
 const LOWKEY_VAULT_PORT = 8443;
 
 describe('GitHub Action (E2E)', () => {
