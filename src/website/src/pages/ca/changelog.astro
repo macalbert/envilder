@@ -13,9 +13,9 @@ const fallback = '# Changelog\n\nNo releases yet.';
 
 const products = [
   { id: 'cli', label: t.changelogPage.categoryCli, raw: __CHANGELOG_CLI__ || fallback },
-  { id: 'gha', label: t.changelogPage.categoryGha, raw: __CHANGELOG_GHA__ || fallback },
   { id: 'sdk-dotnet', label: t.changelogPage.categorySdkDotnet, raw: __CHANGELOG_SDK_DOTNET__ || fallback, group: 'sdks' },
   { id: 'sdk-python', label: t.changelogPage.categorySdkPython, raw: __CHANGELOG_SDK_PYTHON__ || fallback, group: 'sdks' },
+  { id: 'gha', label: t.changelogPage.categoryGha, raw: __CHANGELOG_GHA__ || fallback },
 ];
 
 const parsed = products.map((p) => ({
@@ -23,34 +23,6 @@ const parsed = products.map((p) => ({
   html: changelogToHtml(p.raw),
   versions: extractVersions(p.raw),
 }));
-
-/** Build a package-manager URL for a given product + semver tag. */
-function pkgUrl(productId: string, tag: string): string | null {
-  const ver = tag.replace(/^v/, '');
-  switch (productId) {
-    case 'cli':
-      return `https://www.npmjs.com/package/envilder/v/${ver}`;
-    case 'gha':
-      return `https://github.com/macalbert/envilder/releases/tag/v${ver}`;
-    case 'sdk-dotnet':
-      return `https://www.nuget.org/packages/Envilder/${ver}`;
-    case 'sdk-python':
-      return `https://pypi.org/project/envilder/${ver}/`;
-    default:
-      return null;
-  }
-}
-
-/** Short label for the package manager link tooltip. */
-function pkgLabel(productId: string): string {
-  switch (productId) {
-    case 'cli':       return 'npm';
-    case 'gha':       return 'GitHub';
-    case 'sdk-dotnet': return 'NuGet';
-    case 'sdk-python': return 'PyPI';
-    default:          return '';
-  }
-}
 ---
 
 <BaseLayout
@@ -77,14 +49,15 @@ function pkgLabel(productId: string): string {
           {/* ── Desktop sidebar ── */}
           <div class="product-nav-desktop">
             {/* CLI */}
+            <p class="nav-group-title nav-group-first">{t.changelogPage.categoryCli}</p>
             <button
-              class="nav-product-btn active"
+              class="nav-product-btn nav-product-nested active"
               data-product="cli"
               aria-pressed="true"
               aria-expanded="true"
             >
               <span class="nav-product-chevron">›</span>
-              {t.changelogPage.categoryCli}
+              {t.changelogPage.versions}
               <span class="nav-product-count">{parsed[0].versions.length}</span>
             </button>
             <ul class="version-list" data-versions="cli">
@@ -94,46 +67,6 @@ function pkgLabel(productId: string): string {
                     <span class="version-link-tag">{v.tag}</span>
                     {v.date && <span class="version-link-date">{v.date}</span>}
                   </a>
-                  {pkgUrl('cli', v.tag) && (
-                    <a
-                      class="pkg-link"
-                      href={pkgUrl('cli', v.tag)!}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={`${pkgLabel('cli')} ${v.tag}`}
-                    >↗</a>
-                  )}
-                </li>
-              ))}
-            </ul>
-
-            {/* GHA */}
-            <button
-              class="nav-product-btn"
-              data-product="gha"
-              aria-pressed="false"
-              aria-expanded="false"
-            >
-              <span class="nav-product-chevron">›</span>
-              {t.changelogPage.categoryGha}
-              <span class="nav-product-count">{parsed[1].versions.length}</span>
-            </button>
-            <ul class="version-list collapsed" data-versions="gha">
-              {parsed[1].versions.map((v) => (
-                <li>
-                  <a href={`#gha-${v.id}`} data-product="gha">
-                    <span class="version-link-tag">{v.tag}</span>
-                    {v.date && <span class="version-link-date">{v.date}</span>}
-                  </a>
-                  {pkgUrl('gha', v.tag) && (
-                    <a
-                      class="pkg-link"
-                      href={pkgUrl('gha', v.tag)!}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={`${pkgLabel('gha')} ${v.tag}`}
-                    >↗</a>
-                  )}
                 </li>
               ))}
             </ul>
@@ -150,24 +83,15 @@ function pkgLabel(productId: string): string {
             >
               <span class="nav-product-chevron">›</span>
               {t.changelogPage.categorySdkDotnet}
-              <span class="nav-product-count">{parsed[2].versions.length}</span>
+              <span class="nav-product-count">{parsed[1].versions.length}</span>
             </button>
             <ul class="version-list collapsed" data-versions="sdk-dotnet">
-              {parsed[2].versions.map((v) => (
+              {parsed[1].versions.map((v) => (
                 <li>
                   <a href={`#sdk-dotnet-${v.id}`} data-product="sdk-dotnet">
                     <span class="version-link-tag">{v.tag}</span>
                     {v.date && <span class="version-link-date">{v.date}</span>}
                   </a>
-                  {pkgUrl('sdk-dotnet', v.tag) && (
-                    <a
-                      class="pkg-link"
-                      href={pkgUrl('sdk-dotnet', v.tag)!}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={`${pkgLabel('sdk-dotnet')} ${v.tag}`}
-                    >↗</a>
-                  )}
                 </li>
               ))}
             </ul>
@@ -181,24 +105,38 @@ function pkgLabel(productId: string): string {
             >
               <span class="nav-product-chevron">›</span>
               {t.changelogPage.categorySdkPython}
-              <span class="nav-product-count">{parsed[3].versions.length}</span>
+              <span class="nav-product-count">{parsed[2].versions.length}</span>
             </button>
             <ul class="version-list collapsed" data-versions="sdk-python">
-              {parsed[3].versions.map((v) => (
+              {parsed[2].versions.map((v) => (
                 <li>
                   <a href={`#sdk-python-${v.id}`} data-product="sdk-python">
                     <span class="version-link-tag">{v.tag}</span>
                     {v.date && <span class="version-link-date">{v.date}</span>}
                   </a>
-                  {pkgUrl('sdk-python', v.tag) && (
-                    <a
-                      class="pkg-link"
-                      href={pkgUrl('sdk-python', v.tag)!}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={`${pkgLabel('sdk-python')} ${v.tag}`}
-                    >↗</a>
-                  )}
+                </li>
+              ))}
+            </ul>
+
+            {/* GHA */}
+            <p class="nav-group-title">{t.changelogPage.categoryGha}</p>
+            <button
+              class="nav-product-btn nav-product-nested"
+              data-product="gha"
+              aria-pressed="false"
+              aria-expanded="false"
+            >
+              <span class="nav-product-chevron">›</span>
+              {t.changelogPage.versions}
+              <span class="nav-product-count">{parsed[3].versions.length}</span>
+            </button>
+            <ul class="version-list collapsed" data-versions="gha">
+              {parsed[3].versions.map((v) => (
+                <li>
+                  <a href={`#gha-${v.id}`} data-product="gha">
+                    <span class="version-link-tag">{v.tag}</span>
+                    {v.date && <span class="version-link-date">{v.date}</span>}
+                  </a>
                 </li>
               ))}
             </ul>
@@ -408,10 +346,15 @@ function pkgLabel(productId: string): string {
     font-size: 0.45rem;
     text-transform: uppercase;
     letter-spacing: 0.15em;
-    color: var(--color-text-dim);
+    color: var(--color-primary);
     margin-top: var(--space-lg);
     margin-bottom: var(--space-xs);
-    padding-left: var(--space-md);
+    padding: var(--space-xs) var(--space-md) var(--space-sm);
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  .nav-group-first {
+    margin-top: 0;
   }
 
   /* ── Version lists ── */
@@ -458,25 +401,6 @@ function pkgLabel(productId: string): string {
   .version-list a:hover {
     color: var(--color-primary);
     background: var(--color-surface);
-  }
-
-  .pkg-link {
-    flex-shrink: 0;
-    font-size: 0.6rem;
-    color: var(--color-text-dim);
-    text-decoration: none;
-    padding: var(--space-xs) var(--space-xs);
-    opacity: 0.4;
-    transition: opacity var(--transition-fast), color var(--transition-fast);
-  }
-
-  .version-list li:hover .pkg-link {
-    opacity: 1;
-  }
-
-  .pkg-link:hover {
-    color: var(--color-secondary);
-    opacity: 1;
   }
 
   .version-link-tag {
