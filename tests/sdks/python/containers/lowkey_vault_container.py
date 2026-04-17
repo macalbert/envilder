@@ -87,6 +87,7 @@ class LowkeyVaultContainer:
             credential=DefaultAzureCredential(),
             connection_verify=False,  # test-only: Lowkey uses self-signed TLS
             verify_challenge_resource=False,
+            api_version="7.6",  # pin to version supported by Lowkey Vault
         )
 
     def create_provider(self) -> AzureKeyVaultSecretProvider:
