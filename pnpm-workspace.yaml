@@ -7,7 +7,7 @@ packages:
 
 catalog:
   '@biomejs/biome': ^2.4.9
-  typescript: ^6.0.2
+  typescript: ^6.0.3
   ts-node: ^10.9.2
   '@types/node': ^25.5.0
   vitest: ^4.1.2
