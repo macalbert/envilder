@@ -88,10 +88,18 @@ export function changelogToHtml(md: string): string {
         return `<h2 id="${id}"><span class="version-tag">v${ver}</span>${dateHtml}${deprecatedHtml}</h2>`;
       })
       // Fenced code blocks (```...```) → <pre><code>
+      // Supports optional leading whitespace so indented fences (e.g. inside
+      // list-item continuations) are matched. A backreference (\1) ensures the
+      // closing fence has the same indent, and that indent is stripped from
+      // every content line.
       .replace(
-        /^```(\w*)\n([\s\S]*?)^```$/gm,
-        (_m, _lang, code) =>
-          `<pre><code>${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`,
+        /^([ \t]*)```(\w*)\n([\s\S]*?)^\1```$/gm,
+        (_m, indent, _lang, code) => {
+          const dedented = indent
+            ? code.replace(new RegExp(`^${indent}`, 'gm'), '')
+            : code;
+          return `<pre><code>${dedented.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+        },
       )
       .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')

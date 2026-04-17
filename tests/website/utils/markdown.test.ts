@@ -75,4 +75,34 @@ describe('changelogToHtml', () => {
     expect(result).toContain('<li>Second feature</li>');
     expect(result).toContain('<ul>');
   });
+
+  it('Should_ConvertIndentedCodeFences_When_CodeBlockIsInsideListContinuation', () => {
+    // Arrange
+    const md = `## [0.9.3] - 2026-04-17
+
+### Added
+
+* **SDKs available** — no \`.env\` needed:
+
+  **Python** ([PyPI](https://pypi.org/project/envilder)):
+
+  \`\`\`python
+  from envilder import Envilder
+  Envilder.load('secrets-map.json')
+  \`\`\`
+
+### Changed
+
+* **README rewritten** — Simplified quick start`;
+
+    // Act
+    const result = changelogToHtml(md);
+
+    // Assert
+    expect(result).toContain('<pre><code>');
+    expect(result).toContain('from envilder import Envilder');
+    expect(result).not.toContain('```python');
+    expect(result).toContain('<h3>Changed</h3>');
+    expect(result).toContain('<li><strong>README rewritten</strong>');
+  });
 });
