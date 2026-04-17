@@ -1,4 +1,4 @@
-## [0.2.0] - 2026-04-16
+## [0.3.0] - 2026-04-17
 
 ### Added
 
@@ -6,10 +6,20 @@
   `Envilder.resolve_file(env, env_mapping)` accept a dictionary mapping environment names to
   secrets-map file paths (or `None` to skip). Enables environment-aware secret loading without
   external branching logic ([#163](https://github.com/macalbert/envilder/pull/163))
-* **Facade docstrings** — All public methods on the `Envilder` facade now have docstrings with
-  usage examples, improving IDE tooltips and `help()` output for external consumers
 * **Source validation** — Empty or whitespace-only file paths in `env_mapping` now raise
   `ValueError` with a descriptive message including the environment key
+
+---
+
+## [0.2.0] - 2026-04-16
+
+### Added
+
+* **Fluent API facade** — `Envilder` high-level entry point with `load()`, `resolve_file()`,
+  and `from_file()` methods, plus fluent override methods (`with_provider()`, `with_vault_url()`,
+  `with_profile()`) ([#161](https://github.com/macalbert/envilder/pull/161))
+* **Facade docstrings** — All public methods on the `Envilder` facade now have docstrings with
+  usage examples, improving IDE tooltips and `help()` output for external consumers
 
 ---
 
