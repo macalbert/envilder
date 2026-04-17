@@ -13,8 +13,16 @@ const navLinks = [
   { label: t.nav.howItWorks, href: localizedPath(lang, '/#how-it-works') },
   { label: t.nav.providers, href: localizedPath(lang, '/#providers') },
   { label: t.nav.githubAction, href: localizedPath(lang, '/#github-action') },
+  { label: t.nav.sdks, href: localizedPath(lang, '/#sdks') },
   { label: t.nav.changelog, href: localizedPath(lang, '/changelog') },
-  { label: t.nav.docs, href: localizedPath(lang, '/docs') },
+];
+
+const docsDropdown = [
+  { label: t.nav.docsGettingStarted, hash: 'overview' },
+  { label: t.nav.docsCli, hash: 'mapping-file' },
+  { label: t.nav.docsGha, hash: 'gha-setup' },
+  { label: t.nav.docsSdks, hash: 'sdk-dotnet' },
+  { label: t.nav.docsReference, hash: 'config-priority' },
 ];
 ---
 
@@ -33,6 +41,18 @@ const navLinks = [
             <a href={link.href} class="nav-link">{link.label}</a>
           </li>
         ))}
+        <li class="nav-dropdown">
+          <button class="nav-link nav-dropdown-btn" aria-expanded="false">
+            {t.nav.docs} <span class="dropdown-chevron">›</span>
+          </button>
+          <ul class="nav-dropdown-menu">
+            {docsDropdown.map((item) => (
+              <li>
+                <a href={`${localizedPath(lang, '/docs')}#${item.hash}`} class="nav-dropdown-link">{item.label}</a>
+              </li>
+            ))}
+          </ul>
+        </li>
       </ul>
 
       <div class="nav-actions">
@@ -137,6 +157,66 @@ const navLinks = [
     color: var(--color-primary);
   }
 
+  /* ── Docs dropdown ── */
+  .nav-dropdown {
+    position: relative;
+  }
+
+  .nav-dropdown-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+  }
+
+  .dropdown-chevron {
+    font-size: 0.7rem;
+    transition: transform 0.2s;
+    display: inline-block;
+  }
+
+  .nav-dropdown-btn[aria-expanded='true'] .dropdown-chevron {
+    transform: rotate(90deg);
+  }
+
+  .nav-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + var(--space-sm));
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-nav-mobile);
+    border: 2px solid var(--color-border);
+    padding: var(--space-sm) 0;
+    min-width: 160px;
+    z-index: 110;
+    list-style: none;
+    box-shadow: 4px 4px 0 var(--color-border);
+  }
+
+  .nav-dropdown.open .nav-dropdown-menu {
+    display: block;
+  }
+
+  .nav-dropdown-link {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    padding: var(--space-xs) var(--space-md);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--transition-fast), background var(--transition-fast);
+  }
+
+  .nav-dropdown-link:hover {
+    color: var(--color-primary);
+    background: var(--color-surface);
+  }
+
   .nav-actions {
     display: none;
     align-items: center;
@@ -162,6 +242,20 @@ const navLinks = [
   .nav-open .nav-links {
     display: flex;
     flex-direction: column;
+  }
+
+  /* In mobile, dropdown menu is inline */
+  .nav-open .nav-dropdown-menu {
+    position: static;
+    transform: none;
+    border: none;
+    box-shadow: none;
+    padding-left: var(--space-md);
+    background: transparent;
+  }
+
+  .nav-open .nav-dropdown.open .nav-dropdown-menu {
+    display: block;
   }
 
   .nav-open .nav-actions {
@@ -246,11 +340,41 @@ const navLinks = [
     });
 
     // Close mobile menu when a nav link is clicked
-    navbar.querySelectorAll('.nav-link').forEach((link) => {
+    navbar.querySelectorAll('.nav-link:not(.nav-dropdown-btn)').forEach((link) => {
       link.addEventListener('click', () => {
         navbar.classList.remove('nav-open');
         toggle.setAttribute('aria-expanded', 'false');
       });
+    });
+
+    // Close mobile menu when a dropdown link is clicked
+    navbar.querySelectorAll('.nav-dropdown-link').forEach((link) => {
+      link.addEventListener('click', () => {
+        navbar.classList.remove('nav-open');
+        toggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+
+  // Docs dropdown toggle
+  const dropdownBtn = document.querySelector('.nav-dropdown-btn');
+  const dropdown = document.querySelector('.nav-dropdown');
+  if (dropdownBtn && dropdown) {
+    dropdownBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = dropdown.classList.toggle('open');
+      dropdownBtn.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    // Close dropdown on outside click
+    document.addEventListener('click', () => {
+      dropdown.classList.remove('open');
+      dropdownBtn.setAttribute('aria-expanded', 'false');
+    });
+
+    // Prevent dropdown menu clicks from closing
+    dropdown.querySelector('.nav-dropdown-menu')?.addEventListener('click', (e) => {
+      e.stopPropagation();
     });
   }
 </script>

@@ -29,45 +29,79 @@ const pushSingleCmd = 'envilder --push --key=API_KEY --value={SECRET} --secret-p
 <main class="docs-page" id="main-content">
   <div class="docs-layout">
 
+    <!-- Mobile section selector -->
+    <div class="docs-mobile-select">
+      <select id="docs-section-select" aria-label="Select section">
+        <optgroup label={t.docs.sidebarGettingStarted}>
+          <option value="overview">{t.docs.overviewTitle}</option>
+          <option value="requirements">{t.docs.sidebarRequirements}</option>
+          <option value="installation">{t.docs.sidebarInstallation}</option>
+          <option value="credentials">{t.docs.sidebarCredentials}</option>
+          <option value="permissions">{t.docs.sidebarPermissions}</option>
+        </optgroup>
+        <optgroup label={t.docs.sidebarCli}>
+          <option value="mapping-file">{t.docs.sidebarMappingFile}</option>
+          <option value="pull-command">{t.docs.sidebarPullCommand}</option>
+          <option value="push-command">{t.docs.sidebarPushCommand}</option>
+          <option value="push-single">{t.docs.sidebarPushSingle}</option>
+        </optgroup>
+        <optgroup label={t.docs.sidebarGha}>
+          <option value="gha-setup">{t.docs.sidebarGhaSetup}</option>
+          <option value="gha-basic">{t.docs.sidebarGhaBasic}</option>
+          <option value="gha-multi-env">{t.docs.sidebarGhaMultiEnv}</option>
+          <option value="gha-azure">{t.docs.sidebarGhaAzure}</option>
+          <option value="gha-inputs">{t.docs.sidebarGhaInputs}</option>
+        </optgroup>
+        <optgroup label={t.docs.sidebarReference}>
+          <option value="config-priority">{t.docs.sidebarConfigPriority}</option>
+          <option value="azure-setup">{t.docs.sidebarAzureSetup}</option>
+        </optgroup>
+        <optgroup label={t.docs.sidebarSdks}>
+          <option value="sdk-dotnet">{t.docs.sidebarSdkDotnet}</option>
+          <option value="sdk-python">{t.docs.sidebarSdkPython}</option>
+        </optgroup>
+      </select>
+    </div>
+
     <!-- Sidebar navigation -->
     <aside class="docs-sidebar">
       <nav class="docs-nav">
         <p class="nav-section-title">{t.docs.sidebarGettingStarted}</p>
         <ul>
-          <li><a href="#overview">{t.docs.overviewTitle}</a></li>
-          <li><a href="#requirements">{t.docs.sidebarRequirements}</a></li>
-          <li><a href="#installation">{t.docs.sidebarInstallation}</a></li>
-          <li><a href="#credentials">{t.docs.sidebarCredentials}</a></li>
-          <li><a href="#permissions">{t.docs.sidebarPermissions}</a></li>
+          <li><a href="#overview" data-section="overview">{t.docs.overviewTitle}</a></li>
+          <li><a href="#requirements" data-section="requirements">{t.docs.sidebarRequirements}</a></li>
+          <li><a href="#installation" data-section="installation">{t.docs.sidebarInstallation}</a></li>
+          <li><a href="#credentials" data-section="credentials">{t.docs.sidebarCredentials}</a></li>
+          <li><a href="#permissions" data-section="permissions">{t.docs.sidebarPermissions}</a></li>
         </ul>
 
         <p class="nav-section-title">{t.docs.sidebarCli}</p>
         <ul>
-          <li><a href="#mapping-file">{t.docs.sidebarMappingFile}</a></li>
-          <li><a href="#pull-command">{t.docs.sidebarPullCommand}</a></li>
-          <li><a href="#push-command">{t.docs.sidebarPushCommand}</a></li>
-          <li><a href="#push-single">{t.docs.sidebarPushSingle}</a></li>
+          <li><a href="#mapping-file" data-section="mapping-file">{t.docs.sidebarMappingFile}</a></li>
+          <li><a href="#pull-command" data-section="pull-command">{t.docs.sidebarPullCommand}</a></li>
+          <li><a href="#push-command" data-section="push-command">{t.docs.sidebarPushCommand}</a></li>
+          <li><a href="#push-single" data-section="push-single">{t.docs.sidebarPushSingle}</a></li>
         </ul>
 
         <p class="nav-section-title">{t.docs.sidebarGha}</p>
         <ul>
-          <li><a href="#gha-setup">{t.docs.sidebarGhaSetup}</a></li>
-          <li><a href="#gha-basic">{t.docs.sidebarGhaBasic}</a></li>
-          <li><a href="#gha-multi-env">{t.docs.sidebarGhaMultiEnv}</a></li>
-          <li><a href="#gha-azure">{t.docs.sidebarGhaAzure}</a></li>
-          <li><a href="#gha-inputs">{t.docs.sidebarGhaInputs}</a></li>
+          <li><a href="#gha-setup" data-section="gha-setup">{t.docs.sidebarGhaSetup}</a></li>
+          <li><a href="#gha-basic" data-section="gha-basic">{t.docs.sidebarGhaBasic}</a></li>
+          <li><a href="#gha-multi-env" data-section="gha-multi-env">{t.docs.sidebarGhaMultiEnv}</a></li>
+          <li><a href="#gha-azure" data-section="gha-azure">{t.docs.sidebarGhaAzure}</a></li>
+          <li><a href="#gha-inputs" data-section="gha-inputs">{t.docs.sidebarGhaInputs}</a></li>
         </ul>
 
         <p class="nav-section-title">{t.docs.sidebarReference}</p>
         <ul>
-          <li><a href="#config-priority">{t.docs.sidebarConfigPriority}</a></li>
-          <li><a href="#azure-setup">{t.docs.sidebarAzureSetup}</a></li>
+          <li><a href="#config-priority" data-section="config-priority">{t.docs.sidebarConfigPriority}</a></li>
+          <li><a href="#azure-setup" data-section="azure-setup">{t.docs.sidebarAzureSetup}</a></li>
         </ul>
 
         <p class="nav-section-title">{t.docs.sidebarSdks}</p>
         <ul>
-          <li><a href="#sdk-dotnet">{t.docs.sidebarSdkDotnet}</a></li>
-          <li><a href="#sdk-python">{t.docs.sidebarSdkPython}</a></li>
+          <li><a href="#sdk-dotnet" data-section="sdk-dotnet">{t.docs.sidebarSdkDotnet}</a></li>
+          <li><a href="#sdk-python" data-section="sdk-python">{t.docs.sidebarSdkPython}</a></li>
         </ul>
       </nav>
     </aside>
@@ -784,6 +818,29 @@ secrets = (
     border-left-color: var(--color-primary);
   }
 
+  .docs-nav a.active {
+    color: var(--color-primary);
+    border-left-color: var(--color-primary);
+    font-weight: 600;
+  }
+
+  /* ── Mobile section selector ── */
+  .docs-mobile-select {
+    display: none;
+  }
+
+  .docs-mobile-select select {
+    width: 100%;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    padding: var(--space-sm) var(--space-md);
+    cursor: pointer;
+    appearance: auto;
+  }
+
   /* ── Content ── */
   .docs-content {
     min-width: 0;
@@ -864,7 +921,11 @@ secrets = (
     margin-bottom: var(--space-3xl);
     padding-top: var(--space-lg);
     border-top: 1px solid var(--color-border);
-    scroll-margin-top: calc(var(--nav-height) + var(--space-xl));
+    display: none;
+  }
+
+  .docs-section.active {
+    display: block;
   }
 
   .docs-section h2 {
@@ -1106,12 +1167,11 @@ secrets = (
     }
 
     .docs-sidebar {
-      position: static;
-      max-height: none;
-      border-right: none;
-      border-bottom: 1px solid var(--color-border);
-      padding-right: 0;
-      padding-bottom: var(--space-lg);
+      display: none;
+    }
+
+    .docs-mobile-select {
+      display: block;
       margin-bottom: var(--space-lg);
     }
 
@@ -1128,14 +1188,62 @@ secrets = (
 </style>
 
 <script>
+  function initDocsSectionNav() {
+    const sections = document.querySelectorAll<HTMLElement>('.docs-section');
+    const sidebarLinks = document.querySelectorAll<HTMLAnchorElement>('.docs-nav a[data-section]');
+    const mobileSelect = document.getElementById('docs-section-select') as HTMLSelectElement | null;
+
+    function showSection(sectionId: string) {
+      sections.forEach((s) => {
+        s.classList.toggle('active', s.id === sectionId);
+      });
+      sidebarLinks.forEach((a) => {
+        a.classList.toggle('active', a.dataset.section === sectionId);
+      });
+      if (mobileSelect) mobileSelect.value = sectionId;
+      history.replaceState(null, '', `#${sectionId}`);
+      // Scroll content area to top
+      document.querySelector('.docs-content')?.scrollTo(0, 0);
+      window.scrollTo(0, 0);
+    }
+
+    // Sidebar click
+    sidebarLinks.forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const id = link.dataset.section;
+        if (id) showSection(id);
+      });
+    });
+
+    // Mobile select
+    mobileSelect?.addEventListener('change', () => {
+      showSection(mobileSelect.value);
+    });
+
+    // Initial section from hash or default
+    const hash = window.location.hash.replace('#', '');
+    const validIds = Array.from(sections).map((s) => s.id);
+    const initial = validIds.includes(hash) ? hash : 'overview';
+    showSection(initial);
+
+    // Handle browser back/forward
+    window.addEventListener('hashchange', () => {
+      const h = window.location.hash.replace('#', '');
+      if (validIds.includes(h)) showSection(h);
+    });
+  }
+
+  // Run on initial load and Astro page transitions
+  initDocsSectionNav();
+  document.addEventListener('astro:after-swap', initDocsSectionNav);
+
   // Enhance table accessibility: scope="col" on all th, plus scrollable wrappers
   document.querySelectorAll<HTMLTableElement>('.docs-table').forEach((table) => {
-    // Add scope="col" to all header cells
     table.querySelectorAll('thead th').forEach((th) => {
       th.setAttribute('scope', 'col');
     });
 
-    // Wrap in a scrollable region for keyboard access (only if not already wrapped)
     if (!table.parentElement?.classList.contains('table-wrapper')) {
       const wrapper = document.createElement('div');
       wrapper.className = 'table-wrapper';

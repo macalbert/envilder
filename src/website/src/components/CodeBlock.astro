@@ -159,6 +159,13 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
         return;
       }
 
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'copy_code', {
+          event_category: 'engagement',
+          event_label: code.substring(0, 80),
+        });
+      }
+
       const copyIcon = btn.querySelector<SVGElement>('.copy-icon');
       const checkIcon = btn.querySelector<SVGElement>('.check-icon');
       if (copyIcon) copyIcon.style.display = 'none';

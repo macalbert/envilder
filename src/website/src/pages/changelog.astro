@@ -23,6 +23,34 @@ const parsed = products.map((p) => ({
   html: changelogToHtml(p.raw),
   versions: extractVersions(p.raw),
 }));
+
+/** Build a package-manager URL for a given product + semver tag. */
+function pkgUrl(productId: string, tag: string): string | null {
+  const ver = tag.replace(/^v/, '');
+  switch (productId) {
+    case 'cli':
+      return `https://www.npmjs.com/package/envilder/v/${ver}`;
+    case 'gha':
+      return `https://github.com/macalbert/envilder/releases/tag/v${ver}`;
+    case 'sdk-dotnet':
+      return `https://www.nuget.org/packages/Envilder/${ver}`;
+    case 'sdk-python':
+      return `https://pypi.org/project/envilder/${ver}/`;
+    default:
+      return null;
+  }
+}
+
+/** Short label for the package manager link tooltip. */
+function pkgLabel(productId: string): string {
+  switch (productId) {
+    case 'cli':       return 'npm';
+    case 'gha':       return 'GitHub';
+    case 'sdk-dotnet': return 'NuGet';
+    case 'sdk-python': return 'PyPI';
+    default:          return '';
+  }
+}
 ---
 
 <BaseLayout
@@ -66,6 +94,15 @@ const parsed = products.map((p) => ({
                     <span class="version-link-tag">{v.tag}</span>
                     {v.date && <span class="version-link-date">{v.date}</span>}
                   </a>
+                  {pkgUrl('cli', v.tag) && (
+                    <a
+                      class="pkg-link"
+                      href={pkgUrl('cli', v.tag)!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`${pkgLabel('cli')} ${v.tag}`}
+                    >↗</a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -88,6 +125,15 @@ const parsed = products.map((p) => ({
                     <span class="version-link-tag">{v.tag}</span>
                     {v.date && <span class="version-link-date">{v.date}</span>}
                   </a>
+                  {pkgUrl('gha', v.tag) && (
+                    <a
+                      class="pkg-link"
+                      href={pkgUrl('gha', v.tag)!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`${pkgLabel('gha')} ${v.tag}`}
+                    >↗</a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -113,6 +159,15 @@ const parsed = products.map((p) => ({
                     <span class="version-link-tag">{v.tag}</span>
                     {v.date && <span class="version-link-date">{v.date}</span>}
                   </a>
+                  {pkgUrl('sdk-dotnet', v.tag) && (
+                    <a
+                      class="pkg-link"
+                      href={pkgUrl('sdk-dotnet', v.tag)!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`${pkgLabel('sdk-dotnet')} ${v.tag}`}
+                    >↗</a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -135,6 +190,15 @@ const parsed = products.map((p) => ({
                     <span class="version-link-tag">{v.tag}</span>
                     {v.date && <span class="version-link-date">{v.date}</span>}
                   </a>
+                  {pkgUrl('sdk-python', v.tag) && (
+                    <a
+                      class="pkg-link"
+                      href={pkgUrl('sdk-python', v.tag)!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`${pkgLabel('sdk-python')} ${v.tag}`}
+                    >↗</a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -356,7 +420,24 @@ const parsed = products.map((p) => ({
     display: flex;
     flex-direction: column;
     gap: 1px;
-    margin-bottom: var(--space-sm);
+    margin-bottom: var(--space-xs);
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: max-height 0.25s ease, opacity 0.2s ease, margin 0.25s ease;
+    opacity: 1;
+  }
+
+  .version-list.collapsed {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    margin-bottom: 0;
+  }
+
+  .version-list li {
+    display: flex;
+    align-items: baseline;
   }
 
   .version-list a {
@@ -370,11 +451,32 @@ const parsed = products.map((p) => ({
     color: var(--color-text-muted);
     text-decoration: none;
     transition: all var(--transition-fast);
+    flex: 1;
+    min-width: 0;
   }
 
   .version-list a:hover {
     color: var(--color-primary);
     background: var(--color-surface);
+  }
+
+  .pkg-link {
+    flex-shrink: 0;
+    font-size: 0.6rem;
+    color: var(--color-text-dim);
+    text-decoration: none;
+    padding: var(--space-xs) var(--space-xs);
+    opacity: 0.4;
+    transition: opacity var(--transition-fast), color var(--transition-fast);
+  }
+
+  .version-list li:hover .pkg-link {
+    opacity: 1;
+  }
+
+  .pkg-link:hover {
+    color: var(--color-secondary);
+    opacity: 1;
   }
 
   .version-link-tag {

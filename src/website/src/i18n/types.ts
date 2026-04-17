@@ -3,8 +3,14 @@ export interface NavLinks {
   howItWorks: string;
   providers: string;
   githubAction: string;
+  sdks: string;
   changelog: string;
   docs: string;
+  docsGettingStarted: string;
+  docsCli: string;
+  docsGha: string;
+  docsSdks: string;
+  docsReference: string;
   getStarted: string;
   ariaGithub: string;
   ariaSponsor: string;
@@ -141,6 +147,23 @@ export interface GhaTranslations {
   outputDesc: string;
   yes: string;
   no: string;
+}
+
+export interface SdksTranslations {
+  title: string;
+  subtitle: string;
+  pythonTitle: string;
+  pythonDesc: string;
+  dotnetTitle: string;
+  dotnetDesc: string;
+  goTitle: string;
+  goDesc: string;
+  javaTitle: string;
+  javaDesc: string;
+  install: string;
+  available: string;
+  planned: string;
+  docsLink: string;
 }
 
 export interface ChangelogHighlight {
@@ -480,6 +503,7 @@ export interface Translations {
   demo: DemoTranslations;
   providers: ProvidersTranslations;
   gha: GhaTranslations;
+  sdks: SdksTranslations;
   changelog: ChangelogTranslations;
   roadmap: RoadmapTranslations;
   getStarted: GetStartedTranslations;
