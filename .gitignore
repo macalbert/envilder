@@ -371,6 +371,7 @@ changed_files.txt
 
 # python venv
 *venv/
+.mypy_cache/
 deactivate/
 
 # draw io
@@ -387,3 +388,4 @@ dist/
 
 # Astro
 .astro/
+
