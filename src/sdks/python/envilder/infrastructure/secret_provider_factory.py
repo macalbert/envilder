@@ -68,27 +68,21 @@ def _create_aws_provider(
         options.profile if options and options.profile else config.profile
     )
 
-    if profile:
-        try:
-            region = _resolve_region_from_env()
-            session = (
-                boto3.Session(profile_name=profile, region_name=region)
-                if region
-                else boto3.Session(profile_name=profile)
-            )
-            ssm_client = session.client("ssm")
-        except Exception as e:
-            raise ValueError(
-                f"Failed to create AWS session with profile '{profile}': {e}"
-            ) from e
-    else:
-        region = _resolve_region_from_env()
-        session = (
-            boto3.Session(region_name=region) if region else boto3.Session()
-        )
-        ssm_client = session.client("ssm")
+    if not profile:
+        session = boto3.Session()
+        return AwsSsmSecretProvider(session.client("ssm"))
 
-    return AwsSsmSecretProvider(ssm_client)
+    try:
+        region = _resolve_region_from_env()
+        session = boto3.Session(
+            profile_name=profile,
+            region_name=region,
+        )
+        return AwsSsmSecretProvider(session.client("ssm"))
+    except Exception as e:
+        raise ValueError(
+            f"Failed to create AWS session with profile '{profile}': {e}"
+        ) from e
 
 
 def _resolve_region_from_env() -> str | None:
