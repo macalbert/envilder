@@ -375,15 +375,15 @@ export const ca: Translations = {
       },
       {
         status: 'planned',
-        label: '⚡',
-        title: 'Mode exec (--exec)',
-        description: 'Injecta secrets en un procés fill sense escriure a disc',
-      },
-      {
-        status: 'planned',
         label: '☁️',
         title: 'GCP Secret Manager',
         description: 'Tercer proveïdor cloud — completa el trident multi-núvol',
+      },
+      {
+        status: 'planned',
+        label: '⚡',
+        title: 'Mode exec (--exec)',
+        description: 'Injecta secrets en un procés fill sense escriure a disc',
       },
       {
         status: 'planned',
@@ -457,6 +457,11 @@ export const ca: Translations = {
     githubReleases: 'Versions a GitHub',
     versions: 'Versions',
     backToTop: 'Tornar a dalt',
+    categoryCli: 'CLI',
+    categoryGha: 'GitHub Action',
+    categorySdks: 'SDKs',
+    categorySdkDotnet: '.NET',
+    categorySdkPython: 'Python',
   },
   docs: {
     title: 'Docs Envilder | CLI, GitHub Action i AWS SSM',

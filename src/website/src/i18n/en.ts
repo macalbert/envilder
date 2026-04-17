@@ -454,6 +454,11 @@ export const en: Translations = {
     githubReleases: 'GitHub Releases',
     versions: 'Versions',
     backToTop: 'Back to top',
+    categoryCli: 'CLI',
+    categoryGha: 'GitHub Action',
+    categorySdks: 'SDKs',
+    categorySdkDotnet: '.NET',
+    categorySdkPython: 'Python',
   },
   docs: {
     title: 'Envilder Docs | CLI, GitHub Action & AWS SSM',

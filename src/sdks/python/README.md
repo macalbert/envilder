@@ -1,6 +1,6 @@
 # Envilder Python SDK
 
-[![Coverage Report](https://img.shields.io/badge/coverage-report-green.svg)](https://macalbert.github.io/envilder/)
+[![Coverage Report](https://img.shields.io/badge/coverage-report-green.svg)](https://macalbert.github.io/envilder/python/)
 [![PyPI version](https://img.shields.io/pypi/v/envilder.svg)](https://pypi.org/project/envilder/)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/macalbert/envilder/blob/main/LICENSE)
 
@@ -164,6 +164,11 @@ For Azure, add `vaultUrl`:
   "API_KEY": "api-key"
 }
 ```
+
+## Links
+
+- [Changelog](https://github.com/macalbert/envilder/blob/main/docs/changelogs/sdk-python.md)
+- [Official Website](https://envilder.dev)
 
 ## License
 

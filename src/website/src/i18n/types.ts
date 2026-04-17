@@ -230,6 +230,11 @@ export interface ChangelogPageTranslations {
   githubReleases: string;
   versions: string;
   backToTop: string;
+  categoryCli: string;
+  categoryGha: string;
+  categorySdks: string;
+  categorySdkDotnet: string;
+  categorySdkPython: string;
 }
 
 export interface DocsTranslations {

@@ -1,5 +1,9 @@
 # Envilder .NET SDK
 
+[![Coverage Report](https://img.shields.io/badge/coverage-report-green.svg)](https://macalbert.github.io/envilder/dotnet/)
+[![NuGet version](https://img.shields.io/nuget/v/Envilder.svg)](https://www.nuget.org/packages/Envilder/)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/macalbert/envilder/blob/main/LICENSE)
+
 Securely load environment variables from **AWS SSM Parameter Store** or **Azure Key Vault** directly into your .NET application.
 Zero vendor lock-in — secrets stay in your cloud.
 
@@ -112,6 +116,11 @@ For Azure, add `vaultUrl`:
   "API_KEY": "api-key"
 }
 ```
+
+## Links
+
+- [Changelog](https://github.com/macalbert/envilder/blob/main/docs/changelogs/sdk-dotnet.md)
+- [Official Website](https://envilder.dev)
 
 ## License
 
