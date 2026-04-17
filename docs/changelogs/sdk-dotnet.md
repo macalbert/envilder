@@ -1,3 +1,15 @@
+## [0.1.1] - 2026-04-18
+
+### Fixed
+
+* **Delegate default AWS region resolution to the AWS SDK** — When no profile is set, the
+  factory no longer manually resolves the region via `ResolveRegion()`. Instead it creates a
+  plain `AmazonSimpleSystemsManagementClient()` which uses the full AWS SDK resolution chain
+  (env vars → `~/.aws/config` → instance metadata), correctly picking up the default config
+  file settings
+
+---
+
 ## [0.1.0] - 2026-04-09
 
 ### Added
