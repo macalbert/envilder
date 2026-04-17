@@ -87,6 +87,8 @@ jobs:
       - name: 🍄 Run tests
         if: steps.version-check.outputs.version_changed == 'true'
         run: pnpm test
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
 
       - name: 🏗️ Build package
         if: steps.version-check.outputs.version_changed == 'true'
