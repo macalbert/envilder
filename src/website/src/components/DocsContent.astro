@@ -23,7 +23,8 @@ const azVaultPolicy = `az keyvault set-policy \\
   --object-id {YOUR_OBJECT_ID} \\
   --secret-permissions get set list`;
 
-const pushSingleCmd = 'envilder --push --key=API_KEY --value={SECRET} --secret-path=/myapp/api/key';
+const pushSingleCmd =
+  'envilder --push --key=API_KEY --value={SECRET} --secret-path=/myapp/api/key';
 
 const sectionOrder = [
   { id: 'overview', label: t.docs.overviewTitle },

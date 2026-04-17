@@ -18,10 +18,7 @@ try {
 
 function readChangelog(relativePath) {
   try {
-    return readFileSync(
-      new URL(relativePath, import.meta.url),
-      'utf-8',
-    );
+    return readFileSync(new URL(relativePath, import.meta.url), 'utf-8');
   } catch {
     return '';
   }

@@ -12,10 +12,28 @@ const t = useTranslations(lang);
 const fallback = '# Changelog\n\nNo releases yet.';
 
 const products = [
-  { id: 'cli', label: t.changelogPage.categoryCli, raw: __CHANGELOG_CLI__ || fallback },
-  { id: 'sdk-dotnet', label: t.changelogPage.categorySdkDotnet, raw: __CHANGELOG_SDK_DOTNET__ || fallback, group: 'sdks' },
-  { id: 'sdk-python', label: t.changelogPage.categorySdkPython, raw: __CHANGELOG_SDK_PYTHON__ || fallback, group: 'sdks' },
-  { id: 'gha', label: t.changelogPage.categoryGha, raw: __CHANGELOG_GHA__ || fallback },
+  {
+    id: 'cli',
+    label: t.changelogPage.categoryCli,
+    raw: __CHANGELOG_CLI__ || fallback,
+  },
+  {
+    id: 'sdk-dotnet',
+    label: t.changelogPage.categorySdkDotnet,
+    raw: __CHANGELOG_SDK_DOTNET__ || fallback,
+    group: 'sdks',
+  },
+  {
+    id: 'sdk-python',
+    label: t.changelogPage.categorySdkPython,
+    raw: __CHANGELOG_SDK_PYTHON__ || fallback,
+    group: 'sdks',
+  },
+  {
+    id: 'gha',
+    label: t.changelogPage.categoryGha,
+    raw: __CHANGELOG_GHA__ || fallback,
+  },
 ];
 
 const parsed = products.map((p) => ({

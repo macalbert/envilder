@@ -42,7 +42,8 @@ export const ca: Translations = {
     descGcp: 'GCP Secret Manager',
     descOr: 'o',
     descComma: ',',
-    descSuffix: "— localment amb la CLI, en CI/CD amb la GitHub Action o a l'inici de l'app amb SDKs de runtime.",
+    descSuffix:
+      "— localment amb la CLI, en CI/CD amb la GitHub Action o a l'inici de l'app amb SDKs de runtime.",
     getStarted: '▶ Comença',
     viewOnGithub: '★ Veure a GitHub',
     terminalComment1: '# 1. Un model de mapeig per a cada entorn',
@@ -63,7 +64,7 @@ export const ca: Translations = {
     titleAccent: 'està trencada',
     titleSuffix: '',
     subtitle:
-      "Cada equip, cada etapa, cada runtime gestiona els secrets de forma diferent. Sense estàndard. Sense consistència. Sense confiança.",
+      'Cada equip, cada etapa, cada runtime gestiona els secrets de forma diferent. Sense estàndard. Sense consistència. Sense confiança.',
     problems: [
       {
         icon: '💀',
@@ -81,7 +82,7 @@ export const ca: Translations = {
         icon: '🐌',
         title: 'El desfasament de configuració és inevitable',
         description:
-          "Sense una font única de veritat sobre quins secrets necessita una app. Dev, staging i producció es desincronitzen. Els desplegaments fallen. Ningú sap quina config és la correcta.",
+          'Sense una font única de veritat sobre quins secrets necessita una app. Dev, staging i producció es desincronitzen. Els desplegaments fallen. Ningú sap quina config és la correcta.',
       },
     ],
     arrowText: '▼ envilder ho soluciona ▼',
@@ -115,12 +116,12 @@ export const ca: Translations = {
       {
         title: 'Defineix el model de mapeig',
         description:
-          'Un fitxer JSON que mapeja noms de variables d\'entorn a rutes de secrets al núvol. Fes-ne commit. Revisa\'l en PRs. Compara entre entorns. Un model per a cada etapa i runtime.',
+          "Un fitxer JSON que mapeja noms de variables d'entorn a rutes de secrets al núvol. Fes-ne commit. Revisa'l en PRs. Compara entre entorns. Un model per a cada etapa i runtime.",
       },
       {
         title: 'Resol amb la CLI',
         description:
-          'Una comanda obté cada secret del teu vault al núvol i els escriu a .env. Utilitza\'l localment o en scripts. Mateix mapeig, mateix comportament.',
+          "Una comanda obté cada secret del teu vault al núvol i els escriu a .env. Utilitza'l localment o en scripts. Mateix mapeig, mateix comportament.",
       },
       {
         title: 'Carrega en runtime amb SDKs',
@@ -153,7 +154,7 @@ export const ca: Translations = {
     title: 'Fet per a ',
     titleAccent: 'equips reals',
     subtitle:
-      "Un sistema de resolució de configuració dissenyat per a seguretat, consistència i execució multi-runtime.",
+      'Un sistema de resolució de configuració dissenyat per a seguretat, consistència i execució multi-runtime.',
     features: [
       {
         icon: '📋',
@@ -280,9 +281,11 @@ export const ca: Translations = {
     subtitle:
       'Carrega secrets directament a la teva aplicació a l’arrencada. Sense fitxers .env, sense intermediaris — només el teu vault al núvol i el teu codi.',
     pythonTitle: 'Python',
-    pythonDesc: 'Carrega secrets amb una línia. Compatible amb AWS SSM i Azure Key Vault.',
+    pythonDesc:
+      'Carrega secrets amb una línia. Compatible amb AWS SSM i Azure Key Vault.',
     dotnetTitle: '.NET',
-    dotnetDesc: 'Integració nativa amb IConfiguration. Resol secrets a l’arrencada.',
+    dotnetDesc:
+      'Integració nativa amb IConfiguration. Resol secrets a l’arrencada.',
     goTitle: 'Go',
     goDesc: 'Càrrega lleugera de secrets per a serveis Go.',
     javaTitle: 'Java',
@@ -450,7 +453,7 @@ export const ca: Translations = {
   },
   footer: {
     tagline:
-      "Un model de configuració per resoldre secrets de forma consistent a tots els entorns i runtimes. Basat en la teva infraestructura cloud existent.",
+      'Un model de configuració per resoldre secrets de forma consistent a tots els entorns i runtimes. Basat en la teva infraestructura cloud existent.',
     project: 'Projecte',
     documentation: 'Documentació',
     community: 'Comunitat',

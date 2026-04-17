@@ -3,7 +3,8 @@ import type { Translations } from './types';
 
 export const en: Translations = {
   homeMeta: {
-    title: 'Envilder — One model to resolve secrets across every environment and runtime.',
+    title:
+      'Envilder — One model to resolve secrets across every environment and runtime.',
     description:
       'A model-driven configuration resolution system. Define secret mappings once and resolve them consistently — CLI, CI/CD, or application runtime. Powered by AWS SSM, Azure Key Vault, and GCP Secret Manager.',
   },
@@ -42,7 +43,8 @@ export const en: Translations = {
     descGcp: 'GCP Secret Manager',
     descOr: 'or',
     descComma: ',',
-    descSuffix: '— locally with the CLI, in CI/CD with the GitHub Action, or at app startup with runtime SDKs.',
+    descSuffix:
+      '— locally with the CLI, in CI/CD with the GitHub Action, or at app startup with runtime SDKs.',
     getStarted: '▶ Get Started',
     viewOnGithub: '★ View on GitHub',
     terminalComment1: '# 1. One mapping model for every environment',
@@ -279,9 +281,11 @@ export const en: Translations = {
     subtitle:
       'Load secrets directly into your application at startup. No .env files, no intermediaries — just your cloud vault and your code.',
     pythonTitle: 'Python',
-    pythonDesc: 'Load secrets with one line. Supports AWS SSM and Azure Key Vault.',
+    pythonDesc:
+      'Load secrets with one line. Supports AWS SSM and Azure Key Vault.',
     dotnetTitle: '.NET',
-    dotnetDesc: 'Native IConfiguration integration. Resolve secrets at startup.',
+    dotnetDesc:
+      'Native IConfiguration integration. Resolve secrets at startup.',
     goTitle: 'Go',
     goDesc: 'Lightweight secret loading for Go services.',
     javaTitle: 'Java',
@@ -702,7 +706,8 @@ export const en: Translations = {
     sdkDotnetQuickStartConfig: 'Quick start — load into IConfiguration',
     sdkDotnetQuickStartConfigDesc:
       'Add Envilder as a configuration source in your ASP.NET application:',
-    sdkDotnetQuickStartResolve: 'Quick start — resolve + inject into environment',
+    sdkDotnetQuickStartResolve:
+      'Quick start — resolve + inject into environment',
     sdkDotnetQuickStartResolveDesc:
       'Parse the map file, resolve secrets, and inject them into environment variables:',
     sdkDotnetFullDocs: 'Full documentation →',

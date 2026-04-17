@@ -3,7 +3,8 @@ import type { Translations } from './types';
 
 export const es: Translations = {
   homeMeta: {
-    title: 'Envilder — Un modelo para resolver secretos en cada entorno y runtime.',
+    title:
+      'Envilder — Un modelo para resolver secretos en cada entorno y runtime.',
     description:
       'Un sistema de resolución de configuración basado en un modelo. Define los mapeos de secretos una vez y resuélvelos de forma consistente — CLI, CI/CD o runtime de aplicación. Basado en AWS SSM, Azure Key Vault y GCP Secret Manager.',
   },
@@ -42,7 +43,8 @@ export const es: Translations = {
     descGcp: 'GCP Secret Manager',
     descOr: 'o',
     descComma: ',',
-    descSuffix: '— localmente con la CLI, en CI/CD con la GitHub Action o al iniciar la app con SDKs de runtime.',
+    descSuffix:
+      '— localmente con la CLI, en CI/CD con la GitHub Action o al iniciar la app con SDKs de runtime.',
     getStarted: '▶ Empezar',
     viewOnGithub: '★ Ver en GitHub',
     terminalComment1: '# 1. Un modelo de mapeo para cada entorno',
@@ -280,9 +282,11 @@ export const es: Translations = {
     subtitle:
       'Carga secretos directamente en tu aplicación al arrancar. Sin archivos .env, sin intermediarios — solo tu vault en la nube y tu código.',
     pythonTitle: 'Python',
-    pythonDesc: 'Carga secretos con una línea. Compatible con AWS SSM y Azure Key Vault.',
+    pythonDesc:
+      'Carga secretos con una línea. Compatible con AWS SSM y Azure Key Vault.',
     dotnetTitle: '.NET',
-    dotnetDesc: 'Integración nativa con IConfiguration. Resuelve secretos al arrancar.',
+    dotnetDesc:
+      'Integración nativa con IConfiguration. Resuelve secretos al arrancar.',
     goTitle: 'Go',
     goDesc: 'Carga ligera de secretos para servicios Go.',
     javaTitle: 'Java',
@@ -709,7 +713,8 @@ export const es: Translations = {
     sdkDotnetQuickStartConfig: 'Inicio rápido — cargar en IConfiguration',
     sdkDotnetQuickStartConfigDesc:
       'Añade Envilder como fuente de configuración en tu aplicación ASP.NET:',
-    sdkDotnetQuickStartResolve: 'Inicio rápido — resolver + inyectar en el entorno',
+    sdkDotnetQuickStartResolve:
+      'Inicio rápido — resolver + inyectar en el entorno',
     sdkDotnetQuickStartResolveDesc:
       'Analiza el archivo de mapeo, resuelve secretos e inyéctalos en las variables de entorno:',
     sdkDotnetFullDocs: 'Documentación completa →',
