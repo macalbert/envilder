@@ -515,7 +515,10 @@ envilder --push --provider=azure \\
         <CodeBlock lang="csharp" code={`using Envilder;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddEnvilder("secrets-map.json");
+var mapFile = new MapFileParser().Parse(
+    File.ReadAllText("secrets-map.json"));
+var provider = SecretProviderFactory.Create(mapFile.Config);
+builder.Configuration.AddEnvilder("secrets-map.json", provider);
 var app = builder.Build();`} />
 
         <h3>{t.docs.sdkDotnetQuickStartResolve}</h3>

@@ -1,3 +1,64 @@
+## [0.9.3] - 2026-04-17
+
+### Added
+
+* **Runtime SDKs now available** — Load secrets directly into your application
+  at startup, no `.env` file needed:
+
+  **.NET** ([NuGet](https://www.nuget.org/packages/Envilder)):
+
+  ```csharp
+  builder.Configuration.AddEnvilder(
+      "secrets-map.json", provider);
+  ```
+
+  **Python** ([PyPI](https://pypi.org/project/envilder)):
+
+  ```python
+  from envilder import Envilder
+  Envilder.load('secrets-map.json')
+  ```
+
+  **CLI** (as always):
+
+  ```bash
+  npx envilder --map=secrets-map.json --envfile=.env
+  ```
+
+  **GitHub Action:**
+
+  ```yaml
+  - uses: macalbert/envilder/github-action@v0
+    with:
+      map-file: secrets-map.json
+      env-file: .env
+  ```
+
+### Changed
+
+* **README rewritten** — Streamlined messaging, accurate comparison
+  tables, simplified quick start (2 steps), and reduced noise
+* **Comparison table corrected** — Infisical SDKs, dotenvx (successor
+  to dotenv-vault), and chamber capabilities now accurately represented
+  with verified references
+
+### Fixed
+
+* **ci(publish-npm):** Narrowed `paths` filter from `src/**` to
+  `src/envilder/**` so SDK/website/IaC changes no longer trigger the
+  npm publish workflow
+* **ci(publish-npm):** Replaced `npm view` with `curl` against the npm
+  registry API to avoid `.npmrc` auth failures during version detection
+* **ci(publish-website):** Added `docs/CHANGELOG.md` and
+  `docs/changelogs/**` to path filters so changelog updates trigger
+  website deployment
+
+### Dependencies
+
+* Bump `typescript` from 6.0.2 to 6.0.3
+
+---
+
 ## [0.9.2] - 2026-04-02
 
 ### Added
