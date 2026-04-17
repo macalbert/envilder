@@ -65,7 +65,8 @@ public static class SecretProviderFactory
 
         if (!string.IsNullOrWhiteSpace(profile))
         {
-            var chain = new CredentialProfileStoreChain();
+            var profilesLocation = Environment.GetEnvironmentVariable("AWS_SHARED_CREDENTIALS_FILE");
+            var chain = new CredentialProfileStoreChain(profilesLocation);
             if (chain.TryGetAWSCredentials(profile, out var credentials))
             {
                 var region = ResolveProfileRegion(chain, profile!);
