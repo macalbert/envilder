@@ -7,9 +7,11 @@
   plain `AmazonSimpleSystemsManagementClient()` which uses the full AWS SDK resolution chain
   (env vars → `~/.aws/config` → instance metadata), correctly picking up the default config
   file settings
+  ([#166](https://github.com/macalbert/envilder/pull/166))
 * **Respect `AWS_SHARED_CREDENTIALS_FILE` for profile resolution** — `CredentialProfileStoreChain`
   now receives the credentials file path from the `AWS_SHARED_CREDENTIALS_FILE` environment
   variable, fixing profile discovery when credentials are stored at non-default locations
+  ([#166](https://github.com/macalbert/envilder/pull/166))
 
 ---
 
