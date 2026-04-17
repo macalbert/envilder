@@ -12,17 +12,21 @@ on:
     paths:
       - "src/website/**"
       - "src/iac/**"
+      - "docs/CHANGELOG.md"
+      - "docs/changelogs/**"
       - "package.json"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
       - ".github/workflows/publish-website.yml"
-            
+
   push:
     branches:
       - main
     paths:
       - "src/website/**"
       - "src/iac/**"
+      - "docs/CHANGELOG.md"
+      - "docs/changelogs/**"
       - "package.json"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
