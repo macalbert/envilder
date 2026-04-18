@@ -1,7 +1,7 @@
 namespace Envilder.Infrastructure.Configuration;
 
 using Envilder.Application;
-using Envilder.Domain.Ports;
+using Envilder.Domain;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
@@ -14,24 +14,17 @@ public static class ConfigurationBuilderExtensions
 {
 	/// <summary>
 	/// Adds an Envilder configuration source that reads a JSON map file from disk,
-	/// resolves every mapping against the given <paramref name="secretProvider"/>,
-	/// and exposes the results as <see cref="IConfiguration"/> keys.
+	/// resolves every mapping via the provider specified in the file's <c>$config</c>
+	/// section, and exposes the results as <see cref="IConfiguration"/> keys.
 	/// </summary>
 	/// <param name="builder">The configuration builder.</param>
 	/// <param name="mapFilePath">Absolute or relative path to the JSON map file.</param>
-	/// <param name="secretProvider">The secret provider to resolve values from.</param>
+	/// <param name="options">Optional runtime overrides (provider, profile, vault URL).</param>
 	/// <returns>The same <see cref="IConfigurationBuilder"/> for chaining.</returns>
-	/// <exception cref="ArgumentException"><paramref name="mapFilePath"/> is null or empty.</exception>
-	/// <exception cref="FileNotFoundException">The map file does not exist on disk.</exception>
 	public static IConfigurationBuilder AddEnvilder(this IConfigurationBuilder builder,
 													string mapFilePath,
-													ISecretProvider secretProvider)
+													EnvilderOptions? options = null)
 	{
-		if (secretProvider is null)
-		{
-			throw new ArgumentNullException(nameof(secretProvider));
-		}
-
 		if (string.IsNullOrWhiteSpace(mapFilePath))
 		{
 			throw new ArgumentException("Map file path cannot be null or empty.", nameof(mapFilePath));
@@ -44,7 +37,8 @@ public static class ConfigurationBuilderExtensions
 
 		var json = File.ReadAllText(mapFilePath);
 		var mapFile = new MapFileParser().Parse(json);
-		var client = new EnvilderClient(secretProvider);
+		var provider = SecretProviderFactory.Create(mapFile.Config, options);
+		var client = new EnvilderClient(provider);
 
 		return builder.Add(new EnvilderConfigurationSource(client, mapFile));
 	}

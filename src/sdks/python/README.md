@@ -107,36 +107,6 @@ Behaviour:
 - The environment name is stripped of leading/trailing whitespace before lookup.
 - Empty or whitespace-only environment names raise `ValueError`.
 
-### Advanced usage
-
-For full control over parsing, provider creation, and secret resolution:
-
-```python
-from envilder import (
-    EnvilderClient,
-    EnvilderOptions,
-    MapFileParser,
-    SecretProviderFactory,
-    SecretProviderType,
-)
-
-with open('secrets-map.json', encoding='utf-8') as file:
-    json_content = file.read()
-map_file = MapFileParser().parse(json_content)
-
-# Optional: override config at runtime
-options = EnvilderOptions(
-    provider=SecretProviderType.AZURE,
-    vault_url='https://my-vault.vault.azure.net',
-)
-provider = SecretProviderFactory.create(map_file.config, options)
-
-client = EnvilderClient(provider)
-secrets = client.resolve_secrets(map_file)
-
-EnvilderClient.inject_into_environment(secrets)
-```
-
 ### Secret validation
 
 Opt-in validation ensures all resolved secrets have non-empty values:
@@ -164,6 +134,29 @@ try:
     validate_secrets(secrets)
 except SecretValidationError as e:
     print(f"Missing: {', '.join(e.missing_keys)}")
+```
+
+### Advanced usage
+
+Implement the `ISecretProvider` protocol to plug in a custom backend
+(e.g., HashiCorp Vault, GCP Secret Manager):
+
+```python
+from envilder import EnvilderClient, ISecretProvider, MapFileParser
+
+
+class MyCustomProvider(ISecretProvider):
+    def get_secret(self, name: str) -> str | None:
+        # fetch from your custom backend
+        ...
+
+
+with open('secrets-map.json', encoding='utf-8') as file:
+    map_file = MapFileParser().parse(file.read())
+
+provider = MyCustomProvider()
+secrets = EnvilderClient(provider).resolve_secrets(map_file)
+EnvilderClient.inject_into_environment(secrets)
 ```
 
 ## API Reference

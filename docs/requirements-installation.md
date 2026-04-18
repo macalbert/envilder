@@ -237,7 +237,7 @@ Requirements:
 Verify:
 
 ```python
-from envilder import EnvilderClient, MapFileParser, SecretProviderFactory
+from envilder import Envilder
 print("Envilder Python SDK installed successfully")
 ```
 

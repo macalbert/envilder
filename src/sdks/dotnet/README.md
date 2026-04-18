@@ -137,14 +137,11 @@ secrets.ValidateSecrets(); // throws SecretValidationException if any value is e
 ### Via IConfiguration (ASP.NET)
 
 ```csharp
-using Envilder;
-
-var json = File.ReadAllText("secrets-map.json");
-var mapFile = new MapFileParser().Parse(json);
-var provider = SecretProviderFactory.Create(mapFile.Config);
+using Envilder.Infrastructure.Configuration;
+using Microsoft.Extensions.Configuration;
 
 var config = new ConfigurationBuilder()
-    .AddEnvilder("secrets-map.json", provider)
+    .AddEnvilder("secrets-map.json")
     .Build();
 
 var dbPassword = config["DB_PASSWORD"];
@@ -167,42 +164,27 @@ var connString = dbSettings["ConnectionString"];
 ### Via IServiceCollection (ASP.NET DI)
 
 ```csharp
-using Envilder;
+using Envilder.Infrastructure.DependencyInjection;
 
-var json = File.ReadAllText("secrets-map.json");
-var mapFile = new MapFileParser().Parse(json);
-var provider = SecretProviderFactory.Create(mapFile.Config);
-
-services.AddEnvilder("secrets-map.json", provider);
+services.AddEnvilder("secrets-map.json");
 ```
 
-### Advanced usage
+### With runtime overrides (IConfiguration)
 
-For full control over parsing, provider creation, and secret resolution:
+Pass `EnvilderOptions` to override the map file's `$config` from code:
 
 ```csharp
-using Envilder;
+using Envilder.Domain;
+using Envilder.Infrastructure.Configuration;
+using Microsoft.Extensions.Configuration;
 
-var json = File.ReadAllText("secrets-map.json");
-var mapFile = new MapFileParser().Parse(json);
-
-// Optional: override config at runtime
-var options = new EnvilderOptions
-{
-    Provider = SecretProviderType.Azure,
-    VaultUrl = "https://my-vault.vault.azure.net"
-};
-var provider = SecretProviderFactory.Create(mapFile.Config, options);
-var client = new EnvilderClient(provider);
-
-// Async
-var secrets = await client.ResolveSecretsAsync(mapFile);
-
-// Or sync
-var secrets = client.ResolveSecrets(mapFile);
-
-// Inject into process environment
-EnvilderClient.InjectIntoEnvironment(secrets);
+var config = new ConfigurationBuilder()
+    .AddEnvilder("secrets-map.json", new EnvilderOptions
+    {
+        Provider = SecretProviderType.Azure,
+        VaultUrl = "https://my-vault.vault.azure.net",
+    })
+    .Build();
 ```
 
 ## API Reference
@@ -238,6 +220,18 @@ EnvilderClient.InjectIntoEnvironment(secrets);
 | Method | Description |
 |--------|-------------|
 | `ValidateSecrets()` | Throws `SecretValidationException` if any value is empty or dictionary is empty |
+
+### IConfiguration integration
+
+| Method | Description |
+|--------|-------------|
+| `AddEnvilder(path, options?)` | Add Envilder as an `IConfigurationBuilder` source |
+
+### Dependency injection
+
+| Method | Description |
+|--------|-------------|
+| `AddEnvilder(path, options?)` | Register Envilder secrets into `IServiceCollection` |
 
 ## Map File Format
 

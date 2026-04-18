@@ -1,46 +1,20 @@
 namespace Envilder.Tests.Infrastructure.Configuration;
 
 using AwesomeAssertions;
-using Envilder.Domain.Ports;
 using Envilder.Infrastructure.Configuration;
 using Microsoft.Extensions.Configuration;
-using NSubstitute;
 using System.IO;
 
-public class ConfigurationBuilderExtensionsTests : IDisposable
+public class ConfigurationBuilderExtensionsTests
 {
-	private readonly string _mapFilePath;
-
-	public ConfigurationBuilderExtensionsTests()
-	{
-		_mapFilePath = Path.GetTempFileName();
-		File.WriteAllText(_mapFilePath, """
-            {
-                "TOKEN": "/Test/Token",
-                "DB_PASS": "/App/Db"
-            }
-            """);
-	}
-
-	public void Dispose()
-	{
-		if (File.Exists(_mapFilePath))
-		{
-			File.Delete(_mapFilePath);
-		}
-
-		GC.SuppressFinalize(this);
-	}
-
 	[Fact]
 	public void Should_ThrowFileNotFoundException_When_MapFileDoesNotExist()
 	{
 		// Arrange
-		var secretProvider = Substitute.For<ISecretProvider>();
 		var builder = new ConfigurationBuilder();
 
 		// Act
-		var act = () => builder.AddEnvilder("/nonexistent/path/map.json", secretProvider);
+		var act = () => builder.AddEnvilder("/nonexistent/path/map.json");
 
 		// Assert
 		act.Should().Throw<FileNotFoundException>();
@@ -50,34 +24,13 @@ public class ConfigurationBuilderExtensionsTests : IDisposable
 	public void Should_ThrowArgumentException_When_MapFilePathIsNullOrEmpty()
 	{
 		// Arrange
-		var secretProvider = Substitute.For<ISecretProvider>();
 		var builder = new ConfigurationBuilder();
 
 		// Act
-		var act = () => builder.AddEnvilder(string.Empty, secretProvider);
+		var act = () => builder.AddEnvilder(string.Empty);
 
 		// Assert
 		act.Should().Throw<ArgumentException>()
 			.WithParameterName("mapFilePath");
-	}
-
-	[Fact]
-	public void Should_ExposeSecretsViaIConfiguration_When_AddEnvilderCalled()
-	{
-		// Arrange
-		var secretProvider = Substitute.For<ISecretProvider>();
-		secretProvider.GetSecretAsync("/Test/Token", Arg.Any<CancellationToken>())
-			.Returns("secret-token");
-		secretProvider.GetSecretAsync("/App/Db", Arg.Any<CancellationToken>())
-			.Returns("secret-db");
-
-		// Act
-		var actual = new ConfigurationBuilder()
-			.AddEnvilder(_mapFilePath, secretProvider)
-			.Build();
-
-		// Assert
-		actual["TOKEN"].Should().Be("secret-token");
-		actual["DB_PASS"].Should().Be("secret-db");
 	}
 }

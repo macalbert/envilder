@@ -3,11 +3,8 @@
 #:property PublishAot=false
 
 using Envilder.Application;
-using Envilder.Infrastructure;
 
-var mapFile = new MapFileParser().Parse(File.ReadAllText("../../../secrets-map.json"));
-var provider = SecretProviderFactory.Create(mapFile.Config);
-var secrets = await new EnvilderClient(provider).ResolveSecretsAsync(mapFile);
+var secrets = Envilder.ResolveFile("../../../secrets-map.json");
 
 foreach (var (key, value) in secrets)
     Console.WriteLine($"{key} = {value}");

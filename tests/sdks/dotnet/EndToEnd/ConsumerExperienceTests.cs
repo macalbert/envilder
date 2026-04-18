@@ -4,8 +4,6 @@ using Amazon.SimpleSystemsManagement;
 using AwesomeAssertions;
 using Envilder.Domain;
 using Envilder.Infrastructure;
-using Envilder.Infrastructure.Aws;
-using Envilder.Infrastructure.Azure;
 using Envilder.Infrastructure.Configuration;
 using Envilder.Tests.Fixtures;
 using Microsoft.Extensions.Configuration;
@@ -19,8 +17,6 @@ public class ConsumerExperienceTests : IAsyncLifetime
 	private readonly LocalStackFixture _localStack;
 	private readonly LowkeyVaultFixture _lowkeyVault;
 
-	private readonly AwsSsmSecretProvider _awsProvider;
-	private readonly AzureKeyVaultSecretProvider _azureProvider;
 	private readonly List<string> _tempFiles = [];
 
 	private static readonly string[] FacadeEnvVars =
@@ -37,8 +33,6 @@ public class ConsumerExperienceTests : IAsyncLifetime
 	{
 		_localStack = localStack;
 		_lowkeyVault = lowkeyVault;
-		_awsProvider = _localStack.CreateProvider();
-		_azureProvider = new(_lowkeyVault.SecretClient);
 	}
 
 	public ValueTask InitializeAsync()
@@ -95,7 +89,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
 
 		// Act
 		var actual = new ConfigurationBuilder()
-			.AddEnvilder(mapFilePath, _awsProvider)
+			.AddEnvilder(mapFilePath)
 			.Build();
 
 		// Assert
@@ -104,7 +98,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
 	}
 
 	[Fact]
-	public async Task Should_ExposeAwsSecretsViaIConfiguration_When_MapFileIncludesProfileConfig()
+	public async Task Should_ExposeAwsSecretsViaIConfiguration_When_OptionsOverrideMapFileConfig()
 	{
 		// Arrange
 		var connectionStringName = "/e2e/db2-url";
@@ -113,42 +107,18 @@ public class ConsumerExperienceTests : IAsyncLifetime
 
 		var mapFilePath = await WriteTempMapFileAsync($$"""
             {
-                "$config": { "provider": "aws",  "profile": "production" },
+                "$config": { "provider": "aws", "profile": "nonexistent" },
                 "DB_URL": "{{connectionStringName}}"
             }
             """);
 
 		// Act
 		var config = new ConfigurationBuilder()
-			.AddEnvilder(mapFilePath, _awsProvider)
+			.AddEnvilder(mapFilePath, new EnvilderOptions { Profile = "" })
 			.Build();
 
 		// Assert
 		config["DB_URL"].Should().Be(expectedConnectionString);
-	}
-
-	[Fact]
-	public async Task Should_ExposeAzureSecretsViaIConfiguration_When_MapFileUsesAzureProvider()
-	{
-		// Arrange
-		var name = "e2e-vault-secret";
-		var expectedSecret = "azure-e2e-value";
-		await _lowkeyVault.SecretClient.SetSecretAsync(name, expectedSecret);
-
-		var mapFilePath = await WriteTempMapFileAsync($$"""
-            {
-                "$config": { "provider": "azure", "vaultUrl": "{{_lowkeyVault.VaultUrl}}" },
-                "VAULT_SECRET": "{{name}}"
-            }
-            """);
-
-		// Act
-		var config = new ConfigurationBuilder()
-			.AddEnvilder(mapFilePath, _azureProvider)
-			.Build();
-
-		// Assert
-		config["VAULT_SECRET"].Should().Be(expectedSecret);
 	}
 
 	[Fact]
@@ -167,7 +137,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
             """);
 
 		var builder = Host.CreateApplicationBuilder();
-		builder.Configuration.AddEnvilder(mapFilePath, _awsProvider);
+		builder.Configuration.AddEnvilder(mapFilePath);
 		using var host = builder.Build();
 
 		// Act
@@ -182,7 +152,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
 	{
 		// Act
 		var act = () => new ConfigurationBuilder()
-			.AddEnvilder("/nonexistent/secrets-map.json", _awsProvider)
+			.AddEnvilder("/nonexistent/secrets-map.json")
 			.Build();
 
 		// Assert
@@ -195,7 +165,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
 	{
 		// Act
 		var act = () => new ConfigurationBuilder()
-			.AddEnvilder("", _awsProvider)
+			.AddEnvilder(string.Empty)
 			.Build();
 
 		// Assert
@@ -235,7 +205,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
 
 		// Act
 		var config = new ConfigurationBuilder()
-			.AddEnvilder(mapFilePath, _awsProvider)
+			.AddEnvilder(mapFilePath)
 			.Build();
 
 		// Assert

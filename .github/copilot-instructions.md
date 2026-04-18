@@ -220,11 +220,11 @@ but have **no code dependency** on the TypeScript core.
   - `MapFileParser` — Parses `$config` + variable mappings from JSON
   - `SecretValidationExtensions` — Opt-in `ValidateSecrets()` extension (throws `SecretValidationException` for empty/missing values)
 - **Infrastructure** (`Infrastructure/`):
-  - `SecretProviderFactory` — Creates provider from `MapFileConfig` + optional `EnvilderOptions` overrides
+  - `SecretProviderFactory` (internal) — Creates provider from `MapFileConfig` + optional `EnvilderOptions` overrides. Validates cross-provider config (profile is AWS-only, vaultUrl is Azure-only)
   - `Aws/AwsSsmSecretProvider` — `GetSecretAsync`: `GetParameterAsync(WithDecryption=true)`, catches `ParameterNotFoundException` → `null`. `GetSecret` (sync): wraps in `Task.Run()` to prevent `SynchronizationContext` deadlocks, 60s `CancellationTokenSource` timeout
   - `Azure/AzureKeyVaultSecretProvider` — `GetSecretAsync`: `SecretClient.GetSecretAsync()`, catches `RequestFailedException(404)` → `null`. `GetSecret` (sync): uses native `SecretClient.GetSecret()` (no deadlock risk)
-  - `Configuration/` — `ConfigurationBuilderExtensions.AddEnvilder()` integrates into `IConfigurationBuilder` pipeline; backed by `EnvilderConfigurationProvider` + `EnvilderConfigurationSource`
-  - `DependencyInjection/ServiceCollectionExtensions` — `IServiceCollection.AddEnvilder()` for ASP.NET DI
+  - `Configuration/` — `ConfigurationBuilderExtensions.AddEnvilder(mapFilePath, options?)` integrates into `IConfigurationBuilder` pipeline; creates provider internally via factory
+  - `DependencyInjection/ServiceCollectionExtensions` — `IServiceCollection.AddEnvilder(mapFilePath, options?)` for ASP.NET DI
 
 **AWS credential resolution** (in `SecretProviderFactory`):
 
@@ -234,11 +234,12 @@ but have **no code dependency** on the TypeScript core.
 
 **Key patterns**:
 
-- Factory pattern (`SecretProviderFactory.Create()`) for standalone use; also DI extensions for ASP.NET
+- `SecretProviderFactory` is internal — consumers use the facade, builder, or `AddEnvilder()` extensions
 - Pull-only — SDKs do not support push mode
 - `ISecretProvider.GetSecretAsync()` / `GetSecret()` return `null` for missing secrets (no exceptions)
 - `EnvilderClient.ResolveSecretsAsync()` / `ResolveSecrets()` silently omit missing secrets
 - `SecretValidationExtensions.ValidateSecrets()` — opt-in post-resolution validation
+- Cross-provider validation: profile + Azure → error, vaultUrl + AWS → error
 
 **Tests** (`tests/sdks/dotnet/`): xUnit + NSubstitute + AwesomeAssertions.
 Acceptance tests use TestContainers (LocalStack for AWS, Lowkey Vault for Azure).
@@ -260,17 +261,18 @@ Naming: `Should_<Expected>_When_<Condition>`. AAA pattern with comment markers.
   - `EnvilderClient` — Core resolver (`resolve_secrets(map_file)` + `inject_into_environment(secrets)` static method sets `os.environ`)
   - `MapFileParser` — Parses `$config` + variable mappings from JSON
   - `secret_validation` — `validate_secrets(dict)` raises `SecretValidationError` for empty/missing values
-- **Infrastructure** (`infrastructure/`): `SecretProviderFactory`, `AwsSsmSecretProvider` (boto3), `AzureKeyVaultSecretProvider`
+- **Infrastructure** (`infrastructure/`): `SecretProviderFactory` (not exported in `__all__`), `AwsSsmSecretProvider` (boto3), `AzureKeyVaultSecretProvider`
 
 **Key patterns**:
 
 - Synchronous API — uses `boto3` natively (no async/await)
 - Protocol-based ports — Python `Protocol` instead of ABC
-- Factory pattern (`SecretProviderFactory.create()`) with optional `EnvilderOptions` overrides
+- `SecretProviderFactory` is internal — consumers use the `Envilder` facade
 - `Envilder` facade is the primary public API (fluent: `from_file().with_provider().with_vault_url().inject()`)
 - `ISecretProvider.get_secret()` returns `None` for missing secrets (no exceptions)
 - `EnvilderClient.resolve_secrets()` silently omits missing secrets
 - `validate_secrets()` — opt-in post-resolution validation
+- Cross-provider validation: profile + Azure → error, vault_url + AWS → error
 
 **Tests** (`tests/sdks/python/`): pytest with `Should_<Expected>_When_<Condition>` naming.
 Container wrappers follow xxtemplatexx pattern with explicit `start()`/`stop()` lifecycle.

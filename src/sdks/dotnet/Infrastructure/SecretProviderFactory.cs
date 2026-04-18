@@ -15,7 +15,7 @@ using System;
 /// Creates the appropriate <see cref="ISecretProvider"/> implementation
 /// based on the map file configuration and optional runtime overrides.
 /// </summary>
-public static class SecretProviderFactory
+internal static class SecretProviderFactory
 {
 	private static readonly RegionEndpoint FallbackRegion = RegionEndpoint.USEast1;
 
@@ -38,18 +38,40 @@ public static class SecretProviderFactory
 		}
 
 		var provider = options?.Provider ?? config.Provider;
+		var profile = options?.Profile ?? config.Profile;
+		var vaultUrl = options?.VaultUrl ?? config.VaultUrl;
+
+		ValidateCrossProviderConfig(provider, profile, vaultUrl);
 
 		return provider switch
 		{
-			SecretProviderType.Azure => CreateAzureSecretProvider(config, options),
-			_ => CreateAwsSecretProvider(config, options),
+			SecretProviderType.Azure => CreateAzureSecretProvider(vaultUrl),
+			_ => CreateAwsSecretProvider(profile),
 		};
 	}
 
-	private static AzureKeyVaultSecretProvider CreateAzureSecretProvider(MapFileConfig config, EnvilderOptions? options)
+	private static void ValidateCrossProviderConfig(
+		SecretProviderType? provider,
+		string? profile,
+		string? vaultUrl)
 	{
-		var vaultUrl = options?.VaultUrl ?? config.VaultUrl;
+		var isAzure = provider == SecretProviderType.Azure;
 
+		if (isAzure && !string.IsNullOrWhiteSpace(profile))
+		{
+			throw new InvalidOperationException(
+				"AWS profile cannot be used with Azure Key Vault provider.");
+		}
+
+		if (!isAzure && !string.IsNullOrWhiteSpace(vaultUrl))
+		{
+			throw new InvalidOperationException(
+				"Vault URL cannot be used with AWS SSM provider.");
+		}
+	}
+
+	private static AzureKeyVaultSecretProvider CreateAzureSecretProvider(string? vaultUrl)
+	{
 		if (string.IsNullOrWhiteSpace(vaultUrl))
 		{
 			throw new InvalidOperationException("Vault URL must be provided for Azure Key Vault provider.");
@@ -59,10 +81,8 @@ public static class SecretProviderFactory
 		return new(secretClient);
 	}
 
-	private static AwsSsmSecretProvider CreateAwsSecretProvider(MapFileConfig config, EnvilderOptions? options)
+	private static AwsSsmSecretProvider CreateAwsSecretProvider(string? profile)
 	{
-		var profile = options?.Profile ?? config.Profile;
-
 		if (!string.IsNullOrWhiteSpace(profile))
 		{
 			var profilesLocation = Environment.GetEnvironmentVariable("AWS_SHARED_CREDENTIALS_FILE");
