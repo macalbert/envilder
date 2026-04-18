@@ -41,6 +41,11 @@ public class AzureKeyVaultSecretProvider : ISecretProvider
     /// <inheritdoc />
     public string? GetSecret(string name)
     {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Secret name cannot be null or whitespace.", nameof(name));
+        }
+
         try
         {
             var response = _secretClient.GetSecret(name);

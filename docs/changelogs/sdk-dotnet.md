@@ -13,6 +13,12 @@
 * `AzureKeyVaultSecretProvider.GetSecret()` — Sync Azure Key Vault implementation
 * `EnvilderClient.ResolveSecrets(mapFile)` — Sync secret resolution
 
+### Breaking
+
+* `ISecretProvider.GetSecret(string name)` — New required interface method. External
+  implementations of `ISecretProvider` must add a synchronous `GetSecret` method
+  (return `null` for missing secrets, matching the `GetSecretAsync` contract)
+
 ### Fixed
 
 * **Delegate default AWS region resolution to the AWS SDK** — When no profile is set, the

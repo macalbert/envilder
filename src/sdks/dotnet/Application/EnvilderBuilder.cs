@@ -58,7 +58,7 @@ public class EnvilderBuilder
     public IReadOnlyDictionary<string, string> Inject()
     {
         var secrets = Resolve();
-        EnvilderClient.InjectIntoEnvironment((Dictionary<string, string>)secrets);
+        EnvilderClient.InjectIntoEnvironment(secrets);
         return secrets;
     }
 
@@ -66,7 +66,7 @@ public class EnvilderBuilder
         CancellationToken cancellationToken = default)
     {
         var secrets = await ResolveAsync(cancellationToken).ConfigureAwait(false);
-        EnvilderClient.InjectIntoEnvironment((Dictionary<string, string>)secrets);
+        EnvilderClient.InjectIntoEnvironment(secrets);
         return secrets;
     }
 }

@@ -25,6 +25,7 @@ public static class Envilder
         CancellationToken cancellationToken = default)
     {
         ValidateFilePath(filePath);
+        cancellationToken.ThrowIfCancellationRequested();
         string json;
         using (var reader = new StreamReader(filePath))
         {
@@ -41,7 +42,7 @@ public static class Envilder
     public static IReadOnlyDictionary<string, string> Load(string filePath)
     {
         var secrets = ResolveFile(filePath);
-        EnvilderClient.InjectIntoEnvironment((Dictionary<string, string>)secrets);
+        EnvilderClient.InjectIntoEnvironment(secrets);
         return secrets;
     }
 
@@ -50,7 +51,7 @@ public static class Envilder
         CancellationToken cancellationToken = default)
     {
         var secrets = await ResolveFileAsync(filePath, cancellationToken).ConfigureAwait(false);
-        EnvilderClient.InjectIntoEnvironment((Dictionary<string, string>)secrets);
+        EnvilderClient.InjectIntoEnvironment(secrets);
         return secrets;
     }
 
@@ -117,6 +118,11 @@ public static class Envilder
             throw new ArgumentException("Environment name cannot be null or empty.", nameof(environment));
         }
 
+        if (envMapping is null)
+        {
+            throw new ArgumentNullException(nameof(envMapping));
+        }
+
         if (!envMapping.TryGetValue(environment, out var filePath))
         {
             return null;
@@ -159,6 +165,7 @@ public static class Envilder
         string filePath,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         using var reader = new StreamReader(filePath);
         return await reader.ReadToEndAsync().ConfigureAwait(false);
     }

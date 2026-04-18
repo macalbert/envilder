@@ -28,7 +28,7 @@ public class EnvilderClient
     /// Sets every key/value pair as a process-level environment variable.
     /// </summary>
     /// <param name="secrets">Resolved secrets to inject.</param>
-    public static void InjectIntoEnvironment(IDictionary<string, string> secrets)
+    public static void InjectIntoEnvironment(IEnumerable<KeyValuePair<string, string>> secrets)
     {
         foreach (var kvp in secrets)
         {

@@ -22,5 +22,14 @@ public interface ISecretProvider
     /// </returns>
     Task<string?> GetSecretAsync(string name, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Synchronously retrieves a single secret by its name or path.
+    /// </summary>
+    /// <param name="name">
+    /// Provider-specific identifier (see <see cref="GetSecretAsync"/>).
+    /// </param>
+    /// <returns>
+    /// The secret value, or <see langword="null"/> when the secret does not exist.
+    /// </returns>
     string? GetSecret(string name);
 }
