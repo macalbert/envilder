@@ -63,8 +63,7 @@ public async Task Should_CreateGroup_When_RequestIsValid()
 
 **Rules:**
 
-- **Each comment (`// Arrange`, `// Act`, `// Assert`) appears AT MOST ONCE per test** — if you need to test
-two actions, write two tests
+- **Each comment (`// Arrange`, `// Act`, `// Assert`) appears AT MOST ONCE per test** — if you need to test two actions, write two tests
 - Each section clearly separated by comments
 - Never mix phases
 - **No `if`, `switch`, or conditional logic** inside Arrange, Act, or Assert blocks

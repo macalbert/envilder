@@ -7,6 +7,18 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+/// <summary>
+/// Fluent builder for configuring and resolving secrets from a map file.
+/// Obtain an instance via <see cref="Envilder.FromFile(string)"/>.
+/// </summary>
+/// <example>
+/// <code>
+/// var secrets = Envilder.FromFile("param-map.json")
+///     .WithProvider(SecretProviderType.Azure)
+///     .WithVaultUrl("https://my-vault.vault.azure.net")
+///     .Resolve();
+/// </code>
+/// </example>
 public class EnvilderBuilder
 {
 	private readonly string _filePath;

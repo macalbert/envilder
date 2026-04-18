@@ -9,8 +9,8 @@
 * `FromFile(path)` — Fluent builder with `.WithProvider()`, `.WithProfile()`, `.WithVaultUrl()`
 * `EnvilderBuilder.Resolve()` / `ResolveAsync()` / `Inject()` / `InjectAsync()` — Fluent terminal methods
 * `ISecretProvider.GetSecret(name)` — Synchronous secret retrieval (new interface method)
-* `AwsSsmSecretProvider.GetSecret()` — Sync AWS SSM implementation
-* `AzureKeyVaultSecretProvider.GetSecret()` — Sync Azure Key Vault implementation
+* `AwsSsmSecretProvider.GetSecret(name)` — Sync AWS SSM implementation
+* `AzureKeyVaultSecretProvider.GetSecret(name)` — Sync Azure Key Vault implementation
 * `EnvilderClient.ResolveSecrets(mapFile)` — Sync secret resolution
 
 ### Breaking

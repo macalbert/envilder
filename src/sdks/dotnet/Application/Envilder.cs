@@ -7,6 +7,29 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+/// <summary>
+/// One-liner facade for resolving and injecting secrets from a map file.
+/// <para>
+/// Use <see cref="ResolveFile(string)"/> to resolve secrets, <see cref="Load(string)"/>
+/// to resolve and inject into <see cref="System.Environment"/>, or
+/// <see cref="FromFile(string)"/> for fluent configuration.
+/// </para>
+/// </summary>
+/// <example>
+/// <code>
+/// // Resolve + inject in one call
+/// Envilder.Load("param-map.json");
+///
+/// // Resolve without injecting
+/// var secrets = Envilder.ResolveFile("param-map.json");
+///
+/// // Fluent builder with provider override
+/// var secrets = Envilder.FromFile("param-map.json")
+///     .WithProvider(SecretProviderType.Azure)
+///     .WithVaultUrl("https://my-vault.vault.azure.net")
+///     .Resolve();
+/// </code>
+/// </example>
 public static class Envilder
 {
 	public static IReadOnlyDictionary<string, string> ResolveFile(string filePath)

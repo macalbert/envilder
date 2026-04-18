@@ -1,6 +1,10 @@
 from envilder.application.envilder_client import EnvilderClient
 from envilder.application.envilder_facade import Envilder
 from envilder.application.map_file_parser import MapFileParser
+from envilder.application.secret_validation import (
+    SecretValidationError,
+    validate_secrets,
+)
 from envilder.domain.envilder_options import EnvilderOptions
 from envilder.domain.map_file_config import MapFileConfig
 from envilder.domain.parsed_map_file import ParsedMapFile
@@ -28,4 +32,6 @@ __all__ = [
     "ParsedMapFile",
     "SecretProviderFactory",
     "SecretProviderType",
+    "SecretValidationError",
+    "validate_secrets",
 ]

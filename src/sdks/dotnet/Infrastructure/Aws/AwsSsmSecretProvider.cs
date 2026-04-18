@@ -56,7 +56,7 @@ public class AwsSsmSecretProvider : ISecretProvider
 		{
 			using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
 #pragma warning disable VSTHRD002 // AWS SDK v4 has no synchronous GetParameter API
-			var response = _ssmClient.GetParameterAsync(new() { Name = name, WithDecryption = true }, cts.Token).GetAwaiter().GetResult();
+			var response = Task.Run(() => _ssmClient.GetParameterAsync(new() { Name = name, WithDecryption = true }, cts.Token)).GetAwaiter().GetResult();
 #pragma warning restore VSTHRD002
 			return response.Parameter.Value;
 		}
