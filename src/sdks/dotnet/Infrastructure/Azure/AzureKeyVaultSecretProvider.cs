@@ -44,7 +44,7 @@ public class AzureKeyVaultSecretProvider : ISecretProvider
         try
         {
             var response = _secretClient.GetSecret(name);
-            return response?.Value?.Value;
+            return response.Value.Value;
         }
         catch (RequestFailedException ex) when (ex.Status == 404)
         {
