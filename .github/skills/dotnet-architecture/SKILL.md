@@ -10,6 +10,8 @@ Domain-Driven Design, CQRS, and Clean Architecture patterns for .NET backends.
 ## Code Style Rules
 
 **NEVER write unnecessary comments or XML summaries.** Code should be self-explanatory.
+Exception: **SDK public APIs** (`src/sdks/*`) MUST keep XML doc summaries and `<param>` tags on
+public classes and methods — consumers rely on IDE tooltips and IntelliSense.
 
 | Rule | Example |
 | ---- | ------ |
