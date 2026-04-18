@@ -27,6 +27,11 @@ public class AzureKeyVaultSecretProvider : ISecretProvider
 	/// <inheritdoc />
 	public async Task<string?> GetSecretAsync(string name, CancellationToken cancellationToken = default)
 	{
+		if (string.IsNullOrWhiteSpace(name))
+		{
+			throw new ArgumentException("Secret name cannot be null or whitespace.", nameof(name));
+		}
+
 		try
 		{
 			var response = await _secretClient.GetSecretAsync(name, null, cancellationToken);
