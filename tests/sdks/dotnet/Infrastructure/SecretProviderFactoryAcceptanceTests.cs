@@ -7,13 +7,32 @@ using Envilder.Infrastructure;
 using Envilder.Tests.Fixtures;
 
 [Collection(nameof(ContainersCollection))]
-public class SecretProviderFactoryAcceptanceTests
+public class SecretProviderFactoryAcceptanceTests : IAsyncLifetime
 {
     private readonly LocalStackFixture _localStack;
+    private readonly List<(string Name, string? Value)> _savedEnvVars = [];
+    private string? _tempDirToDelete;
 
     public SecretProviderFactoryAcceptanceTests(LocalStackFixture localStack)
     {
         _localStack = localStack;
+    }
+
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public Task DisposeAsync()
+    {
+        foreach (var (name, value) in _savedEnvVars)
+        {
+            Environment.SetEnvironmentVariable(name, value);
+        }
+
+        if (_tempDirToDelete is not null)
+        {
+            Directory.Delete(_tempDirToDelete, true);
+        }
+
+        return Task.CompletedTask;
     }
 
     [Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
@@ -28,42 +47,22 @@ public class SecretProviderFactoryAcceptanceTests
             Overwrite = true,
         });
 
-        var envVarsToOverride = new[]
-        {
-            "AWS_ENDPOINT_URL", "AWS_SERVICE_URL",
-            "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY",
-            "AWS_DEFAULT_REGION", "AWS_REGION",
-            "AWS_PROFILE",
-        };
-        var originalValues = envVarsToOverride
-            .Select(v => (Name: v, Value: Environment.GetEnvironmentVariable(v)))
-            .ToArray();
+        OverrideEnvironmentVariable("AWS_ENDPOINT_URL", _localStack.ServiceUrl);
+        OverrideEnvironmentVariable("AWS_SERVICE_URL", _localStack.ServiceUrl);
+        OverrideEnvironmentVariable("AWS_ACCESS_KEY_ID", "test");
+        OverrideEnvironmentVariable("AWS_SECRET_ACCESS_KEY", "test");
+        OverrideEnvironmentVariable("AWS_DEFAULT_REGION", "us-east-1");
+        OverrideEnvironmentVariable("AWS_REGION", null);
+        OverrideEnvironmentVariable("AWS_PROFILE", null);
 
-        try
-        {
-            Environment.SetEnvironmentVariable("AWS_ENDPOINT_URL", _localStack.ServiceUrl);
-            Environment.SetEnvironmentVariable("AWS_SERVICE_URL", _localStack.ServiceUrl);
-            Environment.SetEnvironmentVariable("AWS_ACCESS_KEY_ID", "test");
-            Environment.SetEnvironmentVariable("AWS_SECRET_ACCESS_KEY", "test");
-            Environment.SetEnvironmentVariable("AWS_DEFAULT_REGION", "us-east-1");
-            Environment.SetEnvironmentVariable("AWS_PROFILE", null);
+        var config = new MapFileConfig { Provider = SecretProviderType.Aws };
+        var sut = SecretProviderFactory.Create(config);
 
-            var config = new MapFileConfig { Provider = SecretProviderType.Aws };
-            var sut = SecretProviderFactory.Create(config);
+        // Act
+        var actual = await sut.GetSecretAsync("/Test/FactoryNoProfile");
 
-            // Act
-            var actual = await sut.GetSecretAsync("/Test/FactoryNoProfile");
-
-            // Assert
-            actual.Should().Be("factory-no-profile-secret");
-        }
-        finally
-        {
-            foreach (var (name, value) in originalValues)
-            {
-                Environment.SetEnvironmentVariable(name, value);
-            }
-        }
+        // Assert
+        actual.Should().Be("factory-no-profile-secret");
     }
 
     [Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
@@ -78,11 +77,11 @@ public class SecretProviderFactoryAcceptanceTests
             Overwrite = true,
         });
 
-        var tempDir = Path.Combine(Path.GetTempPath(), $"envilder-test-{Guid.NewGuid()}");
-        Directory.CreateDirectory(tempDir);
+        _tempDirToDelete = Path.Combine(Path.GetTempPath(), $"envilder-test-{Guid.NewGuid()}");
+        Directory.CreateDirectory(_tempDirToDelete);
 
-        var configFilePath = Path.Combine(tempDir, "config");
-        var credentialsFilePath = Path.Combine(tempDir, "credentials");
+        var configFilePath = Path.Combine(_tempDirToDelete, "config");
+        var credentialsFilePath = Path.Combine(_tempDirToDelete, "credentials");
 
         await File.WriteAllTextAsync(configFilePath,
             $"""
@@ -98,49 +97,32 @@ public class SecretProviderFactoryAcceptanceTests
             aws_secret_access_key = test
             """);
 
-        var envVarsToOverride = new[]
+        OverrideEnvironmentVariable("AWS_CONFIG_FILE", configFilePath);
+        OverrideEnvironmentVariable("AWS_SHARED_CREDENTIALS_FILE", credentialsFilePath);
+        OverrideEnvironmentVariable("AWS_ENDPOINT_URL", _localStack.ServiceUrl);
+        OverrideEnvironmentVariable("AWS_ACCESS_KEY_ID", null);
+        OverrideEnvironmentVariable("AWS_SECRET_ACCESS_KEY", null);
+        OverrideEnvironmentVariable("AWS_DEFAULT_REGION", null);
+        OverrideEnvironmentVariable("AWS_REGION", null);
+        OverrideEnvironmentVariable("AWS_PROFILE", null);
+
+        var config = new MapFileConfig
         {
-            "AWS_CONFIG_FILE", "AWS_SHARED_CREDENTIALS_FILE",
-            "AWS_ENDPOINT_URL", "AWS_ACCESS_KEY_ID",
-            "AWS_SECRET_ACCESS_KEY", "AWS_DEFAULT_REGION",
-            "AWS_REGION", "AWS_PROFILE",
+            Provider = SecretProviderType.Aws,
+            Profile = "localstack-test",
         };
-        var originalValues = envVarsToOverride
-            .Select(v => (Name: v, Value: Environment.GetEnvironmentVariable(v)))
-            .ToArray();
+        var sut = SecretProviderFactory.Create(config);
 
-        try
-        {
-            Environment.SetEnvironmentVariable("AWS_CONFIG_FILE", configFilePath);
-            Environment.SetEnvironmentVariable("AWS_SHARED_CREDENTIALS_FILE", credentialsFilePath);
-            Environment.SetEnvironmentVariable("AWS_ENDPOINT_URL", _localStack.ServiceUrl);
-            Environment.SetEnvironmentVariable("AWS_ACCESS_KEY_ID", null);
-            Environment.SetEnvironmentVariable("AWS_SECRET_ACCESS_KEY", null);
-            Environment.SetEnvironmentVariable("AWS_DEFAULT_REGION", null);
-            Environment.SetEnvironmentVariable("AWS_REGION", null);
-            Environment.SetEnvironmentVariable("AWS_PROFILE", null);
+        // Act
+        var actual = await sut.GetSecretAsync("/Test/FactoryWithProfile");
 
-            var config = new MapFileConfig
-            {
-                Provider = SecretProviderType.Aws,
-                Profile = "localstack-test",
-            };
-            var sut = SecretProviderFactory.Create(config);
+        // Assert
+        actual.Should().Be("factory-profile-secret");
+    }
 
-            // Act
-            var actual = await sut.GetSecretAsync("/Test/FactoryWithProfile");
-
-            // Assert
-            actual.Should().Be("factory-profile-secret");
-        }
-        finally
-        {
-            foreach (var (name, value) in originalValues)
-            {
-                Environment.SetEnvironmentVariable(name, value);
-            }
-
-            Directory.Delete(tempDir, true);
-        }
+    private void OverrideEnvironmentVariable(string name, string? value)
+    {
+        _savedEnvVars.Add((name, Environment.GetEnvironmentVariable(name)));
+        Environment.SetEnvironmentVariable(name, value);
     }
 }
