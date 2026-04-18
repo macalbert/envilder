@@ -21,7 +21,10 @@ const sdkTabs = [
     docsHash: 'sdk-dotnet',
     codeLang: 'csharp',
     codeFile: 'Program.cs',
-    code: `using Envilder;
+    code: `using Envilder.Application;
+using Envilder.Domain;
+using Envilder.Infrastructure.Configuration;
+using Envilder.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 

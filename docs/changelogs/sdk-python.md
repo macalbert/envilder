@@ -6,7 +6,7 @@
   from public re-exports; consumers should use the `Envilder` facade instead of creating
   providers manually
   ([#167](https://github.com/macalbert/envilder/pull/167))
-* **Cross-provider validation** — `SecretProviderFactory.create()` now rejects invalid
+* **Cross-provider validation** — `_SecretProviderFactory.create()` now rejects invalid
   combinations: AWS profile with Azure provider, or vault URL with AWS provider
   ([#167](https://github.com/macalbert/envilder/pull/167))
 

@@ -14,6 +14,11 @@ pre-commit:
       run: make format-sdk-python && make check-sdk-python
       stage_fixed: true
 
+pre-push:
+  commands:
+    biome-format:
+      run: pnpm format
+
 commit-msg:
   commands:
     commitlint:
