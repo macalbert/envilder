@@ -19,6 +19,8 @@ _ENV_KEYS = [
     "AWS_ACCESS_KEY_ID",
     "AWS_SECRET_ACCESS_KEY",
     "AWS_DEFAULT_REGION",
+    "AWS_REGION",
+    "AWS_PROFILE",
 ]
 
 _PROFILE_ENV_KEYS = [
@@ -69,6 +71,8 @@ def aws_env_for_factory(
     os.environ["AWS_ACCESS_KEY_ID"] = "test"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "test"
     os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
+    os.environ.pop("AWS_REGION", None)
+    os.environ.pop("AWS_PROFILE", None)
     yield
     _restore_env(originals)
 

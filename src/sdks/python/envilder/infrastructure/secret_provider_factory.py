@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import os
-
 import boto3
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
@@ -73,17 +71,9 @@ def _create_aws_provider(
         return AwsSsmSecretProvider(session.client("ssm"))
 
     try:
-        region = _resolve_region_from_env()
-        session = boto3.Session(
-            profile_name=profile,
-            region_name=region,
-        )
+        session = boto3.Session(profile_name=profile)
         return AwsSsmSecretProvider(session.client("ssm"))
     except Exception as e:
         raise ValueError(
             f"Failed to create AWS session with profile '{profile}': {e}"
         ) from e
-
-
-def _resolve_region_from_env() -> str | None:
-    return os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION")

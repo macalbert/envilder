@@ -33,6 +33,7 @@ public class SecretProviderFactoryAcceptanceTests
             "AWS_ENDPOINT_URL", "AWS_SERVICE_URL",
             "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY",
             "AWS_DEFAULT_REGION", "AWS_REGION",
+            "AWS_PROFILE",
         };
         var originalValues = envVarsToOverride
             .Select(v => (Name: v, Value: Environment.GetEnvironmentVariable(v)))
@@ -45,6 +46,7 @@ public class SecretProviderFactoryAcceptanceTests
             Environment.SetEnvironmentVariable("AWS_ACCESS_KEY_ID", "test");
             Environment.SetEnvironmentVariable("AWS_SECRET_ACCESS_KEY", "test");
             Environment.SetEnvironmentVariable("AWS_DEFAULT_REGION", "us-east-1");
+            Environment.SetEnvironmentVariable("AWS_PROFILE", null);
 
             var config = new MapFileConfig { Provider = SecretProviderType.Aws };
             var sut = SecretProviderFactory.Create(config);
