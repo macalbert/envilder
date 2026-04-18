@@ -48,7 +48,8 @@ public class AzureKeyVaultSecretProvider : ISecretProvider
 
         try
         {
-            var response = _secretClient.GetSecret(name);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+            var response = _secretClient.GetSecret(name, version: null, cancellationToken: cts.Token);
             return response.Value.Value;
         }
         catch (RequestFailedException ex) when (ex.Status == 404)

@@ -54,7 +54,8 @@ public class AwsSsmSecretProvider : ISecretProvider
 
         try
         {
-            var response = _ssmClient.GetParameterAsync(new() { Name = name, WithDecryption = true }, CancellationToken.None).GetAwaiter().GetResult();
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+            var response = _ssmClient.GetParameterAsync(new() { Name = name, WithDecryption = true }, cts.Token).GetAwaiter().GetResult();
             return response.Parameter.Value;
         }
         catch (ParameterNotFoundException)

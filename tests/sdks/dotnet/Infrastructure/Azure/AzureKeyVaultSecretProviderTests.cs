@@ -6,6 +6,7 @@ using global::Azure;
 using global::Azure.Security.KeyVault.Secrets;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using System.Threading;
 
 public class AzureKeyVaultSecretProviderTests
 {
@@ -70,7 +71,7 @@ public class AzureKeyVaultSecretProviderTests
             properties: SecretModelFactory.SecretProperties(new Uri("https://vault.azure.net/secrets/sync-secret")),
             value: "sync-azure-value");
         var response = Response.FromValue(secret, Substitute.For<Response>());
-        secretClient.GetSecret("sync-secret")
+        secretClient.GetSecret("sync-secret", version: null, cancellationToken: Arg.Any<CancellationToken>())
             .Returns(response);
         var sut = new AzureKeyVaultSecretProvider(secretClient);
 
