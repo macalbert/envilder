@@ -32,7 +32,7 @@ reviews:
     - "e2e/**"
     - "docs/**"
     - "scripts/**"
-    - "example/**"
+    - "examples/**"
 
   path_instructions:
     # TypeScript core (CLI + GHA)

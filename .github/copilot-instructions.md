@@ -261,13 +261,13 @@ Naming: `Should_<Expected>_When_<Condition>`. AAA pattern with comment markers.
   - `EnvilderClient` — Core resolver (`resolve_secrets(map_file)` + `inject_into_environment(secrets)` static method sets `os.environ`)
   - `MapFileParser` — Parses `$config` + variable mappings from JSON
   - `secret_validation` — `validate_secrets(dict)` raises `SecretValidationError` for empty/missing values
-- **Infrastructure** (`infrastructure/`): `SecretProviderFactory` (not exported in `__all__`), `AwsSsmSecretProvider` (boto3), `AzureKeyVaultSecretProvider`
+- **Infrastructure** (`infrastructure/`): `_SecretProviderFactory` (private by convention, not exported in `__all__`), `AwsSsmSecretProvider` (boto3), `AzureKeyVaultSecretProvider`
 
 **Key patterns**:
 
 - Synchronous API — uses `boto3` natively (no async/await)
 - Protocol-based ports — Python `Protocol` instead of ABC
-- `SecretProviderFactory` is internal — consumers use the `Envilder` facade
+- `_SecretProviderFactory` is internal — consumers use the `Envilder` facade
 - `Envilder` facade is the primary public API (fluent: `from_map_file().with_provider().with_vault_url().inject()`)
 - `ISecretProvider.get_secret()` returns `None` for missing secrets (no exceptions)
 - `EnvilderClient.resolve_secrets()` silently omits missing secrets

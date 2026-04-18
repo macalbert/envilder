@@ -14,7 +14,7 @@ Uses .NET 10
 
 ## Run
 
-All commands from the **`example/sdk/dotnet/`** directory:
+All commands from the **`examples/sdk/dotnet/`** directory:
 
 | Example              | Description                    | Command                        |
 |----------------------|--------------------------------|--------------------------------|
@@ -23,6 +23,6 @@ All commands from the **`example/sdk/dotnet/`** directory:
 | `3_configuration.cs` | Use as `IConfiguration` source | `dotnet run 3_configuration.cs`|
 
 ```bash
-cd example/sdk/dotnet
+cd examples/sdk/dotnet
 dotnet run 1_resolve.cs
 ```

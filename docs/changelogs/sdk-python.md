@@ -1,14 +1,3 @@
-## [1.0.0] - 2026-04-19
-
-### Breaking
-
-* **Rename `from_file` to `from_map_file`** — The fluent builder entry point has been renamed from
-  `Envilder.from_file(path)` to `Envilder.from_map_file(path)` for clarity and alignment with the
-  CLI `--map` flag. Update all call sites: `Envilder.from_map_file("secrets-map.json").resolve()`
-  ([#167](https://github.com/macalbert/envilder/pull/167))
-
----
-
 ## [0.3.2] - 2026-04-18
 
 ### Changed

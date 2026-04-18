@@ -1,3 +1,11 @@
+## [Unreleased]
+
+### Security
+
+* **Fix CVE-2026-33532** — Override transitive `yaml` dependency to `>=2.8.3`
+  to resolve Uncontrolled Recursion vulnerability (CVSS 5.3, CWE-674)
+  introduced through `@astrojs/check` → `yaml-language-server` → `yaml@2.7.1`
+
 ## [0.9.3] - 2026-04-17
 
 ### Added
