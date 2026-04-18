@@ -23,14 +23,23 @@ const sdkTabs = [
     codeFile: 'Program.cs',
     code: `using Envilder;
 
+var builder = WebApplication.CreateBuilder(args);
+
+// Load secrets into IConfiguration
+builder.Configuration.AddEnvilder("param-map.json");
+
+// Register EnvilderClient in DI
+builder.Services.AddEnvilder("param-map.json");
+
+var app = builder.Build();
+
+// --- Or standalone (no ASP.NET) ---
+
 // One-liner: resolve + inject into Environment
 Envilder.Load("param-map.json");
 
-// Or resolve without injecting
-var secrets = Envilder.ResolveFile("param-map.json");
-
 // Fluent builder with provider override
-var secrets = Envilder.FromMapFile("param-map.json")
+Envilder.FromMapFile("param-map.json")
     .WithProvider(SecretProviderType.Azure)
     .WithVaultUrl("https://my-vault.vault.azure.net")
     .Inject();`,
@@ -55,10 +64,12 @@ Envilder.load("param-map.json")
 secrets = Envilder.resolve_file("param-map.json")
 
 # Fluent builder with provider override
-secrets = (Envilder.from_map_file("param-map.json")
+secrets = (
+    Envilder.from_map_file("param-map.json")
     .with_provider(SecretProviderType.AZURE)
     .with_vault_url("https://my-vault.vault.azure.net")
-    .inject())`,
+    .inject()
+)`,
   },
   {
     id: 'typescript',
