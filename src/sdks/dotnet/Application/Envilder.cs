@@ -207,6 +207,8 @@ public static class Envilder
 			throw new ArgumentNullException(nameof(envMapping));
 		}
 
+		environment = environment.Trim();
+
 		if (!envMapping.TryGetValue(environment, out var filePath))
 		{
 			return null;

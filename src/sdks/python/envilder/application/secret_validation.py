@@ -33,7 +33,7 @@ class SecretValidationError(Exception):
         )
 
 
-def validate_secrets(secrets: Dict[str, str]) -> None:
+def validate_secrets(secrets: Dict[str, str | None]) -> None:
     """Validate that all resolved secrets have non-empty values.
 
     Raises:

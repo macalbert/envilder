@@ -125,10 +125,7 @@ validate_secrets(secrets)  # raises SecretValidationError if any value is empty
 - Passes silently when all values are present
 
 ```python
-from envilder.application.secret_validation import (
-    SecretValidationError,
-    validate_secrets,
-)
+from envilder import SecretValidationError, validate_secrets
 
 try:
     validate_secrets(secrets)

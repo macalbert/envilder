@@ -27,17 +27,14 @@ secrets = Envilder.from_map_file("param-map.json").resolve()`,
     label: t.howItWorks.sdkTabDotnet,
     lang: 'csharp',
     filename: 'Program.cs',
-    code: `using Envilder;
+    code: `using Envilder.Application;
+using Envilder.Infrastructure.Configuration;
 
 // Load into IConfiguration
-var mapFile = new MapFileParser().Parse(
-    File.ReadAllText("param-map.json"));
-var provider = SecretProviderFactory.Create(mapFile.Config);
-builder.Configuration.AddEnvilder("param-map.json", provider);
+builder.Configuration.AddEnvilder("param-map.json");
 
 // Or resolve + inject into environment
-var client = new EnvilderClient(provider);
-var secrets = await client.ResolveSecretsAsync(mapFile);
+var secrets = await Envilder.ResolveFileAsync("param-map.json");
 EnvilderClient.InjectIntoEnvironment(secrets);`,
   },
 ];

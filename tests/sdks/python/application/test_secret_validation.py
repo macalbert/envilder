@@ -13,7 +13,7 @@ class TestValidateSecrets:
             "API_KEY": "sk-123",
         }
 
-        # Act & Assert — no exception expected
+        # Act
         validate_secrets(secrets)
 
     def Should_Raise_When_AnyValueIsEmpty(self) -> None:

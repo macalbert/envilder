@@ -1,8 +1,10 @@
 ---
 import { Code } from 'astro:components';
 
+type SupportedLang = 'json' | 'bash' | 'typescript' | 'python' | 'csharp' | 'yaml';
+
 export interface Props {
-  lang?: string;
+  lang?: SupportedLang;
   filename?: string;
   code: string;
 }
@@ -35,7 +37,7 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
     </button>
     <Code
       code={code}
-      lang={lang as any}
+      lang={lang}
       themes={{ dark: 'github-dark', light: 'github-light' }}
       defaultColor="dark"
     />

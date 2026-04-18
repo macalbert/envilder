@@ -14,12 +14,12 @@
     "lint:write": "biome check --write"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.8",
     "@astrojs/sitemap": "3.7.2",
-    "astro": "^6.1.7",
-    "typescript": "catalog:"
+    "astro": "^6.1.7"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:"
+    "@astrojs/check": "^0.9.8",
+    "@biomejs/biome": "catalog:",
+    "typescript": "catalog:"
   }
 }

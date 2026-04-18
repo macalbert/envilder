@@ -30,6 +30,12 @@ class _SecretProviderFactory:
         profile = opts.profile or config.profile
         vault_url = opts.vault_url or config.vault_url
 
+        if provider is not None and provider not in (
+            SecretProviderType.AWS,
+            SecretProviderType.AZURE,
+        ):
+            raise ValueError(f"Unsupported secret provider: {provider!r}")
+
         if provider == SecretProviderType.AZURE and profile:
             raise ValueError(
                 "AWS profile cannot be used with Azure Key Vault provider."
@@ -43,8 +49,6 @@ class _SecretProviderFactory:
                 return _create_azure_provider(vault_url)
             case SecretProviderType.AWS | None:
                 return _create_aws_provider(profile)
-            case _:
-                raise ValueError(f"Unsupported secret provider: {provider!r}")
 
 
 def _create_azure_provider(

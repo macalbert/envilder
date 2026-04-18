@@ -441,7 +441,7 @@ wheels = [
 
 [[package]]
 name = "envilder"
-version = "1.0.0"
+version = "0.3.2"
 source = { editable = "." }
 dependencies = [
     { name = "azure-identity" },

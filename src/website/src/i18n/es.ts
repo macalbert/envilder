@@ -731,7 +731,7 @@ export const es: Translations = {
     sdkDotnetValidation: 'Validación de secretos',
     sdkDotnetValidationDesc:
       'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
-    sdkDotnetQuickStartConfig: 'Via IConfiguration (ASP.NET)',
+    sdkDotnetQuickStartConfig: 'Vía IConfiguration (ASP.NET)',
     sdkDotnetQuickStartConfigDesc:
       'Añade Envilder como fuente de configuración en tu aplicación ASP.NET:',
     sdkDotnetQuickStartResolve: 'Avanzado — control programático total',

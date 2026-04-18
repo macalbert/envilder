@@ -31,7 +31,9 @@
 * `ISecretProvider.GetSecret(string name)` — New required interface method. External
   implementations of `ISecretProvider` must add a synchronous `GetSecret` method
   (return `null` for missing secrets, matching the `GetSecretAsync` contract)
-* `AddEnvilder(string, ISecretProvider)` signature removed — Use
+* `ServiceCollectionExtensions.AddEnvilder(string, ISecretProvider)` signature removed — Use
+  `AddEnvilder(string, EnvilderOptions?)` instead
+* `ConfigurationBuilderExtensions.AddEnvilder(string, ISecretProvider)` signature removed — Use
   `AddEnvilder(string, EnvilderOptions?)` instead
 
 ### Fixed
