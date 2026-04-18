@@ -13,15 +13,6 @@
 * `AzureKeyVaultSecretProvider.GetSecret()` — Sync Azure Key Vault implementation
 * `EnvilderClient.ResolveSecrets(mapFile)` — Sync secret resolution
 
-### Testing
-
-* Unit tests for facade validation, env routing, and fluent builder chaining
-* Acceptance tests for `ResolveFile` and `Load` against LocalStack
-* Sync `GetSecret` tests for AWS SSM and Azure Key Vault providers
-* Sync `ResolveSecrets` test for `EnvilderClient`
-
-## [0.1.1] - 2026-04-18
-
 ### Fixed
 
 * **Delegate default AWS region resolution to the AWS SDK** — When no profile is set, the
@@ -34,6 +25,13 @@
   now receives the credentials file path from the `AWS_SHARED_CREDENTIALS_FILE` environment
   variable, fixing profile discovery when credentials are stored at non-default locations
   ([#166](https://github.com/macalbert/envilder/pull/166))
+
+### Testing
+
+* Unit tests for facade validation, env routing, and fluent builder chaining
+* Acceptance tests for `ResolveFile` and `Load` against LocalStack
+* Sync `GetSecret` tests for AWS SSM and Azure Key Vault providers
+* Sync `ResolveSecrets` test for `EnvilderClient`
 
 ## [0.1.0] - 2026-04-09
 
