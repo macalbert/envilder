@@ -2,10 +2,16 @@
 
 ## Project Overview
 
-Envilder is a TypeScript CLI tool and GitHub Action that securely centralizes
-environment variables from AWS SSM Parameter Store or Azure Key Vault. Built
-with **Hexagonal Architecture** (Ports & Adapters) and **Clean Architecture**
-principles for testability and modularity.
+Envilder is a **multi-runtime secret management platform** that securely
+centralizes environment variables from AWS SSM Parameter Store or Azure Key
+Vault. The product has two halves:
+
+1. **TypeScript core** — CLI + GitHub Action for pulling/pushing secrets (Hexagonal Architecture, InversifyJS DI)
+2. **Runtime SDKs** — Independent libraries (.NET, Python, more planned) that load secrets directly into app processes at startup — no `.env` files, no intermediaries
+
+All components share the **map-file format** as the universal contract (JSON,
+Git-versioned, PR-reviewable). Built with **Clean Architecture** principles for
+testability and modularity.
 
 ## Architecture Layers
 
@@ -52,19 +58,20 @@ principles for testability and modularity.
 **Container Setup Pattern** (see `src/envilder/apps/shared/ContainerConfiguration.ts`):
 
 ```typescript
-// Provider selection based on MapFileConfig
-const provider = config.provider?.toLowerCase() || 'aws';
-if (provider === 'azure') {
-  const client = new SecretClient(config.vaultUrl, new DefaultAzureCredential());
-  container.bind(TYPES.ISecretProvider)
-    .toConstantValue(new AzureKeyVaultSecretProvider(client));
-} else {
-  const ssm = config.profile
-    ? new SSM({ credentials: fromIni({ profile: config.profile }) })
-    : new SSM();
-  container.bind(TYPES.ISecretProvider)
-    .toConstantValue(new AwsSsmSecretProvider(ssm));
+// Provider selection via factory registry — NOT inline construction
+const providerFactories: Record<string, ProviderFactory> = {
+  aws: (config) => createAwsSecretProvider(config),
+  azure: (config, options) => createAzureSecretProvider(config, options),
+};
+
+// In configureInfrastructureServices():
+const selectedProvider = config.provider?.toLowerCase() || 'aws';
+const factory = providerFactories[selectedProvider];
+if (!factory) {
+  throw new InvalidArgumentError(`Unsupported provider: ${config.provider}`);
 }
+container.bind<ISecretProvider>(TYPES.ISecretProvider)
+  .toConstantValue(factory(config, options));
 ```
 
 **Provider Configuration**: CLI reads `$config` from the map file and merges
@@ -205,18 +212,35 @@ but have **no code dependency** on the TypeScript core.
 
 **Architecture**: Layered (Domain → Application → Infrastructure), no DI framework.
 
-- **Domain** (`Domain/`): `ISecretProvider` port, `MapFileConfig`, `EnvilderOptions`, `ParsedMapFile`, `SecretProviderType` enum
-- **Application** (`Application/`): `MapFileParser` (parses `$config` + mappings), `EnvilderClient` (resolves secrets, injects into env)
-- **Infrastructure** (`Infrastructure/`): `SecretProviderFactory`, `AwsSsmSecretProvider`, `AzureKeyVaultSecretProvider`, `IConfiguration` extensions, `IServiceCollection` extensions
+- **Domain** (`Domain/`): `ISecretProvider` port (async `GetSecretAsync` + sync `GetSecret`), `MapFileConfig`, `EnvilderOptions`, `ParsedMapFile`, `SecretProviderType` enum
+- **Application** (`Application/`):
+  - `Envilder` — Static one-liner facade (`Load`, `ResolveFile`, `FromFile` + env-routing overloads)
+  - `EnvilderBuilder` — Fluent builder (`WithProvider`, `WithProfile`, `WithVaultUrl` → `Resolve`/`Inject`)
+  - `EnvilderClient` — Core resolver (resolves mappings, `InjectIntoEnvironment` static method)
+  - `MapFileParser` — Parses `$config` + variable mappings from JSON
+  - `SecretValidationExtensions` — Opt-in `ValidateSecrets()` extension (throws `SecretValidationException` for empty/missing values)
+- **Infrastructure** (`Infrastructure/`):
+  - `SecretProviderFactory` — Creates provider from `MapFileConfig` + optional `EnvilderOptions` overrides
+  - `Aws/AwsSsmSecretProvider` — `GetSecretAsync`: `GetParameterAsync(WithDecryption=true)`, catches `ParameterNotFoundException` → `null`. `GetSecret` (sync): wraps in `Task.Run()` to prevent `SynchronizationContext` deadlocks, 60s `CancellationTokenSource` timeout
+  - `Azure/AzureKeyVaultSecretProvider` — `GetSecretAsync`: `SecretClient.GetSecretAsync()`, catches `RequestFailedException(404)` → `null`. `GetSecret` (sync): uses native `SecretClient.GetSecret()` (no deadlock risk)
+  - `Configuration/` — `ConfigurationBuilderExtensions.AddEnvilder()` integrates into `IConfigurationBuilder` pipeline; backed by `EnvilderConfigurationProvider` + `EnvilderConfigurationSource`
+  - `DependencyInjection/ServiceCollectionExtensions` — `IServiceCollection.AddEnvilder()` for ASP.NET DI
+
+**AWS credential resolution** (in `SecretProviderFactory`):
+
+1. If `profile` is set → `CredentialProfileStoreChain` (respects `AWS_SHARED_CREDENTIALS_FILE` env var)
+2. Region: profile region → `AWS_REGION` env → `AWS_DEFAULT_REGION` env → fallback `us-east-1`
+3. No profile → default `AmazonSimpleSystemsManagementClient()` (uses SDK default chain)
 
 **Key patterns**:
 
-- Factory pattern (`SecretProviderFactory.Create()`) instead of DI container
+- Factory pattern (`SecretProviderFactory.Create()`) for standalone use; also DI extensions for ASP.NET
 - Pull-only — SDKs do not support push mode
-- `ISecretProvider.GetSecretAsync()` returns `null` for missing secrets (no exceptions)
-- `EnvilderClient.ResolveSecretsAsync()` silently omits missing secrets
+- `ISecretProvider.GetSecretAsync()` / `GetSecret()` return `null` for missing secrets (no exceptions)
+- `EnvilderClient.ResolveSecretsAsync()` / `ResolveSecrets()` silently omit missing secrets
+- `SecretValidationExtensions.ValidateSecrets()` — opt-in post-resolution validation
 
-**Tests** (`tests/sdks/dotnet/`): xUnit + NSubstitute + AwesomeAssertions + AutoFixture.
+**Tests** (`tests/sdks/dotnet/`): xUnit + NSubstitute + AwesomeAssertions.
 Acceptance tests use TestContainers (LocalStack for AWS, Lowkey Vault for Azure).
 Naming: `Should_<Expected>_When_<Condition>`. AAA pattern with comment markers.
 
@@ -231,7 +255,11 @@ Naming: `Should_<Expected>_When_<Condition>`. AAA pattern with comment markers.
 **Architecture**: Layered (Domain → Application → Infrastructure), no DI framework.
 
 - **Domain** (`domain/`): `ISecretProvider` Protocol, `MapFileConfig`, `EnvilderOptions`, `ParsedMapFile` dataclasses, `SecretProviderType` enum
-- **Application** (`application/`): `MapFileParser` (parses `$config` + mappings), `EnvilderClient` (resolves secrets, injects into `os.environ`)
+- **Application** (`application/`):
+  - `Envilder` (facade) — Primary entry point: `load(path)`, `resolve_file(path)`, `from_file(path)` fluent builder, plus env-routing overloads `load(env, mapping)` / `resolve_file(env, mapping)`
+  - `EnvilderClient` — Core resolver (`resolve_secrets(map_file)` + `inject_into_environment(secrets)` static method sets `os.environ`)
+  - `MapFileParser` — Parses `$config` + variable mappings from JSON
+  - `secret_validation` — `validate_secrets(dict)` raises `SecretValidationError` for empty/missing values
 - **Infrastructure** (`infrastructure/`): `SecretProviderFactory`, `AwsSsmSecretProvider` (boto3), `AzureKeyVaultSecretProvider`
 
 **Key patterns**:
@@ -239,9 +267,10 @@ Naming: `Should_<Expected>_When_<Condition>`. AAA pattern with comment markers.
 - Synchronous API — uses `boto3` natively (no async/await)
 - Protocol-based ports — Python `Protocol` instead of ABC
 - Factory pattern (`SecretProviderFactory.create()`) with optional `EnvilderOptions` overrides
+- `Envilder` facade is the primary public API (fluent: `from_file().with_provider().with_vault_url().inject()`)
 - `ISecretProvider.get_secret()` returns `None` for missing secrets (no exceptions)
 - `EnvilderClient.resolve_secrets()` silently omits missing secrets
-- `inject_into_environment()` static method sets secrets into `os.environ`
+- `validate_secrets()` — opt-in post-resolution validation
 
 **Tests** (`tests/sdks/python/`): pytest with `Should_<Expected>_When_<Condition>` naming.
 Container wrappers follow xxtemplatexx pattern with explicit `start()`/`stop()` lifecycle.

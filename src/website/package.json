@@ -14,8 +14,10 @@
     "lint:write": "biome check --write"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.8",
     "@astrojs/sitemap": "3.7.2",
-    "astro": "^6.1.7"
+    "astro": "^6.1.7",
+    "typescript": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:"

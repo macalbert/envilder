@@ -510,6 +510,56 @@ envilder --push --provider=azure \\
         <h3>{t.docs.sdkDotnetInstall}</h3>
         <CodeBlock lang="bash" code="dotnet add package Envilder" />
 
+        <h3>{t.docs.sdkDotnetOneLiner}</h3>
+        <p>{t.docs.sdkDotnetOneLinerDesc}</p>
+        <CodeBlock lang="csharp" code={`using Envilder;
+
+// Resolve secrets and inject into Environment
+Envilder.Load("secrets-map.json");
+
+var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");`} />
+
+        <h3>{t.docs.sdkDotnetResolve}</h3>
+        <p>{t.docs.sdkDotnetResolveDesc}</p>
+        <CodeBlock lang="csharp" code={`using Envilder;
+
+var secrets = Envilder.ResolveFile("secrets-map.json");
+var dbPassword = secrets["DB_PASSWORD"];`} />
+
+        <h3>{t.docs.sdkDotnetFluent}</h3>
+        <p>{t.docs.sdkDotnetFluentDesc}</p>
+        <CodeBlock lang="csharp" code={`using Envilder;
+
+var secrets = Envilder.FromFile("secrets-map.json")
+    .WithProvider(SecretProviderType.Azure)
+    .WithVaultUrl("https://my-vault.vault.azure.net")
+    .Resolve();
+
+// Or inject directly
+Envilder.FromFile("secrets-map.json")
+    .WithProfile("staging")
+    .Inject();`} />
+
+        <h3>{t.docs.sdkDotnetEnvLoading}</h3>
+        <p>{t.docs.sdkDotnetEnvLoadingDesc}</p>
+        <CodeBlock lang="csharp" code={`using Envilder;
+
+var env = Environment.GetEnvironmentVariable("APP_ENV") ?? "development";
+
+Envilder.Load(env, new Dictionary<string, string?>
+{
+    ["production"] = "prod-secrets.json",
+    ["development"] = "dev-secrets.json",
+    ["test"] = null,  // no secrets loaded
+});`} />
+
+        <h3>{t.docs.sdkDotnetValidation}</h3>
+        <p>{t.docs.sdkDotnetValidationDesc}</p>
+        <CodeBlock lang="csharp" code={`using Envilder;
+
+var secrets = Envilder.ResolveFile("secrets-map.json");
+secrets.ValidateSecrets(); // throws SecretValidationException if any value is empty`} />
+
         <h3>{t.docs.sdkDotnetQuickStartConfig}</h3>
         <p>{t.docs.sdkDotnetQuickStartConfigDesc}</p>
         <CodeBlock lang="csharp" code={`using Envilder;
@@ -577,6 +627,13 @@ secrets = (
     .with_vault_url('https://my-vault.vault.azure.net')
     .resolve()
 )`} />
+
+        <h3>{t.docs.sdkPythonValidation}</h3>
+        <p>{t.docs.sdkPythonValidationDesc}</p>
+        <CodeBlock lang="python" code={`from envilder import Envilder, validate_secrets
+
+secrets = Envilder.resolve_file('secrets-map.json')
+validate_secrets(secrets)  # raises SecretValidationError if any value is empty`} />
 
         <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/python" target="_blank" rel="noopener noreferrer">{t.docs.sdkPythonFullDocs}</a></p>
       </section>

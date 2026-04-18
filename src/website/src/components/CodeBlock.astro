@@ -35,7 +35,7 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
     </button>
     <Code
       code={code}
-      lang={lang}
+      lang={lang as any}
       themes={{ dark: 'github-dark', light: 'github-light' }}
       defaultColor="dark"
     />

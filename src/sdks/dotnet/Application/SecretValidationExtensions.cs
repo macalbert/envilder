@@ -8,6 +8,19 @@ using System.Linq;
 /// Thrown by <see cref="SecretValidationExtensions.ValidateSecrets"/> when one or
 /// more resolved secrets are missing (empty, whitespace-only, or the dictionary is empty).
 /// </summary>
+/// <example>
+/// <code>
+/// var secrets = Envilder.ResolveFile("param-map.json");
+/// try
+/// {
+///     secrets.ValidateSecrets();
+/// }
+/// catch (SecretValidationException ex)
+/// {
+///     Console.WriteLine($"Missing: {string.Join(", ", ex.MissingKeys)}");
+/// }
+/// </code>
+/// </example>
 public class SecretValidationException : Exception
 {
 	/// <summary>
@@ -16,6 +29,13 @@ public class SecretValidationException : Exception
 	/// </summary>
 	public IReadOnlyList<string> MissingKeys { get; }
 
+	/// <summary>
+	/// Initializes a new instance with the keys that failed validation.
+	/// </summary>
+	/// <param name="missingKeys">
+	/// Keys whose values were null, empty, or whitespace.
+	/// Pass an empty list when the entire dictionary was empty.
+	/// </param>
 	public SecretValidationException(IReadOnlyList<string> missingKeys)
 		: base(BuildMessage(missingKeys))
 	{
@@ -45,8 +65,14 @@ public static class SecretValidationExtensions
 	/// <param name="secrets">The resolved secrets to validate.</param>
 	/// <exception cref="ArgumentNullException">When <paramref name="secrets"/> is null.</exception>
 	/// <exception cref="SecretValidationException">
-	/// When the dictionary is empty or any value is null/empty/whitespace.
+	/// When the dictionary is empty or any value is null, empty, or whitespace.
 	/// </exception>
+	/// <example>
+	/// <code>
+	/// var secrets = Envilder.ResolveFile("param-map.json");
+	/// secrets.ValidateSecrets(); // throws if any value is empty
+	/// </code>
+	/// </example>
 	public static void ValidateSecrets(this IReadOnlyDictionary<string, string> secrets)
 	{
 		if (secrets is null)

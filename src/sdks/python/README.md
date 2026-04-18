@@ -137,6 +137,63 @@ secrets = client.resolve_secrets(map_file)
 EnvilderClient.inject_into_environment(secrets)
 ```
 
+### Secret validation
+
+Opt-in validation ensures all resolved secrets have non-empty values:
+
+```python
+from envilder import Envilder, validate_secrets
+
+secrets = Envilder.resolve_file('secrets-map.json')
+validate_secrets(secrets)  # raises SecretValidationError if any value is empty
+```
+
+`validate_secrets()` checks that:
+
+- The dictionary is not empty (raises `SecretValidationError` with empty `missing_keys`)
+- Every value is non-None and non-whitespace (raises `SecretValidationError` listing the failing keys)
+- Passes silently when all values are present
+
+```python
+from envilder.application.secret_validation import (
+    SecretValidationError,
+    validate_secrets,
+)
+
+try:
+    validate_secrets(secrets)
+except SecretValidationError as e:
+    print(f"Missing: {', '.join(e.missing_keys)}")
+```
+
+## API Reference
+
+### Static facade (`Envilder`)
+
+| Method | Description |
+|--------|-------------|
+| `load(path)` | Resolve secrets and inject into `os.environ` |
+| `resolve_file(path)` | Resolve secrets, return as `dict` |
+| `load(env, mapping)` | Environment-based resolve + inject |
+| `resolve_file(env, mapping)` | Environment-based resolve |
+| `from_file(path)` | Returns fluent builder for configuration |
+
+### Fluent builder (via `from_file()`)
+
+| Method | Description |
+|--------|-------------|
+| `with_provider(type)` | Override secret provider (AWS/Azure) |
+| `with_profile(name)` | Override AWS named profile |
+| `with_vault_url(url)` | Override Azure Key Vault URL |
+| `resolve()` | Resolve secrets, return as dict |
+| `inject()` | Resolve + inject into `os.environ` |
+
+### Validation
+
+| Function | Description |
+|----------|-------------|
+| `validate_secrets(dict)` | Raises `SecretValidationError` if any value is empty or dict is empty |
+
 ## Map File Format
 
 ```json

@@ -708,12 +708,27 @@ export const ca: Translations = {
     sidebarSdkPython: 'Python SDK',
     sdkDotnetTitle: '.NET SDK',
     sdkDotnetDesc:
-      "Carrega secrets directament a la teva aplicació .NET a l'inici. S'integra amb IConfiguration o resol secrets de manera programàtica.",
+      "Carrega secrets directament a la teva aplicació .NET a l'inici. Façana d'una línia, constructor fluent, integració amb IConfiguration o control programàtic total.",
     sdkDotnetInstall: 'Instal·lació',
-    sdkDotnetQuickStartConfig: 'Inici ràpid — carregar a IConfiguration',
+    sdkDotnetOneLiner: 'Una línia — resoldre + injectar',
+    sdkDotnetOneLinerDesc:
+      "Resol secrets del fitxer de mapeig i injecta'ls a Environment en una sola crida:",
+    sdkDotnetResolve: 'Resoldre sense injectar',
+    sdkDotnetResolveDesc:
+      "Obté secrets com un diccionari sense modificar l'entorn:",
+    sdkDotnetFluent: 'Constructor fluent amb sobreescriptures',
+    sdkDotnetFluentDesc:
+      "Sobreescriu la configuració del proveïdor de manera programàtica amb l'API fluent:",
+    sdkDotnetEnvLoading: 'Càrrega basada en entorn',
+    sdkDotnetEnvLoadingDesc:
+      'Encamina la càrrega de secrets segons el teu entorn actual. Cada entorn mapeja al seu fitxer de secrets:',
+    sdkDotnetValidation: 'Validació de secrets',
+    sdkDotnetValidationDesc:
+      'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
+    sdkDotnetQuickStartConfig: 'Via IConfiguration (ASP.NET)',
     sdkDotnetQuickStartConfigDesc:
       'Afegeix Envilder com a font de configuració a la teva aplicació ASP.NET:',
-    sdkDotnetQuickStartResolve: "Inici ràpid — resoldre + injectar a l'entorn",
+    sdkDotnetQuickStartResolve: 'Avançat — control programàtic total',
     sdkDotnetQuickStartResolveDesc:
       "Analitza el fitxer de mapeig, resol secrets i injecta'ls a les variables d'entorn:",
     sdkDotnetFullDocs: 'Documentació completa →',
@@ -733,6 +748,9 @@ export const ca: Translations = {
     sdkPythonFluent: 'Constructor fluent amb sobreescriptures',
     sdkPythonFluentDesc:
       "Sobreescriu la configuració del proveïdor de manera programàtica amb l'API fluent:",
+    sdkPythonValidation: 'Validació de secrets',
+    sdkPythonValidationDesc:
+      'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
     sdkPythonFullDocs: 'Documentació completa →',
     pagerPrev: 'Anterior',
     pagerNext: 'Següent',

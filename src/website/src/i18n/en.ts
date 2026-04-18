@@ -701,13 +701,27 @@ export const en: Translations = {
     sidebarSdkPython: 'Python SDK',
     sdkDotnetTitle: '.NET SDK',
     sdkDotnetDesc:
-      'Load secrets directly into your .NET application at startup. Integrates with IConfiguration or resolves secrets programmatically.',
+      'Load secrets directly into your .NET application at startup. One-liner facade, fluent builder, IConfiguration integration, or full programmatic control.',
     sdkDotnetInstall: 'Install',
-    sdkDotnetQuickStartConfig: 'Quick start — load into IConfiguration',
+    sdkDotnetOneLiner: 'One-liner — resolve + inject',
+    sdkDotnetOneLinerDesc:
+      'Resolve secrets from the map file and inject into Environment in a single call:',
+    sdkDotnetResolve: 'Resolve without injecting',
+    sdkDotnetResolveDesc:
+      'Get secrets as a dictionary without modifying the environment:',
+    sdkDotnetFluent: 'Fluent builder with overrides',
+    sdkDotnetFluentDesc:
+      'Override provider settings programmatically using the fluent API:',
+    sdkDotnetEnvLoading: 'Environment-based loading',
+    sdkDotnetEnvLoadingDesc:
+      'Route secret loading based on your current environment. Each environment maps to its own secrets file:',
+    sdkDotnetValidation: 'Secret validation',
+    sdkDotnetValidationDesc:
+      'Opt-in validation ensures all resolved secrets have non-empty values:',
+    sdkDotnetQuickStartConfig: 'Via IConfiguration (ASP.NET)',
     sdkDotnetQuickStartConfigDesc:
       'Add Envilder as a configuration source in your ASP.NET application:',
-    sdkDotnetQuickStartResolve:
-      'Quick start — resolve + inject into environment',
+    sdkDotnetQuickStartResolve: 'Advanced — full programmatic control',
     sdkDotnetQuickStartResolveDesc:
       'Parse the map file, resolve secrets, and inject them into environment variables:',
     sdkDotnetFullDocs: 'Full documentation →',
@@ -727,6 +741,9 @@ export const en: Translations = {
     sdkPythonFluent: 'Fluent builder with overrides',
     sdkPythonFluentDesc:
       'Override provider settings programmatically using the fluent API:',
+    sdkPythonValidation: 'Secret validation',
+    sdkPythonValidationDesc:
+      'Opt-in validation ensures all resolved secrets have non-empty values:',
     sdkPythonFullDocs: 'Full documentation →',
     pagerPrev: 'Previous',
     pagerNext: 'Next',
