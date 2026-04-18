@@ -10,7 +10,7 @@ public class EnvilderFacadeTests
     public void Should_ThrowArgumentException_When_ResolveFileCalledWithEmptyPath()
     {
         // Act
-        var act = () => EnvilderFacade.ResolveFile("");
+        var act = () => EnvilderFacade.ResolveFile(string.Empty);
 
         // Assert
         act.Should().Throw<ArgumentException>();
@@ -20,7 +20,7 @@ public class EnvilderFacadeTests
     public async Task Should_ThrowArgumentException_When_ResolveFileAsyncCalledWithEmptyPath()
     {
         // Act
-        var act = () => EnvilderFacade.ResolveFileAsync("");
+        var act = () => EnvilderFacade.ResolveFileAsync(string.Empty);
 
         // Assert
         await act.Should().ThrowAsync<ArgumentException>();
@@ -50,7 +50,7 @@ public class EnvilderFacadeTests
     public void Should_ThrowArgumentException_When_LoadCalledWithEmptyPath()
     {
         // Act
-        var act = () => EnvilderFacade.Load("");
+        var act = () => EnvilderFacade.Load(string.Empty);
 
         // Assert
         act.Should().Throw<ArgumentException>();
@@ -60,7 +60,7 @@ public class EnvilderFacadeTests
     public async Task Should_ThrowArgumentException_When_LoadAsyncCalledWithEmptyPath()
     {
         // Act
-        var act = () => EnvilderFacade.LoadAsync("");
+        var act = () => EnvilderFacade.LoadAsync(string.Empty);
 
         // Assert
         await act.Should().ThrowAsync<ArgumentException>();
@@ -112,7 +112,7 @@ public class EnvilderFacadeTests
         var mapping = new Dictionary<string, string?> { ["production"] = "prod.json" };
 
         // Act
-        var act = () => EnvilderFacade.ResolveFile("", mapping);
+        var act = () => EnvilderFacade.ResolveFile(string.Empty, mapping);
 
         // Assert
         act.Should().Throw<ArgumentException>();
@@ -122,7 +122,7 @@ public class EnvilderFacadeTests
     public void Should_ThrowArgumentException_When_FromFileCalledWithEmptyPath()
     {
         // Act
-        var act = () => EnvilderFacade.FromFile("");
+        var act = () => EnvilderFacade.FromFile(string.Empty);
 
         // Assert
         act.Should().Throw<ArgumentException>();
