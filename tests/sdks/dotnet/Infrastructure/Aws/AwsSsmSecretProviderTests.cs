@@ -9,63 +9,63 @@ using NSubstitute.ExceptionExtensions;
 
 public class AwsSsmSecretProviderTests
 {
-    [Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
-    public async Task Should_ReturnSecret_When_AwsSsmParameterExists()
-    {
-        // Arrange
-        var ssmClient = Substitute.For<IAmazonSimpleSystemsManagement>();
-        ssmClient.GetParameterAsync(
-                Arg.Is<GetParameterRequest>(r => r.Name == "/Test/Token" && r.WithDecryption == true),
-                Arg.Any<CancellationToken>())
-            .Returns(new GetParameterResponse
-            {
-                Parameter = new Parameter { Value = "secret-value-123" },
-            });
-        var sut = new AwsSsmSecretProvider(ssmClient);
+	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
+	public async Task Should_ReturnSecret_When_AwsSsmParameterExists()
+	{
+		// Arrange
+		var ssmClient = Substitute.For<IAmazonSimpleSystemsManagement>();
+		ssmClient.GetParameterAsync(
+				Arg.Is<GetParameterRequest>(r => r.Name == "/Test/Token" && r.WithDecryption == true),
+				Arg.Any<CancellationToken>())
+			.Returns(new GetParameterResponse
+			{
+				Parameter = new Parameter { Value = "secret-value-123" },
+			});
+		var sut = new AwsSsmSecretProvider(ssmClient);
 
-        // Act
-        var actual = await sut.GetSecretAsync("/Test/Token");
+		// Act
+		var actual = await sut.GetSecretAsync("/Test/Token");
 
-        // Assert
-        actual.Should().Be("secret-value-123");
-    }
+		// Assert
+		actual.Should().Be("secret-value-123");
+	}
 
-    [Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
-    public async Task Should_ReturnNull_When_AwsSsmParameterNotFound()
-    {
-        // Arrange
-        var ssmClient = Substitute.For<IAmazonSimpleSystemsManagement>();
-        ssmClient.GetParameterAsync(
-                Arg.Any<GetParameterRequest>(),
-                Arg.Any<CancellationToken>())
-            .ThrowsAsync(new ParameterNotFoundException("not found"));
-        var sut = new AwsSsmSecretProvider(ssmClient);
+	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
+	public async Task Should_ReturnNull_When_AwsSsmParameterNotFound()
+	{
+		// Arrange
+		var ssmClient = Substitute.For<IAmazonSimpleSystemsManagement>();
+		ssmClient.GetParameterAsync(
+				Arg.Any<GetParameterRequest>(),
+				Arg.Any<CancellationToken>())
+			.ThrowsAsync(new ParameterNotFoundException("not found"));
+		var sut = new AwsSsmSecretProvider(ssmClient);
 
-        // Act
-        var actual = await sut.GetSecretAsync("/Test/NonExistent");
+		// Act
+		var actual = await sut.GetSecretAsync("/Test/NonExistent");
 
-        // Assert
-        actual.Should().BeNull();
-    }
+		// Assert
+		actual.Should().BeNull();
+	}
 
-    [Fact]
-    public void Should_ReturnSecret_When_GetSecretCalledSync()
-    {
-        // Arrange
-        var ssmClient = Substitute.For<IAmazonSimpleSystemsManagement>();
-        ssmClient.GetParameterAsync(
-                Arg.Is<GetParameterRequest>(r => r.Name == "/Test/SyncToken" && r.WithDecryption == true),
-                Arg.Any<CancellationToken>())
-            .Returns(new GetParameterResponse
-            {
-                Parameter = new Parameter { Value = "sync-secret-value" },
-            });
-        var sut = new AwsSsmSecretProvider(ssmClient);
+	[Fact]
+	public void Should_ReturnSecret_When_GetSecretCalledSync()
+	{
+		// Arrange
+		var ssmClient = Substitute.For<IAmazonSimpleSystemsManagement>();
+		ssmClient.GetParameterAsync(
+				Arg.Is<GetParameterRequest>(r => r.Name == "/Test/SyncToken" && r.WithDecryption == true),
+				Arg.Any<CancellationToken>())
+			.Returns(new GetParameterResponse
+			{
+				Parameter = new Parameter { Value = "sync-secret-value" },
+			});
+		var sut = new AwsSsmSecretProvider(ssmClient);
 
-        // Act
-        var actual = sut.GetSecret("/Test/SyncToken");
+		// Act
+		var actual = sut.GetSecret("/Test/SyncToken");
 
-        // Assert
-        actual.Should().Be("sync-secret-value");
-    }
+		// Assert
+		actual.Should().Be("sync-secret-value");
+	}
 }

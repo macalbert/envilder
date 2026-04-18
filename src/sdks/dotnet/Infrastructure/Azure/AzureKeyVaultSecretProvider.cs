@@ -13,48 +13,48 @@ using System.Threading.Tasks;
 /// </summary>
 public class AzureKeyVaultSecretProvider : ISecretProvider
 {
-    private readonly SecretClient _secretClient;
+	private readonly SecretClient _secretClient;
 
-    /// <summary>
-    /// Initializes a new instance using the supplied Key Vault client.
-    /// </summary>
-    /// <param name="secretClient">A configured <see cref="SecretClient"/> instance.</param>
-    public AzureKeyVaultSecretProvider(SecretClient secretClient)
-    {
-        _secretClient = secretClient ?? throw new ArgumentNullException(nameof(secretClient));
-    }
+	/// <summary>
+	/// Initializes a new instance using the supplied Key Vault client.
+	/// </summary>
+	/// <param name="secretClient">A configured <see cref="SecretClient"/> instance.</param>
+	public AzureKeyVaultSecretProvider(SecretClient secretClient)
+	{
+		_secretClient = secretClient ?? throw new ArgumentNullException(nameof(secretClient));
+	}
 
-    /// <inheritdoc />
-    public async Task<string?> GetSecretAsync(string name, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var response = await _secretClient.GetSecretAsync(name, null, cancellationToken);
-            return response.Value.Value;
-        }
-        catch (RequestFailedException ex) when (ex.Status == 404)
-        {
-            return null;
-        }
-    }
+	/// <inheritdoc />
+	public async Task<string?> GetSecretAsync(string name, CancellationToken cancellationToken = default)
+	{
+		try
+		{
+			var response = await _secretClient.GetSecretAsync(name, null, cancellationToken);
+			return response.Value.Value;
+		}
+		catch (RequestFailedException ex) when (ex.Status == 404)
+		{
+			return null;
+		}
+	}
 
-    /// <inheritdoc />
-    public string? GetSecret(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException("Secret name cannot be null or whitespace.", nameof(name));
-        }
+	/// <inheritdoc />
+	public string? GetSecret(string name)
+	{
+		if (string.IsNullOrWhiteSpace(name))
+		{
+			throw new ArgumentException("Secret name cannot be null or whitespace.", nameof(name));
+		}
 
-        try
-        {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-            var response = _secretClient.GetSecret(name, version: null, cancellationToken: cts.Token);
-            return response.Value.Value;
-        }
-        catch (RequestFailedException ex) when (ex.Status == 404)
-        {
-            return null;
-        }
-    }
+		try
+		{
+			using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+			var response = _secretClient.GetSecret(name, version: null, cancellationToken: cts.Token);
+			return response.Value.Value;
+		}
+		catch (RequestFailedException ex) when (ex.Status == 404)
+		{
+			return null;
+		}
+	}
 }

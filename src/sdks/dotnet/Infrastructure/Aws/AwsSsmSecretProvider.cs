@@ -14,53 +14,55 @@ using System.Threading.Tasks;
 /// </summary>
 public class AwsSsmSecretProvider : ISecretProvider
 {
-    private readonly IAmazonSimpleSystemsManagement _ssmClient;
+	private readonly IAmazonSimpleSystemsManagement _ssmClient;
 
-    /// <summary>
-    /// Initializes a new instance using the supplied SSM client.
-    /// </summary>
-    /// <param name="ssmClient">A configured <see cref="IAmazonSimpleSystemsManagement"/> instance.</param>
-    public AwsSsmSecretProvider(IAmazonSimpleSystemsManagement ssmClient)
-    {
-        _ssmClient = ssmClient ?? throw new ArgumentNullException(nameof(ssmClient));
-    }
+	/// <summary>
+	/// Initializes a new instance using the supplied SSM client.
+	/// </summary>
+	/// <param name="ssmClient">A configured <see cref="IAmazonSimpleSystemsManagement"/> instance.</param>
+	public AwsSsmSecretProvider(IAmazonSimpleSystemsManagement ssmClient)
+	{
+		_ssmClient = ssmClient ?? throw new ArgumentNullException(nameof(ssmClient));
+	}
 
-    /// <inheritdoc />
-    public async Task<string?> GetSecretAsync(string name, CancellationToken cancellationToken = default)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException("Secret name cannot be null or whitespace.", nameof(name));
-        }
+	/// <inheritdoc />
+	public async Task<string?> GetSecretAsync(string name, CancellationToken cancellationToken = default)
+	{
+		if (string.IsNullOrWhiteSpace(name))
+		{
+			throw new ArgumentException("Secret name cannot be null or whitespace.", nameof(name));
+		}
 
-        try
-        {
-            var response = await _ssmClient.GetParameterAsync(new() { Name = name, WithDecryption = true }, cancellationToken);
-            return response.Parameter.Value;
-        }
-        catch (ParameterNotFoundException)
-        {
-            return null;
-        }
-    }
+		try
+		{
+			var response = await _ssmClient.GetParameterAsync(new() { Name = name, WithDecryption = true }, cancellationToken);
+			return response.Parameter.Value;
+		}
+		catch (ParameterNotFoundException)
+		{
+			return null;
+		}
+	}
 
-    /// <inheritdoc />
-    public string? GetSecret(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException("Secret name cannot be null or whitespace.", nameof(name));
-        }
+	/// <inheritdoc />
+	public string? GetSecret(string name)
+	{
+		if (string.IsNullOrWhiteSpace(name))
+		{
+			throw new ArgumentException("Secret name cannot be null or whitespace.", nameof(name));
+		}
 
-        try
-        {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-            var response = _ssmClient.GetParameterAsync(new() { Name = name, WithDecryption = true }, cts.Token).GetAwaiter().GetResult();
-            return response.Parameter.Value;
-        }
-        catch (ParameterNotFoundException)
-        {
-            return null;
-        }
-    }
+		try
+		{
+			using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+#pragma warning disable VSTHRD002 // AWS SDK v4 has no synchronous GetParameter API
+			var response = _ssmClient.GetParameterAsync(new() { Name = name, WithDecryption = true }, cts.Token).GetAwaiter().GetResult();
+#pragma warning restore VSTHRD002
+			return response.Parameter.Value;
+		}
+		catch (ParameterNotFoundException)
+		{
+			return null;
+		}
+	}
 }

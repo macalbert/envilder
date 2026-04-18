@@ -5,9 +5,9 @@ namespace Envilder.Domain;
 /// </summary>
 public enum SecretProviderType
 {
-    /// <summary>AWS Systems Manager Parameter Store.</summary>
-    Aws,
+	/// <summary>AWS Systems Manager Parameter Store.</summary>
+	Aws,
 
-    /// <summary>Azure Key Vault.</summary>
-    Azure,
+	/// <summary>Azure Key Vault.</summary>
+	Azure,
 }

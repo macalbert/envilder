@@ -7,35 +7,37 @@ using System;
 
 public class EnvilderConfigurationProvider : ConfigurationProvider
 {
-    private readonly EnvilderClient _client;
-    private readonly ParsedMapFile _mapFile;
+	private readonly EnvilderClient _client;
+	private readonly ParsedMapFile _mapFile;
 
-    public EnvilderConfigurationProvider(EnvilderClient client, ParsedMapFile mapFile)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _mapFile = mapFile ?? throw new ArgumentNullException(nameof(mapFile));
-    }
+	public EnvilderConfigurationProvider(EnvilderClient client, ParsedMapFile mapFile)
+	{
+		_client = client ?? throw new ArgumentNullException(nameof(client));
+		_mapFile = mapFile ?? throw new ArgumentNullException(nameof(mapFile));
+	}
 
-    // ConfigurationProvider.Load() is synchronous by design.
-    // ResolveSecretsAsync uses ConfigureAwait(false) throughout to avoid deadlocks.
-    public override void Load()
-    {
-        var secrets = _client.ResolveSecretsAsync(_mapFile)
-            .ConfigureAwait(false)
-            .GetAwaiter()
-            .GetResult();
+	// ConfigurationProvider.Load() is synchronous by design.
+	// ResolveSecretsAsync uses ConfigureAwait(false) throughout to avoid deadlocks.
+	public override void Load()
+	{
+#pragma warning disable VSTHRD002 // ConfigurationProvider.Load() is sync-only; no async override exists
+		var secrets = _client.ResolveSecretsAsync(_mapFile)
+			.ConfigureAwait(false)
+			.GetAwaiter()
+			.GetResult();
+#pragma warning restore VSTHRD002
 
-        Data.Clear();
+		Data.Clear();
 
-        foreach (var kvp in secrets)
-        {
-            var key = NormalizeKey(kvp.Key);
-            Data[key] = kvp.Value;
-        }
-    }
+		foreach (var kvp in secrets)
+		{
+			var key = NormalizeKey(kvp.Key);
+			Data[key] = kvp.Value;
+		}
+	}
 
-    private static string NormalizeKey(string key)
-    {
-        return key.Replace("/", ConfigurationPath.KeyDelimiter);
-    }
+	private static string NormalizeKey(string key)
+	{
+		return key.Replace("/", ConfigurationPath.KeyDelimiter);
+	}
 }
