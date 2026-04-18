@@ -84,7 +84,8 @@ await Envilder.FromFile("secrets-map.json")
 
 ### Environment-based loading
 
-Route secret loading based on your current environment. Each environment maps to its own secrets file (or `null` to skip loading):
+Route secret loading based on your current environment. Each environment maps to its own
+secrets file (or `null` to skip loading):
 
 ```csharp
 using Envilder;
