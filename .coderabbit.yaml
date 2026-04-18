@@ -1,5 +1,10 @@
 # CodeRabbit configuration for envilder
-# CLI tool for AWS SSM secrets management
+# Multi-runtime secret management platform:
+#   - TypeScript CLI + GitHub Action (core engine)
+#   - .NET SDK (NuGet: Envilder)
+#   - Python SDK (PyPI: envilder)
+#   - Astro website (docs + marketing)
+#   - AWS CDK infrastructure
 # https://docs.coderabbit.ai/guides/configure-coderabbit
 
 language: en-US
@@ -12,25 +17,97 @@ reviews:
   review_status: true
   collapse_walkthrough: false
 
-  # Security-focused path filters
   path_filters:
-    - "!package-lock.json"
+    - "!pnpm-lock.yaml"
+    - "!**/package-lock.json"
     - "!lib/**"
     - "!coverage/**"
+    - "!github-action/dist/**"
+    - "!**/bin/**"
+    - "!**/obj/**"
+    - "!**/.venv/**"
+    - "!**/node_modules/**"
     - "src/**"
     - "tests/**"
+    - "e2e/**"
     - "docs/**"
+    - "scripts/**"
+    - "example/**"
 
-  # Security-focused instructions
   path_instructions:
-    - path: "**/aws/**"
-      instructions: "Verify AWS credential handling, no hardcoded secrets, and proper error handling for SDK calls"
-    - path: "**/infrastructure/**"
-      instructions: "Review dependency injection patterns and security best practices"
-    - path: "**/domain/**"
-      instructions: "Ensure domain logic is well-tested and follows SOLID principles"
+    # TypeScript core (CLI + GHA)
+    - path: "src/envilder/core/domain/**"
+      instructions: |
+        Pure domain layer — NO external dependencies allowed.
+        Entities must be immutable. Ports are interfaces only.
+        Custom errors extend DomainError.
+    - path: "src/envilder/core/application/**"
+      instructions: |
+        Application layer — Command/Handler pattern with InversifyJS DI.
+        Each feature = Command + CommandHandler pair.
+        Commands have static .create() factory methods.
+    - path: "src/envilder/core/infrastructure/**"
+      instructions: |
+        Infrastructure adapters implementing domain ports.
+        Verify AWS credential handling, no hardcoded secrets.
+        Check proper error handling for SDK calls.
+    - path: "src/envilder/apps/**"
+      instructions: |
+        Entry points (CLI + GHA). Shared DI setup in shared/.
+        GHA is pull-only (no push mode).
+        After code changes, verify pnpm build:gha updates dist/.
 
-  # Enable security scanning
+    # .NET SDK
+    - path: "src/sdks/dotnet/**"
+      instructions: |
+        .NET SDK targeting netstandard2.0 — no default interface methods,
+        no File.ReadAllTextAsync with CancellationToken, no cancelable ReadToEndAsync.
+        Uses Central Package Management (Directory.Packages.props).
+        EditorConfig enforces tabs, _prefix for private fields, PascalCase for const/static readonly.
+        ISecretProvider has sync GetSecret + async GetSecretAsync.
+        Factory pattern (SecretProviderFactory.Create) — no DI container.
+        Envilder static facade is the primary public API.
+    - path: "tests/sdks/dotnet/**"
+      instructions: |
+        xUnit v3 with NSubstitute + AwesomeAssertions + AutoFixture.
+        IAsyncLifetime returns ValueTask (not Task).
+        Test naming: Should_Expected_When_Condition. AAA pattern with comment markers.
+        No try/catch/finally in tests — use IAsyncLifetime or fixtures for cleanup.
+        GlobalSuppressions.cs suppresses VSTHRD200 and CA1707 for test naming.
+
+    # Python SDK
+    - path: "src/sdks/python/**"
+      instructions: |
+        Python SDK using boto3 (AWS) and azure-identity (Azure).
+        Synchronous API — no async/await. Protocol-based ports.
+        Factory pattern (SecretProviderFactory.create).
+        Envilder facade is the primary public API with fluent builder.
+        Strict mypy (disallow_untyped_defs). Format: black + isort (79 cols).
+        SDK public APIs SHOULD have docstrings with examples.
+    - path: "tests/sdks/python/**"
+      instructions: |
+        pytest with Should_Expected_When_Condition naming (python_functions = ["Should_*"]).
+        AAA pattern with comment markers. No docstrings except AAA markers.
+        Acceptance tests use TestContainers (LocalStack for AWS, Lowkey Vault for Azure).
+
+    # Website
+    - path: "src/website/**"
+      instructions: |
+        Astro + pure CSS website. Dual theme (retro/light).
+        i18n system with multiple locales. Check responsive design.
+
+    # Infrastructure as Code
+    - path: "src/iac/**"
+      instructions: |
+        AWS CDK in TypeScript. Review IAM permissions carefully.
+        No overly permissive policies. Verify resource naming conventions.
+
+    # E2E tests
+    - path: "e2e/**"
+      instructions: |
+        End-to-end tests using TestContainers with LocalStack (AWS)
+        and Lowkey Vault (Azure). Run pnpm build + pack-and-install before E2E.
+
   tools:
     gitleaks:
       enabled: true
@@ -43,7 +120,9 @@ reviews:
       - "draft"
       - "dependabot"
 
-  # Disable docstring coverage for CLI project
   finishing_touches:
     docstrings:
       enabled: false
+
+chat:
+  auto_reply: true

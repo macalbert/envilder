@@ -13,3 +13,8 @@ pre-commit:
       glob: "*.py"
       run: make format-sdk-python && make check-sdk-python
       stage_fixed: true
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpx commitlint --edit {1}
