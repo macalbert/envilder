@@ -1,6 +1,6 @@
 namespace Envilder.Application;
 
-using Envilder.Domain;
+using global::Envilder.Domain;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;

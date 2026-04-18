@@ -71,7 +71,7 @@ public class ServiceCollectionExtensionsTests : IDisposable
         var services = new ServiceCollection();
 
         // Act
-        var act = () => services.AddEnvilder("", secretProvider);
+        var act = () => services.AddEnvilder(string.Empty, secretProvider);
 
         // Assert
         act.Should().Throw<ArgumentException>()

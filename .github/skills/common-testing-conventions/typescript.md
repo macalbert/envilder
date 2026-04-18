@@ -147,3 +147,49 @@ Configuration in `biome.json` at project root. Enforces:
 - Use `import type` for type-only imports.
 - TypeScript strict mode is enabled — respect all strict checks.
 - Always run `pnpx biome check --write .` after modifying TypeScript files.
+
+## Test Cleanup — No `try/catch/finally` in Tests
+
+**NEVER** use `try/catch`, `try/finally`, `if`, or any control flow inside test functions.
+Use framework teardown mechanisms instead:
+
+| Scenario | Mechanism |
+| -------- | --------- |
+| Env var restore | `beforeEach` / `afterEach` |
+| Temp file cleanup | `afterEach` / `afterAll` |
+| Vitest spy cleanup | `vi.restoreAllMocks()` in `afterEach` |
+
+```typescript
+// GOOD — cleanup via afterEach
+describe('resolve', () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    process.env = { ...originalEnv, AWS_ENDPOINT_URL: 'http://localhost:4566' };
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it('Should_ResolveSecret_When_EnvConfigured', async () => {
+    // Act
+    const actual = await resolve('map.json');
+
+    // Assert
+    expect(actual['DB_URL']).toBe(expected);
+  });
+});
+
+// BAD — try/finally in test body
+it('Should_ResolveSecret_When_EnvConfigured', async () => {
+  const original = process.env.AWS_ENDPOINT_URL;
+  try {
+    process.env.AWS_ENDPOINT_URL = 'http://localhost:4566';
+    const actual = await resolve('map.json');
+    expect(actual['DB_URL']).toBe(expected);
+  } finally {
+    process.env.AWS_ENDPOINT_URL = original;
+  }
+});
+```

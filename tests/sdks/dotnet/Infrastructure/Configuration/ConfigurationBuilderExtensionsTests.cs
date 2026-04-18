@@ -54,7 +54,7 @@ public class ConfigurationBuilderExtensionsTests : IDisposable
         var builder = new ConfigurationBuilder();
 
         // Act
-        var act = () => builder.AddEnvilder("", secretProvider);
+        var act = () => builder.AddEnvilder(string.Empty, secretProvider);
 
         // Assert
         act.Should().Throw<ArgumentException>()

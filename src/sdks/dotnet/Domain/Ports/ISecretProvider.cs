@@ -21,4 +21,6 @@ public interface ISecretProvider
     /// The secret value, or <see langword="null"/> when the secret does not exist.
     /// </returns>
     Task<string?> GetSecretAsync(string name, CancellationToken cancellationToken = default);
+
+    string? GetSecret(string name);
 }

@@ -47,4 +47,25 @@ public class AwsSsmSecretProviderTests
         // Assert
         actual.Should().BeNull();
     }
+
+    [Fact]
+    public void Should_ReturnSecret_When_GetSecretCalledSync()
+    {
+        // Arrange
+        var ssmClient = Substitute.For<IAmazonSimpleSystemsManagement>();
+        ssmClient.GetParameterAsync(
+                Arg.Is<GetParameterRequest>(r => r.Name == "/Test/SyncToken" && r.WithDecryption == true),
+                Arg.Any<CancellationToken>())
+            .Returns(new GetParameterResponse
+            {
+                Parameter = new Parameter { Value = "sync-secret-value" },
+            });
+        var sut = new AwsSsmSecretProvider(ssmClient);
+
+        // Act
+        var actual = sut.GetSecret("/Test/SyncToken");
+
+        // Assert
+        actual.Should().Be("sync-secret-value");
+    }
 }

@@ -1,3 +1,25 @@
+## [0.2.0] - 2026-04-18
+
+### Added
+
+* **Static facade** — `Envilder` class with one-liner API for resolving and injecting secrets
+* `ResolveFile(path)` / `ResolveFileAsync(path)` — Resolve secrets from a map file
+* `Load(path)` / `LoadAsync(path)` — Resolve and inject secrets into `Environment`
+* `ResolveFile(env, mapping)` / `Load(env, mapping)` — Environment-routed overloads
+* `FromFile(path)` — Fluent builder with `.WithProvider()`, `.WithProfile()`, `.WithVaultUrl()`
+* `EnvilderBuilder.Resolve()` / `ResolveAsync()` / `Inject()` / `InjectAsync()` — Fluent terminal methods
+* `ISecretProvider.GetSecret(name)` — Synchronous secret retrieval (new interface method)
+* `AwsSsmSecretProvider.GetSecret()` — Sync AWS SSM implementation
+* `AzureKeyVaultSecretProvider.GetSecret()` — Sync Azure Key Vault implementation
+* `EnvilderClient.ResolveSecrets(mapFile)` — Sync secret resolution
+
+### Testing
+
+* Unit tests for facade validation, env routing, and fluent builder chaining
+* Acceptance tests for `ResolveFile` and `Load` against LocalStack
+* Sync `GetSecret` tests for AWS SSM and Azure Key Vault providers
+* Sync `ResolveSecrets` test for `EnvilderClient`
+
 ## [0.1.1] - 2026-04-18
 
 ### Fixed
@@ -12,8 +34,6 @@
   now receives the credentials file path from the `AWS_SHARED_CREDENTIALS_FILE` environment
   variable, fixing profile discovery when credentials are stored at non-default locations
   ([#166](https://github.com/macalbert/envilder/pull/166))
-
----
 
 ## [0.1.0] - 2026-04-09
 
