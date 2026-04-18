@@ -13,11 +13,26 @@
 * `AzureKeyVaultSecretProvider.GetSecret(name)` — Sync Azure Key Vault implementation
 * `EnvilderClient.ResolveSecrets(mapFile)` — Sync secret resolution
 
+### Changed
+
+* **Encapsulate `SecretProviderFactory`** — Made `internal`; consumers should use the
+  `Envilder` facade, `EnvilderBuilder`, or `AddEnvilder()` extensions instead
+  ([#167](https://github.com/macalbert/envilder/pull/167))
+* **Simplify `AddEnvilder` extensions** — `IConfigurationBuilder.AddEnvilder()` and
+  `IServiceCollection.AddEnvilder()` now accept `(string mapFilePath, EnvilderOptions? options)`
+  instead of requiring a manually-created `ISecretProvider`
+  ([#167](https://github.com/macalbert/envilder/pull/167))
+* **Cross-provider validation** — `SecretProviderFactory` now rejects invalid combinations:
+  AWS profile with Azure provider, or Vault URL with AWS provider
+  ([#167](https://github.com/macalbert/envilder/pull/167))
+
 ### Breaking
 
 * `ISecretProvider.GetSecret(string name)` — New required interface method. External
   implementations of `ISecretProvider` must add a synchronous `GetSecret` method
   (return `null` for missing secrets, matching the `GetSecretAsync` contract)
+* `AddEnvilder(string, ISecretProvider)` signature removed — Use
+  `AddEnvilder(string, EnvilderOptions?)` instead
 
 ### Fixed
 
