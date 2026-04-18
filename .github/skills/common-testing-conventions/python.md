@@ -212,3 +212,49 @@ markers = [
     "integration: marks tests as integration tests",
 ]
 ```
+
+## Test Cleanup — No `try/catch/finally` in Tests
+
+**NEVER** use `try/except`, `try/finally`, `if`, or any control flow inside test functions.
+Use pytest fixtures with `yield` for setup/teardown:
+
+| Scenario | Mechanism |
+| -------- | --------- |
+| Env var restore | `yield` fixture that saves and restores |
+| Temp file cleanup | `yield` fixture + `os.remove` in teardown |
+| Shared resource | Session/module-scoped `yield` fixture |
+
+```python
+# GOOD — cleanup via yield fixture
+@pytest.fixture
+def aws_env(localstack_url: str) -> Generator[None, None, None]:
+    original = {k: os.environ.get(k) for k in ENV_VARS}
+    os.environ["AWS_ENDPOINT_URL"] = localstack_url
+    os.environ["AWS_ACCESS_KEY_ID"] = "test"
+    yield
+    for name, value in original.items():
+        if value is None:
+            os.environ.pop(name, None)
+        else:
+            os.environ[name] = value
+
+def Should_ResolveSecret_When_EnvConfigured(aws_env: None) -> None:
+    # Act
+    actual = resolve("map.json")
+
+    # Assert
+    assert actual["DB_URL"] == expected
+
+# BAD — try/finally in test body
+def Should_ResolveSecret_When_EnvConfigured() -> None:
+    original = os.environ.get("AWS_ENDPOINT_URL")
+    try:
+        os.environ["AWS_ENDPOINT_URL"] = localstack_url
+        actual = resolve("map.json")
+        assert actual["DB_URL"] == expected
+    finally:
+        if original is None:
+            os.environ.pop("AWS_ENDPOINT_URL", None)
+        else:
+            os.environ["AWS_ENDPOINT_URL"] = original
+```
