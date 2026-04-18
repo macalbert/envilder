@@ -11,7 +11,7 @@ from envilder.infrastructure.azure.azure_key_vault_secret_provider import (
     AzureKeyVaultSecretProvider,
 )
 from envilder.infrastructure.secret_provider_factory import (
-    SecretProviderFactory,
+    _SecretProviderFactory,
 )
 
 
@@ -27,7 +27,7 @@ class TestSecretProviderFactory:
         config = MapFileConfig()
 
         # Act
-        actual = SecretProviderFactory.create(config)
+        actual = _SecretProviderFactory.create(config)
 
         # Assert
         assert isinstance(actual, AwsSsmSecretProvider)
@@ -47,7 +47,7 @@ class TestSecretProviderFactory:
         )
 
         # Act
-        actual = SecretProviderFactory.create(config)
+        actual = _SecretProviderFactory.create(config)
 
         # Assert
         assert isinstance(actual, AzureKeyVaultSecretProvider)
@@ -71,7 +71,7 @@ class TestSecretProviderFactory:
         )
 
         # Act
-        actual = SecretProviderFactory.create(config, options)
+        actual = _SecretProviderFactory.create(config, options)
 
         # Assert
         assert isinstance(actual, AzureKeyVaultSecretProvider)
@@ -86,7 +86,7 @@ class TestSecretProviderFactory:
         )
 
         # Act
-        action = lambda: SecretProviderFactory.create(config)
+        action = lambda: _SecretProviderFactory.create(config)
 
         # Assert
         with pytest.raises(ValueError, match="Vault URL"):
@@ -94,7 +94,7 @@ class TestSecretProviderFactory:
 
     def Should_RaiseValueError_When_ConfigIsNone(self) -> None:
         # Act
-        action = lambda: SecretProviderFactory.create(None)  # type: ignore[arg-type]
+        action = lambda: _SecretProviderFactory.create(None)  # type: ignore[arg-type]
 
         # Assert
         with pytest.raises(ValueError, match="config cannot be None"):
@@ -107,7 +107,7 @@ class TestSecretProviderFactory:
         config = MapFileConfig(provider="gcp")  # type: ignore[arg-type]
 
         # Act
-        action = lambda: SecretProviderFactory.create(config)
+        action = lambda: _SecretProviderFactory.create(config)
 
         # Assert
         with pytest.raises(ValueError, match="Unsupported secret provider"):
@@ -124,7 +124,7 @@ class TestSecretProviderFactory:
         )
 
         # Act
-        action = lambda: SecretProviderFactory.create(config)
+        action = lambda: _SecretProviderFactory.create(config)
 
         # Assert
         with pytest.raises(ValueError, match="profile.*Azure"):
@@ -141,7 +141,7 @@ class TestSecretProviderFactory:
         options = EnvilderOptions(profile="my-profile")
 
         # Act
-        action = lambda: SecretProviderFactory.create(config, options)
+        action = lambda: _SecretProviderFactory.create(config, options)
 
         # Assert
         with pytest.raises(ValueError, match="profile.*Azure"):
@@ -157,7 +157,7 @@ class TestSecretProviderFactory:
         )
 
         # Act
-        action = lambda: SecretProviderFactory.create(config)
+        action = lambda: _SecretProviderFactory.create(config)
 
         # Assert
         with pytest.raises(ValueError, match="Vault URL.*AWS"):
@@ -173,7 +173,7 @@ class TestSecretProviderFactory:
         )
 
         # Act
-        action = lambda: SecretProviderFactory.create(config, options)
+        action = lambda: _SecretProviderFactory.create(config, options)
 
         # Assert
         with pytest.raises(ValueError, match="Vault URL.*AWS"):

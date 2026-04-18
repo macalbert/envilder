@@ -14,9 +14,9 @@ public class EnvilderConfigurationProviderTests
 	{
 		// Arrange
 		var secretProvider = Substitute.For<ISecretProvider>();
-		secretProvider.GetSecretAsync("/Test/Token", Arg.Any<CancellationToken>())
+		secretProvider.GetSecret("/Test/Token")
 			.Returns("secret-123");
-		secretProvider.GetSecretAsync("/App/Db", Arg.Any<CancellationToken>())
+		secretProvider.GetSecret("/App/Db")
 			.Returns("db-pass");
 
 		var client = new EnvilderClient(secretProvider);

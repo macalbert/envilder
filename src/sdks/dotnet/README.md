@@ -26,7 +26,7 @@ dotnet add package Envilder
 ### One-liner — resolve + inject
 
 ```csharp
-using Envilder;
+using Envilder.Application;
 
 // Resolve secrets from the map file and inject into Environment
 Envilder.Load("secrets-map.json");
@@ -38,7 +38,7 @@ var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 ### Resolve without injecting
 
 ```csharp
-using Envilder;
+using Envilder.Application;
 
 var secrets = Envilder.ResolveFile("secrets-map.json");
 var dbPassword = secrets["DB_PASSWORD"];
@@ -49,6 +49,8 @@ var dbPassword = secrets["DB_PASSWORD"];
 Every method has an async counterpart:
 
 ```csharp
+using Envilder.Application;
+
 await Envilder.LoadAsync("secrets-map.json");
 var secrets = await Envilder.ResolveFileAsync("secrets-map.json");
 ```
@@ -58,26 +60,27 @@ var secrets = await Envilder.ResolveFileAsync("secrets-map.json");
 Override the map file's `$config` at runtime — useful for switching providers, profiles, or vault URLs per environment:
 
 ```csharp
-using Envilder;
+using Envilder.Application;
+using Envilder.Domain;
 
 // Override provider + vault URL
-var secrets = Envilder.FromFile("secrets-map.json")
+var secrets = Envilder.FromMapFile("secrets-map.json")
     .WithProvider(SecretProviderType.Azure)
     .WithVaultUrl("https://my-vault.vault.azure.net")
     .Resolve();
 
 // Override AWS profile and inject
-Envilder.FromFile("secrets-map.json")
+Envilder.FromMapFile("secrets-map.json")
     .WithProfile("staging")
     .Inject();
 
 // Async versions
-var secrets = await Envilder.FromFile("secrets-map.json")
+var secrets = await Envilder.FromMapFile("secrets-map.json")
     .WithProvider(SecretProviderType.Azure)
     .WithVaultUrl("https://my-vault.vault.azure.net")
     .ResolveAsync();
 
-await Envilder.FromFile("secrets-map.json")
+await Envilder.FromMapFile("secrets-map.json")
     .WithProfile("staging")
     .InjectAsync();
 ```
@@ -88,7 +91,7 @@ Route secret loading based on your current environment. Each environment maps to
 secrets file (or `null` to skip loading):
 
 ```csharp
-using Envilder;
+using Envilder.Application;
 
 var env = Environment.GetEnvironmentVariable("APP_ENV") ?? "development";
 
@@ -123,7 +126,7 @@ Behaviour:
 Opt-in validation ensures all resolved secrets have non-empty values:
 
 ```csharp
-using Envilder;
+using Envilder.Application;
 
 var secrets = Envilder.ResolveFile("secrets-map.json");
 secrets.ValidateSecrets(); // throws SecretValidationException if any value is empty
@@ -202,7 +205,7 @@ var config = new ConfigurationBuilder()
 | `LoadAsync(env, mapping, ct?)` | Async version |
 | `ResolveFile(env, mapping)` | Environment-based resolve |
 | `ResolveFileAsync(env, mapping, ct?)` | Async version |
-| `FromFile(path)` | Returns `EnvilderBuilder` for fluent configuration |
+| `FromMapFile(path)` | Returns `EnvilderBuilder` for fluent configuration |
 
 ### Fluent builder (`EnvilderBuilder`)
 

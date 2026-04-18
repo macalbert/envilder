@@ -1,3 +1,14 @@
+## [1.0.0] - 2026-04-19
+
+### Breaking
+
+* **Rename `FromFile` to `FromMapFile`** — The fluent builder entry point has been renamed from
+  `Envilder.FromFile(path)` to `Envilder.FromMapFile(path)` for clarity and alignment with the
+  CLI `--map` flag. Update all call sites: `Envilder.FromMapFile("secrets-map.json").Resolve()`
+  ([#167](https://github.com/macalbert/envilder/pull/167))
+
+---
+
 ## [0.2.0] - 2026-04-18
 
 ### Added
@@ -6,7 +17,7 @@
 * `ResolveFile(path)` / `ResolveFileAsync(path)` — Resolve secrets from a map file
 * `Load(path)` / `LoadAsync(path)` — Resolve and inject secrets into `Environment`
 * `ResolveFile(env, mapping)` / `Load(env, mapping)` — Environment-routed overloads
-* `FromFile(path)` — Fluent builder with `.WithProvider()`, `.WithProfile()`, `.WithVaultUrl()`
+* `FromMapFile(path)` — Fluent builder with `.WithProvider()`, `.WithProfile()`, `.WithVaultUrl()`
 * `EnvilderBuilder.Resolve()` / `ResolveAsync()` / `Inject()` / `InjectAsync()` — Fluent terminal methods
 * `ISecretProvider.GetSecret(name)` — Synchronous secret retrieval (new interface method)
 * `AwsSsmSecretProvider.GetSecret(name)` — Sync AWS SSM implementation

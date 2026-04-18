@@ -21,7 +21,7 @@ const sdkTabs = [
 Envilder.load("param-map.json")
 
 # Or resolve as a dict without injecting
-secrets = Envilder.from_file("param-map.json").resolve()`,
+secrets = Envilder.from_map_file("param-map.json").resolve()`,
   },
   {
     label: t.howItWorks.sdkTabDotnet,

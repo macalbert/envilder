@@ -214,7 +214,7 @@ but have **no code dependency** on the TypeScript core.
 
 - **Domain** (`Domain/`): `ISecretProvider` port (async `GetSecretAsync` + sync `GetSecret`), `MapFileConfig`, `EnvilderOptions`, `ParsedMapFile`, `SecretProviderType` enum
 - **Application** (`Application/`):
-  - `Envilder` — Static one-liner facade (`Load`, `ResolveFile`, `FromFile` + env-routing overloads)
+  - `Envilder` — Static one-liner facade (`Load`, `ResolveFile`, `FromMapFile` + env-routing overloads)
   - `EnvilderBuilder` — Fluent builder (`WithProvider`, `WithProfile`, `WithVaultUrl` → `Resolve`/`Inject`)
   - `EnvilderClient` — Core resolver (resolves mappings, `InjectIntoEnvironment` static method)
   - `MapFileParser` — Parses `$config` + variable mappings from JSON
@@ -257,7 +257,7 @@ Naming: `Should_<Expected>_When_<Condition>`. AAA pattern with comment markers.
 
 - **Domain** (`domain/`): `ISecretProvider` Protocol, `MapFileConfig`, `EnvilderOptions`, `ParsedMapFile` dataclasses, `SecretProviderType` enum
 - **Application** (`application/`):
-  - `Envilder` (facade) — Primary entry point: `load(path)`, `resolve_file(path)`, `from_file(path)` fluent builder, plus env-routing overloads `load(env, mapping)` / `resolve_file(env, mapping)`
+  - `Envilder` (facade) — Primary entry point: `load(path)`, `resolve_file(path)`, `from_map_file(path)` fluent builder, plus env-routing overloads `load(env, mapping)` / `resolve_file(env, mapping)`
   - `EnvilderClient` — Core resolver (`resolve_secrets(map_file)` + `inject_into_environment(secrets)` static method sets `os.environ`)
   - `MapFileParser` — Parses `$config` + variable mappings from JSON
   - `secret_validation` — `validate_secrets(dict)` raises `SecretValidationError` for empty/missing values
@@ -268,7 +268,7 @@ Naming: `Should_<Expected>_When_<Condition>`. AAA pattern with comment markers.
 - Synchronous API — uses `boto3` natively (no async/await)
 - Protocol-based ports — Python `Protocol` instead of ABC
 - `SecretProviderFactory` is internal — consumers use the `Envilder` facade
-- `Envilder` facade is the primary public API (fluent: `from_file().with_provider().with_vault_url().inject()`)
+- `Envilder` facade is the primary public API (fluent: `from_map_file().with_provider().with_vault_url().inject()`)
 - `ISecretProvider.get_secret()` returns `None` for missing secrets (no exceptions)
 - `EnvilderClient.resolve_secrets()` silently omits missing secrets
 - `validate_secrets()` — opt-in post-resolution validation

@@ -119,10 +119,10 @@ public class EnvilderFacadeTests
 	}
 
 	[Fact]
-	public void Should_ThrowArgumentException_When_FromFileCalledWithEmptyPath()
+	public void Should_ThrowArgumentException_When_FromMapFileCalledWithEmptyPath()
 	{
 		// Act
-		var act = () => EnvilderFacade.FromFile(string.Empty);
+		var act = () => EnvilderFacade.FromMapFile(string.Empty);
 
 		// Assert
 		act.Should().Throw<ArgumentException>();
@@ -132,17 +132,17 @@ public class EnvilderFacadeTests
 	public void Should_ThrowFileNotFoundException_When_FluentResolveCalledWithNonExistentFile()
 	{
 		// Act
-		var act = () => EnvilderFacade.FromFile("/nonexistent/map.json").Resolve();
+		var act = () => EnvilderFacade.FromMapFile("/nonexistent/map.json").Resolve();
 
 		// Assert
 		act.Should().Throw<FileNotFoundException>();
 	}
 
 	[Fact]
-	public void Should_ReturnBuilder_When_FromFileCalled()
+	public void Should_ReturnBuilder_When_FromMapFileCalled()
 	{
 		// Act
-		var actual = EnvilderFacade.FromFile("/some/path.json");
+		var actual = EnvilderFacade.FromMapFile("/some/path.json");
 
 		// Assert
 		actual.Should().NotBeNull();
@@ -152,7 +152,7 @@ public class EnvilderFacadeTests
 	public void Should_ReturnSameBuilder_When_WithProviderCalled()
 	{
 		// Arrange
-		var builder = EnvilderFacade.FromFile("/some/path.json");
+		var builder = EnvilderFacade.FromMapFile("/some/path.json");
 
 		// Act
 		var actual = builder.WithProvider(SecretProviderType.Azure);
@@ -165,7 +165,7 @@ public class EnvilderFacadeTests
 	public void Should_ReturnSameBuilder_When_WithProfileCalled()
 	{
 		// Arrange
-		var builder = EnvilderFacade.FromFile("/some/path.json");
+		var builder = EnvilderFacade.FromMapFile("/some/path.json");
 
 		// Act
 		var actual = builder.WithProfile("my-profile");
@@ -178,7 +178,7 @@ public class EnvilderFacadeTests
 	public void Should_ReturnSameBuilder_When_WithVaultUrlCalled()
 	{
 		// Arrange
-		var builder = EnvilderFacade.FromFile("/some/path.json");
+		var builder = EnvilderFacade.FromMapFile("/some/path.json");
 
 		// Act
 		var actual = builder.WithVaultUrl("https://vault.azure.net");
@@ -191,7 +191,7 @@ public class EnvilderFacadeTests
 	public void Should_SupportFullFluentChain_When_AllOverridesApplied()
 	{
 		// Act
-		var actual = EnvilderFacade.FromFile("/some/path.json")
+		var actual = EnvilderFacade.FromMapFile("/some/path.json")
 			.WithProvider(SecretProviderType.Azure)
 			.WithVaultUrl("https://vault.azure.net")
 			.WithProfile("my-profile");

@@ -4,7 +4,7 @@ import pytest
 from envilder.domain.map_file_config import MapFileConfig
 from envilder.domain.secret_provider_type import SecretProviderType
 from envilder.infrastructure.secret_provider_factory import (
-    SecretProviderFactory,
+    _SecretProviderFactory,
 )
 
 pytestmark = pytest.mark.acceptance
@@ -24,7 +24,7 @@ class TestSecretProviderFactoryAcceptance:
             Overwrite=True,
         )
         config = MapFileConfig(provider=SecretProviderType.AWS)
-        sut = SecretProviderFactory.create(config)
+        sut = _SecretProviderFactory.create(config)
 
         # Act
         actual = sut.get_secret("/Test/FactoryNoProfile")
@@ -48,7 +48,7 @@ class TestSecretProviderFactoryAcceptance:
             provider=SecretProviderType.AWS,
             profile="localstack-test",
         )
-        sut = SecretProviderFactory.create(config)
+        sut = _SecretProviderFactory.create(config)
 
         # Act
         actual = sut.get_secret("/Test/FactoryWithProfile")

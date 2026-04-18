@@ -8,7 +8,7 @@ from envilder.domain.envilder_options import EnvilderOptions
 from envilder.domain.parsed_map_file import ParsedMapFile
 from envilder.domain.secret_provider_type import SecretProviderType
 from envilder.infrastructure.secret_provider_factory import (
-    SecretProviderFactory,
+    _SecretProviderFactory,
 )
 
 
@@ -36,7 +36,7 @@ class Envilder:
 
         # Fluent builder with provider override:
         secrets = (
-            Envilder.from_file("secrets-map.json")
+            Envilder.from_map_file("secrets-map.json")
             .with_provider(SecretProviderType.AZURE)
             .with_vault_url("https://my-vault.vault.azure.net")
             .inject()
@@ -50,7 +50,7 @@ class Envilder:
         self._options = EnvilderOptions()
 
     @staticmethod
-    def from_file(file_path: str) -> Envilder:
+    def from_map_file(file_path: str) -> Envilder:
         """Return a fluent builder bound to *file_path*.
 
         Chain ``.with_provider()``, ``.with_vault_url()``,
@@ -216,7 +216,7 @@ class Envilder:
         """Resolve secrets and return them as a dict."""
         map_file = self._parse_file()
         options = self._build_options()
-        provider = SecretProviderFactory.create(
+        provider = _SecretProviderFactory.create(
             map_file.config, options=options
         )
         client = EnvilderClient(provider)

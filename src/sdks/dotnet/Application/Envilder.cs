@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 /// <para>
 /// Use <see cref="ResolveFile(string)"/> to resolve secrets, <see cref="Load(string)"/>
 /// to resolve and inject into <see cref="System.Environment"/>, or
-/// <see cref="FromFile(string)"/> for fluent configuration.
+/// <see cref="FromMapFile(string)"/> for fluent configuration.
 /// </para>
 /// </summary>
 /// <example>
@@ -24,7 +24,7 @@ using System.Threading.Tasks;
 /// var secrets = Envilder.ResolveFile("param-map.json");
 ///
 /// // Fluent builder with provider override
-/// var secrets = Envilder.FromFile("param-map.json")
+/// var secrets = Envilder.FromMapFile("param-map.json")
 ///     .WithProvider(SecretProviderType.Azure)
 ///     .WithVaultUrl("https://my-vault.vault.azure.net")
 ///     .Resolve();
@@ -32,6 +32,14 @@ using System.Threading.Tasks;
 /// </example>
 public static class Envilder
 {
+	/// <summary>
+	/// Reads the map file at <paramref name="filePath"/>, resolves every secret from
+	/// the configured provider, and returns the results as a dictionary.
+	/// </summary>
+	/// <param name="filePath">Path to the JSON map file on disk.</param>
+	/// <returns>Resolved secrets keyed by environment variable name.</returns>
+	/// <exception cref="ArgumentException">When <paramref name="filePath"/> is null or whitespace.</exception>
+	/// <exception cref="FileNotFoundException">When the file does not exist.</exception>
 	public static IReadOnlyDictionary<string, string> ResolveFile(string filePath)
 	{
 		ValidateFilePath(filePath);
@@ -43,17 +51,21 @@ public static class Envilder
 		return new Dictionary<string, string>(client.ResolveSecrets(mapFile));
 	}
 
+	/// <summary>
+	/// Asynchronously reads the map file at <paramref name="filePath"/>, resolves every
+	/// secret from the configured provider, and returns the results as a dictionary.
+	/// </summary>
+	/// <param name="filePath">Path to the JSON map file on disk.</param>
+	/// <param name="cancellationToken">Optional cancellation token.</param>
+	/// <returns>Resolved secrets keyed by environment variable name.</returns>
+	/// <exception cref="ArgumentException">When <paramref name="filePath"/> is null or whitespace.</exception>
+	/// <exception cref="FileNotFoundException">When the file does not exist.</exception>
 	public static async Task<IReadOnlyDictionary<string, string>> ResolveFileAsync(
 		string filePath,
 		CancellationToken cancellationToken = default)
 	{
 		ValidateFilePath(filePath);
-		cancellationToken.ThrowIfCancellationRequested();
-		string json;
-		using (var reader = new StreamReader(filePath))
-		{
-			json = await reader.ReadToEndAsync().ConfigureAwait(false);
-		}
+		var json = await ReadFileAsync(filePath, cancellationToken).ConfigureAwait(false);
 		var parser = new MapFileParser();
 		var mapFile = parser.Parse(json);
 		var provider = SecretProviderFactory.Create(mapFile.Config);
@@ -62,6 +74,14 @@ public static class Envilder
 		return new Dictionary<string, string>(secrets);
 	}
 
+	/// <summary>
+	/// Resolves secrets from the map file and injects them as process-level
+	/// environment variables via <see cref="System.Environment.SetEnvironmentVariable(string, string)"/>.
+	/// </summary>
+	/// <param name="filePath">Path to the JSON map file on disk.</param>
+	/// <returns>Resolved secrets keyed by environment variable name.</returns>
+	/// <exception cref="ArgumentException">When <paramref name="filePath"/> is null or whitespace.</exception>
+	/// <exception cref="FileNotFoundException">When the file does not exist.</exception>
 	public static IReadOnlyDictionary<string, string> Load(string filePath)
 	{
 		var secrets = ResolveFile(filePath);
@@ -69,6 +89,15 @@ public static class Envilder
 		return secrets;
 	}
 
+	/// <summary>
+	/// Asynchronously resolves secrets from the map file and injects them as
+	/// process-level environment variables.
+	/// </summary>
+	/// <param name="filePath">Path to the JSON map file on disk.</param>
+	/// <param name="cancellationToken">Optional cancellation token.</param>
+	/// <returns>Resolved secrets keyed by environment variable name.</returns>
+	/// <exception cref="ArgumentException">When <paramref name="filePath"/> is null or whitespace.</exception>
+	/// <exception cref="FileNotFoundException">When the file does not exist.</exception>
 	public static async Task<IReadOnlyDictionary<string, string>> LoadAsync(
 		string filePath,
 		CancellationToken cancellationToken = default)
@@ -78,6 +107,15 @@ public static class Envilder
 		return secrets;
 	}
 
+	/// <summary>
+	/// Resolves secrets using environment-based routing. Looks up <paramref name="environment"/>
+	/// in <paramref name="envMapping"/>; if the value is a file path, resolves from that file.
+	/// Returns an empty dictionary when the environment maps to <see langword="null"/> or is absent.
+	/// </summary>
+	/// <param name="environment">The current environment name (e.g. "production").</param>
+	/// <param name="envMapping">Maps environment names to map-file paths (or <see langword="null"/> to skip).</param>
+	/// <returns>Resolved secrets, or an empty dictionary.</returns>
+	/// <exception cref="ArgumentException">When <paramref name="environment"/> is null or whitespace.</exception>
 	public static IReadOnlyDictionary<string, string> ResolveFile(
 		string environment,
 		IDictionary<string, string?> envMapping)
@@ -91,6 +129,13 @@ public static class Envilder
 		return ResolveFile(filePath);
 	}
 
+	/// <summary>
+	/// Asynchronously resolves secrets using environment-based routing.
+	/// </summary>
+	/// <param name="environment">The current environment name.</param>
+	/// <param name="envMapping">Maps environment names to map-file paths (or <see langword="null"/> to skip).</param>
+	/// <param name="cancellationToken">Optional cancellation token.</param>
+	/// <returns>Resolved secrets, or an empty dictionary.</returns>
 	public static async Task<IReadOnlyDictionary<string, string>> ResolveFileAsync(
 		string environment,
 		IDictionary<string, string?> envMapping,
@@ -105,6 +150,14 @@ public static class Envilder
 		return await ResolveFileAsync(filePath, cancellationToken).ConfigureAwait(false);
 	}
 
+	/// <summary>
+	/// Resolves secrets using environment-based routing and injects them as
+	/// process-level environment variables.
+	/// </summary>
+	/// <param name="environment">The current environment name.</param>
+	/// <param name="envMapping">Maps environment names to map-file paths (or <see langword="null"/> to skip).</param>
+	/// <returns>Resolved secrets, or an empty dictionary.</returns>
+	/// <exception cref="ArgumentException">When <paramref name="environment"/> is null or whitespace.</exception>
 	public static IReadOnlyDictionary<string, string> Load(
 		string environment,
 		IDictionary<string, string?> envMapping)
@@ -118,6 +171,14 @@ public static class Envilder
 		return Load(filePath);
 	}
 
+	/// <summary>
+	/// Asynchronously resolves secrets using environment-based routing and injects them
+	/// as process-level environment variables.
+	/// </summary>
+	/// <param name="environment">The current environment name.</param>
+	/// <param name="envMapping">Maps environment names to map-file paths (or <see langword="null"/> to skip).</param>
+	/// <param name="cancellationToken">Optional cancellation token.</param>
+	/// <returns>Resolved secrets, or an empty dictionary.</returns>
 	public static async Task<IReadOnlyDictionary<string, string>> LoadAsync(
 		string environment,
 		IDictionary<string, string?> envMapping,
@@ -166,7 +227,16 @@ public static class Envilder
 		return filePath;
 	}
 
-	public static EnvilderBuilder FromFile(string filePath)
+	/// <summary>
+	/// Returns a fluent <see cref="EnvilderBuilder"/> for the given map file.
+	/// Chain <see cref="EnvilderBuilder.WithProvider"/>, <see cref="EnvilderBuilder.WithProfile"/>,
+	/// or <see cref="EnvilderBuilder.WithVaultUrl"/> before calling <see cref="EnvilderBuilder.Resolve"/>
+	/// or <see cref="EnvilderBuilder.Inject"/>.
+	/// </summary>
+	/// <param name="filePath">Path to the JSON map file on disk.</param>
+	/// <returns>A builder for configuring overrides and resolving secrets.</returns>
+	/// <exception cref="ArgumentException">When <paramref name="filePath"/> is null or whitespace.</exception>
+	public static EnvilderBuilder FromMapFile(string filePath)
 	{
 		if (string.IsNullOrWhiteSpace(filePath))
 		{
@@ -184,13 +254,17 @@ public static class Envilder
 		}
 	}
 
+	// StreamReader.ReadToEndAsync(CancellationToken) is not available on netstandard2.0.
+	// We check cancellation before and after the read to honour the token as closely as possible.
 	internal static async Task<string> ReadFileAsync(
 		string filePath,
 		CancellationToken cancellationToken)
 	{
 		cancellationToken.ThrowIfCancellationRequested();
 		using var reader = new StreamReader(filePath);
-		return await reader.ReadToEndAsync().ConfigureAwait(false);
+		var content = await reader.ReadToEndAsync().ConfigureAwait(false);
+		cancellationToken.ThrowIfCancellationRequested();
+		return content;
 	}
 
 	private static void ValidateFilePath(string filePath)

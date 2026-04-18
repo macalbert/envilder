@@ -286,14 +286,20 @@ export const ca: Translations = {
     dotnetTitle: '.NET',
     dotnetDesc:
       'Integració nativa amb IConfiguration. Resol secrets a l’arrencada.',
+    typescriptTitle: 'TypeScript',
+    typescriptDesc:
+      'Carrega secrets directament a Node.js. Mateix map-file, zero dependències del CLI.',
     goTitle: 'Go',
     goDesc: 'Càrrega lleugera de secrets per a serveis Go.',
     javaTitle: 'Java',
     javaDesc: 'Suport per a Spring Boot i Java standalone.',
     install: 'Instal·lar',
+    quickStart: 'Inici ràpid',
     available: 'Disponible',
     planned: 'Planificat',
+    comingSoon: 'Properament',
     docsLink: 'Veure docs',
+    packageLink: 'Paquet',
   },
   changelog: {
     title: 'Què hi ha de ',

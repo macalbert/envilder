@@ -16,16 +16,9 @@ public class EnvilderConfigurationProvider : ConfigurationProvider
 		_mapFile = mapFile ?? throw new ArgumentNullException(nameof(mapFile));
 	}
 
-	// ConfigurationProvider.Load() is synchronous by design.
-	// ResolveSecretsAsync uses ConfigureAwait(false) throughout to avoid deadlocks.
 	public override void Load()
 	{
-#pragma warning disable VSTHRD002 // ConfigurationProvider.Load() is sync-only; no async override exists
-		var secrets = _client.ResolveSecretsAsync(_mapFile)
-			.ConfigureAwait(false)
-			.GetAwaiter()
-			.GetResult();
-#pragma warning restore VSTHRD002
+		var secrets = _client.ResolveSecrets(_mapFile);
 
 		Data.Clear();
 

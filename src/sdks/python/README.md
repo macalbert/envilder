@@ -56,7 +56,7 @@ from envilder import Envilder, SecretProviderType
 
 # Override provider + vault URL
 secrets = (
-    Envilder.from_file('secrets-map.json')
+    Envilder.from_map_file('secrets-map.json')
     .with_provider(SecretProviderType.AZURE)
     .with_vault_url('https://my-vault.vault.azure.net')
     .resolve()
@@ -64,7 +64,7 @@ secrets = (
 
 # Override AWS profile and inject
 (
-    Envilder.from_file('secrets-map.json')
+    Envilder.from_map_file('secrets-map.json')
     .with_profile('staging')
     .inject()
 )
@@ -169,9 +169,9 @@ EnvilderClient.inject_into_environment(secrets)
 | `resolve_file(path)` | Resolve secrets, return as `dict` |
 | `load(env, mapping)` | Environment-based resolve + inject |
 | `resolve_file(env, mapping)` | Environment-based resolve |
-| `from_file(path)` | Returns fluent builder for configuration |
+| `from_map_file(path)` | Returns fluent builder for configuration |
 
-### Fluent builder (via `from_file()`)
+### Fluent builder (via `from_map_file()`)
 
 | Method | Description |
 |--------|-------------|

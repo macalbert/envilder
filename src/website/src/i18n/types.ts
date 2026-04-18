@@ -156,14 +156,19 @@ export interface SdksTranslations {
   pythonDesc: string;
   dotnetTitle: string;
   dotnetDesc: string;
+  typescriptTitle: string;
+  typescriptDesc: string;
   goTitle: string;
   goDesc: string;
   javaTitle: string;
   javaDesc: string;
   install: string;
+  quickStart: string;
   available: string;
   planned: string;
+  comingSoon: string;
   docsLink: string;
+  packageLink: string;
 }
 
 export interface ChangelogHighlight {

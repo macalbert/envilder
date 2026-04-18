@@ -24,10 +24,10 @@ public class EnvilderConfigurationSectionBindingTests
 	{
 		// Arrange
 		_secretProvider
-			.GetSecretAsync("/myapp/prod/pg-connection-string", Arg.Any<CancellationToken>())
+			.GetSecret("/myapp/prod/pg-connection-string")
 			.Returns("Host=db.example.com;Port=5432;Database=orders;Username=app;Password=s3cret");
 		_secretProvider
-			.GetSecretAsync("/myapp/prod/pg-max-pool-size", Arg.Any<CancellationToken>())
+			.GetSecret("/myapp/prod/pg-max-pool-size")
 			.Returns("100");
 
 		var mapFile = new ParsedMapFile(
@@ -65,10 +65,10 @@ public class EnvilderConfigurationSectionBindingTests
 	{
 		// Arrange
 		_secretProvider
-			.GetSecretAsync("/myapp/prod/openai-api-key", Arg.Any<CancellationToken>())
+			.GetSecret("/myapp/prod/openai-api-key")
 			.Returns("sk-proj-abc123");
 		_secretProvider
-			.GetSecretAsync("/myapp/prod/openai-model", Arg.Any<CancellationToken>())
+			.GetSecret("/myapp/prod/openai-model")
 			.Returns("gpt-4o");
 
 		var mapFile = new ParsedMapFile(

@@ -286,14 +286,20 @@ export const en: Translations = {
     dotnetTitle: '.NET',
     dotnetDesc:
       'Native IConfiguration integration. Resolve secrets at startup.',
+    typescriptTitle: 'TypeScript',
+    typescriptDesc:
+      'Load secrets directly in Node.js. Same map-file, zero dependencies on the CLI.',
     goTitle: 'Go',
     goDesc: 'Lightweight secret loading for Go services.',
     javaTitle: 'Java',
     javaDesc: 'Spring Boot and standalone Java support.',
     install: 'Install',
+    quickStart: 'Quick start',
     available: 'Available',
     planned: 'Planned',
+    comingSoon: 'Coming soon',
     docsLink: 'View docs',
+    packageLink: 'Package',
   },
   changelog: {
     title: "What's ",

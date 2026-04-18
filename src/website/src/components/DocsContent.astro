@@ -530,13 +530,13 @@ var dbPassword = secrets["DB_PASSWORD"];`} />
         <p>{t.docs.sdkDotnetFluentDesc}</p>
         <CodeBlock lang="csharp" code={`using Envilder;
 
-var secrets = Envilder.FromFile("secrets-map.json")
+var secrets = Envilder.FromMapFile("secrets-map.json")
     .WithProvider(SecretProviderType.Azure)
     .WithVaultUrl("https://my-vault.vault.azure.net")
     .Resolve();
 
 // Or inject directly
-Envilder.FromFile("secrets-map.json")
+Envilder.FromMapFile("secrets-map.json")
     .WithProfile("staging")
     .Inject();`} />
 
@@ -622,7 +622,7 @@ Envilder.load(env, {
         <CodeBlock lang="python" code={`from envilder import Envilder, SecretProviderType
 
 secrets = (
-    Envilder.from_file('secrets-map.json')
+    Envilder.from_map_file('secrets-map.json')
     .with_provider(SecretProviderType.AZURE)
     .with_vault_url('https://my-vault.vault.azure.net')
     .resolve()

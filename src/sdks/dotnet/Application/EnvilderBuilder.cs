@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 /// <summary>
 /// Fluent builder for configuring and resolving secrets from a map file.
-/// Obtain an instance via <see cref="Envilder.FromFile(string)"/>.
+/// Obtain an instance via <see cref="Envilder.FromMapFile(string)"/>.
 /// </summary>
 /// <example>
 /// <code>
-/// var secrets = Envilder.FromFile("param-map.json")
+/// var secrets = Envilder.FromMapFile("param-map.json")
 ///     .WithProvider(SecretProviderType.Azure)
 ///     .WithVaultUrl("https://my-vault.vault.azure.net")
 ///     .Resolve();
@@ -29,24 +29,46 @@ public class EnvilderBuilder
 		_filePath = filePath;
 	}
 
+	/// <summary>
+	/// Overrides the secret provider type specified in the map file's <c>$config</c>.
+	/// </summary>
+	/// <param name="provider">The provider to use (AWS or Azure).</param>
+	/// <returns>This builder for chaining.</returns>
 	public EnvilderBuilder WithProvider(SecretProviderType provider)
 	{
 		_options.Provider = provider;
 		return this;
 	}
 
+	/// <summary>
+	/// Overrides the AWS named profile used for credential resolution.
+	/// Only applicable when the provider is AWS.
+	/// </summary>
+	/// <param name="profile">The AWS profile name.</param>
+	/// <returns>This builder for chaining.</returns>
 	public EnvilderBuilder WithProfile(string profile)
 	{
 		_options.Profile = profile;
 		return this;
 	}
 
+	/// <summary>
+	/// Overrides the Azure Key Vault URL used for secret retrieval.
+	/// Only applicable when the provider is Azure.
+	/// </summary>
+	/// <param name="vaultUrl">The Key Vault URL (e.g. <c>https://my-vault.vault.azure.net</c>).</param>
+	/// <returns>This builder for chaining.</returns>
 	public EnvilderBuilder WithVaultUrl(string vaultUrl)
 	{
 		_options.VaultUrl = vaultUrl;
 		return this;
 	}
 
+	/// <summary>
+	/// Resolves secrets from the map file using the configured overrides and
+	/// returns them as a dictionary, without injecting into the environment.
+	/// </summary>
+	/// <returns>Resolved secrets keyed by environment variable name.</returns>
 	public IReadOnlyDictionary<string, string> Resolve()
 	{
 		Envilder.ValidateFileExists(_filePath);
@@ -56,6 +78,11 @@ public class EnvilderBuilder
 		return new Dictionary<string, string>(new EnvilderClient(provider).ResolveSecrets(mapFile));
 	}
 
+	/// <summary>
+	/// Asynchronously resolves secrets from the map file using the configured overrides.
+	/// </summary>
+	/// <param name="cancellationToken">Optional cancellation token.</param>
+	/// <returns>Resolved secrets keyed by environment variable name.</returns>
 	public async Task<IReadOnlyDictionary<string, string>> ResolveAsync(
 		CancellationToken cancellationToken = default)
 	{
@@ -67,6 +94,11 @@ public class EnvilderBuilder
 		return new Dictionary<string, string>(secrets);
 	}
 
+	/// <summary>
+	/// Resolves secrets and injects them as process-level environment variables
+	/// via <see cref="System.Environment.SetEnvironmentVariable(string, string)"/>.
+	/// </summary>
+	/// <returns>Resolved secrets keyed by environment variable name.</returns>
 	public IReadOnlyDictionary<string, string> Inject()
 	{
 		var secrets = Resolve();
@@ -74,6 +106,11 @@ public class EnvilderBuilder
 		return secrets;
 	}
 
+	/// <summary>
+	/// Asynchronously resolves secrets and injects them as process-level environment variables.
+	/// </summary>
+	/// <param name="cancellationToken">Optional cancellation token.</param>
+	/// <returns>Resolved secrets keyed by environment variable name.</returns>
 	public async Task<IReadOnlyDictionary<string, string>> InjectAsync(
 		CancellationToken cancellationToken = default)
 	{

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "envilder"
-version = "0.3.2"
+version = "1.0.0"
 description = "Securely load environment variables from AWS SSM Parameter Store or Azure Key Vault."
 readme = "README.md"
 license = { text = "MIT" }

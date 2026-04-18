@@ -16,7 +16,7 @@ from envilder.infrastructure.azure.azure_key_vault_secret_provider import (
 )
 
 
-class SecretProviderFactory:
+class _SecretProviderFactory:
     @staticmethod
     def create(
         config: MapFileConfig,

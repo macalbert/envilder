@@ -1,9 +1,21 @@
+## [1.0.0] - 2026-04-19
+
+### Breaking
+
+* **Rename `from_file` to `from_map_file`** — The fluent builder entry point has been renamed from
+  `Envilder.from_file(path)` to `Envilder.from_map_file(path)` for clarity and alignment with the
+  CLI `--map` flag. Update all call sites: `Envilder.from_map_file("secrets-map.json").resolve()`
+  ([#167](https://github.com/macalbert/envilder/pull/167))
+
+---
+
 ## [0.3.2] - 2026-04-18
 
 ### Changed
 
-* **Encapsulate `SecretProviderFactory`** — Removed from public `__all__` exports; consumers
-  should use the `Envilder` facade instead of creating providers manually
+* **Encapsulate `SecretProviderFactory`** — Renamed to `_SecretProviderFactory` and removed
+  from public re-exports; consumers should use the `Envilder` facade instead of creating
+  providers manually
   ([#167](https://github.com/macalbert/envilder/pull/167))
 * **Cross-provider validation** — `SecretProviderFactory.create()` now rejects invalid
   combinations: AWS profile with Azure provider, or vault URL with AWS provider
@@ -49,7 +61,7 @@
 ### Added
 
 * **Fluent API facade** — `Envilder` high-level entry point with `load()`, `resolve_file()`,
-  and `from_file()` methods, plus fluent override methods (`with_provider()`, `with_vault_url()`,
+  and `from_map_file()` methods, plus fluent override methods (`with_provider()`, `with_vault_url()`,
   `with_profile()`) ([#161](https://github.com/macalbert/envilder/pull/161))
 * **Facade docstrings** — All public methods on the `Envilder` facade now have docstrings with
   usage examples, improving IDE tooltips and `help()` output for external consumers
@@ -63,7 +75,7 @@
 * **Initial release** — Runtime library for loading secrets from AWS SSM Parameter Store or
   Azure Key Vault directly into Python applications
   ([#157](https://github.com/macalbert/envilder/pull/157))
-* `Envilder` facade — High-level entry point with `load()`, `resolve_file()`, and `from_file()` methods
+* `Envilder` facade — High-level entry point with `load()`, `resolve_file()`, and `from_map_file()` methods
 * `EnvilderClient` — Resolves secrets from a map-file and injects them into `os.environ`
 * `MapFileParser` — Parses `param-map.json` files with `$config` section and variable mappings
 * `SecretProviderFactory` — Creates the appropriate secret provider based on configuration

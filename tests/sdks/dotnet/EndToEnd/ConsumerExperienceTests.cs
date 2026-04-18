@@ -2,9 +2,11 @@ namespace Envilder.Tests.EndToEnd;
 
 using Amazon.SimpleSystemsManagement;
 using AwesomeAssertions;
+using Envilder.Application;
 using Envilder.Domain;
 using Envilder.Infrastructure;
 using Envilder.Infrastructure.Configuration;
+using Envilder.Infrastructure.DependencyInjection;
 using Envilder.Tests.Fixtures;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +26,11 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		"AWS_ENDPOINT_URL", "AWS_SERVICE_URL",
 		"AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_DEFAULT_REGION",
 		"FACADE_RESOLVE", "FACADE_LOAD",
+		"FACADE_RESOLVE_ASYNC", "FACADE_LOAD_ASYNC",
+		"BUILDER_RESOLVE", "BUILDER_INJECT",
+		"BUILDER_RESOLVE_ASYNC", "BUILDER_INJECT_ASYNC",
+		"ENV_ROUTE_RESOLVE", "ENV_ROUTE_LOAD",
+		"DI_RESOLVE",
 	];
 
 	private (string Name, string? Value)[] _originalEnvValues = [];
@@ -256,6 +263,250 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		// Assert
 		actual["FACADE_LOAD"].Should().Be(expectedValue);
 		Environment.GetEnvironmentVariable("FACADE_LOAD").Should().Be(expectedValue);
+	}
+
+	[Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
+	public async Task Should_ResolveSecrets_When_FacadeResolveFileAsyncCalled()
+	{
+		// Arrange
+		var parameterName = "/e2e/facade-resolve-async";
+		var expectedValue = "facade-resolve-async-value";
+		await PutAwsParameterAsync(parameterName, expectedValue);
+
+		var mapFilePath = await WriteTempMapFileAsync($$"""
+            {
+                "$config": { "provider": "aws" },
+                "FACADE_RESOLVE_ASYNC": "{{parameterName}}"
+            }
+            """);
+
+		// Act
+		var actual = await EnvilderFacade.ResolveFileAsync(mapFilePath);
+
+		// Assert
+		actual["FACADE_RESOLVE_ASYNC"].Should().Be(expectedValue);
+	}
+
+	[Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
+	public async Task Should_InjectIntoEnvironment_When_FacadeLoadAsyncCalled()
+	{
+		// Arrange
+		var parameterName = "/e2e/facade-load-async";
+		var expectedValue = "facade-load-async-value";
+		await PutAwsParameterAsync(parameterName, expectedValue);
+
+		var mapFilePath = await WriteTempMapFileAsync($$"""
+            {
+                "$config": { "provider": "aws" },
+                "FACADE_LOAD_ASYNC": "{{parameterName}}"
+            }
+            """);
+
+		// Act
+		var actual = await EnvilderFacade.LoadAsync(mapFilePath);
+
+		// Assert
+		actual["FACADE_LOAD_ASYNC"].Should().Be(expectedValue);
+		Environment.GetEnvironmentVariable("FACADE_LOAD_ASYNC").Should().Be(expectedValue);
+	}
+
+	[Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
+	public async Task Should_ResolveSecrets_When_BuilderResolveCalledSync()
+	{
+		// Arrange
+		var parameterName = "/e2e/builder-resolve";
+		var expectedValue = "builder-resolve-value";
+		await PutAwsParameterAsync(parameterName, expectedValue);
+
+		var mapFilePath = await WriteTempMapFileAsync($$"""
+            {
+                "$config": { "provider": "aws" },
+                "BUILDER_RESOLVE": "{{parameterName}}"
+            }
+            """);
+
+		// Act
+		var actual = EnvilderFacade.FromMapFile(mapFilePath).Resolve();
+
+		// Assert
+		actual["BUILDER_RESOLVE"].Should().Be(expectedValue);
+	}
+
+	[Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
+	public async Task Should_InjectIntoEnvironment_When_BuilderInjectCalledSync()
+	{
+		// Arrange
+		var parameterName = "/e2e/builder-inject";
+		var expectedValue = "builder-inject-value";
+		await PutAwsParameterAsync(parameterName, expectedValue);
+
+		var mapFilePath = await WriteTempMapFileAsync($$"""
+            {
+                "$config": { "provider": "aws" },
+                "BUILDER_INJECT": "{{parameterName}}"
+            }
+            """);
+
+		// Act
+		var actual = EnvilderFacade.FromMapFile(mapFilePath).Inject();
+
+		// Assert
+		actual["BUILDER_INJECT"].Should().Be(expectedValue);
+		Environment.GetEnvironmentVariable("BUILDER_INJECT").Should().Be(expectedValue);
+	}
+
+	[Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
+	public async Task Should_ResolveSecrets_When_BuilderResolveAsyncCalled()
+	{
+		// Arrange
+		var parameterName = "/e2e/builder-resolve-async";
+		var expectedValue = "builder-resolve-async-value";
+		await PutAwsParameterAsync(parameterName, expectedValue);
+
+		var mapFilePath = await WriteTempMapFileAsync($$"""
+            {
+                "$config": { "provider": "aws" },
+                "BUILDER_RESOLVE_ASYNC": "{{parameterName}}"
+            }
+            """);
+
+		// Act
+		var actual = await EnvilderFacade.FromMapFile(mapFilePath).ResolveAsync();
+
+		// Assert
+		actual["BUILDER_RESOLVE_ASYNC"].Should().Be(expectedValue);
+	}
+
+	[Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
+	public async Task Should_InjectIntoEnvironment_When_BuilderInjectAsyncCalled()
+	{
+		// Arrange
+		var parameterName = "/e2e/builder-inject-async";
+		var expectedValue = "builder-inject-async-value";
+		await PutAwsParameterAsync(parameterName, expectedValue);
+
+		var mapFilePath = await WriteTempMapFileAsync($$"""
+            {
+                "$config": { "provider": "aws" },
+                "BUILDER_INJECT_ASYNC": "{{parameterName}}"
+            }
+            """);
+
+		// Act
+		var actual = await EnvilderFacade.FromMapFile(mapFilePath).InjectAsync();
+
+		// Assert
+		actual["BUILDER_INJECT_ASYNC"].Should().Be(expectedValue);
+		Environment.GetEnvironmentVariable("BUILDER_INJECT_ASYNC").Should().Be(expectedValue);
+	}
+
+	[Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
+	public async Task Should_ResolveSecrets_When_EnvRoutingResolveFileUsed()
+	{
+		// Arrange
+		var parameterName = "/e2e/env-route-resolve";
+		var expectedValue = "env-route-resolve-value";
+		await PutAwsParameterAsync(parameterName, expectedValue);
+
+		var mapFilePath = await WriteTempMapFileAsync($$"""
+            {
+                "$config": { "provider": "aws" },
+                "ENV_ROUTE_RESOLVE": "{{parameterName}}"
+            }
+            """);
+
+		var envMapping = new Dictionary<string, string?>
+		{
+			["production"] = mapFilePath,
+			["test"] = null,
+		};
+
+		// Act
+		var actual = EnvilderFacade.ResolveFile("production", envMapping);
+
+		// Assert
+		actual["ENV_ROUTE_RESOLVE"].Should().Be(expectedValue);
+	}
+
+	[Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
+	public async Task Should_InjectIntoEnvironment_When_EnvRoutingLoadUsed()
+	{
+		// Arrange
+		var parameterName = "/e2e/env-route-load";
+		var expectedValue = "env-route-load-value";
+		await PutAwsParameterAsync(parameterName, expectedValue);
+
+		var mapFilePath = await WriteTempMapFileAsync($$"""
+            {
+                "$config": { "provider": "aws" },
+                "ENV_ROUTE_LOAD": "{{parameterName}}"
+            }
+            """);
+
+		var envMapping = new Dictionary<string, string?>
+		{
+			["production"] = mapFilePath,
+			["test"] = null,
+		};
+
+		// Act
+		var actual = EnvilderFacade.Load("production", envMapping);
+
+		// Assert
+		actual["ENV_ROUTE_LOAD"].Should().Be(expectedValue);
+		Environment.GetEnvironmentVariable("ENV_ROUTE_LOAD").Should().Be(expectedValue);
+	}
+
+	[Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
+	public async Task Should_PassValidation_When_AllSecretsResolved()
+	{
+		// Arrange
+		var parameterName = "/e2e/validate-ok";
+		var expectedValue = "validate-ok-value";
+		await PutAwsParameterAsync(parameterName, expectedValue);
+
+		var mapFilePath = await WriteTempMapFileAsync($$"""
+            {
+                "$config": { "provider": "aws" },
+                "VALIDATE_OK": "{{parameterName}}"
+            }
+            """);
+
+		// Act
+		var secrets = EnvilderFacade.ResolveFile(mapFilePath);
+		var act = () => secrets.ValidateSecrets();
+
+		// Assert
+		act.Should().NotThrow();
+	}
+
+	[Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
+	public async Task Should_ResolveSecrets_When_ServiceCollectionAddEnvilderUsed()
+	{
+		// Arrange
+		var parameterName = "/e2e/di-resolve";
+		var expectedValue = "di-resolve-value";
+		await PutAwsParameterAsync(parameterName, expectedValue);
+
+		var mapFilePath = await WriteTempMapFileAsync($$"""
+            {
+                "$config": { "provider": "aws" },
+                "DI_RESOLVE": "{{parameterName}}"
+            }
+            """);
+
+		var services = new ServiceCollection();
+		services.AddEnvilder(mapFilePath);
+		using var provider = services.BuildServiceProvider();
+
+		var client = provider.GetRequiredService<EnvilderClient>();
+		var mapFile = provider.GetRequiredService<ParsedMapFile>();
+
+		// Act
+		var actual = client.ResolveSecrets(mapFile);
+
+		// Assert
+		actual["DI_RESOLVE"].Should().Be(expectedValue);
 	}
 
 	private async Task<string> WriteTempMapFileAsync(string json)
