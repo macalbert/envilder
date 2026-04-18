@@ -1,3 +1,15 @@
+## [0.3.2] - 2026-04-18
+
+### Fixed
+
+* **Delegate default AWS region resolution to boto3** — When no profile is set, the factory
+  no longer manually resolves the region from environment variables. Instead it creates a plain
+  `boto3.Session()` which uses the full AWS SDK resolution chain (env vars → `~/.aws/config` →
+  instance metadata), correctly picking up the default config file settings
+  ([#166](https://github.com/macalbert/envilder/pull/166))
+
+---
+
 ## [0.3.1] - 2026-04-17
 
 ### Fixed

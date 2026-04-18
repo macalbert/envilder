@@ -20,6 +20,21 @@
 * Sync `GetSecret` tests for AWS SSM and Azure Key Vault providers
 * Sync `ResolveSecrets` test for `EnvilderClient`
 
+## [0.1.1] - 2026-04-18
+
+### Fixed
+
+* **Delegate default AWS region resolution to the AWS SDK** — When no profile is set, the
+  factory no longer manually resolves the region via `ResolveRegion()`. Instead it creates a
+  plain `AmazonSimpleSystemsManagementClient()` which uses the full AWS SDK resolution chain
+  (env vars → `~/.aws/config` → instance metadata), correctly picking up the default config
+  file settings
+  ([#166](https://github.com/macalbert/envilder/pull/166))
+* **Respect `AWS_SHARED_CREDENTIALS_FILE` for profile resolution** — `CredentialProfileStoreChain`
+  now receives the credentials file path from the `AWS_SHARED_CREDENTIALS_FILE` environment
+  variable, fixing profile discovery when credentials are stored at non-default locations
+  ([#166](https://github.com/macalbert/envilder/pull/166))
+
 ## [0.1.0] - 2026-04-09
 
 ### Added
