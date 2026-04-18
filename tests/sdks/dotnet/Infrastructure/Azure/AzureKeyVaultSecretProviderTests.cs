@@ -60,4 +60,24 @@ public class AzureKeyVaultSecretProviderTests
         // Assert
         await act.Should().ThrowAsync<RequestFailedException>();
     }
+
+    [Fact]
+    public void Should_ReturnSecret_When_GetSecretCalledSync()
+    {
+        // Arrange
+        var secretClient = Substitute.For<SecretClient>();
+        var secret = SecretModelFactory.KeyVaultSecret(
+            properties: SecretModelFactory.SecretProperties(new Uri("https://vault.azure.net/secrets/sync-secret")),
+            value: "sync-azure-value");
+        var response = Response.FromValue(secret, Substitute.For<Response>());
+        secretClient.GetSecret("sync-secret")
+            .Returns(response);
+        var sut = new AzureKeyVaultSecretProvider(secretClient);
+
+        // Act
+        var actual = sut.GetSecret("sync-secret");
+
+        // Assert
+        actual.Should().Be("sync-azure-value");
+    }
 }

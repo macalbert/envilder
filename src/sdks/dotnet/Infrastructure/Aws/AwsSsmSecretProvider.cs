@@ -43,4 +43,18 @@ public class AwsSsmSecretProvider : ISecretProvider
             return null;
         }
     }
+
+    /// <inheritdoc />
+    public string? GetSecret(string name)
+    {
+        try
+        {
+            var response = _ssmClient.GetParameterAsync(new() { Name = name, WithDecryption = true }, CancellationToken.None).GetAwaiter().GetResult();
+            return response.Parameter.Value;
+        }
+        catch (ParameterNotFoundException)
+        {
+            return null;
+        }
+    }
 }

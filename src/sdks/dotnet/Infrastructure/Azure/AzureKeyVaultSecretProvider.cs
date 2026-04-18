@@ -37,4 +37,18 @@ public class AzureKeyVaultSecretProvider : ISecretProvider
             return null;
         }
     }
+
+    /// <inheritdoc />
+    public string? GetSecret(string name)
+    {
+        try
+        {
+            var response = _secretClient.GetSecret(name);
+            return response?.Value?.Value;
+        }
+        catch (RequestFailedException ex) when (ex.Status == 404)
+        {
+            return null;
+        }
+    }
 }

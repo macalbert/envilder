@@ -94,4 +94,31 @@ public class EnvilderClientTests : IDisposable
         actual.Should().ContainKey("DB_PASSWORD");
         actual.Should().NotContainKey("MISSING_KEY");
     }
+
+    [Fact]
+    public void Should_ResolveAllSecrets_When_ResolveSecretsCalledSync()
+    {
+        // Arrange
+        var secretProvider = Substitute.For<ISecretProvider>();
+        secretProvider.GetSecret("/Test/Token").Returns("token-value");
+        secretProvider.GetSecret("/App/DbPassword").Returns("db-password");
+
+        var mapFile = new ParsedMapFile(
+            new MapFileConfig(),
+            new Dictionary<string, string>
+            {
+                ["TOKEN_SECRET"] = "/Test/Token",
+                ["DB_PASSWORD"] = "/App/DbPassword",
+            });
+
+        var sut = new EnvilderClient(secretProvider);
+
+        // Act
+        var actual = sut.ResolveSecrets(mapFile);
+
+        // Assert
+        actual.Should().HaveCount(2);
+        actual["TOKEN_SECRET"].Should().Be("token-value");
+        actual["DB_PASSWORD"].Should().Be("db-password");
+    }
 }

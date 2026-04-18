@@ -11,6 +11,7 @@ using Envilder.Tests.Fixtures;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using EnvilderFacade = Envilder.Application.Envilder;
 
 [Collection(nameof(ContainersCollection))]
 public class ConsumerExperienceTests : IAsyncLifetime
@@ -21,6 +22,15 @@ public class ConsumerExperienceTests : IAsyncLifetime
     private readonly AwsSsmSecretProvider _awsProvider;
     private readonly AzureKeyVaultSecretProvider _azureProvider;
     private readonly List<string> _tempFiles = [];
+
+    private static readonly string[] FacadeEnvVars =
+    [
+        "AWS_ENDPOINT_URL", "AWS_SERVICE_URL",
+        "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_DEFAULT_REGION",
+        "FACADE_RESOLVE", "FACADE_LOAD",
+    ];
+
+    private (string Name, string? Value)[] _originalEnvValues = [];
 
     public ConsumerExperienceTests(LocalStackFixture localStack,
                                    LowkeyVaultFixture lowkeyVault)
@@ -33,11 +43,26 @@ public class ConsumerExperienceTests : IAsyncLifetime
 
     public Task InitializeAsync()
     {
+        _originalEnvValues = FacadeEnvVars
+            .Select(v => (Name: v, Value: Environment.GetEnvironmentVariable(v)))
+            .ToArray();
+
+        Environment.SetEnvironmentVariable("AWS_ENDPOINT_URL", _localStack.ServiceUrl);
+        Environment.SetEnvironmentVariable("AWS_SERVICE_URL", _localStack.ServiceUrl);
+        Environment.SetEnvironmentVariable("AWS_ACCESS_KEY_ID", "test");
+        Environment.SetEnvironmentVariable("AWS_SECRET_ACCESS_KEY", "test");
+        Environment.SetEnvironmentVariable("AWS_DEFAULT_REGION", "us-east-1");
+
         return Task.CompletedTask;
     }
 
     public Task DisposeAsync()
     {
+        foreach (var (name, value) in _originalEnvValues)
+        {
+            Environment.SetEnvironmentVariable(name, value);
+        }
+
         foreach (var file in _tempFiles)
         {
             if (File.Exists(file))
@@ -216,6 +241,51 @@ public class ConsumerExperienceTests : IAsyncLifetime
         // Assert
         config["DB_URL"].Should().Be(expectedValue);
         config["MISSING_KEY"].Should().BeNull();
+    }
+
+    [Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
+    public async Task Should_ResolveSecrets_When_FacadeResolveFileCalledSync()
+    {
+        // Arrange
+        var parameterName = "/e2e/facade-resolve";
+        var expectedValue = "facade-resolve-value";
+        await PutAwsParameterAsync(parameterName, expectedValue);
+
+        var mapFilePath = await WriteTempMapFileAsync($$"""
+            {
+                "$config": { "provider": "aws" },
+                "FACADE_RESOLVE": "{{parameterName}}"
+            }
+            """);
+
+        // Act
+        var actual = EnvilderFacade.ResolveFile(mapFilePath);
+
+        // Assert
+        actual["FACADE_RESOLVE"].Should().Be(expectedValue);
+    }
+
+    [Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
+    public async Task Should_InjectIntoEnvironment_When_FacadeLoadCalledSync()
+    {
+        // Arrange
+        var parameterName = "/e2e/facade-load";
+        var expectedValue = "facade-load-value";
+        await PutAwsParameterAsync(parameterName, expectedValue);
+
+        var mapFilePath = await WriteTempMapFileAsync($$"""
+            {
+                "$config": { "provider": "aws" },
+                "FACADE_LOAD": "{{parameterName}}"
+            }
+            """);
+
+        // Act
+        var actual = EnvilderFacade.Load(mapFilePath);
+
+        // Assert
+        actual["FACADE_LOAD"].Should().Be(expectedValue);
+        Environment.GetEnvironmentVariable("FACADE_LOAD").Should().Be(expectedValue);
     }
 
     private async Task<string> WriteTempMapFileAsync(string json)

@@ -1,7 +1,7 @@
 namespace Envilder.Application;
 
-using Envilder.Domain;
-using Envilder.Domain.Ports;
+using global::Envilder.Domain;
+using global::Envilder.Domain.Ports;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -51,6 +51,28 @@ public class EnvilderClient
         foreach (var entry in mapFile.Mappings)
         {
             var secretValue = await _secretProvider.GetSecretAsync(entry.Value, cancellationToken).ConfigureAwait(false);
+            if (secretValue is not null)
+            {
+                result[entry.Key] = secretValue;
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Resolves all mappings in <paramref name="mapFile"/> against the configured secret provider.
+    /// Entries whose secret does not exist in the store are silently omitted from the result.
+    /// </summary>
+    /// <param name="mapFile">Parsed map file containing the config and variable mappings.</param>
+    /// <returns>A dictionary of resolved environment variable name → secret value pairs.</returns>
+    public IDictionary<string, string> ResolveSecrets(ParsedMapFile mapFile)
+    {
+        var result = new Dictionary<string, string>();
+
+        foreach (var entry in mapFile.Mappings)
+        {
+            var secretValue = _secretProvider.GetSecret(entry.Value);
             if (secretValue is not null)
             {
                 result[entry.Key] = secretValue;
