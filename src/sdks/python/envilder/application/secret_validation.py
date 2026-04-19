@@ -1,6 +1,7 @@
 """Secret validation utilities for resolved secret dictionaries."""
 
-from typing import Dict, List
+from collections.abc import Mapping
+from typing import List
 
 
 class SecretValidationError(Exception):
@@ -33,7 +34,7 @@ class SecretValidationError(Exception):
         )
 
 
-def validate_secrets(secrets: Dict[str, str | None]) -> None:
+def validate_secrets(secrets: Mapping[str, str | None]) -> None:
     """Validate that all resolved secrets have non-empty values.
 
     Raises:

@@ -27,7 +27,7 @@ public class SecretProviderFactoryAcceptanceTests : IAsyncLifetime
 			Environment.SetEnvironmentVariable(name, value);
 		}
 
-		if (_tempDirToDelete is not null)
+		if (_tempDirToDelete is not null && Directory.Exists(_tempDirToDelete))
 		{
 			Directory.Delete(_tempDirToDelete, true);
 		}

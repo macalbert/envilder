@@ -15,9 +15,6 @@
 
 ### Changed
 
-* **Encapsulate `SecretProviderFactory`** — Made `internal`; consumers should use the
-  `Envilder` facade, `EnvilderBuilder`, or `AddEnvilder()` extensions instead
-  ([#167](https://github.com/macalbert/envilder/pull/167))
 * **Simplify `AddEnvilder` extensions** — `IConfigurationBuilder.AddEnvilder()` and
   `IServiceCollection.AddEnvilder()` now accept `(string mapFilePath, EnvilderOptions? options)`
   instead of requiring a manually-created `ISecretProvider`
@@ -28,6 +25,10 @@
 
 ### Breaking
 
+* `SecretProviderFactory` is now `internal` — External code that referenced this type
+  directly will no longer compile. Use the `Envilder` facade, `EnvilderBuilder`
+  (`Envilder.FromMapFile(...)`), or the `AddEnvilder(string, EnvilderOptions?)` extensions instead
+  ([#167](https://github.com/macalbert/envilder/pull/167))
 * `ISecretProvider.GetSecret(string name)` — New required interface method. External
   implementations of `ISecretProvider` must add a synchronous `GetSecret` method
   (return `null` for missing secrets, matching the `GetSecretAsync` contract)

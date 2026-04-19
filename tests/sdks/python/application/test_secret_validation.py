@@ -17,7 +17,7 @@ class TestValidateSecrets:
         act = lambda: validate_secrets(secrets)
 
         # Assert
-        act()  # does not raise
+        act()
 
     def Should_Raise_When_AnyValueIsEmpty(self) -> None:
         # Arrange
@@ -81,8 +81,11 @@ class TestValidateSecrets:
             act()
 
     def Should_RaiseTypeError_When_SecretsIsNone(self) -> None:
+        # Arrange
+        secrets = None
+
         # Act
-        act = lambda: validate_secrets(None)  # type: ignore[arg-type]
+        act = lambda: validate_secrets(secrets)  # type: ignore[arg-type]
 
         # Assert
         with pytest.raises(TypeError):
