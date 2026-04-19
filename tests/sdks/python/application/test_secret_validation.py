@@ -14,7 +14,10 @@ class TestValidateSecrets:
         }
 
         # Act
-        validate_secrets(secrets)
+        act = lambda: validate_secrets(secrets)
+
+        # Assert
+        act()  # does not raise
 
     def Should_Raise_When_AnyValueIsEmpty(self) -> None:
         # Arrange
