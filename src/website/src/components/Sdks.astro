@@ -14,7 +14,7 @@ const sdkTabs = [
     id: 'dotnet',
     title: t.sdks.dotnetTitle,
     desc: t.sdks.dotnetDesc,
-    icon: '🟣',
+    icon: '/sdk-dotnet.svg',
     install: 'dotnet add package Envilder',
     status: 'available' as const,
     pkg: 'https://www.nuget.org/packages/Envilder',
@@ -51,7 +51,7 @@ Envilder.FromMapFile("param-map.json")
     id: 'python',
     title: t.sdks.pythonTitle,
     desc: t.sdks.pythonDesc,
-    icon: '🐍',
+    icon: '/sdk-python.svg',
     install: 'pip install envilder',
     status: 'available' as const,
     pkg: 'https://pypi.org/project/envilder/',
@@ -78,7 +78,7 @@ secrets = (
     id: 'typescript',
     title: t.sdks.typescriptTitle,
     desc: t.sdks.typescriptDesc,
-    icon: '🟦',
+    icon: '/sdk-typescript.svg',
     install: '',
     status: 'planned' as const,
     pkg: '',
@@ -91,7 +91,7 @@ secrets = (
     id: 'go',
     title: t.sdks.goTitle,
     desc: t.sdks.goDesc,
-    icon: '🔵',
+    icon: '/sdk-go.svg',
     install: '',
     status: 'planned' as const,
     pkg: '',
@@ -104,7 +104,7 @@ secrets = (
     id: 'java',
     title: t.sdks.javaTitle,
     desc: t.sdks.javaDesc,
-    icon: '☕',
+    icon: '/sdk-java.svg',
     install: '',
     status: 'planned' as const,
     pkg: '',
@@ -138,7 +138,7 @@ secrets = (
             type="button"
             disabled={sdk.status === 'planned'}
           >
-            <span class="sdk-tab-icon pixel-icon">{sdk.icon}</span>
+            <img src={sdk.icon} alt={sdk.title} class="sdk-tab-icon" width="20" height="20" />
             <span class="sdk-tab-label">{sdk.title}</span>
             {sdk.status === 'planned' && (
               <span class="sdk-tab-badge badge-muted">{t.sdks.planned}</span>
@@ -160,7 +160,7 @@ secrets = (
             <div class="sdk-panel-header">
               <div class="sdk-panel-meta">
                 <h3>
-                  <span class="sdk-panel-icon pixel-icon">{sdk.icon}</span>
+                  <img src={sdk.icon} alt={sdk.title} class="sdk-panel-icon" width="24" height="24" />
                   {sdk.title}
                 </h3>
                 <span class={`badge ${sdk.status === 'available' ? 'badge-primary' : 'badge-muted'}`}>
@@ -258,7 +258,9 @@ secrets = (
   }
 
   .sdk-tab-icon {
-    font-size: 1rem;
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
   }
 
   .sdk-tab-badge {
@@ -295,7 +297,9 @@ secrets = (
   }
 
   .sdk-panel-icon {
-    font-size: 1.4rem;
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
   }
 
   .sdk-panel-desc {
