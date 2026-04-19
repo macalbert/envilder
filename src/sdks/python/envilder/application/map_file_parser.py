@@ -15,7 +15,29 @@ _PROVIDER_MAP = {
 
 
 class MapFileParser:
+    """Parses a JSON map file into a :class:`~envilder.ParsedMapFile`.
+
+    The optional ``$config`` object is extracted as
+    :class:`~envilder.MapFileConfig`; all other top-level string
+    properties become secret mappings.
+
+    Example::
+
+        from envilder import MapFileParser
+
+        with open("secrets-map.json") as f:
+            map_file = MapFileParser().parse(f.read())
+    """
+
     def parse(self, json_content: str) -> ParsedMapFile:
+        """Parse raw JSON into a :class:`~envilder.ParsedMapFile`.
+
+        Args:
+            json_content: Raw JSON string of the map file.
+
+        Returns:
+            A :class:`~envilder.ParsedMapFile` ready for secret resolution.
+        """
         document = json.loads(json_content)
 
         if not isinstance(document, dict):

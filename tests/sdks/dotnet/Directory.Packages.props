@@ -1,0 +1,3 @@
+<Project>
+	<Import Project="..\..\..\src\sdks\dotnet\Directory.Packages.props" />
+</Project>

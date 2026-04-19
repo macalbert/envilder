@@ -9,42 +9,109 @@ interface Props {
 const { lang = 'en' } = Astro.props;
 const t = useTranslations(lang);
 
-const sdkCards = [
+const sdkTabs = [
   {
-    title: t.sdks.pythonTitle,
-    desc: t.sdks.pythonDesc,
-    icon: '🐍',
-    install: 'pip install envilder',
-    status: 'available' as const,
-    pkg: 'https://pypi.org/project/envilder/',
-    docsHash: 'sdk-python',
-  },
-  {
+    id: 'dotnet',
     title: t.sdks.dotnetTitle,
     desc: t.sdks.dotnetDesc,
-    icon: '🟣',
+    icon: '/sdk-dotnet.svg',
     install: 'dotnet add package Envilder',
     status: 'available' as const,
     pkg: 'https://www.nuget.org/packages/Envilder',
     docsHash: 'sdk-dotnet',
+    codeLang: 'csharp',
+    codeFile: 'Program.cs',
+    code: `using Envilder.Application;
+using Envilder.Domain;
+using Envilder.Infrastructure.Configuration;
+using Envilder.Infrastructure.DependencyInjection;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Load secrets into IConfiguration
+builder.Configuration.AddEnvilder("param-map.json");
+
+// Register EnvilderClient in DI
+builder.Services.AddEnvilder("param-map.json");
+
+var app = builder.Build();
+
+// --- Or standalone (no ASP.NET) ---
+
+// One-liner: resolve + inject into Environment
+Envilder.Load("param-map.json");
+
+// Fluent builder with provider override
+Envilder.FromMapFile("param-map.json")
+    .WithProvider(SecretProviderType.Azure)
+    .WithVaultUrl("https://my-vault.vault.azure.net")
+    .Inject();`,
   },
   {
+    id: 'python',
+    title: t.sdks.pythonTitle,
+    desc: t.sdks.pythonDesc,
+    icon: '/sdk-python.svg',
+    install: 'pip install envilder',
+    status: 'available' as const,
+    pkg: 'https://pypi.org/project/envilder/',
+    docsHash: 'sdk-python',
+    codeLang: 'python',
+    codeFile: 'settings.py',
+    code: `from envilder import Envilder, SecretProviderType
+
+# One-liner: load secrets into os.environ
+Envilder.load("param-map.json")
+
+# Or resolve as a dict without injecting
+secrets = Envilder.resolve_file("param-map.json")
+
+# Fluent builder with provider override
+secrets = (
+    Envilder.from_map_file("param-map.json")
+    .with_provider(SecretProviderType.AZURE)
+    .with_vault_url("https://my-vault.vault.azure.net")
+    .inject()
+)`,
+  },
+  {
+    id: 'typescript',
+    title: t.sdks.typescriptTitle,
+    desc: t.sdks.typescriptDesc,
+    icon: '/sdk-typescript.svg',
+    install: '',
+    status: 'planned' as const,
+    pkg: '',
+    docsHash: '',
+    codeLang: 'typescript',
+    codeFile: 'config.ts',
+    code: '',
+  },
+  {
+    id: 'go',
     title: t.sdks.goTitle,
     desc: t.sdks.goDesc,
-    icon: '🔵',
+    icon: '/sdk-go.svg',
     install: '',
     status: 'planned' as const,
     pkg: '',
     docsHash: '',
+    codeLang: 'go',
+    codeFile: 'main.go',
+    code: '',
   },
   {
+    id: 'java',
     title: t.sdks.javaTitle,
     desc: t.sdks.javaDesc,
-    icon: '☕',
+    icon: '/sdk-java.svg',
     install: '',
     status: 'planned' as const,
     pkg: '',
     docsHash: '',
+    codeLang: 'java',
+    codeFile: 'App.java',
+    code: '',
   },
 ];
 ---
@@ -56,122 +123,196 @@ const sdkCards = [
       <p class="section-subtitle">{t.sdks.subtitle}</p>
     </div>
 
-    <div class="sdks-grid">
-      {sdkCards.map((sdk) => (
-        <div class={`sdk-card ${sdk.status === 'planned' ? 'sdk-planned' : ''}`}>
-          <div class="sdk-header">
-            <span class="sdk-icon pixel-icon">{sdk.icon}</span>
-            <h3>{sdk.title}</h3>
-            <span class={`badge ${sdk.status === 'available' ? 'badge-primary' : 'badge-muted'}`}>
-              {sdk.status === 'available' ? t.sdks.available : t.sdks.planned}
-            </span>
+    <div class="sdk-tabs-wrapper">
+      <div class="sdk-tab-list" role="tablist">
+        {sdkTabs.map((sdk, i) => (
+          <button
+            id={`sdk-tab-${sdk.id}`}
+            role="tab"
+            class:list={['sdk-tab', { active: i === 0 && sdk.status === 'available', 'sdk-tab-disabled': sdk.status === 'planned' }]}
+            aria-selected={i === 0 && sdk.status === 'available' ? 'true' : 'false'}
+            aria-controls={sdk.status === 'available' ? `sdk-panel-${sdk.id}` : undefined}
+            aria-disabled={sdk.status === 'planned' ? 'true' : undefined}
+            tabindex={i === 0 && sdk.status === 'available' ? 0 : -1}
+            data-sdk-tab={sdk.id}
+            type="button"
+            disabled={sdk.status === 'planned'}
+          >
+            <img src={sdk.icon} alt={sdk.title} class="sdk-tab-icon" width="20" height="20" />
+            <span class="sdk-tab-label">{sdk.title}</span>
+            {sdk.status === 'planned' && (
+              <span class="sdk-tab-badge badge-muted">{t.sdks.planned}</span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      <div class="sdk-panels">
+        {sdkTabs.map((sdk, i) => (
+          <div
+            id={`sdk-panel-${sdk.id}`}
+            role="tabpanel"
+            aria-labelledby={`sdk-tab-${sdk.id}`}
+            tabindex="0"
+            class:list={['sdk-panel', { active: i === 0 }]}
+            data-sdk-panel={sdk.id}
+          >
+            <div class="sdk-panel-header">
+              <div class="sdk-panel-meta">
+                <h3>
+                  <img src={sdk.icon} alt={sdk.title} class="sdk-panel-icon" width="24" height="24" />
+                  {sdk.title}
+                </h3>
+                <span class={`badge ${sdk.status === 'available' ? 'badge-primary' : 'badge-muted'}`}>
+                  {sdk.status === 'available' ? t.sdks.available : t.sdks.planned}
+                </span>
+              </div>
+              <p class="sdk-panel-desc">{sdk.desc}</p>
+              {sdk.status === 'available' && (
+                <div class="sdk-panel-links">
+                  <a href={`${localizedPath(lang, '/docs')}#${sdk.docsHash}`} class="sdk-docs-link">
+                    {t.sdks.docsLink} →
+                  </a>
+                  <a href={sdk.pkg} target="_blank" rel="noopener noreferrer" class="sdk-pkg-link">
+                    📦 {t.sdks.packageLink}
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {sdk.status === 'available' ? (
+              <div class="sdk-panel-content">
+                <div class="sdk-panel-install">
+                  <h4>{t.sdks.install}</h4>
+                  <CodeBlock lang="bash" code={sdk.install} />
+                </div>
+                <div class="sdk-panel-code">
+                  <h4>{t.sdks.quickStart}</h4>
+                  <CodeBlock lang={sdk.codeLang} filename={sdk.codeFile} code={sdk.code} />
+                </div>
+              </div>
+            ) : (
+              <div class="sdk-panel-planned">
+                <span class="sdk-planned-icon pixel-icon">🚧</span>
+                <p>{t.sdks.comingSoon}</p>
+              </div>
+            )}
           </div>
-          <p class="sdk-desc">{sdk.desc}</p>
-          {sdk.status === 'available' && (
-            <div class="sdk-install">
-              <CodeBlock lang="bash" code={sdk.install} />
-            </div>
-          )}
-          {sdk.status === 'available' && (
-            <div class="sdk-links">
-              <a href={`${localizedPath(lang, '/docs')}#${sdk.docsHash}`} class="sdk-docs-link">
-                {t.sdks.docsLink} →
-              </a>
-              <a href={sdk.pkg} target="_blank" rel="noopener noreferrer" class="sdk-pkg-link">
-                📦
-              </a>
-            </div>
-          )}
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   </div>
 </section>
 
 <style>
-  .sdks-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-lg);
-  }
-
-  @media (min-width: 640px) {
-    .sdks-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .sdks-grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-
-  .sdk-card {
+  .sdk-tabs-wrapper {
     background: var(--color-surface);
     border: 2px solid var(--color-border);
-    padding: var(--space-lg);
+  }
+
+  .sdk-tab-list {
     display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-    transition: border-color var(--transition-fast);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-bottom: 2px solid var(--color-border);
+    scrollbar-width: none;
   }
 
-  .sdk-card:hover {
-    border-color: var(--color-primary);
+  .sdk-tab-list::-webkit-scrollbar {
+    display: none;
   }
 
-  .sdk-planned {
-    opacity: 0.5;
+  .sdk-tab {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    font-family: var(--font-pixel);
+    font-size: 0.5rem;
+    background: transparent;
+    color: var(--color-text-muted);
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+    position: relative;
+    margin-bottom: -2px;
   }
 
-  .sdk-header {
+  .sdk-tab:hover:not(:disabled) {
+    color: var(--color-text);
+    background: var(--color-surface-alt);
+  }
+
+  .sdk-tab.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+    background: var(--color-surface);
+  }
+
+  .sdk-tab-disabled {
+    opacity: 0.35;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .sdk-tab-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+  }
+
+  .sdk-tab-badge {
+    font-size: 0.4rem;
+    padding: 1px 4px;
+  }
+
+  .sdk-panel {
+    display: none;
+    padding: var(--space-lg);
+  }
+
+  .sdk-panel.active {
+    display: block;
+  }
+
+  .sdk-panel-header {
+    margin-bottom: var(--space-lg);
+  }
+
+  .sdk-panel-meta {
     display: flex;
     align-items: center;
     gap: var(--space-sm);
-    flex-wrap: wrap;
+    margin-bottom: var(--space-sm);
   }
 
-  .sdk-header h3 {
-    font-size: 0.65rem;
+  .sdk-panel-meta h3 {
+    font-size: 0.7rem;
     margin: 0;
-    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
   }
 
-  .sdk-icon {
-    font-size: 1.2rem;
+  .sdk-panel-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
   }
 
-  .badge-muted {
-    background: var(--color-surface);
-    color: var(--color-text-muted);
-    border: 1px solid var(--color-border);
-    font-family: var(--font-mono);
-    font-size: 0.55rem;
-    padding: 1px var(--space-xs);
-  }
-
-  .sdk-desc {
-    font-size: 0.85rem;
+  .sdk-panel-desc {
+    font-size: 0.9rem;
     color: var(--color-text-muted);
     line-height: 1.6;
-    margin: 0;
-    flex: 1;
+    margin: 0 0 var(--space-sm) 0;
   }
 
-  .sdk-install {
-    margin-top: auto;
-  }
-
-  .sdk-install :global(.codeblock) {
-    margin-bottom: 0;
-  }
-
-  .sdk-links {
+  .sdk-panel-links {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--space-sm);
+    gap: var(--space-lg);
   }
 
   .sdk-docs-link {
@@ -187,13 +328,136 @@ const sdkCards = [
   }
 
   .sdk-pkg-link {
-    font-size: 0.9rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
     text-decoration: none;
-    opacity: 0.5;
-    transition: opacity var(--transition-fast);
+    transition: color var(--transition-fast);
   }
 
   .sdk-pkg-link:hover {
-    opacity: 1;
+    color: var(--color-primary);
+  }
+
+  .sdk-panel-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+
+  @media (min-width: 1024px) {
+    .sdk-panel-content {
+      grid-template-columns: 1fr 2fr;
+    }
+  }
+
+  .sdk-panel-install h4,
+  .sdk-panel-code h4 {
+    font-family: var(--font-pixel);
+    font-size: 0.55rem;
+    color: var(--color-text-muted);
+    margin: 0 0 var(--space-sm) 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .sdk-panel-install :global(.codeblock),
+  .sdk-panel-code :global(.codeblock) {
+    margin-bottom: 0;
+  }
+
+  .sdk-panel-planned {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--space-2xl) var(--space-lg);
+    text-align: center;
+    opacity: 0.6;
+  }
+
+  .sdk-planned-icon {
+    font-size: 2rem;
+  }
+
+  .sdk-panel-planned p {
+    font-family: var(--font-pixel);
+    font-size: 0.6rem;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .badge-muted {
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    padding: 1px var(--space-xs);
   }
 </style>
+
+<script>
+  function initSdkTabs() {
+    const wrapper = document.querySelector('.sdk-tabs-wrapper');
+    if (!wrapper || (wrapper as HTMLElement).dataset.sdkTabInit) return;
+    (wrapper as HTMLElement).dataset.sdkTabInit = 'true';
+
+    const tabs = wrapper.querySelectorAll<HTMLButtonElement>('.sdk-tab:not(:disabled)');
+    const panels = wrapper.querySelectorAll<HTMLElement>('.sdk-panel');
+
+    function activateTab(tab: HTMLButtonElement) {
+      if (tab.disabled) return;
+      const id = tab.getAttribute('data-sdk-tab');
+
+      tabs.forEach((t) => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+        t.setAttribute('tabindex', '-1');
+      });
+      panels.forEach((p) => p.classList.remove('active'));
+
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      tab.setAttribute('tabindex', '0');
+      tab.focus();
+
+      const panel = wrapper.querySelector(`[data-sdk-panel="${id}"]`);
+      if (panel) panel.classList.add('active');
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => activateTab(tab));
+
+      tab.addEventListener('keydown', (e: KeyboardEvent) => {
+        const tabArr = Array.from(tabs);
+        const current = tabArr.indexOf(tab);
+        let target: number | null = null;
+
+        switch (e.key) {
+          case 'ArrowRight':
+            target = (current + 1) % tabArr.length;
+            break;
+          case 'ArrowLeft':
+            target = (current - 1 + tabArr.length) % tabArr.length;
+            break;
+          case 'Home':
+            target = 0;
+            break;
+          case 'End':
+            target = tabArr.length - 1;
+            break;
+          default:
+            return;
+        }
+
+        e.preventDefault();
+        activateTab(tabArr[target]);
+      });
+    });
+  }
+
+  initSdkTabs();
+  document.addEventListener('astro:after-swap', initSdkTabs);
+</script>

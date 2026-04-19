@@ -11,6 +11,12 @@ if TYPE_CHECKING:
 
 
 class AwsSsmSecretProvider(ISecretProvider):
+    """:class:`~envilder.ISecretProvider` backed by AWS SSM Parameter Store.
+
+    Parameters are retrieved with decryption enabled so that
+    ``SecureString`` values are returned in plain text.
+    """
+
     def __init__(self, ssm_client: SSMClient) -> None:
         if ssm_client is None:
             raise ValueError("ssm_client cannot be None")

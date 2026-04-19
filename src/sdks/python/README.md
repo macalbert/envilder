@@ -56,7 +56,7 @@ from envilder import Envilder, SecretProviderType
 
 # Override provider + vault URL
 secrets = (
-    Envilder.from_file('secrets-map.json')
+    Envilder.from_map_file('secrets-map.json')
     .with_provider(SecretProviderType.AZURE)
     .with_vault_url('https://my-vault.vault.azure.net')
     .resolve()
@@ -64,7 +64,7 @@ secrets = (
 
 # Override AWS profile and inject
 (
-    Envilder.from_file('secrets-map.json')
+    Envilder.from_map_file('secrets-map.json')
     .with_profile('staging')
     .inject()
 )
@@ -107,35 +107,82 @@ Behaviour:
 - The environment name is stripped of leading/trailing whitespace before lookup.
 - Empty or whitespace-only environment names raise `ValueError`.
 
-### Advanced usage
+### Secret validation
 
-For full control over parsing, provider creation, and secret resolution:
+Opt-in validation ensures all resolved secrets have non-empty values:
 
 ```python
-from envilder import (
-    EnvilderClient,
-    EnvilderOptions,
-    MapFileParser,
-    SecretProviderFactory,
-    SecretProviderType,
-)
+from envilder import Envilder, validate_secrets
+
+secrets = Envilder.resolve_file('secrets-map.json')
+validate_secrets(secrets)  # raises SecretValidationError if any value is empty
+```
+
+`validate_secrets()` checks that:
+
+- The dictionary is not empty (raises `SecretValidationError` with empty `missing_keys`)
+- Every value is non-None and non-whitespace (raises `SecretValidationError` listing the failing keys)
+- Passes silently when all values are present
+
+```python
+from envilder import SecretValidationError, validate_secrets
+
+try:
+    validate_secrets(secrets)
+except SecretValidationError as e:
+    print(f"Missing: {', '.join(e.missing_keys)}")
+```
+
+### Advanced usage
+
+Implement the `ISecretProvider` protocol to plug in a custom backend
+(e.g., HashiCorp Vault, GCP Secret Manager):
+
+```python
+from envilder import EnvilderClient, ISecretProvider, MapFileParser
+
+
+class MyCustomProvider(ISecretProvider):
+    def get_secret(self, name: str) -> str | None:
+        # fetch from your custom backend
+        ...
+
 
 with open('secrets-map.json', encoding='utf-8') as file:
-    json_content = file.read()
-map_file = MapFileParser().parse(json_content)
+    map_file = MapFileParser().parse(file.read())
 
-# Optional: override config at runtime
-options = EnvilderOptions(
-    provider=SecretProviderType.AZURE,
-    vault_url='https://my-vault.vault.azure.net',
-)
-provider = SecretProviderFactory.create(map_file.config, options)
-
-client = EnvilderClient(provider)
-secrets = client.resolve_secrets(map_file)
-
+provider = MyCustomProvider()
+secrets = EnvilderClient(provider).resolve_secrets(map_file)
 EnvilderClient.inject_into_environment(secrets)
 ```
+
+## API Reference
+
+### Static facade (`Envilder`)
+
+| Method | Description |
+|--------|-------------|
+| `load(path)` | Resolve secrets and inject into `os.environ` |
+| `resolve_file(path)` | Resolve secrets, return as `dict` |
+| `load(env, mapping)` | Environment-based resolve + inject |
+| `resolve_file(env, mapping)` | Environment-based resolve |
+| `from_map_file(path)` | Returns fluent builder for configuration |
+
+### Fluent builder (via `from_map_file()`)
+
+| Method | Description |
+|--------|-------------|
+| `with_provider(type)` | Override secret provider (AWS/Azure) |
+| `with_profile(name)` | Override AWS named profile |
+| `with_vault_url(url)` | Override Azure Key Vault URL |
+| `resolve()` | Resolve secrets, return as dict |
+| `inject()` | Resolve + inject into `os.environ` |
+
+### Validation
+
+| Function | Description |
+|----------|-------------|
+| `validate_secrets(dict)` | Raises `SecretValidationError` if any value is empty or dict is empty |
 
 ## Map File Format
 

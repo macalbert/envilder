@@ -39,11 +39,11 @@ class TestEnvilderResolve:
         self, mock_provider: Mock
     ) -> None:
         # Arrange
-        sut = Envilder.from_file(MAP_FILE)
+        sut = Envilder.from_map_file(MAP_FILE)
 
         # Act
         with patch(
-            "envilder.application.envilder_facade.SecretProviderFactory.create",
+            "envilder.application.envilder_facade._SecretProviderFactory.create",
             return_value=mock_provider,
         ):
             actual = sut.resolve()
@@ -56,7 +56,7 @@ class TestEnvilderResolve:
     ) -> None:
         # Act
         with patch(
-            "envilder.application.envilder_facade.SecretProviderFactory.create",
+            "envilder.application.envilder_facade._SecretProviderFactory.create",
             return_value=mock_provider,
         ):
             actual = Envilder.resolve_file(MAP_FILE)
@@ -74,7 +74,7 @@ class TestEnvilderInject:
 
         # Act
         with patch(
-            "envilder.application.envilder_facade.SecretProviderFactory.create",
+            "envilder.application.envilder_facade._SecretProviderFactory.create",
             return_value=mock_provider,
         ):
             Envilder.load(MAP_FILE)
@@ -90,10 +90,10 @@ class TestEnvilderInject:
 
         # Act
         with patch(
-            "envilder.application.envilder_facade.SecretProviderFactory.create",
+            "envilder.application.envilder_facade._SecretProviderFactory.create",
             return_value=mock_provider,
         ):
-            actual = Envilder.from_file(MAP_FILE).inject()
+            actual = Envilder.from_map_file(MAP_FILE).inject()
 
         # Assert
         assert os.environ["LOCALSTACK_AUTH_TOKEN"] == "test-auth-token"
@@ -106,10 +106,10 @@ class TestEnvilderOverrides:
     ) -> None:
         # Act
         with patch(
-            "envilder.application.envilder_facade.SecretProviderFactory.create",
+            "envilder.application.envilder_facade._SecretProviderFactory.create",
             return_value=mock_provider,
         ) as factory_mock:
-            Envilder.from_file(MAP_FILE).with_provider(
+            Envilder.from_map_file(MAP_FILE).with_provider(
                 SecretProviderType.AZURE
             ).with_vault_url("https://my-vault.vault.azure.net").resolve()
 
@@ -124,10 +124,10 @@ class TestEnvilderOverrides:
     ) -> None:
         # Act
         with patch(
-            "envilder.application.envilder_facade.SecretProviderFactory.create",
+            "envilder.application.envilder_facade._SecretProviderFactory.create",
             return_value=mock_provider,
         ) as factory_mock:
-            Envilder.from_file(MAP_FILE).with_profile("staging").resolve()
+            Envilder.from_map_file(MAP_FILE).with_profile("staging").resolve()
 
         # Assert
         call_args = factory_mock.call_args
@@ -150,7 +150,7 @@ class TestEnvilderValidation:
         self,
     ) -> None:
         # Act
-        action = lambda: Envilder.from_file("")
+        action = lambda: Envilder.from_map_file("")
 
         # Assert
         with pytest.raises(ValueError, match="file_path"):
@@ -169,7 +169,7 @@ class TestEnvilderLoadWithEnvMapping:
 
         # Act
         with patch(
-            "envilder.application.envilder_facade.SecretProviderFactory.create",
+            "envilder.application.envilder_facade._SecretProviderFactory.create",
             return_value=mock_provider,
         ):
             actual = Envilder.load("production", env_mapping)
@@ -188,7 +188,7 @@ class TestEnvilderLoadWithEnvMapping:
 
         # Act
         with patch(
-            "envilder.application.envilder_facade.SecretProviderFactory.create",
+            "envilder.application.envilder_facade._SecretProviderFactory.create",
             return_value=mock_provider,
         ):
             actual = Envilder.load(" production ", env_mapping)
@@ -207,7 +207,7 @@ class TestEnvilderLoadWithEnvMapping:
 
         # Act
         with patch(
-            "envilder.application.envilder_facade.SecretProviderFactory.create",
+            "envilder.application.envilder_facade._SecretProviderFactory.create",
             return_value=mock_provider,
         ):
             Envilder.load("production", env_mapping)
@@ -280,7 +280,7 @@ class TestEnvilderResolveWithEnvMapping:
 
         # Act
         with patch(
-            "envilder.application.envilder_facade.SecretProviderFactory.create",
+            "envilder.application.envilder_facade._SecretProviderFactory.create",
             return_value=mock_provider,
         ):
             actual = Envilder.resolve_file("production", env_mapping)
@@ -340,7 +340,7 @@ class TestEnvilderResolveWithEnvMapping:
 
         # Act
         with patch(
-            "envilder.application.envilder_facade.SecretProviderFactory.create",
+            "envilder.application.envilder_facade._SecretProviderFactory.create",
             return_value=mock_provider,
         ):
             Envilder.resolve_file("production", env_mapping)

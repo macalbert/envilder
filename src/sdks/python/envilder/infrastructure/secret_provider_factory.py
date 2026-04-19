@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import os
-
 import boto3
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
@@ -18,7 +16,7 @@ from envilder.infrastructure.azure.azure_key_vault_secret_provider import (
 )
 
 
-class SecretProviderFactory:
+class _SecretProviderFactory:
     @staticmethod
     def create(
         config: MapFileConfig,
@@ -27,30 +25,35 @@ class SecretProviderFactory:
         if config is None:
             raise ValueError("config cannot be None")
 
-        provider = (
-            options.provider
-            if options and options.provider
-            else config.provider
-        )
+        opts = options or EnvilderOptions()
+        provider = opts.provider or config.provider
+        profile = opts.profile or config.profile
+        vault_url = opts.vault_url or config.vault_url
+
+        if provider is not None and provider not in (
+            SecretProviderType.AWS,
+            SecretProviderType.AZURE,
+        ):
+            raise ValueError(f"Unsupported secret provider: {provider!r}")
+
+        if provider == SecretProviderType.AZURE and profile:
+            raise ValueError(
+                "AWS profile cannot be used with Azure Key Vault provider."
+            )
+
+        if provider != SecretProviderType.AZURE and vault_url:
+            raise ValueError("Vault URL cannot be used with AWS SSM provider.")
 
         match provider:
             case SecretProviderType.AZURE:
-                return _create_azure_provider(config, options)
+                return _create_azure_provider(vault_url)
             case SecretProviderType.AWS | None:
-                return _create_aws_provider(config, options)
-            case _:
-                raise ValueError(f"Unsupported secret provider: {provider!r}")
+                return _create_aws_provider(profile)
 
 
 def _create_azure_provider(
-    config: MapFileConfig, options: EnvilderOptions | None
+    vault_url: str | None,
 ) -> AzureKeyVaultSecretProvider:
-    vault_url = (
-        options.vault_url
-        if options and options.vault_url
-        else config.vault_url
-    )
-
     if not vault_url or not vault_url.strip():
         raise ValueError(
             "Vault URL must be provided for Azure Key Vault provider."
@@ -62,34 +65,16 @@ def _create_azure_provider(
 
 
 def _create_aws_provider(
-    config: MapFileConfig, options: EnvilderOptions | None
+    profile: str | None,
 ) -> AwsSsmSecretProvider:
-    profile = (
-        options.profile if options and options.profile else config.profile
-    )
+    if not profile:
+        session = boto3.Session()
+        return AwsSsmSecretProvider(session.client("ssm"))
 
-    if profile:
-        try:
-            region = _resolve_region_from_env()
-            session = (
-                boto3.Session(profile_name=profile, region_name=region)
-                if region
-                else boto3.Session(profile_name=profile)
-            )
-            ssm_client = session.client("ssm")
-        except Exception as e:
-            raise ValueError(
-                f"Failed to create AWS session with profile '{profile}': {e}"
-            ) from e
-    else:
-        region = _resolve_region_from_env()
-        session = (
-            boto3.Session(region_name=region) if region else boto3.Session()
-        )
-        ssm_client = session.client("ssm")
-
-    return AwsSsmSecretProvider(ssm_client)
-
-
-def _resolve_region_from_env() -> str | None:
-    return os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION")
+    try:
+        session = boto3.Session(profile_name=profile)
+        return AwsSsmSecretProvider(session.client("ssm"))
+    except Exception as e:
+        raise ValueError(
+            f"Failed to create AWS session with profile '{profile}': {e}"
+        ) from e

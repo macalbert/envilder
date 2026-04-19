@@ -15,94 +15,112 @@ using System;
 /// Creates the appropriate <see cref="ISecretProvider"/> implementation
 /// based on the map file configuration and optional runtime overrides.
 /// </summary>
-public static class SecretProviderFactory
+internal static class SecretProviderFactory
 {
-    private static readonly RegionEndpoint FallbackRegion = RegionEndpoint.USEast1;
+	private static readonly RegionEndpoint FallbackRegion = RegionEndpoint.USEast1;
 
-    /// <summary>
-    /// Creates an <see cref="ISecretProvider"/> for the provider specified in
-    /// <paramref name="config"/>. When <paramref name="options"/> is provided,
-    /// its values take precedence over <paramref name="config"/>.
-    /// </summary>
-    /// <param name="config">Configuration from the <c>$config</c> section of a map file.</param>
-    /// <param name="options">Optional runtime overrides (e.g. CLI flags).</param>
-    /// <returns>A ready-to-use secret provider.</returns>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when Azure is selected but no Vault URL is provided.
-    /// </exception>
-    public static ISecretProvider Create(MapFileConfig config, EnvilderOptions? options = null)
-    {
-        if (config is null)
-        {
-            throw new ArgumentNullException(nameof(config));
-        }
+	/// <summary>
+	/// Creates an <see cref="ISecretProvider"/> for the provider specified in
+	/// <paramref name="config"/>. When <paramref name="options"/> is provided,
+	/// its values take precedence over <paramref name="config"/>.
+	/// </summary>
+	/// <param name="config">Configuration from the <c>$config</c> section of a map file.</param>
+	/// <param name="options">Optional runtime overrides (e.g. CLI flags).</param>
+	/// <returns>A ready-to-use secret provider.</returns>
+	/// <exception cref="InvalidOperationException">
+	/// Thrown when Azure is selected but no Vault URL is provided.
+	/// </exception>
+	public static ISecretProvider Create(MapFileConfig config, EnvilderOptions? options = null)
+	{
+		if (config is null)
+		{
+			throw new ArgumentNullException(nameof(config));
+		}
 
-        var provider = options?.Provider ?? config.Provider;
+		var provider = options?.Provider ?? config.Provider;
+		var profile = options?.Profile ?? config.Profile;
+		var vaultUrl = options?.VaultUrl ?? config.VaultUrl;
 
-        return provider switch
-        {
-            SecretProviderType.Azure => CreateAzureSecretProvider(config, options),
-            _ => CreateAwsSecretProvider(config, options),
-        };
-    }
+		ValidateCrossProviderConfig(provider, profile, vaultUrl);
 
-    private static AzureKeyVaultSecretProvider CreateAzureSecretProvider(MapFileConfig config, EnvilderOptions? options)
-    {
-        var vaultUrl = options?.VaultUrl ?? config.VaultUrl;
+		return provider switch
+		{
+			SecretProviderType.Azure => CreateAzureSecretProvider(vaultUrl),
+			_ => CreateAwsSecretProvider(profile),
+		};
+	}
 
-        if (string.IsNullOrWhiteSpace(vaultUrl))
-        {
-            throw new InvalidOperationException("Vault URL must be provided for Azure Key Vault provider.");
-        }
+	private static void ValidateCrossProviderConfig(
+		SecretProviderType? provider,
+		string? profile,
+		string? vaultUrl)
+	{
+		var isAzure = provider == SecretProviderType.Azure;
 
-        var secretClient = new SecretClient(new Uri(vaultUrl), new DefaultAzureCredential());
-        return new(secretClient);
-    }
+		if (isAzure && !string.IsNullOrWhiteSpace(profile))
+		{
+			throw new InvalidOperationException(
+				"AWS profile cannot be used with Azure Key Vault provider.");
+		}
 
-    private static AwsSsmSecretProvider CreateAwsSecretProvider(MapFileConfig config, EnvilderOptions? options)
-    {
-        var profile = options?.Profile ?? config.Profile;
+		if (!isAzure && !string.IsNullOrWhiteSpace(vaultUrl))
+		{
+			throw new InvalidOperationException(
+				"Vault URL cannot be used with AWS SSM provider.");
+		}
+	}
 
-        if (!string.IsNullOrWhiteSpace(profile))
-        {
-            var chain = new CredentialProfileStoreChain();
-            if (chain.TryGetAWSCredentials(profile, out var credentials))
-            {
-                var region = ResolveProfileRegion(chain, profile!);
-                return new(new AmazonSimpleSystemsManagementClient(credentials, region));
-            }
+	private static AzureKeyVaultSecretProvider CreateAzureSecretProvider(string? vaultUrl)
+	{
+		if (string.IsNullOrWhiteSpace(vaultUrl))
+		{
+			throw new InvalidOperationException("Vault URL must be provided for Azure Key Vault provider.");
+		}
 
-            throw new InvalidOperationException(
-                $"AWS profile '{profile}' was not found in the credential store.");
-        }
+		var secretClient = new SecretClient(new Uri(vaultUrl), new DefaultAzureCredential());
+		return new(secretClient);
+	}
 
-        return new(new AmazonSimpleSystemsManagementClient(new AmazonSimpleSystemsManagementConfig
-        {
-            RegionEndpoint = ResolveRegion(),
-        }));
-    }
+	private static AwsSsmSecretProvider CreateAwsSecretProvider(string? profile)
+	{
+		if (!string.IsNullOrWhiteSpace(profile))
+		{
+			var profilesLocation = Environment.GetEnvironmentVariable("AWS_SHARED_CREDENTIALS_FILE");
+			var chain = new CredentialProfileStoreChain(profilesLocation);
+			if (chain.TryGetAWSCredentials(profile, out var credentials))
+			{
+				var region = ResolveProfileRegion(chain, profile!);
+				return new(new AmazonSimpleSystemsManagementClient(credentials, region));
+			}
 
-    private static RegionEndpoint ResolveProfileRegion(CredentialProfileStoreChain chain, string profile)
-    {
-        if (chain.TryGetProfile(profile, out var credentialProfile) && credentialProfile.Region != null)
-        {
-            return credentialProfile.Region;
-        }
+			throw new InvalidOperationException(
+				$"AWS profile '{profile}' was not found in the credential store.");
+		}
 
-        return ResolveRegion();
-    }
+		return new(new AmazonSimpleSystemsManagementClient());
+	}
 
-    /// <summary>
-    /// Resolves the AWS region from environment variables (<c>AWS_REGION</c> or
-    /// <c>AWS_DEFAULT_REGION</c>), falling back to <c>us-east-1</c> when neither is set.
-    /// </summary>
-    private static RegionEndpoint ResolveRegion()
-    {
-        var regionName = Environment.GetEnvironmentVariable("AWS_REGION")
-            ?? Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION");
+	private static RegionEndpoint ResolveProfileRegion(CredentialProfileStoreChain chain, string profile)
+	{
+		if (chain.TryGetProfile(profile, out var credentialProfile) && credentialProfile.Region != null)
+		{
+			return credentialProfile.Region;
+		}
 
-        return string.IsNullOrWhiteSpace(regionName)
-            ? FallbackRegion
-            : RegionEndpoint.GetBySystemName(regionName);
-    }
+		return ResolveRegion();
+	}
+
+	/// <summary>
+	/// Resolves the AWS region from environment variables (<c>AWS_REGION</c> or
+	/// <c>AWS_DEFAULT_REGION</c>), falling back to <c>us-east-1</c> when neither is set.
+	/// </summary>
+	private static RegionEndpoint ResolveRegion()
+	{
+		var regionName = Environment.GetEnvironmentVariable("AWS_REGION")
+			?? Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION");
+
+		return string.IsNullOrWhiteSpace(regionName)
+			? FallbackRegion
+			: RegionEndpoint.GetBySystemName(regionName);
+	}
 }

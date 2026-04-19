@@ -1,8 +1,17 @@
 ---
 import { Code } from 'astro:components';
 
+type SupportedLang =
+  | 'json'
+  | 'bash'
+  | 'typescript'
+  | 'python'
+  | 'csharp'
+  | 'yaml'
+  | 'dotenv';
+
 export interface Props {
-  lang?: string;
+  lang?: SupportedLang;
   filename?: string;
   code: string;
 }

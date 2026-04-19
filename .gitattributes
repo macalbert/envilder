@@ -1,11 +1,15 @@
 ###############################################################################
 # Set default behavior to automatically normalize line endings.
 ###############################################################################
-* text=auto
+* text=auto eol=lf
 
-# Explicitly declare text files you want to always be normalized and converted
-# to native line endings on checkout.
+# Shell scripts must always be LF (even on Windows)
 *.sh text eol=lf
+
+# Windows-specific files that need CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
 
 ###############################################################################
 # Set default behavior for command prompt diff.

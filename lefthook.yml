@@ -2,14 +2,24 @@ pre-commit:
   parallel: true
   commands:
     biome:
-      glob: "*.{ts,tsx,js,jsx,json}"
+      glob: "**/*.{ts,tsx,js,jsx,json}"
       run: pnpx biome check --write --unsafe --no-errors-on-unmatched {staged_files}
       stage_fixed: true
     dotnet-format:
-      glob: "*.{cs,csproj}"
+      glob: "**/*.{cs,csproj}"
       run: make format-sdk-dotnet
       stage_fixed: true
     python-format-check:
-      glob: "*.py"
+      glob: "**/*.py"
       run: make format-sdk-python && make check-sdk-python
       stage_fixed: true
+
+pre-push:
+  commands:
+    biome-format:
+      run: pnpm format
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpx commitlint --edit {1}

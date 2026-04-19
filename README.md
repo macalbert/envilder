@@ -260,20 +260,15 @@ Load secrets into `IConfiguration` or inject them into the process environment:
 
 ```csharp
 // Option A: integrate with IConfiguration
-var mapFile = new MapFileParser().Parse(
-    File.ReadAllText("secrets-map.json"));
-var provider = SecretProviderFactory.Create(mapFile.Config);
-
 var config = new ConfigurationBuilder()
-    .AddEnvilder("secrets-map.json", provider)
+    .AddEnvilder("secrets-map.json")
     .Build();
 
 var dbPassword = config["DB_PASSWORD"];
 
 // Option B: resolve + inject into environment
-var client = new EnvilderClient(provider);
-var secrets = await client.ResolveSecretsAsync(mapFile);
-EnvilderClient.InjectIntoEnvironment(secrets);
+Envilder.Load("secrets-map.json");
+var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 ```
 
 📖 **[Full .NET SDK docs](./src/sdks/dotnet/README.md)**

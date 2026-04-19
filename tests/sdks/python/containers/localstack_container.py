@@ -11,7 +11,7 @@ from envilder.infrastructure.aws.aws_ssm_secret_provider import (
     AwsSsmSecretProvider,
 )
 from envilder.infrastructure.secret_provider_factory import (
-    SecretProviderFactory,
+    _SecretProviderFactory,
 )
 from mypy_boto3_ssm import SSMClient
 from testcontainers.localstack import (
@@ -81,8 +81,8 @@ class LocalStackContainer:
         config: MapFileConfig,
     ) -> EnvilderClient:
         try:
-            provider = SecretProviderFactory.create(config)
+            provider = _SecretProviderFactory.create(config)
             return EnvilderClient(provider)
-        except Exception:
+        except ValueError:
             fallback = MapFileConfig(provider=SecretProviderType.AWS)
-            return EnvilderClient(SecretProviderFactory.create(fallback))
+            return EnvilderClient(_SecretProviderFactory.create(fallback))

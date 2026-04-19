@@ -156,14 +156,19 @@ export interface SdksTranslations {
   pythonDesc: string;
   dotnetTitle: string;
   dotnetDesc: string;
+  typescriptTitle: string;
+  typescriptDesc: string;
   goTitle: string;
   goDesc: string;
   javaTitle: string;
   javaDesc: string;
   install: string;
+  quickStart: string;
   available: string;
   planned: string;
+  comingSoon: string;
   docsLink: string;
+  packageLink: string;
 }
 
 export interface ChangelogHighlight {
@@ -461,6 +466,16 @@ export interface DocsTranslations {
   sdkDotnetTitle: string;
   sdkDotnetDesc: string;
   sdkDotnetInstall: string;
+  sdkDotnetOneLiner: string;
+  sdkDotnetOneLinerDesc: string;
+  sdkDotnetResolve: string;
+  sdkDotnetResolveDesc: string;
+  sdkDotnetFluent: string;
+  sdkDotnetFluentDesc: string;
+  sdkDotnetEnvLoading: string;
+  sdkDotnetEnvLoadingDesc: string;
+  sdkDotnetValidation: string;
+  sdkDotnetValidationDesc: string;
   sdkDotnetQuickStartConfig: string;
   sdkDotnetQuickStartConfigDesc: string;
   sdkDotnetQuickStartResolve: string;
@@ -477,6 +492,8 @@ export interface DocsTranslations {
   sdkPythonResolveDesc: string;
   sdkPythonFluent: string;
   sdkPythonFluentDesc: string;
+  sdkPythonValidation: string;
+  sdkPythonValidationDesc: string;
   sdkPythonFullDocs: string;
   // Pager
   pagerPrev: string;

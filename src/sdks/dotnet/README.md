@@ -23,57 +23,133 @@ dotnet add package Envilder
 
 ## Quick Start
 
-### Via IConfiguration (recommended)
+### One-liner — resolve + inject
 
 ```csharp
-var json = File.ReadAllText("secrets-map.json");
-var mapFile = new MapFileParser().Parse(json);
-var provider = SecretProviderFactory.Create(mapFile.Config);
+using Envilder.Application;
+
+// Resolve secrets from the map file and inject into Environment
+Envilder.Load("secrets-map.json");
+
+// Access via standard environment variable API
+var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+```
+
+### Resolve without injecting
+
+```csharp
+using Envilder.Application;
+
+var secrets = Envilder.ResolveFile("secrets-map.json");
+var dbPassword = secrets["DB_PASSWORD"];
+```
+
+### Async variants
+
+Every method has an async counterpart:
+
+```csharp
+using Envilder.Application;
+
+await Envilder.LoadAsync("secrets-map.json");
+var secrets = await Envilder.ResolveFileAsync("secrets-map.json");
+```
+
+### Fluent builder (with overrides)
+
+Override the map file's `$config` at runtime — useful for switching providers, profiles, or vault URLs per environment:
+
+```csharp
+using Envilder.Application;
+using Envilder.Domain;
+
+// Override provider + vault URL
+var secrets = Envilder.FromMapFile("secrets-map.json")
+    .WithProvider(SecretProviderType.Azure)
+    .WithVaultUrl("https://my-vault.vault.azure.net")
+    .Resolve();
+
+// Override AWS profile and inject
+Envilder.FromMapFile("secrets-map.json")
+    .WithProfile("staging")
+    .Inject();
+
+// Async versions
+var secrets = await Envilder.FromMapFile("secrets-map.json")
+    .WithProvider(SecretProviderType.Azure)
+    .WithVaultUrl("https://my-vault.vault.azure.net")
+    .ResolveAsync();
+
+await Envilder.FromMapFile("secrets-map.json")
+    .WithProfile("staging")
+    .InjectAsync();
+```
+
+### Environment-based loading
+
+Route secret loading based on your current environment. Each environment maps to its own
+secrets file (or `null` to skip loading):
+
+```csharp
+using Envilder.Application;
+
+var env = Environment.GetEnvironmentVariable("APP_ENV") ?? "development";
+
+// Resolve + inject
+Envilder.Load(env, new Dictionary<string, string?>
+{
+    ["production"] = "prod-secrets.json",
+    ["development"] = "dev-secrets.json",
+    ["test"] = null,  // no secrets loaded
+});
+```
+
+Resolve without injecting:
+
+```csharp
+var secrets = Envilder.ResolveFile(env, new Dictionary<string, string?>
+{
+    ["production"] = "prod-secrets.json",
+    ["development"] = "dev-secrets.json",
+    ["test"] = null,
+});
+```
+
+Behaviour:
+
+- If the environment maps to a file path, secrets are loaded from that file.
+- If the environment maps to `null` or is not in the mapping, an empty dictionary is returned silently.
+- Empty or whitespace-only environment names throw `ArgumentException`.
+
+### Secret validation
+
+Opt-in validation ensures all resolved secrets have non-empty values:
+
+```csharp
+using Envilder.Application;
+
+var secrets = Envilder.ResolveFile("secrets-map.json");
+secrets.ValidateSecrets(); // throws SecretValidationException if any value is empty
+```
+
+`ValidateSecrets()` is an extension method on `IReadOnlyDictionary<string, string>` that:
+
+- Throws `SecretValidationException` when the dictionary is empty
+- Throws `SecretValidationException` listing the keys whose values are null, empty, or whitespace
+- Passes silently when all values are present
+
+### Via IConfiguration (ASP.NET)
+
+```csharp
+using Envilder.Infrastructure.Configuration;
+using Microsoft.Extensions.Configuration;
 
 var config = new ConfigurationBuilder()
-    .AddEnvilder("secrets-map.json", provider)
+    .AddEnvilder("secrets-map.json")
     .Build();
 
 var dbPassword = config["DB_PASSWORD"];
 ```
-
-### Via IServiceCollection
-
-```csharp
-var json = File.ReadAllText("secrets-map.json");
-var mapFile = new MapFileParser().Parse(json);
-var provider = SecretProviderFactory.Create(mapFile.Config);
-
-services.AddEnvilder("secrets-map.json", provider);
-```
-
-### Direct usage
-
-```csharp
-var json = File.ReadAllText("secrets-map.json");
-var mapFile = new MapFileParser().Parse(json);
-var provider = SecretProviderFactory.Create(mapFile.Config);
-var client = new EnvilderClient(provider);
-var secrets = await client.ResolveSecretsAsync(mapFile);
-EnvilderClient.InjectIntoEnvironment(secrets);
-```
-
-### With runtime overrides (EnvilderOptions)
-
-Override the map file's `$config` at runtime — useful for switching providers per environment:
-
-```csharp
-var json = File.ReadAllText("secrets-map.json");
-var mapFile = new MapFileParser().Parse(json);
-var options = new EnvilderOptions
-{
-    Provider = SecretProviderType.Azure,
-    VaultUrl = "https://my-vault.vault.azure.net"
-};
-var provider = SecretProviderFactory.Create(mapFile.Config, options);
-```
-
-### IConfiguration section binding
 
 Secrets with `/` in their paths are normalized to configuration sections:
 
@@ -88,6 +164,78 @@ Secrets with `/` in their paths are normalized to configuration sections:
 var dbSettings = config.GetSection("Database");
 var connString = dbSettings["ConnectionString"];
 ```
+
+### Via IServiceCollection (ASP.NET DI)
+
+```csharp
+using Envilder.Infrastructure.DependencyInjection;
+
+services.AddEnvilder("secrets-map.json");
+```
+
+### With runtime overrides (IConfiguration)
+
+Pass `EnvilderOptions` to override the map file's `$config` from code:
+
+```csharp
+using Envilder.Domain;
+using Envilder.Infrastructure.Configuration;
+using Microsoft.Extensions.Configuration;
+
+var config = new ConfigurationBuilder()
+    .AddEnvilder("secrets-map.json", new EnvilderOptions
+    {
+        Provider = SecretProviderType.Azure,
+        VaultUrl = "https://my-vault.vault.azure.net",
+    })
+    .Build();
+```
+
+## API Reference
+
+### Static facade (`Envilder`)
+
+| Method | Description |
+|--------|-------------|
+| `Load(path)` | Resolve secrets and inject into `Environment` |
+| `LoadAsync(path, ct?)` | Async version of `Load` |
+| `ResolveFile(path)` | Resolve secrets, return as `IReadOnlyDictionary` |
+| `ResolveFileAsync(path, ct?)` | Async version of `ResolveFile` |
+| `Load(env, mapping)` | Environment-based resolve + inject |
+| `LoadAsync(env, mapping, ct?)` | Async version |
+| `ResolveFile(env, mapping)` | Environment-based resolve |
+| `ResolveFileAsync(env, mapping, ct?)` | Async version |
+| `FromMapFile(path)` | Returns `EnvilderBuilder` for fluent configuration |
+
+### Fluent builder (`EnvilderBuilder`)
+
+| Method | Description |
+|--------|-------------|
+| `WithProvider(type)` | Override secret provider (AWS/Azure) |
+| `WithProfile(name)` | Override AWS named profile |
+| `WithVaultUrl(url)` | Override Azure Key Vault URL |
+| `Resolve()` | Resolve secrets, return as dictionary |
+| `ResolveAsync(ct?)` | Async version of `Resolve` |
+| `Inject()` | Resolve + inject into `Environment` |
+| `InjectAsync(ct?)` | Async version of `Inject` |
+
+### Validation (`SecretValidationExtensions`)
+
+| Method | Description |
+|--------|-------------|
+| `ValidateSecrets()` | Throws `SecretValidationException` if any value is empty or dictionary is empty |
+
+### IConfiguration integration
+
+| Method | Description |
+|--------|-------------|
+| `AddEnvilder(path, options?)` | Add Envilder as an `IConfigurationBuilder` source |
+
+### Dependency injection
+
+| Method | Description |
+|--------|-------------|
+| `AddEnvilder(path, options?)` | Register Envilder secrets into `IServiceCollection` |
 
 ## Map File Format
 

@@ -73,7 +73,7 @@ const t = useTranslations(lang);
 </style>
 
 <script>
-  let osThemeListener: (() => void) | null = null;
+  let osThemeListener: ((e: Event) => void) | null = null;
 
   function initThemeSwitcher() {
     const buttons = document.querySelectorAll<HTMLButtonElement>(

@@ -18,6 +18,8 @@
     "astro": "^6.1.7"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:"
+    "@astrojs/check": "^0.9.8",
+    "@biomejs/biome": "catalog:",
+    "typescript": "catalog:"
   }
 }

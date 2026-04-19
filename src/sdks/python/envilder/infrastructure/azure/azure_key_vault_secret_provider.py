@@ -7,6 +7,11 @@ from envilder.domain.ports.secret_provider import ISecretProvider
 
 
 class AzureKeyVaultSecretProvider(ISecretProvider):
+    """:class:`~envilder.ISecretProvider` backed by Azure Key Vault.
+
+    Secrets that return HTTP 404 are treated as missing and yield ``None``.
+    """
+
     def __init__(self, secret_client: SecretClient) -> None:
         if secret_client is None:
             raise ValueError("secret_client cannot be None")

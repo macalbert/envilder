@@ -287,14 +287,20 @@ export const es: Translations = {
     dotnetTitle: '.NET',
     dotnetDesc:
       'Integración nativa con IConfiguration. Resuelve secretos al arrancar.',
+    typescriptTitle: 'TypeScript',
+    typescriptDesc:
+      'Carga secretos directamente en Node.js. Mismo map-file, cero dependencias del CLI.',
     goTitle: 'Go',
     goDesc: 'Carga ligera de secretos para servicios Go.',
     javaTitle: 'Java',
     javaDesc: 'Soporte para Spring Boot y Java standalone.',
     install: 'Instalar',
+    quickStart: 'Inicio rápido',
     available: 'Disponible',
     planned: 'Planificado',
+    comingSoon: 'Próximamente',
     docsLink: 'Ver docs',
+    packageLink: 'Paquete',
   },
   changelog: {
     title: 'Qué hay de ',
@@ -708,13 +714,27 @@ export const es: Translations = {
     sidebarSdkPython: 'Python SDK',
     sdkDotnetTitle: '.NET SDK',
     sdkDotnetDesc:
-      'Carga secretos directamente en tu aplicación .NET al inicio. Se integra con IConfiguration o resuelve secretos de forma programática.',
+      'Carga secretos directamente en tu aplicación .NET al inicio. Fachada de una línea, constructor fluido, integración con IConfiguration o control programático total.',
     sdkDotnetInstall: 'Instalación',
-    sdkDotnetQuickStartConfig: 'Inicio rápido — cargar en IConfiguration',
+    sdkDotnetOneLiner: 'Una línea — resolver + inyectar',
+    sdkDotnetOneLinerDesc:
+      'Resuelve secretos del archivo de mapeo e inyéctalos en Environment en una sola llamada:',
+    sdkDotnetResolve: 'Resolver sin inyectar',
+    sdkDotnetResolveDesc:
+      'Obtén secretos como un diccionario sin modificar el entorno:',
+    sdkDotnetFluent: 'Constructor fluido con sobreescrituras',
+    sdkDotnetFluentDesc:
+      'Sobreescribe la configuración del proveedor de forma programática con la API fluida:',
+    sdkDotnetEnvLoading: 'Carga basada en entorno',
+    sdkDotnetEnvLoadingDesc:
+      'Enruta la carga de secretos según tu entorno actual. Cada entorno mapea a su archivo de secretos:',
+    sdkDotnetValidation: 'Validación de secretos',
+    sdkDotnetValidationDesc:
+      'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
+    sdkDotnetQuickStartConfig: 'Vía IConfiguration (ASP.NET)',
     sdkDotnetQuickStartConfigDesc:
       'Añade Envilder como fuente de configuración en tu aplicación ASP.NET:',
-    sdkDotnetQuickStartResolve:
-      'Inicio rápido — resolver + inyectar en el entorno',
+    sdkDotnetQuickStartResolve: 'Avanzado — control programático total',
     sdkDotnetQuickStartResolveDesc:
       'Analiza el archivo de mapeo, resuelve secretos e inyéctalos en las variables de entorno:',
     sdkDotnetFullDocs: 'Documentación completa →',
@@ -734,6 +754,9 @@ export const es: Translations = {
     sdkPythonFluent: 'Constructor fluido con sobreescrituras',
     sdkPythonFluentDesc:
       'Sobreescribe la configuración del proveedor de forma programática con la API fluida:',
+    sdkPythonValidation: 'Validación de secretos',
+    sdkPythonValidationDesc:
+      'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
     sdkPythonFullDocs: 'Documentación completa →',
     pagerPrev: 'Anterior',
     pagerNext: 'Siguiente',

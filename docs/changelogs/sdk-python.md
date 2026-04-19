@@ -1,3 +1,25 @@
+## [0.3.2] - 2026-04-18
+
+### Changed
+
+* **Encapsulate `SecretProviderFactory`** — Renamed to `_SecretProviderFactory` and removed
+  from public re-exports; consumers should use the `Envilder` facade instead of creating
+  providers manually
+  ([#167](https://github.com/macalbert/envilder/pull/167))
+* **Cross-provider validation** — `_SecretProviderFactory.create()` now rejects invalid
+  combinations: AWS profile with Azure provider, or vault URL with AWS provider
+  ([#167](https://github.com/macalbert/envilder/pull/167))
+
+### Fixed
+
+* **Delegate default AWS region resolution to boto3** — When no profile is set, the factory
+  no longer manually resolves the region from environment variables. Instead it creates a plain
+  `boto3.Session()` which uses the full AWS SDK resolution chain (env vars → `~/.aws/config` →
+  instance metadata), correctly picking up the default config file settings
+  ([#166](https://github.com/macalbert/envilder/pull/166))
+
+---
+
 ## [0.3.1] - 2026-04-17
 
 ### Fixed
@@ -28,7 +50,7 @@
 ### Added
 
 * **Fluent API facade** — `Envilder` high-level entry point with `load()`, `resolve_file()`,
-  and `from_file()` methods, plus fluent override methods (`with_provider()`, `with_vault_url()`,
+  and `from_map_file()` methods, plus fluent override methods (`with_provider()`, `with_vault_url()`,
   `with_profile()`) ([#161](https://github.com/macalbert/envilder/pull/161))
 * **Facade docstrings** — All public methods on the `Envilder` facade now have docstrings with
   usage examples, improving IDE tooltips and `help()` output for external consumers
@@ -42,7 +64,7 @@
 * **Initial release** — Runtime library for loading secrets from AWS SSM Parameter Store or
   Azure Key Vault directly into Python applications
   ([#157](https://github.com/macalbert/envilder/pull/157))
-* `Envilder` facade — High-level entry point with `load()`, `resolve_file()`, and `from_file()` methods
+* `Envilder` facade — High-level entry point with `load()`, `resolve_file()`, and `from_map_file()` methods
 * `EnvilderClient` — Resolves secrets from a map-file and injects them into `os.environ`
 * `MapFileParser` — Parses `param-map.json` files with `$config` section and variable mappings
 * `SecretProviderFactory` — Creates the appropriate secret provider based on configuration
