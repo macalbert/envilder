@@ -16,14 +16,15 @@ Uses [PEP 723](https://peps.python.org/pep-0723/) inline script metadata
 
 All commands from the **`examples/sdk/python/`** directory:
 
-| Example            | Description                    | Command                |
-|--------------------|--------------------------------|------------------------|
-| `1_load.py`        | Load + inject into `os.environ`| `uv run 1_load.py`    |
-| `2_resolve.py`     | Resolve without injecting      | `uv run 2_resolve.py` |
-| `3_fluent.py`      | Fluent builder with overrides  | `uv run 3_fluent.py`  |
-| `4_env_routing.py` | Pick map file by environment   | `uv run 4_env_routing.py` |
+| Example            | Description                              | Command                       |
+|--------------------|------------------------------------------|-------------------------------|
+| `1_fluent.py`      | Fluent builder with provider overrides   | `uv run 1_fluent.py`          |
+| `2_env_routing.py` | Pick map file by environment             | `uv run 2_env_routing.py`     |
+| `3_validation.py`  | Fail fast on missing secrets             | `uv run 3_validation.py`      |
+| `4_load.py`        | Load + inject into `os.environ`          | `uv run 4_load.py`            |
+| `5_resolve.py`     | Resolve without injecting                | `uv run 5_resolve.py`         |
 
 ```bash
 cd examples/sdk/python
-uv run 1_load.py
+uv run 1_fluent.py
 ```
