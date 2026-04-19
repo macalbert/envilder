@@ -16,13 +16,16 @@ Uses .NET 10
 
 All commands from the **`examples/sdk/dotnet/`** directory:
 
-| Example              | Description                    | Command                        |
-|----------------------|--------------------------------|--------------------------------|
-| `1_resolve.cs`       | Resolve secrets and print them | `dotnet run 1_resolve.cs`      |
-| `2_inject.cs`        | Resolve + inject into env vars | `dotnet run 2_inject.cs`       |
-| `3_configuration.cs` | Use as `IConfiguration` source | `dotnet run 3_configuration.cs`|
+| Example                | Description                              | Command                          |
+|------------------------|------------------------------------------|----------------------------------|
+| `1_configuration.cs`   | Use as `IConfiguration` source           | `dotnet run 1_configuration.cs`  |
+| `2_fluent.cs`          | Fluent builder with provider overrides   | `dotnet run 2_fluent.cs`         |
+| `3_env_routing.cs`     | Environment-based map file routing       | `dotnet run 3_env_routing.cs`    |
+| `4_validation.cs`      | Fail fast on missing secrets             | `dotnet run 4_validation.cs`     |
+| `5_load.cs`            | Resolve + inject into env vars           | `dotnet run 5_load.cs`           |
+| `6_resolve.cs`         | Resolve secrets without injecting        | `dotnet run 6_resolve.cs`        |
 
 ```bash
 cd examples/sdk/dotnet
-dotnet run 1_resolve.cs
+dotnet run 1_configuration.cs
 ```
