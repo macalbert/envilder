@@ -79,13 +79,25 @@ secrets = (
     title: t.sdks.typescriptTitle,
     desc: t.sdks.typescriptDesc,
     icon: '/sdk-typescript.svg',
-    install: '',
-    status: 'planned' as const,
-    pkg: '',
-    docsHash: '',
+    install: 'npm install @envilder/sdk',
+    status: 'available' as const,
+    pkg: 'https://www.npmjs.com/package/@envilder/sdk',
+    docsHash: 'sdk-typescript',
     codeLang: 'typescript',
     codeFile: 'config.ts',
-    code: '',
+    code: `import { Envilder, SecretProviderType } from '@envilder/sdk';
+
+// One-liner: resolve + inject into process.env
+await Envilder.load('param-map.json');
+
+// Or resolve as a dict without injecting
+const secrets = await Envilder.resolveFile('param-map.json');
+
+// Fluent builder with provider override
+const override = await Envilder.fromMapFile('param-map.json')
+  .withProvider(SecretProviderType.Azure)
+  .withVaultUrl('https://my-vault.vault.azure.net')
+  .inject();`,
   },
   {
     id: 'go',

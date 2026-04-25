@@ -263,6 +263,7 @@ export interface ChangelogPageTranslations {
   categorySdks: string;
   categorySdkDotnet: string;
   categorySdkPython: string;
+  categorySdkTypescript: string;
 }
 
 export interface DocsTranslations {
@@ -495,6 +496,21 @@ export interface DocsTranslations {
   sdkPythonValidation: string;
   sdkPythonValidationDesc: string;
   sdkPythonFullDocs: string;
+  sidebarSdkTypescript: string;
+  sdkTypescriptTitle: string;
+  sdkTypescriptDesc: string;
+  sdkTypescriptInstall: string;
+  sdkTypescriptQuickStart: string;
+  sdkTypescriptQuickStartDesc: string;
+  sdkTypescriptResolve: string;
+  sdkTypescriptResolveDesc: string;
+  sdkTypescriptFluent: string;
+  sdkTypescriptFluentDesc: string;
+  sdkTypescriptEnvLoading: string;
+  sdkTypescriptEnvLoadingDesc: string;
+  sdkTypescriptValidation: string;
+  sdkTypescriptValidationDesc: string;
+  sdkTypescriptFullDocs: string;
   // Pager
   pagerPrev: string;
   pagerNext: string;

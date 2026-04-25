@@ -38,6 +38,7 @@ const sectionOrder = [
   { id: 'push-single', label: t.docs.sidebarPushSingle },
   { id: 'sdk-dotnet', label: t.docs.sidebarSdkDotnet },
   { id: 'sdk-python', label: t.docs.sidebarSdkPython },
+  { id: 'sdk-typescript', label: t.docs.sidebarSdkTypescript },
   { id: 'gha-setup', label: t.docs.sidebarGhaSetup },
   { id: 'gha-basic', label: t.docs.sidebarGhaBasic },
   { id: 'gha-multi-env', label: t.docs.sidebarGhaMultiEnv },
@@ -70,6 +71,7 @@ const sectionOrder = [
         <optgroup label={t.docs.sidebarSdks}>
           <option value="sdk-dotnet">{t.docs.sidebarSdkDotnet}</option>
           <option value="sdk-python">{t.docs.sidebarSdkPython}</option>
+          <option value="sdk-typescript">{t.docs.sidebarSdkTypescript}</option>
         </optgroup>
         <optgroup label={t.docs.sidebarGha}>
           <option value="gha-setup">{t.docs.sidebarGhaSetup}</option>
@@ -109,6 +111,7 @@ const sectionOrder = [
         <ul>
           <li><a href="#sdk-dotnet" data-section="sdk-dotnet">{t.docs.sidebarSdkDotnet}</a></li>
           <li><a href="#sdk-python" data-section="sdk-python">{t.docs.sidebarSdkPython}</a></li>
+          <li><a href="#sdk-typescript" data-section="sdk-typescript">{t.docs.sidebarSdkTypescript}</a></li>
         </ul>
 
         <p class="nav-section-title">{t.docs.sidebarGha}</p>
@@ -632,6 +635,70 @@ validate_secrets(secrets)  # raises SecretValidationError if any value is empty`
 
         <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/python" target="_blank" rel="noopener noreferrer">{t.docs.sdkPythonFullDocs}</a></p>
       </section>
+
+      <!-- ───── TYPESCRIPT SDK ───── -->
+
+    <section id="sdk-typescript" class="docs-section">
+      <h2>{t.docs.sdkTypescriptTitle}</h2>
+      <p>{t.docs.sdkTypescriptDesc}</p>
+      <div class="sdk-badges">
+        <a class="sdk-badge" href="https://www.npmjs.com/package/@envilder/sdk" target="_blank" rel="noopener noreferrer">📦 npm v0.1.0</a>
+      </div>
+
+      <h3>{t.docs.sdkTypescriptInstall}</h3>
+      <CodeBlock lang="bash" code="npm install @envilder/sdk" />
+
+      <h3>{t.docs.sdkTypescriptQuickStart}</h3>
+      <p>{t.docs.sdkTypescriptQuickStartDesc}</p>
+      <CodeBlock lang="typescript" code={`import { Envilder } from '@envilder/sdk';
+
+// Resolve secrets and inject into process.env
+await Envilder.load('secrets-map.json');
+
+const dbPassword = process.env.DB_PASSWORD;`} />
+
+      <h3>{t.docs.sdkTypescriptResolve}</h3>
+      <p>{t.docs.sdkTypescriptResolveDesc}</p>
+      <CodeBlock lang="typescript" code={`import { Envilder } from '@envilder/sdk';
+
+const secrets = await Envilder.resolveFile('secrets-map.json');
+const dbPassword = secrets.get('DB_PASSWORD');`} />
+
+      <h3>{t.docs.sdkTypescriptFluent}</h3>
+      <p>{t.docs.sdkTypescriptFluentDesc}</p>
+      <CodeBlock lang="typescript" code={`import { Envilder, SecretProviderType } from '@envilder/sdk';
+
+const secrets = await Envilder.fromMapFile('secrets-map.json')
+  .withProvider(SecretProviderType.Azure)
+  .withVaultUrl('https://my-vault.vault.azure.net')
+  .resolve();
+
+// Or inject directly
+await Envilder.fromMapFile('secrets-map.json')
+  .withProfile('staging')
+  .inject();`} />
+
+      <h3>{t.docs.sdkTypescriptEnvLoading}</h3>
+      <p>{t.docs.sdkTypescriptEnvLoadingDesc}</p>
+      <CodeBlock lang="typescript" code={`import { Envilder } from '@envilder/sdk';
+
+const env = process.env.APP_ENV ?? 'development';
+
+await Envilder.load(env, {
+  production: 'prod-secrets.json',
+  development: 'dev-secrets.json',
+  test: null,  // no secrets loaded
+});`} />
+
+      <h3>{t.docs.sdkTypescriptValidation}</h3>
+      <p>{t.docs.sdkTypescriptValidationDesc}</p>
+      <CodeBlock lang="typescript" code={`import { Envilder, validateSecrets } from '@envilder/sdk';
+
+const secrets = await Envilder.resolveFile('secrets-map.json');
+validateSecrets(secrets); // throws SecretValidationError if any value is empty`} />
+
+      <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/typescript" target="_blank" rel="noopener noreferrer">{t.docs.sdkTypescriptFullDocs}</a></p>
+    </section>
 
       <!-- ───── GITHUB ACTION ───── -->
 

@@ -382,8 +382,8 @@ export const en: Translations = {
           'Runtime library for enterprise apps and Azure-native shops. Published to NuGet',
       },
       {
-        status: 'next',
-        label: '📦',
+        status: 'done',
+        label: '✅',
         title: 'TypeScript SDK (@envilder/sdk)',
         description:
           'Native runtime library — load secrets directly into process.env from a map-file. Published to npm',
@@ -492,6 +492,7 @@ export const en: Translations = {
     categorySdks: 'SDKs',
     categorySdkDotnet: '.NET',
     categorySdkPython: 'Python',
+    categorySdkTypescript: 'TypeScript',
   },
   docs: {
     title: 'Envilder Docs | CLI, GitHub Action & AWS SSM',
@@ -751,6 +752,27 @@ export const en: Translations = {
     sdkPythonValidationDesc:
       'Opt-in validation ensures all resolved secrets have non-empty values:',
     sdkPythonFullDocs: 'Full documentation →',
+    sidebarSdkTypescript: 'TypeScript SDK',
+    sdkTypescriptTitle: 'TypeScript SDK',
+    sdkTypescriptDesc:
+      'Load secrets directly into your Node.js application at startup. Async-first API with one-liner facade or fluent builder for full control.',
+    sdkTypescriptInstall: 'Install',
+    sdkTypescriptQuickStart: 'Quick start — one-liner',
+    sdkTypescriptQuickStartDesc:
+      'Load secrets from a map file and inject them into process.env:',
+    sdkTypescriptResolve: 'Resolve without injecting',
+    sdkTypescriptResolveDesc:
+      'Get secrets as a Map without modifying the environment:',
+    sdkTypescriptFluent: 'Fluent builder with overrides',
+    sdkTypescriptFluentDesc:
+      'Override provider settings programmatically using the fluent API:',
+    sdkTypescriptEnvLoading: 'Environment-based loading',
+    sdkTypescriptEnvLoadingDesc:
+      'Recommended for multi-environment apps. Map each environment to its own secrets file:',
+    sdkTypescriptValidation: 'Secret validation',
+    sdkTypescriptValidationDesc:
+      'Opt-in validation ensures all resolved secrets have non-empty values:',
+    sdkTypescriptFullDocs: 'Full documentation →',
     pagerPrev: 'Previous',
     pagerNext: 'Next',
   },

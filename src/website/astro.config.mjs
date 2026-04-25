@@ -28,6 +28,9 @@ const changelogCli = readChangelog('../../docs/changelogs/cli.md');
 const changelogGha = readChangelog('../../docs/changelogs/gha.md');
 const changelogSdkDotnet = readChangelog('../../docs/changelogs/sdk-dotnet.md');
 const changelogSdkPython = readChangelog('../../docs/changelogs/sdk-python.md');
+const changelogSdkTypescript = readChangelog(
+  '../../docs/changelogs/sdk-typescript.md',
+);
 
 export default defineConfig({
   site: 'https://envilder.com',
@@ -48,6 +51,7 @@ export default defineConfig({
       __CHANGELOG_GHA__: JSON.stringify(changelogGha),
       __CHANGELOG_SDK_DOTNET__: JSON.stringify(changelogSdkDotnet),
       __CHANGELOG_SDK_PYTHON__: JSON.stringify(changelogSdkPython),
+      __CHANGELOG_SDK_TYPESCRIPT__: JSON.stringify(changelogSdkTypescript),
     },
   },
   build: {

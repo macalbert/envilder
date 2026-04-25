@@ -386,11 +386,11 @@ export const es: Translations = {
           'Librería para apps enterprise y Azure-native. Publicado en NuGet',
       },
       {
-        status: 'next',
-        label: '📦',
+        status: 'done',
+        label: '✅',
         title: 'TypeScript SDK (@envilder/sdk)',
         description:
-          'Librería nativa de ejecución — cargará secretos directamente en process.env desde un map-file. Se publicará en npm',
+          'Librería nativa de ejecución — carga secretos directamente en process.env desde un map-file. Publicado en npm',
       },
       {
         status: 'next',
@@ -495,6 +495,7 @@ export const es: Translations = {
     categorySdks: 'SDKs',
     categorySdkDotnet: '.NET',
     categorySdkPython: 'Python',
+    categorySdkTypescript: 'TypeScript',
   },
   docs: {
     title: 'Docs Envilder | CLI, GitHub Action y AWS SSM',
@@ -758,6 +759,27 @@ export const es: Translations = {
     sdkPythonValidationDesc:
       'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
     sdkPythonFullDocs: 'Documentación completa →',
+    sidebarSdkTypescript: 'TypeScript SDK',
+    sdkTypescriptTitle: 'TypeScript SDK',
+    sdkTypescriptDesc:
+      'Carga secretos directamente en tu aplicación Node.js al inicio. API asíncrona con fachada de una línea o constructor fluido para control total.',
+    sdkTypescriptInstall: 'Instalación',
+    sdkTypescriptQuickStart: 'Inicio rápido — una línea',
+    sdkTypescriptQuickStartDesc:
+      'Carga secretos desde un archivo de mapeo e inyéctalos en process.env:',
+    sdkTypescriptResolve: 'Resolver sin inyectar',
+    sdkTypescriptResolveDesc:
+      'Obtén secretos como un Map sin modificar el entorno:',
+    sdkTypescriptFluent: 'Constructor fluido con sobreescrituras',
+    sdkTypescriptFluentDesc:
+      'Sobreescribe la configuración del proveedor de forma programática con la API fluida:',
+    sdkTypescriptEnvLoading: 'Carga basada en entorno',
+    sdkTypescriptEnvLoadingDesc:
+      'Recomendado para aplicaciones multi-entorno. Mapea cada entorno a su archivo de secretos:',
+    sdkTypescriptValidation: 'Validación de secretos',
+    sdkTypescriptValidationDesc:
+      'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
+    sdkTypescriptFullDocs: 'Documentación completa →',
     pagerPrev: 'Anterior',
     pagerNext: 'Siguiente',
   },

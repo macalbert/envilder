@@ -285,3 +285,38 @@ AAA pattern with comment markers.
 - `make check-sdk-python` (black + isort + mypy strict)
 - `make format-sdk-python` (auto-format)
 - `make test-sdk-python` (all tests, requires Docker for acceptance)
+
+### TypeScript SDK (`src/sdks/typescript/`)
+
+**Architecture**: Layered (Domain → Application → Infrastructure), no DI framework.
+
+- **Domain** (`src/domain/`): `ISecretProvider` interface (async `getSecret`), `MapFileConfig`, `EnvilderOptions`, `ParsedMapFile` types, `SecretProviderType` enum
+- **Application** (`src/application/`):
+  - `Envilder` — Async facade (`load`, `resolveFile`, `fromMapFile` + env-routing overloads)
+  - `EnvilderClient` — Core resolver (`resolveSecrets`, `injectIntoEnvironment` static method sets `process.env`)
+  - `MapFileParser` — Parses `$config` + variable mappings from JSON
+  - `validateSecrets` — Opt-in validation throws `SecretValidationError` for empty/missing values
+- **Infrastructure** (`src/infrastructure/`):
+  - `createSecretProvider` (not exported) — Creates provider from `MapFileConfig` + optional `EnvilderOptions` overrides
+  - `AwsSsmSecretProvider` — `GetParameterCommand` with `WithDecryption: true`, catches `ParameterNotFound` → `null`
+  - `AzureKeyVaultSecretProvider` — `SecretClient.getSecret()`, catches 404 → `null`
+
+**Key patterns**:
+
+- Async-first — all provider and facade methods return `Promise`
+- Interface-based ports — TypeScript `interface` for `ISecretProvider`
+- `createSecretProvider` is internal — consumers use the `Envilder` facade
+- `Envilder` facade is the primary public API (fluent: `fromMapFile().withProvider().withVaultUrl().inject()`)
+- `ISecretProvider.getSecret()` returns `null` for missing secrets (no exceptions)
+- `EnvilderClient.resolveSecrets()` silently omits missing secrets
+- `validateSecrets()` — opt-in post-resolution validation
+- Cross-provider validation: profile + Azure → error, vaultUrl + AWS → error
+- `Map<string, string>` used for mappings and resolved secrets
+
+**Tests** (`tests/sdks/typescript/`): Vitest with `Should_<Expected>_When_<Condition>` naming.
+AAA pattern with comment markers. `vi.fn()` for mocks.
+
+**Build & test**:
+
+- `cd src/sdks/typescript && pnpm build` (TypeScript compilation)
+- `cd tests/sdks/typescript && pnpm vitest run --reporter=verbose` (unit tests)

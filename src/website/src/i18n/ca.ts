@@ -385,11 +385,11 @@ export const ca: Translations = {
           'Biblioteca per a apps enterprise i Azure-native. Publicat a NuGet',
       },
       {
-        status: 'next',
-        label: '📦',
+        status: 'done',
+        label: '✅',
         title: 'TypeScript SDK (@envilder/sdk)',
         description:
-          'Biblioteca nativa de runtime — carregarà secrets directament a process.env des d’un map-file. Es publicarà a npm',
+          'Biblioteca nativa de runtime — carrega secrets directament a process.env des d’un map-file. Publicat a npm',
       },
       {
         status: 'next',
@@ -494,6 +494,7 @@ export const ca: Translations = {
     categorySdks: 'SDKs',
     categorySdkDotnet: '.NET',
     categorySdkPython: 'Python',
+    categorySdkTypescript: 'TypeScript',
   },
   docs: {
     title: 'Docs Envilder | CLI, GitHub Action i AWS SSM',
@@ -758,6 +759,27 @@ export const ca: Translations = {
     sdkPythonValidationDesc:
       'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
     sdkPythonFullDocs: 'Documentació completa →',
+    sidebarSdkTypescript: 'TypeScript SDK',
+    sdkTypescriptTitle: 'TypeScript SDK',
+    sdkTypescriptDesc:
+      "Carrega secrets directament a la teva aplicació Node.js a l'inici. API asíncrona amb façana d'una línia o constructor fluent per a control total.",
+    sdkTypescriptInstall: 'Instal·lació',
+    sdkTypescriptQuickStart: 'Inici ràpid — una línia',
+    sdkTypescriptQuickStartDesc:
+      "Carrega secrets des d'un fitxer de mapeig i injecta'ls a process.env:",
+    sdkTypescriptResolve: 'Resoldre sense injectar',
+    sdkTypescriptResolveDesc:
+      "Obté secrets com un Map sense modificar l'entorn:",
+    sdkTypescriptFluent: 'Constructor fluent amb sobreescriptures',
+    sdkTypescriptFluentDesc:
+      "Sobreescriu la configuració del proveïdor de manera programàtica amb l'API fluent:",
+    sdkTypescriptEnvLoading: 'Càrrega basada en entorn',
+    sdkTypescriptEnvLoadingDesc:
+      'Recomanat per a aplicacions multi-entorn. Mapeja cada entorn al seu fitxer de secrets:',
+    sdkTypescriptValidation: 'Validació de secrets',
+    sdkTypescriptValidationDesc:
+      'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
+    sdkTypescriptFullDocs: 'Documentació completa →',
     pagerPrev: 'Anterior',
     pagerNext: 'Següent',
   },
