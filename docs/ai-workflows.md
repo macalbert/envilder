@@ -11,13 +11,13 @@ Envilder via VS Code Copilot agents, prompts, skills, and instructions.
 │  pre-commit → biome check --write on staged files   │
 ├─────────────────────────────────────────────────────┤
 │  Prompts (.github/prompts/)                         │
-│  /smart-commit  /pr-sync  /scaffold-feature  ...    │
+│  /scaffold-feature  /resolve-pr-comments  ...       │
 ├─────────────────────────────────────────────────────┤
 │  Agents (.github/agents/)                           │
-│  @TDD Coach  @Code Review  @Bug Hunter  ...         │
+│  @TDD Coach  @Code Reviewer  @Bug Hunter  ...       │
 ├─────────────────────────────────────────────────────┤
 │  Skills (.github/skills/)                           │
-│  testing-conventions                                │
+│  testing-conventions  smart-commit  pr-sync  ...    │
 ├─────────────────────────────────────────────────────┤
 │  Instructions (.github/instructions/)               │
 │  architecture · coding · git · review-response      │
@@ -31,11 +31,11 @@ automatic delegation via the `agents:` frontmatter. Dashed arrows represent
 suggestions shown to the user (user invokes the next step manually).
 
 ```text
-/scaffold-feature ···► @TDD Coach ···► /smart-commit ···► /pr-sync
+/scaffold-feature ···► @TDD Coach ···► smart-commit ···► pr-sync
                           │                                    │
-                  @TDD Red / Green /              @Code Review ◄┘
+                  @TDD Red / Green /          @Code Reviewer ◄┘
                   @TDD Refactor                        │
-                                                  @PR Comment Resolver
+                                                  @PR Resolver
                                                   ┌────┴─────┐
                                              bug? │          │ code fix
                                            @Bug Hunter   edit + commit
@@ -51,22 +51,20 @@ suggestions shown to the user (user invokes the next step manually).
 
 | Agent | Purpose | Can Edit? | Subagents | Next Step |
 |-------|---------|-----------|-----------|-----------|
-| **@TDD Coach** | Orchestrates TDD | No (coordinator) | TDD Red, TDD Green, TDD Refactor | `/smart-commit` → `/pr-sync`|
+| **@TDD Coach** | Orchestrates TDD | No (coordinator) | TDD Red, TDD Green, TDD Refactor | `smart-commit` → `pr-sync`|
 | **@TDD Red** | Writes one failing test | Yes | — | *(worker, not user-invocable)* |
 | **@TDD Green** | Writes minimal passing code | Yes | — | *(worker, not user-invocable)* |
 | **@TDD Refactor** | Improves structure, keeps tests green | Yes | — | *(worker, not user-invocable)* |
-| **@Code Review** | Multi-perspective review (4 parallel) | No (read-only) | — | `@PR Comment Resolver` |
-| **@PR Comment Resolver** | Resolves PR review comments | Yes | Bug Hunter, Code Review | `/smart-commit` |
-| **@Bug Hunter** | Reproduces and fixes bugs | No (coordinator) | TDD Red, TDD Green, TDD Refactor | `/smart-commit` |
-| **@Refactor** | Code smell detection, SOLID improvements | Yes | — | `/smart-commit` |
+| **@Code Reviewer** | Multi-perspective review | No (delegates via agents) | TDD Coach, Code Refactorer, Bug Hunter, PR Resolver, Document Maintainer, Website Designer, i18n Reviewer | `@PR Resolver` |
+| **@PR Resolver** | Resolves PR review comments | Yes | Bug Hunter, Code Reviewer, TDD Coach, Code Refactorer, Document Maintainer, Website Designer, i18n Reviewer | `smart-commit` |
+| **@Bug Hunter** | Reproduces and fixes bugs | No (coordinator) | TDD Red, TDD Green, TDD Refactor, TDD Coach, Code Reviewer, Code Refactorer | `smart-commit` |
+| **@Code Refactorer** | Code smell detection, SOLID improvements | Yes | — | `smart-commit` |
 | **@Document Maintainer** | Keeps docs in sync with code changes | Yes | — | — |
 
 ## Prompts
 
 | Prompt | Purpose | When to Use |
 |--------|---------|-------------|
-| `/smart-commit` | Generate conventional commit from staged changes | After completing a code change |
-| `/pr-sync` | Create or update a PR with auto-generated description | After pushing commits |
 | `/scaffold-feature` | Generate skeleton files for a new feature | Starting a new feature |
 | `/resolve-pr-comments` | Process PR review feedback end-to-end | After receiving review comments |
 | `/use-semantic-versioning` | Determine correct SemVer bump | Before releasing |
@@ -75,7 +73,10 @@ suggestions shown to the user (user invokes the next step manually).
 
 | Skill | Purpose | Loaded By |
 |-------|---------|-----------|
-| `testing-conventions` | Vitest naming, AAA structure, mock patterns | TDD agents, testing tasks |
+| `testing-conventions` | Vitest naming, AAA structure, mock patterns | TDD Red, TDD Green, TDD Coach |
+| `smart-commit` | Generate conventional commit from staged changes | Any agent after code changes |
+| `pr-sync` | Create or update a PR with auto-generated description | PR Resolver, any agent after pushing |
+| `doc-sync` | Audit and sync docs across all surfaces | Document Maintainer, Code Reviewer |
 
 ## Instructions
 
@@ -109,7 +110,7 @@ Two mechanisms:
 - **Automatic delegation**: The `agents:` frontmatter field lists subagents
   that the coordinator can invoke directly (e.g., TDD Coach → TDD Red/Green/Refactor)
 - **Suggestions**: Each agent's `## Next Steps` section recommends the natural
-  next action (e.g., "Run `/smart-commit`"). The user decides whether to follow.
+  next action (e.g., "Run `smart-commit`"). The user decides whether to follow.
 
 ### Why not full automation?
 

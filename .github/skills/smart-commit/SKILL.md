@@ -1,23 +1,29 @@
 ---
-name: "Smart Commit"
-description: "Analyze staged changes and create a conventional commit with an auto-generated message."
-argument-hint: "optional scope override or commit type hint"
+name: smart-commit
+description: 'Analyze staged changes and create a conventional commit with an auto-generated message. Use when committing code, staging changes, or generating commit messages.'
+argument-hint: 'optional scope override or commit type hint'
 ---
 
-Create a conventional commit from the current staged changes.
+# Smart Commit
 
-## Workflow
+Analyze staged changes and create a conventional commit message.
+
+## When to Use
+
+- Creating a commit from staged changes
+- Generating a commit message that follows project conventions
+- Verifying commit message format before committing
+
+## Procedure
 
 1. Run `git diff --cached --stat` to see what's staged.
 2. Run `git diff --cached` to read the full diff.
 3. Analyze the changes — identify the dominant change type and scope.
-4. Generate a conventional commit message following the rules below.
+4. Generate a conventional commit message following the [format](#commit-message-format), [rules](#rules), and [scope heuristics](./reference.md).
 5. Present the commit message for user approval.
 6. Run `git commit -m "<message>"` after approval.
 
-## Commit Message Rules
-
-Follow [Conventional Commits](https://www.conventionalcommits.org/):
+## Commit Message Format
 
 ```txt
 <type>(<scope>): <description>
@@ -38,18 +44,9 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 | `style` | Formatting (no logic change) |
 | `perf` | Performance improvement |
 
-### Scopes (Envilder-specific)
+### Scopes
 
-| Scope | Area |
-|-------|------|
-| `cli` | CLI entry point (`src/envilder/apps/cli/`) |
-| `gha` | GitHub Action (`src/envilder/apps/gha/`) |
-| `ssm` | AWS SSM provider |
-| `domain` | Domain entities, ports, errors |
-| `app` | Application layer handlers |
-| `infra` | Infrastructure adapters |
-| `e2e` | End-to-end tests |
-| `dx` | Developer experience, tooling |
+See [reference.md](./reference.md) for the full scope table.
 
 ### Rules
 
