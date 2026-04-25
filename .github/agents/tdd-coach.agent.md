@@ -99,7 +99,7 @@ Remaining: {N} cycles
 - **Present plan before acting.** User must approve the cycle list.
 - **Delegate all code writing.** You are a coordinator only.
 - **Keep CRAP below 4.** Every method produced in Green/Refactor must have
-  a CRAP score < 4. If a method exceeds this threshold, add a Refactor
+  a CRAP score < 4. If a method reaches or exceeds this threshold, add a Refactor
   cycle to reduce complexity before moving to the next behavior.
 
 ## Conventions
