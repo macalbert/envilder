@@ -91,9 +91,7 @@ jobs:
 
       - name: 🚩 Publish to npm
         if: steps.version-check.outputs.version_changed == 'true'
-        run: pnpm publish --access public --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance --access public
 
       - name: 🏁 Create version tag
         if: steps.version-check.outputs.version_changed == 'true'
