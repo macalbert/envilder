@@ -37,7 +37,7 @@ You resolve pull request review comments with minimal, correct, verified changes
 
 For each review comment on the active PR:
 
-1. **Load comments** via MCP `getPullRequestComments` or from user-provided text.
+1. **Load comments** via `github-pull-request_getPullRequestComments` or from user-provided text.
 2. **Classify** the comment (see Classification below).
 3. **Present to user** — for every comment, show:
    - The reviewer's comment (quoted)
