@@ -2,11 +2,12 @@
 name: Bug Hunter
 description: >
   Reproduces and fixes bugs via TDD. Fetches GitHub issue details, investigates
-  the codebase, delegates to TDD Red/Green/Refactor workers for the fix. Use
-  when a bug is reported, a GitHub issue is referenced, or a reviewer describes
-  incorrect behavior.
-tools: [read, search, execute, agent]
-agents: ['TDD Red', 'TDD Green', 'TDD Refactor', 'Code Reviewer']
+  the codebase, runs commands and browser checks to reproduce, delegates to TDD
+  Red/Green/Refactor workers for the fix. Delegates to TDD Coach when multiple
+  test cases are needed. Use when a bug is reported, a GitHub issue is
+  referenced, or a reviewer describes incorrect behavior.
+tools: [read, search, execute, browser, agent]
+agents: ['TDD Red', 'TDD Green', 'TDD Refactor', 'TDD Coach', 'Code Reviewer', 'Code Refactorer']
 argument-hint: "bug description or GitHub issue number (e.g. #42)"
 user-invocable: true
 ---
@@ -113,10 +114,23 @@ Delegate to `@TDD Refactor` with all changed files.
 
 | Trigger | Delegate to | Why |
 |---------|-------------|-----|
-| Fix has wide blast radius or touches multiple layers | `@Code Reviewer` | Read-only impact analysis before committing |
+| Bug needs multiple test cases (edge cases, regressions) | `@TDD Coach` | Plans and orchestrates full TDD cycles |
+| Fix has wide blast radius or touches multiple layers | `@Code Reviewer` | Verifies cross-cutting impact |
 | Bug is in a website component or page | `@Website Designer` | UI/UX specialist for Astro components |
 | Bug involves translation or i18n strings | `@i18n Reviewer` | Linguistic and i18n correctness |
-| Post-fix docs are outdated (README, CHANGELOG) | `@Document Maintainer` | Keep docs in sync with fix |
+| Post-fix docs are outdated (README, CHANGELOG) | `@Document Maintainer` | Keep docs in sync |
+| Fix introduces code smells or SRP violations | `@Code Refactorer` | Safe incremental refactoring specialist |
+
+## Investigation Tools
+
+Use all available tools to investigate and reproduce bugs:
+
+- **Terminal**: Run CLI commands, `pnpm test`, `pnpm lint`, `dotnet test`,
+  `make test-sdk-python` to reproduce failures
+- **MCP Playwright / Browser**: Navigate the website, take screenshots, check
+  console errors, validate visual regressions at different breakpoints
+- **Read/Search**: Explore codebase, trace code paths, check logs
+- **Execute**: Run arbitrary commands to test hypotheses
 
 ## Rules
 
