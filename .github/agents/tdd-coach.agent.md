@@ -98,6 +98,9 @@ Remaining: {N} cycles
 - **One behavior per cycle.** Do not batch multiple behaviors.
 - **Present plan before acting.** User must approve the cycle list.
 - **Delegate all code writing.** You are a coordinator only.
+- **Keep CRAP below 4.** Every method produced in Green/Refactor must have
+  a CRAP score < 4. If a method exceeds this threshold, add a Refactor
+  cycle to reduce complexity before moving to the next behavior.
 
 ## Conventions
 
@@ -120,3 +123,25 @@ Remaining: {N} cycles
 After all cycles complete: "Run `/smart-commit` to commit, then `/pr-sync` to open a PR."
 
 If implementation is non-trivial: "Use `@Code Reviewer` for a post-implementation review."
+
+## Quality Gate — CRAP Score
+
+CRAP (Change Risk Anti-Patterns) measures the risk of a method based on
+cyclomatic complexity and test coverage:
+
+$$\text{CRAP}(m) = \text{comp}(m)^2 \times (1 - \text{cov}(m))^3 + \text{comp}(m)$$
+
+A CRAP score < 4 means the method is either simple or well-tested (or both).
+
+| Complexity | Coverage needed for CRAP < 4 |
+|------------|------------------------------|
+| 1 | 0% |
+| 2 | 60%+ |
+| 3 | 80%+ |
+| 4+ | 100% (and consider splitting) |
+
+During the **Refactor** phase, if any method has CRAP >= 4:
+
+1. Extract complex branches into smaller, focused methods
+2. Add missing test paths to increase coverage
+3. Verify CRAP drops below 4 before marking the cycle complete

@@ -1,0 +1,41 @@
+# Smart Commit — Scope Reference
+
+## Envilder-Specific Scopes
+
+| Scope | Area |
+|-------|------|
+| `cli` | CLI entry point (`src/envilder/apps/cli/`) |
+| `gha` | GitHub Action (`src/envilder/apps/gha/`) |
+| `ssm` | AWS SSM provider |
+| `keyvault` | Azure Key Vault provider |
+| `domain` | Domain entities, ports, errors |
+| `app` | Application layer handlers |
+| `infra` | Infrastructure adapters |
+| `sdk-ts` | TypeScript SDK (`src/sdks/typescript/`) |
+| `sdk-dotnet` | .NET SDK (`src/sdks/dotnet/`) |
+| `sdk-python` | Python SDK (`src/sdks/python/`) |
+| `sdk-go` | Go SDK (`src/sdks/go/`) |
+| `sdk-java` | Java SDK (`src/sdks/java/`) |
+| `website` | Astro website (`src/website/`) |
+| `e2e` | End-to-end tests |
+| `iac` | Infrastructure as Code (`src/iac/`) |
+| `dx` | Developer experience, tooling |
+
+## Scope Selection Heuristic
+
+1. If all changes are in one SDK → use `sdk-<runtime>` scope
+2. If all changes are in one layer → use that layer scope (`domain`, `app`, `infra`)
+3. If changes span CLI + core → use `cli` (user-facing entry point)
+4. If changes span multiple SDKs → omit scope or use `sdk`
+5. If changes are purely infrastructure/tooling → use `dx` or `chore`
+
+## Examples
+
+```bash
+feat(sdk-ts): add fluent builder for secret resolution
+fix(ssm): handle throttling on GetParameter calls
+test(sdk-dotnet): add acceptance tests for Azure Key Vault
+docs(website): update SDK landing page with TypeScript examples
+chore(dx): update biome to v2.0
+refactor(app): extract shared validation into domain layer
+```
