@@ -73,7 +73,9 @@ Each addressed comment produces **its own commit** before replying:
    fix(scope): brief description of the change
    ```
 
-3. Only then reply to the GitHub comment referencing the commit.
+3. Capture the commit hash: `git rev-parse --short HEAD`
+4. Build the commit URL: `https://github.com/{owner}/{repo}/commit/{hash}`
+5. Only then reply to the GitHub comment, including the commit link.
 
 This keeps the PR history reviewable and each fix traceable to its comment.
 
@@ -89,7 +91,7 @@ Reply with a Markdown body that includes:
 - **Status**: `**Resolved.**` or `**Addressed.**`
 - **What changed**: one-line summary of the fix
 - **Files**: changed file paths with line references
-- **Commit**: the commit hash or short message
+- **Commit**: clickable link to the commit (`[<hash>](<url>)`)
 - **Evidence**: test name, lint output, or validation result
 
 Example reply:
@@ -98,7 +100,7 @@ Example reply:
 **Resolved.** Renamed `getParam` → `getParameter` for consistency.
 
 **Files:** `src/core/domain/ports/ISecretProvider.ts:12`
-**Commit:** `fix(core): rename getParam to getParameter`
+**Commit:** [`a1b2c3d`](https://github.com/owner/repo/commit/a1b2c3d)
 **Evidence:** `pnpm lint` — ✓, `pnpm test` — ✓
 ```
 
@@ -193,7 +195,7 @@ After processing all comments, output a summary in the chat:
 ### Comment: "{summary}"
 **Action:** {what changed and why}
 **Files:** {path:line references}
-**Commit:** {commit message}
+**Commit:** [`<hash>`](<url>)
 **GitHub Reply:** ✓ posted
 
 ### Comment: "{summary}"
