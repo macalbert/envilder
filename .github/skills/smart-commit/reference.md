@@ -19,6 +19,7 @@
 | `website` | Astro website (`src/website/`) |
 | `e2e` | End-to-end tests |
 | `iac` | Infrastructure as Code (`src/iac/`) |
+| `sdk` | Changes spanning multiple SDKs |
 | `dx` | Developer experience, tooling |
 
 ## Scope Selection Heuristic
@@ -26,8 +27,8 @@
 1. If all changes are in one SDK → use `sdk-<runtime>` scope
 2. If all changes are in one layer → use that layer scope (`domain`, `app`, `infra`)
 3. If changes span CLI + core → use `cli` (user-facing entry point)
-4. If changes span multiple SDKs → omit scope or use `sdk`
-5. If changes are purely infrastructure/tooling → use `dx` or `chore`
+4. If changes span multiple SDKs → use `sdk` scope
+5. If changes are purely infrastructure/tooling → use `dx` scope (with `chore` as the commit type)
 
 ## Examples
 

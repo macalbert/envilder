@@ -99,8 +99,9 @@ Remaining: {N} cycles
 - **Present plan before acting.** User must approve the cycle list.
 - **Delegate all code writing.** You are a coordinator only.
 - **Keep CRAP below 4.** Every method produced in Green/Refactor must have
-  a CRAP score < 4. If a method reaches or exceeds this threshold, add a Refactor
-  cycle to reduce complexity before moving to the next behavior.
+  a CRAP score < 4. If CRAP >= 4 due to high complexity, add a Refactor cycle
+  to extract smaller methods. If CRAP >= 4 due to insufficient test coverage,
+  schedule a new Red/Green cycle to add the missing test paths.
 
 ## Conventions
 
@@ -138,10 +139,11 @@ A CRAP score < 4 means the method is either simple or well-tested (or both).
 | 1 | 0% |
 | 2 | 60%+ |
 | 3 | 80%+ |
-| 4+ | 100% (and consider splitting) |
+| 4+ | Not achievable — split to reduce complexity |
 
 During the **Refactor** phase, if any method has CRAP >= 4:
 
 1. Extract complex branches into smaller, focused methods
-2. Add missing test paths to increase coverage
+2. If CRAP is still >= 4 because coverage is insufficient, schedule a new
+   **Red/Green** cycle to add the missing test paths, then return to Refactor
 3. Verify CRAP drops below 4 before marking the cycle complete

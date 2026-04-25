@@ -11,13 +11,13 @@ Envilder via VS Code Copilot agents, prompts, skills, and instructions.
 │  pre-commit → biome check --write on staged files   │
 ├─────────────────────────────────────────────────────┤
 │  Prompts (.github/prompts/)                         │
-│  /smart-commit  /pr-sync  /scaffold-feature  ...    │
+│  /scaffold-feature  /resolve-pr-comments  ...       │
 ├─────────────────────────────────────────────────────┤
 │  Agents (.github/agents/)                           │
 │  @TDD Coach  @Code Review  @Bug Hunter  ...         │
 ├─────────────────────────────────────────────────────┤
 │  Skills (.github/skills/)                           │
-│  testing-conventions                                │
+│  testing-conventions  smart-commit  pr-sync  ...    │
 ├─────────────────────────────────────────────────────┤
 │  Instructions (.github/instructions/)               │
 │  architecture · coding · git · review-response      │
@@ -65,8 +65,6 @@ suggestions shown to the user (user invokes the next step manually).
 
 | Prompt | Purpose | When to Use |
 |--------|---------|-------------|
-| `/smart-commit` | Generate conventional commit from staged changes | After completing a code change |
-| `/pr-sync` | Create or update a PR with auto-generated description | After pushing commits |
 | `/scaffold-feature` | Generate skeleton files for a new feature | Starting a new feature |
 | `/resolve-pr-comments` | Process PR review feedback end-to-end | After receiving review comments |
 | `/use-semantic-versioning` | Determine correct SemVer bump | Before releasing |
@@ -76,6 +74,8 @@ suggestions shown to the user (user invokes the next step manually).
 | Skill | Purpose | Loaded By |
 |-------|---------|-----------|
 | `testing-conventions` | Vitest naming, AAA structure, mock patterns | TDD agents, testing tasks |
+| `smart-commit` | Generate conventional commit from staged changes | After completing a code change |
+| `pr-sync` | Create or update a PR with auto-generated description | After pushing commits |
 
 ## Instructions
 

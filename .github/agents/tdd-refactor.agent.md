@@ -45,12 +45,15 @@ green.
 
 - **Never change behavior** — only improve structure
 - **Keep CRAP below 4.** Every method must have a CRAP score < 4 after
-  refactoring. Extract complex branches into smaller methods and ensure
-  test coverage matches complexity:
+  refactoring. Extract complex branches into smaller methods to reduce
+  complexity. Use these coverage thresholds only to decide whether to flag
+  the coordinator for a new Red cycle; do not add tests in Refactor:
   - Complexity 1 → any coverage
   - Complexity 2 → 60%+
   - Complexity 3 → 80%+
-  - Complexity 4+ → 100% (flag to coordinator for a new Red cycle)
+  - Complexity 4+ → not achievable, must split
+  If the applicable threshold cannot be met without adding new tests, flag
+  the coordinator to start a new Red cycle for coverage.
 - Run tests after **every** change, not just at the end
 - If unsure whether a change preserves behavior, skip it
 - Do not add new tests or features — that starts a new cycle

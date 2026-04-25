@@ -19,7 +19,7 @@ Analyze staged changes and create a conventional commit message.
 1. Run `git diff --cached --stat` to see what's staged.
 2. Run `git diff --cached` to read the full diff.
 3. Analyze the changes — identify the dominant change type and scope.
-4. Generate a conventional commit message following the [rules](./reference.md).
+4. Generate a conventional commit message following the [format](#commit-message-format), [rules](#rules), and [scope heuristics](./reference.md).
 5. Present the commit message for user approval.
 6. Run `git commit -m "<message>"` after approval.
 

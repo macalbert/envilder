@@ -29,11 +29,10 @@ of inline `--body`. PowerShell treats the backtick as an escape character, which
 corrupts inline markdown containing code spans.
 
 ```powershell
-# 1. Write body to temp file (use create_file tool, NOT echo/Set-Content)
-#    Path: .pr-body.md  (gitignored or deleted after use)
+# 1. Write body to a temp file (.pr-body.md, gitignored or deleted after use)
 
-# 2. Create new PR:
-gh pr create --base main --title "<title>" --body-file .pr-body.md
+# 2. Create new PR (use <base>=main unless targeting a different branch):
+gh pr create --base <base> --title "<title>" --body-file .pr-body.md
 
 # 3. Or update existing PR:
 gh pr edit --title "<title>" --body-file .pr-body.md

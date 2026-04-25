@@ -17,10 +17,14 @@ Create or update a GitHub pull request for the current branch.
 ## Procedure
 
 1. Get the current branch: `git branch --show-current`
-2. Check if a PR already exists: `gh pr view --json number,title,url 2>$null`
-3. Get commits since base: `git log main..HEAD --oneline`
-4. Generate PR title and body following the [template](./reference.md).
-5. Create or update the PR using `--body-file` (see [constraints](#constraints)).
+2. Determine the base branch from the optional argument; if none is
+   provided, default to `main`.
+3. Check if a PR already exists:
+   - PowerShell: `gh pr view --json number,title,url 2>$null`
+   - Bash/Zsh: `gh pr view --json number,title,url 2>/dev/null`
+4. Get commits since base: `git log <base>..HEAD --oneline`
+5. Generate PR title and body following the [template](./reference.md).
+6. Create or update the PR using `--body-file` (see [constraints](#constraints)).
 
 ## PR Title
 
