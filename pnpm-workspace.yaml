@@ -2,8 +2,10 @@ packages:
   - "."
   - "src/website"
   - "src/iac"
+  - "src/sdks/typescript"
   - "tests/iac"
   - "tests/website"
+  - "tests/sdks/typescript"
 
 catalog:
   '@biomejs/biome': ^2.4.9
