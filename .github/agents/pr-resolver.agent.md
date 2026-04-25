@@ -39,15 +39,23 @@ For each review comment on the active PR:
 
 1. **Load comments** via MCP `getPullRequestComments` or from user-provided text.
 2. **Classify** the comment (see Classification below).
-3. **Act** on the comment:
+3. **Present to user** — for every comment, show:
+   - The reviewer's comment (quoted)
+   - The affected file and line
+   - Your proposed action (fix, skip, delegate, or answer)
+   - A brief explanation of the change you plan to make
+4. **Wait for user approval** — do NOT proceed until the user explicitly
+   confirms. The user may approve, reject, or request an alternative. **This
+   step is mandatory and must never be skipped.**
+5. **Act** on the comment (only after approval):
    - Apply the fix, delegate, answer the question, or decide to skip.
-4. **Commit** the fix immediately by staging only the changed files
+6. **Commit** the fix immediately by staging only the changed files
    (`git add <files>`) then running `git commit`.
-5. **Reply on GitHub** to the comment thread with a Markdown summary of what was
+7. **Reply on GitHub** to the comment thread with a Markdown summary of what was
    done (or why it was skipped).
-6. **Resolve** the thread via `resolveReviewThread`.
-7. Repeat for the next comment.
-8. After all comments: **validate** with `pnpm lint` and `pnpm test`, then push.
+8. **Resolve** the thread via `resolveReviewThread`.
+9. Repeat for the next comment.
+10. After all comments: **validate** with `pnpm lint` and `pnpm test`, then push.
 
 ### Classification
 
@@ -211,6 +219,9 @@ After processing all comments, output a summary in the chat:
 
 ## Constraints
 
+- **Never act on a comment without user approval.** Present each comment and
+  your proposed action, then wait for explicit confirmation before applying any
+  change, commit, or GitHub reply. This rule has no exceptions.
 - **Always respond and write PR comments in English**, regardless of user's
   language.
 - **Every comment gets a GitHub reply** — addressed, skipped, or answered.
