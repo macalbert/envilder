@@ -14,7 +14,7 @@ Envilder via VS Code Copilot agents, prompts, skills, and instructions.
 │  /scaffold-feature  /resolve-pr-comments  ...       │
 ├─────────────────────────────────────────────────────┤
 │  Agents (.github/agents/)                           │
-│  @TDD Coach  @Code Review  @Bug Hunter  ...         │
+│  @TDD Coach  @Code Reviewer  @Bug Hunter  ...       │
 ├─────────────────────────────────────────────────────┤
 │  Skills (.github/skills/)                           │
 │  testing-conventions  smart-commit  pr-sync  ...    │
@@ -33,9 +33,9 @@ suggestions shown to the user (user invokes the next step manually).
 ```text
 /scaffold-feature ···► @TDD Coach ···► /smart-commit ···► /pr-sync
                           │                                    │
-                  @TDD Red / Green /              @Code Review ◄┘
+                  @TDD Red / Green /          @Code Reviewer ◄┘
                   @TDD Refactor                        │
-                                                  @PR Comment Resolver
+                                                  @PR Resolver
                                                   ┌────┴─────┐
                                              bug? │          │ code fix
                                            @Bug Hunter   edit + commit
