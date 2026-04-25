@@ -1,0 +1,12 @@
+{
+  "name": "@envilder/sdk-tests",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "vitest": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "typescript": "catalog:",
+    "@types/node": "catalog:"
+  }
+}
