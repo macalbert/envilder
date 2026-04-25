@@ -113,7 +113,7 @@ After all perspectives return:
 After analysis, verify findings before reporting:
 
 1. **Run tests**: `pnpm test` — confirm test suite passes (or fails where expected)
-2. **Run linter**: `pnpm lint` — confirm lint/format compliance
+2. **Run linter**: `biome check && tsc --noEmit` — confirm lint compliance without modifying files
 3. **Run formatter check**: `pnpm format` — verify formatting without modifying files
 4. **Browser checks** (when website or UI changes are in scope):
    - Use MCP Playwright to navigate the site, take screenshots, and validate
