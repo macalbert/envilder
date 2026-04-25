@@ -73,10 +73,10 @@ suggestions shown to the user (user invokes the next step manually).
 
 | Skill | Purpose | Loaded By |
 |-------|---------|-----------|
-| `testing-conventions` | Vitest naming, AAA structure, mock patterns | TDD agents, testing tasks |
-| `smart-commit` | Generate conventional commit from staged changes | After completing a code change |
-| `pr-sync` | Create or update a PR with auto-generated description | After pushing commits |
-| `doc-sync` | Audit and sync docs across all surfaces | After feature changes, SDK updates, or before release |
+| `testing-conventions` | Vitest naming, AAA structure, mock patterns | TDD Red, TDD Green, TDD Coach |
+| `smart-commit` | Generate conventional commit from staged changes | Any agent after code changes |
+| `pr-sync` | Create or update a PR with auto-generated description | PR Resolver, any agent after pushing |
+| `doc-sync` | Audit and sync docs across all surfaces | Document Maintainer, Code Reviewer |
 
 ## Instructions
 
