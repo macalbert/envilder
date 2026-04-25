@@ -17,7 +17,7 @@ pre-commit:
 pre-push:
   commands:
     biome-format:
-      run: pnpm format
+      run: pnpm format:write
 
 commit-msg:
   commands:
