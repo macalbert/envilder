@@ -34,10 +34,11 @@ describe('AzureKeyVaultSecretProvider', () => {
   });
 
   it('Should_ThrowError_When_SecretClientIsNull', () => {
-    // Act & Assert
-    expect(() => new AzureKeyVaultSecretProvider(null)).toThrow(
-      'secretClient cannot be null',
-    );
+    // Act
+    const act = () => new AzureKeyVaultSecretProvider(null);
+
+    // Assert
+    expect(act).toThrow('secretClient cannot be null');
   });
 
   it('Should_ThrowError_When_NameIsEmpty', async () => {
@@ -45,10 +46,11 @@ describe('AzureKeyVaultSecretProvider', () => {
     const mockClient = { getSecret: vi.fn() };
     const sut = new AzureKeyVaultSecretProvider(mockClient);
 
-    // Act & Assert
-    await expect(sut.getSecret('')).rejects.toThrow(
-      'Secret name cannot be null or empty',
-    );
+    // Act
+    const act = sut.getSecret('');
+
+    // Assert
+    await expect(act).rejects.toThrow('Secret name cannot be null or empty');
   });
 
   it('Should_RethrowError_When_UnexpectedAzureError', async () => {
@@ -60,7 +62,10 @@ describe('AzureKeyVaultSecretProvider', () => {
     const mockClient = { getSecret: mockGetSecret };
     const sut = new AzureKeyVaultSecretProvider(mockClient);
 
-    // Act & Assert
-    await expect(sut.getSecret('db-url')).rejects.toThrow('Forbidden');
+    // Act
+    const act = sut.getSecret('db-url');
+
+    // Assert
+    await expect(act).rejects.toThrow('Forbidden');
   });
 });

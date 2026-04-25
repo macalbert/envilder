@@ -62,17 +62,19 @@ describe('Envilder', () => {
     });
 
     it('Should_ThrowError_When_FilePathIsEmpty', async () => {
-      // Act & Assert
-      await expect(Envilder.load('')).rejects.toThrow(
-        'file path cannot be empty',
-      );
+      // Act
+      const act = Envilder.load('');
+
+      // Assert
+      await expect(act).rejects.toThrow('file path cannot be empty');
     });
 
     it('Should_ThrowError_When_FilePathIsWhitespace', async () => {
-      // Act & Assert
-      await expect(Envilder.load('   ')).rejects.toThrow(
-        'file path cannot be empty',
-      );
+      // Act
+      const act = Envilder.load('   ');
+
+      // Assert
+      await expect(act).rejects.toThrow('file path cannot be empty');
     });
   });
 
@@ -86,6 +88,19 @@ describe('Envilder', () => {
       expect(actual.get('API_KEY')).toBe('sk-123');
       expect(process.env.DB_URL).toBeUndefined();
       expect(process.env.API_KEY).toBeUndefined();
+    });
+
+    it('Should_ResolveFromMappedFile_When_EnvMappingProvided', async () => {
+      // Act
+      const actual = await Envilder.resolveFile('production', {
+        production: 'prod-secrets.json',
+        test: null,
+      });
+
+      // Assert
+      expect(mockReadFile).toHaveBeenCalledWith('prod-secrets.json', 'utf-8');
+      expect(actual.size).toBe(2);
+      expect(process.env.DB_URL).toBeUndefined();
     });
   });
 
@@ -125,17 +140,19 @@ describe('Envilder', () => {
     });
 
     it('Should_ThrowError_When_EnvIsEmpty', async () => {
-      // Act & Assert
-      await expect(
-        Envilder.load('', { production: 'prod-secrets.json' }),
-      ).rejects.toThrow('env cannot be empty');
+      // Act
+      const act = Envilder.load('', { production: 'prod-secrets.json' });
+
+      // Assert
+      await expect(act).rejects.toThrow('env cannot be empty');
     });
 
     it('Should_ThrowError_When_EnvMappingHasEmptyPath', async () => {
-      // Act & Assert
-      await expect(
-        Envilder.load('production', { production: '   ' }),
-      ).rejects.toThrow('empty file path');
+      // Act
+      const act = Envilder.load('production', { production: '   ' });
+
+      // Assert
+      await expect(act).rejects.toThrow('empty file path');
     });
   });
 
@@ -181,10 +198,11 @@ describe('Envilder', () => {
     });
 
     it('Should_ThrowError_When_FromMapFilePathIsEmpty', () => {
-      // Act & Assert
-      expect(() => Envilder.fromMapFile('')).toThrow(
-        'file path cannot be empty',
-      );
+      // Act
+      const act = () => Envilder.fromMapFile('');
+
+      // Assert
+      expect(act).toThrow('file path cannot be empty');
     });
   });
 });

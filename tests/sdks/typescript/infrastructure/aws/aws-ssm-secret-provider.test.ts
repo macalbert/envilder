@@ -33,10 +33,11 @@ describe('AwsSsmSecretProvider', () => {
   });
 
   it('Should_ThrowError_When_SsmClientIsNull', () => {
-    // Act & Assert
-    expect(() => new AwsSsmSecretProvider(null)).toThrow(
-      'ssmClient cannot be null',
-    );
+    // Act
+    const act = () => new AwsSsmSecretProvider(null);
+
+    // Assert
+    expect(act).toThrow('ssmClient cannot be null');
   });
 
   it('Should_ThrowError_When_NameIsEmpty', async () => {
@@ -44,8 +45,11 @@ describe('AwsSsmSecretProvider', () => {
     const mockClient = { send: vi.fn() };
     const sut = new AwsSsmSecretProvider(mockClient);
 
-    // Act & Assert
-    await expect(sut.getSecret('')).rejects.toThrow(
+    // Act
+    const act = sut.getSecret('');
+
+    // Assert
+    await expect(act).rejects.toThrow(
       'Secret name cannot be null or whitespace',
     );
   });
@@ -58,7 +62,10 @@ describe('AwsSsmSecretProvider', () => {
     const mockClient = { send: mockSend };
     const sut = new AwsSsmSecretProvider(mockClient);
 
-    // Act & Assert
-    await expect(sut.getSecret('/app/db-url')).rejects.toThrow('AccessDenied');
+    // Act
+    const act = sut.getSecret('/app/db-url');
+
+    // Assert
+    await expect(act).rejects.toThrow('AccessDenied');
   });
 });

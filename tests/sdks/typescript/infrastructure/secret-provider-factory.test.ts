@@ -85,8 +85,11 @@ describe('SecretProviderFactory', () => {
     };
     const options = { profile: 'staging' };
 
-    // Act & Assert
-    expect(() => createSecretProvider(config, options)).toThrow(
+    // Act
+    const act = () => createSecretProvider(config, options);
+
+    // Assert
+    expect(act).toThrow(
       'AWS profile cannot be used with Azure Key Vault provider',
     );
   });
@@ -96,18 +99,22 @@ describe('SecretProviderFactory', () => {
     const config = { provider: SecretProviderType.Aws };
     const options = { vaultUrl: 'https://my-vault.vault.azure.net' };
 
-    // Act & Assert
-    expect(() => createSecretProvider(config, options)).toThrow(
-      'Vault URL cannot be used with AWS SSM provider',
-    );
+    // Act
+    const act = () => createSecretProvider(config, options);
+
+    // Assert
+    expect(act).toThrow('Vault URL cannot be used with AWS SSM provider');
   });
 
   it('Should_ThrowError_When_AzureWithoutVaultUrl', () => {
     // Arrange
     const config = { provider: SecretProviderType.Azure };
 
-    // Act & Assert
-    expect(() => createSecretProvider(config)).toThrow(
+    // Act
+    const act = () => createSecretProvider(config);
+
+    // Assert
+    expect(act).toThrow(
       'Vault URL must be provided for Azure Key Vault provider',
     );
   });

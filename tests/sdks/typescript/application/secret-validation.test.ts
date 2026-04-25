@@ -12,17 +12,23 @@ describe('validateSecrets', () => {
       ['API_KEY', 'sk-123'],
     ]);
 
-    // Act & Assert
-    expect(() => validateSecrets(secrets)).not.toThrow();
+    // Act
+    const act = () => validateSecrets(secrets);
+
+    // Assert
+    expect(act).not.toThrow();
   });
 
   it('Should_ThrowError_When_DictionaryIsEmpty', () => {
     // Arrange
     const secrets = new Map<string, string>();
 
-    // Act & Assert
-    expect(() => validateSecrets(secrets)).toThrow(SecretValidationError);
-    expect(() => validateSecrets(secrets)).toThrow('No secrets were resolved');
+    // Act
+    const act = () => validateSecrets(secrets);
+
+    // Assert
+    expect(act).toThrow(SecretValidationError);
+    expect(act).toThrow('No secrets were resolved');
   });
 
   it('Should_ThrowError_When_ValueIsEmpty', () => {
@@ -32,8 +38,11 @@ describe('validateSecrets', () => {
       ['API_KEY', 'sk-123'],
     ]);
 
-    // Act & Assert
-    expect(() => validateSecrets(secrets)).toThrow(SecretValidationError);
+    // Act
+    const act = () => validateSecrets(secrets);
+
+    // Assert
+    expect(act).toThrow(SecretValidationError);
   });
 
   it('Should_ThrowError_When_ValueIsWhitespace', () => {
@@ -43,8 +52,11 @@ describe('validateSecrets', () => {
       ['API_KEY', 'sk-123'],
     ]);
 
-    // Act & Assert
-    expect(() => validateSecrets(secrets)).toThrow(SecretValidationError);
+    // Act
+    const act = () => validateSecrets(secrets);
+
+    // Assert
+    expect(act).toThrow(SecretValidationError);
   });
 
   it('Should_ReportMissingKeys_When_MultipleEmpty', () => {
@@ -56,17 +68,12 @@ describe('validateSecrets', () => {
     ]);
 
     // Act
-    let error: SecretValidationError | undefined;
-    try {
-      validateSecrets(secrets);
-    } catch (e) {
-      error = e as SecretValidationError;
-    }
+    const act = () => validateSecrets(secrets);
 
     // Assert
-    expect(error).toBeInstanceOf(SecretValidationError);
-    expect(error!.missingKeys).toContain('DB_URL');
-    expect(error!.missingKeys).toContain('API_KEY');
-    expect(error!.missingKeys).not.toContain('VALID');
+    expect(act).toThrow(SecretValidationError);
+    expect(act).toThrow(
+      'The following secrets have empty or missing values: DB_URL, API_KEY',
+    );
   });
 });
