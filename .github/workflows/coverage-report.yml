@@ -255,13 +255,13 @@ jobs:
       - name: 🏎️ Run tests with coverage
         run: |
           mkdir -p output
-          cd tests/sdks/typescript && pnpm vitest run --reporter=verbose --coverage --coverage.reporter=lcov --coverage.reporter=text 2>&1 | tee ../../../output/test-output.txt
+          cd tests/sdks/typescript && pnpm vitest run --reporter=verbose --coverage --coverage.reporter=lcov --coverage.reporter=text --coverage.reportsDirectory=${{ github.workspace }}/coverage-ts-sdk 2>&1 | tee ../../../output/test-output.txt
 
       - name: 📋 Generate coverage report
         if: always()
         uses: danielpalme/ReportGenerator-GitHub-Action@5.5.4
         with:
-          reports: coverage/lcov.info
+          reports: coverage-ts-sdk/lcov.info
           sourcedirs: src/sdks/typescript/src
           targetdir: report
           reporttypes: Html;MarkdownSummaryGithub;Badges
