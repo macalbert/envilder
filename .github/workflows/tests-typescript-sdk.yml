@@ -56,14 +56,14 @@ jobs:
         run: cd src/sdks/typescript && pnpm build
 
       - name: 🍄 Run tests
-        run: cd tests/sdks/typescript && pnpm vitest run --reporter=verbose --reporter=junit --outputFile=test-results.xml
+        run: cd tests/sdks/typescript && pnpm vitest run --reporter=verbose --reporter=junit --outputFile=${{ github.workspace }}/test-results.xml
 
       - name: 📊 Test Results Reporter
         uses: dorny/test-reporter@v3
         if: always()
         with:
           name: TypeScript SDK Test Results
-          path: tests/sdks/typescript/test-results.xml
+          path: test-results.xml
           reporter: jest-junit
           only-summary: "false"
           list-suites: "all"
