@@ -1,0 +1,72 @@
+name: 🟦 TypeScript SDK Tests
+
+permissions:
+  id-token: write
+  contents: read
+  checks: write
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+    branches:
+      - '*'
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - '.github/workflows/tests-typescript-sdk.yml'
+      - 'src/sdks/typescript/**'
+      - 'tests/sdks/typescript/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  test-typescript-sdk:
+    runs-on: ubuntu-24.04
+    if: ${{ !github.event.pull_request.draft }}
+    timeout-minutes: 10
+
+    steps:
+      - name: 🧱 Checkout repository
+        uses: actions/checkout@v6
+
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
+
+      - name: 🛠️ Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.x"
+          cache: "pnpm"
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🌟 Format check
+        run: npx biome check src/sdks/typescript/src/ tests/sdks/typescript/
+
+      - name: 🏗️ Build
+        run: cd src/sdks/typescript && pnpm build
+
+      - name: 🍄 Run tests
+        run: cd tests/sdks/typescript && pnpm vitest run --reporter=verbose --reporter=junit --outputFile=test-results.xml
+
+      - name: 📊 Test Results Reporter
+        uses: dorny/test-reporter@v3
+        if: always()
+        with:
+          name: TypeScript SDK Test Results
+          path: tests/sdks/typescript/test-results.xml
+          reporter: jest-junit
+          only-summary: "false"
+          list-suites: "all"
+          list-tests: "all"
+          max-annotations: "10"
+          fail-on-error: "true"
