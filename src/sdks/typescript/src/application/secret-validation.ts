@@ -31,7 +31,7 @@ export function validateSecrets(secrets: ReadonlyMap<string, string>): void {
 
   const missingKeys: string[] = [];
   for (const [key, value] of secrets) {
-    if (!value || !value.trim()) {
+    if (!value?.trim()) {
       missingKeys.push(key);
     }
   }

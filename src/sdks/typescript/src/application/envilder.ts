@@ -42,7 +42,7 @@ export class Envilder {
    * before calling `.resolve()` or `.inject()`.
    */
   static fromMapFile(filePath: string): Envilder {
-    if (!filePath || !filePath.trim()) {
+    if (!filePath?.trim()) {
       throw new Error('file path cannot be empty');
     }
     return new Envilder(filePath);
@@ -143,7 +143,7 @@ export class Envilder {
 }
 
 function validateFilePath(filePath: string): void {
-  if (!filePath || !filePath.trim()) {
+  if (!filePath?.trim()) {
     throw new Error('file path cannot be empty');
   }
 }
@@ -152,7 +152,7 @@ function resolveEnvSource(
   env: string,
   envMapping: Record<string, string | null>,
 ): string | null {
-  if (!env || !env.trim()) {
+  if (!env?.trim()) {
     throw new Error('env cannot be empty');
   }
 

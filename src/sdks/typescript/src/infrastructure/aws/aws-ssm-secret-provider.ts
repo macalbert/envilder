@@ -18,7 +18,7 @@ export class AwsSsmSecretProvider implements ISecretProvider {
   }
 
   async getSecret(name: string): Promise<string | null> {
-    if (!name || !name.trim()) {
+    if (!name?.trim()) {
       throw new Error('Secret name cannot be null or whitespace.');
     }
 

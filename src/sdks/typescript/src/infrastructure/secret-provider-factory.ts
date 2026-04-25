@@ -38,7 +38,7 @@ export function createSecretProvider(
 function createAzureProvider(
   vaultUrl: string | undefined,
 ): AzureKeyVaultSecretProvider {
-  if (!vaultUrl || !vaultUrl.trim()) {
+  if (!vaultUrl?.trim()) {
     throw new Error('Vault URL must be provided for Azure Key Vault provider.');
   }
 
