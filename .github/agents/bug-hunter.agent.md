@@ -119,6 +119,7 @@ Delegate to `@TDD Refactor` with all changed files.
 | Bug is in a website component or page | `@Website Designer` | UI/UX specialist for Astro components |
 | Bug involves translation or i18n strings | `@i18n Reviewer` | Linguistic and i18n correctness |
 | Post-fix docs are outdated (README, CHANGELOG) | `@Document Maintainer` | Keep docs in sync |
+| Fix introduces code smells or SRP violations | `@Code Refactorer` | Safe incremental refactoring specialist |
 
 ## Investigation Tools
 
