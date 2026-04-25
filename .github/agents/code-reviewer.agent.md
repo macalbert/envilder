@@ -49,6 +49,23 @@ changed files and returns findings independently.
 - InversifyJS decorator usage, `@injectable()`, `@inject(TYPES.X)`
 - Conventional commits in PR title
 
+### 5. Complexity — CRAP Score
+
+Every changed or new method must have a CRAP score below 4.
+
+$$\text{CRAP}(m) = \text{comp}(m)^2 \times (1 - \text{cov}(m))^3 + \text{comp}(m)$$
+
+| Complexity | Coverage needed for CRAP < 4 |
+|------------|------------------------------|
+| 1 | 0% |
+| 2 | 60%+ |
+| 3 | 80%+ |
+| 4+ | 100% (and consider splitting) |
+
+- Flag any method with cyclomatic complexity ≥ 3 that lacks proportional test coverage
+- Flag methods with complexity ≥ 5 regardless of coverage — recommend extraction
+- Classify CRAP violations as **Medium** (complexity 3-4) or **High** (complexity 5+)
+
 ## Synthesis
 
 After all perspectives return:
