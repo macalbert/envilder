@@ -53,7 +53,7 @@ For each review comment on the active PR:
    (`git add <files>`) then running `git commit`.
 7. **Reply on GitHub** to the comment thread with a Markdown summary of what was
    done (or why it was skipped).
-8. **Resolve** the thread via `resolveReviewThread`.
+8. **Resolve** the thread via `github-pull-request_resolveReviewThread`.
 9. Repeat for the next comment.
 10. After all comments: **validate** with `pnpm lint` and `pnpm test`, then push.
 
@@ -179,7 +179,7 @@ When a change has unclear scope, delegate a read-only analysis to
 
 After replying to a comment:
 
-1. **Resolve** the thread via MCP `resolveReviewThread` or GraphQL mutation.
+1. **Resolve** the thread via `github-pull-request_resolveReviewThread` or GraphQL mutation.
 2. Multiple threads can be resolved in a single GraphQL call using aliases:
 
 ```graphql

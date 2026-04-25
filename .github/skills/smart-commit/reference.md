@@ -24,7 +24,7 @@
 
 ## Scope Selection Heuristic
 
-1. If all changes are in one SDK → use `sdk-<runtime>` scope
+1. If all changes are in one SDK → use the matching `sdk-*` scope (e.g. `sdk-ts`, `sdk-dotnet`, `sdk-python`)
 2. If all changes are in one layer → use that layer scope (`domain`, `app`, `infra`)
 3. If changes span CLI + core → use `cli` (user-facing entry point)
 4. If changes span multiple SDKs → use `sdk` scope
