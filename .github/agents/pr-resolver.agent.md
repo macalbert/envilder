@@ -16,7 +16,6 @@ tools:
   - github-pull-request_getPullRequestComments
   - github-pull-request_replyToReviewComment
   - github-pull-request_resolveReviewThread
-  - github-pull-request_createReviewComment
 agents:
   - Bug Hunter
   - Code Reviewer

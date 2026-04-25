@@ -6,7 +6,7 @@ description: >
   Red/Green/Refactor workers for the fix. Delegates to TDD Coach when multiple
   test cases are needed. Use when a bug is reported, a GitHub issue is
   referenced, or a reviewer describes incorrect behavior.
-tools: [read, search, edit, execute, browser, agent]
+tools: [read, search, execute, browser, agent]
 agents: ['TDD Red', 'TDD Green', 'TDD Refactor', 'TDD Coach', 'Code Reviewer']
 argument-hint: "bug description or GitHub issue number (e.g. #42)"
 user-invocable: true

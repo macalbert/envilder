@@ -5,7 +5,7 @@ description: >
   architecture, security, conventions, and complexity. Runs tests, linters,
   and browser checks to validate findings. Delegates to TDD Coach or Code
   Refactorer for automatic fixes. Use when reviewing PRs, commits, or local changes.
-tools: [read, search, edit, execute, browser, agent]
+tools: [read, search, execute, browser, agent]
 agents: ['TDD Coach', 'Code Refactorer', 'Bug Hunter', 'PR Resolver', 'Document Maintainer', 'Website Designer', 'i18n Reviewer']
 argument-hint: "PR, commit range, or files to review"
 user-invocable: true
@@ -112,7 +112,7 @@ After analysis, verify findings before reporting:
 
 1. **Run tests**: `pnpm test` — confirm test suite passes (or fails where expected)
 2. **Run linter**: `pnpm lint` — confirm lint/format compliance
-3. **Run formatter check**: `pnpm format:write` — auto-fix trivial formatting
+3. **Run formatter check**: `pnpm exec biome format --check .` — verify formatting without modifying files
 4. **Browser checks** (when website or UI changes are in scope):
    - Use MCP Playwright to navigate the site, take screenshots, and validate
      visual regressions or broken layouts
