@@ -42,7 +42,8 @@ For each review comment on the active PR:
 2. **Classify** the comment (see Classification below).
 3. **Act** on the comment:
    - Apply the fix, delegate, answer the question, or decide to skip.
-4. **Commit** the fix immediately (`git add -A && git commit`).
+4. **Commit** the fix immediately by staging only the changed files
+   (`git add <files>`) then running `git commit`.
 5. **Reply on GitHub** to the comment thread with a Markdown summary of what was
    done (or why it was skipped).
 6. **Resolve** the thread via `resolveReviewThread`.

@@ -55,7 +55,7 @@ suggestions shown to the user (user invokes the next step manually).
 | **@TDD Red** | Writes one failing test | Yes | — | *(worker, not user-invocable)* |
 | **@TDD Green** | Writes minimal passing code | Yes | — | *(worker, not user-invocable)* |
 | **@TDD Refactor** | Improves structure, keeps tests green | Yes | — | *(worker, not user-invocable)* |
-| **@Code Review** | Multi-perspective review (4 parallel) | No (read-only) | — | `@PR Comment Resolver` |
+| **@Code Review** | Multi-perspective review (5 parallel) | Yes (verifies + delegates fixes) | TDD Coach, Code Refactorer, Bug Hunter, PR Resolver, Document Maintainer, Website Designer, i18n Reviewer | `@PR Resolver` |
 | **@PR Comment Resolver** | Resolves PR review comments | Yes | Bug Hunter, Code Review | `/smart-commit` |
 | **@Bug Hunter** | Reproduces and fixes bugs | No (coordinator) | TDD Red, TDD Green, TDD Refactor | `/smart-commit` |
 | **@Refactor** | Code smell detection, SOLID improvements | Yes | — | `/smart-commit` |

@@ -64,11 +64,11 @@ $$\text{CRAP}(m) = \text{comp}(m)^2 \times (1 - \text{cov}(m))^3 + \text{comp}(m
 | 1 | 0% |
 | 2 | 60%+ |
 | 3 | 80%+ |
-| 4+ | 100% (and consider splitting) |
+| 4+ | Not achievable — must split (CRAP floor = complexity) |
 
 - Flag any method with cyclomatic complexity ≥ 3 that lacks proportional test coverage
-- Flag methods with complexity ≥ 5 regardless of coverage — recommend extraction
-- Classify CRAP violations as **Medium** (complexity 3-4) or **High** (complexity 5+)
+- Flag methods with complexity ≥ 4 — recommend extraction to reduce complexity
+- Classify CRAP violations as **Medium** (complexity 3) or **High** (complexity 4+)
 
 ## Synthesis
 
