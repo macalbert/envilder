@@ -59,12 +59,15 @@ Every changed or new method must have a CRAP score below 4.
 
 $$\text{CRAP}(m) = \text{comp}(m)^2 \times (1 - \text{cov}(m))^3 + \text{comp}(m)$$
 
-| Complexity | Coverage needed for CRAP < 4 |
-|------------|------------------------------|
+| Complexity | Recommended coverage for CRAP < 4 |
+|------------|------------------------------------|
 | 1 | 0% |
 | 2 | 60%+ |
 | 3 | 80%+ |
 | 4+ | Not achievable — must split (CRAP floor = complexity) |
+
+These thresholds are intentionally stricter than the mathematical minimum
+implied by the formula, providing a safety margin.
 
 - Flag any method with cyclomatic complexity ≥ 3 that lacks proportional test coverage
 - Flag methods with complexity ≥ 4 — recommend extraction to reduce complexity

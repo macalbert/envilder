@@ -134,12 +134,15 @@ $$\text{CRAP}(m) = \text{comp}(m)^2 \times (1 - \text{cov}(m))^3 + \text{comp}(m
 
 A CRAP score < 4 means the method is either simple or well-tested (or both).
 
-| Complexity | Coverage needed for CRAP < 4 |
-|------------|------------------------------|
+| Complexity | Recommended coverage for CRAP < 4 |
+|------------|------------------------------------|
 | 1 | 0% |
 | 2 | 60%+ |
 | 3 | 80%+ |
 | 4+ | Not achievable — split to reduce complexity |
+
+These thresholds are intentionally stricter than the mathematical minimum
+implied by the formula, providing a safety margin.
 
 During the **Refactor** phase, if any method has CRAP >= 4:
 

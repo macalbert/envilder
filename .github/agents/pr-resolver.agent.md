@@ -69,7 +69,7 @@ Each addressed comment produces **its own commit** before replying:
 1. Apply the code/doc/test change.
 2. Stage and commit with a descriptive message:
 
-   ```
+   ```txt
    fix(scope): brief description of the change
    ```
 
@@ -242,5 +242,5 @@ gh api ... -X PATCH -f body="**Resolved.** Updated references from \`v0.7.11\` t
 
 ## Next Steps
 
-After all comments resolved and validated: run `/smart-commit` to amend or
-squash if needed, then `git push`.
+After all comments resolved and validated: verify with `pnpm lint` and
+`pnpm test`, then `git push`.
