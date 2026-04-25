@@ -228,6 +228,59 @@ jobs:
           retention-days: 1
 
   # ────────────────────────────────────────────────────────────────────────────
+  # 🟦 TypeScript SDK
+  # ────────────────────────────────────────────────────────────────────────────
+  test-typescript-sdk:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: 🧲 Checkout
+        uses: actions/checkout@v6
+
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
+
+      - name: 🛠️ Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.x"
+          cache: "pnpm"
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏎️ Run tests with coverage
+        run: |
+          mkdir -p output
+          cd tests/sdks/typescript && pnpm vitest run --reporter=verbose --coverage --coverage.reporter=lcov --coverage.reporter=text 2>&1 | tee ../../../output/test-output.txt
+
+      - name: 📋 Generate coverage report
+        if: always()
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.4
+        with:
+          reports: coverage/lcov.info
+          sourcedirs: src/sdks/typescript/src
+          targetdir: report
+          reporttypes: Html;MarkdownSummaryGithub;Badges
+          filefilters: +*src/sdks/typescript/src/*;-*node_modules/*;-*tests/*;-*index.ts
+          title: "Envilder TypeScript SDK"
+
+      - name: 📊 Extract test stats
+        if: always()
+        run: node .github/workflows/coverage-report/extract-test-stats.mjs output/test-output.txt report/test-stats.json vitest
+
+      - name: 📤 Upload report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: typescript-sdk
+          path: report/
+          retention-days: 1
+
+  # ────────────────────────────────────────────────────────────────────────────
   # ☁️ IaC (CDK)
   # ────────────────────────────────────────────────────────────────────────────
   test-iac:
@@ -284,7 +337,7 @@ jobs:
   # 📊 Publish aggregated dashboard
   # ────────────────────────────────────────────────────────────────────────────
   publish-report:
-    needs: [test-core, test-dotnet, test-python, test-iac]
+    needs: [test-core, test-dotnet, test-python, test-typescript-sdk, test-iac]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -298,6 +351,7 @@ jobs:
           [ "${{ needs.test-core.result }}" != "success" ] && failed="$failed core"
           [ "${{ needs.test-dotnet.result }}" != "success" ] && failed="$failed dotnet"
           [ "${{ needs.test-python.result }}" != "success" ] && failed="$failed python"
+          [ "${{ needs.test-typescript-sdk.result }}" != "success" ] && failed="$failed typescript-sdk"
           [ "${{ needs.test-iac.result }}" != "success" ] && failed="$failed iac"
 
           if [ -n "$failed" ]; then

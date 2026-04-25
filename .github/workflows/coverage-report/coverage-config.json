@@ -12,6 +12,9 @@
     "python": {
       "line": 80
     },
+    "typescript-sdk": {
+      "line": 80
+    },
     "iac": {
       "line": 70
     }
