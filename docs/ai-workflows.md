@@ -55,7 +55,7 @@ suggestions shown to the user (user invokes the next step manually).
 | **@TDD Red** | Writes one failing test | Yes | — | *(worker, not user-invocable)* |
 | **@TDD Green** | Writes minimal passing code | Yes | — | *(worker, not user-invocable)* |
 | **@TDD Refactor** | Improves structure, keeps tests green | Yes | — | *(worker, not user-invocable)* |
-| **@Code Reviewer** | Multi-perspective review (5 parallel) | Yes (verifies + delegates fixes) | TDD Coach, Code Refactorer, Bug Hunter, PR Resolver, Document Maintainer, Website Designer, i18n Reviewer | `@PR Resolver` |
+| **@Code Reviewer** | Multi-perspective review | Yes | *(all agents)* | `@PR Resolver` |
 | **@PR Resolver** | Resolves PR review comments | Yes | Bug Hunter, Code Reviewer | `/smart-commit` |
 | **@Bug Hunter** | Reproduces and fixes bugs | No (coordinator) | TDD Red, TDD Green, TDD Refactor | `/smart-commit` |
 | **@Code Refactorer** | Code smell detection, SOLID improvements | Yes | — | `/smart-commit` |
@@ -76,7 +76,7 @@ suggestions shown to the user (user invokes the next step manually).
 | `testing-conventions` | Vitest naming, AAA structure, mock patterns | TDD agents, testing tasks |
 | `smart-commit` | Generate conventional commit from staged changes | After completing a code change |
 | `pr-sync` | Create or update a PR with auto-generated description | After pushing commits |
-| `doc-sync` | Audit and synchronize documentation across all surfaces | After feature changes, SDK updates, or before release |
+| `doc-sync` | Audit and sync docs across all surfaces | After feature changes, SDK updates, or before release |
 
 ## Instructions
 

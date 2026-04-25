@@ -115,10 +115,10 @@ Delegate to `@TDD Refactor` with all changed files.
 | Trigger | Delegate to | Why |
 |---------|-------------|-----|
 | Bug needs multiple test cases (edge cases, regressions) | `@TDD Coach` | Plans and orchestrates full TDD cycles |
-| Fix has wide blast radius or touches multiple layers | `@Code Reviewer` | Verifies cross-cutting impact and delegates follow-up review |
+| Fix has wide blast radius or touches multiple layers | `@Code Reviewer` | Verifies cross-cutting impact |
 | Bug is in a website component or page | `@Website Designer` | UI/UX specialist for Astro components |
 | Bug involves translation or i18n strings | `@i18n Reviewer` | Linguistic and i18n correctness |
-| Post-fix docs are outdated (README, CHANGELOG) | `@Document Maintainer` | Keep docs in sync with fix |
+| Post-fix docs are outdated (README, CHANGELOG) | `@Document Maintainer` | Keep docs in sync |
 
 ## Investigation Tools
 

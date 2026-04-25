@@ -38,7 +38,8 @@ Determine which feature area to audit:
 
 - **CLI**: root README, `docs/pull-command.md`, `docs/push-command.md`, website DocsContent
 - **GHA**: `github-action/README.md`, `docs/github-action.md`, website DocsContent
-- **SDK (per runtime)**: `src/sdks/{runtime}/README.md`, `examples/sdk/{runtime}/`, website DocsContent + Sdks.astro, i18n strings
+- **SDK (per runtime)**: `src/sdks/{runtime}/README.md`, `examples/sdk/{runtime}/`,
+  website DocsContent + Sdks.astro, i18n strings
 - **Full**: all surfaces
 
 ### 2. Extract Source of Truth
@@ -104,9 +105,9 @@ Use this matrix to ensure consistency when updating a feature:
 
 | When you change... | Also update... |
 |--------------------|----------------|
-| CLI flag in `Cli.ts` | `docs/pull-command.md` or `docs/push-command.md`, root README, website DocsContent, i18n (3 locales) |
+| CLI flag in `Cli.ts` | `docs/pull-command.md` or `docs/push-command.md`, root README, DocsContent, i18n |
 | GHA input in `action.yml` | `github-action/README.md`, `docs/github-action.md`, website DocsContent, i18n |
-| SDK public API | SDK README, examples README, website DocsContent + Sdks.astro, i18n |
+| SDK public API | SDK README, examples README, website DocsContent + Sdks.astro, i18n  |
 | New provider | All provider listings: root README, website Providers.astro, DocsContent, SDK READMEs |
 | Map-file format | Root README, all SDK READMEs, website DocsContent |
 | ROADMAP status | `ROADMAP.md`, website Roadmap.astro |
