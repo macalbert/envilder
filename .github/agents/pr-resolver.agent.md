@@ -67,9 +67,11 @@ Each addressed comment produces **its own commit** before replying:
 
 1. Apply the code/doc/test change.
 2. Stage and commit with a descriptive message:
+
    ```
    fix(scope): brief description of the change
    ```
+
 3. Only then reply to the GitHub comment referencing the commit.
 
 This keeps the PR history reviewable and each fix traceable to its comment.
@@ -223,7 +225,7 @@ After processing all comments, output a summary in the chat:
 When posting or updating PR comments via `gh api`, use **single quotes** for the
 `-f body=` parameter to preserve Markdown backticks. PowerShell double-quoted
 strings and `-f body="..."` escape backticks as `\``, producing broken rendering
-(e.g. `\v0.7.11\` instead of `` `v0.7.11` ``).
+(e.g.`\v0.7.11\` instead of `` `v0.7.11` ``).
 
 **Correct:**
 
