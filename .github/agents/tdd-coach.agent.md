@@ -135,7 +135,7 @@ $$\text{CRAP}(m) = \text{comp}(m)^2 \times (1 - \text{cov}(m))^3 + \text{comp}(m
 A CRAP score < 6 means the method is either simple or well-tested (or both).
 
 | Complexity | Recommended coverage for CRAP < 6 |
-|------------|------------------------------------||
+|-----------|------------------------------------|
 | 1 | 0% |
 | 2 | > 0% |
 | 3 | 40%+ |

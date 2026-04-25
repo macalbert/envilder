@@ -60,7 +60,7 @@ Every changed or new method must have a CRAP score below 6.
 $$\text{CRAP}(m) = \text{comp}(m)^2 \times (1 - \text{cov}(m))^3 + \text{comp}(m)$$
 
 | Complexity | Recommended coverage for CRAP < 6 |
-|------------|------------------------------------||
+|-----------|------------------------------------|
 | 1 | 0% |
 | 2 | > 0% |
 | 3 | 40%+ |
@@ -130,7 +130,7 @@ passes all checks, downgrade or remove it.
 
 | Trigger | Delegate to | Why |
 |---------|-------------|-----|
-| CRAP >= 4 on any method | `@TDD Coach` | Plans Red-Green-Refactor cycles to reduce complexity |
+| CRAP >= 6 on any method | `@TDD Coach` | Plans Red-Green-Refactor cycles to reduce complexity |
 | Structural issues (code smells, SRP) | `@Code Refactorer` | Safe incremental refactoring specialist |
 | Missing test coverage found | `@TDD Coach` | Adds tests via Red-Green-Refactor cycle |
 | Bug or incorrect behavior spotted | `@Bug Hunter` | Reproduces and fixes via TDD |
