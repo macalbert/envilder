@@ -12,8 +12,8 @@
     "isolatedModules": true,
     "noEmit": true,
     "paths": {
-      "@envilder/sdk": ["../../src/sdks/typescript/src/index.js"],
-      "@envilder/sdk/*": ["../../src/sdks/typescript/src/*"]
+      "@envilder/sdk": ["../../../src/sdks/typescript/src/index.ts"],
+      "@envilder/sdk/*": ["../../../src/sdks/typescript/src/*"]
     }
   },
   "include": ["**/*.ts"],

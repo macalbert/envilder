@@ -1,6 +1,8 @@
+import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { defineConfig } from 'vitest/config';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '../../..');
 
 export default defineConfig({
@@ -8,6 +10,7 @@ export default defineConfig({
   test: {
     globals: false,
     environment: 'node',
+    pool: 'forks',
     include: ['tests/sdks/typescript/**/*.test.ts'],
     coverage: {
       provider: 'v8',
