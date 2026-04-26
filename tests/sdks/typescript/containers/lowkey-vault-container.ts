@@ -22,6 +22,7 @@ export class LowkeyVaultTestContainer {
 
     try {
       this.container = await new GenericContainer(LOWKEY_VAULT_IMAGE)
+        .withName('lowkey-vault')
         .withExposedPorts(HTTPS_PORT, HTTP_PORT)
         .withEnvironment({
           LOWKEY_ARGS: '--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true',

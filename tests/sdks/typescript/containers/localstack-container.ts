@@ -35,6 +35,7 @@ export class LocalStackTestContainer {
     }
 
     this.container = await new LocalstackContainer(LOCALSTACK_IMAGE)
+      .withName('localstack')
       .withEnvironment(envRecord)
       .start();
 
