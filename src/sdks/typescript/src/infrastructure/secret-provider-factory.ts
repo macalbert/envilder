@@ -19,9 +19,7 @@ export function createSecretProvider(
   const isAzure = provider === SecretProviderType.Azure;
 
   if (isAzure && profile) {
-    throw new Error(
-      'AWS profile cannot be used with Azure Key Vault provider',
-    );
+    throw new Error('AWS profile cannot be used with Azure Key Vault provider');
   }
 
   if (!isAzure && vaultUrl) {

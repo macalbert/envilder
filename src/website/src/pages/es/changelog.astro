@@ -142,6 +142,28 @@ const parsed = products.map((p) => ({
               ))}
             </ul>
 
+            {/* TypeScript */}
+            <button
+              class="nav-product-btn nav-product-nested"
+              data-product="sdk-typescript"
+              aria-pressed="false"
+              aria-expanded="false"
+            >
+              <span class="nav-product-chevron">›</span>
+              {t.changelogPage.categorySdkTypescript}
+              <span class="nav-product-count">{parsed[3].versions.length}</span>
+            </button>
+            <ul class="version-list collapsed" data-versions="sdk-typescript">
+              {parsed[3].versions.map((v) => (
+                <li>
+                  <a href={`#sdk-typescript-${v.id}`} data-product="sdk-typescript">
+                    <span class="version-link-tag">{v.tag}</span>
+                    {v.date && <span class="version-link-date">{v.date}</span>}
+                  </a>
+                </li>
+              ))}
+            </ul>
+
             {/* GHA */}
             <p class="nav-group-title">{t.changelogPage.categoryGha}</p>
             <button
@@ -152,10 +174,10 @@ const parsed = products.map((p) => ({
             >
               <span class="nav-product-chevron">›</span>
               {t.changelogPage.versions}
-              <span class="nav-product-count">{parsed[3].versions.length}</span>
+              <span class="nav-product-count">{parsed[4].versions.length}</span>
             </button>
             <ul class="version-list collapsed" data-versions="gha">
-              {parsed[3].versions.map((v) => (
+              {parsed[4].versions.map((v) => (
                 <li>
                   <a href={`#gha-${v.id}`} data-product="gha">
                     <span class="version-link-tag">{v.tag}</span>

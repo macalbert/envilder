@@ -6,6 +6,38 @@ const rootPkg = JSON.parse(
   readFileSync(new URL('../../package.json', import.meta.url), 'utf-8'),
 );
 
+const sdkTsPkg = JSON.parse(
+  readFileSync(
+    new URL('../sdks/typescript/package.json', import.meta.url),
+    'utf-8',
+  ),
+);
+
+function extractCsprojVersion(relativePath) {
+  try {
+    const xml = readFileSync(new URL(relativePath, import.meta.url), 'utf-8');
+    const match = xml.match(/<Version>(.*?)<\/Version>/);
+    return match ? match[1] : '0.0.0';
+  } catch {
+    return '0.0.0';
+  }
+}
+
+function extractPyprojectVersion(relativePath) {
+  try {
+    const toml = readFileSync(new URL(relativePath, import.meta.url), 'utf-8');
+    const match = toml.match(/^version\s*=\s*"(.*?)"/m);
+    return match ? match[1] : '0.0.0';
+  } catch {
+    return '0.0.0';
+  }
+}
+
+const sdkDotnetVersion = extractCsprojVersion('../sdks/dotnet/Envilder.csproj');
+const sdkPythonVersion = extractPyprojectVersion(
+  '../sdks/python/pyproject.toml',
+);
+
 let changelogContent = '';
 try {
   changelogContent = readFileSync(
@@ -52,6 +84,9 @@ export default defineConfig({
       __CHANGELOG_SDK_DOTNET__: JSON.stringify(changelogSdkDotnet),
       __CHANGELOG_SDK_PYTHON__: JSON.stringify(changelogSdkPython),
       __CHANGELOG_SDK_TYPESCRIPT__: JSON.stringify(changelogSdkTypescript),
+      __SDK_DOTNET_VERSION__: JSON.stringify(sdkDotnetVersion),
+      __SDK_PYTHON_VERSION__: JSON.stringify(sdkPythonVersion),
+      __SDK_TYPESCRIPT_VERSION__: JSON.stringify(sdkTsPkg.version),
     },
   },
   build: {

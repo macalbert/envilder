@@ -277,6 +277,7 @@ For each breakpoint:
 |---------|-------------|-----|
 | After any component edit with user-visible text | `@i18n Reviewer` | Verify translations are complete and correct |
 | Website changes affect documented features or CLI usage | `@Document Maintainer` | Keep docs in sync |
+| Adding or updating an SDK on the website | `sdk-release-checklist` skill | Ensures version badge, changelog, and i18n are all wired |
 | Website code needs quality review | `@Code Reviewer` | Multi-perspective read-only analysis |
 | Website JS/TS logic has a bug | `@Bug Hunter` | Reproduce and fix via TDD |
 | CSS or layout needs structural cleanup | `@Code Refactorer` | Safe incremental improvements |
@@ -293,6 +294,7 @@ After all work complete: "Run `/smart-commit` to commit, then `/pr-sync` to open
   design system
 - DO NOT hardcode colors — always use CSS variables from `global.css`
 - DO NOT hardcode user-visible text — always use the i18n system
+- DO NOT hardcode version numbers — use `__SDK_*_VERSION__` / `__APP_VERSION__` globals from `astro.config.mjs`
 - DO NOT use fixed pixel font sizes — use `clamp()` or relative units
 - DO NOT break existing responsive layouts when adding new sections
 - DO NOT add JavaScript frameworks (React, Vue, etc.) — use Astro components

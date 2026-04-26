@@ -10,6 +10,10 @@ interface Props {
 const { lang = 'en' } = Astro.props;
 const t = useTranslations(lang);
 
+const sdkDotnetVersion = `v${__SDK_DOTNET_VERSION__}`;
+const sdkPythonVersion = `v${__SDK_PYTHON_VERSION__}`;
+const sdkTypescriptVersion = `v${__SDK_TYPESCRIPT_VERSION__}`;
+
 const azRbacAssign = `az role assignment create \\
   --role "Key Vault Secrets Officer" \\
   --assignee {YOUR_OBJECT_ID} \\
@@ -507,7 +511,7 @@ envilder --push --provider=azure \\
         <h2>{t.docs.sdkDotnetTitle}</h2>
         <p>{t.docs.sdkDotnetDesc}</p>
         <div class="sdk-badges">
-          <a class="sdk-badge" href="https://www.nuget.org/packages/Envilder" target="_blank" rel="noopener noreferrer">📦 NuGet v0.1.0</a>
+          <a class="sdk-badge" href="https://www.nuget.org/packages/Envilder" target="_blank" rel="noopener noreferrer">📦 NuGet {sdkDotnetVersion}</a>
         </div>
 
         <h3>{t.docs.sdkDotnetInstall}</h3>
@@ -586,7 +590,7 @@ EnvilderClient.InjectIntoEnvironment(secrets);`} />
         <h2>{t.docs.sdkPythonTitle}</h2>
         <p>{t.docs.sdkPythonDesc}</p>
         <div class="sdk-badges">
-          <a class="sdk-badge" href="https://pypi.org/project/envilder/" target="_blank" rel="noopener noreferrer">📦 PyPI v0.2.0</a>
+          <a class="sdk-badge" href="https://pypi.org/project/envilder/" target="_blank" rel="noopener noreferrer">📦 PyPI {sdkPythonVersion}</a>
         </div>
 
         <h3>{t.docs.sdkPythonInstall}</h3>
@@ -642,7 +646,7 @@ validate_secrets(secrets)  # raises SecretValidationError if any value is empty`
         <h2>{t.docs.sdkTypescriptTitle}</h2>
         <p>{t.docs.sdkTypescriptDesc}</p>
         <div class="sdk-badges">
-          <a class="sdk-badge" href="https://www.npmjs.com/package/@envilder/sdk" target="_blank" rel="noopener noreferrer">📦 npm v0.1.0</a>
+          <a class="sdk-badge" href="https://www.npmjs.com/package/@envilder/sdk" target="_blank" rel="noopener noreferrer">📦 npm {sdkTypescriptVersion}</a>
         </div>
 
         <h3>{t.docs.sdkTypescriptInstall}</h3>
