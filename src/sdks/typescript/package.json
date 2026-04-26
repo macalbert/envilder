@@ -13,11 +13,15 @@
     "url": "git://github.com/macalbert/envilder.git",
     "directory": "src/sdks/typescript"
   },
+  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "clean": "rimraf dist"
@@ -32,7 +36,7 @@
     "envilder"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.700.0",
@@ -41,8 +45,8 @@
     "@azure/keyvault-secrets": "^4.9.0"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "typescript": "^5.7.0",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
     "rimraf": "^6.0.0"
   }
 }
