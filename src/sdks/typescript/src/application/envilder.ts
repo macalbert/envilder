@@ -155,9 +155,16 @@ function resolveEnvSource(
   }
 
   const normalized = env.trim();
+
+  if (!(normalized in envMapping)) {
+    throw new Error(
+      `Environment '${normalized}' not found in environment mapping.`,
+    );
+  }
+
   const source = envMapping[normalized];
 
-  if (source === undefined || source === null) {
+  if (source === null) {
     return null;
   }
 

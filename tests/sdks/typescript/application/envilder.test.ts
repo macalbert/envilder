@@ -122,15 +122,16 @@ describe('Envilder', () => {
       expect(process.env.DB_URL).toBeUndefined();
     });
 
-    it('Should_ReturnEmpty_When_EnvNotInMapping', async () => {
+    it('Should_ThrowError_When_EnvNotInMapping', async () => {
       // Act
-      const actual = await Envilder.resolveFile('staging', {
+      const act = Envilder.resolveFile('staging', {
         production: 'prod-secrets.json',
       });
 
       // Assert
-      expect(actual.size).toBe(0);
-      expect(mockReadFile).not.toHaveBeenCalled();
+      await expect(act).rejects.toThrow(
+        "Environment 'staging' not found in environment mapping.",
+      );
     });
   });
 
@@ -159,14 +160,16 @@ describe('Envilder', () => {
       expect(mockReadFile).not.toHaveBeenCalled();
     });
 
-    it('Should_ReturnEmpty_When_EnvNotInMapping', async () => {
+    it('Should_ThrowError_When_EnvNotInMapping', async () => {
       // Act
-      const actual = await Envilder.load('staging', {
+      const act = Envilder.load('staging', {
         production: 'prod-secrets.json',
       });
 
       // Assert
-      expect(actual.size).toBe(0);
+      await expect(act).rejects.toThrow(
+        "Environment 'staging' not found in environment mapping.",
+      );
     });
 
     it('Should_ThrowError_When_EnvIsEmpty', async () => {
