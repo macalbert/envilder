@@ -17,7 +17,7 @@ pre-commit:
 pre-push:
   commands:
     biome-format:
-      run: pnpx biome format --write && pnpx biome check --write --unsafe
+      run: pnpm format
 
 commit-msg:
   commands:
