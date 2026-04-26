@@ -305,7 +305,7 @@ AAA pattern with comment markers.
 
 - Async-first — all provider and facade methods return `Promise`
 - Interface-based ports — TypeScript `interface` for `ISecretProvider`
-- `createSecretProvider` is internal — consumers use the `Envilder` facade
+- `createSecretProvider` is not re-exported from the public barrel (`index.ts`) — consumers use the `Envilder` facade
 - `Envilder` facade is the primary public API (fluent: `fromMapFile().withProvider().withVaultUrl().inject()`)
 - `ISecretProvider.getSecrets(names[])` returns `Map<string, string>` — missing secrets silently omitted
 - `EnvilderClient.resolveSecrets()` delegates to `getSecrets()` in a single call
