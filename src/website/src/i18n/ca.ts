@@ -713,6 +713,7 @@ export const ca: Translations = {
     sidebarSdks: 'SDKs',
     sidebarSdkDotnet: '.NET SDK',
     sidebarSdkPython: 'Python SDK',
+    sidebarSdkTypescript: 'TypeScript SDK',
     sdkDotnetTitle: '.NET SDK',
     sdkDotnetDesc:
       "Carrega secrets directament a la teva aplicació .NET a l'inici. Façana d'una línia, constructor fluent, integració amb IConfiguration o control programàtic total.",
@@ -759,7 +760,6 @@ export const ca: Translations = {
     sdkPythonValidationDesc:
       'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
     sdkPythonFullDocs: 'Documentació completa →',
-    sidebarSdkTypescript: 'TypeScript SDK',
     sdkTypescriptTitle: 'TypeScript SDK',
     sdkTypescriptDesc:
       "Carrega secrets directament a la teva aplicació Node.js a l'inici. API asíncrona amb façana d'una línia o constructor fluent per a control total.",

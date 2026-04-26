@@ -297,7 +297,7 @@ AAA pattern with comment markers.
   - `MapFileParser` — Parses `$config` + variable mappings from JSON
   - `validateSecrets` — Opt-in validation throws `SecretValidationError` for empty/missing values
 - **Infrastructure** (`src/infrastructure/`):
-  - `createSecretProvider` (not exported) — Creates provider from `MapFileConfig` + optional `EnvilderOptions` overrides
+  - `createSecretProvider` (not re-exported from barrel) — Creates provider from `MapFileConfig` + optional `EnvilderOptions` overrides
   - `AwsSsmSecretProvider` — `GetParametersCommand` (batch, up to 10 per request) with `WithDecryption: true`, missing parameters silently omitted via `InvalidParameters`
   - `AzureKeyVaultSecretProvider` — `Promise.all` over `SecretClient.getSecret()` calls, catches 404 → omitted
 

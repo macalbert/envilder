@@ -464,6 +464,7 @@ export interface DocsTranslations {
   sidebarSdks: string;
   sidebarSdkDotnet: string;
   sidebarSdkPython: string;
+  sidebarSdkTypescript: string;
   sdkDotnetTitle: string;
   sdkDotnetDesc: string;
   sdkDotnetInstall: string;
@@ -496,7 +497,6 @@ export interface DocsTranslations {
   sdkPythonValidation: string;
   sdkPythonValidationDesc: string;
   sdkPythonFullDocs: string;
-  sidebarSdkTypescript: string;
   sdkTypescriptTitle: string;
   sdkTypescriptDesc: string;
   sdkTypescriptInstall: string;

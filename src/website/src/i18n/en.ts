@@ -706,6 +706,7 @@ export const en: Translations = {
     sidebarSdks: 'SDKs',
     sidebarSdkDotnet: '.NET SDK',
     sidebarSdkPython: 'Python SDK',
+    sidebarSdkTypescript: 'TypeScript SDK',
     sdkDotnetTitle: '.NET SDK',
     sdkDotnetDesc:
       'Load secrets directly into your .NET application at startup. One-liner facade, fluent builder, IConfiguration integration, or full programmatic control.',
@@ -752,7 +753,6 @@ export const en: Translations = {
     sdkPythonValidationDesc:
       'Opt-in validation ensures all resolved secrets have non-empty values:',
     sdkPythonFullDocs: 'Full documentation →',
-    sidebarSdkTypescript: 'TypeScript SDK',
     sdkTypescriptTitle: 'TypeScript SDK',
     sdkTypescriptDesc:
       'Load secrets directly into your Node.js application at startup. Async-first API with one-liner facade or fluent builder for full control.',

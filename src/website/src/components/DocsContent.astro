@@ -638,35 +638,35 @@ validate_secrets(secrets)  # raises SecretValidationError if any value is empty`
 
       <!-- ───── TYPESCRIPT SDK ───── -->
 
-    <section id="sdk-typescript" class="docs-section">
-      <h2>{t.docs.sdkTypescriptTitle}</h2>
-      <p>{t.docs.sdkTypescriptDesc}</p>
-      <div class="sdk-badges">
-        <a class="sdk-badge" href="https://www.npmjs.com/package/@envilder/sdk" target="_blank" rel="noopener noreferrer">📦 npm v0.1.0</a>
-      </div>
+      <section id="sdk-typescript" class="docs-section">
+        <h2>{t.docs.sdkTypescriptTitle}</h2>
+        <p>{t.docs.sdkTypescriptDesc}</p>
+        <div class="sdk-badges">
+          <a class="sdk-badge" href="https://www.npmjs.com/package/@envilder/sdk" target="_blank" rel="noopener noreferrer">📦 npm v0.1.0</a>
+        </div>
 
-      <h3>{t.docs.sdkTypescriptInstall}</h3>
-      <CodeBlock lang="bash" code="npm install @envilder/sdk" />
+        <h3>{t.docs.sdkTypescriptInstall}</h3>
+        <CodeBlock lang="bash" code="npm install @envilder/sdk" />
 
-      <h3>{t.docs.sdkTypescriptQuickStart}</h3>
-      <p>{t.docs.sdkTypescriptQuickStartDesc}</p>
-      <CodeBlock lang="typescript" code={`import { Envilder } from '@envilder/sdk';
+        <h3>{t.docs.sdkTypescriptQuickStart}</h3>
+        <p>{t.docs.sdkTypescriptQuickStartDesc}</p>
+        <CodeBlock lang="typescript" code={`import { Envilder } from '@envilder/sdk';
 
 // Resolve secrets and inject into process.env
 await Envilder.load('secrets-map.json');
 
 const dbPassword = process.env.DB_PASSWORD;`} />
 
-      <h3>{t.docs.sdkTypescriptResolve}</h3>
-      <p>{t.docs.sdkTypescriptResolveDesc}</p>
-      <CodeBlock lang="typescript" code={`import { Envilder } from '@envilder/sdk';
+        <h3>{t.docs.sdkTypescriptResolve}</h3>
+        <p>{t.docs.sdkTypescriptResolveDesc}</p>
+        <CodeBlock lang="typescript" code={`import { Envilder } from '@envilder/sdk';
 
 const secrets = await Envilder.resolveFile('secrets-map.json');
 const dbPassword = secrets.get('DB_PASSWORD');`} />
 
-      <h3>{t.docs.sdkTypescriptFluent}</h3>
-      <p>{t.docs.sdkTypescriptFluentDesc}</p>
-      <CodeBlock lang="typescript" code={`import { Envilder, SecretProviderType } from '@envilder/sdk';
+        <h3>{t.docs.sdkTypescriptFluent}</h3>
+        <p>{t.docs.sdkTypescriptFluentDesc}</p>
+        <CodeBlock lang="typescript" code={`import { Envilder, SecretProviderType } from '@envilder/sdk';
 
 const secrets = await Envilder.fromMapFile('secrets-map.json')
   .withProvider(SecretProviderType.Azure)
@@ -678,9 +678,9 @@ await Envilder.fromMapFile('secrets-map.json')
   .withProfile('staging')
   .inject();`} />
 
-      <h3>{t.docs.sdkTypescriptEnvLoading}</h3>
-      <p>{t.docs.sdkTypescriptEnvLoadingDesc}</p>
-      <CodeBlock lang="typescript" code={`import { Envilder } from '@envilder/sdk';
+        <h3>{t.docs.sdkTypescriptEnvLoading}</h3>
+        <p>{t.docs.sdkTypescriptEnvLoadingDesc}</p>
+        <CodeBlock lang="typescript" code={`import { Envilder } from '@envilder/sdk';
 
 const env = process.env.APP_ENV ?? 'development';
 
@@ -690,15 +690,15 @@ await Envilder.load(env, {
   test: null,  // no secrets loaded
 });`} />
 
-      <h3>{t.docs.sdkTypescriptValidation}</h3>
-      <p>{t.docs.sdkTypescriptValidationDesc}</p>
-      <CodeBlock lang="typescript" code={`import { Envilder, validateSecrets } from '@envilder/sdk';
+        <h3>{t.docs.sdkTypescriptValidation}</h3>
+        <p>{t.docs.sdkTypescriptValidationDesc}</p>
+        <CodeBlock lang="typescript" code={`import { Envilder, validateSecrets } from '@envilder/sdk';
 
 const secrets = await Envilder.resolveFile('secrets-map.json');
 validateSecrets(secrets); // throws SecretValidationError if any value is empty`} />
 
-      <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/typescript" target="_blank" rel="noopener noreferrer">{t.docs.sdkTypescriptFullDocs}</a></p>
-    </section>
+        <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/typescript" target="_blank" rel="noopener noreferrer">{t.docs.sdkTypescriptFullDocs}</a></p>
+      </section>
 
       <!-- ───── GITHUB ACTION ───── -->
 

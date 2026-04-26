@@ -713,6 +713,7 @@ export const es: Translations = {
     sidebarSdks: 'SDKs',
     sidebarSdkDotnet: '.NET SDK',
     sidebarSdkPython: 'Python SDK',
+    sidebarSdkTypescript: 'TypeScript SDK',
     sdkDotnetTitle: '.NET SDK',
     sdkDotnetDesc:
       'Carga secretos directamente en tu aplicación .NET al inicio. Fachada de una línea, constructor fluido, integración con IConfiguration o control programático total.',
@@ -759,7 +760,6 @@ export const es: Translations = {
     sdkPythonValidationDesc:
       'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
     sdkPythonFullDocs: 'Documentación completa →',
-    sidebarSdkTypescript: 'TypeScript SDK',
     sdkTypescriptTitle: 'TypeScript SDK',
     sdkTypescriptDesc:
       'Carga secretos directamente en tu aplicación Node.js al inicio. API asíncrona con fachada de una línea o constructor fluido para control total.',

@@ -90,7 +90,7 @@ secrets = (
 // One-liner: resolve + inject into process.env
 await Envilder.load('param-map.json');
 
-// Or resolve as a dict without injecting
+// Or resolve as a Map without injecting
 const secrets = await Envilder.resolveFile('param-map.json');
 
 // Fluent builder with provider override

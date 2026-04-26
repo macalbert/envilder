@@ -1,4 +1,9 @@
 // Domain
+export type { EnvilderOptions } from './domain/envilder-options.js';
+export type { MapFileConfig } from './domain/map-file-config.js';
+export type { ParsedMapFile } from './domain/parsed-map-file.js';
+export type { ISecretProvider } from './domain/ports/secret-provider.js';
+export { SecretProviderType } from './domain/secret-provider-type.js';
 
 // Application
 export { Envilder } from './application/envilder.js';
@@ -8,11 +13,6 @@ export {
   SecretValidationError,
   validateSecrets,
 } from './application/secret-validation.js';
-export type { EnvilderOptions } from './domain/envilder-options.js';
-export type { MapFileConfig } from './domain/map-file-config.js';
-export type { ParsedMapFile } from './domain/parsed-map-file.js';
-export type { ISecretProvider } from './domain/ports/secret-provider.js';
-export { SecretProviderType } from './domain/secret-provider-type.js';
 
 // Infrastructure (for advanced usage)
 export { AwsSsmSecretProvider } from './infrastructure/aws/aws-ssm-secret-provider.js';
