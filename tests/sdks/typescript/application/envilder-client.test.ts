@@ -89,8 +89,7 @@ describe('EnvilderClient', () => {
 
   it('Should_ThrowError_When_ProviderIsNull', () => {
     // Act
-    const act = () =>
-      new EnvilderClient(null as unknown as ISecretProvider);
+    const act = () => new EnvilderClient(null as unknown as ISecretProvider);
 
     // Assert
     expect(act).toThrow('secretProvider cannot be null');
