@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { SecretProviderType } from '../../../../src/sdks/typescript/src/domain/secret-provider-type.js';
+import { AzureKeyVaultSecretProvider } from '../../../../src/sdks/typescript/src/infrastructure/azure/azure-key-vault-secret-provider.js';
 import { createSecretProvider } from '../../../../src/sdks/typescript/src/infrastructure/secret-provider-factory.js';
 
 // Mock the AWS and Azure provider modules so we don't need real cloud SDKs
@@ -131,6 +132,6 @@ describe('SecretProviderFactory', () => {
     const actual = createSecretProvider(config, options);
 
     // Assert
-    expect(actual).toBeDefined();
+    expect(actual).toBeInstanceOf(AzureKeyVaultSecretProvider);
   });
 });

@@ -49,8 +49,8 @@ describe('Envilder', () => {
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
     vi.clearAllMocks();
+    vi.restoreAllMocks();
     delete process.env.DB_URL;
     delete process.env.API_KEY;
   });

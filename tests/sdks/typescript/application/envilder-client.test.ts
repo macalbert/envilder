@@ -88,10 +88,12 @@ describe('EnvilderClient', () => {
   });
 
   it('Should_ThrowError_When_ProviderIsNull', () => {
-    // Act & Assert
-    expect(
-      () => new EnvilderClient(null as unknown as ISecretProvider),
-    ).toThrow('secretProvider cannot be null');
+    // Act
+    const act = () =>
+      new EnvilderClient(null as unknown as ISecretProvider);
+
+    // Assert
+    expect(act).toThrow('secretProvider cannot be null');
   });
 
   it('Should_ReturnEmptyMap_When_NoMappings', async () => {
