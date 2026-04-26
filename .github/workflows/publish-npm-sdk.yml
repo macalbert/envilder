@@ -19,6 +19,8 @@ jobs:
   publish-npm-sdk:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    env:
+      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
 
     defaults:
       run:
@@ -76,6 +78,13 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: .
 
+      - name: 🪙 Collect Coins (Configure AWS credentials)
+        if: steps.version-check.outputs.version_changed == 'true'
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
       - name: 🌟 Format check
         if: steps.version-check.outputs.version_changed == 'true'
         run: npx biome check src/sdks/typescript/src/ tests/sdks/typescript/
@@ -88,6 +97,9 @@ jobs:
       - name: 🍄 Run tests
         if: steps.version-check.outputs.version_changed == 'true'
         run: cd ../../../tests/sdks/typescript && pnpm vitest run --reporter=verbose
+        env:
+          TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
+          DOCKER_HOST: unix:///var/run/docker.sock
 
       - name: 🚩 Publish to npm
         if: steps.version-check.outputs.version_changed == 'true'

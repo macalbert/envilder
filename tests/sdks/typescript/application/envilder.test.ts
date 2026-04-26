@@ -108,6 +108,30 @@ describe('Envilder', () => {
       expect(actual.size).toBe(2);
       expect(process.env.DB_URL).toBeUndefined();
     });
+
+    it('Should_ReturnEmpty_When_EnvMapsToNull', async () => {
+      // Act
+      const actual = await Envilder.resolveFile('test', {
+        production: 'prod-secrets.json',
+        test: null,
+      });
+
+      // Assert
+      expect(actual.size).toBe(0);
+      expect(mockReadFile).not.toHaveBeenCalled();
+      expect(process.env.DB_URL).toBeUndefined();
+    });
+
+    it('Should_ReturnEmpty_When_EnvNotInMapping', async () => {
+      // Act
+      const actual = await Envilder.resolveFile('staging', {
+        production: 'prod-secrets.json',
+      });
+
+      // Assert
+      expect(actual.size).toBe(0);
+      expect(mockReadFile).not.toHaveBeenCalled();
+    });
   });
 
   describe('environment routing', () => {

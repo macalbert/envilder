@@ -30,6 +30,8 @@ jobs:
     runs-on: ubuntu-24.04
     if: ${{ !github.event.pull_request.draft }}
     timeout-minutes: 10
+    env:
+      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
 
     steps:
       - name: 🧱 Checkout repository
@@ -49,6 +51,12 @@ jobs:
       - name: 📦 Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: 🪙 Collect Coins (Configure AWS credentials)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
       - name: 🌟 Format check
         run: npx biome check src/sdks/typescript/src/ tests/sdks/typescript/
 
@@ -57,6 +65,9 @@ jobs:
 
       - name: 🍄 Run tests
         run: cd tests/sdks/typescript && pnpm vitest run --reporter=verbose --reporter=junit --outputFile=${{ github.workspace }}/test-results.xml
+        env:
+          TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
+          DOCKER_HOST: unix:///var/run/docker.sock
 
       - name: 📊 Test Results Reporter
         uses: dorny/test-reporter@v3

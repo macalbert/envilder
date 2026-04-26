@@ -234,6 +234,8 @@ jobs:
     if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    env:
+      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
     steps:
       - name: 🧲 Checkout
         uses: actions/checkout@v6
@@ -252,10 +254,20 @@ jobs:
       - name: 📦 Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: 🪙 Configure AWS credentials
+        if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
       - name: 🏎️ Run tests with coverage
         run: |
           mkdir -p output
           cd tests/sdks/typescript && pnpm vitest run --reporter=verbose --coverage --coverage.reporter=lcov --coverage.reporter=text --coverage.reportsDirectory=${{ github.workspace }}/coverage-ts-sdk 2>&1 | tee ../../../output/test-output.txt
+        env:
+          TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
+          DOCKER_HOST: unix:///var/run/docker.sock
 
       - name: 📋 Generate coverage report
         if: always()

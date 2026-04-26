@@ -100,4 +100,31 @@ describe('MapFileParser', () => {
     expect(actual.mappings.size).toBe(0);
     expect(actual.config.provider).toBe('aws');
   });
+
+  it('Should_ThrowError_When_RootIsNotObject', () => {
+    // Arrange
+    const json = '[]';
+    const sut = new MapFileParser();
+
+    // Act
+    const act = () => sut.parse(json);
+
+    // Assert
+    expect(act).toThrow('Invalid map file: root must be a JSON object');
+  });
+
+  it('Should_ThrowError_When_ProviderIsUnknown', () => {
+    // Arrange
+    const json = JSON.stringify({
+      $config: { provider: 'gcp' },
+      DB_URL: '/app/db-url',
+    });
+    const sut = new MapFileParser();
+
+    // Act
+    const act = () => sut.parse(json);
+
+    // Assert
+    expect(act).toThrow("Unknown provider: 'gcp'. Supported: aws, azure");
+  });
 });
