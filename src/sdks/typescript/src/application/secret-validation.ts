@@ -11,7 +11,7 @@ export class SecretValidationError extends Error {
   constructor(missingKeys: string[]) {
     super(
       missingKeys.length === 0
-        ? 'No secrets were resolved.'
+        ? 'No secrets were resolved'
         : `The following secrets have empty or missing values: ${missingKeys.join(', ')}`,
     );
     this.missingKeys = missingKeys;

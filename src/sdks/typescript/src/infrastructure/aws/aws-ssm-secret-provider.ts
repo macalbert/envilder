@@ -30,7 +30,7 @@ export class AwsSsmSecretProvider implements ISecretProvider {
 
     for (const name of names) {
       if (!name?.trim()) {
-        throw new Error('Secret name cannot be null or whitespace.');
+        throw new Error('Secret name cannot be null or whitespace');
       }
     }
 

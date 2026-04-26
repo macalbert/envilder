@@ -25,7 +25,7 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
 
     for (const name of names) {
       if (!name?.trim()) {
-        throw new Error('Secret name cannot be null or empty.');
+        throw new Error('Secret name cannot be null or empty');
       }
     }
 

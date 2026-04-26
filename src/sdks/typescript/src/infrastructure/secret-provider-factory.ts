@@ -20,12 +20,12 @@ export function createSecretProvider(
 
   if (isAzure && profile) {
     throw new Error(
-      'AWS profile cannot be used with Azure Key Vault provider.',
+      'AWS profile cannot be used with Azure Key Vault provider',
     );
   }
 
   if (!isAzure && vaultUrl) {
-    throw new Error('Vault URL cannot be used with AWS SSM provider.');
+    throw new Error('Vault URL cannot be used with AWS SSM provider');
   }
 
   if (isAzure) {
@@ -39,7 +39,7 @@ function createAzureProvider(
   vaultUrl: string | undefined,
 ): AzureKeyVaultSecretProvider {
   if (!vaultUrl?.trim()) {
-    throw new Error('Vault URL must be provided for Azure Key Vault provider.');
+    throw new Error('Vault URL must be provided for Azure Key Vault provider');
   }
 
   const credential = new DefaultAzureCredential();
