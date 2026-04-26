@@ -4,12 +4,14 @@
  */
 export interface ISecretProvider {
   /**
-   * Retrieves a single secret by its provider-specific identifier.
+   * Retrieves multiple secrets by their provider-specific identifiers.
    *
-   * For AWS SSM this is the parameter path (e.g. `/app/db-url`);
-   * for Azure Key Vault this is the secret name.
+   * For AWS SSM these are parameter paths (e.g. `/app/db-url`);
+   * for Azure Key Vault these are secret names.
    *
-   * @returns The secret value, or `null` when the secret does not exist.
+   * Secrets that do not exist are silently omitted from the result.
+   *
+   * @returns A map of name → value for secrets that were found.
    */
-  getSecret(name: string): Promise<string | null>;
+  getSecrets(names: string[]): Promise<Map<string, string>>;
 }

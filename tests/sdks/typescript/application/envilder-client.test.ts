@@ -6,7 +6,16 @@ import type { ISecretProvider } from '../../../../src/sdks/typescript/src/domain
 const createMockProvider = (
   secrets: Record<string, string | null> = {},
 ): ISecretProvider => ({
-  getSecret: vi.fn(async (name: string) => secrets[name] ?? null),
+  getSecrets: vi.fn(async (names: string[]) => {
+    const result = new Map<string, string>();
+    for (const name of names) {
+      const value = secrets[name];
+      if (value !== null && value !== undefined) {
+        result.set(name, value);
+      }
+    }
+    return result;
+  }),
 });
 
 describe('EnvilderClient', () => {

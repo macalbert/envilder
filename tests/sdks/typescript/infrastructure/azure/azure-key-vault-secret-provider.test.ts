@@ -2,35 +2,69 @@ import { describe, expect, it, vi } from 'vitest';
 import { AzureKeyVaultSecretProvider } from '../../../../../src/sdks/typescript/src/infrastructure/azure/azure-key-vault-secret-provider.js';
 
 describe('AzureKeyVaultSecretProvider', () => {
-  it('Should_ReturnValue_When_SecretExists', async () => {
+  it('Should_ReturnValues_When_SecretsExist', async () => {
     // Arrange
-    const mockGetSecret = vi.fn().mockResolvedValue({
-      value: 'my-secret-value',
-    });
+    const mockGetSecret = vi.fn().mockImplementation(async (name: string) => ({
+      value: name === 'db-url' ? 'postgres://localhost' : 'sk-123',
+    }));
     const mockClient = { getSecret: mockGetSecret };
     const sut = new AzureKeyVaultSecretProvider(mockClient);
 
     // Act
-    const actual = await sut.getSecret('db-url');
+    const actual = await sut.getSecrets(['db-url', 'api-key']);
 
     // Assert
-    expect(actual).toBe('my-secret-value');
+    expect(actual.get('db-url')).toBe('postgres://localhost');
+    expect(actual.get('api-key')).toBe('sk-123');
+    expect(actual.size).toBe(2);
   });
 
-  it('Should_ReturnNull_When_SecretNotFound', async () => {
+  it('Should_OmitMissing_When_SecretNotFound', async () => {
     // Arrange
-    const error = Object.assign(new Error('Not found'), {
-      statusCode: 404,
+    const mockGetSecret = vi.fn().mockImplementation(async (name: string) => {
+      if (name === 'missing') {
+        throw Object.assign(new Error('Not found'), { statusCode: 404 });
+      }
+      return { value: 'found-value' };
     });
-    const mockGetSecret = vi.fn().mockRejectedValue(error);
     const mockClient = { getSecret: mockGetSecret };
     const sut = new AzureKeyVaultSecretProvider(mockClient);
 
     // Act
-    const actual = await sut.getSecret('missing-secret');
+    const actual = await sut.getSecrets(['db-url', 'missing']);
 
     // Assert
-    expect(actual).toBeNull();
+    expect(actual.get('db-url')).toBe('found-value');
+    expect(actual.has('missing')).toBe(false);
+    expect(actual.size).toBe(1);
+  });
+
+  it('Should_FetchInParallel_When_MultipleNames', async () => {
+    // Arrange
+    const mockGetSecret = vi.fn().mockImplementation(async (name: string) => {
+      return { value: `value-${name}` };
+    });
+    const mockClient = { getSecret: mockGetSecret };
+    const sut = new AzureKeyVaultSecretProvider(mockClient);
+
+    // Act
+    await sut.getSecrets(['a', 'b', 'c']);
+
+    // Assert
+    expect(mockGetSecret).toHaveBeenCalledTimes(3);
+  });
+
+  it('Should_ReturnEmptyMap_When_NamesIsEmpty', async () => {
+    // Arrange
+    const mockClient = { getSecret: vi.fn() };
+    const sut = new AzureKeyVaultSecretProvider(mockClient);
+
+    // Act
+    const actual = await sut.getSecrets([]);
+
+    // Assert
+    expect(actual.size).toBe(0);
+    expect(mockClient.getSecret).not.toHaveBeenCalled();
   });
 
   it('Should_ThrowError_When_SecretClientIsNull', () => {
@@ -41,13 +75,13 @@ describe('AzureKeyVaultSecretProvider', () => {
     expect(act).toThrow('secretClient cannot be null');
   });
 
-  it('Should_ThrowError_When_NameIsEmpty', async () => {
+  it('Should_ThrowError_When_AnyNameIsEmpty', async () => {
     // Arrange
     const mockClient = { getSecret: vi.fn() };
     const sut = new AzureKeyVaultSecretProvider(mockClient);
 
     // Act
-    const act = sut.getSecret('');
+    const act = sut.getSecrets(['valid-name', '']);
 
     // Assert
     await expect(act).rejects.toThrow('Secret name cannot be null or empty');
@@ -63,7 +97,7 @@ describe('AzureKeyVaultSecretProvider', () => {
     const sut = new AzureKeyVaultSecretProvider(mockClient);
 
     // Act
-    const act = sut.getSecret('db-url');
+    const act = sut.getSecrets(['db-url']);
 
     // Assert
     await expect(act).rejects.toThrow('Forbidden');

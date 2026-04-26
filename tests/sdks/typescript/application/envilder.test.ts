@@ -27,12 +27,18 @@ const SAMPLE_MAP_JSON = JSON.stringify({
 });
 
 const mockProvider = {
-  getSecret: vi.fn(async (name: string) => {
+  getSecrets: vi.fn(async (names: string[]) => {
     const secrets: Record<string, string> = {
       '/app/db-url': 'postgres://localhost',
       '/app/api-key': 'sk-123',
     };
-    return secrets[name] ?? null;
+    const result = new Map<string, string>();
+    for (const name of names) {
+      if (secrets[name]) {
+        result.set(name, secrets[name]);
+      }
+    }
+    return result;
   }),
 };
 

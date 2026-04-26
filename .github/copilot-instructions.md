@@ -290,7 +290,7 @@ AAA pattern with comment markers.
 
 **Architecture**: Layered (Domain → Application → Infrastructure), no DI framework.
 
-- **Domain** (`src/domain/`): `ISecretProvider` interface (async `getSecret`), `MapFileConfig`, `EnvilderOptions`, `ParsedMapFile` types, `SecretProviderType` enum
+- **Domain** (`src/domain/`): `ISecretProvider` interface (async `getSecrets` batch method), `MapFileConfig`, `EnvilderOptions`, `ParsedMapFile` types, `SecretProviderType` enum
 - **Application** (`src/application/`):
   - `Envilder` — Async facade (`load`, `resolveFile`, `fromMapFile` + env-routing overloads)
   - `EnvilderClient` — Core resolver (`resolveSecrets`, `injectIntoEnvironment` static method sets `process.env`)
@@ -298,8 +298,8 @@ AAA pattern with comment markers.
   - `validateSecrets` — Opt-in validation throws `SecretValidationError` for empty/missing values
 - **Infrastructure** (`src/infrastructure/`):
   - `createSecretProvider` (not exported) — Creates provider from `MapFileConfig` + optional `EnvilderOptions` overrides
-  - `AwsSsmSecretProvider` — `GetParameterCommand` with `WithDecryption: true`, catches `ParameterNotFound` → `null`
-  - `AzureKeyVaultSecretProvider` — `SecretClient.getSecret()`, catches 404 → `null`
+  - `AwsSsmSecretProvider` — `GetParametersCommand` (batch, up to 10 per request) with `WithDecryption: true`, missing parameters silently omitted via `InvalidParameters`
+  - `AzureKeyVaultSecretProvider` — `Promise.all` over `SecretClient.getSecret()` calls, catches 404 → omitted
 
 **Key patterns**:
 
@@ -307,8 +307,8 @@ AAA pattern with comment markers.
 - Interface-based ports — TypeScript `interface` for `ISecretProvider`
 - `createSecretProvider` is internal — consumers use the `Envilder` facade
 - `Envilder` facade is the primary public API (fluent: `fromMapFile().withProvider().withVaultUrl().inject()`)
-- `ISecretProvider.getSecret()` returns `null` for missing secrets (no exceptions)
-- `EnvilderClient.resolveSecrets()` silently omits missing secrets
+- `ISecretProvider.getSecrets(names[])` returns `Map<string, string>` — missing secrets silently omitted
+- `EnvilderClient.resolveSecrets()` delegates to `getSecrets()` in a single call
 - `validateSecrets()` — opt-in post-resolution validation
 - Cross-provider validation: profile + Azure → error, vaultUrl + AWS → error
 - `Map<string, string>` used for mappings and resolved secrets

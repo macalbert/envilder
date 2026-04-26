@@ -29,12 +29,18 @@ export class EnvilderClient {
    * Entries whose secret does not exist are silently omitted.
    */
   async resolveSecrets(mapFile: ParsedMapFile): Promise<Map<string, string>> {
-    const result = new Map<string, string>();
+    if (mapFile.mappings.size === 0) {
+      return new Map();
+    }
 
+    const secretPaths = Array.from(mapFile.mappings.values());
+    const resolved = await this.secretProvider.getSecrets(secretPaths);
+
+    const result = new Map<string, string>();
     for (const [envVarName, secretPath] of mapFile.mappings) {
-      const secretValue = await this.secretProvider.getSecret(secretPath);
-      if (secretValue !== null) {
-        result.set(envVarName, secretValue);
+      const value = resolved.get(secretPath);
+      if (value !== undefined) {
+        result.set(envVarName, value);
       }
     }
 
