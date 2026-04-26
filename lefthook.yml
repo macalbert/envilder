@@ -2,7 +2,7 @@ pre-commit:
   parallel: true
   commands:
     biome:
-      glob: "**/*.{ts,tsx,js,jsx,json,astro,mjs}"
+      glob: "**/*.{ts,tsx,js,jsx,json,jsonc,astro,mjs}"
       run: pnpx biome check --write --unsafe --no-errors-on-unmatched {staged_files} && pnpx biome format --write --no-errors-on-unmatched {staged_files}
       stage_fixed: true
     dotnet-format:
