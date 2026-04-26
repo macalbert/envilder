@@ -20,7 +20,10 @@ export class MapFileParser {
    * @returns Parsed config and variable mappings.
    */
   parse(json: string): ParsedMapFile {
-    const raw = JSON.parse(json) as Record<string, unknown>;
+    const raw = JSON.parse(json);
+    if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+      throw new Error('Invalid map file: root must be a JSON object');
+    }
     const mappings = new Map<string, string>();
     let config: MapFileConfig = {};
 
@@ -36,6 +39,12 @@ export class MapFileParser {
           vaultUrl: typeof obj.vaultUrl === 'string' ? obj.vaultUrl : undefined,
           profile: typeof obj.profile === 'string' ? obj.profile : undefined,
         };
+
+        if (providerStr && !config.provider) {
+          throw new Error(
+            `Unknown provider: '${obj.provider}'. Supported: aws, azure`,
+          );
+        }
       } else if (typeof value === 'string') {
         mappings.set(key, value);
       }

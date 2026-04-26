@@ -42,10 +42,8 @@ export class Envilder {
    * before calling `.resolve()` or `.inject()`.
    */
   static fromMapFile(filePath: string): Envilder {
-    if (!filePath?.trim()) {
-      throw new Error('file path cannot be empty');
-    }
-    return new Envilder(filePath);
+    validateFilePath(filePath);
+    return new Envilder(filePath.trim());
   }
 
   /**
