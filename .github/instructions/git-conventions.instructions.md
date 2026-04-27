@@ -19,5 +19,5 @@ Apply these rules whenever making or validating git changes.
 `BREAKING CHANGE:` in the footer.
 - Use branch names in `<type>/<short-kebab-topic>` format, for example `fix/ssm-timeout` or `chore/update-aws-sdk`.
 - Do not amend commits unless explicitly requested.
-- Before push, ensure quality checks pass: `pnpm format:write`, `pnpm lint`, `pnpm test`.
+- Before push, ensure quality checks pass: `pnpm format`, `pnpm lint`, `pnpm test`.
 - Treat push as the final gate: if checks fail, fix issues first and push only after green results.

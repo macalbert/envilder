@@ -20,8 +20,8 @@ on:
     paths:
       - ".github/workflows/tests.yml"
       - "github-action/action.yml"
-      - "src/**"
-      - "tests/**"
+      - "src/envilder/**"
+      - "tests/envilder/**"
       - "e2e/**"
       - "package.json"
       - "pnpm-lock.yaml"
@@ -65,7 +65,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: 🌟 Shine Sprite (Run formatting checker)
-        run: pnpm format
+        run: pnpm format:check
 
       - name: 🏁 Flagpole (Run code quality checker)
         run: pnpm lint

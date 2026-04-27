@@ -286,8 +286,8 @@ export const en: Translations = {
     dotnetTitle: '.NET',
     dotnetDesc:
       'Native IConfiguration integration. Resolve secrets at startup.',
-    typescriptTitle: 'TypeScript',
-    typescriptDesc:
+    nodejsTitle: 'Node.js',
+    nodejsDesc:
       'Load secrets directly in Node.js. Same map-file, zero dependencies on the CLI.',
     goTitle: 'Go',
     goDesc: 'Lightweight secret loading for Go services.',
@@ -382,9 +382,9 @@ export const en: Translations = {
           'Runtime library for enterprise apps and Azure-native shops. Published to NuGet',
       },
       {
-        status: 'next',
-        label: '📦',
-        title: 'TypeScript SDK (@envilder/sdk)',
+        status: 'done',
+        label: '✅',
+        title: 'Node.js SDK (@envilder/sdk)',
         description:
           'Native runtime library — load secrets directly into process.env from a map-file. Published to npm',
       },
@@ -492,6 +492,7 @@ export const en: Translations = {
     categorySdks: 'SDKs',
     categorySdkDotnet: '.NET',
     categorySdkPython: 'Python',
+    categorySdkNodejs: 'Node.js',
   },
   docs: {
     title: 'Envilder Docs | CLI, GitHub Action & AWS SSM',
@@ -705,6 +706,7 @@ export const en: Translations = {
     sidebarSdks: 'SDKs',
     sidebarSdkDotnet: '.NET SDK',
     sidebarSdkPython: 'Python SDK',
+    sidebarSdkNodejs: 'Node.js SDK',
     sdkDotnetTitle: '.NET SDK',
     sdkDotnetDesc:
       'Load secrets directly into your .NET application at startup. One-liner facade, fluent builder, IConfiguration integration, or full programmatic control.',
@@ -751,6 +753,26 @@ export const en: Translations = {
     sdkPythonValidationDesc:
       'Opt-in validation ensures all resolved secrets have non-empty values:',
     sdkPythonFullDocs: 'Full documentation →',
+    sdkNodejsTitle: 'Node.js SDK',
+    sdkNodejsDesc:
+      'Load secrets directly into your Node.js application at startup. Async-first API with one-liner facade or fluent builder for full control.',
+    sdkNodejsInstall: 'Install',
+    sdkNodejsQuickStart: 'Quick start — one-liner',
+    sdkNodejsQuickStartDesc:
+      'Load secrets from a map file and inject them into process.env:',
+    sdkNodejsResolve: 'Resolve without injecting',
+    sdkNodejsResolveDesc:
+      'Get secrets as a Map without modifying the environment:',
+    sdkNodejsFluent: 'Fluent builder with overrides',
+    sdkNodejsFluentDesc:
+      'Override provider settings programmatically using the fluent API:',
+    sdkNodejsEnvLoading: 'Environment-based loading',
+    sdkNodejsEnvLoadingDesc:
+      'Recommended for multi-environment apps. Map each environment to its own secrets file:',
+    sdkNodejsValidation: 'Secret validation',
+    sdkNodejsValidationDesc:
+      'Opt-in validation ensures all resolved secrets have non-empty values:',
+    sdkNodejsFullDocs: 'Full documentation →',
     pagerPrev: 'Previous',
     pagerNext: 'Next',
   },

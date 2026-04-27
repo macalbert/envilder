@@ -90,8 +90,8 @@ updates:
 
 - package-ecosystem: npm
   directories:
-  - "/src/sdks/typescript"
-  - "/tests/sdks/typescript"
+  - "/src/sdks/nodejs"
+  - "/tests/sdks/nodejs"
   pull-request-branch-name:
     separator: "/"
   schedule:

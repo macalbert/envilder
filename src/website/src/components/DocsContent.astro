@@ -10,6 +10,10 @@ interface Props {
 const { lang = 'en' } = Astro.props;
 const t = useTranslations(lang);
 
+const sdkDotnetVersion = `v${__SDK_DOTNET_VERSION__}`;
+const sdkPythonVersion = `v${__SDK_PYTHON_VERSION__}`;
+const sdkNodejsVersion = `v${__SDK_NODEJS_VERSION__}`;
+
 const azRbacAssign = `az role assignment create \\
   --role "Key Vault Secrets Officer" \\
   --assignee {YOUR_OBJECT_ID} \\
@@ -38,6 +42,7 @@ const sectionOrder = [
   { id: 'push-single', label: t.docs.sidebarPushSingle },
   { id: 'sdk-dotnet', label: t.docs.sidebarSdkDotnet },
   { id: 'sdk-python', label: t.docs.sidebarSdkPython },
+  { id: 'sdk-nodejs', label: t.docs.sidebarSdkNodejs },
   { id: 'gha-setup', label: t.docs.sidebarGhaSetup },
   { id: 'gha-basic', label: t.docs.sidebarGhaBasic },
   { id: 'gha-multi-env', label: t.docs.sidebarGhaMultiEnv },
@@ -70,6 +75,7 @@ const sectionOrder = [
         <optgroup label={t.docs.sidebarSdks}>
           <option value="sdk-dotnet">{t.docs.sidebarSdkDotnet}</option>
           <option value="sdk-python">{t.docs.sidebarSdkPython}</option>
+          <option value="sdk-nodejs">{t.docs.sidebarSdkNodejs}</option>
         </optgroup>
         <optgroup label={t.docs.sidebarGha}>
           <option value="gha-setup">{t.docs.sidebarGhaSetup}</option>
@@ -109,6 +115,7 @@ const sectionOrder = [
         <ul>
           <li><a href="#sdk-dotnet" data-section="sdk-dotnet">{t.docs.sidebarSdkDotnet}</a></li>
           <li><a href="#sdk-python" data-section="sdk-python">{t.docs.sidebarSdkPython}</a></li>
+          <li><a href="#sdk-nodejs" data-section="sdk-nodejs">{t.docs.sidebarSdkNodejs}</a></li>
         </ul>
 
         <p class="nav-section-title">{t.docs.sidebarGha}</p>
@@ -504,7 +511,7 @@ envilder --push --provider=azure \\
         <h2>{t.docs.sdkDotnetTitle}</h2>
         <p>{t.docs.sdkDotnetDesc}</p>
         <div class="sdk-badges">
-          <a class="sdk-badge" href="https://www.nuget.org/packages/Envilder" target="_blank" rel="noopener noreferrer">📦 NuGet v0.1.0</a>
+          <a class="sdk-badge" href="https://www.nuget.org/packages/Envilder" target="_blank" rel="noopener noreferrer">📦 NuGet {sdkDotnetVersion}</a>
         </div>
 
         <h3>{t.docs.sdkDotnetInstall}</h3>
@@ -583,7 +590,7 @@ EnvilderClient.InjectIntoEnvironment(secrets);`} />
         <h2>{t.docs.sdkPythonTitle}</h2>
         <p>{t.docs.sdkPythonDesc}</p>
         <div class="sdk-badges">
-          <a class="sdk-badge" href="https://pypi.org/project/envilder/" target="_blank" rel="noopener noreferrer">📦 PyPI v0.2.0</a>
+          <a class="sdk-badge" href="https://pypi.org/project/envilder/" target="_blank" rel="noopener noreferrer">📦 PyPI {sdkPythonVersion}</a>
         </div>
 
         <h3>{t.docs.sdkPythonInstall}</h3>
@@ -631,6 +638,70 @@ secrets = Envilder.resolve_file('secrets-map.json')
 validate_secrets(secrets)  # raises SecretValidationError if any value is empty`} />
 
         <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/python" target="_blank" rel="noopener noreferrer">{t.docs.sdkPythonFullDocs}</a></p>
+      </section>
+
+      <!-- ───── NODE.JS SDK ───── -->
+
+      <section id="sdk-nodejs" class="docs-section">
+        <h2>{t.docs.sdkNodejsTitle}</h2>
+        <p>{t.docs.sdkNodejsDesc}</p>
+        <div class="sdk-badges">
+          <a class="sdk-badge" href="https://www.npmjs.com/package/@envilder/sdk" target="_blank" rel="noopener noreferrer">📦 npm {sdkNodejsVersion}</a>
+        </div>
+
+        <h3>{t.docs.sdkNodejsInstall}</h3>
+        <CodeBlock lang="bash" code="npm install @envilder/sdk" />
+
+        <h3>{t.docs.sdkNodejsQuickStart}</h3>
+        <p>{t.docs.sdkNodejsQuickStartDesc}</p>
+        <CodeBlock lang="typescript" code={`import { Envilder } from '@envilder/sdk';
+
+// Resolve secrets and inject into process.env
+await Envilder.load('secrets-map.json');
+
+const dbPassword = process.env.DB_PASSWORD;`} />
+
+        <h3>{t.docs.sdkNodejsResolve}</h3>
+        <p>{t.docs.sdkNodejsResolveDesc}</p>
+        <CodeBlock lang="typescript" code={`import { Envilder } from '@envilder/sdk';
+
+const secrets = await Envilder.resolveFile('secrets-map.json');
+const dbPassword = secrets.get('DB_PASSWORD');`} />
+
+        <h3>{t.docs.sdkNodejsFluent}</h3>
+        <p>{t.docs.sdkNodejsFluentDesc}</p>
+        <CodeBlock lang="typescript" code={`import { Envilder, SecretProviderType } from '@envilder/sdk';
+
+const secrets = await Envilder.fromMapFile('secrets-map.json')
+  .withProvider(SecretProviderType.Azure)
+  .withVaultUrl('https://my-vault.vault.azure.net')
+  .resolve();
+
+// Or inject directly
+await Envilder.fromMapFile('secrets-map.json')
+  .withProfile('staging')
+  .inject();`} />
+
+        <h3>{t.docs.sdkNodejsEnvLoading}</h3>
+        <p>{t.docs.sdkNodejsEnvLoadingDesc}</p>
+        <CodeBlock lang="typescript" code={`import { Envilder } from '@envilder/sdk';
+
+const env = process.env.APP_ENV ?? 'development';
+
+await Envilder.load(env, {
+  production: 'prod-secrets.json',
+  development: 'dev-secrets.json',
+  test: null,  // no secrets loaded
+});`} />
+
+        <h3>{t.docs.sdkNodejsValidation}</h3>
+        <p>{t.docs.sdkNodejsValidationDesc}</p>
+        <CodeBlock lang="typescript" code={`import { Envilder, validateSecrets } from '@envilder/sdk';
+
+const secrets = await Envilder.resolveFile('secrets-map.json');
+validateSecrets(secrets); // throws SecretValidationError if any value is empty`} />
+
+        <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/nodejs" target="_blank" rel="noopener noreferrer">{t.docs.sdkNodejsFullDocs}</a></p>
       </section>
 
       <!-- ───── GITHUB ACTION ───── -->

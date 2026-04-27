@@ -7,7 +7,9 @@ centralizes environment variables from AWS SSM Parameter Store or Azure Key
 Vault. The product has two halves:
 
 1. **TypeScript core** — CLI + GitHub Action for pulling/pushing secrets (Hexagonal Architecture, InversifyJS DI)
-2. **Runtime SDKs** — Independent libraries (.NET, Python, more planned) that load secrets directly into app processes at startup — no `.env` files, no intermediaries
+2. **Runtime SDKs** — Independent libraries (.NET, Python, more planned)
+   that load secrets directly into app processes at startup — no `.env`
+   files, no intermediaries
 
 All components share the **map-file format** as the universal contract (JSON,
 Git-versioned, PR-reviewable). Built with **Clean Architecture** principles for
@@ -96,7 +98,7 @@ object passed to `configureInfrastructureServices()`. CLI flags override
 - `pnpm test` — Vitest with coverage (v8 provider, outputs to `coverage/`)
 - `pnpm test:ci` — Adds JUnit reporter for CI pipelines
 - `pnpm lint` — Runs Secretlint (credential detection), Biome (format/lint), and `tsc --noEmit`
-- `pnpm format:write` — Auto-format with Biome
+- `pnpm format` — Auto-format with Biome
 
 **E2E Tests**: Located in `e2e/`, use real AWS SSM via LocalStack and Azure Key Vault
 via Lowkey Vault (both via TestContainers). Run `pnpm build` + `pack-and-install.ts` before E2E.
@@ -185,7 +187,9 @@ Example (PushSingle):
    - Create `src/envilder/core/application/validate/ValidateCommand.ts` with `.create()` factory
    - Create `ValidateCommandHandler.ts`, inject `ISecretProvider` + `ILogger`
    - Add `ValidateCommandHandler: Symbol.for('ValidateCommandHandler')` to `APPLICATION` in `types.ts`
-3. **DI Setup**: In `configureApplicationServices()` (`src/envilder/apps/shared/ContainerConfiguration.ts`), bind handler with `.inTransientScope()`
+3. **DI Setup**: In `configureApplicationServices()`
+   (`src/envilder/apps/shared/ContainerConfiguration.ts`),
+   bind handler with `.inTransientScope()`
 4. **Routing**: Add `case OperationMode.VALIDATE:` to `DispatchActionCommandHandler`
 5. **CLI**: In `Cli.ts`, add `.option('--validate')` and map to `OperationMode.VALIDATE`
 6. **Tests**: Create `tests/envilder/core/application/validate/ValidateCommandHandler.test.ts`, mock ports with `vi.fn()`
@@ -212,19 +216,37 @@ but have **no code dependency** on the TypeScript core.
 
 **Architecture**: Layered (Domain → Application → Infrastructure), no DI framework.
 
-- **Domain** (`Domain/`): `ISecretProvider` port (async `GetSecretAsync` + sync `GetSecret`), `MapFileConfig`, `EnvilderOptions`, `ParsedMapFile`, `SecretProviderType` enum
+- **Domain** (`Domain/`): `ISecretProvider` port
+  (async `GetSecretAsync` + sync `GetSecret`), `MapFileConfig`,
+  `EnvilderOptions`, `ParsedMapFile`, `SecretProviderType` enum
 - **Application** (`Application/`):
   - `Envilder` — Static one-liner facade (`Load`, `ResolveFile`, `FromMapFile` + env-routing overloads)
   - `EnvilderBuilder` — Fluent builder (`WithProvider`, `WithProfile`, `WithVaultUrl` → `Resolve`/`Inject`)
   - `EnvilderClient` — Core resolver (resolves mappings, `InjectIntoEnvironment` static method)
   - `MapFileParser` — Parses `$config` + variable mappings from JSON
-  - `SecretValidationExtensions` — Opt-in `ValidateSecrets()` extension (throws `SecretValidationException` for empty/missing values)
+  - `SecretValidationExtensions` — Opt-in `ValidateSecrets()` extension
+    (throws `SecretValidationException` for empty/missing values)
 - **Infrastructure** (`Infrastructure/`):
-  - `SecretProviderFactory` (internal) — Creates provider from `MapFileConfig` + optional `EnvilderOptions` overrides. Validates cross-provider config (profile is AWS-only, vaultUrl is Azure-only)
-  - `Aws/AwsSsmSecretProvider` — `GetSecretAsync`: `GetParameterAsync(WithDecryption=true)`, catches `ParameterNotFoundException` → `null`. `GetSecret` (sync): wraps in `Task.Run()` to prevent `SynchronizationContext` deadlocks, 60s `CancellationTokenSource` timeout
-  - `Azure/AzureKeyVaultSecretProvider` — `GetSecretAsync`: `SecretClient.GetSecretAsync()`, catches `RequestFailedException(404)` → `null`. `GetSecret` (sync): uses native `SecretClient.GetSecret()` (no deadlock risk)
-  - `Configuration/` — `ConfigurationBuilderExtensions.AddEnvilder(mapFilePath, options?)` integrates into `IConfigurationBuilder` pipeline; creates provider internally via factory
-  - `DependencyInjection/ServiceCollectionExtensions` — `IServiceCollection.AddEnvilder(mapFilePath, options?)` for ASP.NET DI
+  - `SecretProviderFactory` (internal) — Creates provider from
+    `MapFileConfig` + optional `EnvilderOptions` overrides.
+    Validates cross-provider config (profile is AWS-only,
+    vaultUrl is Azure-only)
+  - `Aws/AwsSsmSecretProvider` — `GetSecretAsync`:
+    `GetParameterAsync(WithDecryption=true)`, catches
+    `ParameterNotFoundException` → `null`. `GetSecret` (sync):
+    wraps in `Task.Run()` to prevent `SynchronizationContext`
+    deadlocks, 60s `CancellationTokenSource` timeout
+  - `Azure/AzureKeyVaultSecretProvider` — `GetSecretAsync`:
+    `SecretClient.GetSecretAsync()`, catches
+    `RequestFailedException(404)` → `null`. `GetSecret` (sync):
+    uses native `SecretClient.GetSecret()` (no deadlock risk)
+  - `Configuration/` —
+    `ConfigurationBuilderExtensions.AddEnvilder(mapFilePath, options?)`
+    integrates into `IConfigurationBuilder` pipeline; creates provider
+    internally via factory
+  - `DependencyInjection/ServiceCollectionExtensions` —
+    `IServiceCollection.AddEnvilder(mapFilePath, options?)`
+    for ASP.NET DI
 
 **AWS credential resolution** (in `SecretProviderFactory`):
 
@@ -255,13 +277,24 @@ Naming: `Should_<Expected>_When_<Condition>`. AAA pattern with comment markers.
 
 **Architecture**: Layered (Domain → Application → Infrastructure), no DI framework.
 
-- **Domain** (`domain/`): `ISecretProvider` Protocol, `MapFileConfig`, `EnvilderOptions`, `ParsedMapFile` dataclasses, `SecretProviderType` enum
+- **Domain** (`domain/`): `ISecretProvider` Protocol, `MapFileConfig`,
+  `EnvilderOptions`, `ParsedMapFile` dataclasses,
+  `SecretProviderType` enum
 - **Application** (`application/`):
-  - `Envilder` (facade) — Primary entry point: `load(path)`, `resolve_file(path)`, `from_map_file(path)` fluent builder, plus env-routing overloads `load(env, mapping)` / `resolve_file(env, mapping)`
-  - `EnvilderClient` — Core resolver (`resolve_secrets(map_file)` + `inject_into_environment(secrets)` static method sets `os.environ`)
+  - `Envilder` (facade) — Primary entry point: `load(path)`,
+    `resolve_file(path)`, `from_map_file(path)` fluent builder,
+    plus env-routing overloads `load(env, mapping)` /
+    `resolve_file(env, mapping)`
+  - `EnvilderClient` — Core resolver
+    (`resolve_secrets(map_file)` +
+    `inject_into_environment(secrets)` static method sets
+    `os.environ`)
   - `MapFileParser` — Parses `$config` + variable mappings from JSON
   - `secret_validation` — `validate_secrets(dict)` raises `SecretValidationError` for empty/missing values
-- **Infrastructure** (`infrastructure/`): `_SecretProviderFactory` (private by convention, not exported in `__all__`), `AwsSsmSecretProvider` (boto3), `AzureKeyVaultSecretProvider`
+- **Infrastructure** (`infrastructure/`):
+  `_SecretProviderFactory` (private by convention, not exported
+  in `__all__`), `AwsSsmSecretProvider` (boto3),
+  `AzureKeyVaultSecretProvider`
 
 **Key patterns**:
 
@@ -285,3 +318,46 @@ AAA pattern with comment markers.
 - `make check-sdk-python` (black + isort + mypy strict)
 - `make format-sdk-python` (auto-format)
 - `make test-sdk-python` (all tests, requires Docker for acceptance)
+
+### Node.js SDK (`src/sdks/nodejs/`)
+
+**Architecture**: Layered (Domain → Application → Infrastructure), no DI framework.
+
+- **Domain** (`src/domain/`): `ISecretProvider` interface
+  (async `getSecrets` batch method), `MapFileConfig`,
+  `EnvilderOptions`, `ParsedMapFile` types,
+  `SecretProviderType` enum
+- **Application** (`src/application/`):
+  - `Envilder` — Async facade (`load`, `resolveFile`, `fromMapFile` + env-routing overloads)
+  - `EnvilderClient` — Core resolver (`resolveSecrets`, `injectIntoEnvironment` static method sets `process.env`)
+  - `MapFileParser` — Parses `$config` + variable mappings from JSON
+  - `validateSecrets` — Opt-in validation throws `SecretValidationError` for empty/missing values
+- **Infrastructure** (`src/infrastructure/`):
+  - `createSecretProvider` (not re-exported from barrel) —
+    Creates provider from `MapFileConfig` + optional
+    `EnvilderOptions` overrides
+  - `AwsSsmSecretProvider` — `GetParametersCommand`
+    (batch, up to 10 per request) with
+    `WithDecryption: true`, missing parameters silently
+    omitted via `InvalidParameters`
+  - `AzureKeyVaultSecretProvider` — `Promise.all` over `SecretClient.getSecret()` calls, catches 404 → omitted
+
+**Key patterns**:
+
+- Async-first — all provider and facade methods return `Promise`
+- Interface-based ports — TypeScript `interface` for `ISecretProvider`
+- `createSecretProvider` is not re-exported from the public barrel (`index.ts`) — consumers use the `Envilder` facade
+- `Envilder` facade is the primary public API (fluent: `fromMapFile().withProvider().withVaultUrl().inject()`)
+- `ISecretProvider.getSecrets(names[])` returns `Map<string, string>` — missing secrets silently omitted
+- `EnvilderClient.resolveSecrets()` delegates to `getSecrets()` in a single call
+- `validateSecrets()` — opt-in post-resolution validation
+- Cross-provider validation: profile + Azure → error, vaultUrl + AWS → error
+- `Map<string, string>` used for mappings and resolved secrets
+
+**Tests** (`tests/sdks/nodejs/`): Vitest with `Should_<Expected>_When_<Condition>` naming.
+AAA pattern with comment markers. `vi.fn()` for mocks.
+
+**Build & test**:
+
+- `cd src/sdks/nodejs && pnpm build` (TypeScript compilation)
+- `cd tests/sdks/nodejs && pnpm vitest run --reporter=verbose` (unit tests)

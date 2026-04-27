@@ -1,0 +1,21 @@
+{
+  "name": "@envilder/sdk-tests",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-ssm": "^3.700.0",
+    "@azure/identity": "^4.5.0",
+    "@azure/keyvault-secrets": "^4.9.0",
+    "@testcontainers/localstack": "^11.13.0",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "testcontainers": "^11.13.0",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

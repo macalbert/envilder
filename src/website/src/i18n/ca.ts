@@ -286,8 +286,8 @@ export const ca: Translations = {
     dotnetTitle: '.NET',
     dotnetDesc:
       'Integració nativa amb IConfiguration. Resol secrets a l’arrencada.',
-    typescriptTitle: 'TypeScript',
-    typescriptDesc:
+    nodejsTitle: 'Node.js',
+    nodejsDesc:
       'Carrega secrets directament a Node.js. Mateix map-file, zero dependències del CLI.',
     goTitle: 'Go',
     goDesc: 'Càrrega lleugera de secrets per a serveis Go.',
@@ -385,11 +385,11 @@ export const ca: Translations = {
           'Biblioteca per a apps enterprise i Azure-native. Publicat a NuGet',
       },
       {
-        status: 'next',
-        label: '📦',
-        title: 'TypeScript SDK (@envilder/sdk)',
+        status: 'done',
+        label: '✅',
+        title: 'Node.js SDK (@envilder/sdk)',
         description:
-          'Biblioteca nativa de runtime — carregarà secrets directament a process.env des d’un map-file. Es publicarà a npm',
+          'Biblioteca nativa de runtime — carrega secrets directament a process.env des d’un map-file. Publicat a npm',
       },
       {
         status: 'next',
@@ -494,6 +494,7 @@ export const ca: Translations = {
     categorySdks: 'SDKs',
     categorySdkDotnet: '.NET',
     categorySdkPython: 'Python',
+    categorySdkNodejs: 'Node.js',
   },
   docs: {
     title: 'Docs Envilder | CLI, GitHub Action i AWS SSM',
@@ -712,6 +713,7 @@ export const ca: Translations = {
     sidebarSdks: 'SDKs',
     sidebarSdkDotnet: '.NET SDK',
     sidebarSdkPython: 'Python SDK',
+    sidebarSdkNodejs: 'Node.js SDK',
     sdkDotnetTitle: '.NET SDK',
     sdkDotnetDesc:
       "Carrega secrets directament a la teva aplicació .NET a l'inici. Façana d'una línia, constructor fluent, integració amb IConfiguration o control programàtic total.",
@@ -758,6 +760,25 @@ export const ca: Translations = {
     sdkPythonValidationDesc:
       'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
     sdkPythonFullDocs: 'Documentació completa →',
+    sdkNodejsTitle: 'Node.js SDK',
+    sdkNodejsDesc:
+      "Carrega secrets directament a la teva aplicació Node.js a l'inici. API asíncrona amb façana d'una línia o constructor fluent per a control total.",
+    sdkNodejsInstall: 'Instal·lació',
+    sdkNodejsQuickStart: 'Inici ràpid — una línia',
+    sdkNodejsQuickStartDesc:
+      "Carrega secrets des d'un fitxer de mapeig i injecta'ls a process.env:",
+    sdkNodejsResolve: 'Resoldre sense injectar',
+    sdkNodejsResolveDesc: "Obté secrets com un Map sense modificar l'entorn:",
+    sdkNodejsFluent: 'Constructor fluent amb sobreescriptures',
+    sdkNodejsFluentDesc:
+      "Sobreescriu la configuració del proveïdor de manera programàtica amb l'API fluent:",
+    sdkNodejsEnvLoading: 'Càrrega basada en entorn',
+    sdkNodejsEnvLoadingDesc:
+      'Recomanat per a aplicacions multi-entorn. Mapeja cada entorn al seu fitxer de secrets:',
+    sdkNodejsValidation: 'Validació de secrets',
+    sdkNodejsValidationDesc:
+      'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
+    sdkNodejsFullDocs: 'Documentació completa →',
     pagerPrev: 'Anterior',
     pagerNext: 'Següent',
   },

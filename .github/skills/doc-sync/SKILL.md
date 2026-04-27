@@ -108,6 +108,8 @@ Use this matrix to ensure consistency when updating a feature:
 | CLI flag in `Cli.ts` | `docs/pull-command.md` or `docs/push-command.md`, root README, DocsContent, i18n |
 | GHA input in `action.yml` | `github-action/README.md`, `docs/github-action.md`, website DocsContent, i18n |
 | SDK public API | SDK README, examples README, website DocsContent + Sdks.astro, i18n  |
+| New SDK added | Run full `sdk-release-checklist` skill (version badge, changelog, i18n, docs) |
+| SDK version bump | Bump canonical source file; changelog entry; website picks up version at build time |
 | New provider | All provider listings: root README, website Providers.astro, DocsContent, SDK READMEs |
 | Map-file format | Root README, all SDK READMEs, website DocsContent |
 | ROADMAP status | `ROADMAP.md`, website Roadmap.astro |
