@@ -87,7 +87,7 @@ wrapper navigates to the root file via a relative path. This file:
 
 ### 5. Test Directory Structure
 
-```
+```txt
 tests/sdks/{lang}/
 ├── containers/                   ← Container wrappers
 │   ├── localstack-container
