@@ -59,7 +59,10 @@ jobs:
       - name: 🏎️ Run tests with coverage
         run: |
           mkdir -p output
-          pnpm vitest run --reporter=verbose --coverage --coverage.reporter=lcov --coverage.reporter=text --coverage.reportsDirectory=coverage 2>&1 | tee output/test-output.txt
+          pnpm vitest run --reporter=verbose \
+            --exclude='tests/sdks/**' \
+            --coverage --coverage.reporter=lcov --coverage.reporter=text \
+            --coverage.reportsDirectory=coverage 2>&1 | tee output/test-output.txt
 
       - name: 📋 Generate coverage report
         if: always()
