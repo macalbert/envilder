@@ -121,7 +121,7 @@ tests/sdks/{lang}/
   `tests/sdks/dotnet/Fixtures/LowkeyVaultFixture.cs`
 - **Python**: `tests/sdks/python/containers/localstack_container.py`,
   `tests/sdks/python/containers/lowkey_vault_container.py`
-- **TypeScript**: `tests/sdks/typescript/containers/localstack-container.ts`,
-  `tests/sdks/typescript/containers/lowkey-vault-container.ts`
+- **Node.js**: `tests/sdks/nodejs/containers/localstack-container.ts`,
+  `tests/sdks/nodejs/containers/lowkey-vault-container.ts`
 - **Go**: Planned
 - **Java**: Planned

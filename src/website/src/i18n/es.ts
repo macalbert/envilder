@@ -287,8 +287,8 @@ export const es: Translations = {
     dotnetTitle: '.NET',
     dotnetDesc:
       'Integración nativa con IConfiguration. Resuelve secretos al arrancar.',
-    typescriptTitle: 'TypeScript',
-    typescriptDesc:
+    nodejsTitle: 'Node.js',
+    nodejsDesc:
       'Carga secretos directamente en Node.js. Mismo map-file, cero dependencias del CLI.',
     goTitle: 'Go',
     goDesc: 'Carga ligera de secretos para servicios Go.',
@@ -388,7 +388,7 @@ export const es: Translations = {
       {
         status: 'done',
         label: '✅',
-        title: 'TypeScript SDK (@envilder/sdk)',
+        title: 'Node.js SDK (@envilder/sdk)',
         description:
           'Librería nativa de ejecución — carga secretos directamente en process.env desde un map-file. Publicado en npm',
       },
@@ -495,7 +495,7 @@ export const es: Translations = {
     categorySdks: 'SDKs',
     categorySdkDotnet: '.NET',
     categorySdkPython: 'Python',
-    categorySdkTypescript: 'TypeScript',
+    categorySdkNodejs: 'Node.js',
   },
   docs: {
     title: 'Docs Envilder | CLI, GitHub Action y AWS SSM',
@@ -713,7 +713,7 @@ export const es: Translations = {
     sidebarSdks: 'SDKs',
     sidebarSdkDotnet: '.NET SDK',
     sidebarSdkPython: 'Python SDK',
-    sidebarSdkTypescript: 'TypeScript SDK',
+    sidebarSdkNodejs: 'Node.js SDK',
     sdkDotnetTitle: '.NET SDK',
     sdkDotnetDesc:
       'Carga secretos directamente en tu aplicación .NET al inicio. Fachada de una línea, constructor fluido, integración con IConfiguration o control programático total.',
@@ -760,26 +760,26 @@ export const es: Translations = {
     sdkPythonValidationDesc:
       'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
     sdkPythonFullDocs: 'Documentación completa →',
-    sdkTypescriptTitle: 'TypeScript SDK',
-    sdkTypescriptDesc:
+    sdkNodejsTitle: 'Node.js SDK',
+    sdkNodejsDesc:
       'Carga secretos directamente en tu aplicación Node.js al inicio. API asíncrona con fachada de una línea o constructor fluido para control total.',
-    sdkTypescriptInstall: 'Instalación',
-    sdkTypescriptQuickStart: 'Inicio rápido — una línea',
-    sdkTypescriptQuickStartDesc:
+    sdkNodejsInstall: 'Instalación',
+    sdkNodejsQuickStart: 'Inicio rápido — una línea',
+    sdkNodejsQuickStartDesc:
       'Carga secretos desde un archivo de mapeo e inyéctalos en process.env:',
-    sdkTypescriptResolve: 'Resolver sin inyectar',
-    sdkTypescriptResolveDesc:
+    sdkNodejsResolve: 'Resolver sin inyectar',
+    sdkNodejsResolveDesc:
       'Obtén secretos como un Map sin modificar el entorno:',
-    sdkTypescriptFluent: 'Constructor fluido con sobreescrituras',
-    sdkTypescriptFluentDesc:
+    sdkNodejsFluent: 'Constructor fluido con sobreescrituras',
+    sdkNodejsFluentDesc:
       'Sobreescribe la configuración del proveedor de forma programática con la API fluida:',
-    sdkTypescriptEnvLoading: 'Carga basada en entorno',
-    sdkTypescriptEnvLoadingDesc:
+    sdkNodejsEnvLoading: 'Carga basada en entorno',
+    sdkNodejsEnvLoadingDesc:
       'Recomendado para aplicaciones multi-entorno. Mapea cada entorno a su archivo de secretos:',
-    sdkTypescriptValidation: 'Validación de secretos',
-    sdkTypescriptValidationDesc:
+    sdkNodejsValidation: 'Validación de secretos',
+    sdkNodejsValidationDesc:
       'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
-    sdkTypescriptFullDocs: 'Documentación completa →',
+    sdkNodejsFullDocs: 'Documentación completa →',
     pagerPrev: 'Anterior',
     pagerNext: 'Siguiente',
   },

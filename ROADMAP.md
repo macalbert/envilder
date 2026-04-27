@@ -33,7 +33,7 @@ or directly inside application code at runtime.
 | **Onboarding documentation** | [Setup guide](./docs/requirements-installation.md) |
 | **.NET SDK** (`Envilder`) | First runtime SDK — load secrets into `IConfiguration` or `EnvilderClient`. AWS SSM + Azure Key Vault. [Documentation](./src/sdks/dotnet/README.md) |
 | **Python SDK** (`envilder`) | Runtime library for Python — Django, FastAPI, data pipelines. Sync API with `EnvilderClient`, `MapFileParser`, `SecretProviderFactory`. AWS SSM + Azure Key Vault. Published to PyPI. [Documentation](./src/sdks/python/README.md) |
-| **TypeScript SDK** (`@envilder/sdk`) | Runtime library for Node.js — load secrets directly into `process.env` from a map-file. AWS SSM + Azure Key Vault. Published to npm. [Documentation](./src/sdks/typescript/README.md) |
+| **Node.js SDK** (`@envilder/sdk`) | Runtime library for Node.js — load secrets directly into `process.env` from a map-file. AWS SSM + Azure Key Vault. Published to npm. [Documentation](./src/sdks/nodejs/README.md) |
 
 ### 🔥 Up Next
 
@@ -82,7 +82,7 @@ All five SDKs are developed **in parallel** — same map-file contract, same con
 
 | SDK | Package | Registry |
 |-----|---------|----------|
-| **TypeScript** | `@envilder/sdk` | npm |
+| **Node.js** | `@envilder/sdk` | npm |
 | **Python** | `envilder` | PyPI |
 | **Go** | `envilder` | Go module |
 | **.NET** | `Envilder` | NuGet |
@@ -92,7 +92,7 @@ All five SDKs are developed **in parallel** — same map-file contract, same con
 
 - **One map-file spec** — formal JSON Schema at `spec/` is the source of truth for all SDKs
 - **Conformance tests** — language-agnostic fixtures that every SDK must pass
-- **Independent versioning** — each SDK has its own semver (`sdk-ts@1.2.0`, `sdk-py@0.3.0`)
+- **Independent versioning** — each SDK has its own semver (`sdk-node@1.2.0`, `sdk-py@0.3.0`)
 - **Shared test infrastructure** — LocalStack (AWS) and Lowkey Vault (Azure) via Docker Compose serve all SDKs
 
 ---

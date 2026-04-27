@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AzureKeyVaultSecretProvider } from '../../../../../src/sdks/typescript/src/infrastructure/azure/azure-key-vault-secret-provider.js';
+import { AzureKeyVaultSecretProvider } from '../../../../../src/sdks/nodejs/src/infrastructure/azure/azure-key-vault-secret-provider.js';
 
 describe('AzureKeyVaultSecretProvider', () => {
   it('Should_ReturnValues_When_SecretsExist', async () => {

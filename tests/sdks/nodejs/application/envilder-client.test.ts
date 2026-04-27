@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { EnvilderClient } from '../../../../src/sdks/typescript/src/application/envilder-client.js';
-import type { ParsedMapFile } from '../../../../src/sdks/typescript/src/domain/parsed-map-file.js';
-import type { ISecretProvider } from '../../../../src/sdks/typescript/src/domain/ports/secret-provider.js';
+import { EnvilderClient } from '../../../../src/sdks/nodejs/src/application/envilder-client.js';
+import type { ParsedMapFile } from '../../../../src/sdks/nodejs/src/domain/parsed-map-file.js';
+import type { ISecretProvider } from '../../../../src/sdks/nodejs/src/domain/ports/secret-provider.js';
 
 const createMockProvider = (
   secrets: Record<string, string | null> = {},

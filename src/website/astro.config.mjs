@@ -6,9 +6,9 @@ const rootPkg = JSON.parse(
   readFileSync(new URL('../../package.json', import.meta.url), 'utf-8'),
 );
 
-const sdkTsPkg = JSON.parse(
+const sdkNodePkg = JSON.parse(
   readFileSync(
-    new URL('../sdks/typescript/package.json', import.meta.url),
+    new URL('../sdks/nodejs/package.json', import.meta.url),
     'utf-8',
   ),
 );
@@ -60,8 +60,8 @@ const changelogCli = readChangelog('../../docs/changelogs/cli.md');
 const changelogGha = readChangelog('../../docs/changelogs/gha.md');
 const changelogSdkDotnet = readChangelog('../../docs/changelogs/sdk-dotnet.md');
 const changelogSdkPython = readChangelog('../../docs/changelogs/sdk-python.md');
-const changelogSdkTypescript = readChangelog(
-  '../../docs/changelogs/sdk-typescript.md',
+const changelogSdkNodejs = readChangelog(
+  '../../docs/changelogs/sdk-nodejs.md',
 );
 
 export default defineConfig({
@@ -83,10 +83,10 @@ export default defineConfig({
       __CHANGELOG_GHA__: JSON.stringify(changelogGha),
       __CHANGELOG_SDK_DOTNET__: JSON.stringify(changelogSdkDotnet),
       __CHANGELOG_SDK_PYTHON__: JSON.stringify(changelogSdkPython),
-      __CHANGELOG_SDK_TYPESCRIPT__: JSON.stringify(changelogSdkTypescript),
+      __CHANGELOG_SDK_NODEJS__: JSON.stringify(changelogSdkNodejs),
       __SDK_DOTNET_VERSION__: JSON.stringify(sdkDotnetVersion),
       __SDK_PYTHON_VERSION__: JSON.stringify(sdkPythonVersion),
-      __SDK_TYPESCRIPT_VERSION__: JSON.stringify(sdkTsPkg.version),
+      __SDK_NODEJS_VERSION__: JSON.stringify(sdkNodePkg.version),
     },
   },
   build: {

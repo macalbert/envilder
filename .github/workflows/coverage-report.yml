@@ -228,9 +228,9 @@ jobs:
           retention-days: 1
 
   # ────────────────────────────────────────────────────────────────────────────
-  # 🟦 TypeScript SDK
+  # � Node.js SDK
   # ────────────────────────────────────────────────────────────────────────────
-  test-typescript-sdk:
+  test-nodejs-sdk:
     if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -264,7 +264,7 @@ jobs:
       - name: 🏎️ Run tests with coverage
         run: |
           mkdir -p output
-          cd tests/sdks/typescript && pnpm vitest run --reporter=verbose --coverage --coverage.reporter=lcov --coverage.reporter=text --coverage.reportsDirectory=${{ github.workspace }}/coverage-ts-sdk 2>&1 | tee ../../../output/test-output.txt
+          cd tests/sdks/nodejs && pnpm vitest run --reporter=verbose --coverage --coverage.reporter=lcov --coverage.reporter=text --coverage.reportsDirectory=${{ github.workspace }}/coverage-ts-sdk 2>&1 | tee ../../../output/test-output.txt
         env:
           TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
           DOCKER_HOST: unix:///var/run/docker.sock
@@ -274,11 +274,11 @@ jobs:
         uses: danielpalme/ReportGenerator-GitHub-Action@5.5.4
         with:
           reports: coverage-ts-sdk/lcov.info
-          sourcedirs: src/sdks/typescript/src
+          sourcedirs: src/sdks/nodejs/src
           targetdir: report
           reporttypes: Html;MarkdownSummaryGithub;Badges
-          filefilters: +*src/sdks/typescript/src/*;-*node_modules/*;-*tests/*;-*index.ts
-          title: "Envilder TypeScript SDK"
+          filefilters: +*src/sdks/nodejs/src/*;-*node_modules/*;-*tests/*;-*index.ts
+          title: "Envilder Node.js SDK"
 
       - name: 📊 Extract test stats
         if: always()
@@ -288,7 +288,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: typescript-sdk
+          name: nodejs-sdk
           path: report/
           retention-days: 1
 
@@ -349,7 +349,7 @@ jobs:
   # 📊 Publish aggregated dashboard
   # ────────────────────────────────────────────────────────────────────────────
   publish-report:
-    needs: [test-core, test-dotnet, test-python, test-typescript-sdk, test-iac]
+    needs: [test-core, test-dotnet, test-python, test-nodejs-sdk, test-iac]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -363,7 +363,7 @@ jobs:
           [ "${{ needs.test-core.result }}" != "success" ] && failed="$failed core"
           [ "${{ needs.test-dotnet.result }}" != "success" ] && failed="$failed dotnet"
           [ "${{ needs.test-python.result }}" != "success" ] && failed="$failed python"
-          [ "${{ needs.test-typescript-sdk.result }}" != "success" ] && failed="$failed typescript-sdk"
+          [ "${{ needs.test-nodejs-sdk.result }}" != "success" ] && failed="$failed nodejs-sdk"
           [ "${{ needs.test-iac.result }}" != "success" ] && failed="$failed iac"
 
           if [ -n "$failed" ]; then

@@ -11,7 +11,7 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/macalbert/envilder.git",
-    "directory": "src/sdks/typescript"
+    "directory": "src/sdks/nodejs"
   },
   "type": "module",
   "main": "./dist/index.js",

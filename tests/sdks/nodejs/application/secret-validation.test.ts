@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   SecretValidationError,
   validateSecrets,
-} from '../../../../src/sdks/typescript/src/application/secret-validation.js';
+} from '../../../../src/sdks/nodejs/src/application/secret-validation.js';
 
 describe('validateSecrets', () => {
   it('Should_Pass_When_AllSecretsPresent', () => {

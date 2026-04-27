@@ -11,17 +11,17 @@ export default defineConfig({
     globals: false,
     environment: 'node',
     pool: 'forks',
-    include: ['tests/sdks/typescript/**/*.test.ts'],
+    include: ['tests/sdks/nodejs/**/*.test.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
-      include: ['src/sdks/typescript/src/**/*.ts'],
+      include: ['src/sdks/nodejs/src/**/*.ts'],
       exclude: ['**/index.ts'],
     },
   },
   resolve: {
     alias: {
-      '@envilder/sdk': path.resolve(repoRoot, 'src/sdks/typescript/src'),
+      '@envilder/sdk': path.resolve(repoRoot, 'src/sdks/nodejs/src'),
     },
   },
 });

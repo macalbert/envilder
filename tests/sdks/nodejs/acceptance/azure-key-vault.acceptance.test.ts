@@ -1,9 +1,9 @@
 import type { SecretClient } from '@azure/keyvault-secrets';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { EnvilderClient } from '../../../../src/sdks/typescript/src/application/envilder-client.js';
-import type { ParsedMapFile } from '../../../../src/sdks/typescript/src/domain/parsed-map-file.js';
-import { SecretProviderType } from '../../../../src/sdks/typescript/src/domain/secret-provider-type.js';
-import type { AzureKeyVaultSecretProvider } from '../../../../src/sdks/typescript/src/infrastructure/azure/azure-key-vault-secret-provider.js';
+import { EnvilderClient } from '../../../../src/sdks/nodejs/src/application/envilder-client.js';
+import type { ParsedMapFile } from '../../../../src/sdks/nodejs/src/domain/parsed-map-file.js';
+import { SecretProviderType } from '../../../../src/sdks/nodejs/src/domain/secret-provider-type.js';
+import type { AzureKeyVaultSecretProvider } from '../../../../src/sdks/nodejs/src/infrastructure/azure/azure-key-vault-secret-provider.js';
 import { LowkeyVaultTestContainer } from '../containers/lowkey-vault-container.js';
 
 let lowkeyVault: LowkeyVaultTestContainer;

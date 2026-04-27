@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MapFileParser } from '../../../../src/sdks/typescript/src/application/map-file-parser.js';
+import { MapFileParser } from '../../../../src/sdks/nodejs/src/application/map-file-parser.js';
 
 describe('MapFileParser', () => {
   it('Should_ParseMappings_When_ValidJsonProvided', () => {

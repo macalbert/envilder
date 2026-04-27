@@ -30,9 +30,9 @@ const products = [
     group: 'sdks',
   },
   {
-    id: 'sdk-typescript',
-    label: t.changelogPage.categorySdkTypescript,
-    raw: __CHANGELOG_SDK_TYPESCRIPT__ || fallback,
+    id: 'sdk-nodejs',
+    label: t.changelogPage.categorySdkNodejs,
+    raw: __CHANGELOG_SDK_NODEJS__ || fallback,
     group: 'sdks',
   },
   {
@@ -145,18 +145,18 @@ const parsed = products.map((p) => ({
             {/* TypeScript */}
             <button
               class="nav-product-btn nav-product-nested"
-              data-product="sdk-typescript"
+              data-product="sdk-nodejs"
               aria-pressed="false"
               aria-expanded="false"
             >
               <span class="nav-product-chevron">›</span>
-              {t.changelogPage.categorySdkTypescript}
+              {t.changelogPage.categorySdkNodejs}
               <span class="nav-product-count">{parsed[3].versions.length}</span>
             </button>
-            <ul class="version-list collapsed" data-versions="sdk-typescript">
+            <ul class="version-list collapsed" data-versions="sdk-nodejs">
               {parsed[3].versions.map((v) => (
                 <li>
-                  <a href={`#sdk-typescript-${v.id}`} data-product="sdk-typescript">
+                  <a href={`#sdk-nodejs-${v.id}`} data-product="sdk-nodejs">
                     <span class="version-link-tag">{v.tag}</span>
                     {v.date && <span class="version-link-date">{v.date}</span>}
                   </a>

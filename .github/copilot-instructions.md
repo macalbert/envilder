@@ -286,7 +286,7 @@ AAA pattern with comment markers.
 - `make format-sdk-python` (auto-format)
 - `make test-sdk-python` (all tests, requires Docker for acceptance)
 
-### TypeScript SDK (`src/sdks/typescript/`)
+### Node.js SDK (`src/sdks/nodejs/`)
 
 **Architecture**: Layered (Domain → Application → Infrastructure), no DI framework.
 
@@ -313,10 +313,10 @@ AAA pattern with comment markers.
 - Cross-provider validation: profile + Azure → error, vaultUrl + AWS → error
 - `Map<string, string>` used for mappings and resolved secrets
 
-**Tests** (`tests/sdks/typescript/`): Vitest with `Should_<Expected>_When_<Condition>` naming.
+**Tests** (`tests/sdks/nodejs/`): Vitest with `Should_<Expected>_When_<Condition>` naming.
 AAA pattern with comment markers. `vi.fn()` for mocks.
 
 **Build & test**:
 
-- `cd src/sdks/typescript && pnpm build` (TypeScript compilation)
-- `cd tests/sdks/typescript && pnpm vitest run --reporter=verbose` (unit tests)
+- `cd src/sdks/nodejs && pnpm build` (TypeScript compilation)
+- `cd tests/sdks/nodejs && pnpm vitest run --reporter=verbose` (unit tests)

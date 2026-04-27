@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
-import { SecretProviderType } from '../../../../src/sdks/typescript/src/domain/secret-provider-type.js';
-import { AzureKeyVaultSecretProvider } from '../../../../src/sdks/typescript/src/infrastructure/azure/azure-key-vault-secret-provider.js';
-import { createSecretProvider } from '../../../../src/sdks/typescript/src/infrastructure/secret-provider-factory.js';
+import { SecretProviderType } from '../../../../src/sdks/nodejs/src/domain/secret-provider-type.js';
+import { AzureKeyVaultSecretProvider } from '../../../../src/sdks/nodejs/src/infrastructure/azure/azure-key-vault-secret-provider.js';
+import { createSecretProvider } from '../../../../src/sdks/nodejs/src/infrastructure/secret-provider-factory.js';
 
 // Mock the AWS and Azure provider modules so we don't need real cloud SDKs
 vi.mock(
-  '../../../../src/sdks/typescript/src/infrastructure/aws/aws-ssm-secret-provider.js',
+  '../../../../src/sdks/nodejs/src/infrastructure/aws/aws-ssm-secret-provider.js',
   () => ({
     AwsSsmSecretProvider: class {
       getSecret = vi.fn();
@@ -14,7 +14,7 @@ vi.mock(
 );
 
 vi.mock(
-  '../../../../src/sdks/typescript/src/infrastructure/azure/azure-key-vault-secret-provider.js',
+  '../../../../src/sdks/nodejs/src/infrastructure/azure/azure-key-vault-secret-provider.js',
   () => ({
     AzureKeyVaultSecretProvider: class {
       getSecret = vi.fn();

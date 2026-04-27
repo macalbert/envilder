@@ -5,12 +5,12 @@ import {
   LocalstackContainer,
   type StartedLocalStackContainer,
 } from '@testcontainers/localstack';
-import { EnvilderClient } from '../../../../src/sdks/typescript/src/application/envilder-client.js';
-import { MapFileParser } from '../../../../src/sdks/typescript/src/application/map-file-parser.js';
-import type { MapFileConfig } from '../../../../src/sdks/typescript/src/domain/map-file-config.js';
-import { SecretProviderType } from '../../../../src/sdks/typescript/src/domain/secret-provider-type.js';
-import { AwsSsmSecretProvider } from '../../../../src/sdks/typescript/src/infrastructure/aws/aws-ssm-secret-provider.js';
-import { createSecretProvider } from '../../../../src/sdks/typescript/src/infrastructure/secret-provider-factory.js';
+import { EnvilderClient } from '../../../../src/sdks/nodejs/src/application/envilder-client.js';
+import { MapFileParser } from '../../../../src/sdks/nodejs/src/application/map-file-parser.js';
+import type { MapFileConfig } from '../../../../src/sdks/nodejs/src/domain/map-file-config.js';
+import { SecretProviderType } from '../../../../src/sdks/nodejs/src/domain/secret-provider-type.js';
+import { AwsSsmSecretProvider } from '../../../../src/sdks/nodejs/src/infrastructure/aws/aws-ssm-secret-provider.js';
+import { createSecretProvider } from '../../../../src/sdks/nodejs/src/infrastructure/secret-provider-factory.js';
 
 const LOCALSTACK_IMAGE = 'localstack/localstack:stable';
 const SECRETS_MAP = path.resolve(__dirname, '../../../../secrets-map.json');

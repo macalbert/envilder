@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AwsSsmSecretProvider } from '../../../../../src/sdks/typescript/src/infrastructure/aws/aws-ssm-secret-provider.js';
+import { AwsSsmSecretProvider } from '../../../../../src/sdks/nodejs/src/infrastructure/aws/aws-ssm-secret-provider.js';
 
 describe('AwsSsmSecretProvider', () => {
   it('Should_ReturnValues_When_ParametersExist', async () => {

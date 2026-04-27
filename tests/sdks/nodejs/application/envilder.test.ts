@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { Envilder } from '../../../../src/sdks/typescript/src/application/envilder.js';
-import { SecretProviderType } from '../../../../src/sdks/typescript/src/domain/secret-provider-type.js';
+import { Envilder } from '../../../../src/sdks/nodejs/src/application/envilder.js';
+import { SecretProviderType } from '../../../../src/sdks/nodejs/src/domain/secret-provider-type.js';
 
 // Mock fs/promises for file reading
 vi.mock('node:fs/promises', () => ({
@@ -9,14 +9,14 @@ vi.mock('node:fs/promises', () => ({
 
 // Mock the factory
 vi.mock(
-  '../../../../src/sdks/typescript/src/infrastructure/secret-provider-factory.js',
+  '../../../../src/sdks/nodejs/src/infrastructure/secret-provider-factory.js',
   () => ({
     createSecretProvider: vi.fn(),
   }),
 );
 
 import { readFile } from 'node:fs/promises';
-import { createSecretProvider } from '../../../../src/sdks/typescript/src/infrastructure/secret-provider-factory.js';
+import { createSecretProvider } from '../../../../src/sdks/nodejs/src/infrastructure/secret-provider-factory.js';
 
 const mockReadFile = vi.mocked(readFile);
 const mockCreateProvider = vi.mocked(createSecretProvider);

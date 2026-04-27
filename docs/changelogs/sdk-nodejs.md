@@ -2,7 +2,7 @@
 
 ### Added
 
-* **Initial release** — TypeScript runtime SDK for loading secrets directly
+* **Initial release** — Node.js runtime SDK for loading secrets directly
   into `process.env` from a map file. Supports AWS SSM Parameter Store and
   Azure Key Vault
 * **Envilder facade** — `load()`, `resolveFile()`, `fromMapFile()` fluent

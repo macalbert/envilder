@@ -1,4 +1,4 @@
-name: 🟦 TypeScript SDK Tests
+name: � Node.js SDK Tests
 
 permissions:
   id-token: write
@@ -17,16 +17,16 @@ on:
       - synchronize
       - ready_for_review
     paths:
-      - '.github/workflows/tests-typescript-sdk.yml'
-      - 'src/sdks/typescript/**'
-      - 'tests/sdks/typescript/**'
+      - '.github/workflows/tests-nodejs-sdk.yml'
+      - 'src/sdks/nodejs/**'
+      - 'tests/sdks/nodejs/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
   cancel-in-progress: true
 
 jobs:
-  test-typescript-sdk:
+  test-nodejs-sdk:
     runs-on: ubuntu-24.04
     if: ${{ !github.event.pull_request.draft }}
     timeout-minutes: 10
@@ -58,13 +58,13 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: 🌟 Format check
-        run: npx biome check src/sdks/typescript/src/ tests/sdks/typescript/
+        run: npx biome check src/sdks/nodejs/src/ tests/sdks/nodejs/
 
       - name: 🏗️ Build
-        run: cd src/sdks/typescript && pnpm build
+        run: cd src/sdks/nodejs && pnpm build
 
       - name: 🍄 Run tests
-        run: cd tests/sdks/typescript && pnpm vitest run --reporter=verbose --reporter=junit --outputFile=${{ github.workspace }}/test-results.xml
+        run: cd tests/sdks/nodejs && pnpm vitest run --reporter=verbose --reporter=junit --outputFile=${{ github.workspace }}/test-results.xml
         env:
           TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
           DOCKER_HOST: unix:///var/run/docker.sock
@@ -73,7 +73,7 @@ jobs:
         uses: dorny/test-reporter@v3
         if: always()
         with:
-          name: TypeScript SDK Test Results
+          name: Node.js SDK Test Results
           path: test-results.xml
           reporter: jest-junit
           only-summary: "false"

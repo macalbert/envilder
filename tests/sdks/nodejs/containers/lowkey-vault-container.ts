@@ -2,7 +2,7 @@ import https from 'node:https';
 import { DefaultAzureCredential } from '@azure/identity';
 import { SecretClient } from '@azure/keyvault-secrets';
 import { GenericContainer, type StartedTestContainer } from 'testcontainers';
-import { AzureKeyVaultSecretProvider } from '../../../../src/sdks/typescript/src/infrastructure/azure/azure-key-vault-secret-provider.js';
+import { AzureKeyVaultSecretProvider } from '../../../../src/sdks/nodejs/src/infrastructure/azure/azure-key-vault-secret-provider.js';
 
 const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.61';
 const HTTPS_PORT = 8443;

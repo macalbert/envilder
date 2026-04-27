@@ -39,7 +39,7 @@ Every SDK must have a canonical version source read at build time:
 |------------|------------------------------------|------------------------|
 | .NET       | `src/sdks/dotnet/Envilder.csproj`  | `<Version>X.Y.Z</Version>` |
 | Python     | `src/sdks/python/pyproject.toml`   | `version = "X.Y.Z"`   |
-| TypeScript | `src/sdks/typescript/package.json` | `"version": "X.Y.Z"`  |
+| Node.js    | `src/sdks/nodejs/package.json` | `"version": "X.Y.Z"`  |
 | Go         | Git tag / `go.mod` convention      | `vX.Y.Z` tag          |
 | Java       | `pom.xml` or `build.gradle`        | `<version>` / `version =` |
 
@@ -48,7 +48,7 @@ Every SDK must have a canonical version source read at build time:
 The website reads SDK versions at **build time** via `astro.config.mjs`:
 
 - [ ] Add version extraction in `src/website/astro.config.mjs`:
-  - For `package.json`: read + `JSON.parse` (see TypeScript SDK pattern)
+  - For `package.json`: read + `JSON.parse` (see Node.js SDK pattern)
   - For `.csproj`: use `extractCsprojVersion()` helper (regex on `<Version>`)
   - For `pyproject.toml`: use `extractPyprojectVersion()` helper (regex)
 - [ ] Add Vite `define` global: `__SDK_{RUNTIME}_VERSION__`
@@ -122,7 +122,7 @@ node -e "const h=require('fs').readFileSync('dist/docs/index.html','utf-8'); \
 node -e "const h=require('fs').readFileSync('dist/changelog/index.html','utf-8'); \
   console.log('dotnet:', h.includes('sdk-dotnet')); \
   console.log('python:', h.includes('sdk-python')); \
-  console.log('typescript:', h.includes('sdk-typescript'))"
+  console.log('nodejs:', h.includes('sdk-nodejs'))"
 ```
 
 ## Common Pitfalls

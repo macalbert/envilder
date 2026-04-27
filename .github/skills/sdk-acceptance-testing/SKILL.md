@@ -63,7 +63,7 @@ copies per SDK test directory.
 **Path resolution example (TypeScript):**
 
 ```typescript
-// From tests/sdks/typescript/containers/localstack-container.ts
+// From tests/sdks/nodejs/containers/localstack-container.ts
 const SECRETS_MAP = path.resolve(__dirname, '../../../../secrets-map.json');
 ```
 
@@ -193,4 +193,4 @@ steps:
 | ---------- | -------------------------------------- | ------------------------------------------------------------------------ |
 | .NET       | `tests/sdks/dotnet/Fixtures/`          | `tests/sdks/dotnet/Infrastructure/`, `tests/sdks/dotnet/EndToEnd/`       |
 | Python     | `tests/sdks/python/containers/`        | `tests/sdks/python/infrastructure/`, `tests/sdks/python/end_to_end/`     |
-| TypeScript | `tests/sdks/typescript/containers/`    | `tests/sdks/typescript/acceptance/`                                      |
+| Node.js    | `tests/sdks/nodejs/containers/`    | `tests/sdks/nodejs/acceptance/`                                      |

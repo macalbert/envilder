@@ -156,8 +156,8 @@ export interface SdksTranslations {
   pythonDesc: string;
   dotnetTitle: string;
   dotnetDesc: string;
-  typescriptTitle: string;
-  typescriptDesc: string;
+  nodejsTitle: string;
+  nodejsDesc: string;
   goTitle: string;
   goDesc: string;
   javaTitle: string;
@@ -263,7 +263,7 @@ export interface ChangelogPageTranslations {
   categorySdks: string;
   categorySdkDotnet: string;
   categorySdkPython: string;
-  categorySdkTypescript: string;
+  categorySdkNodejs: string;
 }
 
 export interface DocsTranslations {
@@ -464,7 +464,7 @@ export interface DocsTranslations {
   sidebarSdks: string;
   sidebarSdkDotnet: string;
   sidebarSdkPython: string;
-  sidebarSdkTypescript: string;
+  sidebarSdkNodejs: string;
   sdkDotnetTitle: string;
   sdkDotnetDesc: string;
   sdkDotnetInstall: string;
@@ -497,20 +497,20 @@ export interface DocsTranslations {
   sdkPythonValidation: string;
   sdkPythonValidationDesc: string;
   sdkPythonFullDocs: string;
-  sdkTypescriptTitle: string;
-  sdkTypescriptDesc: string;
-  sdkTypescriptInstall: string;
-  sdkTypescriptQuickStart: string;
-  sdkTypescriptQuickStartDesc: string;
-  sdkTypescriptResolve: string;
-  sdkTypescriptResolveDesc: string;
-  sdkTypescriptFluent: string;
-  sdkTypescriptFluentDesc: string;
-  sdkTypescriptEnvLoading: string;
-  sdkTypescriptEnvLoadingDesc: string;
-  sdkTypescriptValidation: string;
-  sdkTypescriptValidationDesc: string;
-  sdkTypescriptFullDocs: string;
+  sdkNodejsTitle: string;
+  sdkNodejsDesc: string;
+  sdkNodejsInstall: string;
+  sdkNodejsQuickStart: string;
+  sdkNodejsQuickStartDesc: string;
+  sdkNodejsResolve: string;
+  sdkNodejsResolveDesc: string;
+  sdkNodejsFluent: string;
+  sdkNodejsFluentDesc: string;
+  sdkNodejsEnvLoading: string;
+  sdkNodejsEnvLoadingDesc: string;
+  sdkNodejsValidation: string;
+  sdkNodejsValidationDesc: string;
+  sdkNodejsFullDocs: string;
   // Pager
   pagerPrev: string;
   pagerNext: string;
