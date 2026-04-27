@@ -157,9 +157,7 @@ function resolveEnvSource(
   const normalized = env.trim();
 
   if (!(normalized in envMapping)) {
-    throw new Error(
-      `Environment '${normalized}' not found in environment mapping.`,
-    );
+    return null;
   }
 
   const source = envMapping[normalized];
@@ -170,7 +168,7 @@ function resolveEnvSource(
 
   if (!source.trim()) {
     throw new Error(
-      `env_mapping contains an empty file path for environment '${normalized}'.`,
+      `envMapping contains an empty file path for environment '${normalized}'.`,
     );
   }
 

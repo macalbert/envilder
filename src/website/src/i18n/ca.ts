@@ -768,8 +768,7 @@ export const ca: Translations = {
     sdkNodejsQuickStartDesc:
       "Carrega secrets des d'un fitxer de mapeig i injecta'ls a process.env:",
     sdkNodejsResolve: 'Resoldre sense injectar',
-    sdkNodejsResolveDesc:
-      "Obté secrets com un Map sense modificar l'entorn:",
+    sdkNodejsResolveDesc: "Obté secrets com un Map sense modificar l'entorn:",
     sdkNodejsFluent: 'Constructor fluent amb sobreescriptures',
     sdkNodejsFluentDesc:
       "Sobreescriu la configuració del proveïdor de manera programàtica amb l'API fluent:",

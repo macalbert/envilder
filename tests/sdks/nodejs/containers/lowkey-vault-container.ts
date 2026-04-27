@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import https from 'node:https';
 import { DefaultAzureCredential } from '@azure/identity';
 import { SecretClient } from '@azure/keyvault-secrets';
@@ -21,11 +22,12 @@ export class LowkeyVaultTestContainer {
     console.log('\n[LowkeyVault] Starting container...');
 
     try {
+      const suffix = crypto.randomUUID().slice(0, 8);
       this.container = await new GenericContainer(LOWKEY_VAULT_IMAGE)
-        .withName('lowkey-vault')
+        .withName(`lowkey-vault-${suffix}`)
         .withExposedPorts(HTTPS_PORT, HTTP_PORT)
         .withEnvironment({
-          LOWKEY_ARGS: '--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true',
+          LOWKEY_ARGS: `--server.port=${HTTPS_PORT} --LOWKEY_VAULT_RELAXED_PORTS=true`,
         })
         .start();
 

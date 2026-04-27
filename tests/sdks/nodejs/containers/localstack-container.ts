@@ -1,5 +1,7 @@
+import crypto from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { SSMClient } from '@aws-sdk/client-ssm';
 import {
   LocalstackContainer,
@@ -13,6 +15,8 @@ import { AwsSsmSecretProvider } from '../../../../src/sdks/nodejs/src/infrastruc
 import { createSecretProvider } from '../../../../src/sdks/nodejs/src/infrastructure/secret-provider-factory.js';
 
 const LOCALSTACK_IMAGE = 'localstack/localstack:stable';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const SECRETS_MAP = path.resolve(__dirname, '../../../../secrets-map.json');
 
 export class LocalStackTestContainer {
@@ -34,8 +38,9 @@ export class LocalStackTestContainer {
       envRecord[key] = value;
     }
 
+    const suffix = crypto.randomUUID().slice(0, 8);
     this.container = await new LocalstackContainer(LOCALSTACK_IMAGE)
-      .withName('localstack')
+      .withName(`localstack-${suffix}`)
       .withEnvironment(envRecord)
       .start();
 

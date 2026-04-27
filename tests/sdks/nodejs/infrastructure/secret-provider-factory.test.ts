@@ -8,7 +8,7 @@ vi.mock(
   '../../../../src/sdks/nodejs/src/infrastructure/aws/aws-ssm-secret-provider.js',
   () => ({
     AwsSsmSecretProvider: class {
-      getSecret = vi.fn();
+      getSecrets = vi.fn();
     },
   }),
 );
@@ -17,7 +17,7 @@ vi.mock(
   '../../../../src/sdks/nodejs/src/infrastructure/azure/azure-key-vault-secret-provider.js',
   () => ({
     AzureKeyVaultSecretProvider: class {
-      getSecret = vi.fn();
+      getSecrets = vi.fn();
     },
   }),
 );
@@ -50,7 +50,7 @@ describe('SecretProviderFactory', () => {
 
     // Assert
     expect(actual).toBeDefined();
-    expect(actual.getSecret).toBeDefined();
+    expect(actual.getSecrets).toBeDefined();
   });
 
   it('Should_CreateAwsProvider_When_AwsProviderSpecified', () => {

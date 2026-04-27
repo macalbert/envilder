@@ -44,7 +44,7 @@ export class AwsSsmSecretProvider implements ISecretProvider {
       );
 
       for (const param of response.Parameters ?? []) {
-        if (param.Name && param.Value) {
+        if (param.Name && param.Value != null) {
           result.set(param.Name, param.Value);
         }
       }

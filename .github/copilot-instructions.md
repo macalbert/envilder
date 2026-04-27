@@ -96,7 +96,7 @@ object passed to `configureInfrastructureServices()`. CLI flags override
 - `pnpm test` — Vitest with coverage (v8 provider, outputs to `coverage/`)
 - `pnpm test:ci` — Adds JUnit reporter for CI pipelines
 - `pnpm lint` — Runs Secretlint (credential detection), Biome (format/lint), and `tsc --noEmit`
-- `pnpm format:write` — Auto-format with Biome
+- `pnpm format` — Auto-format with Biome
 
 **E2E Tests**: Located in `e2e/`, use real AWS SSM via LocalStack and Azure Key Vault
 via Lowkey Vault (both via TestContainers). Run `pnpm build` + `pack-and-install.ts` before E2E.

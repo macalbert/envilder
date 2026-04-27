@@ -60,9 +60,7 @@ const changelogCli = readChangelog('../../docs/changelogs/cli.md');
 const changelogGha = readChangelog('../../docs/changelogs/gha.md');
 const changelogSdkDotnet = readChangelog('../../docs/changelogs/sdk-dotnet.md');
 const changelogSdkPython = readChangelog('../../docs/changelogs/sdk-python.md');
-const changelogSdkNodejs = readChangelog(
-  '../../docs/changelogs/sdk-nodejs.md',
-);
+const changelogSdkNodejs = readChangelog('../../docs/changelogs/sdk-nodejs.md');
 
 export default defineConfig({
   site: 'https://envilder.com',
