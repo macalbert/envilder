@@ -3,7 +3,7 @@
     "default": {
       "line": 80
     },
-    "core": {
+    "cli": {
       "line": 80
     },
     "dotnet": {

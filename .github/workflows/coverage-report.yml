@@ -23,9 +23,9 @@ concurrency:
 
 jobs:
   # ────────────────────────────────────────────────────────────────────────────
-  # 🎮 Core — TypeScript CLI + GHA + unit tests
+  # 🎮 CLI + GHA — TypeScript core + unit tests
   # ────────────────────────────────────────────────────────────────────────────
-  test-core:
+  test-cli:
     if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -70,7 +70,7 @@ jobs:
           targetdir: report
           reporttypes: Html;MarkdownSummaryGithub;Badges
           filefilters: +*src/envilder/*;-*node_modules/*;-*tests/*
-          title: "Envilder Core (TypeScript)"
+          title: "Envilder CLI"
 
       - name: 📊 Extract test stats
         if: always()
@@ -80,7 +80,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: core
+          name: cli
           path: report/
           retention-days: 1
 
@@ -228,7 +228,7 @@ jobs:
           retention-days: 1
 
   # ────────────────────────────────────────────────────────────────────────────
-  # � Node.js SDK
+  # 🟢 Node.js SDK
   # ────────────────────────────────────────────────────────────────────────────
   test-nodejs-sdk:
     if: ${{ !github.event.pull_request.draft }}
@@ -349,7 +349,7 @@ jobs:
   # 📊 Publish aggregated dashboard
   # ────────────────────────────────────────────────────────────────────────────
   publish-report:
-    needs: [test-core, test-dotnet, test-python, test-nodejs-sdk, test-iac]
+    needs: [test-cli, test-dotnet, test-python, test-nodejs-sdk, test-iac]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -360,7 +360,7 @@ jobs:
       - name: 🚨 Fail workflow if any test job failed
         run: |
           failed=""
-          [ "${{ needs.test-core.result }}" != "success" ] && failed="$failed core"
+          [ "${{ needs.test-cli.result }}" != "success" ] && failed="$failed cli"
           [ "${{ needs.test-dotnet.result }}" != "success" ] && failed="$failed dotnet"
           [ "${{ needs.test-python.result }}" != "success" ] && failed="$failed python"
           [ "${{ needs.test-nodejs-sdk.result }}" != "success" ] && failed="$failed nodejs-sdk"
