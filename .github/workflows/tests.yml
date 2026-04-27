@@ -20,8 +20,8 @@ on:
     paths:
       - ".github/workflows/tests.yml"
       - "github-action/action.yml"
-      - "src/**"
-      - "tests/**"
+      - "src/envilder/**"
+      - "tests/envilder/**"
       - "e2e/**"
       - "package.json"
       - "pnpm-lock.yaml"
