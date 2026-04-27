@@ -1,4 +1,4 @@
-name: � Node.js SDK Tests
+name: 🧪 Node.js SDK Tests
 
 permissions:
   id-token: write
@@ -58,7 +58,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: 🌟 Format check
-        run: npx biome check src/sdks/nodejs/src/ tests/sdks/nodejs/
+        run: npx biome check src/sdks/nodejs/src/ tests/sdks/nodejs/ && npx biome format src/sdks/nodejs/src/ tests/sdks/nodejs/
 
       - name: 🏗️ Build
         run: cd src/sdks/nodejs && pnpm build

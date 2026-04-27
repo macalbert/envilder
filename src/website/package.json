@@ -8,10 +8,10 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "format": "biome format",
-    "format:write": "biome format --write",
+    "format": "biome check --write --unsafe && biome format --write",
+    "format:check": "biome check && biome format",
     "lint": "biome check",
-    "lint:write": "biome check --write"
+    "lint:fix": "biome check --write"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.2",

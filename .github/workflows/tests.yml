@@ -65,7 +65,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: 🌟 Shine Sprite (Run formatting checker)
-        run: pnpm format
+        run: pnpm format:check
 
       - name: 🏁 Flagpole (Run code quality checker)
         run: pnpm lint
