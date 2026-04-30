@@ -87,7 +87,7 @@ jobs:
 
       - name: 🌟 Format check
         if: steps.version-check.outputs.version_changed == 'true'
-        run: npx biome check src/sdks/nodejs/src/ tests/sdks/nodejs/
+        run: pnpm biome check src/sdks/nodejs/src/ tests/sdks/nodejs/
         working-directory: .
 
       - name: 🏗️ Build

@@ -59,7 +59,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: 🌟 Format check
-        run: npx biome check src/sdks/nodejs/src/ tests/sdks/nodejs/ && npx biome format src/sdks/nodejs/src/ tests/sdks/nodejs/
+        run: pnpm biome check src/sdks/nodejs/src/ tests/sdks/nodejs/ && pnpm biome format src/sdks/nodejs/src/ tests/sdks/nodejs/
 
       - name: 🏗️ Build
         run: cd src/sdks/nodejs && pnpm build
