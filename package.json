@@ -107,7 +107,7 @@
     "@vitest/coverage-v8": "catalog:",
     "glob": "^13.0.6",
     "lefthook": "^2.1.4",
-    "secretlint": "^11.4.0",
+    "secretlint": "^12.3.1",
     "testcontainers": "^11.13.0",
     "ts-node": "catalog:",
     "tsx": "^4.21.0",
