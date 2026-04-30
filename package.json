@@ -100,7 +100,7 @@
     "@biomejs/biome": "catalog:",
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
-    "@secretlint/secretlint-rule-preset-recommend": "^11.4.0",
+    "@secretlint/secretlint-rule-preset-recommend": "^12.3.1",
     "@testcontainers/localstack": "^11.13.0",
     "@types/node": "catalog:",
     "@vercel/ncc": "^0.38.4",
