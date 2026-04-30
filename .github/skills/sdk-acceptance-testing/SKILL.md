@@ -10,7 +10,7 @@ description: >-
 # SDK Acceptance Testing
 
 Patterns for acceptance testing Envilder SDKs against real cloud provider
-emulators. Applies to all SDKs (.NET, Python, TypeScript, Go, Java).
+emulators. Applies to all SDKs (.NET, Python, Node.js, Go, Java).
 
 See [ADR-0001](../../../docs/architecture/adr/0001-sdk-acceptance-test-infrastructure.md)
 for the architectural decision behind these patterns.

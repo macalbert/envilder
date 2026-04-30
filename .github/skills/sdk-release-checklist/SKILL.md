@@ -15,7 +15,7 @@ existing SDK. Prevents drift between code, website, changelogs, and CI.
 ## When to Use
 
 - Creating a new runtime SDK (e.g., Go, Java, Ruby)
-- Releasing a new version of any existing SDK (.NET, Python, TypeScript)
+- Releasing a new version of any existing SDK (.NET, Python, Node.js)
 - Auditing that an SDK is fully wired into the website and build system
 - After a version bump to verify all integration points are updated
 

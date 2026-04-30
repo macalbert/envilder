@@ -7,7 +7,7 @@ Accepted
 ## Context
 
 Envilder is a multi-runtime secret management platform with SDKs for .NET,
-Python, TypeScript (and planned Go, Java). Each SDK implements its own providers
+Python, Node.js (and planned Go, Java). Each SDK implements its own providers
 for AWS SSM Parameter Store and Azure Key Vault.
 
 Acceptance tests must exercise real cloud provider interactions against
