@@ -3,13 +3,16 @@
     "default": {
       "line": 80
     },
-    "core": {
+    "cli": {
       "line": 80
     },
     "dotnet": {
       "line": 80
     },
     "python": {
+      "line": 80
+    },
+    "nodejs-sdk": {
       "line": 80
     },
     "iac": {

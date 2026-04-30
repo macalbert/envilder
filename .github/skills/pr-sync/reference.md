@@ -45,7 +45,7 @@ Remove-Item .pr-body.md
 
 Before creating or updating a PR, verify:
 
-1. `pnpm format:write` — auto-format
+1. `pnpm format` — auto-format
 2. `pnpm lint` — secretlint + biome + tsc
 3. `pnpm test` — vitest with coverage
 

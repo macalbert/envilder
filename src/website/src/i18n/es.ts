@@ -287,8 +287,8 @@ export const es: Translations = {
     dotnetTitle: '.NET',
     dotnetDesc:
       'Integración nativa con IConfiguration. Resuelve secretos al arrancar.',
-    typescriptTitle: 'TypeScript',
-    typescriptDesc:
+    nodejsTitle: 'Node.js',
+    nodejsDesc:
       'Carga secretos directamente en Node.js. Mismo map-file, cero dependencias del CLI.',
     goTitle: 'Go',
     goDesc: 'Carga ligera de secretos para servicios Go.',
@@ -386,11 +386,11 @@ export const es: Translations = {
           'Librería para apps enterprise y Azure-native. Publicado en NuGet',
       },
       {
-        status: 'next',
-        label: '📦',
-        title: 'TypeScript SDK (@envilder/sdk)',
+        status: 'done',
+        label: '✅',
+        title: 'Node.js SDK (@envilder/sdk)',
         description:
-          'Librería nativa de ejecución — cargará secretos directamente en process.env desde un map-file. Se publicará en npm',
+          'Librería nativa de ejecución — carga secretos directamente en process.env desde un map-file. Publicado en npm',
       },
       {
         status: 'next',
@@ -495,6 +495,7 @@ export const es: Translations = {
     categorySdks: 'SDKs',
     categorySdkDotnet: '.NET',
     categorySdkPython: 'Python',
+    categorySdkNodejs: 'Node.js',
   },
   docs: {
     title: 'Docs Envilder | CLI, GitHub Action y AWS SSM',
@@ -712,6 +713,7 @@ export const es: Translations = {
     sidebarSdks: 'SDKs',
     sidebarSdkDotnet: '.NET SDK',
     sidebarSdkPython: 'Python SDK',
+    sidebarSdkNodejs: 'Node.js SDK',
     sdkDotnetTitle: '.NET SDK',
     sdkDotnetDesc:
       'Carga secretos directamente en tu aplicación .NET al inicio. Fachada de una línea, constructor fluido, integración con IConfiguration o control programático total.',
@@ -758,6 +760,26 @@ export const es: Translations = {
     sdkPythonValidationDesc:
       'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
     sdkPythonFullDocs: 'Documentación completa →',
+    sdkNodejsTitle: 'Node.js SDK',
+    sdkNodejsDesc:
+      'Carga secretos directamente en tu aplicación Node.js al inicio. API asíncrona con fachada de una línea o constructor fluido para control total.',
+    sdkNodejsInstall: 'Instalación',
+    sdkNodejsQuickStart: 'Inicio rápido — una línea',
+    sdkNodejsQuickStartDesc:
+      'Carga secretos desde un archivo de mapeo e inyéctalos en process.env:',
+    sdkNodejsResolve: 'Resolver sin inyectar',
+    sdkNodejsResolveDesc:
+      'Obtén secretos como un Map sin modificar el entorno:',
+    sdkNodejsFluent: 'Constructor fluido con sobreescrituras',
+    sdkNodejsFluentDesc:
+      'Sobreescribe la configuración del proveedor de forma programática con la API fluida:',
+    sdkNodejsEnvLoading: 'Carga basada en entorno',
+    sdkNodejsEnvLoadingDesc:
+      'Recomendado para aplicaciones multi-entorno. Mapea cada entorno a su archivo de secretos:',
+    sdkNodejsValidation: 'Validación de secretos',
+    sdkNodejsValidationDesc:
+      'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
+    sdkNodejsFullDocs: 'Documentación completa →',
     pagerPrev: 'Anterior',
     pagerNext: 'Siguiente',
   },

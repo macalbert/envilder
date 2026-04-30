@@ -1,0 +1,58 @@
+{
+  "name": "@envilder/sdk",
+  "version": "0.1.1",
+  "description": "Load secrets from AWS SSM Parameter Store or Azure Key Vault directly into your Node.js process — no .env files needed.",
+  "license": "MIT",
+  "author": {
+    "name": "Marçal Albert Castellví",
+    "email": "mac.albert@gmail.com",
+    "url": "https://github.com/macalbert/envilder"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/macalbert/envilder.git",
+    "directory": "src/sdks/nodejs"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist"
+  },
+  "keywords": [
+    "secrets",
+    "environment",
+    "aws",
+    "ssm",
+    "azure",
+    "keyvault",
+    "envilder"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ssm": "^3.700.0",
+    "@aws-sdk/credential-providers": "^3.700.0",
+    "@azure/identity": "^4.5.0",
+    "@azure/keyvault-secrets": "^4.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "rimraf": "^6.0.0"
+  }
+}

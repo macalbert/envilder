@@ -35,19 +35,51 @@ function stripAnsi(raw) {
 const text = stripAnsi(readFileSync(inputFile, 'utf8'));
 
 function parseDotnet(text) {
-  const match = text.match(
+  // Classic vstest format: "Failed: 0, Passed: 92, Skipped: 0, Total: 92, Duration: 3.2 s"
+  const classic = text.match(
     /Failed:\s*(\d+),\s*Passed:\s*(\d+),\s*Skipped:\s*(\d+),\s*Total:\s*(\d+),\s*Duration:\s*(.+)/,
   );
-  if (!match) {
-    return null;
+  if (classic) {
+    return {
+      total: +classic[4],
+      passed: +classic[2],
+      failed: +classic[1],
+      skipped: +classic[3],
+      duration: normalizeDuration(classic[5].trim()),
+    };
   }
-  return {
-    total: +match[4],
-    passed: +match[2],
-    failed: +match[1],
-    skipped: +match[3],
-    duration: normalizeDuration(match[5].trim()),
-  };
+
+  // .NET 9+ terminal logger: "total: 92, failed: 0, succeeded: 92, skipped: 0, duration: 4.7s"
+  const terminal = text.match(
+    /total:\s*(\d+),\s*failed:\s*(\d+),\s*succeeded:\s*(\d+),\s*skipped:\s*(\d+),\s*duration:\s*([\d.]+\s*[ms]*s)/i,
+  );
+  if (terminal) {
+    return {
+      total: +terminal[1],
+      passed: +terminal[3],
+      failed: +terminal[2],
+      skipped: +terminal[4],
+      duration: normalizeDuration(terminal[5].trim()),
+    };
+  }
+
+  // Fallback: "Total tests: 92 Passed: 92 Failed: 0 Skipped: 0" + "Total time: 4.72 Seconds"
+  const totalMatch = text.match(/Total\s+tests:\s*(\d+)/i);
+  const passedMatch = text.match(/Passed:\s*(\d+)/i);
+  const failedMatch = text.match(/Failed:\s*(\d+)/i);
+  const skippedMatch = text.match(/Skipped:\s*(\d+)/i);
+  const timeMatch = text.match(/Total\s+time:\s*([\d.]+)\s*Seconds/i);
+  if (totalMatch && passedMatch) {
+    return {
+      total: +totalMatch[1],
+      passed: +passedMatch[1],
+      failed: +(failedMatch?.[1] ?? 0),
+      skipped: +(skippedMatch?.[1] ?? 0),
+      duration: timeMatch ? normalizeDuration(`${timeMatch[1]}s`) : null,
+    };
+  }
+
+  return null;
 }
 
 function parseJest(text) {
@@ -172,7 +204,11 @@ function normalizeDuration(raw) {
 }
 
 function autoDetect(text) {
-  if (/Failed:\s*\d+,\s*Passed:/.test(text)) {
+  if (
+    /Failed:\s*\d+,\s*Passed:/.test(text) ||
+    /total:\s*\d+,\s*failed:\s*\d+,\s*succeeded:/i.test(text) ||
+    /Total\s+tests:\s*\d+/i.test(text)
+  ) {
     return parseDotnet(text);
   }
   if (/Test Files\s+/.test(text) && /Duration\s+/.test(text)) {

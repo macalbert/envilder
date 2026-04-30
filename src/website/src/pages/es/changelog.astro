@@ -30,6 +30,12 @@ const products = [
     group: 'sdks',
   },
   {
+    id: 'sdk-nodejs',
+    label: t.changelogPage.categorySdkNodejs,
+    raw: __CHANGELOG_SDK_NODEJS__ || fallback,
+    group: 'sdks',
+  },
+  {
     id: 'gha',
     label: t.changelogPage.categoryGha,
     raw: __CHANGELOG_GHA__ || fallback,
@@ -41,6 +47,8 @@ const parsed = products.map((p) => ({
   html: changelogToHtml(p.raw),
   versions: extractVersions(p.raw),
 }));
+
+const parsedById = Object.fromEntries(parsed.map((p) => [p.id, p]));
 ---
 
 <BaseLayout
@@ -76,10 +84,10 @@ const parsed = products.map((p) => ({
             >
               <span class="nav-product-chevron">›</span>
               {t.changelogPage.versions}
-              <span class="nav-product-count">{parsed[0].versions.length}</span>
+              <span class="nav-product-count">{parsedById['cli'].versions.length}</span>
             </button>
             <ul class="version-list" data-versions="cli">
-              {parsed[0].versions.map((v) => (
+              {parsedById['cli'].versions.map((v) => (
                 <li>
                   <a href={`#cli-${v.id}`} data-product="cli">
                     <span class="version-link-tag">{v.tag}</span>
@@ -101,10 +109,10 @@ const parsed = products.map((p) => ({
             >
               <span class="nav-product-chevron">›</span>
               {t.changelogPage.categorySdkDotnet}
-              <span class="nav-product-count">{parsed[1].versions.length}</span>
+              <span class="nav-product-count">{parsedById['sdk-dotnet'].versions.length}</span>
             </button>
             <ul class="version-list collapsed" data-versions="sdk-dotnet">
-              {parsed[1].versions.map((v) => (
+              {parsedById['sdk-dotnet'].versions.map((v) => (
                 <li>
                   <a href={`#sdk-dotnet-${v.id}`} data-product="sdk-dotnet">
                     <span class="version-link-tag">{v.tag}</span>
@@ -123,12 +131,34 @@ const parsed = products.map((p) => ({
             >
               <span class="nav-product-chevron">›</span>
               {t.changelogPage.categorySdkPython}
-              <span class="nav-product-count">{parsed[2].versions.length}</span>
+              <span class="nav-product-count">{parsedById['sdk-python'].versions.length}</span>
             </button>
             <ul class="version-list collapsed" data-versions="sdk-python">
-              {parsed[2].versions.map((v) => (
+              {parsedById['sdk-python'].versions.map((v) => (
                 <li>
                   <a href={`#sdk-python-${v.id}`} data-product="sdk-python">
+                    <span class="version-link-tag">{v.tag}</span>
+                    {v.date && <span class="version-link-date">{v.date}</span>}
+                  </a>
+                </li>
+              ))}
+            </ul>
+
+            {/* Node.js */}
+            <button
+              class="nav-product-btn nav-product-nested"
+              data-product="sdk-nodejs"
+              aria-pressed="false"
+              aria-expanded="false"
+            >
+              <span class="nav-product-chevron">›</span>
+              {t.changelogPage.categorySdkNodejs}
+              <span class="nav-product-count">{parsedById['sdk-nodejs'].versions.length}</span>
+            </button>
+            <ul class="version-list collapsed" data-versions="sdk-nodejs">
+              {parsedById['sdk-nodejs'].versions.map((v) => (
+                <li>
+                  <a href={`#sdk-nodejs-${v.id}`} data-product="sdk-nodejs">
                     <span class="version-link-tag">{v.tag}</span>
                     {v.date && <span class="version-link-date">{v.date}</span>}
                   </a>
@@ -146,10 +176,10 @@ const parsed = products.map((p) => ({
             >
               <span class="nav-product-chevron">›</span>
               {t.changelogPage.versions}
-              <span class="nav-product-count">{parsed[3].versions.length}</span>
+              <span class="nav-product-count">{parsedById['gha'].versions.length}</span>
             </button>
             <ul class="version-list collapsed" data-versions="gha">
-              {parsed[3].versions.map((v) => (
+              {parsedById['gha'].versions.map((v) => (
                 <li>
                   <a href={`#gha-${v.id}`} data-product="gha">
                     <span class="version-link-tag">{v.tag}</span>

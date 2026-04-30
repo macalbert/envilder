@@ -11,7 +11,7 @@
 | `domain` | Domain entities, ports, errors |
 | `app` | Application layer handlers |
 | `infra` | Infrastructure adapters |
-| `sdk-ts` | TypeScript SDK (`src/sdks/typescript/`) |
+| `sdk-node` | Node.js SDK (`src/sdks/nodejs/`) |
 | `sdk-dotnet` | .NET SDK (`src/sdks/dotnet/`) |
 | `sdk-python` | Python SDK (`src/sdks/python/`) |
 | `sdk-go` | Go SDK (`src/sdks/go/`) |
@@ -24,7 +24,7 @@
 
 ## Scope Selection Heuristic
 
-1. If all changes are in one SDK → use the matching `sdk-*` scope (e.g. `sdk-ts`, `sdk-dotnet`, `sdk-python`)
+1. If all changes are in one SDK → use the matching `sdk-*` scope (e.g. `sdk-node`, `sdk-dotnet`, `sdk-python`)
 2. If all changes are in one layer → use that layer scope (`domain`, `app`, `infra`)
 3. If changes span CLI + core → use `cli` (user-facing entry point)
 4. If changes span multiple SDKs → use `sdk` scope
@@ -33,10 +33,10 @@
 ## Examples
 
 ```bash
-feat(sdk-ts): add fluent builder for secret resolution
+feat(sdk-node): add fluent builder for secret resolution
 fix(ssm): handle throttling on GetParameter calls
 test(sdk-dotnet): add acceptance tests for Azure Key Vault
-docs(website): update SDK landing page with TypeScript examples
+docs(website): update SDK landing page with Node.js examples
 chore(dx): update biome to v2.0
 refactor(app): extract shared validation into domain layer
 ```

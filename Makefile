@@ -19,6 +19,9 @@ DOTNET_TEST := tests/sdks/dotnet
 PYTHON_SRC  := src/sdks/python
 PYTHON_TEST := tests/sdks/python
 
+NODEJS_SRC  := src/sdks/nodejs
+NODEJS_TEST := tests/sdks/nodejs
+
 # ---------------------------------------------------------------------------
 # .NET SDK
 # ---------------------------------------------------------------------------
@@ -62,14 +65,31 @@ test-sdk-python: ## Run all Python tests
 	uv run --project $(PYTHON_SRC) pytest $(PYTHON_TEST)/ -v --junitxml=$(PYTHON_TEST)/test-results.xml
 
 # ---------------------------------------------------------------------------
+# Node.js SDK
+# ---------------------------------------------------------------------------
+.PHONY: check-sdk-nodejs format-sdk-nodejs build-sdk-nodejs test-sdk-nodejs
+
+check-sdk-nodejs: ## Verify Node.js SDK formatting (no changes)
+	pnpm -w exec biome check $(NODEJS_SRC)/src/ $(NODEJS_TEST)/
+
+format-sdk-nodejs: ## Auto-format Node.js SDK code
+	pnpm -w exec biome check --write --unsafe $(NODEJS_SRC)/src/ $(NODEJS_TEST)/ && pnpm -w exec biome format --write $(NODEJS_SRC)/src/ $(NODEJS_TEST)/
+
+build-sdk-nodejs: ## Build Node.js SDK
+	cd $(NODEJS_SRC) && pnpm build
+
+test-sdk-nodejs: build-sdk-nodejs ## Run Node.js SDK unit tests
+	cd $(NODEJS_TEST) && pnpm vitest run --reporter=verbose --exclude="**/acceptance/**"
+
+# ---------------------------------------------------------------------------
 # All SDKs
 # ---------------------------------------------------------------------------
 .PHONY: check-sdk format-sdk build-sdk test-sdk
 
-check-sdk: check-sdk-dotnet check-sdk-python ## Verify all SDKs
-format-sdk: format-sdk-dotnet format-sdk-python ## Format all SDKs
-build-sdk: build-sdk-dotnet ## Build all SDKs
-test-sdk: test-sdk-dotnet test-sdk-python ## Test all SDKs
+check-sdk: check-sdk-dotnet check-sdk-python check-sdk-nodejs ## Verify all SDKs
+format-sdk: format-sdk-dotnet format-sdk-python format-sdk-nodejs ## Format all SDKs
+build-sdk: build-sdk-dotnet build-sdk-nodejs ## Build all SDKs
+test-sdk: test-sdk-dotnet test-sdk-python test-sdk-nodejs ## Test all SDKs
 
 # ---------------------------------------------------------------------------
 # Help
@@ -87,8 +107,13 @@ help: ## Show this help
 	@echo     check-sdk-python            Verify Python formatting + types
 	@echo     format-sdk-python           Auto-format Python code
 	@echo     test-sdk-python             Run all Python tests
+	@echo   Node.js SDK
+	@echo     check-sdk-nodejs            Verify Node.js SDK formatting
+	@echo     format-sdk-nodejs           Auto-format Node.js SDK code
+	@echo     build-sdk-nodejs            Build Node.js SDK
+	@echo     test-sdk-nodejs             Run Node.js SDK unit tests
 	@echo   All SDKs
 	@echo     check-sdk                   Verify all SDKs
 	@echo     format-sdk                  Format all SDKs
-	@echo     build-sdk                   Build all SDKs (.NET only)
+	@echo     build-sdk                   Build all SDKs
 	@echo     test-sdk                    Test all SDKs

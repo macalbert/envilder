@@ -23,9 +23,9 @@ concurrency:
 
 jobs:
   # ────────────────────────────────────────────────────────────────────────────
-  # 🎮 Core — TypeScript CLI + GHA + unit tests
+  # 🎮 CLI + GHA — TypeScript core + unit tests
   # ────────────────────────────────────────────────────────────────────────────
-  test-core:
+  test-cli:
     if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -59,7 +59,10 @@ jobs:
       - name: 🏎️ Run tests with coverage
         run: |
           mkdir -p output
-          pnpm vitest run --reporter=verbose --coverage --coverage.reporter=lcov --coverage.reporter=text --coverage.reportsDirectory=coverage 2>&1 | tee output/test-output.txt
+          pnpm vitest run --reporter=verbose \
+            --exclude='tests/sdks/**' \
+            --coverage --coverage.reporter=lcov --coverage.reporter=text \
+            --coverage.reportsDirectory=coverage 2>&1 | tee output/test-output.txt
 
       - name: 📋 Generate coverage report
         if: always()
@@ -70,7 +73,7 @@ jobs:
           targetdir: report
           reporttypes: Html;MarkdownSummaryGithub;Badges
           filefilters: +*src/envilder/*;-*node_modules/*;-*tests/*
-          title: "Envilder Core (TypeScript)"
+          title: "Envilder CLI"
 
       - name: 📊 Extract test stats
         if: always()
@@ -80,7 +83,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: core
+          name: cli
           path: report/
           retention-days: 1
 
@@ -228,6 +231,71 @@ jobs:
           retention-days: 1
 
   # ────────────────────────────────────────────────────────────────────────────
+  # 🟢 Node.js SDK
+  # ────────────────────────────────────────────────────────────────────────────
+  test-nodejs-sdk:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+    steps:
+      - name: 🧲 Checkout
+        uses: actions/checkout@v6
+
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
+
+      - name: 🛠️ Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.x"
+          cache: "pnpm"
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🪙 Configure AWS credentials
+        if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: 🏎️ Run tests with coverage
+        run: |
+          mkdir -p output
+          cd tests/sdks/nodejs && pnpm vitest run --reporter=verbose --coverage 2>&1 | tee ../../../output/test-output.txt
+        env:
+          TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
+          DOCKER_HOST: unix:///var/run/docker.sock
+
+      - name: 📋 Generate coverage report
+        if: always()
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.4
+        with:
+          reports: tests/sdks/nodejs/coverage/lcov.info
+          sourcedirs: src/sdks/nodejs/src
+          targetdir: report
+          reporttypes: Html;MarkdownSummaryGithub;Badges
+          filefilters: +*src/sdks/nodejs/src/*;-*node_modules/*;-*tests/*;-*index.ts
+          title: "Envilder Node.js SDK"
+
+      - name: 📊 Extract test stats
+        if: always()
+        run: node .github/workflows/coverage-report/extract-test-stats.mjs output/test-output.txt report/test-stats.json vitest
+
+      - name: 📤 Upload report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nodejs-sdk
+          path: report/
+          retention-days: 1
+
+  # ────────────────────────────────────────────────────────────────────────────
   # ☁️ IaC (CDK)
   # ────────────────────────────────────────────────────────────────────────────
   test-iac:
@@ -284,7 +352,7 @@ jobs:
   # 📊 Publish aggregated dashboard
   # ────────────────────────────────────────────────────────────────────────────
   publish-report:
-    needs: [test-core, test-dotnet, test-python, test-iac]
+    needs: [test-cli, test-dotnet, test-python, test-nodejs-sdk, test-iac]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -295,9 +363,10 @@ jobs:
       - name: 🚨 Fail workflow if any test job failed
         run: |
           failed=""
-          [ "${{ needs.test-core.result }}" != "success" ] && failed="$failed core"
+          [ "${{ needs.test-cli.result }}" != "success" ] && failed="$failed cli"
           [ "${{ needs.test-dotnet.result }}" != "success" ] && failed="$failed dotnet"
           [ "${{ needs.test-python.result }}" != "success" ] && failed="$failed python"
+          [ "${{ needs.test-nodejs-sdk.result }}" != "success" ] && failed="$failed nodejs-sdk"
           [ "${{ needs.test-iac.result }}" != "success" ] && failed="$failed iac"
 
           if [ -n "$failed" ]; then
