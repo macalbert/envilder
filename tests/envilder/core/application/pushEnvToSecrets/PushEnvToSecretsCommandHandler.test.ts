@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import { PushEnvToSecretsCommand } from '../../../../../src/envilder/core/application/pushEnvToSecrets/PushEnvToSecretsCommand';
 import { PushEnvToSecretsCommandHandler } from '../../../../../src/envilder/core/application/pushEnvToSecrets/PushEnvToSecretsCommandHandler';
+import { EnvironmentVariable } from '../../../../../src/envilder/core/domain/EnvironmentVariable';
 import type { ILogger } from '../../../../../src/envilder/core/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../../../src/envilder/core/domain/ports/ISecretProvider';
 import type { IVariableStore } from '../../../../../src/envilder/core/domain/ports/IVariableStore';
@@ -412,5 +413,36 @@ describe('PushEnvToSecretsCommandHandler', () => {
     expect(mockLogger.error).toHaveBeenCalledWith(
       'Failed to push environment file: Secret store error',
     );
+  });
+
+  it('Should_LogMaskedSecretPath_When_PushingParameters', async () => {
+    // Arrange
+    const secretPath = '/path/to/ssm/test';
+    const maskedPath = EnvironmentVariable.maskSecretPath(secretPath);
+
+    mockVariableStore.getMapping.mockResolvedValue({
+      TEST_VAR: secretPath,
+    });
+
+    mockVariableStore.getEnvironment.mockResolvedValue({
+      TEST_VAR: 'test-value',
+    });
+
+    const command = PushEnvToSecretsCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    const infoCalls = (mockLogger.info as Mock).mock.calls.map(
+      (call) => call[0] as string,
+    );
+    const pushLogCall = infoCalls.find((msg) => msg.includes('TEST_VAR='));
+    expect(pushLogCall).toBeDefined();
+    expect(pushLogCall).toContain(maskedPath);
+    expect(pushLogCall).not.toContain(secretPath);
   });
 });

@@ -152,10 +152,10 @@ export class PushEnvToSecretsCommandHandler {
     await this.secretProvider.setSecret(secretPath, value);
 
     const keysDescription =
-      sourceKeys.length > 1 ? `${sourceKeys.join(', ')}` : sourceKeys[0];
+      sourceKeys.length > 1 ? sourceKeys.join(', ') : sourceKeys[0];
 
     this.logger.info(
-      `Pushed ${keysDescription}=${envVariable.maskedValue} to secret store at path ${secretPath}`,
+      `Pushed ${keysDescription}=${envVariable.maskedValue} to secret store at path ${EnvironmentVariable.maskSecretPath(secretPath)}`,
     );
   }
 
