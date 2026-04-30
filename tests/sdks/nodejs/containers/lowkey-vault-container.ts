@@ -21,6 +21,10 @@ export class LowkeyVaultTestContainer {
   async start(): Promise<LowkeyVaultTestContainer> {
     console.log('\n[LowkeyVault] Starting container...');
 
+    this.prevIdentityEndpoint = process.env.IDENTITY_ENDPOINT;
+    this.prevIdentityHeader = process.env.IDENTITY_HEADER;
+    this.prevTlsRejectUnauthorized = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+
     try {
       const suffix = crypto.randomUUID().slice(0, 8);
       this.container = await new GenericContainer(LOWKEY_VAULT_IMAGE)
@@ -39,10 +43,6 @@ export class LowkeyVaultTestContainer {
       const tokenUrl = `http://${host}:${httpPort}/metadata/identity/oauth2/token`;
 
       await this.waitUntilReady();
-
-      this.prevIdentityEndpoint = process.env.IDENTITY_ENDPOINT;
-      this.prevIdentityHeader = process.env.IDENTITY_HEADER;
-      this.prevTlsRejectUnauthorized = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
 
       process.env.IDENTITY_ENDPOINT = tokenUrl;
       process.env.IDENTITY_HEADER = 'dummy';
