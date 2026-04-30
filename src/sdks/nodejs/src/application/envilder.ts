@@ -127,7 +127,15 @@ export class Envilder {
   }
 
   private async parseFile() {
-    const json = await readFile(this.filePath, 'utf-8');
+    let json: string;
+    try {
+      json = await readFile(this.filePath, 'utf-8');
+    } catch (err: unknown) {
+      if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
+        throw new Error(`Map file not found: ${this.filePath}`);
+      }
+      throw err;
+    }
     return new MapFileParser().parse(json);
   }
 

@@ -20,7 +20,12 @@ export class MapFileParser {
    * @returns Parsed config and variable mappings.
    */
   parse(json: string): ParsedMapFile {
-    const raw = JSON.parse(json);
+    let raw: unknown;
+    try {
+      raw = JSON.parse(json);
+    } catch {
+      throw new Error('Invalid map file: content is not valid JSON');
+    }
     if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
       throw new Error('Invalid map file: root must be a JSON object');
     }
