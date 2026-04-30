@@ -276,7 +276,7 @@ jobs:
         if: always()
         uses: danielpalme/ReportGenerator-GitHub-Action@5.5.4
         with:
-          reports: coverage/lcov.info
+          reports: tests/sdks/nodejs/coverage/lcov.info
           sourcedirs: src/sdks/nodejs/src
           targetdir: report
           reporttypes: Html;MarkdownSummaryGithub;Badges
