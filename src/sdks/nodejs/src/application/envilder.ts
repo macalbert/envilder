@@ -29,7 +29,7 @@ import { MapFileParser } from './map-file-parser.js';
  */
 export class Envilder {
   private readonly filePath: string;
-  private readonly options: EnvilderOptions = {};
+  private options: EnvilderOptions = {};
 
   private constructor(filePath: string) {
     this.filePath = filePath;
