@@ -9,7 +9,6 @@ import {
 } from '@testcontainers/localstack';
 import { EnvilderClient } from '../../../../src/sdks/nodejs/src/application/envilder-client.js';
 import { MapFileParser } from '../../../../src/sdks/nodejs/src/application/map-file-parser.js';
-import type { MapFileConfig } from '../../../../src/sdks/nodejs/src/domain/map-file-config.js';
 import { SecretProviderType } from '../../../../src/sdks/nodejs/src/domain/secret-provider-type.js';
 import { AwsSsmSecretProvider } from '../../../../src/sdks/nodejs/src/infrastructure/aws/aws-ssm-secret-provider.js';
 import { createSecretProvider } from '../../../../src/sdks/nodejs/src/infrastructure/secret-provider-factory.js';
@@ -77,22 +76,24 @@ export class LocalStackTestContainer {
   }
 }
 
+// Workaround: CI/CD pipelines may not have credentials configured for the
+// provider declared in the map file's $config section (e.g. profile: "mac").
+// Node.js AWS SDK resolves credentials lazily, so errors surface at
+// resolveSecrets() time, not at provider construction. When the configured
+// provider fails, fall back to default AWS credentials so integration tests
+// can still resolve the LOCALSTACK_AUTH_TOKEN from real SSM.
 async function loadEnvironment(): Promise<Map<string, string>> {
   const json = await readFile(SECRETS_MAP, 'utf-8');
   const parser = new MapFileParser();
   const mapFile = parser.parse(json);
-  const client = resolveClient(mapFile.config);
-  return client.resolveSecrets(mapFile);
-}
 
-function resolveClient(config: MapFileConfig): EnvilderClient {
   try {
-    const provider = createSecretProvider(config);
-    return new EnvilderClient(provider);
+    const provider = createSecretProvider(mapFile.config);
+    return await new EnvilderClient(provider).resolveSecrets(mapFile);
   } catch {
     const fallback = createSecretProvider({
       provider: SecretProviderType.Aws,
     });
-    return new EnvilderClient(fallback);
+    return new EnvilderClient(fallback).resolveSecrets(mapFile);
   }
 }
