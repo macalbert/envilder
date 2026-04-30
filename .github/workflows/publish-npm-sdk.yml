@@ -33,7 +33,7 @@ jobs:
           fetch-depth: 0
 
       - name: 📦 Install pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@v6
         with:
           version: 10
 
@@ -104,6 +104,8 @@ jobs:
       - name: 🚩 Publish to npm
         if: steps.version-check.outputs.version_changed == 'true'
         run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: 🏁 Create version tag
         if: steps.version-check.outputs.version_changed == 'true'
