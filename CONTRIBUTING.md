@@ -180,7 +180,7 @@ ci(coverage): add Node.js SDK to coverage report
 | `tests-website.yml` | PR (website paths) | Website build check |
 | `coverage-report.yml` | Push to main | All coverage → GH Pages |
 | `publish-npm.yml` | Push to main | CLI npm publish |
-| `publish-npm-sdk.yml` | Tag `sdk-nodejs/v*` | Node.js SDK npm publish |
+| `publish-npm-sdk.yml` | Push to main (SDK paths) | Node.js SDK npm publish |
 | `publish-nuget.yml` | Tag `sdk-dotnet/v*` | .NET NuGet publish |
 | `publish-pypi.yml` | Tag `sdk-python/v*` | Python PyPI publish |
 | `publish-action.yml` | Push to main | GitHub Action release |

@@ -115,5 +115,5 @@ help: ## Show this help
 	@echo   All SDKs
 	@echo     check-sdk                   Verify all SDKs
 	@echo     format-sdk                  Format all SDKs
-	@echo     build-sdk                   Build all SDKs (.NET only)
+	@echo     build-sdk                   Build all SDKs
 	@echo     test-sdk                    Test all SDKs
