@@ -33,7 +33,7 @@ export class EnvilderClient {
       return new Map();
     }
 
-    const secretPaths = Array.from(mapFile.mappings.values());
+    const secretPaths = [...new Set(mapFile.mappings.values())];
     const resolved = await this.secretProvider.getSecrets(secretPaths);
 
     const result = new Map<string, string>();
