@@ -1,6 +1,6 @@
 {
   "name": "@envilder/sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Load secrets from AWS SSM Parameter Store or Azure Key Vault directly into your Node.js process — no .env files needed.",
   "license": "MIT",
   "author": {
