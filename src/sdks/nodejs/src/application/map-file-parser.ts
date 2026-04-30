@@ -33,24 +33,30 @@ export class MapFileParser {
     let config: MapFileConfig = {};
 
     for (const [key, value] of Object.entries(raw)) {
-      if (key === CONFIG_KEY && typeof value === 'object' && value !== null) {
-        const obj = value as Record<string, unknown>;
-        const providerStr =
-          typeof obj.provider === 'string'
-            ? obj.provider.toLowerCase()
-            : undefined;
-        config = {
-          provider: providerStr ? PROVIDER_MAP[providerStr] : undefined,
-          vaultUrl: typeof obj.vaultUrl === 'string' ? obj.vaultUrl : undefined,
-          profile: typeof obj.profile === 'string' ? obj.profile : undefined,
-        };
+      if (key === CONFIG_KEY) {
+        if (typeof value === 'object' && value !== null) {
+          const obj = value as Record<string, unknown>;
+          const providerStr =
+            typeof obj.provider === 'string'
+              ? obj.provider.toLowerCase()
+              : undefined;
+          config = {
+            provider: providerStr ? PROVIDER_MAP[providerStr] : undefined,
+            vaultUrl:
+              typeof obj.vaultUrl === 'string' ? obj.vaultUrl : undefined,
+            profile: typeof obj.profile === 'string' ? obj.profile : undefined,
+          };
 
-        if (providerStr && !config.provider) {
-          throw new Error(
-            `Unknown provider: '${obj.provider}'. Supported: aws, azure`,
-          );
+          if (providerStr && !config.provider) {
+            throw new Error(
+              `Unknown provider: '${obj.provider}'. Supported: aws, azure`,
+            );
+          }
         }
-      } else if (typeof value === 'string') {
+        continue;
+      }
+
+      if (typeof value === 'string') {
         mappings.set(key, value);
       }
     }
