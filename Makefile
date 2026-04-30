@@ -70,10 +70,10 @@ test-sdk-python: ## Run all Python tests
 .PHONY: check-sdk-nodejs format-sdk-nodejs build-sdk-nodejs test-sdk-nodejs
 
 check-sdk-nodejs: ## Verify Node.js SDK formatting (no changes)
-	cd $(NODEJS_SRC) && pnpm exec biome check
+	pnpm -w exec biome check $(NODEJS_SRC)/src/ $(NODEJS_TEST)/
 
 format-sdk-nodejs: ## Auto-format Node.js SDK code
-	cd $(NODEJS_SRC) && pnpm exec biome check --write --unsafe && pnpm exec biome format --write
+	pnpm -w exec biome check --write --unsafe $(NODEJS_SRC)/src/ $(NODEJS_TEST)/ && pnpm -w exec biome format --write $(NODEJS_SRC)/src/ $(NODEJS_TEST)/
 
 build-sdk-nodejs: ## Build Node.js SDK
 	cd $(NODEJS_SRC) && pnpm build
