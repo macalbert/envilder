@@ -14,8 +14,8 @@ export function createSecretProvider(
   options?: EnvilderOptions,
 ): ISecretProvider {
   const provider = options?.provider ?? config.provider;
-  const profile = options?.profile ?? config.profile;
-  const vaultUrl = options?.vaultUrl ?? config.vaultUrl;
+  const profile = normalize(options?.profile ?? config.profile);
+  const vaultUrl = normalize(options?.vaultUrl ?? config.vaultUrl);
   const isAzure = provider === SecretProviderType.Azure;
 
   if (isAzure && profile) {
@@ -49,4 +49,9 @@ function createAwsProvider(profile: string | undefined): AwsSsmSecretProvider {
   const clientOptions = profile ? { credentials: fromIni({ profile }) } : {};
   const client = new SSMClient(clientOptions);
   return new AwsSsmSecretProvider(client);
+}
+
+function normalize(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed || undefined;
 }
