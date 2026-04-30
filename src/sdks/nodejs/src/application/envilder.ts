@@ -156,7 +156,7 @@ function resolveEnvSource(
 
   const normalized = env.trim();
 
-  if (!(normalized in envMapping)) {
+  if (!Object.hasOwn(envMapping, normalized)) {
     return null;
   }
 
