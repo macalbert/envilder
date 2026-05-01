@@ -11,13 +11,13 @@ public class CreateGroupCommandHandlerTests
 {
     private readonly Fixture _fixture;
     private readonly CreateGroupCommandHandler _sut;
-    private readonly IXXTemplateXXRepository _repository;
+    private readonly IEnvilderRepository _repository;
     private readonly ILogger<CreateGroupCommandHandler> _logger;
 
     public CreateGroupCommandHandlerTests()
     {
         _fixture = new();
-        _repository = Substitute.For<IXXTemplateXXRepository>();
+        _repository = Substitute.For<IEnvilderRepository>();
         _logger = Substitute.For<ILogger<CreateGroupCommandHandler>>();
         _sut = new(_repository, _logger);
     }
@@ -256,7 +256,7 @@ var customGroup = GroupMother.Create(id: specificId, name: "Custom Name");
 
 ```txt
 test/
-├── XXTemplateXX.Tests/
+├── Envilder.Tests/
 │   ├── Application/
 │   │   ├── Group/
 │   │       ├── Create/
@@ -270,7 +270,7 @@ test/
 │   │   └── GroupTests.cs
 │   └── Infrastructure/
 │       └── EntityFramework/
-│           └── XXTemplateXXRepositoryTests.cs
+│           └── EnvilderRepositoryTests.cs
 └── apps/
     └── Minimal.Api.Tests.Acceptance/
         └── Endpoints/

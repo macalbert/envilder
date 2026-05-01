@@ -57,8 +57,8 @@ on:
     branches: ["*"]
     types: [ready_for_review, opened, reopened, synchronize]
     paths:
-      - "xxtemplatexx/**"
-      - "!xxtemplatexx/src/apps/frontend/**"  # Exclude frontend
+      - "Envilder/**"
+      - "!Envilder/src/apps/frontend/**"  # Exclude frontend
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}

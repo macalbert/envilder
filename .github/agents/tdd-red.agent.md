@@ -44,6 +44,17 @@ You write a single failing test that defines the expected behavior.
 **Next:** {what production code change is needed to make it pass}
 ```
 
+## Quality Checklist (per test)
+
+Before reporting back:
+
+- [ ] Test describes behavior (WHAT), not implementation (HOW)
+- [ ] Test uses public interface only — no internal method calls
+- [ ] Test would survive an internal refactor without breaking
+- [ ] Mocks are preferably at system boundaries (ports: ISecretProvider,
+      IVariableStore, ILogger) — mocking own classes is acceptable when it
+      avoids complex Arrange setup without losing behavioral confidence
+
 ## Rules
 
 - Write **exactly one** test per invocation

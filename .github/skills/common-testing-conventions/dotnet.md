@@ -103,8 +103,8 @@ public class ApiServicesFactory : LocalStackWebBaseServicesFactory<IMinimalApiMa
         {
             services.RedirectToLocalStack(Localstack.Credentials, Localstack.Uri);
 
-            services.Remove<DbContextOptions<XXTemplateXXDbContext>>();
-            services.AddDbContext<XXTemplateXXDbContext>((sp, options) =>
+            services.Remove<DbContextOptions<EnvilderDbContext>>();
+            services.AddDbContext<EnvilderDbContext>((sp, options) =>
             {
                 options.UseNpgsql(_postgreSqlContainer.GetConnectionString());
                 options.AddInterceptors(sp.GetRequiredService<DomainEventInterceptor>());
@@ -115,7 +115,7 @@ public class ApiServicesFactory : LocalStackWebBaseServicesFactory<IMinimalApiMa
     protected override async Task OtherInitializeAsync(CancellationToken cancellationToken)
     {
         await _postgreSqlContainer.StartAsync(cancellationToken);
-        GetService<XXTemplateXXDbContext>().Database.Migrate();
+        GetService<EnvilderDbContext>().Database.Migrate();
     }
 }
 ```

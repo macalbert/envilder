@@ -5,7 +5,7 @@ Examples extracted from the codebase to illustrate patterns described in SKILL.m
 ## Project Structure
 
 ```txt
-xxtemplatexx/test/apps/ai-process-lambda/
+Envilder/test/apps/ai-process-lambda/
 ├── conftest.py
 ├── test_builder.py
 ├── acceptance/
