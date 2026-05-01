@@ -102,7 +102,7 @@ export class PushEnvToSecretsCommandHandler {
           const newMasked = new EnvironmentVariable(envKey, envValue, true)
             .maskedValue;
           throw new Error(
-            `Conflicting values for secret path '${secretPath}': ` +
+            `Conflicting values for secret path '${EnvironmentVariable.maskSecretPath(secretPath)}': ` +
               `'${existing.sourceKeys[0]}' has value '${existingMasked}' ` +
               `but '${envKey}' has value '${newMasked}'`,
           );
@@ -152,10 +152,10 @@ export class PushEnvToSecretsCommandHandler {
     await this.secretProvider.setSecret(secretPath, value);
 
     const keysDescription =
-      sourceKeys.length > 1 ? `${sourceKeys.join(', ')}` : sourceKeys[0];
+      sourceKeys.length > 1 ? sourceKeys.join(', ') : sourceKeys[0];
 
     this.logger.info(
-      `Pushed ${keysDescription}=${envVariable.maskedValue} to secret store at path ${secretPath}`,
+      `Pushed ${keysDescription}=${envVariable.maskedValue} to secret store at path ${EnvironmentVariable.maskSecretPath(secretPath)}`,
     );
   }
 

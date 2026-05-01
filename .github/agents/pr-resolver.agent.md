@@ -5,17 +5,7 @@ description: >
   test updates. Commits each fix individually, replies to every comment on
   GitHub (including skipped ones), and resolves threads automatically. Delegates
   to Bug Hunter, TDD Coach, or Code Refactorer as needed.
-tools:
-  - read
-  - search
-  - edit
-  - execute
-  - github-pull-request_activePullRequest
-  - github-pull-request_openPullRequest
-  - github-pull-request_issue_fetch
-  - github-pull-request_getPullRequestComments
-  - github-pull-request_replyToReviewComment
-  - github-pull-request_resolveReviewThread
+tools: [vscode/*, read, search, edit, execute, agent, web, browser, playwright/*, github.vscode-pull-request-github/*, todo]
 agents:
   - Bug Hunter
   - Code Reviewer
