@@ -60,3 +60,24 @@ e2e/                         End-to-end tests (TestContainers)
 Detailed architecture, DI patterns, coding conventions, and extension guides
 are in `.github/copilot-instructions.md`. Path-specific rules are in
 `.github/instructions/`. Custom agent definitions are in `.github/agents/`.
+
+## Mandatory Skill Loading
+
+**Before performing any task**, check if a relevant skill applies in
+`.github/skills/`. If it does, load and follow its procedure completely.
+
+Critical skills that are commonly missed:
+
+| Task | Skill to load |
+|------|---------------|
+| Creating/updating a PR | `workflow-pr-sync` |
+| Committing code | `workflow-smart-commit` |
+| Writing tests | `common-testing-conventions` + stack-specific (`core-testing`, `python-testing`, `dotnet-test-doubles`) |
+| Reviewing code | `code-review-perspectives` |
+| Investigating bugs | `code-bug-investigation` |
+| Making design decisions | `common-architecture-decisions` (check ADRs first) |
+| Touching security-sensitive code | `common-security` |
+
+**Never skip a skill's template, checklist, or procedure.** If a skill defines
+a mandatory format (e.g., PR body template, commit message format, test naming),
+follow it exactly.
