@@ -102,7 +102,7 @@ updates:
 - package-ecosystem: github-actions
   directory: "/"
   pull-request-branch-name:
-      separator: "/"
+    separator: "/"
   schedule:
     interval: daily
     time: "10:00"
