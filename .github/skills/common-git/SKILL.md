@@ -1,6 +1,7 @@
 ---
 name: common-git
 description: Git commit messages, PR workflow, and branching strategy using Conventional Commits and Semantic Versioning. Use when creating commits, pull requests, or managing Git workflow.
+user-invocable: false
 ---
 
 # Git Conventions
@@ -31,26 +32,27 @@ Use **Conventional Commits** format:
 ### Examples
 
 ```bash
-feat(groups): add active coupon support
+feat(sdk-dotnet): add Azure Key Vault provider
 
-Implements the ability to assign a single active public coupon to a group.
-This replaces the previous visibility-based approach.
+Implements ISecretProvider for Azure Key Vault using
+DefaultAzureCredential. Supports vault URL from $config
+and EnvilderOptions override.
 
-Closes #123
+Closes #85
 ```
 
 ```bash
-fix(stripe): correct webhook signature validation
+fix(cli): correct map file path resolution on Windows
 
-The webhook signature was not being validated correctly due to
-incorrect header parsing. This fix ensures proper validation.
+The map file path was not being resolved correctly when using
+backslashes. This fix normalizes paths cross-platform.
 ```
 
 ```bash
-refactor(repository): separate read and write repositories
+refactor(core): extract provider factory to shared module
 
-Implements CQRS pattern by splitting IXXTemplateXXRepository into
-separate read and write interfaces for better optimization.
+Moves provider selection logic from CLI and GHA startup into
+shared ContainerConfiguration for consistency.
 ```
 
 ### Commit Guidelines
@@ -120,10 +122,10 @@ Use **Squash and Merge** to keep main branch clean:
 ### Branch Naming
 
 ```txt
-feature/add-group-coupons
-fix/stripe-webhook-validation
-refactor/split-repositories
-docs/update-architecture-adr
+feature/add-azure-provider
+fix/windows-path-resolution
+refactor/extract-provider-factory
+docs/add-nodejs-sdk-references
 ```
 
 ### Workflow

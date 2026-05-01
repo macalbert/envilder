@@ -139,8 +139,8 @@ repository.UpdateGroup(
 ```csharp
 _wireMock
     .Given(Request.Create()
-        .WithPath("/api/tipsters/*")
-        .WithParam("active", "true")
+        .WithPath("/secrets/*")
+        .WithParam("withDecryption", "true")
         .WithHeader("Authorization", "Bearer *")
         .UsingGet())
     .RespondWith(Response.Create()
@@ -166,14 +166,14 @@ _wireMock
 ```csharp
 _wireMock
     .Given(Request.Create()
-        .WithPath("/api/tipsters/*")
+        .WithPath("/secrets/*")
         .UsingGet())
     .RespondWith(Response.Create()
         .WithTransformer()
         .WithBody(context =>
         {
-            var id = context.Request.PathSegments[2];
-            return $"{{\"id\": \"{id}\", \"name\": \"Tipster {id}\"}}";
+            var name = context.Request.PathSegments[1];
+            return $"{{\"name\": \"{name}\", \"value\": \"resolved-{name}\"}}";
         }));
 ```
 

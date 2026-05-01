@@ -163,7 +163,7 @@ async def Should_ReturnUser_When_UserExists(
 
 **Act and Assert MUST be separate.** Extract the action into a `lambda` in the Act phase.
 
-#### ✅ CORRECT — separate Act and Assert
+### ✅ CORRECT — separate Act and Assert
 
 ```python
 def Should_RaiseValueError_When_NameIsEmpty(sut: GroupService) -> None:
@@ -178,7 +178,7 @@ def Should_RaiseValueError_When_NameIsEmpty(sut: GroupService) -> None:
         action()
 ```
 
-#### ❌ FORBIDDEN — combined Act & Assert
+### ❌ FORBIDDEN — combined Act & Assert
 
 ```python
 def Should_RaiseValueError_When_NameIsEmpty(sut: GroupService) -> None:
@@ -196,7 +196,7 @@ def Should_RaiseValueError_When_NameIsEmpty(sut: GroupService) -> None:
 
 **Never use `try/finally` in tests.** Use pytest fixtures with `yield` for cleanup.
 
-#### ✅ CORRECT — fixture with yield
+### ✅ CORRECT — fixture with yield
 
 ```python
 @pytest.fixture()
@@ -222,7 +222,7 @@ class TestEnvilderClient:
         assert os.environ["MY_TOKEN"] == "token-123"
 ```
 
-#### ❌ FORBIDDEN — try/finally in test
+### ❌ FORBIDDEN — try/finally in test
 
 ```python
 def Should_SetEnvVars_When_InjectCalled(self) -> None:

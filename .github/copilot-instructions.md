@@ -308,7 +308,7 @@ Naming: `Should_<Expected>_When_<Condition>`. AAA pattern with comment markers.
 - Cross-provider validation: profile + Azure → error, vault_url + AWS → error
 
 **Tests** (`tests/sdks/python/`): pytest with `Should_<Expected>_When_<Condition>` naming.
-Container wrappers follow xxtemplatexx pattern with explicit `start()`/`stop()` lifecycle.
+Container wrappers follow Envilder pattern with explicit `start()`/`stop()` lifecycle.
 Acceptance tests use TestContainers (LocalStack for AWS, Lowkey Vault for Azure).
 AAA pattern with comment markers.
 

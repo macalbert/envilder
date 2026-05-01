@@ -4,16 +4,12 @@ description: >
   Processes PR review comments interactively. Maps each comment to code, doc, or
   test updates. Commits each fix individually, replies to every comment on
   GitHub (including skipped ones), and resolves threads automatically. Delegates
-  to Bug Hunter, TDD Coach, or Code Refactorer as needed.
+  to TDD Coach as needed.
 tools: [vscode/*, read, search, edit, execute, agent, web, browser, playwright/*, github.vscode-pull-request-github/*, todo]
 agents:
-  - Bug Hunter
   - Code Reviewer
   - TDD Coach
-  - Code Refactorer
-  - Document Maintainer
-  - Website Designer
-  - i18n Reviewer
+  - Content Designer
 argument-hint: "PR comments or files to address"
 user-invocable: true
 ---
@@ -51,11 +47,11 @@ For each review comment on the active PR:
 
 | Type | Action |
 |------|--------|
-| **Bug report** (incorrect runtime behavior) | Delegate to `@Bug Hunter` |
+| **Bug report** (incorrect runtime behavior) | Delegate to `@TDD Coach` (with `code-bug-investigation` skill) |
 | **Code change request** | Apply the smallest safe fix directly |
 | **Question / clarification** | Answer with evidence from the codebase |
 | **Documentation gap** | Update relevant docs |
-| **Refactoring request** | Delegate to `@Code Refactorer` |
+| **Refactoring request** | Apply using `code-refactoring` skill |
 | **Test coverage request** | Delegate to `@TDD Coach` |
 | **Out of scope / disagree** | Skip — reply explaining why |
 
@@ -144,21 +140,20 @@ takes precedence — see the spread order at line 35.
 When a review comment describes a **bug** (incorrect behavior, unexpected error,
 wrong output):
 
-- Delegate to `@Bug Hunter` with the bug description
-- Bug Hunter will reproduce via TDD (Red → Green → Refactor)
+- Delegate to `@TDD Coach` with the bug description
+- Use `code-bug-investigation` skill for the investigation phase
+- TDD Coach will reproduce via TDD (Red → Green → Refactor)
 - Commit the fix, then reply to the comment with the resolution
 
 ## Delegation Rules
 
 | Trigger | Delegate to | Why |
 |---------|-------------|-----|
-| Comment describes incorrect runtime behavior | `@Bug Hunter` | Reproduces via TDD before fixing |
-| Comment requests structural improvement / refactoring | `@Code Refactorer` | Safe incremental refactoring |
+| Comment describes incorrect runtime behavior | `@TDD Coach` | Investigates + fixes via TDD |
+| Comment requests structural improvement / refactoring | Apply directly | Use `code-refactoring` skill |
 | Comment asks for new test coverage | `@TDD Coach` | Adds tests via Red-Green-Refactor |
 | Change has unclear scope or wide blast radius | `@Code Reviewer` | Read-only impact analysis |
-| Comment points to outdated docs / CHANGELOG | `@Document Maintainer` | Keeps docs accurate |
-| Comment affects website components or pages | `@Website Designer` | UI/UX and Astro specialist |
-| Comment affects translations or i18n strings | `@i18n Reviewer` | Linguistic and i18n correctness |
+| Comment points to outdated docs, CHANGELOG, website, or i18n | `@Content Designer` | Docs, website, and translation specialist |
 
 ## Impact Analysis
 

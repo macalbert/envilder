@@ -24,6 +24,9 @@ green.
    - Improve naming clarity
    - Extract helper methods if warranted
    - Simplify conditional logic
+   - **Shallow modules** — interface nearly as complex as implementation.
+     Apply deletion test: if removing it concentrates complexity, keep it.
+     If removing it just moves logic back to callers without loss, inline it.
    - Ensure test readability (clear AAA sections, descriptive names)
 2. **Apply** one improvement at a time.
 3. **After each change**, run `pnpm test` to ensure all tests pass.
@@ -44,18 +47,10 @@ green.
 ## Rules
 
 - **Never change behavior** — only improve structure
-- **Keep CRAP below 6.** Every method must have a CRAP score < 6 after
-  refactoring. Extract complex branches into smaller methods to reduce
-  complexity. Use these coverage thresholds only to decide whether to flag
-  the coordinator for a new Red cycle; do not add tests in Refactor:
-  - Complexity 1 → any coverage
-  - Complexity 2 → > 0%
-  - Complexity 3 → 40%+
-  - Complexity 4 → 60%+
-  - Complexity 5 → 80%+
-  - Complexity 6+ → not achievable, must split
-  If the applicable threshold cannot be met without adding new tests, flag
-  the coordinator to start a new Red cycle for coverage.
+- **Keep CRAP below 6.** See `code-quality-crap` skill for formula and
+  thresholds. Extract complex branches into smaller methods. If the
+  threshold cannot be met without adding tests, flag the coordinator
+  to start a new Red cycle for coverage.
 - Run tests after **every** change, not just at the end
 - If unsure whether a change preserves behavior, skip it
 - Do not add new tests or features — that starts a new cycle

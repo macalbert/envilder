@@ -72,8 +72,8 @@ public class CreateGroupCommandHandlerTests
     public async Task Should_CreateGroup_When_RequestIsValid()
     {
         // Arrange
-        var tipsterId = _fixture.Create<string>();
-        var groupId = _fixture.Create<Guid>();
+        var secretName = _fixture.Create<string>();
+        var secretValue = _fixture.Create<string>();
         // ...
     }
 }
@@ -143,14 +143,14 @@ Use **WireMock.Net** for mocking HTTP services.
 // Setup WireMock
 _wireMock
     .Given(Request.Create()
-        .WithPath("/api/tipsters/betdata")
+        .WithPath("/secrets/my-secret")
         .UsingGet())
     .RespondWith(Response.Create()
         .WithStatusCode(200)
-        .WithBodyAsJson(new { id = "123", name = "BetData" }));
+        .WithBodyAsJson(new { value = "secret-value" }));
 
 // Test HTTP client
-var response = await _httpClient.GetAsync("/api/tipsters/betdata");
+var response = await _httpClient.GetAsync("/secrets/my-secret");
 ```
 
 ## NSubstitute Patterns
@@ -159,7 +159,7 @@ var response = await _httpClient.GetAsync("/api/tipsters/betdata");
 
 ```csharp
 // Create mock
-var repository = Substitute.For<IXXTemplateXXRepository>();
+var repository = Substitute.For<IEnvilderRepository>();
 
 // Setup return value
 repository

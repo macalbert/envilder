@@ -1,6 +1,7 @@
 ---
 name: common-testing-conventions
 description: Mandatory testing conventions including AAA pattern, test naming, and assertions across all stacks (.NET, Frontend, Python). Use when writing unit tests, integration tests, E2E tests, or verifying mock interactions.
+user-invocable: false
 ---
 
 # Testing Conventions Skill
@@ -63,7 +64,8 @@ public async Task Should_CreateGroup_When_RequestIsValid()
 
 **Rules:**
 
-- **Each comment (`// Arrange`, `// Act`, `// Assert`) appears AT MOST ONCE per test** — if you need to test two actions, write two tests
+- **Each comment (`// Arrange`, `// Act`, `// Assert`) appears AT MOST ONCE per test** — if you need two actions,
+  write two tests
 - Each section clearly separated by comments
 - Never mix phases
 - **No `if`, `switch`, or conditional logic** inside Arrange, Act, or Assert blocks
@@ -107,12 +109,12 @@ public class CreateGroupCommandHandlerTests
 {
     private readonly Fixture _fixture;
     private readonly CreateGroupCommandHandler _sut;
-    private readonly IXXTemplateXXRepository _repository;
+    private readonly IEnvilderRepository _repository;
 
     public CreateGroupCommandHandlerTests()
     {
         _fixture = new();
-        _repository = Substitute.For<IXXTemplateXXRepository>();
+        _repository = Substitute.For<IEnvilderRepository>();
         _sut = new(_repository);
     }
 

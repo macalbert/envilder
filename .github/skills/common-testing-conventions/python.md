@@ -103,7 +103,7 @@ def Should_MatchSnapshot_When_ResponseGenerated(snapshot) -> None:
 
 ## Builder Pattern (polyfactory + shared `Builder[T]`)
 
-The shared test package (`xxtemplatexx-shared-test-ai`) provides a generic `Builder[T]`
+The shared test package (`Envilder-shared-test-ai`) provides a generic `Builder[T]`
 that wraps `polyfactory` to create type-safe builders for any Pydantic model.
 
 ### 1. Define Factory + Builder

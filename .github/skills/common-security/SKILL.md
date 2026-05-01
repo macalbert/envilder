@@ -1,164 +1,166 @@
 ---
 name: common-security
-description: Security guardrails covering OWASP Top 10 adapted to this stack (.NET, Python, TypeScript). Use when reviewing code for security, implementing authentication/authorization, handling secrets, validating input, or configuring CORS.
+description: >-
+  Security guardrails for Envilder (CLI, GitHub Action, SDKs, CDK, website).
+  Covers secret handling, credential hygiene, supply chain safety, input
+  validation, and CI/CD security. Use when reviewing code for security,
+  handling secrets, validating CLI input, or reviewing GitHub Actions workflows.
+user-invocable: false
 ---
 
 # Security Skill
 
-Security guardrails for the M47 monorepo. Covers OWASP Top 10 risks adapted to the
-.NET + Python + TypeScript stack.
+Security guardrails adapted to the Envilder project: a CLI + GitHub Action +
+multi-runtime SDK platform that manages secrets from AWS SSM and Azure Key Vault.
 
 ## When to Use
 
-- Reviewing code for security vulnerabilities
-- Implementing authentication or authorization
-- Handling secrets or sensitive configuration
-- Validating user input
-- Configuring CORS or HTTP security headers
-- Creating API endpoints that accept external data
+- Reviewing code that handles secrets or cloud credentials
+- Adding new CLI options or GHA inputs that accept external data
+- Reviewing GitHub Actions workflows for credential safety
+- Adding new infrastructure (CDK stacks)
+- Reviewing SDK code that interacts with cloud provider APIs
+- Modifying the website (Astro) with user-visible content
 
-## OWASP Top 10 — Stack-Specific Guidance
+## 1. Secret Handling
 
-### 1. Broken Access Control
+### Never Expose Secrets in Output
 
-**Authentication patterns in this repo:**
+- **CLI/GHA**: Use `EnvironmentVariable.maskedValue` (shows last 3 chars) for logging
+- **SDKs**: Never log resolved secret values — log only the key name
+- **Tests**: Use `secrets-map.json` to resolve test tokens; never hardcode tokens
+- **Website**: No secrets — it's a static site
 
-- **Cognito OAuth + JWT Cookie** — Federated login via AWS Cognito, JWT validated server-side
-- **API Key** — Header-based for service-to-service calls
-- **Environment-aware policies** — Development allows all; Production enforces real auth
+### Storage Rules
 
-**Rules:**
+| Context | Where secrets live | Never |
+| ------- | ------------------ | ----- |
+| Production | AWS SSM Parameter Store (encrypted) | In code, env vars, or config files |
+| Production (Azure) | Azure Key Vault | In code or checked-in files |
+| CI | GitHub Secrets → OIDC → SSM | As plaintext in workflow YAML |
+| Local dev | AWS profile → SSM (via `secrets-map.json`) | In `.env` files committed to Git |
+| Tests | TestContainers (LocalStack/Lowkey Vault) | Real credentials in test code |
 
-- Every API endpoint must have `.RequireAuthorization()` with a named policy
-- Never skip authorization in production — use `AuthConstants` policy names
-- Python Lambda: validate the event source (Function URL signature, API Gateway context)
-- Frontend: never store tokens in localStorage — use HTTP-only secure cookies
+### Secretlint Enforcement
 
-### 2. Cryptographic Failures
+Secretlint runs on every `pnpm lint` invocation and scans **all files** for
+credential patterns (AWS keys, tokens, private keys). If Secretlint fails,
+the commit is blocked.
 
-**Rules:**
+## 2. Credential Hygiene in CI/CD
 
-- Secrets go in **AWS SSM Parameter Store** (Production) — never in appsettings, env vars, or code
-- Development uses `appsettings.Development.json` with non-sensitive mock values
-- Cognito `ClientSecret`, JWT signing keys, Loggly tokens: always SSM in Production
-- Database credentials: AWS Secrets Manager (generated via CDK, not manually set)
-- Never log secrets, tokens, or passwords — use structured logging with safe property names
+### GitHub Actions OIDC
 
-### 3. Injection
+- **Always** use `aws-actions/configure-aws-credentials` with `role-to-assume`
+- **Never** store `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` as GitHub Secrets
+- OIDC tokens are short-lived and scoped — no rotation needed
 
-**SQL Injection:**
+### GitHub Action Inputs
 
-- EF Core parametrizes all LINQ queries automatically — never use `FromSqlRaw()` with concatenation
-- If raw SQL is needed, use `FromSqlInterpolated()` (parametrized) — never string concat
+- GHA reads inputs from `process.env.INPUT_*` — validate before use
+- The `map` input (file path) must be validated to prevent path traversal
+- Never interpolate GHA inputs directly into shell commands
 
-```csharp
-// GOOD
-context.Processes.FromSqlInterpolated($"SELECT * FROM Process WHERE Id = {id}");
+### Workflow Permissions
 
-// BAD — never do this
-context.Processes.FromSqlRaw($"SELECT * FROM Process WHERE Id = '{id}'");
-```
+- Use minimal `permissions:` block in every workflow
+- `contents: read` for checkout, `id-token: write` for OIDC
+- Never use `permissions: write-all`
 
-**XSS:**
+## 3. Input Validation
 
-- React escapes output by default — never use `dangerouslySetInnerHTML`
-- Sanitize any user-provided HTML before rendering
-- API responses should set `Content-Type: application/json` — never return raw HTML from APIs
+### CLI
 
-**Command Injection:**
+- Commander validates option types — but validate semantic constraints:
+  - `--map` path must exist and be a `.json` file
+  - `--provider` must be one of `aws` | `azure` (case-insensitive)
+  - `--vault-url` must be a valid HTTPS URL matching `*.vault.azure.net`
+- Never pass CLI arguments to shell commands unsanitized
+- Use custom domain errors (`InvalidArgumentError`) — not generic exceptions
 
-- Python: never use `os.system()` or `subprocess.run(shell=True)` with user input
-- .NET: never use `Process.Start()` with unsanitized arguments
+### SDKs
 
-### 4. Insecure Design
+- Map file paths: validate existence before parsing
+- JSON parsing: handle malformed JSON gracefully (domain error, not stack trace)
+- Provider names: strict enum matching, reject unknown values
+- Cross-provider validation: profile + Azure → `InvalidArgumentError`
 
-**Rules:**
+### Website
 
-- Clean Architecture enforces security boundaries by design:
-  - Domain layer has zero external dependencies (no I/O, no HTTP, no SDK)
-  - Infrastructure layer implements ports — security validation happens at boundaries
-  - Presentation layer validates input before dispatching to Application
-- FluentValidation on every request DTO — never trust input from external sources
-- Rate limiting on public endpoints (configure in CDK or middleware)
+- Static site (Astro) — no user input at runtime
+- Build-time i18n: translation keys are developer-controlled, not user-supplied
 
-### 5. Security Misconfiguration
+## 4. Supply Chain Security
 
-**CORS:**
+### Dependency Pinning
 
-- **WithCredentials** policy: specific origins from config, credentials allowed
-- **AnyOrigin** policy: public endpoints only (no credentials)
-- Never use `AllowAnyOrigin()` + `AllowCredentials()` together — browsers reject this
-- Origins loaded from `appsettings.json` `Cors:AllowedOrigins` — configure per environment
+| Stack | Mechanism | File |
+| ----- | --------- | ---- |
+| TypeScript | `pnpm-lock.yaml` + `catalog:` versions | `pnpm-workspace.yaml` |
+| .NET | Central Package Management | `Directory.Packages.props` |
+| Python | `uv.lock` (deterministic) | `uv.lock` |
 
-**HTTP Headers:**
+### Rules
 
-- Use HSTS in production
-- Set `X-Content-Type-Options: nosniff`
-- Set `X-Frame-Options: DENY` for API endpoints
+- Lock files **must** be committed — never `.gitignore` them
+- Dependabot (or Renovate) configured for automatic dependency updates
+- Review advisories on every dependency update PR
+- `@vercel/ncc` bundles GHA — verify bundle is up-to-date (`pnpm verify:gha`)
+- Pin GitHub Actions to full commit SHA (not `@v4` tags) in production workflows
 
-**Error Responses:**
+### CDK
 
-- `UnhandledExceptionMiddleware` returns structured errors without stack traces in production
-- Never expose internal exception details to the client
+- Keep `aws-cdk-lib` up to date — security patches affect deployed infra
+- CDK synth output (`cdk.out/`) is `.gitignored` — never commit CloudFormation templates
 
-### 6. Vulnerable and Outdated Components
+## 5. SDK-Specific Security
 
-**Rules:**
+### AWS SSM Provider
 
-- Dependabot configured for automatic dependency updates
-- Review NuGet, pip, and npm advisories on every PR
-- Pin exact versions in `Directory.Packages.props` (.NET), `pyproject.toml` (Python)
-- CDK: keep `aws-cdk-lib` up to date — security patches affect deployed infrastructure
+- Always use `WithDecryption: true` for SecureString parameters
+- Never log the decrypted parameter value
+- Credential chain: SDK default chain (env vars → profile → instance role)
+- If `profile` is specified, only use `CredentialProfileStoreChain` — don't mix
 
-### 7. Identification and Authentication Failures
+### Azure Key Vault Provider
 
-**Rules:**
+- Use `DefaultAzureCredential` — never hardcode `clientId`/`clientSecret`
+- Vault URL validation: must match `https://*.vault.azure.net`
+- TLS certificate validation: enabled in production, only disabled in tests
+  against Lowkey Vault (emulator)
 
-- JWT tokens must be validated (issuer, audience, expiry, signature)
-- API keys: compare with constant-time comparison (`CryptographicOperations.FixedTimeEquals`)
-- Session timeout: configure token expiry in Cognito (not infinite)
-- Never implement custom password hashing — delegate to Cognito
+### Cross-Provider
 
-### 8. Software and Data Integrity Failures
+- `EnvilderOptions` overrides `$config` — validate that overrides don't
+  introduce insecure combinations (e.g., disabling encryption)
+- Missing secrets → `null`/`None` (silent). Validation is opt-in via
+  `validateSecrets()` — document this to users clearly
 
-**Rules:**
+## 6. Website Security
 
-- GitHub Actions: use OIDC federation for AWS (no stored credentials)
-- Lock files committed: `pnpm-lock.yaml`, `Directory.Packages.props`
-- Verify checksums for external downloads in Dockerfiles
-- CDK: use CDK Nag or similar for best-practice validation
+- Astro generates static HTML — no server-side injection possible
+- External links: use `rel="noopener noreferrer"` on `target="_blank"` links
+- No inline scripts or `dangerouslySetInnerHTML` equivalents
+- CSP headers configured at CDN/CloudFront level (via CDK)
 
-### 9. Security Logging and Monitoring Failures
+## 7. Testing Security
 
-**Rules:**
-
-- Log authentication failures (failed logins, invalid tokens, rejected API keys)
-- Log authorization failures (access denied to resources)
-- Include correlation context: `ClaimId`, `ProcessId`, `UserId` where applicable
-- Never log sensitive data (passwords, tokens, full credit card numbers)
-- Serilog enrichers: `FromLogContext()`, `WithExceptionDetails()`, `WithMachineName()`
-
-See `common-observability` skill for the Structured Log Key Contract, PascalCase key naming
-rules, and the full list of mandatory/contextual log properties.
-
-### 10. Server-Side Request Forgery (SSRF)
-
-**Rules:**
-
-- Never pass user-supplied URLs directly to `HttpClient` or `httpx`
-- Validate URLs against an allowlist of known hosts/domains
-- Lambda functions: restrict outbound with VPC security groups
-- S3 pre-signed URLs: set short expiry, validate bucket/key patterns
+- Acceptance tests use emulators (LocalStack, Lowkey Vault) — never real
+  cloud endpoints
+- `LOCALSTACK_AUTH_TOKEN` resolved via Envilder itself (dogfooding) — stored
+  in SSM, never in code
+- Test cleanup: containers destroyed after test run (TestContainers lifecycle)
+- TLS disabled only for Lowkey Vault container tests (self-signed cert)
 
 ## Quick Security Checklist
 
 Before merging any PR, verify:
 
-- [ ] All endpoints have `.RequireAuthorization()` with appropriate policy
-- [ ] All request DTOs have FluentValidation validators
-- [ ] No secrets hardcoded in code or config files
-- [ ] No `FromSqlRaw()` with string concatenation
-- [ ] No `dangerouslySetInnerHTML` without sanitization
-- [ ] CORS configured with specific origins (not `*` with credentials)
-- [ ] Error responses don't leak stack traces or internal details
-- [ ] Sensitive operations are logged (auth events, data access)
+- [ ] No secrets hardcoded in code, config, or test files
+- [ ] Secretlint passes (`pnpm lint`)
+- [ ] CLI/SDK input validated with domain errors (not generic exceptions)
+- [ ] Cloud credentials use OIDC (CI) or SDK default chain (runtime)
+- [ ] Secrets logged only via `maskedValue` (last 3 chars visible)
+- [ ] Lock files updated if dependencies changed
+- [ ] GHA workflows use minimal `permissions:`
+- [ ] No `shell=True` or unsanitized argument interpolation in scripts
