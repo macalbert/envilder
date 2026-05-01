@@ -62,7 +62,7 @@ No SaaS middleman. No vendor lock-in. Secrets stay in your cloud.
 |---------|-------------|
 | 📋 **Declarative Mapping** | One JSON file defines all secrets. Git-versioned, PR-reviewable, diff-able |
 | ☁️ **Multi-Provider** | AWS SSM + Azure Key Vault. No vendor lock-in |
-| 🔌 **Runtime SDKs** | Load secrets into memory at app startup: [.NET](./src/sdks/dotnet/README.md), [Python](./src/sdks/python/README.md), [Node.js](./src/sdks/nodejs/). No `.env` on disk |
+| 🔌 **Runtime SDKs** | Load secrets into memory at app startup: [.NET](./src/sdks/dotnet/README.md), [Python](./src/sdks/python/README.md), [Node.js](./examples/sdk/nodejs/README.md). No `.env` on disk |
 | ⚙️ **GitHub Action** | Pull secrets in CI/CD. Same mapping, zero manual config |
 | 🔄 **Bidirectional Sync** | Pull secrets to `.env` or push values back to the cloud |
 | 🧱 **Zero Infrastructure** | No servers, no proxies, no SaaS. Uses cloud services you already have |
