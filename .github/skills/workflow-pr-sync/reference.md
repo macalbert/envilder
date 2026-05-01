@@ -2,6 +2,9 @@
 
 ## PR Body Template
 
+**All four sections below are mandatory.** Do not skip, reorder, or replace
+with freeform text. Use `N/A` for sections that don't apply.
+
 ```markdown
 ## Summary
 
@@ -19,7 +22,7 @@
 
 ## Related
 
-{link to issue if branch name contains issue number, e.g., #42}
+{link to issue if branch name contains issue number, e.g., #42. Otherwise: N/A}
 ```
 
 ## `gh` CLI Commands

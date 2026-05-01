@@ -24,6 +24,8 @@ Create or update a GitHub pull request for the current branch.
    - Bash/Zsh: `gh pr view --json number,title,url 2>/dev/null`
 4. Get commits since base: `git log <base>..HEAD --oneline`
 5. Generate PR title and body following the [template](./reference.md).
+   **The template is mandatory** — all four sections (Summary, Changes, Testing,
+   Related) must appear in every PR body, exactly in that order.
 6. Create or update the PR using `--body-file` (see [constraints](#constraints)).
 
 ## PR Title
@@ -42,6 +44,10 @@ If the branch has a single commit, use that commit's message as the title.
 - Always target `main` unless the user specifies otherwise
 - **Always use `--body-file` with a temp file** — never pass markdown inline
   via `--body` (PowerShell corrupts backticks in inline strings)
+- **Never use the VS Code PR creation tool** — always use `gh` CLI with
+  `--body-file` to ensure template compliance and avoid encoding issues
+- **All four template sections are mandatory** — do not skip, reorder, or
+  replace with freeform text
 - If `gh` CLI is not available, output the title and body for manual creation
 
 ## Commands
