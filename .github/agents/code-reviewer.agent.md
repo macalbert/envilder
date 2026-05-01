@@ -5,7 +5,7 @@ description: >
   architecture, security, conventions, and complexity. Runs tests, linters,
   and browser checks to validate findings. Delegates to TDD Coach for fixes.
   Use when reviewing PRs, commits, or local changes.
-tools: [read, search, execute, browser, agent]
+tools: [execute/*, read/*, agent/*, browser/*, search/*, vault/*]
 agents: ['TDD Coach', 'PR Resolver', 'Content Designer']
 argument-hint: "PR, commit range, or files to review"
 user-invocable: true
