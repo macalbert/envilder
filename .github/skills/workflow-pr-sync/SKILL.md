@@ -22,11 +22,16 @@ Create or update a GitHub pull request for the current branch.
 3. Check if a PR already exists:
    - PowerShell: `gh pr view --json number,title,url 2>$null`
    - Bash/Zsh: `gh pr view --json number,title,url 2>/dev/null`
-4. Get commits since base: `git log <base>..HEAD --oneline`
-5. Generate PR title and body following the [template](./reference.md).
+4. Get the **final diff** against base to understand what the PR actually
+   changes: `git diff <base>...HEAD --stat` (three-dot merge-base diff).
+   Use this — not the commit list — as the source of truth for the PR body.
+   Commits may include merge commits or changes already in main.
+5. Optionally get commits for context: `git log <base>..HEAD --oneline`
+6. Generate PR title and body following the [template](./reference.md).
    **The template is mandatory** — all four sections (Summary, Changes, Testing,
    Related) must appear in every PR body, exactly in that order.
-6. Create or update the PR using `--body-file` (see [constraints](#constraints)).
+   **The body must describe the final diff vs base**, not individual commits.
+7. Create or update the PR using `--body-file` (see [constraints](#constraints)).
 
 ## PR Title
 

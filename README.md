@@ -326,7 +326,7 @@ const secrets = await Envilder.load('secrets-map.json');
 Or use the fluent builder for full control:
 
 ```typescript
-import { Envilder } from '@envilder/sdk';
+import { Envilder, SecretProviderType } from '@envilder/sdk';
 
 const secrets = await Envilder.fromMapFile('secrets-map.json')
   .withProvider(SecretProviderType.Aws)
