@@ -37,6 +37,18 @@ builder.Configuration.AddEnvilder("param-map.json");
 var secrets = await Envilder.ResolveFileAsync("param-map.json");
 EnvilderClient.InjectIntoEnvironment(secrets);`,
   },
+  {
+    label: t.howItWorks.sdkTabTypescript,
+    lang: 'typescript',
+    filename: 'config.ts',
+    code: `import { Envilder } from '@envilder/sdk';
+
+// One-liner: resolve + inject into process.env
+await Envilder.load('param-map.json');
+
+// Or resolve as a Map without injecting
+const secrets = await Envilder.fromMapFile('param-map.json').resolve();`,
+  },
 ];
 ---
 
