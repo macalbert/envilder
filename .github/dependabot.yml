@@ -10,8 +10,7 @@ updates:
   pull-request-branch-name:
     separator: "/"
   schedule:
-    interval: monthly
-    day: monday
+    interval: daily
     time: "10:00"
     timezone: Europe/Madrid
   labels:
@@ -27,8 +26,7 @@ updates:
   pull-request-branch-name:
     separator: "/"
   schedule:
-    interval: monthly
-    day: monday
+    interval: daily
     time: "10:00"
     timezone: Europe/Madrid
   labels:
@@ -44,8 +42,7 @@ updates:
   pull-request-branch-name:
     separator: "/"
   schedule:
-    interval: monthly
-    day: monday
+    interval: daily
     time: "10:00"
     timezone: Europe/Madrid
   labels:
@@ -61,8 +58,7 @@ updates:
   pull-request-branch-name:
     separator: "/"
   schedule:
-    interval: monthly
-    day: monday
+    interval: daily
     time: "10:00"
     timezone: Europe/Madrid
   labels:
@@ -78,8 +74,7 @@ updates:
   pull-request-branch-name:
     separator: "/"
   schedule:
-    interval: monthly
-    day: monday
+    interval: daily
     time: "10:00"
     timezone: Europe/Madrid
   labels:
@@ -95,8 +90,7 @@ updates:
   pull-request-branch-name:
     separator: "/"
   schedule:
-    interval: monthly
-    day: monday
+    interval: daily
     time: "10:00"
     timezone: Europe/Madrid
   labels:
@@ -108,10 +102,9 @@ updates:
 - package-ecosystem: github-actions
   directory: "/"
   pull-request-branch-name:
-      separator: "/"
+    separator: "/"
   schedule:
-    interval: monthly
-    day: monday
+    interval: daily
     time: "10:00"
     timezone: Europe/Madrid
   labels:
