@@ -135,7 +135,7 @@ describe('PushEnvToSecretsCommandHandler', () => {
 
     // Assert
     await expect(action).rejects.toThrow(
-      "Conflicting values for secret path '/path/to/api-key': 'API_KEY' has value '*********' but 'NEXT_PUBLIC_API_KEY' has value '*********'",
+      `Conflicting values for secret path '${EnvironmentVariable.maskSecretPath('/path/to/api-key')}': 'API_KEY' has value '*********' but 'NEXT_PUBLIC_API_KEY' has value '*********'`,
     );
     expect(mockSecretProvider.setSecret).not.toHaveBeenCalled();
   });

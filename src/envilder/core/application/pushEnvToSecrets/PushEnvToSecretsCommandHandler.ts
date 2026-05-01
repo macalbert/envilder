@@ -102,7 +102,7 @@ export class PushEnvToSecretsCommandHandler {
           const newMasked = new EnvironmentVariable(envKey, envValue, true)
             .maskedValue;
           throw new Error(
-            `Conflicting values for secret path '${secretPath}': ` +
+            `Conflicting values for secret path '${EnvironmentVariable.maskSecretPath(secretPath)}': ` +
               `'${existing.sourceKeys[0]}' has value '${existingMasked}' ` +
               `but '${envKey}' has value '${newMasked}'`,
           );
