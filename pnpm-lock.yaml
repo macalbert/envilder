@@ -132,7 +132,7 @@ importers:
     devDependencies:
       aws-cdk:
         specifier: ^2.1114.1
-        version: 2.1118.2
+        version: 2.1120.0
       ts-node:
         specifier: 'catalog:'
         version: 10.9.2(@types/node@25.6.0)(typescript@6.0.3)
@@ -1840,8 +1840,8 @@ packages:
       - yaml
       - mime-types
 
-  aws-cdk@2.1118.2:
-    resolution: {integrity: sha512-jHuShSx0JI14enDz2Hk2Qe0LYTDPzLyF2nBhWCvoXyRCpz31sI3XsCh4KO5ZXKfw9ET0bHvDTVnMZQPBpswg8A==}
+  aws-cdk@2.1120.0:
+    resolution: {integrity: sha512-vDVa0IX0FhizARdY/GLSParFglKbdHCIhM8IDmynrAv9w8uLLljzWMeLUOhC1XpMErDZ/npYEihAOjfKxTaMIw==}
     engines: {node: '>= 18.0.0'}
     hasBin: true
 
@@ -6301,7 +6301,7 @@ snapshots:
       '@aws-cdk/cloud-assembly-schema': 53.16.0
       constructs: 10.6.0
 
-  aws-cdk@2.1118.2: {}
+  aws-cdk@2.1120.0: {}
 
   axobject-query@4.1.0: {}
 
