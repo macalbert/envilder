@@ -43,7 +43,7 @@ importers:
     dependencies:
       '@aws-sdk/client-ssm':
         specifier: ^3.1019.0
-        version: 3.1039.0
+        version: 3.1040.0
       '@aws-sdk/credential-providers':
         specifier: ^3.1019.0
         version: 3.1031.0
@@ -144,7 +144,7 @@ importers:
     dependencies:
       '@aws-sdk/client-ssm':
         specifier: ^3.700.0
-        version: 3.1039.0
+        version: 3.1040.0
       '@aws-sdk/credential-providers':
         specifier: ^3.700.0
         version: 3.1031.0
@@ -200,7 +200,7 @@ importers:
     devDependencies:
       '@aws-sdk/client-ssm':
         specifier: ^3.700.0
-        version: 3.1039.0
+        version: 3.1040.0
       '@azure/identity':
         specifier: ^4.5.0
         version: 4.13.1
@@ -308,8 +308,8 @@ packages:
     resolution: {integrity: sha512-Tr13HNnBBLhag78gA/1kRekaw0BCkM2LVxT//ZFr51jNEhLGjrEU2iGjTiRlef898uedDiJ8I/m7cmSTitlUyw==}
     engines: {node: '>=20.0.0'}
 
-  '@aws-sdk/client-ssm@3.1039.0':
-    resolution: {integrity: sha512-UvFJ/9HSIkQWxcLNbq/QaWemhqi7TChLW+ZSWBv8mNmSybTj4ZrMFpzbH2y9gJq38dN1KVR6FyjtOA/+FE6avg==}
+  '@aws-sdk/client-ssm@3.1040.0':
+    resolution: {integrity: sha512-Su6vrzo32lx7jL6Dk/fatQpjrGjBCQIDr7pRdlpHOGOSTfg2L+UFg/XRrZRL5blz7dCNdfhZf2uuuMK1n0hrkg==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/core@3.974.0':
@@ -4142,7 +4142,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-ssm@3.1039.0':
+  '@aws-sdk/client-ssm@3.1040.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
