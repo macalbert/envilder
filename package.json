@@ -81,7 +81,7 @@
     "LICENSE",
     "ROADMAP.md",
     "docs/CHANGELOG.md",
-    "docs/changelogs/cli.md",
+    "docs/changelogs/**",
     "docs/SECURITY.md"
   ],
   "type": "module",

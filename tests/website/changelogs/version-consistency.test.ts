@@ -71,4 +71,16 @@ describe('Version consistency', () => {
     // Assert
     expect(actual).toBe(expected);
   });
+
+  it('Should_MatchRootPackageVersion_When_GhaChangelogIsParsed', () => {
+    // Arrange
+    const pkg = JSON.parse(readVersion('package.json'));
+    const expected = `v${pkg.version}`;
+
+    // Act
+    const actual = latestChangelogVersion('gha.md');
+
+    // Assert
+    expect(actual).toBe(expected);
+  });
 });
