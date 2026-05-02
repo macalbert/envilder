@@ -8,7 +8,7 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "@aws-sdk/client-ssm": "^3.1039.0",
+    "@aws-sdk/client-ssm": "^3.1041.0",
     "@azure/identity": "^4.5.0",
     "@azure/keyvault-secrets": "^4.9.0",
     "@testcontainers/localstack": "^11.13.0",
