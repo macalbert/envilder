@@ -37,6 +37,8 @@ function handler(event) {
 		".xml",
 		".txt",
 		".map",
+		".mp4",
+		".webm",
 	];
 
 	function hasKnownExt(uLower) {
