@@ -37,7 +37,7 @@ describe('Version consistency', () => {
       match,
       'Failed to parse <Version> from Envilder.csproj',
     ).not.toBeNull();
-    const expected = `v${match![1]}`;
+    const expected = `v${match?.[1]}`;
 
     // Act
     const actual = latestChangelogVersion('sdk-dotnet.md');
@@ -50,11 +50,8 @@ describe('Version consistency', () => {
     // Arrange
     const toml = readVersion('src/sdks/python/pyproject.toml');
     const match = toml.match(/^version\s*=\s*"(.*?)"/m);
-    expect(
-      match,
-      'Failed to parse version from pyproject.toml',
-    ).not.toBeNull();
-    const expected = `v${match![1]}`;
+    expect(match, 'Failed to parse version from pyproject.toml').not.toBeNull();
+    const expected = `v${match?.[1]}`;
 
     // Act
     const actual = latestChangelogVersion('sdk-python.md');
