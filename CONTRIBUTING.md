@@ -8,7 +8,7 @@
 | **pnpm** | 10+ | Monorepo package manager |
 | **Docker** | Latest | Acceptance tests (TestContainers) |
 | **.NET** | 10+ | .NET SDK |
-| **Python** | 3.12+ | Python SDK |
+| **Python** | 3.10+ | Python SDK |
 | **uv** | Latest | Python dependency management |
 
 ## Getting Started
@@ -40,7 +40,9 @@ envilder/
 ├── src/sdks/
 │   ├── nodejs/            # Node.js SDK (@envilder/sdk)
 │   ├── dotnet/            # .NET SDK (Envilder NuGet)
-│   └── python/            # Python SDK (envilder PyPI)
+│   ├── python/            # Python SDK (envilder PyPI)
+│   ├── go/                # Go SDK (planned)
+│   └── java/              # Java SDK (planned)
 ├── src/iac/               # AWS CDK infrastructure
 ├── src/website/           # Astro docs site
 ├── tests/                 # Mirrors src/ structure

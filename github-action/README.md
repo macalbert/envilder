@@ -187,7 +187,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 ```
 
-Your Azure identity needs **Key Vault Secrets User** role (for pull) or **Key Vault Secrets Officer** role (for push).
+Your Azure identity needs **Key Vault Secrets User** role to pull secrets.
 
 ## 🌟 Examples
 

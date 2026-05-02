@@ -11,7 +11,7 @@ Part of the [Envilder](https://github.com/macalbert/envilder) project.
 
 ## Prerequisites
 
-- .NET Standard 2.0 compatible runtime (.NET 6+, .NET Framework 4.6.1+)
+- .NET Standard 2.0 compatible runtime (.NET 6+, .NET Framework 4.6.1+, and any netstandard2.0-compatible target)
 - **AWS provider**: AWS credentials configured (CLI, environment variables, or IAM role)
 - **Azure provider**: Azure credentials via `az login`, managed identity, or environment variables
 

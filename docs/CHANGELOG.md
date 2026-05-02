@@ -1,3 +1,8 @@
+# Changelog
+
+All notable cross-component changes to the Envilder project are documented
+here. For per-component changelogs, see `docs/changelogs/`.
+
 ## [Unreleased]
 
 ### Security
@@ -5,6 +10,25 @@
 * **Fix CVE-2026-33532** — Override transitive `yaml` dependency to `>=2.8.3`
   to resolve Uncontrolled Recursion vulnerability (CVSS 5.3, CWE-674)
   introduced through `@astrojs/check` → `yaml-language-server` → `yaml@2.7.1`
+
+### Added
+
+* **Node.js SDK v0.1.0** (`@envilder/sdk`) — Runtime library for Node.js.
+  Load secrets directly into `process.env` from a map file. AWS SSM +
+  Azure Key Vault. Published to npm
+  ([docs](../src/sdks/nodejs/README.md),
+  [changelog](changelogs/sdk-nodejs.md))
+
+* **.NET SDK v0.2.0** — Static facade (`Envilder.Load`, `Envilder.FromMapFile`),
+  fluent builder, environment-based routing, sync + async API, cross-provider
+  validation. `SecretProviderFactory` is now internal
+  ([changelog](changelogs/sdk-dotnet.md))
+
+* **Python SDK v0.3.2** — Encapsulated `SecretProviderFactory`, cross-provider
+  validation, delegated default AWS region resolution to boto3
+  ([changelog](changelogs/sdk-python.md))
+
+---
 
 ## [0.9.3] - 2026-04-17
 
@@ -197,7 +221,6 @@ prints a warning. It will be removed in a future release.
 ### Changed
 
 * **ci:** Update CI configuration for improved build reliability
-* Bump AWS SDK SSM to 3.1000.0 and align CI/publish workflows ([#123](https://github.com/macalbert/envilder/pull/123))
 
 ### Dependencies
 
@@ -397,222 +420,3 @@ prints a warning. It will be removed in a future release.
 * Bumped testcontainers from 11.2.1 to 11.5.1
 * Bumped @aws-sdk/credential-providers from 3.844.0 to 3.879.0
 * Bumped secretlint from 10.2.1 to 11.2.0
-* Bumped @biomejs/biome from 2.1.3 to 2.2.4
-* Bumped @secretlint/secretlint-rule-preset-recommend from 10.2.1 to 11.2.4
-* Bumped vite from 7.0.4 to 7.1.5
-* Bumped commander from 14.0.0 to 14.0.1
-* Bumped inversify from 7.6.1 to 7.10.2
-* Updated actions/checkout from 4 to 5
-* Updated actions/setup-node from 4 to 5
-* Updated actions/upload-pages-artifact from 3 to 4
-* Updated aws-actions/configure-aws-credentials from 4 to 5
-
-## [0.6.4] - 2025-08-02
-
-### Changed
-
-* Bumped typescript from 5.8.3 to 5.9.2
-* Bumped secretlint from 10.2.0 to 10.2.1
-* Bumped @types/glob from 8.1.0 to 9.0.0
-* Bumped @secretlint/secretlint-rule-preset-recommend from 10.2.0 to 10.2.1
-* Bumped @biomejs/biome from 2.1.1 to 2.1.3
-
-## [0.6.3] - 2025-07-20
-
-### Changed
-
-* Bump version to 0.6.3 in package.json
-
----
-
-## [0.6.2] - 2025-07-20
-
-### Changed
-
-* **di:** Implement .NET-Style DIP Startup Pattern for dependency injection — improved separation of concerns in DI configuration ([#59](https://github.com/macalbert/envilder/pull/59))
-
----
-
-## [0.6.1] - 2025-07-13
-
-### Added
-
-* **Push Mode** functionality to upload environment variables to AWS SSM Parameter Store
-* File-based approach for pushing multiple variables from `.env` files
-* Single-variable approach for direct command line uploads
-* Support for working with different AWS profiles when pushing secrets
-* Comprehensive test coverage for all Push Mode functionality
-
-### Security
-
-* Implemented secure parameter handling to protect sensitive values
-* Maintained AWS IAM best practices for least privilege
-* Added safeguards against accidental overwrites of critical parameters
-
-### Changed
-
-* Designed clean, modular command structure for Push Mode operations
-* Added new domain models and handlers to support Push feature
-* Maintained separation of concerns between infrastructure and application layers
-* Ensured backward compatibility with existing Pull Mode features
-
-### Documentation
-
-* Added comprehensive examples for all new Push Mode commands
-* Created visual diagrams explaining Push Mode data flow
-* Documented options and parameters for Push Mode operations
-
----
-
-## [0.6.0] - 2025-07-13
-
-### Added
-
-* **push:** Introduced Push Mode — sync local `.env` variables to AWS SSM Parameter Store ([#57](https://github.com/macalbert/envilder/pull/57))
-
----
-
-## [0.5.6] - 2025-07-06
-
-### Added
-
-* Introduced new logger interface for seamless integration of custom logging implementations
-
-### Changed
-
-* Updated several packages to latest versions for improved security and performance
-
-### Documentation
-
-* Added video guide to README demonstrating CLI usage
-* Enhanced user onboarding materials
-
-## [0.5.5] - 2025-06-29
-
-### Changed
-
-* Moved `EnvilderBuilder` from `domain` to `application/builders` directory
-* Updated import paths across codebase for better organization
-* Enhanced code architecture alignment with domain-driven design principles
-
-### Fixed
-
-* Fixed glob pattern and path handling in test cleanup functions
-* Corrected file path resolution in end-to-end tests
-* Improved error handling during test file deletions
-
-### Documentation
-
-* Extensively updated README with clearer structure and table of contents
-* Added feature status table to clarify implemented vs planned features
-* Simplified installation and usage instructions
-* Revamped pull request template for better contributor experience
-* Removed outdated environment-specific parameter examples
-
-## [0.5.4] - 2025-06-10
-
-### Added
-
-* Added unit tests for error handling with missing CLI arguments
-* Enhanced unit test reporting with JUnit format for better CI integration
-
-### Changed
-
-* Refactored `EnvFileManager` and related interfaces to use async/await
-* Improved error handling and modularized secret processing in `Envilder`
-* Enhanced error handling for missing secrets with clearer feedback
-* Renamed methods, test suite descriptions, and filenames for consistency
-* Extracted package.json version retrieval into dedicated `PackageJsonFinder` class
-* Modularized and simplified `escapeEnvValue` method and related tests
-* Updated dependencies for better reliability
-* Improved test cleanup for more reliable test runs
-* Added and reorganized permissions in CI workflow
-* Updated `.gitattributes` for better language stats on GitHub
-
-## [0.5.3] - 2025-06-07
-
-### Added
-
-* Modular CLI for environment variable synchronization with pluggable secret providers
-* Builder pattern for flexible CLI configuration and usage
-* Extensive unit, integration, and end-to-end tests
-* AWS integration testing using Localstack with Testcontainers
-* Expanded tests for environment file escaping and builder configuration
-
-### Changed
-
-* **BREAKING**: Full TypeScript migration from JavaScript
-* Introduced modular, layered architecture with clear separation
-* Restructured CLI internals for improved maintainability
-* Test structure now mirrors production code structure
-* Migrated CI/CD workflows and scripts from Yarn to npm
-* Updated ignore files and configuration
-
-### Documentation
-
-* Updated documentation to focus on npm commands
-* Improved workflow and script documentation
-
-## [0.5.2] - 2025-05-18
-
-### Added
-
-* Comprehensive E2E validation test in CI/CD pipeline
-* Validation includes: build, `npm pack`, local install, and CLI command execution
-* Ensures package integrity and command-line operability before release
-
-## [0.5.1] - 2025-05-16
-
-### Fixed
-
-* CLI command not recognized after global install (`npm install -g envilder`)
-* Fixed missing compiled `lib/` files in published package
-
----
-
-> **Note:** Versions below 0.5.1 are deprecated on npm and no longer supported.
-> They are preserved here for historical reference only.
-
----
-
-## [0.3.0] - 2025-05-09 [DEPRECATED]
-
-### Added
-
-* Support for working with different AWS accounts and configurations via AWS profiles
-
-### Changed
-
-* Bumped @secretlint/secretlint-rule-preset-recommend from 9.3.0 to 9.3.2
-* Bumped @types/node from 22.14.1 to 22.15.3
-* Bumped commander from 12.1.0 to 13.1.0
-* Bumped vite from 6.2.6 to 6.3.4
-* Bumped @aws-sdk/client-ssm from 3.787.0 to 3.799.0
-
-## [0.2.3] - 2025-04-12 [DEPRECATED]
-
-### Changed
-
-* Updated multiple dependencies including:
-  * @types/node from 22.7.5 to 22.10.3
-  * @aws-sdk/client-ssm from 3.670.0 to 3.716.0
-  * @biomejs/biome from 1.9.3 to 1.9.4
-  * nanoid from 3.3.7 to 3.3.8
-  * @secretlint/secretlint-rule-preset-recommend from 8.5.0 to 9.0.0
-  * secretlint from 8.5.0 to 9.0.0
-
-## [0.2.1] - 2024-10-16 [DEPRECATED]
-
-### Added
-
-* Code coverage reporting and deployment to GitHub Pages
-* CodeQL workflow for security analysis
-* Preserve existing `.env` file and update values if present
-
-### Documentation
-
-* Updated README.md with improved documentation
-
-## [0.1.4] - 2024-10-01 [DEPRECATED]
-
-Initial public release of Envilder.

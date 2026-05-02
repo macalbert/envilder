@@ -1,3 +1,20 @@
+# CLI + GitHub Action Changelog
+
+Changes specific to the CLI (`envilder` npm package) and the GitHub Action.
+For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.md`.
+
+---
+
+## [Unreleased]
+
+### Security
+
+* **Fix CVE-2026-33532** — Override transitive `yaml` dependency to `>=2.8.3`
+  to resolve Uncontrolled Recursion vulnerability (CVSS 5.3, CWE-674)
+  introduced through `@astrojs/check` → `yaml-language-server` → `yaml@2.7.1`
+
+---
+
 ## [0.9.3] - 2026-04-17
 
 ### Added
@@ -8,8 +25,7 @@
   **.NET** ([NuGet](https://www.nuget.org/packages/Envilder)):
 
   ```csharp
-  builder.Configuration.AddEnvilder(
-      "secrets-map.json", provider);
+  builder.Configuration.AddEnvilder("secrets-map.json");
   ```
 
   **Python** ([PyPI](https://pypi.org/project/envilder)):

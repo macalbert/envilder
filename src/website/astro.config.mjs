@@ -38,16 +38,6 @@ const sdkPythonVersion = extractPyprojectVersion(
   '../sdks/python/pyproject.toml',
 );
 
-let changelogContent = '';
-try {
-  changelogContent = readFileSync(
-    new URL('../../docs/CHANGELOG.md', import.meta.url),
-    'utf-8',
-  );
-} catch {
-  // fallback: changelog not found at build time
-}
-
 function readChangelog(relativePath) {
   try {
     return readFileSync(new URL(relativePath, import.meta.url), 'utf-8');
@@ -76,7 +66,6 @@ export default defineConfig({
   vite: {
     define: {
       __APP_VERSION__: JSON.stringify(rootPkg.version),
-      __CHANGELOG_CONTENT__: JSON.stringify(changelogContent),
       __CHANGELOG_CLI__: JSON.stringify(changelogCli),
       __CHANGELOG_GHA__: JSON.stringify(changelogGha),
       __CHANGELOG_SDK_DOTNET__: JSON.stringify(changelogSdkDotnet),

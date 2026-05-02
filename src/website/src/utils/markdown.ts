@@ -1,6 +1,6 @@
 /**
  * Simple markdown-to-HTML conversion for the changelog.
- * Only handles the subset of markdown used in docs/CHANGELOG.md:
+ * Only handles the subset of markdown used in docs/changelogs/:
  * headings, bold, inline code, links, unordered lists, and horizontal rules.
  *
  * Strips HTML comments left over from markdownlint directives.

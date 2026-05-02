@@ -243,4 +243,29 @@ print("Envilder Python SDK installed successfully")
 
 📖 **[Full Python SDK documentation](../src/sdks/python/README.md)**
 
+### Node.js SDK
+
+For the Node.js SDK, install via npm:
+
+```bash
+npm install @envilder/sdk
+```
+
+Requirements:
+
+- Node.js 20+
+- **AWS provider**: AWS credentials configured via CLI, environment
+  variables, or IAM role
+- **Azure provider**: Azure credentials via `az login`, managed identity,
+  or environment variables
+
+Verify:
+
+```typescript
+import { Envilder } from '@envilder/sdk';
+console.log('Envilder Node.js SDK installed successfully');
+```
+
+📖 **[Full Node.js SDK documentation](../src/sdks/nodejs/README.md)**
+
 If you see the CLI help output, you're ready to use Envilder!
