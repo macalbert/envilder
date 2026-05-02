@@ -19,21 +19,22 @@ Tests live in `tests/iac/` and run with Vitest.
 
 ### Test Organization
 
-Mirror the source structure in tests:
+Tests mirror the source structure:
 
 ```txt
 tests/iac/
-├── aws/
-│   ├── compute/       Lambda, ECS Fargate tests
-│   ├── database/      RDS PostgreSQL, MySQL tests
-│   ├── integration/   SQS, SNS, Step Functions tests
-│   ├── network/       VPC, NLB, API Gateway tests
-│   ├── storage/       S3, CloudFront tests
-│   └── website/       Static website stack tests
-└── config/
-    ├── application/   Deployment handler tests
-    ├── domain/        Config model tests
-    └── infrastructure/ Stack builder, factory tests
+├── bin/
+│   └── main.test.ts                  CDK app entry point test
+├── lib/
+│   ├── stacks/
+│   │   ├── cloudfrontUrlRewrite.test.ts
+│   │   ├── staticWebsiteStack.test.ts
+│   │   └── __snapshots__/
+│   └── utils/
+│       └── cloudFormationUtils.test.ts
+├── package.json
+├── tsconfig.json
+└── vitest.d.ts
 ```
 
 ## Snapshot Testing (Primary Pattern)
@@ -191,14 +192,14 @@ const testConfig: BackendStackConfig = {
 # Run all CDK tests
 cd tests/iac && pnpm test
 
-# Run with verbose output
-cd tests/iac && pnpm test -- --reporter=verbose
-
 # Update snapshots (after intentional changes only)
 cd tests/iac && pnpm test -- -u
 
 # Run specific test file
-cd tests/iac && pnpm test -- lambda
+cd tests/iac && pnpm test -- lib/stacks/staticWebsiteStack.test.ts
+
+# Filter by test name
+cd tests/iac && pnpm test -- -t "Should_MatchSnapshot"
 ```
 
 ## Anti-Patterns
