@@ -13,7 +13,7 @@ here. For per-component changelogs, see `docs/changelogs/`.
 
 ### Added
 
-* **Node.js SDK v0.1.0** (`@envilder/sdk`) — Runtime library for Node.js.
+* **Node.js SDK v0.1.1** (`@envilder/sdk`) — Runtime library for Node.js.
   Load secrets directly into `process.env` from a map file. AWS SSM +
   Azure Key Vault. Published to npm
   ([docs](../src/sdks/nodejs/README.md),
@@ -122,9 +122,11 @@ here. For per-component changelogs, see `docs/changelogs/`.
 ### Dependencies
 
 * Bump `@aws-sdk/client-ssm` from 3.1019.0 to 3.1021.0 ([#140](https://github.com/macalbert/envilder/pull/140))
-* Bump `@aws-sdk/credential-providers` from 3.1019.0 to 3.1021.0 ([#142](https://github.com/macalbert/envilder/pull/142))
+* Bump `@aws-sdk/credential-providers` from 3.1019.0 to 3.1021.0
+  ([#142](https://github.com/macalbert/envilder/pull/142))
 * Bump `secretlint` from 11.4.0 to 11.4.1 ([#141](https://github.com/macalbert/envilder/pull/141))
-* Bump `@secretlint/secretlint-rule-preset-recommend` from 11.4.0 to 11.4.1 ([#144](https://github.com/macalbert/envilder/pull/144))
+* Bump `@secretlint/secretlint-rule-preset-recommend` from 11.4.0 to 11.4.1
+  ([#144](https://github.com/macalbert/envilder/pull/144))
 * Bump `astro` from 6.1.1 to 6.1.2 ([#143](https://github.com/macalbert/envilder/pull/143))
 * Bump `actions/configure-pages` from 5 to 6 ([#139](https://github.com/macalbert/envilder/pull/139))
 * Bump `actions/deploy-pages` from 4 to 5 ([#138](https://github.com/macalbert/envilder/pull/138))
@@ -145,7 +147,8 @@ here. For per-component changelogs, see `docs/changelogs/`.
 
 ### Fixed
 
-* **deps:** Move `@types/node` from `dependencies` to `devDependencies` to prevent it from being bundled as a runtime dependency
+* **deps:** Move `@types/node` from `dependencies` to `devDependencies` to prevent it from being bundled
+  as a runtime dependency
 * **e2e:** Use unique SSM paths per CLI test run to prevent race conditions between parallel test executions
 
 ### Dependencies
@@ -159,8 +162,9 @@ here. For per-component changelogs, see `docs/changelogs/`.
 
 ### Added
 
-* **`$config` section in map files** — Map files now support an optional `$config` key to declare provider and connection
-details inline (e.g., `"provider": "azure"`, `"vaultUrl": "https://..."`, `"profile": "dev-account"`)
+* **`$config` section in map files** — Map files now support an optional `$config` key to declare provider
+and connection details inline (e.g., `"provider": "azure"`, `"vaultUrl": "https://..."`,
+`"profile": "dev-account"`)
 * New CLI flag `--vault-url <url>` — Azure Key Vault URL, overrides `$config.vaultUrl` in the map file
 * New GitHub Action input `vault-url` — Azure Key Vault URL, overrides `$config.vaultUrl` in the map file
 * Precedence chain: CLI flags / GHA inputs > `$config` in map file > defaults
@@ -179,8 +183,10 @@ from Azure Key Vault ([#90](https://github.com/macalbert/envilder/pull/90))
 prints a warning. It will be removed in a future release.
 * `configureInfrastructureServices()` now receives a single `MapFileConfig` object instead of separate parameters
 * CLI and GHA entry points read `$config` from the map file and merge with CLI flags / GHA inputs
-* Extracted shared `ContainerConfiguration` module (`src/envilder/apps/shared/`) for DI setup reused by CLI and GitHub Action
-* Both `Startup.ts` files (CLI and GHA) now delegate to shared `configureInfrastructureServices()` and `configureApplicationServices()`
+* Extracted shared `ContainerConfiguration` module (`src/envilder/apps/shared/`) for DI setup reused by CLI
+  and GitHub Action
+* Both `Startup.ts` files (CLI and GHA) now delegate to shared `configureInfrastructureServices()`
+  and `configureApplicationServices()`
 * Updated CLI description to include Azure Key Vault examples
 * Updated `action.yml` description and inputs to reflect multi-provider support
 
@@ -207,8 +213,10 @@ prints a warning. It will be removed in a future release.
 
 ### Changed
 
-* **ci:** Upgrade `dorny/test-reporter` to v3 for Node.js 24 support ([#127](https://github.com/macalbert/envilder/pull/127))
-* **dx:** Add AI workflow agents, prompts, and lefthook pre-commit hook ([#125](https://github.com/macalbert/envilder/pull/125))
+* **ci:** Upgrade `dorny/test-reporter` to v3 for Node.js 24 support
+  ([#127](https://github.com/macalbert/envilder/pull/127))
+* **dx:** Add AI workflow agents, prompts, and lefthook pre-commit hook
+  ([#125](https://github.com/macalbert/envilder/pull/125))
 
 ### Dependencies
 
@@ -220,7 +228,8 @@ prints a warning. It will be removed in a future release.
 
 ### Security
 
-* Bump AWS SDK packages to resolve `fast-xml-parser` vulnerability ([#124](https://github.com/macalbert/envilder/pull/124))
+* Bump AWS SDK packages to resolve `fast-xml-parser` vulnerability
+  ([#124](https://github.com/macalbert/envilder/pull/124))
 
 ---
 
@@ -255,7 +264,8 @@ prints a warning. It will be removed in a future release.
 
 ### Fixed
 
-* **deps:** Upgrade AWS SDK to resolve `fast-xml-parser` DoS vulnerability ([#116](https://github.com/macalbert/envilder/pull/116))
+* **deps:** Upgrade AWS SDK to resolve `fast-xml-parser` DoS vulnerability
+  ([#116](https://github.com/macalbert/envilder/pull/116))
 
 ### Dependencies
 
@@ -272,7 +282,8 @@ prints a warning. It will be removed in a future release.
 
 ### Added
 
-* **push:** AWS throttling retry logic and duplicate SSM path validation ([#109](https://github.com/macalbert/envilder/pull/109))
+* **push:** AWS throttling retry logic and duplicate SSM path validation
+  ([#109](https://github.com/macalbert/envilder/pull/109))
 
 ### Fixed
 
