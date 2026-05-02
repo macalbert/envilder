@@ -244,3 +244,16 @@ gh api ... -X PATCH -f body="**Resolved.** Updated references from \`v0.7.11\` t
 
 After all comments resolved and validated: verify with `pnpm lint` and
 `pnpm test`, then `git push`.
+
+## Lessons Learned
+
+### Duplicate replies on grouped threads
+
+When multiple review threads point to the same file/area (e.g., 4 threads on
+`DemoVideo.astro`), reply with the full resolution to the **first** thread only.
+For the remaining threads, reply with:
+
+> Same fix — see reply above. **Commit:** [`<hash>`](<url>)
+
+Then resolve all threads. This avoids duplicate walls of text in the PR
+conversation view.
