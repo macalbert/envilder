@@ -10,7 +10,7 @@ runner and conventions.
 | **CLI / Core** | Vitest | `tests/envilder/` |
 | **Node.js SDK** | Vitest | `tests/sdks/nodejs/` |
 | **Website** | Vitest | `tests/website/` |
-| **CDK (IaC)** | Jest | `tests/iac/` |
+| **CDK (IaC)** | Vitest | `tests/iac/` |
 | **E2E** | Vitest + TestContainers | `e2e/` |
 
 ## CLI / Core / Node.js SDK (Vitest)
@@ -98,7 +98,7 @@ describe('EnvilderClient', () => {
 });
 ```
 
-## CDK / IaC (Jest)
+## CDK / IaC (Vitest)
 
 ### Snapshot Testing
 

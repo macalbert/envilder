@@ -1,6 +1,6 @@
 ---
 name: typescript-testing
-description: Mandatory testing conventions for TypeScript stacks (Vitest for CLI/SDK/Website, Jest for CDK). Use for unit, integration, or E2E tests with Vitest, Jest, or Playwright.
+description: Mandatory testing conventions for TypeScript stacks (Vitest for CLI/SDK/Website/CDK). Use for unit, integration, or E2E tests with Vitest or Playwright.
 ---
 
 # Testing Conventions (TypeScript)
@@ -32,7 +32,7 @@ internal helpers.
 | CLI / Core | Vitest | `tests/envilder/` |
 | Node.js SDK | Vitest | `tests/sdks/nodejs/` |
 | Website | Vitest | `tests/website/` |
-| CDK (IaC) | Jest | `tests/iac/` |
+| CDK (IaC) | Vitest | `tests/iac/` |
 | E2E | Vitest + TestContainers | `e2e/` |
 
 ---
@@ -261,7 +261,7 @@ describe('EnvilderClient', () => {
 });
 ```
 
-### CDK / IaC (Jest)
+### CDK / IaC (Vitest)
 
 ```typescript
 describe('AppStack', () => {
@@ -308,7 +308,7 @@ it('Should_HaveNoMissingKeys_When_CatalanComparedToEnglish', () => {
 | ------- | ------- |
 | CLI / Core / Website | `pnpm test` |
 | Node.js SDK | `cd tests/sdks/nodejs && pnpm vitest run --reporter=verbose` |
-| CDK | `cd tests/iac && pnpm jest` |
+| CDK | `cd tests/iac && pnpm test` |
 | CI parity | `pnpm test:ci` |
 | Lint | `pnpm lint` |
 | Format | `pnpm format` |
