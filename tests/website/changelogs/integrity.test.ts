@@ -36,9 +36,7 @@ describe('Changelog integrity', () => {
       const semverPattern = /^v\d+\.\d+\.\d+$/;
 
       // Act
-      const invalidTags = versions.filter(
-        (v) => !semverPattern.test(v.tag),
-      );
+      const invalidTags = versions.filter((v) => !semverPattern.test(v.tag));
 
       // Assert
       expect(invalidTags).toEqual([]);

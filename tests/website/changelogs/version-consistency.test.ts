@@ -57,9 +57,7 @@ describe('Version consistency', () => {
 
   it('Should_MatchNodejsPackageVersion_When_NodejsChangelogIsParsed', () => {
     // Arrange
-    const pkg = JSON.parse(
-      readVersion('src/sdks/nodejs/package.json'),
-    );
+    const pkg = JSON.parse(readVersion('src/sdks/nodejs/package.json'));
     const expected = `v${pkg.version}`;
 
     // Act
