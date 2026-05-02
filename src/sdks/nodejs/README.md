@@ -40,7 +40,7 @@ console.log('DB_PASSWORD loaded:', !!process.env.DB_PASSWORD);
 import { Envilder } from '@envilder/sdk';
 
 const secrets = await Envilder.resolveFile('secrets-map.json');
-console.log(secrets.get('DB_PASSWORD'));
+console.log(secrets.get('DB_PASSWORD')); // avoid logging secrets in production
 ```
 
 ### Fluent builder (with overrides)
