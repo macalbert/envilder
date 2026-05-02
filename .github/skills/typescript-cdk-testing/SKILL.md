@@ -6,6 +6,7 @@ description: AWS CDK testing patterns including snapshot tests, fine-grained ass
 # CDK Testing Skill
 
 Testing patterns for AWS CDK infrastructure in the Envilder project (`src/iac/`).
+Tests live in `tests/iac/` and run with Vitest.
 
 ## When to Use
 
@@ -16,30 +17,24 @@ Testing patterns for AWS CDK infrastructure in the Envilder project (`src/iac/`)
 
 ## Test Architecture
 
-### Test Locations
-
-| Scope | Location | Purpose |
-| --- | --- | --- |
-| Shared constructs | `shared/src/iac/test/` | Test reusable CDK constructs |
-| Project stacks | `Envilder/src/iac/test/` | Test project-specific infrastructure |
-
 ### Test Organization
 
-Mirror the source structure in tests:
+Tests mirror the source structure:
 
 ```txt
-shared/src/iac/test/
-├── aws/
-│   ├── compute/       Lambda, ECS Fargate tests
-│   ├── database/      RDS PostgreSQL, MySQL tests
-│   ├── integration/   SQS, SNS, Step Functions tests
-│   ├── network/       VPC, NLB, API Gateway tests
-│   ├── storage/       S3, CloudFront tests
-│   └── website/       Static website stack tests
-└── config/
-    ├── application/   Deployment handler tests
-    ├── domain/        Config model tests
-    └── infrastructure/ Stack builder, factory tests
+tests/iac/
+├── bin/
+│   └── main.test.ts                  CDK app entry point test
+├── lib/
+│   ├── stacks/
+│   │   ├── cloudfrontUrlRewrite.test.ts
+│   │   ├── staticWebsiteStack.test.ts
+│   │   └── __snapshots__/
+│   └── utils/
+│       └── cloudFormationUtils.test.ts
+├── package.json
+├── tsconfig.json
+└── vitest.d.ts
 ```
 
 ## Snapshot Testing (Primary Pattern)
@@ -195,16 +190,16 @@ const testConfig: BackendStackConfig = {
 
 ```bash
 # Run all CDK tests
-pnpm test
-
-# Run with verbose output
-pnpm test -- --verbose
+cd tests/iac && pnpm test
 
 # Update snapshots (after intentional changes only)
-pnpm test -- -u
+cd tests/iac && pnpm test -- -u
 
 # Run specific test file
-pnpm test -- --testPathPattern="lambda"
+cd tests/iac && pnpm test -- lib/stacks/staticWebsiteStack.test.ts
+
+# Filter by test name
+cd tests/iac && pnpm test -- -t "Should_MatchSnapshot"
 ```
 
 ## Anti-Patterns
