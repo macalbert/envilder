@@ -33,12 +33,13 @@ describe('Version consistency', () => {
     // Arrange
     const csproj = readVersion('src/sdks/dotnet/Envilder.csproj');
     const match = csproj.match(/<Version>(.*?)<\/Version>/);
-    const expected = `v${match?.[1] ?? '0.0.0'}`;
+    const expected = `v${match?.[1]}`;
 
     // Act
     const actual = latestChangelogVersion('sdk-dotnet.md');
 
     // Assert
+    expect(match).not.toBeNull();
     expect(actual).toBe(expected);
   });
 
@@ -46,12 +47,13 @@ describe('Version consistency', () => {
     // Arrange
     const toml = readVersion('src/sdks/python/pyproject.toml');
     const match = toml.match(/^version\s*=\s*"(.*?)"/m);
-    const expected = `v${match?.[1] ?? '0.0.0'}`;
+    const expected = `v${match?.[1]}`;
 
     // Act
     const actual = latestChangelogVersion('sdk-python.md');
 
     // Assert
+    expect(match).not.toBeNull();
     expect(actual).toBe(expected);
   });
 

@@ -29,37 +29,28 @@ describe('i18n completeness', () => {
   const caKeys = extractKeys(ca);
   const esKeys = extractKeys(es);
 
-  it('Should_HaveIdenticalKeysToCatalan_When_ComparedToEnglish', () => {
-    // Arrange
+  it('Should_HaveNoMissingKeys_When_CatalanComparedToEnglish', () => {
     const missingInCa = enKeys.filter((k) => !caKeys.includes(k));
-    const extraInCa = caKeys.filter((k) => !enKeys.includes(k));
-
-    // Act — comparison done in arrange
-
-    // Assert
     expect(missingInCa, 'Keys missing in ca.ts').toEqual([]);
+  });
+
+  it('Should_HaveNoExtraKeys_When_CatalanComparedToEnglish', () => {
+    const extraInCa = caKeys.filter((k) => !enKeys.includes(k));
     expect(extraInCa, 'Extra keys in ca.ts not in en.ts').toEqual([]);
   });
 
-  it('Should_HaveIdenticalKeysToSpanish_When_ComparedToEnglish', () => {
-    // Arrange
+  it('Should_HaveNoMissingKeys_When_SpanishComparedToEnglish', () => {
     const missingInEs = enKeys.filter((k) => !esKeys.includes(k));
-    const extraInEs = esKeys.filter((k) => !enKeys.includes(k));
-
-    // Act — comparison done in arrange
-
-    // Assert
     expect(missingInEs, 'Keys missing in es.ts').toEqual([]);
+  });
+
+  it('Should_HaveNoExtraKeys_When_SpanishComparedToEnglish', () => {
+    const extraInEs = esKeys.filter((k) => !enKeys.includes(k));
     expect(extraInEs, 'Extra keys in es.ts not in en.ts').toEqual([]);
   });
 
   it('Should_HaveNonZeroKeys_When_EnglishLocaleIsLoaded', () => {
-    // Arrange — enKeys computed above
-
-    // Act
     const count = enKeys.length;
-
-    // Assert
     expect(count).toBeGreaterThan(100);
   });
 });
