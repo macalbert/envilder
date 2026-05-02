@@ -14,6 +14,8 @@ function extractKeys(obj: unknown, prefix = ''): string[] {
         !Array.isArray(value)
       ) {
         keys.push(...extractKeys(value, path));
+      } else if (Array.isArray(value)) {
+        keys.push(`${path}[length:${value.length}]`);
       } else {
         keys.push(path);
       }
