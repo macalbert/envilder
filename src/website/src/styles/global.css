@@ -516,30 +516,21 @@ pre code,
 
 /* Code block horizontal scrollbar */
 .codeblock-body pre::-webkit-scrollbar {
-  height: 6px;
+  height: 8px;
 }
 
 .codeblock-body pre::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--color-surface, rgba(0, 0, 0, 0.1));
+  border-radius: 4px;
 }
 
 .codeblock-body pre::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 3px;
+  background: var(--color-text-dim, var(--color-border));
+  border-radius: 4px;
 }
 
 .codeblock-body pre::-webkit-scrollbar-thumb:hover {
-  background: var(--color-border-light);
-}
-
-@media (max-width: 640px) {
-  .codeblock-body pre::-webkit-scrollbar {
-    height: 8px;
-  }
-
-  .codeblock-body pre::-webkit-scrollbar-thumb {
-    background: var(--color-text-dim, var(--color-border));
-  }
+  background: var(--color-text-muted);
 }
 
 /* Firefox fallback */
