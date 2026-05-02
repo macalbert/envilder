@@ -116,7 +116,7 @@ here. For per-component changelogs, see `docs/changelogs/`.
 ### Fixed
 
 * **README:** Replace `#gh-light-mode-only` / `#gh-dark-mode-only` image fragments with a `<picture>` element using
-`prefers-color-scheme` media queries for reliable dark/light theme logo switching
+  `prefers-color-scheme` media queries for reliable dark/light theme logo switching
 * **ci:** Update version check in publish workflow to use published version from npm
 
 ### Dependencies
