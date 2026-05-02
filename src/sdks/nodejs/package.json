@@ -30,7 +30,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "release:publish": "npm pack --dry-run && npm publish --provenance --access public"
   },
   "keywords": [
     "secrets",

@@ -41,7 +41,8 @@ jobs:
       - name: 🛠️ Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "20.x"
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
           cache: "pnpm"
 
       - name: 👑 Detect version bump
@@ -103,7 +104,7 @@ jobs:
 
       - name: 🚩 Publish to npm
         if: steps.version-check.outputs.version_changed == 'true'
-        run: npm publish --provenance --access public
+        run: pnpm run release:publish
 
       - name: 🏁 Create version tag
         if: steps.version-check.outputs.version_changed == 'true'
