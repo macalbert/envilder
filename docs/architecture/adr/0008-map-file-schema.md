@@ -86,7 +86,7 @@ rejected to catch typos.
 A map file targets a single provider and a single environment. Multi-provider
 and multi-environment setups use separate files:
 
-```
+```txt
 param-map.prod.json      → $config.provider: "aws"
 param-map.staging.json   → $config.provider: "aws", different paths
 param-map.dev.json       → $config.provider: "file"
