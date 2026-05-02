@@ -126,7 +126,7 @@ export const ca: Translations = {
       {
         title: 'Carrega en runtime amb SDKs',
         description:
-          "Salta't el fitxer .env completament. Carrega secrets directament a la teva aplicació a l'inici amb SDKs natius: Python, .NET, TypeScript i més.",
+          "Salta't el fitxer .env completament. Carrega secrets directament a la teva aplicació a l'inici amb SDKs natius: Python, .NET, Node.js i més.",
       },
       {
         title: 'Push des de dev al vault',

@@ -127,7 +127,7 @@ export const en: Translations = {
       {
         title: 'Load at runtime with SDKs',
         description:
-          'Skip the .env file entirely. Load secrets directly into your application at startup with native SDKs: Python, .NET, TypeScript, and more.',
+          'Skip the .env file entirely. Load secrets directly into your application at startup with native SDKs: Python, .NET, Node.js, and more.',
       },
       {
         title: 'Push from dev to the vault',
