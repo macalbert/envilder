@@ -276,14 +276,20 @@ it('Should_HaveIdenticalKeys_When_ComparedToEnglish', () => {
     expect(missingInCa).toEqual([]);
 });
 
-// GOOD - Structural guard: one check per test, no AAA pretense
+// GOOD - Structural guard: one check per test, with AAA markers
 it('Should_HaveNoMissingKeys_When_CatalanComparedToEnglish', () => {
+    // Act
     const missingInCa = enKeys.filter((k) => !caKeys.includes(k));
+
+    // Assert
     expect(missingInCa, 'Keys missing in ca.ts').toEqual([]);
 });
 
 it('Should_HaveNoExtraKeys_When_CatalanComparedToEnglish', () => {
+    // Act
     const extraInCa = caKeys.filter((k) => !enKeys.includes(k));
+
+    // Assert
     expect(extraInCa, 'Extra keys in ca.ts not in en.ts').toEqual([]);
 });
 ```

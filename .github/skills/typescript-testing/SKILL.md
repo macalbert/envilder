@@ -320,7 +320,7 @@ it('Should_HaveNoMissingKeys_When_CatalanComparedToEnglish', () => {
 * Pure domain logic → unit test at domain layer
 * Handler orchestrating ports → mock ports with `vi.fn()`
 * AWS integration semantics → E2E with LocalStack/TestContainers
-* Static data consistency → structural guard (no AAA)
+* Static data consistency → structural guard
 * CDK infrastructure → snapshot + fine-grained assertions
 
 ---
@@ -328,7 +328,7 @@ it('Should_HaveNoMissingKeys_When_CatalanComparedToEnglish', () => {
 ## Completion Criteria
 
 * Test names follow `Should_<Expected>_When_<Condition>`
-* AAA markers present (except structural guards), each at most once
+* AAA markers present, each at most once
 * `sut`, `actual`, `expected` used consistently
 * Positive and negative paths covered
 * Tests run green: `pnpm test`
