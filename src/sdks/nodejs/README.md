@@ -31,7 +31,7 @@ import { Envilder } from '@envilder/sdk';
 // Resolve secrets and inject into process.env
 await Envilder.load('secrets-map.json');
 
-console.log(process.env.DB_PASSWORD);
+console.log('DB_PASSWORD loaded:', !!process.env.DB_PASSWORD);
 ```
 
 ### Resolve without injecting
@@ -91,7 +91,7 @@ const secrets = await Envilder.resolveFile(env, {
 });
 ```
 
-Behaviour:
+Behavior:
 
 - If the environment maps to a file path, secrets are loaded from that file.
 - If the environment maps to `null` or is not in the mapping, an empty `Map` is returned silently.
@@ -142,6 +142,7 @@ import { readFileSync } from 'node:fs';
 class MyCustomProvider implements ISecretProvider {
   async getSecrets(names: string[]): Promise<Map<string, string>> {
     // fetch from your custom backend
+    return new Map();
   }
 }
 
