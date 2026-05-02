@@ -81,7 +81,7 @@ export interface HowItWorksTranslations {
   terminalWritten: string;
   sdkTabPython: string;
   sdkTabDotnet: string;
-  sdkTabTypescript: string;
+  sdkTabNodejs: string;
   pushTerminalPushed1: string;
   pushTerminalPushed2: string;
   pushTerminalPushed3: string;

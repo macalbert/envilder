@@ -146,7 +146,7 @@ export const en: Translations = {
     terminalWritten: '✔ Environment file written to .env',
     sdkTabPython: 'Python',
     sdkTabDotnet: '.NET',
-    sdkTabTypescript: 'TypeScript',
+    sdkTabNodejs: 'Node.js',
     pushTerminalPushed1: '✔ Pushed DB_PASSWORD  → /my-app/prod/db-password',
     pushTerminalPushed2: '✔ Pushed API_KEY      → /my-app/prod/api-key',
     pushTerminalPushed3: '✔ Pushed SECRET_TOKEN → /my-app/prod/secret-token',

@@ -145,7 +145,7 @@ export const ca: Translations = {
     terminalWritten: "✔ Fitxer d'entorn escrit a .env",
     sdkTabPython: 'Python',
     sdkTabDotnet: '.NET',
-    sdkTabTypescript: 'TypeScript',
+    sdkTabNodejs: 'Node.js',
     pushTerminalPushed1: '✔ Pujat DB_PASSWORD  → /my-app/prod/db-password',
     pushTerminalPushed2: '✔ Pujat API_KEY      → /my-app/prod/api-key',
     pushTerminalPushed3: '✔ Pujat SECRET_TOKEN → /my-app/prod/secret-token',
