@@ -80,6 +80,7 @@
     "README.md",
     "LICENSE",
     "ROADMAP.md",
+    "docs/CHANGELOG.md",
     "docs/changelogs/cli.md",
     "docs/SECURITY.md"
   ],
