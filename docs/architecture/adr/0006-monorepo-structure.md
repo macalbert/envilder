@@ -31,17 +31,18 @@ Every component of the Envilder project lives in one Git repository:
 | SDK Node.js | `src/sdks/nodejs/` | pnpm workspace |
 | SDK Go | `src/sdks/go/` | go modules |
 | SDK Java/Kotlin | `src/sdks/java/` | Maven/Gradle |
-| SDK PHP | `src/sdks/php/` | Composer |
-| SDK Rust | `src/sdks/rust/` | Cargo |
+| SDK PHP (planned) | `src/sdks/php/` | Composer |
+| SDK Rust (planned) | `src/sdks/rust/` | Cargo |
 
 ### 2. Independent Releases per Component
 
-Each component has its own:
+Each shipped component (CLI, GHA, SDKs) has its own:
 
 - **Version source file** (package.json, .csproj, pyproject.toml, etc.)
 - **Changelog** (`docs/changelogs/{component}.md`)
 - **Git tag** following `{component}/v{semver}` (e.g., `sdk-dotnet/v1.2.0`)
-- **CI release workflow** triggered by its specific tag pattern
+- **CI release workflow** triggered by version-bump detection on push to `main`
+  (the workflow publishes, then creates the component tag post-publish)
 
 Components are never forced to release together. A change to the Python SDK
 does not require a new CLI release.

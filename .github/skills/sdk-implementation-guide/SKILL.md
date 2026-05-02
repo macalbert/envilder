@@ -53,6 +53,10 @@ src/sdks/{runtime}/
 
 Tests mirror the structure under `tests/sdks/{runtime}/`.
 
+> **Note:** This is the logical structure. Each runtime adapts to its own
+> conventions (e.g., Node.js uses `src/` subfolder, Python uses package name
+> as root directory).
+
 ## 2. Mandatory API Surface
 
 ### Tier 1 — Static Facade (one-liner)
@@ -87,7 +91,7 @@ Envilder.load("production", {
 
 | Aspect | Decision |
 | ------ | -------- |
-| Missing secrets | Return null/None/nil (Option<T> in Rust) — never throw |
+| Missing secrets | Return null/None/nil (Option<T> in Rust) or omit from result collection — never throw |
 | Validation | Opt-in `validateSecrets()` post-resolution |
 | Cross-provider validation | profile + Azure → error; vaultUrl + AWS → error |
 | Options override config | Runtime `EnvilderOptions` > `$config` from map file |

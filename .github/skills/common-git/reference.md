@@ -25,10 +25,10 @@ Subject: imperative mood, ≤50 chars, no period, capitalized.
 ## Branch Naming
 
 ```txt
-feature/add-group-coupons
-fix/stripe-webhook-validation
-refactor/split-repositories
-docs/update-architecture-adr
+macalbert/feat/add-group-coupons
+macalbert/fix/stripe-webhook-validation
+macalbert/refactor/split-repositories
+macalbert/docs/update-architecture-adr
 ```
 
 ## PR Workflow

@@ -35,11 +35,12 @@ CI must pass before a PR can be merged:
 
 - All tests (unit + acceptance where applicable)
 - Lint + format check
-- Commitlint validation
+- Commitlint validation (enforced locally via lefthook `commit-msg` hook)
 
-### 4. Releases from Main via Tags
+### 4. Releases from Main via Version Bumps
 
-Releases are triggered by creating a Git tag on `main` following the pattern
+Releases are triggered by version-bump detection on push to `main`. The CI
+workflow publishes the artifact and then creates a Git tag following the pattern
 `{component}/v{semver}` (e.g., `sdk-dotnet/v1.2.0`, `cli/v3.1.0`). No release
 branches needed.
 
