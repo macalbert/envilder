@@ -1,152 +1,212 @@
-# Testing Stack: TypeScript (Frontend & IaC)
+# Testing Stack: TypeScript
 
-Libraries and tools for testing Next.js frontend and AWS CDK infrastructure code.
+TypeScript is used across multiple stacks in this project. Each has its own test
+runner and conventions.
 
-## Libraries
+## Stacks Overview
 
-| Category | Library | Purpose |
-| -------- | ------- | ------- |
-| **Framework** | Jest | Test runner and assertions |
-| **Component testing** | @testing-library/react | React component testing |
-| **DOM testing** | @testing-library/dom | DOM queries and utilities |
-| **DOM matchers** | @testing-library/jest-dom | Custom DOM matchers (`toBeInTheDocument`) |
-| **E2E** | Playwright | End-to-end browser tests |
-| **Linter** | Biome | Linter and formatter (replaces ESLint + Prettier) |
+| Stack | Test Runner | Location |
+| ----- | ----------- | -------- |
+| **CLI / Core** | Vitest | `tests/envilder/` |
+| **Node.js SDK** | Vitest | `tests/sdks/nodejs/` |
+| **Website** | Vitest | `tests/website/` |
+| **CDK (IaC)** | Jest | `tests/iac/` |
+| **E2E** | Vitest + TestContainers | `e2e/` |
 
-## Test Types
+## CLI / Core / Node.js SDK (Vitest)
 
-| Type | Tools | Context |
-| ---- | ----- | ------- |
-| Unit (frontend) | Jest + @testing-library/react | Components, hooks, stores |
-| Unit (IaC) | Jest (snapshot) | CDK stack assertions |
-| E2E | Playwright | Full Docker Compose stack |
-
-## Jest Assertions
+### Assertions
 
 ```typescript
 expect(actual).toBe(expected);
 expect(actual).toEqual(expected);
 expect(actual).toBeTruthy();
-expect(mockFn).toHaveBeenCalledWith("arg1", "arg2");
+expect(mockFn).toHaveBeenCalledWith('arg1', 'arg2');
 expect(mockFn).toHaveBeenCalledTimes(1);
 expect(() => action()).toThrow(Error);
-await expect(asyncAction()).rejects.toThrow("message");
+await expect(asyncAction()).rejects.toThrow('message');
 ```
 
-## @testing-library/react
+### Mocking
 
 ```typescript
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 
-// Query by role (preferred)
-const button = screen.getByRole("button", { name: /submit/i });
-const input = screen.getByRole("textbox", { name: /email/i });
-const checkbox = screen.getByRole("checkbox", { name: /remember/i });
-
-// Query by text
-const heading = screen.getByText(/welcome/i);
-
-// Interactions
-fireEvent.click(button);
-
-// Async state updates (Chakra UI / zag-js)
-await act(async () => {
-    fireEvent.click(checkbox);
-});
-
-// Wait for async results
-await waitFor(() => {
-    expect(screen.getByText("Success")).toBeInTheDocument();
-});
-```
-
-## Jest Mocks
-
-```typescript
 // Module mock
-jest.mock("@/hooks/use-auth.hook", () => ({
-    useAuth: jest.fn(),
+vi.mock('../path/to/module', () => ({
+  someFunction: vi.fn(),
 }));
 
+// Inline mock object (port test double)
+const mockProvider: ISecretProvider = {
+  getSecret: vi.fn(),
+};
+
 // Mock return value
-const mockLogin = jest.fn();
-(useAuth as jest.Mock).mockReturnValue({
-    login: mockLogin,
-    isAuthenticated: false,
-});
+vi.mocked(mockProvider.getSecret).mockResolvedValue('secret-value');
 
 // Verify
-expect(mockLogin).toHaveBeenCalledWith("Google", true);
-expect(mockLogin).toHaveBeenCalledTimes(1);
+expect(mockProvider.getSecret).toHaveBeenCalledWith('/ssm/path');
+expect(mockProvider.getSecret).toHaveBeenCalledTimes(1);
 ```
 
-## Playwright (E2E)
+### Test Structure (CLI/Core)
 
 ```typescript
-import { test, expect } from "@playwright/test";
+describe('PullSecretsToEnvCommandHandler', () => {
+  let sut: PullSecretsToEnvCommandHandler;
+  let mockStore: { getMapping: Mock; saveEnvironment: Mock };
+  let mockProvider: { getSecret: Mock };
 
-test("Should_RedirectToItems_When_LoginCompletes", async ({ page }) => {
+  beforeEach(() => {
+    mockStore = { getMapping: vi.fn(), saveEnvironment: vi.fn() };
+    mockProvider = { getSecret: vi.fn() };
+    sut = new PullSecretsToEnvCommandHandler(mockProvider, mockStore, mockLogger);
+  });
+
+  it('Should_GenerateEnvFile_When_ValidParametersProvided', async () => {
     // Arrange
-    await page.goto("http://localhost");
-    await page.waitForLoadState("networkidle");
+    mockStore.getMapping.mockResolvedValue({ KEY: '/ssm/path' });
+    mockProvider.getSecret.mockResolvedValue('value');
 
     // Act
-    const button = page.getByRole("button", { name: /continuar con google/i });
-    await button.click();
+    await sut.handle(command);
 
     // Assert
-    await expect(page).toHaveURL(/\/items/);
+    expect(mockStore.saveEnvironment).toHaveBeenCalled();
+  });
 });
 ```
 
-## IaC Snapshot Testing (CDK)
+### Test Structure (Node.js SDK)
 
 ```typescript
-describe("AppStack", () => {
-    it("Should_MatchSnapshot_When_StackSynthesized", () => {
-        // Arrange
-        const app = new cdk.App();
-        const stack = new AppStack(app, "TestStack");
+describe('EnvilderClient', () => {
+  it('Should_ResolveSecrets_When_ProviderReturnsValues', async () => {
+    // Arrange
+    const mockProvider: ISecretProvider = {
+      getSecrets: vi.fn().mockResolvedValue(new Map([['KEY', 'value']])),
+    };
+    const sut = new EnvilderClient(mockProvider);
 
-        // Act
-        const actual = Template.fromStack(stack);
+    // Act
+    const actual = await sut.resolveSecrets(parsedMapFile);
 
-        // Assert
-        expect(actual.toJSON()).toMatchSnapshot();
-    });
+    // Assert
+    expect(actual.get('KEY')).toBe('value');
+  });
+});
+```
+
+## CDK / IaC (Jest)
+
+### Snapshot Testing
+
+```typescript
+describe('AppStack', () => {
+  it('Should_MatchSnapshot_When_StackSynthesized', () => {
+    // Arrange
+    const app = new cdk.App();
+    const stack = new AppStack(app, 'TestStack');
+
+    // Act
+    const actual = Template.fromStack(stack);
+
+    // Assert
+    expect(actual.toJSON()).toMatchSnapshot();
+  });
+});
+```
+
+### Fine-Grained Assertions
+
+```typescript
+it('Should_CreateLambda_When_StackSynthesized', () => {
+  // Arrange
+  const app = new cdk.App();
+  const stack = new AppStack(app, 'TestStack');
+
+  // Act
+  const actual = Template.fromStack(stack);
+
+  // Assert
+  actual.hasResourceProperties('AWS::Lambda::Function', {
+    Runtime: 'nodejs20.x',
+    Handler: 'index.handler',
+  });
+});
+```
+
+## Website (Vitest)
+
+```typescript
+import { describe, it, expect } from 'vitest';
+
+describe('i18n completeness', () => {
+  it('Should_HaveAllKeys_When_ComparedToEnglish', () => {
+    // Arrange
+    const enKeys = Object.keys(en);
+    const esKeys = Object.keys(es);
+
+    // Act
+    const missing = enKeys.filter((k) => !esKeys.includes(k));
+
+    // Assert
+    expect(missing).toEqual([]);
+  });
+});
+```
+
+## E2E (Vitest + TestContainers)
+
+```typescript
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+
+describe('CLI E2E', () => {
+  let container: StartedLocalStackContainer;
+
+  beforeAll(async () => {
+    container = await new LocalstackContainer().start();
+  });
+
+  afterAll(async () => {
+    await container.stop();
+  });
+
+  it('Should_PullSecrets_When_MapFileProvided', async () => {
+    // Arrange
+    await seedParameter(container, '/app/key', 'secret-value');
+
+    // Act
+    const result = execSync(`envilder --map=map.json --envfile=.env`);
+
+    // Assert
+    expect(readEnvFile('.env')).toContain('KEY=secret-value');
+  });
 });
 ```
 
 ## Biome (Linter + Formatter)
 
 ```bash
-# Lint
-pnpx biome lint ./src
+# Check (no writes)
+pnpm lint
 
-# Format
-pnpx biome format ./src
-
-# Format and write
-pnpx biome format --write ./src
+# Format and fix (writes)
+pnpm format
 ```
 
-Configuration in `biome.json` at project root. Enforces:
+Root `biome.json` enforces:
 
-- 4 spaces indent, double quotes, semicolons, trailing commas
-- `noExplicitAny: "error"` — **`any` is FORBIDDEN**
-- a11y rules enabled
+- Single quotes, semicolons, 2-space indent, 80-char line width
+- Trailing commas enforced
+- `unsafeParameterDecoratorsEnabled: true` for InversifyJS decorators
 
 ## TypeScript Strict Rules
 
-- **`any` is FORBIDDEN** — Biome enforces `noExplicitAny: "error"`. Always use
-  proper types. For mock component props in `jest.mock`, define explicit prop
-  interfaces or use the library's exported types.
-- `unknown` is NOT the default replacement for `any` — it is only acceptable when
-  the type genuinely cannot be known (e.g., an untyped third-party library with no
-  `@types` package). In all other cases, use the correct concrete type.
 - Use `import type` for type-only imports.
 - TypeScript strict mode is enabled — respect all strict checks.
-- Always run `pnpx biome check --write .` after modifying TypeScript files.
+- Always run `pnpm format` after modifying TypeScript files.
 
 ## Test Cleanup — No `try/catch/finally` in Tests
 
