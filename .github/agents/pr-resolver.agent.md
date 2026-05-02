@@ -209,7 +209,10 @@ After processing all comments, output a summary in the chat:
   change, commit, or GitHub reply. This rule has no exceptions.
 - **Always respond and write PR comments in English**, regardless of user's
   language.
-- **Every comment gets a GitHub reply** — addressed, skipped, or answered.
+- **EVERY comment gets a GitHub reply — NO EXCEPTIONS.** Whether you fix it,
+  skip it, or answer it, you MUST post a reply in the review thread on GitHub.
+  A comment without a GitHub reply is a bug in your workflow. Never consider a
+  comment "done" until the reply is posted and the thread is resolved.
 - **All replies use Markdown formatting** — no plain text.
 - **Commit each fix individually** before replying to the comment.
 - Do not make unrelated refactors while resolving comments.
