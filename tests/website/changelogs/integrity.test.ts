@@ -17,7 +17,7 @@ const changelogs = [
 ] as const;
 
 describe('Changelog integrity', () => {
-  describe.each(changelogs)('$name ($file)', ({ name, file }) => {
+  describe.each(changelogs)('$name ($file)', ({ file }) => {
     const md = readFileSync(resolve(changelogDir, file), 'utf-8');
     const versions = extractVersions(md);
 
