@@ -7,6 +7,7 @@
       "!!**/lib",
       "!!**/dist",
       "!!**/coverage",
+      "!!**/.claude",
       "!!**/.lock",
       "!!**/*.lock",
       "!!**/*-lock.*",
@@ -39,7 +40,9 @@
   },
   "overrides": [
     {
-      "includes": ["**/*.astro"],
+      "includes": [
+        "**/*.astro"
+      ],
       "linter": {
         "rules": {
           "correctness": {
