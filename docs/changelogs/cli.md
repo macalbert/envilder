@@ -1,6 +1,6 @@
-# CLI + GitHub Action Changelog
+# CLI Changelog
 
-Changes specific to the CLI (`envilder` npm package) and the GitHub Action.
+Changes specific to the CLI (`envilder` npm package).
 For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.md`.
 
 ---
