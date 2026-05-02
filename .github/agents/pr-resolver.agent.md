@@ -209,7 +209,10 @@ After processing all comments, output a summary in the chat:
   change, commit, or GitHub reply. This rule has no exceptions.
 - **Always respond and write PR comments in English**, regardless of user's
   language.
-- **Every comment gets a GitHub reply** — addressed, skipped, or answered.
+- **EVERY comment gets a GitHub reply — NO EXCEPTIONS.** Whether you fix it,
+  skip it, or answer it, you MUST post a reply in the review thread on GitHub.
+  A comment without a GitHub reply is a bug in your workflow. Never consider a
+  comment "done" until the reply is posted and the thread is resolved.
 - **All replies use Markdown formatting** — no plain text.
 - **Commit each fix individually** before replying to the comment.
 - Do not make unrelated refactors while resolving comments.
@@ -241,3 +244,16 @@ gh api ... -X PATCH -f body="**Resolved.** Updated references from \`v0.7.11\` t
 
 After all comments resolved and validated: verify with `pnpm lint` and
 `pnpm test`, then `git push`.
+
+## Lessons Learned
+
+### Duplicate replies on grouped threads
+
+When multiple review threads point to the same file/area (e.g., 4 threads on
+`DemoVideo.astro`), reply with the full resolution to the **first** thread only.
+For the remaining threads, reply with:
+
+> Same fix — see reply above. **Commit:** [`<hash>`](<url>)
+
+Then resolve all threads. This avoids duplicate walls of text in the PR
+conversation view.

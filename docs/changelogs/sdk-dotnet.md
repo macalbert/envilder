@@ -71,7 +71,7 @@
 * `IConfiguration` extensions — Load secrets directly into .NET configuration
 * `IServiceCollection` extensions — Register Envilder in the DI container
 * `EnvilderOptions` — Runtime overrides for provider, vault URL, and AWS profile
-* Supports .NET 8.0 and .NET 9.0
+* Targets .NET Standard 2.0 (compatible with .NET 6+, .NET Framework 4.6.1+)
 * Published to NuGet as `Envilder`
 
 ### Testing

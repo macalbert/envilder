@@ -282,6 +282,10 @@ const parsedById = Object.fromEntries(parsed.map((p) => [p.id, p]));
     gap: var(--space-2xl);
   }
 
+  .changelog-main {
+    min-width: 0;
+  }
+
   @media (min-width: 900px) {
     .changelog-layout {
       grid-template-columns: 220px 1fr;
@@ -598,6 +602,7 @@ const parsedById = Object.fromEntries(parsed.map((p) => [p.id, p]));
     background: var(--color-surface);
     padding: 0.15em 0.4em;
     border: 1px solid var(--color-border);
+    overflow-wrap: anywhere;
   }
 
   .changelog-content :global(a) {

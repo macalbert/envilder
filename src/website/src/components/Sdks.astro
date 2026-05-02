@@ -283,6 +283,7 @@ const override = await Envilder.fromMapFile('param-map.json')
   .sdk-panel {
     display: none;
     padding: var(--space-lg);
+    overflow-x: hidden;
   }
 
   .sdk-panel.active {
@@ -361,6 +362,11 @@ const override = await Envilder.fromMapFile('param-map.json')
     .sdk-panel-content {
       grid-template-columns: 1fr 2fr;
     }
+  }
+
+  .sdk-panel-install,
+  .sdk-panel-code {
+    min-width: 0;
   }
 
   .sdk-panel-install h4,

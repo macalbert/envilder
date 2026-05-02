@@ -1,3 +1,17 @@
+## [0.9.3] - 2026-04-17
+
+### Changed
+
+* Bundle updated with latest CLI core (runtime SDKs announcement, dependency bumps)
+
+### Fixed
+
+* **ci(publish-npm):** Narrowed `paths` filter from `src/**` to
+  `src/envilder/**` so SDK/website/IaC changes no longer trigger the
+  npm publish workflow
+
+---
+
 ## [0.9.2] - 2026-04-02
 
 ### Changed

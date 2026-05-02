@@ -1,6 +1,6 @@
 ---
 name: common-testing-conventions
-description: Mandatory testing conventions including AAA pattern, test naming, and assertions across all stacks (.NET, Frontend, Python). Use when writing unit tests, integration tests, E2E tests, or verifying mock interactions.
+description: Mandatory testing conventions including AAA pattern, test naming, and assertions across all stacks (.NET, TypeScript, Python). Use when writing unit tests, integration tests, E2E tests, or verifying mock interactions.
 user-invocable: false
 ---
 
@@ -33,7 +33,7 @@ Exception: `// Arrange`, `// Act`, `// Assert` comments are REQUIRED in tests.
 | File | Description |
 | ---- | ----------- |
 | [dotnet.md](./dotnet.md) | .NET testing stack (xUnit, AwesomeAssertions, NSubstitute, Bogus, Verify.Xunit, WireMock, Testcontainers) |
-| [typescript.md](./typescript.md) | TypeScript testing stack — Frontend & IaC (Jest, @testing-library, Playwright, Biome) |
+| [typescript.md](./typescript.md) | TypeScript testing stack — CLI, SDK, CDK, Website (Vitest, Jest/CDK, Playwright, Biome) |
 | [python.md](./python.md) | Python testing stack (pytest, Mock/AsyncMock, pytest-snapshot, black, mypy, Pydantic) |
 | [examples.md](./examples.md) | Full test examples for C# and TypeScript |
 | [reference.md](./reference.md) | Naming rules, anti-patterns, checklist |
@@ -66,8 +66,15 @@ public async Task Should_CreateGroup_When_RequestIsValid()
 
 - **Each comment (`// Arrange`, `// Act`, `// Assert`) appears AT MOST ONCE per test** — if you need two actions,
   write two tests
+- **Act = one single invocation on the SUT.** Multiple statements in Act only if they are genuinely
+  part of the same logical action (rare and exceptional). Two independent operations = two tests.
+- **AAA markers are mandatory in ALL tests** — including structural guards,
+  static completeness checks, and data validation tests. No exceptions.
 - Each section clearly separated by comments
 - Never mix phases
+- **All assertions belong in Assert only.** No `expect()`, `.Should()`, `assert`, or any verification
+  statement in Arrange or Act. If you feel tempted to assert in Arrange (precondition check), extract
+  it to a separate test or use a guard clause that throws — not an assertion.
 - **No `if`, `switch`, or conditional logic** inside Arrange, Act, or Assert blocks
 - **No `try/catch/finally`** inside tests — use framework teardown (`IAsyncLifetime`, `[ClassCleanup]`, pytest `yield` fixtures)
 - **No `// Act & Assert` combined blocks** — Act and Assert are ALWAYS separate phases
@@ -133,13 +140,21 @@ See the dedicated supporting file for each stack:
 - **.NET Backend:** [dotnet.md](./dotnet.md) — xUnit, AwesomeAssertions, NSubstitute,
   AutoFixture, Bogus, Verify.Xunit, WireMock.Net, Testcontainers (PostgreSQL,
   LocalStack)
-- **Frontend & IaC (TypeScript):** [frontend.md](./frontend.md) — Jest,
-  @testing-library/react, Playwright, Biome
+- **TypeScript (CLI, SDK, CDK, Website):** [typescript.md](./typescript.md) — Vitest
+  (CLI/SDK/Website), Jest (CDK), Playwright, Biome
 - **Python:** [python.md](./python.md) — pytest, pytest-asyncio, pytest-snapshot,
   unittest.mock, black, mypy, Pydantic
 
 ## Related Skills
 
-- **dotnet-test-doubles:** Bogus, AutoFixture, NSubstitute, WireMock patterns
-- **dotnet-integration-testing:** Testcontainers, LocalStack, WebApplicationFactory
-- **python-testing:** Python-specific AAA pattern, pytest configuration
+| Stack | Conventions | Test Doubles |
+| ----- | ----------- | ------------ |
+| .NET | **dotnet-testing** | **dotnet-test-doubles** |
+| TypeScript | **typescript-testing** | **typescript-test-doubles** |
+| Python | **python-testing** | **python-test-doubles** |
+
+Cross-stack:
+
+- **sdk-acceptance-testing:** TestContainers, LocalStack, Lowkey Vault (all SDKs)
+- **typescript-cdk-testing:** CDK snapshot + fine-grained assertions (Jest)
+- **core-testing:** Envilder CLI/Core specific testing procedure (Vitest)

@@ -1,3 +1,9 @@
+## [0.1.1] - 2026-05-02
+
+### Documentation
+
+* Add Node.js SDK references to root README, website, and installation guide
+
 ## [0.1.0] - 2026-04-25
 
 ### Added

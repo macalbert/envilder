@@ -225,6 +225,137 @@ it("Should_CallHandleChange_When_MaxInputChanges", async () => {
 });
 ```
 
+### ✗ Multiple Independent Actions in Act
+
+```typescript
+// BAD - Two independent operations in Act
+it('Should_HaveIdenticalKeys_When_ComparedToEnglish', () => {
+    // Arrange — keys computed above
+
+    // Act
+    const missing = enKeys.filter((k) => !caKeys.includes(k));
+    const extra = caKeys.filter((k) => !enKeys.includes(k));  // ← second independent action
+
+    // Assert
+    expect(missing).toEqual([]);
+    expect(extra).toEqual([]);
+});
+
+// GOOD - Split into two tests (one action each)
+it('Should_HaveNoMissingKeys_When_CatalanComparedToEnglish', () => {
+    // Arrange — keys computed above
+
+    // Act
+    const missing = enKeys.filter((k) => !caKeys.includes(k));
+
+    // Assert
+    expect(missing).toEqual([]);
+});
+
+it('Should_HaveNoExtraKeys_When_CatalanComparedToEnglish', () => {
+    // Arrange — keys computed above
+
+    // Act
+    const extra = caKeys.filter((k) => !enKeys.includes(k));
+
+    // Assert
+    expect(extra).toEqual([]);
+});
+```
+
+### ✗ AAA Ceremony Without a SUT
+
+```typescript
+// BAD - No production code exercised, AAA markers are meaningless
+it('Should_HaveIdenticalKeys_When_ComparedToEnglish', () => {
+    // Arrange — enKeys and caKeys computed in describe scope
+
+    // Act — comparison done in arrange   ← admits there is no Act
+
+    // Assert
+    expect(missingInCa).toEqual([]);
+});
+
+// GOOD - Structural guard: one check per test, with AAA markers
+it('Should_HaveNoMissingKeys_When_CatalanComparedToEnglish', () => {
+    // Act
+    const missingInCa = enKeys.filter((k) => !caKeys.includes(k));
+
+    // Assert
+    expect(missingInCa, 'Keys missing in ca.ts').toEqual([]);
+});
+
+it('Should_HaveNoExtraKeys_When_CatalanComparedToEnglish', () => {
+    // Act
+    const extraInCa = caKeys.filter((k) => !enKeys.includes(k));
+
+    // Assert
+    expect(extraInCa, 'Extra keys in ca.ts not in en.ts').toEqual([]);
+});
+```
+
+### ✗ Assertions Outside Assert Block
+
+```csharp
+// BAD - Assertion in Arrange as "precondition check"
+[Fact]
+public async Task Should_UpdateOrder_When_OrderExists()
+{
+    // Arrange
+    var order = await _repository.GetById(orderId);
+    order.Should().NotBeNull();  // ← VIOLATION: assertion in Arrange
+
+    // Act
+    var actual = await _sut.Handle(new UpdateCommand(order.Id), CancellationToken.None);
+
+    // Assert
+    actual.Status.Should().Be(Status.Updated);
+}
+
+// GOOD - Trust Arrange setup or write a separate test for existence
+[Fact]
+public async Task Should_UpdateOrder_When_OrderExists()
+{
+    // Arrange
+    var order = OrderMother.Create();
+    _repository.GetById(order.Id).Returns(order);
+
+    // Act
+    var actual = await _sut.Handle(new UpdateCommand(order.Id), CancellationToken.None);
+
+    // Assert
+    actual.Status.Should().Be(Status.Updated);
+}
+```
+
+```typescript
+// BAD - expect() in Act block
+it('Should_TransformData_When_InputIsValid', () => {
+    // Arrange
+    const input = createInput();
+
+    // Act
+    const result = sut.transform(input);
+    expect(result).toBeDefined();  // ← VIOLATION: assertion in Act
+
+    // Assert
+    expect(result.value).toBe(42);
+});
+
+// GOOD - All expectations in Assert
+it('Should_TransformData_When_InputIsValid', () => {
+    // Arrange
+    const input = createInput();
+
+    // Act
+    const actual = sut.transform(input);
+
+    // Assert
+    expect(actual).toBeDefined();
+    expect(actual.value).toBe(42);
+});
+```
+
 ## Test Checklist
 
 1. ✓ AAA pattern with comments

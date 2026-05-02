@@ -20,15 +20,30 @@ const t = useTranslations(lang);
 
     <div class="demo-wrapper">
       <div class="demo-frame">
-        <img
-          src="https://github.com/user-attachments/assets/9f194143-117d-49f3-a6fb-f400040ea514"
-          alt={t.demo.cliDemo}
-          loading="lazy"
+        <video
+          src="/Envilder-demo.mp4"
+          autoplay
+          muted
+          loop
+          playsinline
+          controls
+          preload="metadata"
+          aria-label={t.demo.cliDemo}
         />
       </div>
     </div>
   </div>
 </section>
+
+<script>
+  const video = document.querySelector<HTMLVideoElement>(
+    '#demo .demo-frame video',
+  );
+  if (video && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    video.removeAttribute('autoplay');
+    video.pause();
+  }
+</script>
 
 <style>
   .demo-wrapper {
@@ -44,7 +59,7 @@ const t = useTranslations(lang);
     aspect-ratio: 16 / 10;
   }
 
-  .demo-frame img {
+  .demo-frame video {
     display: block;
     width: 100%;
     height: 100%;

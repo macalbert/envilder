@@ -62,7 +62,7 @@ No SaaS middleman. No vendor lock-in. Secrets stay in your cloud.
 |---------|-------------|
 | 📋 **Declarative Mapping** | One JSON file defines all secrets. Git-versioned, PR-reviewable, diff-able |
 | ☁️ **Multi-Provider** | AWS SSM + Azure Key Vault. No vendor lock-in |
-| 🔌 **Runtime SDKs** | Load secrets into memory at app startup: [.NET](./src/sdks/dotnet/README.md), [Python](./src/sdks/python/README.md). No `.env` on disk |
+| 🔌 **Runtime SDKs** | Load secrets into memory at app startup: [.NET](./src/sdks/dotnet/README.md), [Python](./src/sdks/python/README.md), [Node.js](./src/sdks/nodejs/README.md). No `.env` on disk |
 | ⚙️ **GitHub Action** | Pull secrets in CI/CD. Same mapping, zero manual config |
 | 🔄 **Bidirectional Sync** | Pull secrets to `.env` or push values back to the cloud |
 | 🧱 **Zero Infrastructure** | No servers, no proxies, no SaaS. Uses cloud services you already have |
@@ -306,6 +306,36 @@ Envilder.load('production', {
 
 📖 **[Full Python SDK docs](./src/sdks/python/README.md)**
 
+### Node.js SDK
+
+Install via npm:
+
+```bash
+npm install @envilder/sdk
+```
+
+Load secrets into your application with a single line:
+
+```typescript
+import { Envilder } from '@envilder/sdk';
+
+// Resolve + inject into process.env
+const secrets = await Envilder.load('secrets-map.json');
+```
+
+Or use the fluent builder for full control:
+
+```typescript
+import { Envilder, SecretProviderType } from '@envilder/sdk';
+
+const secrets = await Envilder.fromMapFile('secrets-map.json')
+  .withProvider(SecretProviderType.Aws)
+  .withProfile('prod-account')
+  .resolve();
+```
+
+📖 **[Full Node.js SDK docs](./src/sdks/nodejs/README.md)**
+
 ---
 
 ## 🛠️ How it works
@@ -340,7 +370,7 @@ No SaaS backend. No extra servers.
 | **Source of truth** | Your cloud (SSM / Key Vault) | Encrypted `.env` in git | Infisical backend |
 | **Declarative mapping** | ✅ JSON file | ❌ | ❌ |
 | **Multi-cloud** | ✅ AWS + Azure | ❌ | ✅ |
-| **Runtime SDKs** | ✅ .NET, Python | ✅ Node.js | ✅ 6+ languages |
+| **Runtime SDKs** | ✅ .NET, Python, Node.js | ✅ Node.js | ✅ 6+ languages |
 | **Requires SaaS** | ❌ | ❌ | Optional |
 | **Infrastructure** | None | None | Server required |
 
@@ -358,15 +388,15 @@ see [envilder.com](https://envilder.com).
 ## 🏁 What's Next
 
 Envilder already covers the full dev-to-production lifecycle with CLI, GitHub Action,
-and runtime SDKs for .NET and Python. Here's what's coming:
+and runtime SDKs for .NET, Python, and Node.js. Here's what's coming:
 
 | Status | Feature |
 |--------|---------|
 | ✅ | Pull & Push: bidirectional sync between `.env` and cloud vault |
 | ✅ | Multi-provider: AWS SSM + Azure Key Vault |
 | ✅ | GitHub Action for CI/CD |
-| ✅ | .NET SDK and Python SDK |
-| 🚧 | TypeScript, Go, and Java SDKs |
+| ✅ | .NET, Python, and Node.js SDKs |
+| 🚧 | Go and Java SDKs |
 | 🚧 | GCP Secret Manager |
 | 🚧 | Exec mode (inject secrets without writing to disk) |
 

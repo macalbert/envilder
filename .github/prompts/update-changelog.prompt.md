@@ -1,11 +1,11 @@
 ---
 name: "Update Changelog"
-description: "Add new entries to docs/CHANGELOG.md following the project's Keep a Changelog format and Conventional Commits mapping."
+description: "Add new entries to docs/changelogs/cli.md following the project's Keep a Changelog format and Conventional Commits mapping."
 argument-hint: "version number and change summary, or 'from staged'"
 agent: "agent"
 ---
 
-Update `docs/CHANGELOG.md` with new release entries.
+Update `docs/changelogs/cli.md` with new release entries.
 
 ## Inputs
 
@@ -59,7 +59,7 @@ Use only these H3 categories (omit empty ones):
 
 ## Workflow
 
-1. Read `docs/CHANGELOG.md` to understand the current top entry.
+1. Read `docs/changelogs/cli.md` to understand the current top entry.
 2. If `from staged`, run `git diff --cached` and categorize changes.
 3. Build the new version section following the format above.
 4. Insert the new section **at the top** of the file, before existing entries.

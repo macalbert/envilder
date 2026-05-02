@@ -4,9 +4,9 @@ import type { Translations } from './types';
 export const en: Translations = {
   homeMeta: {
     title:
-      'Envilder — One model to resolve secrets across every environment and runtime.',
+      'Envilder: one model to resolve secrets across every environment and runtime.',
     description:
-      'A model-driven configuration resolution system. Define secret mappings once and resolve them consistently — CLI, CI/CD, or application runtime. Powered by AWS SSM, Azure Key Vault, and GCP Secret Manager.',
+      'A model-driven configuration resolution system. Define secret mappings once and resolve them consistently: CLI, CI/CD, or application runtime. Powered by AWS SSM, Azure Key Vault, and GCP Secret Manager.',
   },
   nav: {
     features: 'Features',
@@ -44,7 +44,7 @@ export const en: Translations = {
     descOr: 'or',
     descComma: ',',
     descSuffix:
-      '— locally with the CLI, in CI/CD with the GitHub Action, or at app startup with runtime SDKs.',
+      ': locally with the CLI, in CI/CD with the GitHub Action, or at app startup with runtime SDKs.',
     getStarted: '▶ Get Started',
     viewOnGithub: '★ View on GitHub',
     terminalComment1: '# 1. One mapping model for every environment',
@@ -127,7 +127,7 @@ export const en: Translations = {
       {
         title: 'Load at runtime with SDKs',
         description:
-          'Skip the .env file entirely. Load secrets directly into your application at startup with native SDKs — Python, .NET, TypeScript, and more.',
+          'Skip the .env file entirely. Load secrets directly into your application at startup with native SDKs: Python, .NET, Node.js, and more.',
       },
       {
         title: 'Push from dev to the vault',
@@ -137,7 +137,7 @@ export const en: Translations = {
       {
         title: 'Secrets stay in your vault',
         description:
-          'No intermediaries. Your cloud manages the storage, rotation, and access control. Envilder resolves — it never stores.',
+          'No intermediaries. Your cloud manages the storage, rotation, and access control. Envilder resolves. It never stores.',
       },
     ],
     terminalFetched1: '✔ Fetched DB_PASSWORD  → ···word',
@@ -146,7 +146,7 @@ export const en: Translations = {
     terminalWritten: '✔ Environment file written to .env',
     sdkTabPython: 'Python',
     sdkTabDotnet: '.NET',
-    sdkTabTypescript: 'TypeScript',
+    sdkTabNodejs: 'Node.js',
     pushTerminalPushed1: '✔ Pushed DB_PASSWORD  → /my-app/prod/db-password',
     pushTerminalPushed2: '✔ Pushed API_KEY      → /my-app/prod/api-key',
     pushTerminalPushed3: '✔ Pushed SECRET_TOKEN → /my-app/prod/secret-token',
@@ -167,7 +167,7 @@ export const en: Translations = {
         icon: '🔌',
         title: 'Runtime SDKs',
         description:
-          'Load secrets directly into memory at app startup — Python, .NET, TypeScript, Go, Java. No .env files written to disk. No secrets left behind.',
+          'Load secrets directly into memory at app startup: Python, .NET, Node.js, Go, Java. No .env files written to disk. No secrets left behind.',
       },
       {
         icon: '☁️',
@@ -218,7 +218,7 @@ export const en: Translations = {
     titleAccent: 'action',
     subtitle:
       'Watch how Envilder simplifies secret management in under 2 minutes.',
-    cliDemo: 'CLI Demo — Pull Secrets',
+    cliDemo: 'CLI Demo: Pull Secrets',
     ghaWorkflow: 'GitHub Action Workflow',
     comingSoon: 'Coming soon',
   },
@@ -279,7 +279,7 @@ export const en: Translations = {
   sdks: {
     title: 'Runtime SDKs',
     subtitle:
-      'Load secrets directly into your application at startup. No .env files, no intermediaries — just your cloud vault and your code.',
+      'Load secrets directly into your application at startup. No .env files, no intermediaries. Just your cloud vault and your code.',
     pythonTitle: 'Python',
     pythonDesc:
       'Load secrets with one line. Supports AWS SSM and Azure Key Vault.',
@@ -316,15 +316,15 @@ export const en: Translations = {
     highlights: [
       {
         icon: '✨',
-        text: 'Documentation website launched at envilder.com — full guides, changelog, and multi-language docs',
+        text: 'Documentation website launched at envilder.com: full guides, changelog, and multi-language docs',
       },
       {
         icon: '✨',
-        text: 'Fixed: @types/node moved to devDependencies — no runtime bloat in installs',
+        text: 'Fixed: @types/node moved to devDependencies. No runtime bloat in installs',
       },
       {
         icon: '✨',
-        text: 'Fixed: e2e test flakiness — unique SSM paths per test run prevent race conditions',
+        text: 'Fixed: e2e test flakiness. Unique SSM paths per test run prevent race conditions',
       },
     ],
     fullChangelog: '📋 Full Changelog',
@@ -386,7 +386,7 @@ export const en: Translations = {
         label: '✅',
         title: 'Node.js SDK (@envilder/sdk)',
         description:
-          'Native runtime library — load secrets directly into process.env from a map-file. Published to npm',
+          'Native runtime library: load secrets directly into process.env from a map-file. Published to npm',
       },
       {
         status: 'next',
@@ -413,7 +413,7 @@ export const en: Translations = {
         status: 'planned',
         label: '☁️',
         title: 'GCP Secret Manager',
-        description: 'Third cloud provider — completes the multi-cloud trident',
+        description: 'Third cloud provider. Completes the multi-cloud trident',
       },
       {
         status: 'planned',
@@ -427,7 +427,7 @@ export const en: Translations = {
         label: '✔️',
         title: 'Check/sync mode (--check)',
         description:
-          'Validate cloud secrets vs local .env — fail CI if out-of-sync',
+          'Validate cloud secrets vs local .env. Fail CI if out-of-sync',
       },
     ],
   },
@@ -521,11 +521,11 @@ export const en: Translations = {
     sidebarAzureSetup: 'Azure setup',
     overviewTitle: 'What is Envilder?',
     overviewDesc:
-      'Envilder is a model-driven configuration resolution system. You define a JSON mapping between variable names and cloud secret paths, and Envilder resolves them consistently — via the CLI for local dev, the GitHub Action for CI/CD, or runtime SDKs for application startup. It works with AWS SSM Parameter Store and Azure Key Vault.',
+      'Envilder is a model-driven configuration resolution system. You define a JSON mapping between variable names and cloud secret paths, and Envilder resolves them consistently: via the CLI for local dev, the GitHub Action for CI/CD, or runtime SDKs for application startup. It works with AWS SSM Parameter Store and Azure Key Vault.',
     overviewProblem:
       'Without Envilder, teams fragment secret management across tools and stages. Local dev uses .env files, CI/CD reads from vault integrations, production has its own method. This leads to configuration drift, leaked credentials, and slow onboarding.',
     overviewSolution:
-      'With Envilder, one mapping model is the single source of truth. Secrets are resolved from your cloud vault on demand — same contract, same behavior, whether you run the CLI locally, the GitHub Action in CI, or an SDK at app startup.',
+      'With Envilder, one mapping model is the single source of truth. Secrets are resolved from your cloud vault on demand: same contract, same behavior, whether you run the CLI locally, the GitHub Action in CI, or an SDK at app startup.',
     reqTitle: 'Requirements',
     reqNode: 'Node.js v20+',
     reqAws: 'AWS CLI',
@@ -553,7 +553,7 @@ export const en: Translations = {
     permPush: 'Push',
     permPolicyExample: 'Example IAM policy:',
     permAzureTitle: 'Azure',
-    permAzureRbac: 'Recommended — assign Key Vault Secrets Officer via RBAC:',
+    permAzureRbac: 'Recommended: assign Key Vault Secrets Officer via RBAC:',
     permAzurePullNote:
       'For pull-only access, Key Vault Secrets User is sufficient.',
     mapTitle: 'Mapping file',
@@ -563,7 +563,7 @@ export const en: Translations = {
     mapCalloutKey: 'Each key becomes an env var name in your .env file.',
     mapCalloutValue:
       'Each value is the path where the secret lives in your cloud provider.',
-    mapBasicTitle: 'Basic format (AWS SSM — default)',
+    mapBasicTitle: 'Basic format (AWS SSM, default)',
     mapBasicDesc:
       'When no $config section is present, Envilder defaults to AWS SSM Parameter Store. Values must be valid SSM parameter paths (typically starting with /):',
     mapBasicGenerates: 'This generates:',
@@ -588,7 +588,7 @@ export const en: Translations = {
       'For Azure Key Vault, set provider to "azure" and provide the vaultUrl:',
     mapAzureWarningTitle: 'Azure naming convention:',
     mapAzureWarningDesc:
-      'Key Vault secret names only allow alphanumeric characters and hyphens. Envilder automatically normalizes names — slashes and underscores become hyphens (e.g., /myapp/db/password → myapp-db-password).',
+      'Key Vault secret names only allow alphanumeric characters and hyphens. Envilder automatically normalizes names: slashes and underscores become hyphens (e.g., /myapp/db/password → myapp-db-password).',
     mapDifferencesTitle: 'Key differences by provider',
     mapThEmpty: '',
     mapThAwsSsm: 'AWS SSM',
@@ -660,7 +660,7 @@ export const en: Translations = {
     pushSingleOptProfile: 'AWS CLI profile (AWS only)',
     ghaSetupTitle: 'GitHub Action setup',
     ghaSetupDesc:
-      'The Envilder GitHub Action pulls secrets from AWS SSM or Azure Key Vault into .env files during your CI/CD workflow. No build step needed — the action is pre-built and ready to use from GitHub Marketplace.',
+      'The Envilder GitHub Action pulls secrets from AWS SSM or Azure Key Vault into .env files during your CI/CD workflow. No build step needed. The action is pre-built and ready to use from GitHub Marketplace.',
     ghaPrerequisites: 'Prerequisites',
     ghaPrereqAws:
       'AWS: Configure credentials with aws-actions/configure-aws-credentials',
@@ -698,8 +698,8 @@ export const en: Translations = {
     azureSetupCheck: 'Check which access model your vault uses:',
     azureRbacTrue: 'true → Azure RBAC (recommended)',
     azureRbacFalse: 'false / null → Vault Access Policy (classic)',
-    azureOptionA: 'Option A — Azure RBAC (recommended)',
-    azureOptionB: 'Option B — Vault Access Policy',
+    azureOptionA: 'Option A: Azure RBAC (recommended)',
+    azureOptionB: 'Option B: Vault Access Policy',
     azureAccessNote:
       'For pull-only access, get list is enough. Add set for push.',
     // SDKs
@@ -711,7 +711,7 @@ export const en: Translations = {
     sdkDotnetDesc:
       'Load secrets directly into your .NET application at startup. One-liner facade, fluent builder, IConfiguration integration, or full programmatic control.',
     sdkDotnetInstall: 'Install',
-    sdkDotnetOneLiner: 'One-liner — resolve + inject',
+    sdkDotnetOneLiner: 'One-liner: resolve + inject',
     sdkDotnetOneLinerDesc:
       'Resolve secrets from the map file and inject into Environment in a single call:',
     sdkDotnetResolve: 'Resolve without injecting',
@@ -729,7 +729,7 @@ export const en: Translations = {
     sdkDotnetQuickStartConfig: 'Via IConfiguration (ASP.NET)',
     sdkDotnetQuickStartConfigDesc:
       'Add Envilder as a configuration source in your ASP.NET application:',
-    sdkDotnetQuickStartResolve: 'Advanced — full programmatic control',
+    sdkDotnetQuickStartResolve: 'Advanced: full programmatic control',
     sdkDotnetQuickStartResolveDesc:
       'Parse the map file, resolve secrets, and inject them into environment variables:',
     sdkDotnetFullDocs: 'Full documentation →',
@@ -737,7 +737,7 @@ export const en: Translations = {
     sdkPythonDesc:
       'Load secrets directly into your Python application at startup. One-liner setup or fine-grained control with the fluent builder.',
     sdkPythonInstall: 'Install',
-    sdkPythonQuickStart: 'Quick start — one-liner',
+    sdkPythonQuickStart: 'Quick start: one-liner',
     sdkPythonQuickStartDesc:
       'Load secrets from a map file and inject them into the environment:',
     sdkPythonEnvLoading: 'Environment-based loading',
@@ -757,7 +757,7 @@ export const en: Translations = {
     sdkNodejsDesc:
       'Load secrets directly into your Node.js application at startup. Async-first API with one-liner facade or fluent builder for full control.',
     sdkNodejsInstall: 'Install',
-    sdkNodejsQuickStart: 'Quick start — one-liner',
+    sdkNodejsQuickStart: 'Quick start: one-liner',
     sdkNodejsQuickStartDesc:
       'Load secrets from a map file and inject them into process.env:',
     sdkNodejsResolve: 'Resolve without injecting',

@@ -3,9 +3,9 @@ import type { Translations } from './types';
 
 export const ca: Translations = {
   homeMeta: {
-    title: 'Envilder — Un model per resoldre secrets a cada entorn i runtime.',
+    title: 'Envilder: un model per resoldre secrets a cada entorn i runtime.',
     description:
-      "Un sistema de resolució de configuració basat en un model. Defineix els mapeigs de secrets una vegada i resol-los de forma consistent — CLI, CI/CD o runtime d'aplicació. Basat en AWS SSM, Azure Key Vault i GCP Secret Manager.",
+      "Un sistema de resolució de configuració basat en un model. Defineix els mapeigs de secrets una vegada i resol-los de forma consistent: CLI, CI/CD o runtime d'aplicació. Basat en AWS SSM, Azure Key Vault i GCP Secret Manager.",
   },
   nav: {
     features: 'Funcionalitats',
@@ -43,7 +43,7 @@ export const ca: Translations = {
     descOr: 'o',
     descComma: ',',
     descSuffix:
-      "— localment amb la CLI, en CI/CD amb la GitHub Action o a l'inici de l'app amb SDKs de runtime.",
+      ": localment amb la CLI, en CI/CD amb la GitHub Action o a l'inici de l'app amb SDKs de runtime.",
     getStarted: '▶ Comença',
     viewOnGithub: '★ Veure a GitHub',
     terminalComment1: '# 1. Un model de mapeig per a cada entorn',
@@ -126,7 +126,7 @@ export const ca: Translations = {
       {
         title: 'Carrega en runtime amb SDKs',
         description:
-          "Salta't el fitxer .env completament. Carrega secrets directament a la teva aplicació a l'inici amb SDKs natius — Python, .NET, TypeScript i més.",
+          "Salta't el fitxer .env completament. Carrega secrets directament a la teva aplicació a l'inici amb SDKs natius: Python, .NET, Node.js i més.",
       },
       {
         title: 'Push des de dev al vault',
@@ -136,7 +136,7 @@ export const ca: Translations = {
       {
         title: 'Els secrets es queden al teu vault',
         description:
-          "Sense intermediaris. El teu núvol gestiona l'emmagatzematge, la rotació i el control d'accés. Envilder resol — mai emmagatzema.",
+          "Sense intermediaris. El teu núvol gestiona l'emmagatzematge, la rotació i el control d'accés. Envilder resol, mai emmagatzema.",
       },
     ],
     terminalFetched1: '✔ Obtingut DB_PASSWORD  → ···word',
@@ -145,7 +145,7 @@ export const ca: Translations = {
     terminalWritten: "✔ Fitxer d'entorn escrit a .env",
     sdkTabPython: 'Python',
     sdkTabDotnet: '.NET',
-    sdkTabTypescript: 'TypeScript',
+    sdkTabNodejs: 'Node.js',
     pushTerminalPushed1: '✔ Pujat DB_PASSWORD  → /my-app/prod/db-password',
     pushTerminalPushed2: '✔ Pujat API_KEY      → /my-app/prod/api-key',
     pushTerminalPushed3: '✔ Pujat SECRET_TOKEN → /my-app/prod/secret-token',
@@ -166,7 +166,7 @@ export const ca: Translations = {
         icon: '🔌',
         title: 'SDKs de runtime',
         description:
-          "Carrega secrets directament a memòria a l'inici de l'app — Python, .NET, TypeScript, Go, Java. Sense fitxers .env a disc. Sense secrets residuals.",
+          "Carrega secrets directament a memòria a l'inici de l'app: Python, .NET, Node.js, Go, Java. Sense fitxers .env a disc. Sense secrets residuals.",
       },
       {
         icon: '☁️',
@@ -217,7 +217,7 @@ export const ca: Translations = {
     titleAccent: 'acció',
     subtitle:
       'Mira com Envilder simplifica la gestió de secrets en menys de 2 minuts.',
-    cliDemo: 'Demo CLI — Obtenir Secrets',
+    cliDemo: 'Demo CLI: Obtenir Secrets',
     ghaWorkflow: 'Workflow de GitHub Action',
     comingSoon: 'Properament',
   },
@@ -279,7 +279,7 @@ export const ca: Translations = {
   sdks: {
     title: 'SDKs en temps d’execució',
     subtitle:
-      'Carrega secrets directament a la teva aplicació a l’arrencada. Sense fitxers .env, sense intermediaris — només el teu vault al núvol i el teu codi.',
+      'Carrega secrets directament a la teva aplicació a l’arrencada. Sense fitxers .env, sense intermediaris. Només el teu vault al núvol i el teu codi.',
     pythonTitle: 'Python',
     pythonDesc:
       'Carrega secrets amb una línia. Compatible amb AWS SSM i Azure Key Vault.',
@@ -317,15 +317,15 @@ export const ca: Translations = {
     highlights: [
       {
         icon: '✨',
-        text: 'Web de documentació publicada a envilder.com — guies completes, historial i docs multilingüe',
+        text: 'Web de documentació publicada a envilder.com: guies completes, historial i docs multilingüe',
       },
       {
         icon: '✨',
-        text: 'Corregit: @types/node mogut a devDependencies — sense dependències de runtime innecessàries',
+        text: 'Corregit: @types/node mogut a devDependencies. Sense dependències de runtime innecessàries',
       },
       {
         icon: '✨',
-        text: 'Corregit: inestabilitat als tests e2e — rutes SSM úniques per execució eviten condicions de carrera',
+        text: 'Corregit: inestabilitat als tests e2e. Rutes SSM úniques per execució eviten condicions de carrera',
       },
     ],
     fullChangelog: '📋 Historial complet',
@@ -389,7 +389,7 @@ export const ca: Translations = {
         label: '✅',
         title: 'Node.js SDK (@envilder/sdk)',
         description:
-          'Biblioteca nativa de runtime — carrega secrets directament a process.env des d’un map-file. Publicat a npm',
+          'Biblioteca nativa de runtime: carrega secrets directament a process.env des d’un map-file. Publicat a npm',
       },
       {
         status: 'next',
@@ -409,7 +409,7 @@ export const ca: Translations = {
         status: 'planned',
         label: '☁️',
         title: 'GCP Secret Manager',
-        description: 'Tercer proveïdor cloud — completa el trident multi-núvol',
+        description: 'Tercer proveïdor cloud. Completa el trident multi-núvol',
       },
       {
         status: 'planned',
@@ -428,7 +428,7 @@ export const ca: Translations = {
         label: '✔️',
         title: 'Mode check/sync (--check)',
         description:
-          'Valida secrets al núvol vs .env local — falla CI si estan desincronitzats',
+          'Valida secrets al núvol vs .env local. Falla CI si estan desincronitzats',
       },
     ],
   },
@@ -523,11 +523,11 @@ export const ca: Translations = {
     sidebarAzureSetup: 'Configuració Azure',
     overviewTitle: 'Què és Envilder?',
     overviewDesc:
-      "Envilder és un sistema de resolució de configuració basat en un model. Defineixes un mapeig JSON entre noms de variables i rutes de secrets al núvol, i Envilder els resol de forma consistent — via la CLI per a desenvolupament local, la GitHub Action per a CI/CD o els SDKs de runtime per a l'inici de l'aplicació. Funciona amb AWS SSM Parameter Store i Azure Key Vault.",
+      "Envilder és un sistema de resolució de configuració basat en un model. Defineixes un mapeig JSON entre noms de variables i rutes de secrets al núvol, i Envilder els resol de forma consistent: via la CLI per a desenvolupament local, la GitHub Action per a CI/CD o els SDKs de runtime per a l'inici de l'aplicació. Funciona amb AWS SSM Parameter Store i Azure Key Vault.",
     overviewProblem:
       "Sense Envilder, els equips fragmenten la gestió de secrets entre eines i etapes. L'entorn local utilitza fitxers .env, CI/CD llegeix d'integracions amb vaults, producció té el seu propi mètode. Això provoca desfasament de configuració, credencials filtrades i incorporacions lentes.",
     overviewSolution:
-      "Amb Envilder, un model de mapeig és la font única de veritat. Els secrets es resolen des del teu vault al núvol sota demanda — mateix contracte, mateix comportament, ja sigui executant la CLI localment, la GitHub Action en CI o un SDK a l'inici de l'app.",
+      "Amb Envilder, un model de mapeig és la font única de veritat. Els secrets es resolen des del teu vault al núvol sota demanda: mateix contracte, mateix comportament, ja sigui executant la CLI localment, la GitHub Action en CI o un SDK a l'inici de l'app.",
     reqTitle: 'Requisits',
     reqNode: 'Node.js v20+',
     reqAws: 'AWS CLI',
@@ -556,7 +556,7 @@ export const ca: Translations = {
     permPush: 'Push',
     permPolicyExample: 'Exemple de política IAM:',
     permAzureTitle: 'Azure',
-    permAzureRbac: 'Recomanat — assigna Key Vault Secrets Officer via RBAC:',
+    permAzureRbac: 'Recomanat: assigna Key Vault Secrets Officer via RBAC:',
     permAzurePullNote:
       'Per accés només de lectura, Key Vault Secrets User és suficient.',
     mapTitle: 'Fitxer de mapeig',
@@ -567,7 +567,7 @@ export const ca: Translations = {
       "Cada clau es converteix en un nom de variable d'entorn al teu fitxer .env.",
     mapCalloutValue:
       'Cada valor és la ruta on viu el secret al teu proveïdor al núvol.',
-    mapBasicTitle: 'Format bàsic (AWS SSM — per defecte)',
+    mapBasicTitle: 'Format bàsic (AWS SSM, per defecte)',
     mapBasicDesc:
       'Quan no hi ha secció $config, Envilder utilitza AWS SSM Parameter Store per defecte. Els valors han de ser rutes de paràmetres SSM vàlides (normalment començant amb /):',
     mapBasicGenerates: 'Això genera:',
@@ -594,7 +594,7 @@ export const ca: Translations = {
       'Per Azure Key Vault, estableix provider a "azure" i proporciona el vaultUrl:',
     mapAzureWarningTitle: 'Convenció de noms Azure:',
     mapAzureWarningDesc:
-      'Els noms de secrets de Key Vault només permeten caràcters alfanumèrics i guions. Envilder normalitza automàticament els noms — barres i guions baixos es converteixen en guions (p. ex., /myapp/db/password → myapp-db-password).',
+      'Els noms de secrets de Key Vault només permeten caràcters alfanumèrics i guions. Envilder normalitza automàticament els noms: barres i guions baixos es converteixen en guions (p. ex., /myapp/db/password → myapp-db-password).',
     mapDifferencesTitle: 'Diferències clau per proveïdor',
     mapThEmpty: '',
     mapThAwsSsm: 'AWS SSM',
@@ -667,7 +667,7 @@ export const ca: Translations = {
     pushSingleOptProfile: 'Perfil AWS CLI (només AWS)',
     ghaSetupTitle: 'Configuració de GitHub Action',
     ghaSetupDesc:
-      "La GitHub Action d'Envilder obté secrets d'AWS SSM o Azure Key Vault en fitxers .env durant el teu workflow CI/CD. No cal compilar — l'action està pre-construïda i llesta per utilitzar des de GitHub Marketplace.",
+      "La GitHub Action d'Envilder obté secrets d'AWS SSM o Azure Key Vault en fitxers .env durant el teu workflow CI/CD. No cal compilar. L'action està pre-construïda i llesta per utilitzar des de GitHub Marketplace.",
     ghaPrerequisites: 'Prerequisits',
     ghaPrereqAws:
       'AWS: Configura credencials amb aws-actions/configure-aws-credentials',
@@ -705,8 +705,8 @@ export const ca: Translations = {
     azureSetupCheck: "Comprova quin model d'accés utilitza el teu vault:",
     azureRbacTrue: 'true → Azure RBAC (recomanat)',
     azureRbacFalse: 'false / null → Vault Access Policy (clàssic)',
-    azureOptionA: 'Opció A — Azure RBAC (recomanat)',
-    azureOptionB: 'Opció B — Vault Access Policy',
+    azureOptionA: 'Opció A: Azure RBAC (recomanat)',
+    azureOptionB: 'Opció B: Vault Access Policy',
     azureAccessNote:
       'Per accés només de lectura, get list és suficient. Afegeix set per push.',
     // SDKs
@@ -718,7 +718,7 @@ export const ca: Translations = {
     sdkDotnetDesc:
       "Carrega secrets directament a la teva aplicació .NET a l'inici. Façana d'una línia, constructor fluent, integració amb IConfiguration o control programàtic total.",
     sdkDotnetInstall: 'Instal·lació',
-    sdkDotnetOneLiner: 'Una línia — resoldre + injectar',
+    sdkDotnetOneLiner: 'Una línia: resoldre + injectar',
     sdkDotnetOneLinerDesc:
       "Resol secrets del fitxer de mapeig i injecta'ls a Environment en una sola crida:",
     sdkDotnetResolve: 'Resoldre sense injectar',
@@ -736,7 +736,7 @@ export const ca: Translations = {
     sdkDotnetQuickStartConfig: 'Via IConfiguration (ASP.NET)',
     sdkDotnetQuickStartConfigDesc:
       'Afegeix Envilder com a font de configuració a la teva aplicació ASP.NET:',
-    sdkDotnetQuickStartResolve: 'Avançat — control programàtic total',
+    sdkDotnetQuickStartResolve: 'Avançat: control programàtic total',
     sdkDotnetQuickStartResolveDesc:
       "Analitza el fitxer de mapeig, resol secrets i injecta'ls a les variables d'entorn:",
     sdkDotnetFullDocs: 'Documentació completa →',
@@ -744,7 +744,7 @@ export const ca: Translations = {
     sdkPythonDesc:
       "Carrega secrets directament a la teva aplicació Python a l'inici. Configuració en una línia o control detallat amb el constructor fluent.",
     sdkPythonInstall: 'Instal·lació',
-    sdkPythonQuickStart: 'Inici ràpid — una línia',
+    sdkPythonQuickStart: 'Inici ràpid: una línia',
     sdkPythonQuickStartDesc:
       "Carrega secrets des d'un fitxer de mapeig i injecta'ls a l'entorn:",
     sdkPythonEnvLoading: 'Càrrega basada en entorn',
@@ -764,7 +764,7 @@ export const ca: Translations = {
     sdkNodejsDesc:
       "Carrega secrets directament a la teva aplicació Node.js a l'inici. API asíncrona amb façana d'una línia o constructor fluent per a control total.",
     sdkNodejsInstall: 'Instal·lació',
-    sdkNodejsQuickStart: 'Inici ràpid — una línia',
+    sdkNodejsQuickStart: 'Inici ràpid: una línia',
     sdkNodejsQuickStartDesc:
       "Carrega secrets des d'un fitxer de mapeig i injecta'ls a process.env:",
     sdkNodejsResolve: 'Resoldre sense injectar',
