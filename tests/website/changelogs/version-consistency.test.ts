@@ -13,7 +13,11 @@ function readVersion(file: string): string {
 function latestChangelogVersion(file: string): string {
   const md = readFileSync(resolve(changelogDir, file), 'utf-8');
   const versions = extractVersions(md);
-  return versions[0]?.tag ?? '';
+  expect(
+    versions.length,
+    `No versions found in ${file} — check changelog format`,
+  ).toBeGreaterThan(0);
+  return versions[0].tag;
 }
 
 describe('Version consistency', () => {

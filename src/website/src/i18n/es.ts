@@ -167,7 +167,7 @@ export const es: Translations = {
         icon: '🔌',
         title: 'SDKs de runtime',
         description:
-          'Carga secretos directamente en memoria al iniciar la app: Python, .NET, TypeScript, Go, Java. Sin archivos .env en disco. Sin secretos residuales.',
+          'Carga secretos directamente en memoria al iniciar la app: Python, .NET, Node.js, Go, Java. Sin archivos .env en disco. Sin secretos residuales.',
       },
       {
         icon: '☁️',

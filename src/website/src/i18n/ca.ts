@@ -166,7 +166,7 @@ export const ca: Translations = {
         icon: '🔌',
         title: 'SDKs de runtime',
         description:
-          "Carrega secrets directament a memòria a l'inici de l'app: Python, .NET, TypeScript, Go, Java. Sense fitxers .env a disc. Sense secrets residuals.",
+          "Carrega secrets directament a memòria a l'inici de l'app: Python, .NET, Node.js, Go, Java. Sense fitxers .env a disc. Sense secrets residuals.",
       },
       {
         icon: '☁️',

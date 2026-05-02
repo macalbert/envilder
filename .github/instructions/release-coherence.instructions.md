@@ -5,6 +5,7 @@ description: >-
   with any version bump.
 name: "Release Coherence Guard"
 applyTo:
+  - "package.json"
   - "src/sdks/dotnet/Envilder.csproj"
   - "src/sdks/python/pyproject.toml"
   - "src/sdks/nodejs/package.json"

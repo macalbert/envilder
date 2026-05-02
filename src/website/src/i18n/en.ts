@@ -167,7 +167,7 @@ export const en: Translations = {
         icon: '🔌',
         title: 'Runtime SDKs',
         description:
-          'Load secrets directly into memory at app startup: Python, .NET, TypeScript, Go, Java. No .env files written to disk. No secrets left behind.',
+          'Load secrets directly into memory at app startup: Python, .NET, Node.js, Go, Java. No .env files written to disk. No secrets left behind.',
       },
       {
         icon: '☁️',
