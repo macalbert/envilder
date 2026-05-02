@@ -57,14 +57,14 @@ Tests mirror the structure under `tests/sdks/{runtime}/`.
 
 ### Tier 1 — Static Facade (one-liner)
 
-```
+```txt
 Envilder.load("map.json")              → injects into process env
 Envilder.resolveFile("map.json")       → returns resolved key-value pairs
 ```
 
 ### Tier 2 — Fluent Builder
 
-```
+```txt
 Envilder.fromMapFile("map.json")
   .withProvider("azure")
   .withVaultUrl("https://vault.azure.net")
@@ -76,7 +76,7 @@ Envilder.fromMapFile("map.json")
 
 ### Environment Routing (both tiers)
 
-```
+```txt
 Envilder.load("production", {
   "production": "prod-map.json",
   "staging": "stg-map.json"
