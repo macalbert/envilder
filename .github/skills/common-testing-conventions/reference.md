@@ -183,7 +183,7 @@ await expect(googleButton).toBeVisible({ timeout: 10000 });
 // BAD - Two Act/Assert cycles in one test
 it("Should_HandleBothInputs_When_ValuesChange", async () => {
     // Arrange
-    const handleChange = jest.fn();
+    const handleChange = vi.fn();
     render(<Component onChange={handleChange} />);
 
     // Act
@@ -202,7 +202,7 @@ it("Should_HandleBothInputs_When_ValuesChange", async () => {
 // GOOD - Split into separate tests, one Act/Assert each
 it("Should_CallHandleChange_When_MinInputChanges", async () => {
     // Arrange
-    const handleChange = jest.fn();
+    const handleChange = vi.fn();
     render(<Component onChange={handleChange} />);
 
     // Act
@@ -214,7 +214,7 @@ it("Should_CallHandleChange_When_MinInputChanges", async () => {
 
 it("Should_CallHandleChange_When_MaxInputChanges", async () => {
     // Arrange
-    const handleChange = jest.fn();
+    const handleChange = vi.fn();
     render(<Component onChange={handleChange} />);
 
     // Act

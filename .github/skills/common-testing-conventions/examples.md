@@ -156,7 +156,7 @@ _logger.Received(1).Log(
     Arg.Any<Func<object, Exception?, string>>());
 ```
 
-## Frontend Examples (TypeScript / Jest)
+## Frontend Examples (TypeScript / Vitest)
 
 ### React Hook Test
 
@@ -191,7 +191,7 @@ describe("useAuth", () => {
 describe("CreateGroupForm", () => {
   it("Should_CreateGroup_When_FormIsSubmitted", async () => {
     // Arrange
-    const mockCreateGroup = jest.fn().mockResolvedValue({ id: "123" });
+    const mockCreateGroup = vi.fn().mockResolvedValue({ id: "123" });
     const { getByRole, getByLabelText } = render(
       <CreateGroupForm onSubmit={mockCreateGroup} />
     );

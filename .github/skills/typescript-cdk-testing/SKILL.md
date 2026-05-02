@@ -6,6 +6,7 @@ description: AWS CDK testing patterns including snapshot tests, fine-grained ass
 # CDK Testing Skill
 
 Testing patterns for AWS CDK infrastructure in the Envilder project (`src/iac/`).
+Tests live in `tests/iac/` and run with Vitest.
 
 ## When to Use
 
@@ -16,19 +17,12 @@ Testing patterns for AWS CDK infrastructure in the Envilder project (`src/iac/`)
 
 ## Test Architecture
 
-### Test Locations
-
-| Scope | Location | Purpose |
-| --- | --- | --- |
-| Shared constructs | `shared/src/iac/test/` | Test reusable CDK constructs |
-| Project stacks | `Envilder/src/iac/test/` | Test project-specific infrastructure |
-
 ### Test Organization
 
 Mirror the source structure in tests:
 
 ```txt
-shared/src/iac/test/
+tests/iac/
 ├── aws/
 │   ├── compute/       Lambda, ECS Fargate tests
 │   ├── database/      RDS PostgreSQL, MySQL tests
@@ -195,16 +189,16 @@ const testConfig: BackendStackConfig = {
 
 ```bash
 # Run all CDK tests
-pnpm test
+cd tests/iac && pnpm test
 
 # Run with verbose output
-pnpm test -- --verbose
+cd tests/iac && pnpm test -- --reporter=verbose
 
 # Update snapshots (after intentional changes only)
-pnpm test -- -u
+cd tests/iac && pnpm test -- -u
 
 # Run specific test file
-pnpm test -- --testPathPattern="lambda"
+cd tests/iac && pnpm test -- lambda
 ```
 
 ## Anti-Patterns
