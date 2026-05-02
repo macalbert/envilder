@@ -437,4 +437,4 @@ All help is welcome! PRs, issues, ideas.
 ## 📜 License
 
 MIT © [Marçal Albert](https://github.com/macalbert)  
-See [LICENSE](./LICENSE) | [CHANGELOG](./docs/changelogs/cli.md) | [Security Policy](./docs/SECURITY.md)
+See [LICENSE](./LICENSE) | [CHANGELOG](./docs/CHANGELOG.md) | [Security Policy](./docs/SECURITY.md)
