@@ -33,7 +33,7 @@ Exception: `// Arrange`, `// Act`, `// Assert` comments are REQUIRED in tests.
 | File | Description |
 | ---- | ----------- |
 | [dotnet.md](./dotnet.md) | .NET testing stack (xUnit, AwesomeAssertions, NSubstitute, Bogus, Verify.Xunit, WireMock, Testcontainers) |
-| [typescript.md](./typescript.md) | TypeScript testing stack — CLI, SDK, CDK, Website (Vitest, Jest/CDK, Playwright, Biome) |
+| [typescript.md](./typescript.md) | TypeScript testing stack — CLI, SDK, CDK, Website (Vitest, Playwright, Biome) |
 | [python.md](./python.md) | Python testing stack (pytest, Mock/AsyncMock, pytest-snapshot, black, mypy, Pydantic) |
 | [examples.md](./examples.md) | Full test examples for C# and TypeScript |
 | [reference.md](./reference.md) | Naming rules, anti-patterns, checklist |
@@ -78,7 +78,7 @@ public async Task Should_CreateGroup_When_RequestIsValid()
 - **No `if`, `switch`, or conditional logic** inside Arrange, Act, or Assert blocks
 - **No `try/catch/finally`** inside tests — use framework teardown (`IAsyncLifetime`, `[ClassCleanup]`, pytest `yield` fixtures)
 - **No `// Act & Assert` combined blocks** — Act and Assert are ALWAYS separate phases
-- For exceptions: C# → `AwesomeAssertions` `.Should().ThrowAsync<T>()` | Python → `lambda` + `pytest.raises()` | Jest
+- For exceptions: C# → `AwesomeAssertions` `.Should().ThrowAsync<T>()` | Python → `lambda` + `pytest.raises()` | Vitest
  → `expect(...).rejects.toThrow()`
 - Omit comment if section is empty
 - If a test needs branching, split it into separate test methods (one per scenario)
@@ -141,7 +141,7 @@ See the dedicated supporting file for each stack:
   AutoFixture, Bogus, Verify.Xunit, WireMock.Net, Testcontainers (PostgreSQL,
   LocalStack)
 - **TypeScript (CLI, SDK, CDK, Website):** [typescript.md](./typescript.md) — Vitest
-  (CLI/SDK/Website), Jest (CDK), Playwright, Biome
+  (CLI/SDK/CDK/Website), Playwright, Biome
 - **Python:** [python.md](./python.md) — pytest, pytest-asyncio, pytest-snapshot,
   unittest.mock, black, mypy, Pydantic
 
@@ -156,5 +156,5 @@ See the dedicated supporting file for each stack:
 Cross-stack:
 
 - **sdk-acceptance-testing:** TestContainers, LocalStack, Lowkey Vault (all SDKs)
-- **typescript-cdk-testing:** CDK snapshot + fine-grained assertions (Jest)
+- **typescript-cdk-testing:** CDK snapshot + fine-grained assertions (Vitest)
 - **core-testing:** Envilder CLI/Core specific testing procedure (Vitest)
