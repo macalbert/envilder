@@ -26,12 +26,24 @@ const t = useTranslations(lang);
           muted
           loop
           playsinline
+          controls
+          preload="metadata"
           aria-label={t.demo.cliDemo}
         />
       </div>
     </div>
   </div>
 </section>
+
+<script>
+  const video = document.querySelector<HTMLVideoElement>(
+    '#demo .demo-frame video',
+  );
+  if (video && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    video.removeAttribute('autoplay');
+    video.pause();
+  }
+</script>
 
 <style>
   .demo-wrapper {
