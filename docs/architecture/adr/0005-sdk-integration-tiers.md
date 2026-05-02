@@ -12,7 +12,7 @@ with dependency injection:
 
 | Runtime | DI landscape |
 | ------- | ------------ |
-| .NET | `IServiceCollection` is the de facto universal standard (~99% adoption) |
+| .NET | `IServiceCollection` is the de facto universal standard |
 | Java/Kotlin | Fragmented: Spring, Guice, Dagger, CDI |
 | Python | No standard: Django has its own, FastAPI uses `Depends` |
 | Node.js | Fragmented: NestJS has its own, Express has none |

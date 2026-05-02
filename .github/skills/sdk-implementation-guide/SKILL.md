@@ -28,7 +28,7 @@ Before starting, read:
 
 ## 1. Folder Structure
 
-```
+```txt
 src/sdks/{runtime}/
 ├── domain/
 │   ├── ISecretProvider          ← Port interface/protocol
@@ -87,7 +87,7 @@ Envilder.load("production", {
 
 | Aspect | Decision |
 | ------ | -------- |
-| Missing secrets | Return null/None/nil — never throw |
+| Missing secrets | Return null/None/nil (Option<T> in Rust) — never throw |
 | Validation | Opt-in `validateSecrets()` post-resolution |
 | Cross-provider validation | profile + Azure → error; vaultUrl + AWS → error |
 | Options override config | Runtime `EnvilderOptions` > `$config` from map file |
@@ -100,7 +100,7 @@ Envilder.load("production", {
 | .NET | Both (sync + async methods) | `IConfigurationBuilder` needs sync |
 | Python | Sync only | boto3 is natively synchronous |
 | Node.js | Async only | AWS SDK v3 is async, natural fit |
-| Go | Sync (with goroutines for batch) | Idiomatic Go |
+| Go | Sync (with context.Context and goroutines for batch) | Idiomatic Go |
 | Java/Kotlin | Both (sync + async/CompletableFuture) | Spring uses both patterns |
 | PHP | Sync only | PHP is single-threaded by default |
 | Rust | Async (tokio) | AWS SDK for Rust is async |
@@ -128,7 +128,7 @@ The `SecretProviderFactory` is always **internal** (not part of public API):
 | Node.js | Not re-exported from barrel `index.ts` |
 | Go | Unexported (`secretProviderFactory`, lowercase) |
 | Java/Kotlin | Package-private or `internal` (Kotlin) |
-| PHP | Prefixed `_` or `@internal` docblock |
+| PHP | Prefixed `_` or `#[Internal]` attribute / `@internal` docblock |
 | Rust | `pub(crate)` visibility |
 
 ## 5. Naming Conventions
