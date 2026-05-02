@@ -20,10 +20,13 @@ const t = useTranslations(lang);
 
     <div class="demo-wrapper">
       <div class="demo-frame">
-        <img
-          src="https://github.com/user-attachments/assets/9f194143-117d-49f3-a6fb-f400040ea514"
-          alt={t.demo.cliDemo}
-          loading="lazy"
+        <video
+          src="/Envilder-demo.mp4"
+          autoplay
+          muted
+          loop
+          playsinline
+          aria-label={t.demo.cliDemo}
         />
       </div>
     </div>
@@ -44,7 +47,7 @@ const t = useTranslations(lang);
     aspect-ratio: 16 / 10;
   }
 
-  .demo-frame img {
+  .demo-frame video {
     display: block;
     width: 100%;
     height: 100%;

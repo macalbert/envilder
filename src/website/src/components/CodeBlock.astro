@@ -133,10 +133,38 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
     letter-spacing: inherit;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    padding-bottom: var(--space-xs);
   }
 
   .codeblock-body :global(code) {
     font: inherit;
+  }
+
+  /* Scroll overflow fade indicator */
+  .codeblock-body::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 32px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--color-code-bg, var(--color-surface))
+    );
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 1;
+  }
+
+  .codeblock-body.has-scroll::after {
+    opacity: 1;
+  }
+
+  .codeblock-body.has-scroll.scrolled-end::after {
+    opacity: 0;
   }
 
   :global([data-theme="light"]) .codeblock-body :global(span) {
@@ -193,6 +221,41 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
     });
   }
 
+  function updateScrollState(body: HTMLElement) {
+    const pre = body.querySelector('pre');
+    if (!pre) return;
+    const overflows = pre.scrollWidth > pre.clientWidth;
+    body.classList.toggle('has-scroll', overflows);
+    if (overflows) {
+      const atEnd = pre.scrollLeft + pre.clientWidth >= pre.scrollWidth - 2;
+      body.classList.toggle('scrolled-end', atEnd);
+    }
+  }
+
+  function initScrollIndicators() {
+    document.querySelectorAll<HTMLElement>('.codeblock-body').forEach((body) => {
+      if (body.dataset.scrollInit) return;
+      body.dataset.scrollInit = 'true';
+
+      const pre = body.querySelector('pre');
+      if (!pre) return;
+
+      updateScrollState(body);
+      pre.addEventListener('scroll', () => updateScrollState(body), {
+        passive: true,
+      });
+    });
+  }
+
+  const resizeObserver = new ResizeObserver(() => {
+    document.querySelectorAll<HTMLElement>('.codeblock-body').forEach(updateScrollState);
+  });
+  resizeObserver.observe(document.documentElement);
+
   initCopyButtons();
-  document.addEventListener('astro:after-swap', initCopyButtons);
+  initScrollIndicators();
+  document.addEventListener('astro:after-swap', () => {
+    initCopyButtons();
+    initScrollIndicators();
+  });
 </script>

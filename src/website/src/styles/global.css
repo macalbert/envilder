@@ -498,6 +498,7 @@ pre code,
 /* ── Scrollbar ────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -506,10 +507,47 @@ pre code,
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-border);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-border-light);
+}
+
+/* Code block horizontal scrollbar */
+.codeblock-body pre::-webkit-scrollbar {
+  height: 6px;
+}
+
+.codeblock-body pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.codeblock-body pre::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.codeblock-body pre::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-light);
+}
+
+@media (max-width: 640px) {
+  .codeblock-body pre::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .codeblock-body pre::-webkit-scrollbar-thumb {
+    background: var(--color-text-dim, var(--color-border));
+  }
+}
+
+/* Firefox fallback */
+@supports not selector(::-webkit-scrollbar) {
+  .codeblock-body pre {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
 }
 
 /* ── Selection ────────────────────────────────────────── */
