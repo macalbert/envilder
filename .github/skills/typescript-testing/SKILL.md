@@ -55,9 +55,8 @@ internal helpers.
 * **All assertions belong in Assert only.** No `expect()` in Arrange or Act.
   If you feel tempted to assert in Arrange (precondition check), extract it to
   a separate test or use a guard clause that throws — not an assertion.
-* **A test must have a SUT (subject under test).** If there is no production
-  code being exercised (e.g., structural data guards, static completeness
-  checks), omit AAA markers — write plain assertions without the ceremony.
+* **AAA markers are mandatory in ALL tests** — including structural guards,
+  static completeness checks, and data validation tests. No exceptions.
 * **No `if`, `switch`, or conditional logic** inside Arrange, Act, or Assert
 * **No `try/catch/finally`** inside tests — use `beforeEach`/`afterEach` for
   teardown
@@ -285,19 +284,19 @@ describe('AppStack', () => {
 
 ---
 
-## Structural Guards (No SUT)
+## Structural Guards
 
 Tests that validate static data (i18n completeness, schema conformance,
-version consistency) have **no SUT** and no production code under test.
-**Omit AAA markers** — write plain assertions:
+version consistency) still **MUST** use AAA markers. Arrange can be omitted
+if data is set up at the `describe` level:
 
 ```typescript
-it('Should_HaveIdenticalKeysToCatalan_When_ComparedToEnglish', () => {
-  const missingInCa = enKeys.filter((k) => !caKeys.includes(k));
-  const extraInCa = caKeys.filter((k) => !enKeys.includes(k));
+it('Should_HaveNoMissingKeys_When_CatalanComparedToEnglish', () => {
+  // Act
+  const actual = enKeys.filter((k) => !caKeys.includes(k));
 
-  expect(missingInCa, 'Keys missing in ca.ts').toEqual([]);
-  expect(extraInCa, 'Extra keys in ca.ts not in en.ts').toEqual([]);
+  // Assert
+  expect(actual, 'Keys missing in ca.ts').toEqual([]);
 });
 ```
 

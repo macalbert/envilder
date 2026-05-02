@@ -68,9 +68,8 @@ public async Task Should_CreateGroup_When_RequestIsValid()
   write two tests
 - **Act = one single invocation on the SUT.** Multiple statements in Act only if they are genuinely
   part of the same logical action (rare and exceptional). Two independent operations = two tests.
-- **A test must have a SUT (subject under test).** If there is no production code being exercised
-  (e.g., structural data guards, static completeness checks), omit AAA markers — write plain
-  assertions without the ceremony.
+- **AAA markers are mandatory in ALL tests** — including structural guards,
+  static completeness checks, and data validation tests. No exceptions.
 - Each section clearly separated by comments
 - Never mix phases
 - **All assertions belong in Assert only.** No `expect()`, `.Should()`, `assert`, or any verification

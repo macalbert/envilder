@@ -54,8 +54,8 @@ These are **rules**, not guidelines.
 * **All assertions belong in Assert only.** No `.Should()` in Arrange or Act.
   If you need a precondition check, extract it to a separate test or use a
   guard clause that throws — not an assertion.
-* **A test must have a SUT (subject under test).** If there is no production
-  code being exercised (structural guards, static checks), omit AAA markers.
+* **AAA markers are mandatory in ALL tests** — including structural guards,
+  static completeness checks, and data validation tests. No exceptions.
 * **No `if`, `switch`, or conditional logic** inside Arrange, Act, or Assert
 * **No `try/catch/finally`** inside tests — use `IAsyncLifetime` or
   `IDisposable` for teardown
