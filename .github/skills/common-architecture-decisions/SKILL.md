@@ -34,6 +34,7 @@ behind tooling choices and architectural patterns before proposing changes.
 | [ADR-0005](../../../docs/architecture/adr/0005-sdk-integration-tiers.md) | SDK Integration Tiers | All SDKs | Three tiers (Facade, Builder, Framework); Tier 3 separate package; .NET exception; community-driven |
 | [ADR-0006](../../../docs/architecture/adr/0006-monorepo-structure.md) | Monorepo Structure | All components | Single repo, independent releases per component via version-bump detection, no orchestrator |
 | [ADR-0007](../../../docs/architecture/adr/0007-trunk-based-development.md) | Trunk-Based Development | All components | Single main branch, short-lived feature branches, squash merge, feature flags for incomplete work |
+| [ADR-0008](../../../docs/architecture/adr/0008-map-file-schema.md) | Map-File Schema Specification | All components | JSON Schema v1, `$` prefix reserved, `$config` strict fields, `file` provider for testing (planned), `EnvilderOptions.FromFile` (planned) |
 
 ## Quick Reference: Test Doubles per Stack
 
