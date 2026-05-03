@@ -34,9 +34,9 @@ public class MapFileParser
 
 		foreach (var property in document.RootElement.EnumerateObject())
 		{
-			if (property.Name == ConfigKey)
+			if (property.Name.StartsWith("$"))
 			{
-				if (property.Value.ValueKind == JsonValueKind.Object)
+				if (property.Name == ConfigKey && property.Value.ValueKind == JsonValueKind.Object)
 				{
 					config = JsonSerializer.Deserialize<MapFileConfig>(property.Value.GetRawText(), SerializerOptions)
 						?? new();

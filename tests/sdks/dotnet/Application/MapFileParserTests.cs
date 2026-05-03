@@ -6,6 +6,8 @@ using Envilder.Domain;
 
 public class MapFileParserTests
 {
+	private readonly MapFileParser _sut = new();
+
 	[Fact]
 	public void Should_ParseMappings_When_MapFileHasNoConfig()
 	{
@@ -16,10 +18,9 @@ public class MapFileParserTests
                 "DB_PASSWORD": "/App/DbPassword"
             }
             """;
-		var sut = new MapFileParser();
 
 		// Act
-		var actual = sut.Parse(json);
+		var actual = _sut.Parse(json);
 
 		// Assert
 		actual.Config.Provider.Should().BeNull();
@@ -42,10 +43,9 @@ public class MapFileParserTests
                 "TOKEN_SECRET": "/Test/Token"
             }
             """;
-		var sut = new MapFileParser();
 
 		// Act
-		var actual = sut.Parse(json);
+		var actual = _sut.Parse(json);
 
 		// Assert
 		actual.Config.Provider.Should().Be(SecretProviderType.Aws);
@@ -68,10 +68,9 @@ public class MapFileParserTests
                 "TOKEN_SECRET": "test-secret"
             }
             """;
-		var sut = new MapFileParser();
 
 		// Act
-		var actual = sut.Parse(json);
+		var actual = _sut.Parse(json);
 
 		// Assert
 		actual.Config.Provider.Should().Be(SecretProviderType.Azure);
@@ -91,10 +90,9 @@ public class MapFileParserTests
                 "TOKEN_SECRET": "/Test/Token"
             }
             """;
-		var sut = new MapFileParser();
 
 		// Act
-		var actual = sut.Parse(json);
+		var actual = _sut.Parse(json);
 
 		// Assert
 		actual.Config.Provider.Should().BeNull();
@@ -116,13 +114,34 @@ public class MapFileParserTests
                 "OBJECT_VALUE": { "nested": true }
             }
             """;
-		var sut = new MapFileParser();
 
 		// Act
-		var actual = sut.Parse(json);
+		var actual = _sut.Parse(json);
 
 		// Assert
 		actual.Mappings.Should().HaveCount(1);
 		actual.Mappings["TOKEN_SECRET"].Should().Be("/Test/Token");
+	}
+
+	[Fact]
+	public void Should_ExcludeDollarPrefixedKeys_When_MapFileContainsSchemaKey()
+	{
+		// Arrange
+		var json = """
+            {
+                "$schema": "https://envilder.com/schema/map-file.v1.json",
+                "$config": { "provider": "aws" },
+                "DB_URL": "/app/db"
+            }
+            """;
+
+		// Act
+		var actual = _sut.Parse(json);
+
+		// Assert
+		actual.Mappings.Should().HaveCount(1);
+		actual.Mappings.Should().NotContainKey("$schema");
+		actual.Mappings["DB_URL"].Should().Be("/app/db");
+		actual.Config.Provider.Should().Be(SecretProviderType.Aws);
 	}
 }

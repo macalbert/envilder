@@ -34,7 +34,13 @@ export class FileVariableStore implements IVariableStore {
     const { $config, ...rest } = raw;
     const config: MapFileConfig =
       $config && typeof $config === 'object' ? $config : {};
-    return { config, mappings: rest as Record<string, string> };
+    const mappings: Record<string, string> = {};
+    for (const [key, value] of Object.entries(rest)) {
+      if (!key.startsWith('$')) {
+        mappings[key] = value as string;
+      }
+    }
+    return { config, mappings };
   }
 
   private async readJsonFile(source: string): Promise<Record<string, unknown>> {
