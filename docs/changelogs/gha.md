@@ -6,7 +6,7 @@
 
 ### Dependencies
 
-* Bundle updated with latest CLI core (security fix, dependency bumps)
+* Bundle updated with latest CLI core (dependency bumps)
 
 ---
 
