@@ -31,6 +31,9 @@ behind tooling choices and architectural patterns before proposing changes.
 | [ADR-0002](../../../docs/architecture/adr/0002-test-tooling-per-stack.md) | Test Tooling per Stack | All stacks | Vitest (TS), xUnit+NSubstitute+AwesomeAssertions (NET), pytest+unittest.mock (Py) |
 | [ADR-0003](../../../docs/architecture/adr/0003-sdk-architecture-pattern.md) | SDK Architecture Pattern | All SDKs | Three-layer (Domain→App→Infra), no DI framework, facade as primary API, internal factory |
 | [ADR-0004](../../../docs/architecture/adr/0004-code-quality-tooling.md) | Code Quality and Formatting | All stacks | Biome (TS), dotnet format (.NET), black+isort (Py); Secretlint for credentials |
+| [ADR-0005](../../../docs/architecture/adr/0005-sdk-integration-tiers.md) | SDK Integration Tiers | All SDKs | Three tiers (Facade, Builder, Framework); Tier 3 separate package; .NET exception; community-driven |
+| [ADR-0006](../../../docs/architecture/adr/0006-monorepo-structure.md) | Monorepo Structure | All components | Single repo, independent releases per component via version-bump detection, no orchestrator |
+| [ADR-0007](../../../docs/architecture/adr/0007-trunk-based-development.md) | Trunk-Based Development | All components | Single main branch, short-lived feature branches, squash merge, feature flags for incomplete work |
 
 ## Quick Reference: Test Doubles per Stack
 
