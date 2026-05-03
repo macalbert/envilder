@@ -72,10 +72,7 @@
               "provider": {
                 "const": "aws"
               }
-            },
-            "required": [
-              "provider"
-            ]
+            }
           },
           "then": {
             "properties": {
@@ -181,9 +178,7 @@
     }
   },
   "patternProperties": {
-    "^\\$": {
-      "description": "Reserved keys. All $-prefixed keys are reserved for Envilder and ignored by parsers."
-    },
+    "^\\$(?!schema$|config$)": false,
     "^[a-zA-Z_][a-zA-Z0-9_]*$": {
       "type": "string",
       "description": "Variable mapping: environment variable name → secret identifier (opaque string interpreted by the provider)."
