@@ -1,3 +1,17 @@
+## [0.10.0] - 2026-05-03
+
+### Fixed
+
+* **Reserved key filtering** — `$schema` and other `$`-prefixed keys no longer
+  leak into environment variable mappings
+  ([#218](https://github.com/macalbert/envilder/pull/218))
+
+### Dependencies
+
+* Bundle updated with latest CLI core (map-file schema support)
+
+---
+
 ## [0.9.4] - 2026-05-03
 
 ### Fixed

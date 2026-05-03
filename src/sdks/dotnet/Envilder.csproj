@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>Envilder</PackageId>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <Authors>macalbert</Authors>
     <Description>Securely load environment variables from AWS SSM Parameter Store or Azure Key Vault directly into your .NET application configuration and DI container. Zero vendor lock-in.</Description>
     <PackageTags>secrets;environment-variables;aws-ssm;azure-keyvault;configuration;dependency-injection</PackageTags>

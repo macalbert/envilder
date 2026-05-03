@@ -388,8 +388,9 @@ function runGitHubAction(inputs: { mapFile: string; envFile: string }): {
 // Helper functions
 function readMappings(mapPath: string): Record<string, string> {
   const raw = JSON.parse(readFileSync(mapPath, 'utf8'));
-  const { $config, ...mappings } = raw;
-  return mappings as Record<string, string>;
+  return Object.fromEntries(
+    Object.entries(raw).filter(([key]) => !key.startsWith('$')),
+  ) as Record<string, string>;
 }
 
 async function SetParameterSsm(name: string, value: string): Promise<void> {

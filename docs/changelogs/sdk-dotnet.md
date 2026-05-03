@@ -1,3 +1,19 @@
+## [0.3.0] - 2026-05-03
+
+### Added
+
+* **Map-file JSON Schema support** — Map files can now include
+  `"$schema": "https://envilder.com/schema/map-file.v1.json"` for IDE
+  autocomplete and validation without affecting secret resolution
+
+### Fixed
+
+* **Reserved key filtering** — All `$`-prefixed keys are now excluded from
+  variable mappings. Previously only `$config` was filtered
+  ([#218](https://github.com/macalbert/envilder/pull/218))
+
+---
+
 ## [0.2.0] - 2026-04-18
 
 ### Added

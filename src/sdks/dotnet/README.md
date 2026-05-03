@@ -241,6 +241,7 @@ var config = new ConfigurationBuilder()
 
 ```json
 {
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "$config": {
     "provider": "aws",
     "profile": "my-profile"
@@ -256,6 +257,7 @@ For Azure, add `vaultUrl`:
 
 ```json
 {
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "$config": {
     "provider": "azure",
     "vaultUrl": "https://my-vault.vault.azure.net"
