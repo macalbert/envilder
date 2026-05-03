@@ -122,6 +122,10 @@ Values are opaque identifiers interpreted by the provider:
 The `file` provider enables testing without cloud infrastructure. It reads an
 `.env` file and resolves mappings by key lookup.
 
+> **Note:** The `file` provider and the `EnvilderOptions.FromFile` /
+> `WithOverride` APIs described below are **proposed** — not yet implemented in
+> any SDK. The examples show the target API design for implementation.
+
 Consumers activate it via:
 
 **A) Map file (dedicated test config):**
