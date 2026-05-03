@@ -5,13 +5,26 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
-## [Unreleased]
+## [0.9.4] - 2026-05-03
 
 ### Security
 
 * **Fix CVE-2026-33532** — Override transitive `yaml` dependency to `>=2.8.3`
   to resolve Uncontrolled Recursion vulnerability (CVSS 5.3, CWE-674)
   introduced through `@astrojs/check` → `yaml-language-server` → `yaml@2.7.1`
+
+### Fixed
+
+* Mask secret path in bulk push log output (#185)
+
+### Dependencies
+
+* Bump `@aws-sdk/client-ssm` from 3.1031.0 to 3.1041.0
+* Bump `@aws-sdk/credential-providers` from 3.1031.0 to 3.1041.0
+* Bump `secretlint` from 11.7.1 to 12.3.1
+* Bump `@commitlint/cli` from 20.5.0 to 20.5.3
+* Bump `astro` from 6.1.7 to 6.2.1
+* Bump `@astrojs/check` from 0.9.8 to 0.9.9
 
 ---
 
