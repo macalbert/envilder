@@ -31,16 +31,37 @@ Always write the PR body to a **temporary file** and use `--body-file` instead
 of inline `--body`. PowerShell treats the backtick as an escape character, which
 corrupts inline markdown containing code spans.
 
-```powershell
-# 1. Write body to a temp file (.pr-body.md, gitignored or deleted after use)
+### Writing the temp file
 
-# 2. Create new PR (use <base>=main unless targeting a different branch):
+**ALWAYS use the `create_file` tool** to write `.pr-body.md`. Never use
+PowerShell here-strings (`@"..."@`) or `Set-Content` with inline text.
+
+PowerShell here-strings corrupt:
+
+| Character | Corrupted as | Reason |
+|-----------|-------------|--------|
+| `` ` `` (backtick) | escape char | `` `0 `` = NUL, `` `n `` = newline |
+| `→` (arrow) | `ÔåÆ` | UTF-8 bytes misread as Windows-1252 |
+| `—` (em-dash) | `ÔÇö` | Same encoding mismatch |
+
+**Safe approach:**
+
+```
+1. Use create_file tool to write .pr-body.md with the body content
+2. Run: gh pr create --base main --title "<title>" --body-file .pr-body.md
+3. Run: Remove-Item .pr-body.md
+```
+
+**Avoid non-ASCII in PR bodies** — prefer `to` over `→`, `--` over `—`.
+
+```powershell
+# Create new PR:
 gh pr create --base <base> --title "<title>" --body-file .pr-body.md
 
-# 3. Or update existing PR:
+# Or update existing PR:
 gh pr edit --title "<title>" --body-file .pr-body.md
 
-# 4. Clean up temp file:
+# Clean up temp file:
 Remove-Item .pr-body.md
 ```
 
