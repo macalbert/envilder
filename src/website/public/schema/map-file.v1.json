@@ -16,13 +16,7 @@
       "properties": {
         "provider": {
           "type": "string",
-          "enum": [
-            "aws",
-            "azure",
-            "gcp",
-            "hashicorp",
-            "file"
-          ],
+          "enum": ["aws", "azure", "gcp", "hashicorp", "file"],
           "default": "aws",
           "description": "Secret provider backend. Defaults to 'aws' when absent."
         },
@@ -90,14 +84,10 @@
                 "const": "azure"
               }
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           "then": {
-            "required": [
-              "vaultUrl"
-            ],
+            "required": ["vaultUrl"],
             "properties": {
               "profile": false,
               "projectId": false,
@@ -113,14 +103,10 @@
                 "const": "gcp"
               }
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           "then": {
-            "required": [
-              "projectId"
-            ],
+            "required": ["projectId"],
             "properties": {
               "profile": false,
               "vaultUrl": false,
@@ -136,14 +122,10 @@
                 "const": "hashicorp"
               }
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           "then": {
-            "required": [
-              "vaultUrl"
-            ],
+            "required": ["vaultUrl"],
             "properties": {
               "profile": false,
               "projectId": false,
@@ -158,14 +140,10 @@
                 "const": "file"
               }
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           "then": {
-            "required": [
-              "path"
-            ],
+            "required": ["path"],
             "properties": {
               "profile": false,
               "vaultUrl": false,

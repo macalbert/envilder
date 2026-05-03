@@ -106,6 +106,8 @@
     "@types/node": "catalog:",
     "@vercel/ncc": "^0.38.4",
     "@vitest/coverage-v8": "catalog:",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
     "glob": "^13.0.6",
     "lefthook": "^2.1.4",
     "secretlint": "^12.3.1",
