@@ -13,9 +13,8 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ### Dependencies
 
-* Bump `secretlint` from 11.7.1 to 12.3.1
-* Bump `@secretlint/secretlint-rule-preset-recommend` from 11.7.1 to 12.3.1
-* Bump `@commitlint/cli` from 20.5.0 to 20.5.3
+* Bump `secretlint` from ^11.4.0 to ^12.3.1
+* Bump `@secretlint/secretlint-rule-preset-recommend` from ^11.4.0 to ^12.3.1
 
 ---
 
