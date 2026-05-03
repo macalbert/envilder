@@ -4,7 +4,7 @@ description: >
   Orchestrates the Red-Green-Refactor TDD cycle by delegating each phase to
   specialized worker subagents. Plans the test strategy, tracks progress, and
   communicates with the user. Never writes code directly.
-tools: [read, search, agent]
+tools: [execute/*, read/*, agent/runSubagent, search/*]
 agents: ['TDD Red', 'TDD Green', 'TDD Refactor', 'Code Reviewer', 'Content Designer']
 argument-hint: "feature, requirement, or behavior to implement"
 user-invocable: true
