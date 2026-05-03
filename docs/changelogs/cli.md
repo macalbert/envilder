@@ -5,13 +5,11 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
-## [Unreleased]
+## [0.9.4] - 2026-05-03
 
-### Security
+### Fixed
 
-* **Fix CVE-2026-33532** — Override transitive `yaml` dependency to `>=2.8.3`
-  to resolve Uncontrolled Recursion vulnerability (CVSS 5.3, CWE-674)
-  introduced through `@astrojs/check` → `yaml-language-server` → `yaml@2.7.1`
+* Mask secret path in bulk push log output (#185)
 
 ---
 

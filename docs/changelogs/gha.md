@@ -1,3 +1,15 @@
+## [0.9.4] - 2026-05-03
+
+### Fixed
+
+* Rebuild stale dist and remove force-tracked build artifacts (#193)
+
+### Dependencies
+
+* Bundle updated with latest CLI core (dependency bumps)
+
+---
+
 ## [0.9.3] - 2026-04-17
 
 ### Changed

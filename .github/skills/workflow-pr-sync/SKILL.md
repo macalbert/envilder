@@ -54,6 +54,12 @@ If the branch has a single commit, use that commit's message as the title.
 - **All four template sections are mandatory** — do not skip, reorder, or
   replace with freeform text
 - If `gh` CLI is not available, output the title and body for manual creation
+- **Never use PowerShell here-strings (`@"..."@`) to generate the PR body** —
+  use `create_file` to write the `.pr-body.md` file directly instead.
+  Here-strings corrupt backticks (`` ` `` becomes escape char, e.g. `` `0 `` =
+  NUL), arrows (`→`), em-dashes (`—`), and other non-ASCII characters.
+- **Avoid non-ASCII characters in PR bodies** — use plain ASCII alternatives:
+  `to` instead of `→`, `--` instead of `—`, etc.
 
 ## Commands
 
