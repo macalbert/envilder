@@ -99,7 +99,9 @@ describe('Envilder (E2E)', () => {
 
   afterAll(async () => {
     await cleanUpSystem();
-    await rm(tempDir, { recursive: true, force: true });
+    if (tempDir) {
+      await rm(tempDir, { recursive: true, force: true });
+    }
   }, 60_000);
 
   it('Should_PrintCorrectVersion_When_VersionFlagIsProvided', async () => {
@@ -379,10 +381,10 @@ describe('Envilder (E2E)', () => {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalTlsReject;
       }
       delete process.env.AZURE_POD_IDENTITY_AUTHORITY_HOST;
-      if (existsSync(azureMapFilePath)) {
+      if (azureMapFilePath && existsSync(azureMapFilePath)) {
         await unlink(azureMapFilePath);
       }
-      if (existsSync(azureEnvFilePath)) {
+      if (azureEnvFilePath && existsSync(azureEnvFilePath)) {
         await unlink(azureEnvFilePath);
       }
     }, 60_000);
