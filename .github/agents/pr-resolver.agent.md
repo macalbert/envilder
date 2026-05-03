@@ -5,7 +5,7 @@ description: >
   test updates. Commits each fix individually, replies to every comment on
   GitHub (including skipped ones), and resolves threads automatically. Delegates
   to TDD Coach as needed.
-tools: [vscode/*, read, search, edit, execute, agent, web, browser, playwright/*, github.vscode-pull-request-github/*, todo]
+tools: [vscode, read, search, edit, execute, agent, web, browser, playwright, github.vscode-pull-request-github, todo]
 agents:
   - Code Reviewer
   - TDD Coach

@@ -6,7 +6,7 @@ description: >
   or test logic. Use when updating docs after code changes, creating/editing
   website pages, reviewing translations, maintaining changelogs, or styling
   components.
-tools: [read, edit, search, execute, web, agent, todo, vscode/*, playwright/*]
+tools: [read, edit, search, execute, web, agent, todo, vscode, playwright]
 argument-hint: "page, doc, translation, or changelog to update"
 agents: ['Code Reviewer', 'TDD Coach', 'Explore']
 user-invocable: true
@@ -25,7 +25,7 @@ linguistic correctness across all locales.
 
 - `src/website/` — Astro components, pages, CSS, layouts, i18n files
 - `docs/` — All documentation files, changelogs, architecture docs
-- `README.md`, `github-action/README.md`, `src/sdks/*/README.md`
+- `README.md`, `github-action/README.md`, `src/sdks/README.md`
 - `ROADMAP.md`, `CONTRIBUTING.md`
 - `examples/` — Example code and README files
 - `.github/skills/`, `.github/instructions/` — Copilot customization
@@ -33,7 +33,7 @@ linguistic correctness across all locales.
 ### ❌ CANNOT modify
 
 - `src/envilder/` — CLI and GHA application code
-- `src/sdks/*/` (except README.md) — SDK implementation code
+- `src/sdks/` (except README.md) — SDK implementation code
 - `src/iac/` — Infrastructure as Code
 - `tests/` — Test logic (can read for verification, cannot edit)
 - `e2e/` — End-to-end tests
