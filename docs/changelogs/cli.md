@@ -11,11 +11,6 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 * Mask secret path in bulk push log output (#185)
 
-### Dependencies
-
-* Bump `secretlint` from ^11.4.0 to ^12.3.1
-* Bump `@secretlint/secretlint-rule-preset-recommend` from ^11.4.0 to ^12.3.1
-
 ---
 
 ## [0.9.3] - 2026-04-17
