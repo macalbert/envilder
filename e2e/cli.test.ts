@@ -2,7 +2,8 @@ import 'reflect-metadata';
 import { execSync, spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { rm, unlink, writeFile } from 'node:fs/promises';
+import { mkdtemp, rm, unlink, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -45,17 +46,21 @@ describe('Envilder (E2E)', () => {
   const ssmPrefix = `/Test/${runId}`;
 
   const envilder = 'envilder';
-  const envFilePath = join(rootDir, 'e2e', 'sample', 'cli-validation.env');
-  const mapFilePath = join(rootDir, 'e2e', 'sample', `param-map-${runId}.json`);
-  const mapFileWithConfigPath = join(
-    rootDir,
-    'e2e',
-    'sample',
-    `param-map-with-aws-config-${runId}.json`,
-  );
+  let tempDir: string;
+  let envFilePath: string;
+  let mapFilePath: string;
+  let mapFileWithConfigPath: string;
   const singleSsmPath = `${ssmPrefix}/SingleVariable`;
 
   beforeAll(async () => {
+    tempDir = await mkdtemp(join(tmpdir(), `envilder-e2e-${runId}-`));
+    envFilePath = join(tempDir, 'cli-validation.env');
+    mapFilePath = join(tempDir, `param-map-${runId}.json`);
+    mapFileWithConfigPath = join(
+      tempDir,
+      `param-map-with-aws-config-${runId}.json`,
+    );
+
     await Promise.all([
       writeFile(
         mapFilePath,
@@ -94,10 +99,9 @@ describe('Envilder (E2E)', () => {
 
   afterAll(async () => {
     await cleanUpSystem();
-    await Promise.all([
-      rm(mapFilePath, { force: true }),
-      rm(mapFileWithConfigPath, { force: true }),
-    ]);
+    if (tempDir) {
+      await rm(tempDir, { recursive: true, force: true });
+    }
   }, 60_000);
 
   it('Should_PrintCorrectVersion_When_VersionFlagIsProvided', async () => {
@@ -316,21 +320,13 @@ describe('Envilder (E2E)', () => {
     let azureVaultUrl: string;
     let lowkeyVaultHost: string;
     let azureSecretClient: SecretClient;
-    const azureMapFilePath = join(
-      rootDir,
-      'e2e',
-      'sample',
-      'param-map-azure.json',
-    );
-    const azureEnvFilePath = join(
-      rootDir,
-      'e2e',
-      'sample',
-      'azure-validation.env',
-    );
+    let azureMapFilePath: string;
+    let azureEnvFilePath: string;
     let originalTlsReject: string | undefined;
 
     beforeAll(async () => {
+      azureMapFilePath = join(tempDir, 'param-map-azure.json');
+      azureEnvFilePath = join(tempDir, 'azure-validation.env');
       originalTlsReject = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
       // Self-signed cert on a local test container — safe to skip validation
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -385,10 +381,10 @@ describe('Envilder (E2E)', () => {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalTlsReject;
       }
       delete process.env.AZURE_POD_IDENTITY_AUTHORITY_HOST;
-      if (existsSync(azureMapFilePath)) {
+      if (azureMapFilePath && existsSync(azureMapFilePath)) {
         await unlink(azureMapFilePath);
       }
-      if (existsSync(azureEnvFilePath)) {
+      if (azureEnvFilePath && existsSync(azureEnvFilePath)) {
         await unlink(azureEnvFilePath);
       }
     }, 60_000);
@@ -430,12 +426,7 @@ describe('Envilder (E2E)', () => {
     it('Should_PullFromAzureKeyVault_When_VaultUrlProvidedViaConfig', async () => {
       // Arrange
       await azureSecretClient.setSecret('test-secret', 'config-override-value');
-      const noUrlMapPath = join(
-        rootDir,
-        'e2e',
-        'sample',
-        'param-map-azure-no-url.json',
-      );
+      const noUrlMapPath = join(tempDir, 'param-map-azure-no-url.json');
       writeFileSync(
         noUrlMapPath,
         JSON.stringify(
