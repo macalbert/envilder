@@ -46,7 +46,7 @@ PowerShell here-strings corrupt:
 
 **Safe approach:**
 
-```
+```txt
 1. Use create_file tool to write .pr-body.md with the body content
 2. Run: gh pr create --base main --title "<title>" --body-file .pr-body.md
 3. Run: Remove-Item .pr-body.md
