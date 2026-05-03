@@ -257,3 +257,46 @@ For the remaining threads, reply with:
 
 Then resolve all threads. This avoids duplicate walls of text in the PR
 conversation view.
+
+### NEVER use `gh pr comment` for review replies
+
+`gh pr comment` creates a **top-level PR comment** — it does NOT reply inside a
+review thread. This is ALWAYS wrong when responding to review feedback.
+
+**Correct workflow (GraphQL):**
+
+1. Get thread IDs:
+
+   ```graphql
+   repository(owner, name) { pullRequest(number) {
+     reviewThreads(first: 10) { nodes { id comments(first:1) { nodes { id body } } } }
+   }}
+   ```
+
+2. Reply to each thread individually:
+
+   ```graphql
+   mutation { addPullRequestReviewThreadReply(input: {
+     pullRequestReviewThreadId: "<THREAD_ID>", body: "<markdown>"
+   }) { comment { id } } }
+   ```
+
+3. Resolve threads:
+
+   ```graphql
+   mutation { resolveReviewThread(input: {threadId: "<THREAD_ID>"}) { thread { isResolved } } }
+   ```
+
+**Never** batch multiple thread replies into one top-level comment. Each thread
+gets its own reply.
+
+### PowerShell escaping for bodies with `&&` or backticks
+
+When the reply body contains `&&` or backticks, the terminal mangles them even
+with single quotes. Use a temp file approach:
+
+```powershell
+$body = Get-Content -Raw tmp-reply.md
+gh api repos/{owner}/{repo}/pulls/comments/{id} -X PATCH -f body=$body
+Remove-Item tmp-reply.md
+```

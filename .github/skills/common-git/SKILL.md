@@ -116,16 +116,15 @@ Use **Squash and Merge** to keep main branch clean:
 ### Trunk-Based Development
 
 - **main** - Production-ready code
-- **feature/** - Feature branches (short-lived)
-- **fix/** - Bug fix branches (short-lived)
+- **{usergithub}/{type}/{name}** - All work branches (short-lived)
 
 ### Branch Naming
 
 ```txt
-feature/add-azure-provider
-fix/windows-path-resolution
-refactor/extract-provider-factory
-docs/add-nodejs-sdk-references
+macalbert/feat/add-azure-provider
+macalbert/fix/windows-path-resolution
+macalbert/refactor/extract-provider-factory
+macalbert/docs/add-nodejs-sdk-references
 ```
 
 ### Workflow
