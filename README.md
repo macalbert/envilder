@@ -83,6 +83,7 @@ Watch how easy it is to automate your .env management in less than 1 minute:
 
 ```json
 {
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "DB_PASSWORD": "/my-app/db/password",
   "API_KEY": "/my-app/api-key"
 }
@@ -165,12 +166,17 @@ what secrets your app needs and where they live in your cloud provider. The same
 the CLI, the GitHub Action, and the runtime SDKs. You can optionally include a `$config` section
 to declare which provider and settings to use.
 
+Add `"$schema"` to enable IDE autocomplete, inline documentation, and validation for your map
+files. The schema is published at
+[envilder.com/schema/map-file.v1.json](https://envilder.com/schema/map-file.v1.json).
+
 ### Basic Format (AWS SSM, default)
 
 When no `$config` is present, Envilder defaults to AWS SSM Parameter Store:
 
 ```json
 {
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "API_KEY": "/myapp/prod/api-key",
   "DB_PASSWORD": "/myapp/prod/db-password",
   "SECRET_TOKEN": "/myapp/prod/secret-token"
@@ -188,6 +194,7 @@ and uses all other keys as secret mappings:
 
 ```json
 {
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "$config": {
     "provider": "aws",
     "profile": "prod-account"
@@ -201,6 +208,7 @@ and uses all other keys as secret mappings:
 
 ```json
 {
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "$config": {
     "provider": "azure",
     "vaultUrl": "https://my-vault.vault.azure.net"

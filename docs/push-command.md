@@ -27,6 +27,7 @@ envilder --push --envfile=.env.prod --map=param-map.json --profile=prod-account
 
 ```json
 {
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "API_KEY": "/myapp/api/key",
   "DB_PASSWORD": "/myapp/db/password"
 }
@@ -38,6 +39,7 @@ Add `$config` to your map file to target Azure Key Vault:
 
 ```json
 {
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "$config": {
     "provider": "azure",
     "vaultUrl": "https://my-vault.vault.azure.net"
@@ -96,6 +98,7 @@ And your `param-map.json` file contains:
 
 ```json
 {
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "API_KEY": "/myapp/api/key",
   "DB_PASSWORD": "/myapp/db/password"
 }

@@ -141,6 +141,7 @@ Create a JSON file mapping environment variables to secret paths:
 
 ```json
 {
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "DATABASE_URL": "/myapp/prod/database-url",
   "API_KEY": "/myapp/prod/api-key",
   "SECRET_TOKEN": "/myapp/prod/secret-token"
@@ -153,6 +154,7 @@ Use the optional `$config` section to declare the provider and vault URL:
 
 ```json
 {
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "$config": {
     "provider": "azure",
     "vaultUrl": "https://my-vault.vault.azure.net"

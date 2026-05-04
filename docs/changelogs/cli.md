@@ -5,6 +5,27 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [0.10.0] - 2026-05-03
+
+### Added
+
+* **Map-file JSON Schema** — A formal JSON Schema specification for map files,
+  published at `https://envilder.com/schema/map-file.v1.json`. Add
+  `"$schema": "https://envilder.com/schema/map-file.v1.json"` to any map file
+  for IDE autocomplete, inline documentation, and validation
+  ([#218](https://github.com/macalbert/envilder/pull/218))
+* **Schema contract tests** — 39 tests validating the JSON Schema across all
+  providers (AWS, Azure, GCP, HashiCorp Vault, file)
+
+### Fixed
+
+* **Reserved key filtering** — All `$`-prefixed keys (e.g. `$schema`) are now
+  excluded from variable mappings. Previously only `$config` was filtered,
+  causing `$schema` to leak into environment variables
+  ([#218](https://github.com/macalbert/envilder/pull/218))
+
+---
+
 ## [0.9.4] - 2026-05-03
 
 ### Fixed

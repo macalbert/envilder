@@ -352,6 +352,46 @@ describe('FileVariableStore', () => {
       });
       expect(result.mappings).not.toHaveProperty('$config');
     });
+
+    it('Should_ExcludeDollarPrefixedKeys_When_MapFileContainsSchemaKey', async () => {
+      // Arrange
+      const mapData = {
+        $schema: 'https://envilder.com/schema/map-file.v1.json',
+        $config: { provider: 'aws' },
+        DB_URL: '/app/db',
+      };
+      mockInMemoryFiles.set(mockMapPath, JSON.stringify(mapData));
+
+      // Act
+      const result = await sut.getParsedMapping(mockMapPath);
+
+      // Assert
+      expect(result.config).toEqual({ provider: 'aws' });
+      expect(result.mappings).toEqual({ DB_URL: '/app/db' });
+      expect(result.mappings).not.toHaveProperty('$schema');
+    });
+
+    it('Should_ExcludeNonStringValues_When_MapFileContainsNumericOrObjectValues', async () => {
+      // Arrange
+      const mapData = {
+        DB_URL: '/app/db',
+        INVALID_NUMBER: 42,
+        INVALID_OBJECT: { nested: true },
+        API_KEY: '/app/key',
+        INVALID_BOOL: true,
+        INVALID_NULL: null,
+      };
+      mockInMemoryFiles.set(mockMapPath, JSON.stringify(mapData));
+
+      // Act
+      const result = await sut.getParsedMapping(mockMapPath);
+
+      // Assert
+      expect(result.mappings).toEqual({
+        DB_URL: '/app/db',
+        API_KEY: '/app/key',
+      });
+    });
   });
 
   describe('getMapping with $config', () => {

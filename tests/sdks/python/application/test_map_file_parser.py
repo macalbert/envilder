@@ -158,6 +158,28 @@ class TestMapFileParser:
         # Assert
         assert actual.config.provider == SecretProviderType.AZURE
 
+    def Should_ExcludeDollarPrefixedKeys_When_MapFileContainsSchemaKey(
+        self,
+    ) -> None:
+        # Arrange
+        json_content = """{
+            "$schema": "https://envilder.com/schema/map-file.v1.json",
+            "$config": {
+                "provider": "aws"
+            },
+            "DB_URL": "/app/db"
+        }"""
+        sut = MapFileParser()
+
+        # Act
+        actual = sut.parse(json_content)
+
+        # Assert
+        assert len(actual.mappings) == 1
+        assert "$schema" not in actual.mappings
+        assert actual.mappings["DB_URL"] == "/app/db"
+        assert actual.config.provider == SecretProviderType.AWS
+
     def Should_RaiseValueError_When_ProviderIsUnsupported(self) -> None:
         # Arrange
         json_content = """{
