@@ -66,7 +66,7 @@ jobs:
 
       - name: 📋 Generate coverage report
         if: always()
-        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.7
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.9
         with:
           reports: coverage/lcov.info
           sourcedirs: src/envilder
@@ -140,7 +140,7 @@ jobs:
 
       - name: 📋 Generate coverage report
         if: always()
-        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.7
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.9
         with:
           reports: output/dotnet.cobertura.xml
           sourcedirs: src/sdks/dotnet
@@ -209,7 +209,7 @@ jobs:
 
       - name: 📋 Generate coverage report
         if: always()
-        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.7
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.9
         with:
           reports: output/python-coverage.xml
           sourcedirs: src/sdks/python
@@ -274,7 +274,7 @@ jobs:
 
       - name: 📋 Generate coverage report
         if: always()
-        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.7
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.9
         with:
           reports: tests/sdks/nodejs/coverage/lcov.info
           sourcedirs: src/sdks/nodejs/src
@@ -327,7 +327,7 @@ jobs:
 
       - name: 📋 Generate coverage report
         if: always()
-        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.7
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.9
         with:
           reports: coverage-iac/lcov.info
           sourcedirs: src/iac
