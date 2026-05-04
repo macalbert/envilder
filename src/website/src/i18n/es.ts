@@ -1,4 +1,3 @@
-import { releaseMetadata } from './releaseMetadata';
 import type { Translations } from './types';
 
 export const es: Translations = {
@@ -301,36 +300,6 @@ export const es: Translations = {
     comingSoon: 'Próximamente',
     docsLink: 'Ver docs',
     packageLink: 'Paquete',
-  },
-  changelog: {
-    title: 'Qué hay de ',
-    titleAccent: 'nuevo',
-    subtitle:
-      'Novedades de la última versión. El sitio de documentación ya está en línea.',
-    releaseTitle: 'Documentación y Estabilidad',
-    releaseDate: new Date(
-      `${releaseMetadata.releaseDate}T00:00:00Z`,
-    ).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    }),
-    highlights: [
-      {
-        icon: '✨',
-        text: 'Sitio de documentación publicado en envilder.com: guías completas, historial y docs multiidioma',
-      },
-      {
-        icon: '✨',
-        text: 'Corregido: @types/node movido a devDependencies. Sin dependencias de runtime innecesarias',
-      },
-      {
-        icon: '✨',
-        text: 'Corregido: inestabilidad en tests e2e. Rutas SSM únicas por ejecución evitan condiciones de carrera',
-      },
-    ],
-    fullChangelog: '📋 Historial completo',
-    viewReleases: 'Ver todas las versiones en GitHub →',
   },
   roadmap: {
     title: 'Qué viene ',

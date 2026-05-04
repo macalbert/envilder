@@ -1,4 +1,3 @@
-import { releaseMetadata } from './releaseMetadata';
 import type { Translations } from './types';
 
 export const ca: Translations = {
@@ -300,36 +299,6 @@ export const ca: Translations = {
     comingSoon: 'Properament',
     docsLink: 'Veure docs',
     packageLink: 'Paquet',
-  },
-  changelog: {
-    title: 'Què hi ha de ',
-    titleAccent: 'nou',
-    subtitle:
-      "Novetats de l'última versió. El lloc de documentació ja és en línia.",
-    releaseTitle: 'Documentació i Estabilitat',
-    releaseDate: new Date(
-      `${releaseMetadata.releaseDate}T00:00:00Z`,
-    ).toLocaleDateString('ca-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    }),
-    highlights: [
-      {
-        icon: '✨',
-        text: 'Web de documentació publicada a envilder.com: guies completes, historial i docs multilingüe',
-      },
-      {
-        icon: '✨',
-        text: 'Corregit: @types/node mogut a devDependencies. Sense dependències de runtime innecessàries',
-      },
-      {
-        icon: '✨',
-        text: 'Corregit: inestabilitat als tests e2e. Rutes SSM úniques per execució eviten condicions de carrera',
-      },
-    ],
-    fullChangelog: '📋 Historial complet',
-    viewReleases: 'Veure totes les versions a GitHub →',
   },
   roadmap: {
     title: 'Què ve ',

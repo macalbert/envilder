@@ -171,22 +171,6 @@ export interface SdksTranslations {
   packageLink: string;
 }
 
-export interface ChangelogHighlight {
-  icon: string;
-  text: string;
-}
-
-export interface ChangelogTranslations {
-  title: string;
-  titleAccent: string;
-  subtitle: string;
-  releaseTitle: string;
-  releaseDate: string;
-  highlights: ChangelogHighlight[];
-  fullChangelog: string;
-  viewReleases: string;
-}
-
 export interface RoadmapItem {
   status: string;
   label: string;
@@ -540,7 +524,6 @@ export interface Translations {
   providers: ProvidersTranslations;
   gha: GhaTranslations;
   sdks: SdksTranslations;
-  changelog: ChangelogTranslations;
   roadmap: RoadmapTranslations;
   getStarted: GetStartedTranslations;
   footer: FooterTranslations;
