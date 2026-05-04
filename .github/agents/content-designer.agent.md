@@ -25,7 +25,7 @@ linguistic correctness across all locales.
 
 - `src/website/` — Astro components, pages, CSS, layouts, i18n files
 - `docs/` — All documentation files, changelogs, architecture docs
-- `README.md`, `github-action/README.md`, `src/sdks/README.md`
+- `README.md`, `github-action/README.md`, `src/sdks/*/README.md`
 - `ROADMAP.md`, `CONTRIBUTING.md`
 - `examples/` — Example code and README files
 - `.github/skills/`, `.github/instructions/` — Copilot customization
