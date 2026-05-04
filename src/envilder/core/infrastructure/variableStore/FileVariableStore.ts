@@ -36,8 +36,8 @@ export class FileVariableStore implements IVariableStore {
       $config && typeof $config === 'object' ? $config : {};
     const mappings: Record<string, string> = {};
     for (const [key, value] of Object.entries(rest)) {
-      if (!key.startsWith('$')) {
-        mappings[key] = value as string;
+      if (!key.startsWith('$') && typeof value === 'string') {
+        mappings[key] = value;
       }
     }
     return { config, mappings };
