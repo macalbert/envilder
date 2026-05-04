@@ -127,4 +127,23 @@ describe('MapFileParser', () => {
     // Assert
     expect(act).toThrow("Unknown provider: 'gcp'. Supported: aws, azure");
   });
+
+  it('Should_ExcludeDollarPrefixedKeys_When_MapFileContainsSchemaKey', () => {
+    // Arrange
+    const json = JSON.stringify({
+      $schema: 'https://envilder.com/schema/map-file.v1.json',
+      $config: { provider: 'aws' },
+      DB_URL: '/app/db-url',
+    });
+    const sut = new MapFileParser();
+
+    // Act
+    const actual = sut.parse(json);
+
+    // Assert
+    expect(actual.mappings.size).toBe(1);
+    expect(actual.mappings.has('$schema')).toBe(false);
+    expect(actual.mappings.get('DB_URL')).toBe('/app/db-url');
+    expect(actual.config.provider).toBe('aws');
+  });
 });

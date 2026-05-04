@@ -31,6 +31,7 @@ If your `param-map.json` file contains:
 
 ```json
 {
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "API_KEY": "/myapp/api/key",
   "DB_PASSWORD": "/myapp/db/password",
   "SECRET_TOKEN": "/myapp/auth/token"
@@ -91,6 +92,7 @@ Add `$config` to your map file:
 
 ```json
 {
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "$config": {
     "provider": "azure",
     "vaultUrl": "https://my-vault.vault.azure.net"

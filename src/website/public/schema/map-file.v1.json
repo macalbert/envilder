@@ -16,13 +16,7 @@
       "properties": {
         "provider": {
           "type": "string",
-          "enum": [
-            "aws",
-            "azure",
-            "gcp",
-            "hashicorp",
-            "file"
-          ],
+          "enum": ["aws", "azure", "gcp", "hashicorp", "file"],
           "default": "aws",
           "description": "Secret provider backend. Defaults to 'aws' when absent."
         },
@@ -72,10 +66,7 @@
               "provider": {
                 "const": "aws"
               }
-            },
-            "required": [
-              "provider"
-            ]
+            }
           },
           "then": {
             "properties": {
@@ -93,14 +84,10 @@
                 "const": "azure"
               }
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           "then": {
-            "required": [
-              "vaultUrl"
-            ],
+            "required": ["vaultUrl"],
             "properties": {
               "profile": false,
               "projectId": false,
@@ -116,14 +103,10 @@
                 "const": "gcp"
               }
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           "then": {
-            "required": [
-              "projectId"
-            ],
+            "required": ["projectId"],
             "properties": {
               "profile": false,
               "vaultUrl": false,
@@ -139,14 +122,10 @@
                 "const": "hashicorp"
               }
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           "then": {
-            "required": [
-              "vaultUrl"
-            ],
+            "required": ["vaultUrl"],
             "properties": {
               "profile": false,
               "projectId": false,
@@ -161,14 +140,10 @@
                 "const": "file"
               }
             },
-            "required": [
-              "provider"
-            ]
+            "required": ["provider"]
           },
           "then": {
-            "required": [
-              "path"
-            ],
+            "required": ["path"],
             "properties": {
               "profile": false,
               "vaultUrl": false,
@@ -181,9 +156,7 @@
     }
   },
   "patternProperties": {
-    "^\\$": {
-      "description": "Reserved keys. All $-prefixed keys are reserved for Envilder and ignored by parsers."
-    },
+    "^\\$(?!schema$|config$)": false,
     "^[a-zA-Z_][a-zA-Z0-9_]*$": {
       "type": "string",
       "description": "Variable mapping: environment variable name → secret identifier (opaque string interpreted by the provider)."

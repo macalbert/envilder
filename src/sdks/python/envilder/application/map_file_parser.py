@@ -47,8 +47,8 @@ class MapFileParser:
         config = MapFileConfig()
 
         for key, value in document.items():
-            if key == _CONFIG_KEY:
-                if isinstance(value, dict):
+            if key.startswith("$"):
+                if key == _CONFIG_KEY and isinstance(value, dict):
                     config = _deserialize_config(value)
                 continue
 

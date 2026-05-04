@@ -20,38 +20,14 @@ export class MapFileParser {
    * @returns Parsed config and variable mappings.
    */
   parse(json: string): ParsedMapFile {
-    let raw: unknown;
-    try {
-      raw = JSON.parse(json);
-    } catch {
-      throw new Error('Invalid map file: content is not valid JSON');
-    }
-    if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
-      throw new Error('Invalid map file: root must be a JSON object');
-    }
+    const raw = this.parseRawJson(json);
     const mappings = new Map<string, string>();
     let config: MapFileConfig = {};
 
     for (const [key, value] of Object.entries(raw)) {
-      if (key === CONFIG_KEY) {
-        if (typeof value === 'object' && value !== null) {
-          const obj = value as Record<string, unknown>;
-          const providerStr =
-            typeof obj.provider === 'string'
-              ? obj.provider.toLowerCase()
-              : undefined;
-          config = {
-            provider: providerStr ? PROVIDER_MAP[providerStr] : undefined,
-            vaultUrl:
-              typeof obj.vaultUrl === 'string' ? obj.vaultUrl : undefined,
-            profile: typeof obj.profile === 'string' ? obj.profile : undefined,
-          };
-
-          if (providerStr && !config.provider) {
-            throw new Error(
-              `Unknown provider: '${obj.provider}'. Supported: aws, azure`,
-            );
-          }
+      if (key.startsWith('$')) {
+        if (key === CONFIG_KEY) {
+          config = this.parseConfig(value);
         }
         continue;
       }
@@ -62,5 +38,40 @@ export class MapFileParser {
     }
 
     return { config, mappings };
+  }
+
+  private parseRawJson(json: string): Record<string, unknown> {
+    let raw: unknown;
+    try {
+      raw = JSON.parse(json);
+    } catch {
+      throw new Error('Invalid map file: content is not valid JSON');
+    }
+    if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+      throw new Error('Invalid map file: root must be a JSON object');
+    }
+    return raw as Record<string, unknown>;
+  }
+
+  private parseConfig(value: unknown): MapFileConfig {
+    if (typeof value !== 'object' || value === null) {
+      return {};
+    }
+    const obj = value as Record<string, unknown>;
+    const providerStr =
+      typeof obj.provider === 'string' ? obj.provider.toLowerCase() : undefined;
+    const config: MapFileConfig = {
+      provider: providerStr ? PROVIDER_MAP[providerStr] : undefined,
+      vaultUrl: typeof obj.vaultUrl === 'string' ? obj.vaultUrl : undefined,
+      profile: typeof obj.profile === 'string' ? obj.profile : undefined,
+    };
+
+    if (providerStr && !config.provider) {
+      throw new Error(
+        `Unknown provider: '${obj.provider}'. Supported: aws, azure`,
+      );
+    }
+
+    return config;
   }
 }

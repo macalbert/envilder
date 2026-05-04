@@ -1,4 +1,5 @@
 {
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "$config": {
     "provider": "aws"
   },

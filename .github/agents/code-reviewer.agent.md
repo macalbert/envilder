@@ -5,7 +5,7 @@ description: >
   architecture, security, conventions, and complexity. Runs tests, linters,
   and browser checks to validate findings. Delegates to TDD Coach for fixes.
   Use when reviewing PRs, commits, or local changes.
-tools: [execute/*, read/*, agent/*, browser/*, search/*, vault/*]
+tools: [read, edit, execute, agent, search, web, browser, vscode, todo, github.vscode-pull-request-github, ms-azuretools.vscode-containers]
 agents: ['TDD Coach', 'PR Resolver', 'Content Designer']
 argument-hint: "PR, commit range, or files to review"
 user-invocable: true
