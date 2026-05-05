@@ -65,7 +65,7 @@ feat(cli)!: remove --auto flag
 feat(gha): add support for custom AWS regions
 
 # Bug fix with scope
-fix(cli): prevent crash on missing param-map.json
+fix(cli): prevent crash on missing envilder.json
 
 # Documentation update
 docs: add troubleshooting guide for GitHub Actions

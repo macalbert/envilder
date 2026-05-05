@@ -10,9 +10,9 @@ var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? Enviro
 
 var secrets = await LoadAsync(env, new Dictionary<string, string?>
 {
-    [Environments.Development] = "../../../secrets-map.json",
-    [Environments.Staging] = "../../../secrets-map.json",
-    [Environments.Production] = "../../../secrets-map.json",
+    [Environments.Development] = "../../../envilder.json",
+    [Environments.Staging] = "../../../envilder.json",
+    [Environments.Production] = "../../../envilder.json",
     ["test"] = null,  // no secrets loaded
 });
 

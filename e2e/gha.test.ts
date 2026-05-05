@@ -48,12 +48,12 @@ const LOWKEY_VAULT_PORT = 8443;
 
 describe('GitHub Action (E2E)', () => {
   const envFilePath = join(rootDir, 'e2e', 'sample', 'gha-validation.env');
-  const mapFilePath = join(rootDir, 'e2e', 'sample', 'param-map.json');
+  const mapFilePath = join(rootDir, 'e2e', 'sample', 'envilder.json');
   const mapFileWithConfigPath = join(
     rootDir,
     'e2e',
     'sample',
-    'param-map-with-aws-config.json',
+    'envilder.aws.json',
   );
 
   beforeAll(async () => {
@@ -238,7 +238,7 @@ describe('GitHub Action (E2E)', () => {
       rootDir,
       'e2e',
       'sample',
-      'param-map-azure-gha.json',
+      'envilder-azure-gha.json',
     );
     const azureEnvFilePath = join(
       rootDir,

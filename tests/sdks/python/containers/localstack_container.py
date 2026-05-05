@@ -18,7 +18,7 @@ from testcontainers.localstack import (
     LocalStackContainer as BaseLocalStackContainer,
 )
 
-_SECRETS_MAP = Path(__file__).resolve().parent.parent / "secrets-map.json"
+_SECRETS_MAP = Path(__file__).resolve().parent.parent / "envilder.json"
 
 
 class LocalStackContainer:
@@ -32,7 +32,7 @@ class LocalStackContainer:
         environment = self._load_environment()
         if not environment.get("LOCALSTACK_AUTH_TOKEN"):
             raise EnvironmentError(
-                "LOCALSTACK_AUTH_TOKEN could not be resolved from secrets-map.json"
+                "LOCALSTACK_AUTH_TOKEN could not be resolved from envilder.json"
             )
 
         self._container = BaseLocalStackContainer(

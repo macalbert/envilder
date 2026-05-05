@@ -414,8 +414,8 @@ export const en: Translations = {
     prereqAzureNote: 'for Azure Key Vault',
     install: 'Install',
     quickStart: 'Quick start',
-    step1: 'Create a param-map.json mapping env vars to secret paths',
-    step2: 'Run envilder --map=param-map.json --envfile=.env',
+    step1: 'Create a envilder.json mapping env vars to secret paths',
+    step2: 'Run envilder --map=envilder.json --envfile=.env',
     step3: 'Your .env file is ready ✔',
     terminalTitle: 'Quick start',
     commentInstall: '# Install globally',
@@ -528,7 +528,7 @@ export const en: Translations = {
       'For pull-only access, Key Vault Secrets User is sufficient.',
     mapTitle: 'Mapping file',
     mapIntro:
-      "The mapping file (param-map.json) is the core of Envilder. It's a JSON file that maps environment variable names (keys) to secret paths (values) in your cloud provider.",
+      "The mapping file (envilder.json) is the core of Envilder. It's a JSON file that maps environment variable names (keys) to secret paths (values) in your cloud provider.",
     mapCalloutStructure: 'Structure:',
     mapCalloutKey: 'Each key becomes an env var name in your .env file.',
     mapCalloutValue:
@@ -635,7 +635,7 @@ export const en: Translations = {
     ghaPrereqAws:
       'AWS: Configure credentials with aws-actions/configure-aws-credentials',
     ghaPrereqAzure: 'Azure: Configure credentials with azure/login',
-    ghaPrereqMap: 'A param-map.json committed to your repository',
+    ghaPrereqMap: 'A envilder.json committed to your repository',
     ghaPullOnly: 'The GitHub Action only supports pull mode (no push).',
     ghaBasicTitle: 'Basic workflow example',
     ghaMultiEnvTitle: 'Multi-environment workflow',

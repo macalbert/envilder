@@ -80,7 +80,7 @@ Check `astro.config.mjs` → `i18n.locales` to discover all active locales.
 
 Product names, CLI flags, code tokens, and acronyms stay in English:
 
-`envilder`, `AWS SSM`, `Azure Key Vault`, `GitHub Action`, `param-map.json`,
+`envilder`, `AWS SSM`, `Azure Key Vault`, `GitHub Action`, `envilder.json`,
 `.env`, `--map`, `--envfile`, `--exec`, `--provider`, `--push`, `CI/CD`, `IAM`,
 `RBAC`, `CLI`, `API`, `JSON`, `YAML`, `Node.js`, `pnpm`, `npx`
 

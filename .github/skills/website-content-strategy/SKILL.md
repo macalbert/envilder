@@ -29,7 +29,7 @@ environment variables from AWS SSM Parameter Store or Azure Key Vault.
 
 1. **Security**: Secrets never live in `.env` files, git repos, or CI logs —
    fetched from cloud vault at runtime
-2. **Consistency**: One `param-map.json` = single source of truth for all
+2. **Consistency**: One `envilder.json` = single source of truth for all
    environments (dev, staging, production)
 3. **Developer Experience**: One command replaces manual secret copying,
    reducing onboarding from hours to seconds
@@ -40,7 +40,7 @@ Developers want to know **how it works** and **how to use it quickly**.
 
 ### Content guidelines
 
-- Show real CLI commands and `param-map.json` examples
+- Show real CLI commands and `envilder.json` examples
 - Explain `--exec` mode, push mode, and GitHub Action inputs
 - Use terminal mockups (`TerminalMockup.astro`) for live demos
 - Keep language direct and concise — no marketing fluff
@@ -52,7 +52,7 @@ Developers want to know **how it works** and **how to use it quickly**.
 - One command replaces manual secret management
 - Works with existing `.env` workflows — zero migration cost
 - Supports `--exec` mode to inject secrets without writing files
-- Type-safe configuration via `param-map.json`
+- Type-safe configuration via `envilder.json`
 - Works locally, in CI, and in production
 
 ## Audience: CTOs / Technical Leaders (Strategic Value)

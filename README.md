@@ -28,7 +28,7 @@ them from AWS SSM or Azure Key Vault. The same mapping file works in local dev (
 CI/CD (GitHub Action), and application startup (runtime SDKs).
 
 ```bash
-envilder --map=param-map.json --envfile=.env
+envilder --map=envilder.json --envfile=.env
 ```
 
 No SaaS middleman. No vendor lock-in. Secrets stay in your cloud.
@@ -47,7 +47,7 @@ No SaaS middleman. No vendor lock-in. Secrets stay in your cloud.
 
 ## How Envilder solves it
 
-- 📋 **One mapping file for everything.** A single `param-map.json` defines what secrets your app
+- 📋 **One mapping file for everything.** A single `envilder.json` defines what secrets your app
   needs. Git-versioned, PR-reviewable, the same across every environment.
 - ⚡ **Works everywhere your code runs.** CLI for local dev, GitHub Action for CI/CD, runtime SDKs
   for application startup. Same file, same result.
@@ -79,7 +79,7 @@ Watch how easy it is to automate your .env management in less than 1 minute:
 
 ### 🏁 Get Started (2 steps)
 
-**1. Create a mapping file** (`param-map.json`):
+**1. Create a mapping file** (`envilder.json`):
 
 ```json
 {
@@ -92,7 +92,7 @@ Watch how easy it is to automate your .env management in less than 1 minute:
 **2. Generate your `.env` file:**
 
 ```bash
-npx envilder --map=param-map.json --envfile=.env
+npx envilder --map=envilder.json --envfile=.env
 ```
 
 That's it. Your secrets are pulled from AWS SSM and written to `.env`.
@@ -126,7 +126,7 @@ npm install -g envilder
 - name: Pull secrets from AWS SSM
   uses: macalbert/envilder/github-action@v0.8.0
   with:
-    map-file: param-map.json
+    map-file: envilder.json
     env-file: .env
 ```
 
@@ -143,7 +143,7 @@ npm install -g envilder
 - name: Pull secrets from Azure Key Vault
   uses: macalbert/envilder/github-action@v0.8.0
   with:
-    map-file: param-map.json
+    map-file: envilder.json
     env-file: .env
     provider: azure
     vault-url: ${{ secrets.AZURE_KEY_VAULT_URL }}
@@ -161,7 +161,7 @@ npm install -g envilder
 
 ## 🗺️ Mapping File Format
 
-The mapping file (`param-map.json`) is the core of Envilder. It's the single model that defines
+The mapping file (`envilder.json`) is the core of Envilder. It's the single model that defines
 what secrets your app needs and where they live in your cloud provider. The same file is used by
 the CLI, the GitHub Action, and the runtime SDKs. You can optionally include a `$config` section
 to declare which provider and settings to use.
@@ -242,10 +242,10 @@ This means you can set a default provider in `$config` and override it per invoc
 
 ```bash
 # Uses $config from the map file
-envilder --map=param-map.json --envfile=.env
+envilder --map=envilder.json --envfile=.env
 
 # Overrides provider and vault URL from the map file
-envilder --provider=azure --vault-url=https://other-vault.vault.azure.net --map=param-map.json --envfile=.env
+envilder --provider=azure --vault-url=https://other-vault.vault.azure.net --map=envilder.json --envfile=.env
 ```
 
 ---
@@ -269,13 +269,13 @@ Load secrets into `IConfiguration` or inject them into the process environment:
 ```csharp
 // Option A: integrate with IConfiguration
 var config = new ConfigurationBuilder()
-    .AddEnvilder("secrets-map.json")
+    .AddEnvilder("envilder.json")
     .Build();
 
 var dbPassword = config["DB_PASSWORD"];
 
 // Option B: resolve + inject into environment
-Envilder.Load("secrets-map.json");
+Envilder.Load("envilder.json");
 var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 ```
 
@@ -297,7 +297,7 @@ Load secrets into your application with a single line:
 from envilder import Envilder
 
 # Resolve + inject into os.environ
-Envilder.load('secrets-map.json')
+Envilder.load('envilder.json')
 ```
 
 Or route by environment, where each environment points to its own map file:
@@ -328,7 +328,7 @@ Load secrets into your application with a single line:
 import { Envilder } from '@envilder/sdk';
 
 // Resolve + inject into process.env
-const secrets = await Envilder.load('secrets-map.json');
+const secrets = await Envilder.load('envilder.json');
 ```
 
 Or use the fluent builder for full control:
@@ -336,7 +336,7 @@ Or use the fluent builder for full control:
 ```typescript
 import { Envilder, SecretProviderType } from '@envilder/sdk';
 
-const secrets = await Envilder.fromMapFile('secrets-map.json')
+const secrets = await Envilder.fromMapFile('envilder.json')
   .withProvider(SecretProviderType.Aws)
   .withProfile('prod-account')
   .resolve();
@@ -350,7 +350,7 @@ const secrets = await Envilder.fromMapFile('secrets-map.json')
 
 ```mermaid
 graph LR
-    A["Mapping Model (param-map.json)"] --> B[Envilder]:::core
+    A["Mapping Model (envilder.json)"] --> B[Envilder]:::core
     B --> C["CLI → .env file"]
     B --> D["GitHub Action → CI/CD"]
     B --> E["SDK → app memory"]
@@ -360,7 +360,7 @@ graph LR
     classDef core fill:#1f3b57,color:#fff,stroke:#ccc,stroke-width:2px;
 ```
 
-1. **Define**: create a `param-map.json` mapping env var names to cloud secret paths
+1. **Define**: create a `envilder.json` mapping env var names to cloud secret paths
 2. **Resolve**: Envilder fetches each secret from your cloud vault
 3. **Deliver**: secrets arrive as a `.env` file (CLI/GHA) or in-memory (SDKs)
 4. **Push**: rotate or add secrets from your local environment back to the cloud

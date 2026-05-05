@@ -159,7 +159,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
 	{
 		// Act
 		var act = () => new ConfigurationBuilder()
-			.AddEnvilder("/nonexistent/secrets-map.json")
+			.AddEnvilder("/nonexistent/envilder.json")
 			.Build();
 
 		// Assert

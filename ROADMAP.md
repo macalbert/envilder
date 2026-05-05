@@ -54,7 +54,7 @@ or directly inside application code at runtime.
 |---------|----------|-------|
 | **Auto-discovery mode** (`--auto`) | Medium | Fetch all parameters matching a given prefix (e.g., `/my-app/prod/*`) |
 | **Exec with refresh** (`--refresh-interval`) | Low | Kill & restart child process periodically with fresh secrets (requires `--exec`) |
-| **Hierarchical mapping** | Low | Per-environment `param-map.json` with inheritance/overrides |
+| **Hierarchical mapping** | Low | Per-environment `envilder.json` with inheritance/overrides |
 
 <!-- markdownlint-enable MD013 -->
 
@@ -65,7 +65,7 @@ or directly inside application code at runtime.
 All tools and SDKs live in a single monorepo and share the same map-file format:
 
 ```txt
-param-map.json (universal contract)
+envilder.json (universal contract)
      │
      ├── envilder CLI            → generates .env files
      ├── envilder GitHub Action  → CI/CD secret injection

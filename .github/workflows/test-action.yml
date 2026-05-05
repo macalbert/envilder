@@ -65,7 +65,7 @@ jobs:
       - name: 🔐 Test Action - Pull Secrets
         uses: ./github-action
         with:
-          map-file: e2e/sample/param-map.json
+          map-file: e2e/sample/envilder.json
           env-file: .env.test
 
       - name: ✅ Verify .env file was created

@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 /// </summary>
 /// <example>
 /// <code>
-/// var secrets = Envilder.FromMapFile("param-map.json")
+/// var secrets = Envilder.FromMapFile("envilder.json")
 ///     .WithProvider(SecretProviderType.Azure)
 ///     .WithVaultUrl("https://my-vault.vault.azure.net")
 ///     .Resolve();

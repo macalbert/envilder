@@ -25,7 +25,7 @@ class MapFileParser:
 
         from envilder import MapFileParser
 
-        with open("secrets-map.json") as f:
+        with open("envilder.json") as f:
             map_file = MapFileParser().parse(f.read())
     """
 

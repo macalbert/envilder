@@ -16,7 +16,7 @@ import { createSecretProvider } from '../../../../src/sdks/nodejs/src/infrastruc
 const LOCALSTACK_IMAGE = 'localstack/localstack:stable';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const SECRETS_MAP = path.resolve(__dirname, '../../../../secrets-map.json');
+const SECRETS_MAP = path.resolve(__dirname, '../../../../envilder.json');
 
 export class LocalStackTestContainer {
   private container: StartedLocalStackContainer | null = null;
@@ -28,7 +28,7 @@ export class LocalStackTestContainer {
     const environment = await loadEnvironment();
     if (!environment.get('LOCALSTACK_AUTH_TOKEN')) {
       throw new Error(
-        'LOCALSTACK_AUTH_TOKEN could not be resolved from secrets-map.json',
+        'LOCALSTACK_AUTH_TOKEN could not be resolved from envilder.json',
       );
     }
 

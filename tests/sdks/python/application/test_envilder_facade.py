@@ -31,7 +31,7 @@ def mock_provider() -> Mock:
     return provider
 
 
-MAP_FILE = str(_TEST_DIR / "secrets-map.json")
+MAP_FILE = str(_TEST_DIR / "envilder.json")
 
 
 class TestEnvilderResolve:

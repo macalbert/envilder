@@ -4,7 +4,7 @@
 
 using static Envilder.Application.Envilder;
 
-var secrets = await FromMapFile("../../../secrets-map.json")
+var secrets = await FromMapFile("../../../envilder.json")
     .WithProfile("mac")
     .ResolveAsync();
 

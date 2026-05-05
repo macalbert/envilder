@@ -114,7 +114,7 @@ jobs:
 
             - uses: macalbert/envilder/github-action@v${{ inputs.version }}
               with:
-                map-file: param-map.json
+                map-file: envilder.json
                 env-file: .env
             ```
 

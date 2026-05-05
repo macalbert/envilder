@@ -8,10 +8,10 @@ using Envilder.Infrastructure.Configuration;
 using Microsoft.Extensions.Configuration;
 
 var config = new ConfigurationBuilder()
-    .AddEnvilder("../../../secrets-map.json")
+    .AddEnvilder("../../../envilder.json")
     .Build();
 
-var mapFile = new MapFileParser().Parse(File.ReadAllText("../../../secrets-map.json"));
+var mapFile = new MapFileParser().Parse(File.ReadAllText("../../../envilder.json"));
 
 foreach (var key in mapFile.Mappings.Keys)
     Console.WriteLine($"{key} = {config[key]}");

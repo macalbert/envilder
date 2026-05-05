@@ -4,7 +4,7 @@
 
 using static Envilder.Application.Envilder;
 
-var secrets = await ResolveFileAsync("../../../secrets-map.json");
+var secrets = await ResolveFileAsync("../../../envilder.json");
 
 foreach (var (key, value) in secrets)
     Console.WriteLine($"{key} = {value}");

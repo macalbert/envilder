@@ -44,20 +44,20 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   **.NET** ([NuGet](https://www.nuget.org/packages/Envilder)):
 
   ```csharp
-  builder.Configuration.AddEnvilder("secrets-map.json");
+  builder.Configuration.AddEnvilder("envilder.json");
   ```
 
   **Python** ([PyPI](https://pypi.org/project/envilder)):
 
   ```python
   from envilder import Envilder
-  Envilder.load('secrets-map.json')
+  Envilder.load('envilder.json')
   ```
 
   **CLI** (as always):
 
   ```bash
-  npx envilder --map=secrets-map.json --envfile=.env
+  npx envilder --map=envilder.json --envfile=.env
   ```
 
   **GitHub Action:**
@@ -65,7 +65,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   ```yaml
   - uses: macalbert/envilder/github-action@v0
     with:
-      map-file: secrets-map.json
+      map-file: envilder.json
       env-file: .env
   ```
 

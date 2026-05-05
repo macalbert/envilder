@@ -29,7 +29,7 @@ npm install @envilder/sdk
 import { Envilder } from '@envilder/sdk';
 
 // Resolve secrets and inject into process.env
-await Envilder.load('secrets-map.json');
+await Envilder.load('envilder.json');
 
 console.log('DB_PASSWORD loaded:', !!process.env.DB_PASSWORD);
 ```
@@ -39,7 +39,7 @@ console.log('DB_PASSWORD loaded:', !!process.env.DB_PASSWORD);
 ```typescript
 import { Envilder } from '@envilder/sdk';
 
-const secrets = await Envilder.resolveFile('secrets-map.json');
+const secrets = await Envilder.resolveFile('envilder.json');
 console.log(secrets.get('DB_PASSWORD')); // avoid logging secrets in production
 ```
 
@@ -52,13 +52,13 @@ profiles, or vault URLs per environment:
 import { Envilder, SecretProviderType } from '@envilder/sdk';
 
 // Override provider + vault URL
-const secrets = await Envilder.fromMapFile('secrets-map.json')
+const secrets = await Envilder.fromMapFile('envilder.json')
   .withProvider(SecretProviderType.Azure)
   .withVaultUrl('https://my-vault.vault.azure.net')
   .resolve();
 
 // Override AWS profile and inject
-await Envilder.fromMapFile('secrets-map.json')
+await Envilder.fromMapFile('envilder.json')
   .withProfile('staging')
   .inject();
 ```
@@ -104,7 +104,7 @@ Opt-in validation ensures all resolved secrets have non-empty values:
 ```typescript
 import { Envilder, validateSecrets } from '@envilder/sdk';
 
-const secrets = await Envilder.resolveFile('secrets-map.json');
+const secrets = await Envilder.resolveFile('envilder.json');
 validateSecrets(secrets); // throws SecretValidationError if any value is empty
 ```
 
@@ -146,7 +146,7 @@ class MyCustomProvider implements ISecretProvider {
   }
 }
 
-const json = readFileSync('secrets-map.json', 'utf-8');
+const json = readFileSync('envilder.json', 'utf-8');
 const mapFile = new MapFileParser().parse(json);
 
 const provider = new MyCustomProvider();

@@ -18,7 +18,7 @@ class EnvilderClient:
         from envilder import EnvilderClient, MapFileParser
 
         provider = MyCustomProvider()
-        with open("secrets-map.json") as f:
+        with open("envilder.json") as f:
             map_file = MapFileParser().parse(f.read())
         secrets = EnvilderClient(provider).resolve_secrets(map_file)
     """
