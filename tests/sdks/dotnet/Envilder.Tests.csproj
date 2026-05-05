@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="envilder.json" />
+    <EmbeddedResource Include="..\..\..\envilder.json" Link="envilder.json" />
   </ItemGroup>
 
   <ItemGroup>

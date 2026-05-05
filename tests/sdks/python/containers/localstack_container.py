@@ -18,7 +18,7 @@ from testcontainers.localstack import (
     LocalStackContainer as BaseLocalStackContainer,
 )
 
-_SECRETS_MAP = Path(__file__).resolve().parent.parent / "envilder.json"
+_SECRETS_MAP = Path(__file__).resolve().parents[4] / "envilder.json"
 
 
 class LocalStackContainer:
