@@ -21,3 +21,20 @@ Apply these rules whenever making or validating git changes.
 - Do not amend commits unless explicitly requested.
 - Before push, ensure quality checks pass: `pnpm format`, `pnpm lint`, `pnpm test`.
 - Treat push as the final gate: if checks fail, fix issues first and push only after green results.
+
+## GitHub CLI (`gh`) in PowerShell
+
+- NEVER use inline `--body "..."` with multi-line content — PowerShell garbles encoding (hex escapes, collapsed newlines).
+- Always use `--body-file` with a temp file for issue/PR bodies:
+
+```powershell
+$body = @"
+## Summary
+...markdown content...
+"@
+$body | Set-Content -Path "temp-body.md" -Encoding UTF8
+gh issue create --title "..." --body-file temp-body.md --label "enhancement"
+Remove-Item temp-body.md
+```
+
+- This applies to: `gh issue create`, `gh pr create`, `gh pr edit`, and any command accepting `--body`.

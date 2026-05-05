@@ -58,7 +58,7 @@ Pull secrets from AWS SSM Parameter Store or Azure Key Vault into `.env` files i
 - name: 🔐 Pull Secrets from AWS SSM
   uses: macalbert/envilder/github-action@v0.8.0
   with:
-    map-file: param-map.json
+    map-file: envilder.json
     env-file: .env
 ```
 
@@ -75,7 +75,7 @@ Pull secrets from AWS SSM Parameter Store or Azure Key Vault into `.env` files i
 - name: 🔐 Pull Secrets from Azure Key Vault
   uses: macalbert/envilder/github-action@v0.8.0
   with:
-    map-file: param-map.json
+    map-file: envilder.json
     env-file: .env
     provider: azure
     vault-url: ${{ secrets.AZURE_KEY_VAULT_URL }}
@@ -137,7 +137,7 @@ Your AWS role must have `ssm:GetParameter` permission:
 
 Create a JSON file mapping environment variables to secret paths:
 
-**`param-map.json` (AWS SSM):**
+**`envilder.json` (AWS SSM):**
 
 ```json
 {
@@ -148,7 +148,7 @@ Create a JSON file mapping environment variables to secret paths:
 }
 ```
 
-**`param-map.json` (Azure Key Vault):**
+**`envilder.json` (Azure Key Vault):**
 
 Use the optional `$config` section to declare the provider and vault URL:
 
@@ -223,7 +223,7 @@ jobs:
       - name: 🔐 Pull Secrets from AWS SSM
         uses: macalbert/envilder/github-action@v0.8.0
         with:
-          map-file: config/param-map.json
+          map-file: config/envilder.json
           env-file: .env
 
       - name: 🍄 Setup Node.js
@@ -266,7 +266,7 @@ jobs:
       - name: 🔐 Pull Secrets
         uses: macalbert/envilder/github-action@v0.8.0
         with:
-          map-file: app/config/param-map.json  # Path from repo root!
+          map-file: app/config/envilder.json  # Path from repo root!
           env-file: app/.env                    # Path from repo root!
       
       - run: pnpm install --frozen-lockfile      # Runs in ./app
@@ -310,7 +310,7 @@ jobs:
       - name: 🔐 Pull ${{ inputs.environment }} secrets
         uses: macalbert/envilder/github-action@v0.8.0
         with:
-          map-file: config/${{ inputs.environment }}/param-map.json
+          map-file: config/${{ inputs.environment }}/envilder.json
           env-file: .env.${{ inputs.environment }}
 
       - run: pnpm install --frozen-lockfile
@@ -348,7 +348,7 @@ jobs:
       
       - uses: macalbert/envilder/github-action@v0.8.0
         with:
-          map-file: config/${{ matrix.environment }}/param-map.json
+          map-file: config/${{ matrix.environment }}/envilder.json
           env-file: .env
       
       - run: pnpm install --frozen-lockfile
@@ -395,7 +395,7 @@ marketplace version (`macalbert/envilder/github-action@v0.8.0`) not a local chec
 
 - Verify the parameter exists in AWS SSM Parameter Store
 - Check your IAM role has `ssm:GetParameter` permission for that parameter
-- Ensure the parameter path in `param-map.json` is correct (case-sensitive)
+- Ensure the parameter path in `envilder.json` is correct (case-sensitive)
 
 ### Error: "Unable to assume role"
 
@@ -405,7 +405,7 @@ marketplace version (`macalbert/envilder/github-action@v0.8.0`) not a local chec
 
 ### Generated `.env` file is empty
 
-- Check that `param-map.json` exists and has valid JSON syntax
+- Check that `envilder.json` exists and has valid JSON syntax
 - Verify AWS credentials are configured before running the action
 - Review GitHub Actions logs for specific error messages
 

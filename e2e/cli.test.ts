@@ -55,11 +55,8 @@ describe('Envilder (E2E)', () => {
   beforeAll(async () => {
     tempDir = await mkdtemp(join(tmpdir(), `envilder-e2e-${runId}-`));
     envFilePath = join(tempDir, 'cli-validation.env');
-    mapFilePath = join(tempDir, `param-map-${runId}.json`);
-    mapFileWithConfigPath = join(
-      tempDir,
-      `param-map-with-aws-config-${runId}.json`,
-    );
+    mapFilePath = join(tempDir, `envilder-${runId}.json`);
+    mapFileWithConfigPath = join(tempDir, `envilder-aws-${runId}.json`);
 
     await Promise.all([
       writeFile(
@@ -325,7 +322,7 @@ describe('Envilder (E2E)', () => {
     let originalTlsReject: string | undefined;
 
     beforeAll(async () => {
-      azureMapFilePath = join(tempDir, 'param-map-azure.json');
+      azureMapFilePath = join(tempDir, 'envilder-azure.json');
       azureEnvFilePath = join(tempDir, 'azure-validation.env');
       originalTlsReject = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
       // Self-signed cert on a local test container — safe to skip validation
@@ -426,7 +423,7 @@ describe('Envilder (E2E)', () => {
     it('Should_PullFromAzureKeyVault_When_VaultUrlProvidedViaConfig', async () => {
       // Arrange
       await azureSecretClient.setSecret('test-secret', 'config-override-value');
-      const noUrlMapPath = join(tempDir, 'param-map-azure-no-url.json');
+      const noUrlMapPath = join(tempDir, 'envilder-azure-no-url.json');
       writeFileSync(
         noUrlMapPath,
         JSON.stringify(

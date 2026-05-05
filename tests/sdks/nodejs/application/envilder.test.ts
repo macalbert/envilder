@@ -58,7 +58,7 @@ describe('Envilder', () => {
   describe('load', () => {
     it('Should_ResolveAndInject_When_LoadCalled', async () => {
       // Act
-      const actual = await Envilder.load('secrets-map.json');
+      const actual = await Envilder.load('envilder.json');
 
       // Assert
       expect(actual.get('DB_URL')).toBe('postgres://localhost');
@@ -87,7 +87,7 @@ describe('Envilder', () => {
   describe('resolveFile', () => {
     it('Should_ResolveWithoutInjecting_When_ResolveFileCalled', async () => {
       // Act
-      const actual = await Envilder.resolveFile('secrets-map.json');
+      const actual = await Envilder.resolveFile('envilder.json');
 
       // Assert
       expect(actual.get('DB_URL')).toBe('postgres://localhost');
@@ -188,7 +188,7 @@ describe('Envilder', () => {
   describe('fluent builder', () => {
     it('Should_ApplyOverrides_When_FluentBuilderUsed', async () => {
       // Act
-      const actual = await Envilder.fromMapFile('secrets-map.json')
+      const actual = await Envilder.fromMapFile('envilder.json')
         .withProvider(SecretProviderType.Azure)
         .withVaultUrl('https://my-vault.vault.azure.net')
         .resolve();
@@ -206,7 +206,7 @@ describe('Envilder', () => {
 
     it('Should_InjectSecrets_When_InjectCalled', async () => {
       // Act
-      const actual = await Envilder.fromMapFile('secrets-map.json').inject();
+      const actual = await Envilder.fromMapFile('envilder.json').inject();
 
       // Assert
       expect(actual.get('DB_URL')).toBe('postgres://localhost');
@@ -215,7 +215,7 @@ describe('Envilder', () => {
 
     it('Should_ApplyProfile_When_WithProfileCalled', async () => {
       // Act
-      await Envilder.fromMapFile('secrets-map.json')
+      await Envilder.fromMapFile('envilder.json')
         .withProfile('staging')
         .resolve();
 

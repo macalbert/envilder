@@ -18,13 +18,13 @@ using System.Threading.Tasks;
 /// <example>
 /// <code>
 /// // Resolve + inject in one call
-/// Envilder.Load("param-map.json");
+/// Envilder.Load("envilder.json");
 ///
 /// // Resolve without injecting
-/// var secrets = Envilder.ResolveFile("param-map.json");
+/// var secrets = Envilder.ResolveFile("envilder.json");
 ///
 /// // Fluent builder with provider override
-/// var secrets = Envilder.FromMapFile("param-map.json")
+/// var secrets = Envilder.FromMapFile("envilder.json")
 ///     .WithProvider(SecretProviderType.Azure)
 ///     .WithVaultUrl("https://my-vault.vault.azure.net")
 ///     .Resolve();

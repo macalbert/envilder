@@ -31,7 +31,7 @@ const t = useTranslations(lang);
 - name: 🔐 Pull Secrets from AWS SSM
   uses: macalbert/envilder/github-action@v0
   with:
-    map-file: param-map.json
+    map-file: envilder.json
     env-file: .env`} />
       </div>
 
@@ -47,7 +47,7 @@ const t = useTranslations(lang);
 - name: 🔐 Pull Secrets from Azure Key Vault
   uses: macalbert/envilder/github-action@v0
   with:
-    map-file: param-map.json
+    map-file: envilder.json
     env-file: .env
     provider: azure
     vault-url: \${{ secrets.AZURE_KEY_VAULT_URL }}`} />

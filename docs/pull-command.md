@@ -25,7 +25,7 @@ graph LR
 ```
 
 **Example:**
-If your `param-map.json` file contains:
+If your `envilder.json` file contains:
 
 > 📖 See [Mapping File Format](../README.md#️-mapping-file-format) for the full reference on `$config` and provider options.
 
@@ -41,13 +41,13 @@ If your `param-map.json` file contains:
 Running this command:
 
 ```bash
-envilder --map=param-map.json --envfile=.env
+envilder --map=envilder.json --envfile=.env
 ```
 
 With profile:
 
 ```bash
-envilder --map=param-map.json --envfile=.env --profile=dev-account
+envilder --map=envilder.json --envfile=.env --profile=dev-account
 ```
 
 **Sample Output:**
@@ -77,13 +77,13 @@ SECRET_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
 **AWS SSM (default):**
 
 ```bash
-envilder --map=param-map.json --envfile=.env
+envilder --map=envilder.json --envfile=.env
 ```
 
 With profile:
 
 ```bash
-envilder --map=param-map.json --envfile=.env --profile=dev-account
+envilder --map=envilder.json --envfile=.env --profile=dev-account
 ```
 
 **Azure Key Vault (via `$config` in map file):**
@@ -105,28 +105,28 @@ Add `$config` to your map file:
 Then pull as usual:
 
 ```bash
-envilder --map=param-map.json --envfile=.env
+envilder --map=envilder.json --envfile=.env
 ```
 
 **Azure Key Vault (via CLI flags):**
 
 ```bash
-envilder --provider=azure --vault-url=https://my-vault.vault.azure.net --map=param-map.json --envfile=.env
+envilder --provider=azure --vault-url=https://my-vault.vault.azure.net --map=envilder.json --envfile=.env
 ```
 
 **Other environment examples:**
 
 ```bash
 # Default
-envilder --map=param-map.json --envfile=.env.dev
+envilder --map=envilder.json --envfile=.env.dev
 # Development
-envilder --map=param-map.json --envfile=.env.dev --profile=dev-account
+envilder --map=envilder.json --envfile=.env.dev --profile=dev-account
 # Production
-envilder --map=param-map.json --envfile=.env.prod --profile=prod-account
+envilder --map=envilder.json --envfile=.env.prod --profile=prod-account
 # Azure (using $config in map file)
-envilder --map=azure-param-map.json --envfile=.env.prod
+envilder --map=envilder.azure.json --envfile=.env.prod
 # Azure (using CLI flags)
-envilder --provider=azure --vault-url=https://prod-vault.vault.azure.net --map=param-map.json --envfile=.env.prod
+envilder --provider=azure --vault-url=https://prod-vault.vault.azure.net --map=envilder.json --envfile=.env.prod
 ```
 
 ## Notes

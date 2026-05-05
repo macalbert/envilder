@@ -52,7 +52,7 @@ For each feature area, identify the authoritative source:
 | GHA inputs | `github-action/action.yml` |
 | SDK public API | SDK source code (`src/sdks/{runtime}/`) |
 | Providers | `src/envilder/core/infrastructure/` |
-| Map-file format | `secrets-map.json` (example) + copilot-instructions |
+| Map-file format | `envilder.json` (example) + copilot-instructions |
 
 ### 3. Audit Each Surface
 

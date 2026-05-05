@@ -27,7 +27,7 @@ behind tooling choices and architectural patterns before proposing changes.
 
 | ADR | Title | Scope | Key Decision |
 | --- | ----- | ----- | ------------ |
-| [ADR-0001](../../../docs/architecture/adr/0001-sdk-acceptance-test-infrastructure.md) | SDK Acceptance Test Infrastructure | All SDKs | TestContainers + LocalStack + Lowkey Vault; container wrappers with explicit lifecycle; `secrets-map.json` as single source for test tokens |
+| [ADR-0001](../../../docs/architecture/adr/0001-sdk-acceptance-test-infrastructure.md) | SDK Acceptance Test Infrastructure | All SDKs | TestContainers + LocalStack + Lowkey Vault; container wrappers with explicit lifecycle; `envilder.json` as single source for test tokens |
 | [ADR-0002](../../../docs/architecture/adr/0002-test-tooling-per-stack.md) | Test Tooling per Stack | All stacks | Vitest (TS), xUnit+NSubstitute+AwesomeAssertions (NET), pytest+unittest.mock (Py) |
 | [ADR-0003](../../../docs/architecture/adr/0003-sdk-architecture-pattern.md) | SDK Architecture Pattern | All SDKs | Three-layer (Domain→App→Infra), no DI framework, facade as primary API, internal factory |
 | [ADR-0004](../../../docs/architecture/adr/0004-code-quality-tooling.md) | Code Quality and Formatting | All stacks | Biome (TS), dotnet format (.NET), black+isort (Py); Secretlint for credentials |

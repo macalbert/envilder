@@ -10,7 +10,7 @@ Uses .NET 10
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - AWS credentials configured (`~/.aws/credentials`, env vars, or IAM role)
-- SSM parameters matching the paths in [`secrets-map.json`](../../../secrets-map.json)
+- SSM parameters matching the paths in [`envilder.json`](../../../envilder.json)
 
 ## Run
 

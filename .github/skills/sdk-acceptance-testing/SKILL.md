@@ -37,9 +37,9 @@ tests/sdks/{lang}/
 └── {unit-tests}/                 ← Language-specific unit test dirs
 ```
 
-## secrets-map.json Pattern
+## envilder.json Pattern
 
-All SDKs reference the **root** `secrets-map.json` at the repository root
+All SDKs reference the **root** `envilder.json` at the repository root
 directly. Container wrappers navigate to it via a relative path — there are no
 copies per SDK test directory.
 
@@ -64,7 +64,7 @@ copies per SDK test directory.
 
 ```typescript
 // From tests/sdks/nodejs/containers/localstack-container.ts
-const SECRETS_MAP = path.resolve(__dirname, '../../../../secrets-map.json');
+const SECRETS_MAP = path.resolve(__dirname, '../../../../envilder.json');
 ```
 
 **Fallback pattern:** If the configured provider cannot be created (e.g., Azure
@@ -76,14 +76,14 @@ AWS provider to resolve the token.
 ### Requirements
 
 - Image: `localstack/localstack:stable`
-- Resolve `LOCALSTACK_AUTH_TOKEN` from `secrets-map.json` before starting
+- Resolve `LOCALSTACK_AUTH_TOKEN` from `envilder.json` before starting
 - Throw if token is empty (fail fast)
 - Expose: endpoint URL, SSM client, provider instance
 
 ### Lifecycle
 
 ```txt
-1. Parse secrets-map.json with SDK's own MapFileParser
+1. Parse envilder.json with SDK's own MapFileParser
 2. Resolve LOCALSTACK_AUTH_TOKEN using SDK's own EnvilderClient
 3. Start container with token as environment variable
 4. Expose connection URL for SSM client creation

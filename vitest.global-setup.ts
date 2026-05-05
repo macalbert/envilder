@@ -14,7 +14,7 @@ export async function setup() {
     const envFilePath = resolve(process.cwd(), '.env');
     if (!existsSync(envFilePath)) {
       console.log('⚙️  .env not found — fetching secrets via envilder...');
-      execSync('pnpx envilder --map=secrets-map.json --envfile=.env', {
+      execSync('pnpx envilder --map=envilder.json --envfile=.env', {
         cwd: process.cwd(),
         stdio: 'inherit',
       });

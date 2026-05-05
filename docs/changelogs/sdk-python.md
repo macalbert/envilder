@@ -54,7 +54,7 @@
 
 * **Environment-based loading** — `Envilder.load(env, env_mapping)` and
   `Envilder.resolve_file(env, env_mapping)` accept a dictionary mapping environment names to
-  secrets-map file paths (or `None` to skip). Enables environment-aware secret loading without
+  map file paths (or `None` to skip). Enables environment-aware secret loading without
   external branching logic ([#163](https://github.com/macalbert/envilder/pull/163))
 * **Source validation** — Empty or whitespace-only file paths in `env_mapping` now raise
   `ValueError` with a descriptive message including the environment key
@@ -82,7 +82,7 @@
   ([#157](https://github.com/macalbert/envilder/pull/157))
 * `Envilder` facade — High-level entry point with `load()`, `resolve_file()`, and `from_map_file()` methods
 * `EnvilderClient` — Resolves secrets from a map-file and injects them into `os.environ`
-* `MapFileParser` — Parses `param-map.json` files with `$config` section and variable mappings
+* `MapFileParser` — Parses `envilder.json` files with `$config` section and variable mappings
 * `SecretProviderFactory` — Creates the appropriate secret provider based on configuration
 * `AwsSsmSecretProvider` — Fetches secrets from AWS SSM Parameter Store via boto3
 * `AzureKeyVaultSecretProvider` — Fetches secrets from Azure Key Vault
