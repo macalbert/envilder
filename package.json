@@ -110,7 +110,7 @@
     "ajv-formats": "^3.0.1",
     "glob": "^13.0.6",
     "lefthook": "^2.1.4",
-    "secretlint": "^12.3.1",
+    "secretlint": "^13.0.0",
     "testcontainers": "^11.13.0",
     "ts-node": "catalog:",
     "tsx": "^4.21.0",
