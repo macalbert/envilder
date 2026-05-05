@@ -67,6 +67,21 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
       })();
     </script>
 
+    <!-- Smooth scroll: enable after initial hash scroll to prevent animated jump on refresh -->
+    <script is:inline>
+      (function() {
+        if (!window.location.hash) {
+          document.documentElement.classList.add('smooth-scroll');
+        } else {
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+              document.documentElement.classList.add('smooth-scroll');
+            });
+          });
+        }
+      })();
+    </script>
+
     <!-- Language: redirect to detected locale on first visit per session -->
     <script is:inline>
       (function() {
