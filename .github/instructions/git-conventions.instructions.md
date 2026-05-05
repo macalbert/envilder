@@ -32,6 +32,7 @@ Apply these rules whenever making or validating git changes.
 ### Why encoding breaks
 
 PowerShell treats backticks (`` ` ``) as escape characters. In a here-string or double-quoted string:
+
 - `` `n `` becomes a literal newline
 - `` `e `` becomes an ESC character (U+001B) — this corrupts words like `` `envilder `` into garbage
 - `` `t `` becomes a tab
