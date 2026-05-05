@@ -38,9 +38,7 @@ export const ca: Translations = {
     description: "Envilder llegeix els teus secrets directament d'",
     descAws: 'AWS',
     descAzure: 'Azure',
-    descGcp: '',
     descOr: 'o',
-    descComma: '',
     descSuffix:
       ' cap a la teva app — sense fitxers, sense SaaS, sense filtracions.',
     getStarted: "▶ Veure'l en acció",
