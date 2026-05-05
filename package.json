@@ -31,6 +31,7 @@
     "lint:fix": "biome lint --fix",
     "test": "vitest run --reporter=verbose --coverage",
     "test:ci": "vitest run --reporter=verbose --reporter=junit --coverage --outputFile=coverage/junit/test-results.xml",
+    "test:update": "vitest run --reporter=verbose --update",
     "release:publish": "npm pack --dry-run && npm publish --provenance",
     "action-publish": "pnpm build:gha && pnpm verify:gha",
     "release-patch": "pnpm version patch",

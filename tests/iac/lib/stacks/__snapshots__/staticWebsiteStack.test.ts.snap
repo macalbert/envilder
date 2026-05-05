@@ -905,6 +905,20 @@ function handler(event) {
           "Runtime": "cloudfront-js-1.0",
         },
         "Name": "eu-west-1test-web-apptestncom-url-rewrite979D13F7",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "Development",
+          },
+          {
+            "Key": "Project",
+            "Value": "test-website",
+          },
+          {
+            "Key": "StackId",
+            "Value": "macalbert-test-website-websitetest-development-stack",
+          },
+        ],
       },
       "Type": "AWS::CloudFront::Function",
     },
