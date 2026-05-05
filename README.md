@@ -279,7 +279,7 @@ Envilder.Load("envilder.json");
 var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 ```
 
-📖 **[Full .NET SDK docs](./src/sdks/dotnet/README.md)**
+📖 **[Full .NET SDK docs](./src/sdks/dotnet/README.md)** · 💡 **[Examples](./examples/sdk/dotnet/)**
 
 ### Python SDK
 
@@ -312,7 +312,7 @@ Envilder.load('production', {
 })
 ```
 
-📖 **[Full Python SDK docs](./src/sdks/python/README.md)**
+📖 **[Full Python SDK docs](./src/sdks/python/README.md)** · 💡 **[Examples](./examples/sdk/python/)**
 
 ### Node.js SDK
 
@@ -342,7 +342,7 @@ const secrets = await Envilder.fromMapFile('envilder.json')
   .resolve();
 ```
 
-📖 **[Full Node.js SDK docs](./src/sdks/nodejs/README.md)**
+📖 **[Full Node.js SDK docs](./src/sdks/nodejs/README.md)** · 💡 **[Examples](./examples/sdk/nodejs/)**
 
 ---
 
