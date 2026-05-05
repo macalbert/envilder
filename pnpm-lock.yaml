@@ -82,8 +82,8 @@ importers:
         specifier: ^20.5.0
         version: 20.5.3
       '@secretlint/secretlint-rule-preset-recommend':
-        specifier: ^12.3.1
-        version: 12.3.1
+        specifier: ^13.0.0
+        version: 13.0.0
       '@testcontainers/localstack':
         specifier: ^11.13.0
         version: 11.14.0
@@ -1365,8 +1365,8 @@ packages:
   '@secretlint/resolver@13.0.0':
     resolution: {integrity: sha512-5mUTxb+CPl/589Efq5L4SBqJ2yDguKNVZ7udCPiQasI9jS0h1P/CBWfqp+eoKlSoEggu2RKbMHdRiidRfnRXQQ==}
 
-  '@secretlint/secretlint-rule-preset-recommend@12.3.1':
-    resolution: {integrity: sha512-w9x9rIP1+qhV0k9k15aSIBo+6NrM4npAYIoNs7UmKIxuQSA6b91rhWpdMxgCv2/EQtym+gpuyN7rTSvG5wlYlw==}
+  '@secretlint/secretlint-rule-preset-recommend@13.0.0':
+    resolution: {integrity: sha512-aKjoMnyMmQ1wDxLPUH0IdnM7yPOwSopT4ZhWoctthAW7nfYQoLmHKiTI8bUKOGU9n4VfVPG8N84vXmT3sG7d/g==}
     engines: {node: '>=22.0.0'}
 
   '@secretlint/source-creator@13.0.0':
@@ -3164,6 +3164,10 @@ packages:
   pluralize@8.0.0:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
     engines: {node: '>=4'}
+
+  postcss@8.5.14:
+    resolution: {integrity: sha512-SoSL4+OSEtR99LHFZQiJLkT59C5B1amGO1NzTwj7TT1qCUgUO6hxOvzkOYxD+vMrXBM3XJIKzokoERdqQq/Zmg==}
+    engines: {node: ^10 || ^12 || >=14}
 
   postcss@8.5.14:
     resolution: {integrity: sha512-SoSL4+OSEtR99LHFZQiJLkT59C5B1amGO1NzTwj7TT1qCUgUO6hxOvzkOYxD+vMrXBM3XJIKzokoERdqQq/Zmg==}
@@ -5471,7 +5475,7 @@ snapshots:
 
   '@secretlint/resolver@13.0.0': {}
 
-  '@secretlint/secretlint-rule-preset-recommend@12.3.1': {}
+  '@secretlint/secretlint-rule-preset-recommend@13.0.0': {}
 
   '@secretlint/source-creator@13.0.0':
     dependencies:
@@ -7650,6 +7654,12 @@ snapshots:
   pluralize@2.0.0: {}
 
   pluralize@8.0.0: {}
+
+  postcss@8.5.14:
+    dependencies:
+      nanoid: 3.3.12
+      picocolors: 1.1.1
+      source-map-js: 1.2.1
 
   postcss@8.5.14:
     dependencies:
