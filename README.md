@@ -360,7 +360,7 @@ graph LR
     classDef core fill:#1f3b57,color:#fff,stroke:#ccc,stroke-width:2px;
 ```
 
-1. **Define**: create a `envilder.json` mapping env var names to cloud secret paths
+1. **Define**: create an `envilder.json` mapping env var names to cloud secret paths
 2. **Resolve**: Envilder fetches each secret from your cloud vault
 3. **Deliver**: secrets arrive as a `.env` file (CLI/GHA) or in-memory (SDKs)
 4. **Push**: rotate or add secrets from your local environment back to the cloud

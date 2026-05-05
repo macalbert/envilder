@@ -414,7 +414,7 @@ export const en: Translations = {
     prereqAzureNote: 'for Azure Key Vault',
     install: 'Install',
     quickStart: 'Quick start',
-    step1: 'Create a envilder.json mapping env vars to secret paths',
+    step1: 'Create an envilder.json mapping env vars to secret paths',
     step2: 'Run envilder --map=envilder.json --envfile=.env',
     step3: 'Your .env file is ready ✔',
     terminalTitle: 'Quick start',
@@ -635,7 +635,7 @@ export const en: Translations = {
     ghaPrereqAws:
       'AWS: Configure credentials with aws-actions/configure-aws-credentials',
     ghaPrereqAzure: 'Azure: Configure credentials with azure/login',
-    ghaPrereqMap: 'A envilder.json committed to your repository',
+    ghaPrereqMap: 'An envilder.json committed to your repository',
     ghaPullOnly: 'The GitHub Action only supports pull mode (no push).',
     ghaBasicTitle: 'Basic workflow example',
     ghaMultiEnvTitle: 'Multi-environment workflow',

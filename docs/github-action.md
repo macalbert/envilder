@@ -171,7 +171,7 @@ jobs:
 
 ## Parameter Mapping File
 
-Create a `envilder.json` file that maps environment variable names to secret paths in your cloud provider.
+Create an `envilder.json` file that maps environment variable names to secret paths in your cloud provider.
 
 **AWS SSM (default):**
 
