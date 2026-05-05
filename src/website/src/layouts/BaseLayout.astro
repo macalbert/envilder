@@ -73,10 +73,10 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
         if (!window.location.hash) {
           document.documentElement.classList.add('smooth-scroll');
         } else {
-          requestAnimationFrame(function() {
-            requestAnimationFrame(function() {
+          window.addEventListener('load', function() {
+            setTimeout(function() {
               document.documentElement.classList.add('smooth-scroll');
-            });
+            }, 0);
           });
         }
       })();
