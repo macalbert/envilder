@@ -80,7 +80,7 @@
 * **Initial release** — Runtime library for loading secrets from AWS SSM Parameter Store or Azure Key Vault
   directly into .NET applications ([#147](https://github.com/macalbert/envilder/pull/147))
 * `EnvilderClient` — Resolves secrets from a map-file and returns them as a dictionary
-* `MapFileParser` — Parses `param-map.json` files with `$config` section and variable mappings
+* `MapFileParser` — Parses `envilder.json` files with `$config` section and variable mappings
 * `SecretProviderFactory` — Creates the appropriate secret provider based on configuration
 * `AwsSsmSecretProvider` — Fetches secrets from AWS SSM Parameter Store
 * `AzureKeyVaultSecretProvider` — Fetches secrets from Azure Key Vault

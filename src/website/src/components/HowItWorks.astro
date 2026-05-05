@@ -18,10 +18,10 @@ const sdkTabs = [
     code: `from envilder import Envilder
 
 # One-liner: load secrets into os.environ
-Envilder.load("param-map.json")
+Envilder.load("envilder.json")
 
 # Or resolve as a dict without injecting
-secrets = Envilder.from_map_file("param-map.json").resolve()`,
+secrets = Envilder.from_map_file("envilder.json").resolve()`,
   },
   {
     label: t.howItWorks.sdkTabDotnet,
@@ -31,10 +31,10 @@ secrets = Envilder.from_map_file("param-map.json").resolve()`,
 using Envilder.Infrastructure.Configuration;
 
 // Load into IConfiguration
-builder.Configuration.AddEnvilder("param-map.json");
+builder.Configuration.AddEnvilder("envilder.json");
 
 // Or resolve + inject into environment
-var secrets = await Envilder.ResolveFileAsync("param-map.json");
+var secrets = await Envilder.ResolveFileAsync("envilder.json");
 EnvilderClient.InjectIntoEnvironment(secrets);`,
   },
   {
@@ -44,10 +44,10 @@ EnvilderClient.InjectIntoEnvironment(secrets);`,
     code: `import { Envilder } from '@envilder/sdk';
 
 // One-liner: resolve + inject into process.env
-await Envilder.load('param-map.json');
+await Envilder.load('envilder.json');
 
 // Or resolve as a Map without injecting
-const secrets = await Envilder.fromMapFile('param-map.json').resolve();`,
+const secrets = await Envilder.fromMapFile('envilder.json').resolve();`,
   },
 ];
 ---
@@ -72,7 +72,7 @@ const secrets = await Envilder.fromMapFile('param-map.json').resolve();`,
           <p>
             {t.howItWorks.steps[0].description}
           </p>
-          <CodeBlock lang="json" filename="param-map.json" code={`{
+          <CodeBlock lang="json" filename="envilder.json" code={`{
   "DB_PASSWORD": "/my-app/prod/db-password",
   "API_KEY":     "/my-app/prod/api-key",
   "SECRET_TOKEN": "/my-app/prod/secret-token"
@@ -96,7 +96,7 @@ const secrets = await Envilder.fromMapFile('param-map.json').resolve();`,
           <p>
             {t.howItWorks.steps[1].description}
           </p>
-          <CodeBlock lang="bash" filename="terminal" code={`$ envilder --map=param-map.json --envfile=.env
+          <CodeBlock lang="bash" filename="terminal" code={`$ envilder --map=envilder.json --envfile=.env
 
 ${t.howItWorks.terminalFetched1}
 ${t.howItWorks.terminalFetched2}
@@ -141,7 +141,7 @@ ${t.howItWorks.terminalWritten}`} />
           <p>
             {t.howItWorks.steps[3].description}
           </p>
-          <CodeBlock lang="bash" filename="terminal" code={`$ envilder --push --envfile=.env --map=param-map.json
+          <CodeBlock lang="bash" filename="terminal" code={`$ envilder --push --envfile=.env --map=envilder.json
 
 ${t.howItWorks.pushTerminalPushed1}
 ${t.howItWorks.pushTerminalPushed2}

@@ -10,7 +10,7 @@ using System.Linq;
 /// </summary>
 /// <example>
 /// <code>
-/// var secrets = Envilder.ResolveFile("param-map.json");
+/// var secrets = Envilder.ResolveFile("envilder.json");
 /// try
 /// {
 ///     secrets.ValidateSecrets();
@@ -69,7 +69,7 @@ public static class SecretValidationExtensions
 	/// </exception>
 	/// <example>
 	/// <code>
-	/// var secrets = Envilder.ResolveFile("param-map.json");
+	/// var secrets = Envilder.ResolveFile("envilder.json");
 	/// secrets.ValidateSecrets(); // throws if any value is empty
 	/// </code>
 	/// </example>

@@ -16,7 +16,7 @@ class SecretValidationError(Exception):
         from envilder import Envilder
         from envilder.application.secret_validation import validate_secrets
 
-        secrets = Envilder.resolve_file("param-map.json")
+        secrets = Envilder.resolve_file("envilder.json")
         validate_secrets(secrets)  # raises SecretValidationError if any value is empty
     """
 

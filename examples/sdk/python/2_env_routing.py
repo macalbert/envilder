@@ -1,5 +1,5 @@
 # /// script
-# dependencies = ["envilder>=0.3.1"]
+# dependencies = ["envilder>=0.4.0"]
 # ///
 
 # Environment-based routing: pick a different map file per environment
@@ -10,9 +10,9 @@ from envilder import Envilder
 env = os.environ.get("APP_ENV", "production")
 
 secrets = Envilder.load(env, {
-    "development": "../../../secrets-map.json",
-    "staging": "../../../secrets-map.json",
-    "production": "../../../secrets-map.json",
+    "development": "../../../envilder.json",
+    "staging": "../../../envilder.json",
+    "production": "../../../envilder.json",
     "test": None,  # no secrets loaded
 })
 

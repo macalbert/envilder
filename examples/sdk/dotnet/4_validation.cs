@@ -1,11 +1,11 @@
 // Secret validation: fail fast if any secret is missing or empty
-#:package Envilder@*
+#:package Envilder@0.3.0
 #:property PublishAot=false
 
 using Envilder.Application;
 using static Envilder.Application.Envilder;
 
-var secrets = await ResolveFileAsync("../../../secrets-map.json");
+var secrets = await ResolveFileAsync("../../../envilder.json");
 secrets.ValidateSecrets(); // throws SecretValidationException if any value is empty
 
 foreach (var (key, value) in secrets)

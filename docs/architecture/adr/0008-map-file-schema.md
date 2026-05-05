@@ -96,9 +96,9 @@ discoverability in projects with many map files.
 Multi-provider and multi-environment setups use separate files:
 
 ```txt
-param-map.prod.json      → $config.provider: "aws"
-param-map.staging.json   → $config.provider: "aws", different paths
-param-map.dev.json       → $config.provider: "file"
+envilder.prod.json      → $config.provider: "aws"
+envilder.staging.json   → $config.provider: "aws", different paths
+envilder.dev.json       → $config.provider: "file"
 ```
 
 If a consumer needs secrets from two providers, they make two `load()` calls
@@ -142,17 +142,17 @@ Consumers activate it via:
 
 ```csharp
 // .NET
-Envilder.Load("param-map.json", EnvilderOptions.FromFile(".env.test"));
+Envilder.Load("envilder.json", EnvilderOptions.FromFile(".env.test"));
 ```
 
 ```python
 # Python
-Envilder.load("param-map.json", EnvilderOptions.from_file(".env.test"))
+Envilder.load("envilder.json", EnvilderOptions.from_file(".env.test"))
 ```
 
 ```typescript
 // Node.js
-await Envilder.load('param-map.json', EnvilderOptions.fromFile('.env.test'));
+await Envilder.load('envilder.json', EnvilderOptions.fromFile('.env.test'));
 ```
 
 > **Implementation note (Node.js):** The current Node SDK uses the second
@@ -166,7 +166,7 @@ single `.env.test` file.
 `WithOverride` is an optional companion for per-test overrides:
 
 ```csharp
-Envilder.Load("param-map.json", EnvilderOptions.FromFile(".env.test")
+Envilder.Load("envilder.json", EnvilderOptions.FromFile(".env.test")
     .WithOverride("DB_PASSWORD", "intentionally-wrong"));
 ```
 

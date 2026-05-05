@@ -42,16 +42,16 @@ export async function main() {
   ${pc.yellow('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')}
 
   ${pc.green('>')} ${pc.bold('Generate a .env file')}  ${pc.dim('(pull secrets from the cloud)')}
-    ${pc.cyan('envilder --map=param-map.json --envfile=.env')}
+    ${pc.cyan('envilder --map=envilder.json --envfile=.env')}
 
   ${pc.magenta('>')} ${pc.bold('Sync .env back to cloud')}  ${pc.dim('(push secrets up)')}
-    ${pc.cyan('envilder --push --map=param-map.json --envfile=.env')}
+    ${pc.cyan('envilder --push --map=envilder.json --envfile=.env')}
 
   ${pc.red('>')} ${pc.bold('Push a single secret')}
     ${pc.cyan('envilder --push --key=API_KEY --value=s3cret --secret-path=/my/path')}
 
   ${pc.blue('>')} ${pc.bold('Use Azure Key Vault')}
-    ${pc.cyan('envilder --provider=azure --map=param-map.json --envfile=.env')}
+    ${pc.cyan('envilder --provider=azure --map=envilder.json --envfile=.env')}
 `;
 
   program

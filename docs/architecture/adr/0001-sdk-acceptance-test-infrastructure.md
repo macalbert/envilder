@@ -30,16 +30,16 @@ Each SDK implements its own container wrapper classes with explicit
 `start()`/`stop()` lifecycle (not framework-managed). Two wrappers per SDK:
 
 - **`LocalStackContainer`** — Starts LocalStack, resolves
-  `LOCALSTACK_AUTH_TOKEN` from `secrets-map.json`, exposes SSM client and
+  `LOCALSTACK_AUTH_TOKEN` from `envilder.json`, exposes SSM client and
   provider.
 - **`LowkeyVaultContainer`** — Starts Lowkey Vault (`nagyesta/lowkey-vault`),
   configures `IDENTITY_ENDPOINT`/`IDENTITY_HEADER` env vars for
   `DefaultAzureCredential`, exposes SecretClient and provider.
 
-### 2. Root `secrets-map.json` as Single Source of Truth
+### 2. Root `envilder.json` as Single Source of Truth
 
 All SDK test containers resolve `LOCALSTACK_AUTH_TOKEN` from the root
-`secrets-map.json` at the repository root. There are no copies — each container
+`envilder.json` at the repository root. There are no copies — each container
 wrapper navigates to the root file via a relative path. This file:
 
 - Has `$config.profile` for local development (e.g., `"mac"`)
@@ -59,7 +59,7 @@ wrapper navigates to the root file via a relative path. This file:
 > Store belongs to the project maintainer. If you want to run the AWS acceptance
 > tests locally, you need your own LocalStack token — store it in AWS SSM (or
 > Azure Key Vault) under a path of your choice, update your personal
-> `secrets-map.json` profile and parameter path accordingly, and ensure your AWS
+> `envilder.json` profile and parameter path accordingly, and ensure your AWS
 > credentials can resolve it. Without a valid token, LocalStack will start but
 > SSM SecureString operations will fail.
 
@@ -105,7 +105,7 @@ tests/sdks/{lang}/
 - Consistent test infrastructure across all SDKs. Container lifecycle, token
   resolution, and directory layout follow the same pattern regardless of
   language.
-- Self-documenting via shared `secrets-map.json`. The same file works for local
+- Self-documenting via shared `envilder.json`. The same file works for local
   dev (AWS profile) and CI (OIDC) with no changes.
 - Each SDK validates its own provider implementations against real emulators,
   catching integration bugs that mocks would miss.

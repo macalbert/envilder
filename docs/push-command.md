@@ -10,16 +10,16 @@ or Azure Key Vault) using a mapping file.
 ## Usage
 
 ```bash
-envilder --push --envfile=.env --map=param-map.json
+envilder --push --envfile=.env --map=envilder.json
 ```
 
 ### With AWS Profile
 
 ```bash
-envilder --push --envfile=.env.prod --map=param-map.json --profile=prod-account
+envilder --push --envfile=.env.prod --map=envilder.json --profile=prod-account
 ```
 
-## Mapping File Example (`param-map.json`)
+## Mapping File Example (`envilder.json`)
 
 > 📖 See [Mapping File Format](../README.md#️-mapping-file-format) for the full reference on `$config` and provider options.
 
@@ -94,7 +94,7 @@ API_KEY=abc123
 DB_PASSWORD=secret456
 ```
 
-And your `param-map.json` file contains:
+And your `envilder.json` file contains:
 
 ```json
 {
@@ -107,7 +107,7 @@ And your `param-map.json` file contains:
 Running this command:
 
 ```bash
-envilder --push --envfile=.env --map=param-map.json
+envilder --push --envfile=.env --map=envilder.json
 ```
 
 Will push:
@@ -167,25 +167,25 @@ Will push:
 **Push from .env file (multiple variables):**
 
 ```bash
-envilder --push --envfile=.env --map=param-map.json
+envilder --push --envfile=.env --map=envilder.json
 ```
 
 With AWS profile:
 
 ```bash
-envilder --push --envfile=.env.prod --map=param-map.json --profile=prod-account
+envilder --push --envfile=.env.prod --map=envilder.json --profile=prod-account
 ```
 
 **Azure Key Vault (via `$config` in map file):**
 
 ```bash
-envilder --push --envfile=.env --map=azure-param-map.json
+envilder --push --envfile=.env --map=envilder.azure.json
 ```
 
 **Azure Key Vault (via CLI flags):**
 
 ```bash
-envilder --push --provider=azure --vault-url=https://my-vault.vault.azure.net --envfile=.env --map=param-map.json
+envilder --push --provider=azure --vault-url=https://my-vault.vault.azure.net --envfile=.env --map=envilder.json
 ```
 
 **Single variable push:**

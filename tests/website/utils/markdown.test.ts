@@ -88,7 +88,7 @@ describe('changelogToHtml', () => {
 
   \`\`\`python
   from envilder import Envilder
-  Envilder.load('secrets-map.json')
+  Envilder.load('envilder.json')
   \`\`\`
 
 ### Changed

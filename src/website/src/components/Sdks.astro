@@ -29,20 +29,20 @@ using Envilder.Infrastructure.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
 
 // Load secrets into IConfiguration
-builder.Configuration.AddEnvilder("param-map.json");
+builder.Configuration.AddEnvilder("envilder.json");
 
 // Register EnvilderClient in DI
-builder.Services.AddEnvilder("param-map.json");
+builder.Services.AddEnvilder("envilder.json");
 
 var app = builder.Build();
 
 // --- Or standalone (no ASP.NET) ---
 
 // One-liner: resolve + inject into Environment
-Envilder.Load("param-map.json");
+Envilder.Load("envilder.json");
 
 // Fluent builder with provider override
-Envilder.FromMapFile("param-map.json")
+Envilder.FromMapFile("envilder.json")
     .WithProvider(SecretProviderType.Azure)
     .WithVaultUrl("https://my-vault.vault.azure.net")
     .Inject();`,
@@ -61,14 +61,14 @@ Envilder.FromMapFile("param-map.json")
     code: `from envilder import Envilder, SecretProviderType
 
 # One-liner: load secrets into os.environ
-Envilder.load("param-map.json")
+Envilder.load("envilder.json")
 
 # Or resolve as a dict without injecting
-secrets = Envilder.resolve_file("param-map.json")
+secrets = Envilder.resolve_file("envilder.json")
 
 # Fluent builder with provider override
 secrets = (
-    Envilder.from_map_file("param-map.json")
+    Envilder.from_map_file("envilder.json")
     .with_provider(SecretProviderType.AZURE)
     .with_vault_url("https://my-vault.vault.azure.net")
     .inject()
@@ -88,13 +88,13 @@ secrets = (
     code: `import { Envilder, SecretProviderType } from '@envilder/sdk';
 
 // One-liner: resolve + inject into process.env
-await Envilder.load('param-map.json');
+await Envilder.load('envilder.json');
 
 // Or resolve as a Map without injecting
-const secrets = await Envilder.resolveFile('param-map.json');
+const secrets = await Envilder.resolveFile('envilder.json');
 
 // Fluent builder with provider override
-const override = await Envilder.fromMapFile('param-map.json')
+const override = await Envilder.fromMapFile('envilder.json')
   .withProvider(SecretProviderType.Azure)
   .withVaultUrl('https://my-vault.vault.azure.net')
   .inject();`,

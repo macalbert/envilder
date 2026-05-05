@@ -74,7 +74,7 @@ Provide the vault URL via `$config.vaultUrl` in your map file:
 Or use the `--vault-url` CLI flag:
 
 ```bash
-envilder --provider=azure --vault-url=https://my-vault.vault.azure.net --map=param-map.json --envfile=.env
+envilder --provider=azure --vault-url=https://my-vault.vault.azure.net --map=envilder.json --envfile=.env
 ```
 
 CLI flags override `$config` values in the map file.

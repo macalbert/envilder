@@ -9,7 +9,7 @@ import pytest
 from envilder.application.envilder_facade import Envilder
 from envilder.domain.secret_provider_type import SecretProviderType
 
-_TEST_DIR = Path(__file__).resolve().parent.parent
+_TEST_DIR = Path(__file__).resolve().parents[4]
 
 
 @pytest.fixture()
@@ -31,7 +31,7 @@ def mock_provider() -> Mock:
     return provider
 
 
-MAP_FILE = str(_TEST_DIR / "secrets-map.json")
+MAP_FILE = str(_TEST_DIR / "envilder.json")
 
 
 class TestEnvilderResolve:

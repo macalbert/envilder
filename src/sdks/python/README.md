@@ -31,7 +31,7 @@ pip install envilder
 from envilder import Envilder
 
 # Resolve secrets and inject into os.environ
-Envilder.load('secrets-map.json')
+Envilder.load('envilder.json')
 
 import os
 print(os.environ['DB_PASSWORD'])
@@ -42,7 +42,7 @@ print(os.environ['DB_PASSWORD'])
 ```python
 from envilder import Envilder
 
-secrets = Envilder.resolve_file('secrets-map.json')
+secrets = Envilder.resolve_file('envilder.json')
 print(secrets['DB_PASSWORD'])
 ```
 
@@ -56,7 +56,7 @@ from envilder import Envilder, SecretProviderType
 
 # Override provider + vault URL
 secrets = (
-    Envilder.from_map_file('secrets-map.json')
+    Envilder.from_map_file('envilder.json')
     .with_provider(SecretProviderType.AZURE)
     .with_vault_url('https://my-vault.vault.azure.net')
     .resolve()
@@ -64,7 +64,7 @@ secrets = (
 
 # Override AWS profile and inject
 (
-    Envilder.from_map_file('secrets-map.json')
+    Envilder.from_map_file('envilder.json')
     .with_profile('staging')
     .inject()
 )
@@ -114,7 +114,7 @@ Opt-in validation ensures all resolved secrets have non-empty values:
 ```python
 from envilder import Envilder, validate_secrets
 
-secrets = Envilder.resolve_file('secrets-map.json')
+secrets = Envilder.resolve_file('envilder.json')
 validate_secrets(secrets)  # raises SecretValidationError if any value is empty
 ```
 
@@ -148,7 +148,7 @@ class MyCustomProvider(ISecretProvider):
         ...
 
 
-with open('secrets-map.json', encoding='utf-8') as file:
+with open('envilder.json', encoding='utf-8') as file:
     map_file = MapFileParser().parse(file.read())
 
 provider = MyCustomProvider()
