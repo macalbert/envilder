@@ -39,8 +39,8 @@ export const en: Translations = {
     descAws: 'AWS',
     descAzure: 'Azure',
     descOr: 'or',
-    descSuffix: ' straight into your app — no files, no SaaS, no leaks.',
-    getStarted: '▶ See it in action',
+    descSuffix: ' straight into your app. No files, no SaaS, no leaks.',
+    getStarted: '▶ Get started',
     viewOnGithub: '★ View on GitHub',
     terminalComment1: '# 1. One mapping model for every environment',
     terminalComment2: '# 2. Resolve secrets with the CLI',
@@ -420,6 +420,10 @@ export const en: Translations = {
     commentPush: '# Push a secret',
     doneMessage: ' Done! .env file generated.',
     pushSuccess: ' Secret pushed successfully.',
+    sdkTerminalTitle: 'Runtime SDK (Python)',
+    sdkComment1: '# Install the SDK',
+    sdkComment2: '# Load secrets at startup',
+    sdkComment3: '# Secrets are now in os.environ',
   },
   footer: {
     tagline:

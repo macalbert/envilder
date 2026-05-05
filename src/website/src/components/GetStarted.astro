@@ -83,12 +83,7 @@ const t = useTranslations(lang);
             <span class="comment">{t.getStarted.commentPull}</span>
           </span>
           <span class="line">
-            <span class="prompt">$</span>
-            <span class="command"> envilder</span>
-            <span class="flag"> --map</span>
-            <span class="command">=envilder.json</span>
-            <span class="flag"> --envfile</span>
-            <span class="command">=.env</span>
+            <span class="prompt">$</span><span class="command"> envilder</span><span class="flag"> --map</span><span class="command">=envilder.json</span><span class="flag"> --envfile</span><span class="command">=.env</span>
           </span>
           <span class="line">&nbsp;</span>
           <span class="line">
@@ -100,20 +95,39 @@ const t = useTranslations(lang);
             <span class="comment">{t.getStarted.commentPush}</span>
           </span>
           <span class="line">
-            <span class="prompt">$</span>
-            <span class="command"> envilder</span>
-            <span class="flag"> --push</span>
-            <span class="flag"> --key</span>
-            <span class="command">=API_KEY</span>
-            <span class="flag"> --value</span>
-            <span class="command">=sk_live_abc123</span>
-            <span class="flag"> --secret-path</span>
-            <span class="command">=/app/api-key</span>
+            <span class="prompt">$</span><span class="command"> envilder</span><span class="flag"> --push</span><span class="flag"> --key</span><span class="command">=API_KEY</span><span class="flag"> --value</span><span class="command">=sk_live_abc123</span><span class="flag"> --secret-path</span><span class="command">=/app/api-key</span>
           </span>
           <span class="line">&nbsp;</span>
           <span class="line">
             <span class="highlight">✔</span>
             <span class="output">{t.getStarted.pushSuccess}</span>
+          </span>
+        </TerminalMockup>
+
+        <TerminalMockup title={t.getStarted.sdkTerminalTitle}>
+          <span class="line">
+            <span class="comment">{t.getStarted.sdkComment1}</span>
+          </span>
+          <span class="line">
+            <span class="prompt">$</span><span class="command"> pip install envilder</span>
+          </span>
+          <span class="line">&nbsp;</span>
+          <span class="line">
+            <span class="comment">{t.getStarted.sdkComment2}</span>
+          </span>
+          <span class="line">
+            <span class="command"> from envilder import Envilder</span>
+          </span>
+          <span class="line">&nbsp;</span>
+          <span class="line">
+            <span class="command"> Envilder.load("envilder.json")</span>
+          </span>
+          <span class="line">&nbsp;</span>
+          <span class="line">
+            <span class="comment">{t.getStarted.sdkComment3}</span>
+          </span>
+          <span class="line">
+            <span class="command"> db_pass = os.environ["DB_PASSWORD"]</span>
           </span>
         </TerminalMockup>
       </div>

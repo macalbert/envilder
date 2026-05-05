@@ -207,6 +207,10 @@ export interface GetStartedTranslations {
   commentPush: string;
   doneMessage: string;
   pushSuccess: string;
+  sdkTerminalTitle: string;
+  sdkComment1: string;
+  sdkComment2: string;
+  sdkComment3: string;
 }
 
 export interface FooterTranslations {

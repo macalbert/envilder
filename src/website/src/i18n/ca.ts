@@ -39,8 +39,8 @@ export const ca: Translations = {
     descAzure: 'Azure',
     descOr: 'o',
     descSuffix:
-      ' cap a la teva app — sense fitxers, sense SaaS, sense filtracions.',
-    getStarted: "▶ Veure'l en acció",
+      ' cap a la teva app. Sense fitxers, sense SaaS, sense filtracions.',
+    getStarted: '▶ Comença',
     viewOnGithub: '★ Veure a GitHub',
     terminalComment1: '# 1. Un model de mapeig per a cada entorn',
     terminalComment2: '# 2. Resol secrets amb la CLI',
@@ -422,6 +422,10 @@ export const ca: Translations = {
     commentPush: '# Pujar un secret',
     doneMessage: ' Fet! Fitxer .env generat.',
     pushSuccess: ' Secret pujat correctament.',
+    sdkTerminalTitle: 'Runtime SDK (Python)',
+    sdkComment1: "# Instal·lar l'SDK",
+    sdkComment2: "# Carregar secrets a l'inici",
+    sdkComment3: '# Els secrets ja són a os.environ',
   },
   footer: {
     tagline:
