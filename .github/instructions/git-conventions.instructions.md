@@ -25,16 +25,26 @@ Apply these rules whenever making or validating git changes.
 ## GitHub CLI (`gh`) in PowerShell
 
 - NEVER use inline `--body "..."` with multi-line content — PowerShell garbles encoding (hex escapes, collapsed newlines).
-- Always use `--body-file` with a temp file for issue/PR bodies:
+- NEVER use PowerShell here-strings (`@"..."@`) piped directly to `gh` — variable interpolation mangles backticks and special characters.
+- Always use `--body-file` with a temp file for issue/PR bodies.
+- Create the file via the editor (e.g., `create_file` tool) or `Set-Content` with `-Encoding utf8NoBOM` — never via `Out-File` with here-strings containing markdown backticks.
+
+### Why encoding breaks
+
+PowerShell treats backticks (`` ` ``) as escape characters. In a here-string or double-quoted string:
+- `` `n `` becomes a literal newline
+- `` `e `` becomes an ESC character (U+001B) — this corrupts words like `` `envilder `` into garbage
+- `` `t `` becomes a tab
+
+This means any markdown with inline code (`` `envilder.json` ``) WILL be corrupted if passed through PowerShell string interpolation.
+
+### Safe pattern
 
 ```powershell
-$body = @"
-## Summary
-...markdown content...
-"@
-$body | Set-Content -Path "temp-body.md" -Encoding UTF8
-gh issue create --title "..." --body-file temp-body.md --label "enhancement"
+# 1. Write body to a file (use the editor/create_file tool, NOT PowerShell strings)
+# 2. Then:
+gh issue create --title "feat(cli): ..." --body-file temp-body.md --label "enhancement"
 Remove-Item temp-body.md
 ```
 
-- This applies to: `gh issue create`, `gh pr create`, `gh pr edit`, and any command accepting `--body`.
+- This applies to: `gh issue create`, `gh pr create`, `gh pr edit`, `gh issue edit`, and any command accepting `--body`.
