@@ -31,19 +31,16 @@ export const ca: Translations = {
   },
   hero: {
     openSource: 'Codi obert · MIT',
-    title1: 'Un model.',
-    title2: 'Els teus secrets.',
-    titleAccent: 'Cada runtime.',
-    description:
-      'Defineix els mapeigs de secrets una vegada i resol-los de forma consistent des de',
-    descAws: 'AWS SSM',
-    descAzure: 'Azure Key Vault',
-    descGcp: 'GCP Secret Manager',
+    title1: 'El fitxer .env és',
+    title2: 'un incident de seguretat',
+    titleAccent: 'esperant a passar.',
+    description: "Envilder llegeix els teus secrets directament d'",
+    descAws: 'AWS',
+    descAzure: 'Azure',
     descOr: 'o',
-    descComma: ',',
     descSuffix:
-      ": localment amb la CLI, en CI/CD amb la GitHub Action o a l'inici de l'app amb SDKs de runtime.",
-    getStarted: '▶ Comença',
+      ' cap a la teva app — sense fitxers, sense SaaS, sense filtracions.',
+    getStarted: "▶ Veure'l en acció",
     viewOnGithub: '★ Veure a GitHub',
     terminalComment1: '# 1. Un model de mapeig per a cada entorn',
     terminalComment2: '# 2. Resol secrets amb la CLI',
@@ -415,8 +412,8 @@ export const ca: Translations = {
     install: 'Instal·lar',
     quickStart: 'Inici ràpid',
     step1:
-      "Crea un param-map.json que mapegi variables d'entorn a rutes de secrets",
-    step2: 'Executa envilder --map=param-map.json --envfile=.env',
+      "Crea un envilder.json que mapegi variables d'entorn a rutes de secrets",
+    step2: 'Executa envilder --map=envilder.json --envfile=.env',
     step3: 'El teu fitxer .env està llest ✔',
     terminalTitle: 'Inici ràpid',
     commentInstall: '# Instal·lar globalment',
@@ -530,7 +527,7 @@ export const ca: Translations = {
       'Per accés només de lectura, Key Vault Secrets User és suficient.',
     mapTitle: 'Fitxer de mapeig',
     mapIntro:
-      "El fitxer de mapeig (param-map.json) és el nucli d'Envilder. És un fitxer JSON que mapeja noms de variables d'entorn (claus) a rutes de secrets (valors) al teu proveïdor al núvol.",
+      "El fitxer de mapeig (envilder.json) és el nucli d'Envilder. És un fitxer JSON que mapeja noms de variables d'entorn (claus) a rutes de secrets (valors) al teu proveïdor al núvol.",
     mapCalloutStructure: 'Estructura:',
     mapCalloutKey:
       "Cada clau es converteix en un nom de variable d'entorn al teu fitxer .env.",
@@ -641,7 +638,7 @@ export const ca: Translations = {
     ghaPrereqAws:
       'AWS: Configura credencials amb aws-actions/configure-aws-credentials',
     ghaPrereqAzure: 'Azure: Configura credencials amb azure/login',
-    ghaPrereqMap: 'Un param-map.json al teu repositori',
+    ghaPrereqMap: 'Un envilder.json al teu repositori',
     ghaPullOnly: 'La GitHub Action només suporta el mode pull (sense push).',
     ghaBasicTitle: 'Exemple bàsic de workflow',
     ghaMultiEnvTitle: 'Workflow multi-entorn',

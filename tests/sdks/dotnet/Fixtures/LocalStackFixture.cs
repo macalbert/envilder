@@ -62,7 +62,7 @@ public sealed class LocalStackFixture : IAsyncLifetime
 	private static async Task<IReadOnlyDictionary<string, string>>
 		LoadEnvironmentAsync()
 	{
-		const string filename = "secrets-map.json";
+		const string filename = "envilder.json";
 
 		var assembly = typeof(LocalStackFixture).Assembly;
 		var resourceName = $"{assembly.GetName().Name}.{filename}";

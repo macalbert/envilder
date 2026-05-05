@@ -6,7 +6,7 @@ Minimal examples showing how to load secrets from AWS SSM Parameter Store using 
 
 - Node.js 20+
 - AWS credentials configured (`~/.aws/credentials`, env vars, or IAM role)
-- SSM parameters matching the paths in [`secrets-map.json`](../../../secrets-map.json)
+- SSM parameters matching the paths in [`envilder.json`](../../../envilder.json)
 
 ## Setup
 

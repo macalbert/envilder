@@ -22,10 +22,10 @@ class Envilder:
     Examples::
 
         # Single file — resolve + inject into os.environ:
-        Envilder.load("secrets-map.json")
+        Envilder.load("envilder.json")
 
         # Single file — resolve only (no injection):
-        Envilder.resolve_file("secrets-map.json")
+        Envilder.resolve_file("envilder.json")
 
         # Environment-based — load the right file per env:
         Envilder.load("production", {
@@ -36,7 +36,7 @@ class Envilder:
 
         # Fluent builder with provider override:
         secrets = (
-            Envilder.from_map_file("secrets-map.json")
+            Envilder.from_map_file("envilder.json")
             .with_provider(SecretProviderType.AZURE)
             .with_vault_url("https://my-vault.vault.azure.net")
             .inject()
@@ -107,7 +107,7 @@ class Envilder:
 
         Examples::
 
-            Envilder.load("secrets-map.json")
+            Envilder.load("envilder.json")
 
             Envilder.load("production", {
                 "production": "prod-secrets.json",
@@ -176,7 +176,7 @@ class Envilder:
 
         Examples::
 
-            Envilder.resolve_file("secrets-map.json")
+            Envilder.resolve_file("envilder.json")
 
             Envilder.resolve_file("production", {
                 "production": "prod-secrets.json",

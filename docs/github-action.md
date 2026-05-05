@@ -82,7 +82,7 @@ jobs:
       - name: 🔐 Pull Secrets from AWS SSM
         uses: macalbert/envilder/github-action@v0.8.0
         with:
-          map-file: config/param-map.json
+          map-file: config/envilder.json
           env-file: .env
 
       - name: 🍄 Setup Node.js
@@ -138,7 +138,7 @@ jobs:
       - name: 🔐 Pull ${{ inputs.environment }} secrets
         uses: macalbert/envilder/github-action@v0.8.0
         with:
-          map-file: config/${{ inputs.environment }}/param-map.json
+          map-file: config/${{ inputs.environment }}/envilder.json
           env-file: .env
 
       - uses: actions/setup-node@v6
@@ -171,7 +171,7 @@ jobs:
 
 ## Parameter Mapping File
 
-Create a `param-map.json` file that maps environment variable names to secret paths in your cloud provider.
+Create an `envilder.json` file that maps environment variable names to secret paths in your cloud provider.
 
 **AWS SSM (default):**
 
@@ -205,7 +205,7 @@ Create a `param-map.json` file that maps environment variable names to secret pa
 
 - Verify the parameter exists in AWS SSM Parameter Store
 - Check your IAM role has `ssm:GetParameter` permission for that parameter
-- Ensure the parameter path in `param-map.json` is correct (case-sensitive)
+- Ensure the parameter path in `envilder.json` is correct (case-sensitive)
 
 ### Error: "Unable to assume role"
 
@@ -221,7 +221,7 @@ Create a `param-map.json` file that maps environment variable names to secret pa
 
 ### Generated `.env` file is empty
 
-- Check that `param-map.json` exists and has valid JSON syntax
+- Check that `envilder.json` exists and has valid JSON syntax
 - Verify cloud credentials are configured before running the action
 - Review GitHub Actions logs for specific error messages
 
@@ -281,7 +281,7 @@ steps:
   - name: 🔐 Test Action (Local Reference)
     uses: ./github-action  # Reference action from current repo
     with:
-      map-file: e2e/sample/param-map.json
+      map-file: e2e/sample/envilder.json
       env-file: .env
 ```
 
@@ -301,7 +301,7 @@ This error only occurs when using a local reference (`uses: ./github-action`) du
 - run: pnpm build
 - uses: ./github-action  # Local reference requires build
   with:
-    map-file: param-map.json
+    map-file: envilder.json
     env-file: .env
 ```
 
@@ -320,7 +320,7 @@ Ensure you've configured AWS credentials before the action:
 
 - uses: macalbert/envilder/github-action@v0.8.0
   with:
-    map-file: param-map.json
+    map-file: envilder.json
     env-file: .env
 ```
 
@@ -328,7 +328,7 @@ Ensure you've configured AWS credentials before the action:
 
 Verify that:
 
-1. The SSM parameter path in `param-map.json` is correct
+1. The SSM parameter path in `envilder.json` is correct
 2. The parameter exists in AWS SSM Parameter Store
 3. Your IAM role has permission to read the parameter
 
@@ -337,7 +337,7 @@ Verify that:
 1. **Use OIDC Authentication** - Prefer OIDC over long-lived access keys
 2. **Scope IAM Permissions** - Limit `ssm:GetParameter` to specific parameter paths
 3. **Use Encrypted Parameters** - Store secrets as `SecureString` type in SSM
-4. **Review Parameter Mappings** - Ensure `param-map.json` doesn't contain actual secrets
+4. **Review Parameter Mappings** - Ensure `envilder.json` doesn't contain actual secrets
 5. **Enable CloudTrail** - Monitor SSM parameter access in AWS CloudTrail
 
 ## Publishing to GitHub Marketplace

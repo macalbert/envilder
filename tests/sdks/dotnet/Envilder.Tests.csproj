@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="secrets-map.json" />
+    <EmbeddedResource Include="..\..\..\envilder.json" Link="envilder.json" />
   </ItemGroup>
 
   <ItemGroup>

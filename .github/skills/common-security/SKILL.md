@@ -28,7 +28,7 @@ multi-runtime SDK platform that manages secrets from AWS SSM and Azure Key Vault
 
 - **CLI/GHA**: Use `EnvironmentVariable.maskedValue` (shows last 3 chars) for logging
 - **SDKs**: Never log resolved secret values — log only the key name
-- **Tests**: Use `secrets-map.json` to resolve test tokens; never hardcode tokens
+- **Tests**: Use `envilder.json` to resolve test tokens; never hardcode tokens
 - **Website**: No secrets — it's a static site
 
 ### Storage Rules
@@ -38,7 +38,7 @@ multi-runtime SDK platform that manages secrets from AWS SSM and Azure Key Vault
 | Production | AWS SSM Parameter Store (encrypted) | In code, env vars, or config files |
 | Production (Azure) | Azure Key Vault | In code or checked-in files |
 | CI | GitHub Secrets → OIDC → SSM | As plaintext in workflow YAML |
-| Local dev | AWS profile → SSM (via `secrets-map.json`) | In `.env` files committed to Git |
+| Local dev | AWS profile → SSM (via `envilder.json`) | In `.env` files committed to Git |
 | Tests | TestContainers (LocalStack/Lowkey Vault) | Real credentials in test code |
 
 ### Secretlint Enforcement

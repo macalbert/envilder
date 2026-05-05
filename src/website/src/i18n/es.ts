@@ -32,19 +32,15 @@ export const es: Translations = {
   },
   hero: {
     openSource: 'Código abierto · MIT',
-    title1: 'Un modelo.',
-    title2: 'Tus secretos.',
-    titleAccent: 'Cada runtime.',
-    description:
-      'Define los mapeos de secretos una vez y resuélvelos de forma consistente desde',
-    descAws: 'AWS SSM',
-    descAzure: 'Azure Key Vault',
-    descGcp: 'GCP Secret Manager',
+    title1: 'El archivo .env es',
+    title2: 'un incidente de seguridad',
+    titleAccent: 'esperando a pasar.',
+    description: 'Envilder lee tus secretos directamente de ',
+    descAws: 'AWS',
+    descAzure: 'Azure',
     descOr: 'o',
-    descComma: ',',
-    descSuffix:
-      ': localmente con la CLI, en CI/CD con la GitHub Action o al iniciar la app con SDKs de runtime.',
-    getStarted: '▶ Empezar',
+    descSuffix: ' hacia tu app — sin archivos, sin SaaS, sin filtraciones.',
+    getStarted: '▶ Verlo en acción',
     viewOnGithub: '★ Ver en GitHub',
     terminalComment1: '# 1. Un modelo de mapeo para cada entorno',
     terminalComment2: '# 2. Resuelve secretos con la CLI',
@@ -416,8 +412,8 @@ export const es: Translations = {
     install: 'Instalar',
     quickStart: 'Inicio rápido',
     step1:
-      'Crea un param-map.json que mapee variables de entorno a rutas de secretos',
-    step2: 'Ejecuta envilder --map=param-map.json --envfile=.env',
+      'Crea un envilder.json que mapee variables de entorno a rutas de secretos',
+    step2: 'Ejecuta envilder --map=envilder.json --envfile=.env',
     step3: 'Tu archivo .env está listo ✔',
     terminalTitle: 'Inicio rápido',
     commentInstall: '# Instalar globalmente',
@@ -530,7 +526,7 @@ export const es: Translations = {
       'Para acceso solo de lectura, Key Vault Secrets User es suficiente.',
     mapTitle: 'Archivo de mapeo',
     mapIntro:
-      'El archivo de mapeo (param-map.json) es el núcleo de Envilder. Es un archivo JSON que mapea nombres de variables de entorno (claves) a rutas de secretos (valores) en tu proveedor en la nube.',
+      'El archivo de mapeo (envilder.json) es el núcleo de Envilder. Es un archivo JSON que mapea nombres de variables de entorno (claves) a rutas de secretos (valores) en tu proveedor en la nube.',
     mapCalloutStructure: 'Estructura:',
     mapCalloutKey:
       'Cada clave se convierte en un nombre de variable de entorno en tu archivo .env.',
@@ -641,7 +637,7 @@ export const es: Translations = {
     ghaPrereqAws:
       'AWS: Configura credenciales con aws-actions/configure-aws-credentials',
     ghaPrereqAzure: 'Azure: Configura credenciales con azure/login',
-    ghaPrereqMap: 'Un param-map.json en tu repositorio',
+    ghaPrereqMap: 'Un envilder.json en tu repositorio',
     ghaPullOnly: 'La GitHub Action solo soporta el modo pull (sin push).',
     ghaBasicTitle: 'Ejemplo básico de workflow',
     ghaMultiEnvTitle: 'Workflow multi-entorno',

@@ -31,9 +31,7 @@ export interface HeroTranslations {
   description: string;
   descAws: string;
   descAzure: string;
-  descGcp: string;
   descOr: string;
-  descComma: string;
   descSuffix: string;
   getStarted: string;
   viewOnGithub: string;

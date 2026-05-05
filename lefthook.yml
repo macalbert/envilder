@@ -1,5 +1,4 @@
 pre-commit:
-  parallel: true
   commands:
     biome:
       glob: "**/*.{ts,tsx,js,jsx,json,jsonc,astro,mjs}"
@@ -9,17 +8,15 @@ pre-commit:
       stage_fixed: true
     dotnet-format:
       glob: "**/*.{cs,csproj}"
-      run: make format-sdk-dotnet
+      run: dotnet format src/sdks/dotnet/Envilder.sln --include {staged_files}
       stage_fixed: true
     python-format-check:
       glob: "**/*.py"
-      run: make format-sdk-python && make check-sdk-python
+      run: >-
+        uv run --project src/sdks/python black {staged_files} &&
+        uv run --project src/sdks/python isort {staged_files} &&
+        uv run --project src/sdks/python mypy src/sdks/python/envilder/
       stage_fixed: true
-
-pre-push:
-  commands:
-    biome-format:
-      run: pnpm format
 
 commit-msg:
   commands:

@@ -10,7 +10,7 @@ Uses [PEP 723](https://peps.python.org/pep-0723/) inline script metadata
 - Python 3.10+
 - [uv](https://docs.astral.sh/uv/)
 - AWS credentials configured (`~/.aws/credentials`, env vars, or IAM role)
-- SSM parameters matching the paths in [`secrets-map.json`](../../../secrets-map.json)
+- SSM parameters matching the paths in [`envilder.json`](../../../envilder.json)
 
 ## Run
 

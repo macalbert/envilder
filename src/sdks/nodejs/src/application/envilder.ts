@@ -15,13 +15,13 @@ import { MapFileParser } from './map-file-parser.js';
  * @example
  * ```typescript
  * // One-liner — resolve + inject into process.env:
- * await Envilder.load('secrets-map.json');
+ * await Envilder.load('envilder.json');
  *
  * // Resolve without injecting:
- * const secrets = await Envilder.resolveFile('secrets-map.json');
+ * const secrets = await Envilder.resolveFile('envilder.json');
  *
  * // Fluent builder with provider override:
- * const secrets = await Envilder.fromMapFile('secrets-map.json')
+ * const secrets = await Envilder.fromMapFile('envilder.json')
  *   .withProvider(SecretProviderType.Azure)
  *   .withVaultUrl('https://my-vault.vault.azure.net')
  *   .inject();

@@ -29,7 +29,7 @@ dotnet add package Envilder
 using Envilder.Application;
 
 // Resolve secrets from the map file and inject into Environment
-Envilder.Load("secrets-map.json");
+Envilder.Load("envilder.json");
 
 // Access via standard environment variable API
 var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
@@ -40,7 +40,7 @@ var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 ```csharp
 using Envilder.Application;
 
-var secrets = Envilder.ResolveFile("secrets-map.json");
+var secrets = Envilder.ResolveFile("envilder.json");
 var dbPassword = secrets["DB_PASSWORD"];
 ```
 
@@ -51,8 +51,8 @@ Every method has an async counterpart:
 ```csharp
 using Envilder.Application;
 
-await Envilder.LoadAsync("secrets-map.json");
-var secrets = await Envilder.ResolveFileAsync("secrets-map.json");
+await Envilder.LoadAsync("envilder.json");
+var secrets = await Envilder.ResolveFileAsync("envilder.json");
 ```
 
 ### Fluent builder (with overrides)
@@ -64,23 +64,23 @@ using Envilder.Application;
 using Envilder.Domain;
 
 // Override provider + vault URL
-var secrets = Envilder.FromMapFile("secrets-map.json")
+var secrets = Envilder.FromMapFile("envilder.json")
     .WithProvider(SecretProviderType.Azure)
     .WithVaultUrl("https://my-vault.vault.azure.net")
     .Resolve();
 
 // Override AWS profile and inject
-Envilder.FromMapFile("secrets-map.json")
+Envilder.FromMapFile("envilder.json")
     .WithProfile("staging")
     .Inject();
 
 // Async versions
-var secrets = await Envilder.FromMapFile("secrets-map.json")
+var secrets = await Envilder.FromMapFile("envilder.json")
     .WithProvider(SecretProviderType.Azure)
     .WithVaultUrl("https://my-vault.vault.azure.net")
     .ResolveAsync();
 
-await Envilder.FromMapFile("secrets-map.json")
+await Envilder.FromMapFile("envilder.json")
     .WithProfile("staging")
     .InjectAsync();
 ```
@@ -128,7 +128,7 @@ Opt-in validation ensures all resolved secrets have non-empty values:
 ```csharp
 using Envilder.Application;
 
-var secrets = Envilder.ResolveFile("secrets-map.json");
+var secrets = Envilder.ResolveFile("envilder.json");
 secrets.ValidateSecrets(); // throws SecretValidationException if any value is empty
 ```
 
@@ -145,7 +145,7 @@ using Envilder.Infrastructure.Configuration;
 using Microsoft.Extensions.Configuration;
 
 var config = new ConfigurationBuilder()
-    .AddEnvilder("secrets-map.json")
+    .AddEnvilder("envilder.json")
     .Build();
 
 var dbPassword = config["DB_PASSWORD"];
@@ -170,7 +170,7 @@ var connString = dbSettings["ConnectionString"];
 ```csharp
 using Envilder.Infrastructure.DependencyInjection;
 
-services.AddEnvilder("secrets-map.json");
+services.AddEnvilder("envilder.json");
 ```
 
 ### With runtime overrides (IConfiguration)
@@ -183,7 +183,7 @@ using Envilder.Infrastructure.Configuration;
 using Microsoft.Extensions.Configuration;
 
 var config = new ConfigurationBuilder()
-    .AddEnvilder("secrets-map.json", new EnvilderOptions
+    .AddEnvilder("envilder.json", new EnvilderOptions
     {
         Provider = SecretProviderType.Azure,
         VaultUrl = "https://my-vault.vault.azure.net",

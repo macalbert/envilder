@@ -21,7 +21,7 @@ describe('PullSecretsToEnvCommandHandler', () => {
   let mockLogger: ILogger;
   let sut: PullSecretsToEnvCommandHandler;
 
-  const mockMapPath = './tests/param-map.json';
+  const mockMapPath = './tests/envilder.json';
   const mockEnvFilePath = './tests/env-file.env';
 
   beforeEach(() => {
