@@ -1,5 +1,5 @@
 # /// script
-# dependencies = ["envilder>=0.3.1"]
+# dependencies = ["envilder>=0.4.0"]
 # ///
 
 # Fluent builder: override provider, profile, or vault URL

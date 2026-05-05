@@ -1,5 +1,5 @@
 // Secret validation: fail fast if any secret is missing or empty
-#:package Envilder@*
+#:package Envilder@0.3.0
 #:property PublishAot=false
 
 using Envilder.Application;

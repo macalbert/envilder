@@ -1,5 +1,5 @@
 # /// script
-# dependencies = ["envilder>=0.3.1"]
+# dependencies = ["envilder>=0.4.0"]
 # ///
 
 # Secret validation: fail fast if any secret is missing or empty

@@ -1,5 +1,5 @@
 // Environment-based routing: pick a different map file per environment
-#:package Envilder@*
+#:package Envilder@0.3.0
 #:package Microsoft.Extensions.Hosting.Abstractions@*
 #:property PublishAot=false
 
