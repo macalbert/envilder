@@ -9,7 +9,7 @@
   </ItemGroup>
   <ItemGroup Label="Azure">
     <PackageVersion Include="Azure.Identity" Version="1.21.0" />
-    <PackageVersion Include="Azure.Security.KeyVault.Secrets" Version="4.10.0" />
+    <PackageVersion Include="Azure.Security.KeyVault.Secrets" Version="4.11.0" />
   </ItemGroup>
   <ItemGroup Label="Microsoft">
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.7" />
