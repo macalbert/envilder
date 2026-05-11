@@ -205,7 +205,7 @@ importers:
   tests/sdks/nodejs:
     devDependencies:
       '@aws-sdk/client-ssm':
-        specifier: ^3.1042.0
+        specifier: ^3.1045.0
         version: 3.1045.0
       '@azure/identity':
         specifier: ^4.5.0
