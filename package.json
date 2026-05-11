@@ -101,7 +101,7 @@
   "devDependencies": {
     "@biomejs/biome": "catalog:",
     "@commitlint/cli": "^21.0.0",
-    "@commitlint/config-conventional": "^20.5.0",
+    "@commitlint/config-conventional": "^21.0.0",
     "@secretlint/secretlint-rule-preset-recommend": "^13.0.0",
     "@testcontainers/localstack": "^11.13.0",
     "@types/node": "catalog:",
