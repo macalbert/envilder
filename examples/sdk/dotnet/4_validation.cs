@@ -2,6 +2,7 @@
 #:package Envilder@0.4.0
 #:property PublishAot=false
 
+using Envilder;
 using static Envilder.Envilder;
 
 var secrets = await ResolveFileAsync("../../../envilder.json");

@@ -11,7 +11,7 @@
   `Microsoft.Extensions.Configuration` namespace;
   `AddEnvilder()` for `IServiceCollection` moved to
   `Microsoft.Extensions.DependencyInjection` namespace.
-  Both are now discoverable without any Envilder-specific using
+  Both are now discoverable without any Envilder-specific using directives
 
 ### Migration
 
