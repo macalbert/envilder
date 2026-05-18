@@ -1,8 +1,8 @@
 namespace Envilder.Infrastructure.Azure;
 
-using Envilder.Domain.Ports;
 using global::Azure;
 using global::Azure.Security.KeyVault.Secrets;
+using global::Envilder.Domain.Ports;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

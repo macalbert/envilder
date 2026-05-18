@@ -1,8 +1,8 @@
-namespace Envilder.Infrastructure.Configuration;
+namespace Microsoft.Extensions.Configuration;
 
-using Envilder.Application;
-using Envilder.Domain;
-using Microsoft.Extensions.Configuration;
+using Envilder;
+using global::Envilder.Infrastructure;
+using global::Envilder.Infrastructure.Configuration;
 using System;
 using System.IO;
 

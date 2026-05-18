@@ -2,16 +2,12 @@ namespace Envilder.Tests.EndToEnd;
 
 using Amazon.SimpleSystemsManagement;
 using AwesomeAssertions;
-using Envilder.Application;
-using Envilder.Domain;
-using Envilder.Infrastructure;
-using Envilder.Infrastructure.Configuration;
-using Envilder.Infrastructure.DependencyInjection;
-using Envilder.Tests.Fixtures;
+using global::Envilder.Infrastructure;
+using global::Envilder.Tests.Fixtures;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using EnvilderFacade = Envilder.Application.Envilder;
+using EnvilderFacade = global::Envilder.Envilder;
 
 [Collection(nameof(ContainersCollection))]
 public class ConsumerExperienceTests : IAsyncLifetime

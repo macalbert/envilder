@@ -3,8 +3,7 @@
 #:package Envilder@0.3.0
 #:property PublishAot=false
 
-using Envilder.Application;
-using Envilder.Infrastructure.Configuration;
+using Envilder;
 using Microsoft.Extensions.Configuration;
 
 var config = new ConfigurationBuilder()

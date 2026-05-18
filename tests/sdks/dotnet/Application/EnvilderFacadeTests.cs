@@ -1,8 +1,7 @@
 namespace Envilder.Tests.Application;
 
 using AwesomeAssertions;
-using Envilder.Domain;
-using EnvilderFacade = Envilder.Application.Envilder;
+using EnvilderFacade = global::Envilder.Envilder;
 
 public class EnvilderFacadeTests
 {

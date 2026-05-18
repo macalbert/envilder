@@ -1,4 +1,4 @@
-namespace Envilder.Domain;
+namespace Envilder;
 
 /// <summary>
 /// Configuration read from the <c>$config</c> section of a map file.

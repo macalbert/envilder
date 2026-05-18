@@ -2,7 +2,7 @@
 #:package Envilder@0.3.0
 #:property PublishAot=false
 
-using static Envilder.Application.Envilder;
+using static Envilder.Envilder;
 
 var secrets = await FromMapFile("../../../envilder.json")
     .WithProfile("mac")

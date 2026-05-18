@@ -3,11 +3,9 @@ namespace Envilder.Tests.Fixtures;
 using Amazon.Runtime;
 using Amazon.SimpleSystemsManagement;
 using DotNet.Testcontainers.Builders;
-using Envilder.Application;
-using Envilder.Domain;
-using Envilder.Infrastructure;
-using Envilder.Infrastructure.Aws;
-using Envilder.Tests.Infrastructure.Aws;
+using global::Envilder.Infrastructure;
+using global::Envilder.Infrastructure.Aws;
+using global::Envilder.Tests.Infrastructure.Aws;
 using Testcontainers.LocalStack;
 
 public sealed class LocalStackFixture : IAsyncLifetime

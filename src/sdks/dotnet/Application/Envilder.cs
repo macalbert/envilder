@@ -1,4 +1,4 @@
-namespace Envilder.Application;
+namespace Envilder;
 
 using global::Envilder.Infrastructure;
 using System;

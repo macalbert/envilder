@@ -1,8 +1,7 @@
-namespace Envilder.Infrastructure.DependencyInjection;
+namespace Microsoft.Extensions.DependencyInjection;
 
-using Envilder.Application;
-using Envilder.Domain;
-using Microsoft.Extensions.DependencyInjection;
+using Envilder;
+using global::Envilder.Infrastructure;
 using System;
 using System.IO;
 

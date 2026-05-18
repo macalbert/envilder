@@ -2,8 +2,7 @@
 #:package Envilder@0.3.0
 #:property PublishAot=false
 
-using Envilder.Application;
-using static Envilder.Application.Envilder;
+using static Envilder.Envilder;
 
 var secrets = await ResolveFileAsync("../../../envilder.json");
 secrets.ValidateSecrets(); // throws SecretValidationException if any value is empty

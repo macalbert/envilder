@@ -4,7 +4,7 @@
 #:property PublishAot=false
 
 using Microsoft.Extensions.Hosting;
-using static Envilder.Application.Envilder;
+using static Envilder.Envilder;
 
 var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? Environments.Production;
 

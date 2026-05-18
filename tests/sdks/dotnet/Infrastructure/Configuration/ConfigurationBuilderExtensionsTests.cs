@@ -1,7 +1,6 @@
 namespace Envilder.Tests.Infrastructure.Configuration;
 
 using AwesomeAssertions;
-using Envilder.Infrastructure.Configuration;
 using Microsoft.Extensions.Configuration;
 using System.IO;
 

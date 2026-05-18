@@ -1,6 +1,5 @@
-namespace Envilder.Application;
+namespace Envilder;
 
-using global::Envilder.Domain;
 using global::Envilder.Infrastructure;
 using System.Collections.Generic;
 using System.IO;

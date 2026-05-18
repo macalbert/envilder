@@ -1,7 +1,6 @@
 namespace Envilder.Tests.Infrastructure.DependencyInjection;
 
 using AwesomeAssertions;
-using Envilder.Infrastructure.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 
