@@ -2,9 +2,9 @@
 #:package Envilder@0.4.0
 #:property PublishAot=false
 
-using static Envilder.Envilder;
+using Envilder;
 
-var secrets = await LoadAsync("../../../envilder.json");
+var secrets = await Envilder.LoadAsync("../../../envilder.json");
 
 foreach (var key in secrets.Keys)
     Console.WriteLine($"{key} = {Environment.GetEnvironmentVariable(key)}");

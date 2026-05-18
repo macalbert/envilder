@@ -3,12 +3,12 @@
 #:package Microsoft.Extensions.Hosting.Abstractions@*
 #:property PublishAot=false
 
+using Envilder;
 using Microsoft.Extensions.Hosting;
-using static Envilder.Envilder;
 
 var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? Environments.Production;
 
-var secrets = await LoadAsync(env, new Dictionary<string, string?>
+var secrets = await Envilder.LoadAsync(env, new Dictionary<string, string?>
 {
     [Environments.Development] = "../../../envilder.json",
     [Environments.Staging] = "../../../envilder.json",

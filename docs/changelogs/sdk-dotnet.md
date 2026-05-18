@@ -4,8 +4,7 @@
 
 * **BREAKING: Root namespace for public API** — All consumer-facing types
   moved from `Envilder.Application` / `Envilder.Domain` to the root
-  `Envilder` namespace. Consumers now only need `using Envilder;` (or
-  `using static Envilder.Envilder;` for static imports)
+  `Envilder` namespace. Consumers now only need `using Envilder;`
 * **Extension methods follow .NET conventions** —
   `AddEnvilder()` for `IConfigurationBuilder` moved to
   `Microsoft.Extensions.Configuration` namespace;

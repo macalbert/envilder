@@ -2,9 +2,9 @@
 #:package Envilder@0.4.0
 #:property PublishAot=false
 
-using static Envilder.Envilder;
+using Envilder;
 
-var secrets = await FromMapFile("../../../envilder.json")
+var secrets = await Envilder.FromMapFile("../../../envilder.json")
     .WithProfile("mac")
     .ResolveAsync();
 

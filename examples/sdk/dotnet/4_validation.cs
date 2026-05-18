@@ -3,9 +3,8 @@
 #:property PublishAot=false
 
 using Envilder;
-using static Envilder.Envilder;
 
-var secrets = await ResolveFileAsync("../../../envilder.json");
+var secrets = await Envilder.ResolveFileAsync("../../../envilder.json");
 secrets.ValidateSecrets(); // throws SecretValidationException if any value is empty
 
 foreach (var (key, value) in secrets)
