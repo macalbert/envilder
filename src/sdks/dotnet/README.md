@@ -26,7 +26,7 @@ dotnet add package Envilder
 ### One-liner — resolve + inject
 
 ```csharp
-using Envilder.Application;
+using Envilder;
 
 // Resolve secrets from the map file and inject into Environment
 Envilder.Load("envilder.json");
@@ -38,7 +38,7 @@ var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 ### Resolve without injecting
 
 ```csharp
-using Envilder.Application;
+using Envilder;
 
 var secrets = Envilder.ResolveFile("envilder.json");
 var dbPassword = secrets["DB_PASSWORD"];
@@ -49,7 +49,7 @@ var dbPassword = secrets["DB_PASSWORD"];
 Every method has an async counterpart:
 
 ```csharp
-using Envilder.Application;
+using Envilder;
 
 await Envilder.LoadAsync("envilder.json");
 var secrets = await Envilder.ResolveFileAsync("envilder.json");
@@ -60,8 +60,7 @@ var secrets = await Envilder.ResolveFileAsync("envilder.json");
 Override the map file's `$config` at runtime — useful for switching providers, profiles, or vault URLs per environment:
 
 ```csharp
-using Envilder.Application;
-using Envilder.Domain;
+using Envilder;
 
 // Override provider + vault URL
 var secrets = Envilder.FromMapFile("envilder.json")
@@ -91,7 +90,7 @@ Route secret loading based on your current environment. Each environment maps to
 secrets file (or `null` to skip loading):
 
 ```csharp
-using Envilder.Application;
+using Envilder;
 
 var env = Environment.GetEnvironmentVariable("APP_ENV") ?? "development";
 
@@ -126,7 +125,7 @@ Behaviour:
 Opt-in validation ensures all resolved secrets have non-empty values:
 
 ```csharp
-using Envilder.Application;
+using Envilder;
 
 var secrets = Envilder.ResolveFile("envilder.json");
 secrets.ValidateSecrets(); // throws SecretValidationException if any value is empty
@@ -141,7 +140,6 @@ secrets.ValidateSecrets(); // throws SecretValidationException if any value is e
 ### Via IConfiguration (ASP.NET)
 
 ```csharp
-using Envilder.Infrastructure.Configuration;
 using Microsoft.Extensions.Configuration;
 
 var config = new ConfigurationBuilder()
@@ -168,8 +166,6 @@ var connString = dbSettings["ConnectionString"];
 ### Via IServiceCollection (ASP.NET DI)
 
 ```csharp
-using Envilder.Infrastructure.DependencyInjection;
-
 services.AddEnvilder("envilder.json");
 ```
 
@@ -178,8 +174,7 @@ services.AddEnvilder("envilder.json");
 Pass `EnvilderOptions` to override the map file's `$config` from code:
 
 ```csharp
-using Envilder.Domain;
-using Envilder.Infrastructure.Configuration;
+using Envilder;
 using Microsoft.Extensions.Configuration;
 
 var config = new ConfigurationBuilder()
