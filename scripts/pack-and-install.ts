@@ -1,6 +1,6 @@
 #!/usr/bin/env node --loader=ts-node/esm
 
-import { execSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -110,10 +110,14 @@ function installPackageFile(rootDir: string, packageFile: string): void {
   try {
     const globalBinDir = getGlobalBinDir();
     const env = { ...process.env };
-    if (globalBinDir && !process.env.PATH?.includes(globalBinDir)) {
+    const pathEntries = (process.env.PATH ?? '').split(path.delimiter);
+    if (globalBinDir && !pathEntries.includes(globalBinDir)) {
       env.PATH = `${globalBinDir}${path.delimiter}${process.env.PATH}`;
     }
-    execSync(`pnpm add -g "${packagePath}"`, { stdio: 'inherit', env });
+    execFileSync('pnpm', ['add', '-g', packagePath], {
+      stdio: 'inherit',
+      env,
+    });
     console.log('✅ Package installed globally');
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
