@@ -7,6 +7,14 @@ packages:
   - "tests/website"
   - "tests/sdks/nodejs"
 
+allowBuilds:
+  cpu-features: true
+  esbuild: true
+  lefthook: true
+  protobufjs: true
+  sharp: true
+  ssh2: true
+
 catalog:
   '@biomejs/biome': ^2.4.9
   typescript: ^6.0.3
