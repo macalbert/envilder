@@ -7,6 +7,14 @@ packages:
   - "tests/website"
   - "tests/sdks/nodejs"
 
+allowBuilds:
+  cpu-features: true
+  esbuild: true
+  lefthook: true
+  protobufjs: true
+  sharp: true
+  ssh2: true
+
 catalog:
   '@biomejs/biome': ^2.4.9
   typescript: ^6.0.3
@@ -17,8 +25,8 @@ catalog:
   aws-cdk-lib: ^2.245.0
   constructs: ^10.4.2
 
-onlyBuiltDependencies:
-  - cpu-features
-  - esbuild
-  - protobufjs
-  - ssh2
+overrides:
+  defu: ">=6.1.5"
+  lodash: ">=4.18.0"
+  vite: "^7.3.2"
+  yaml: ">=2.8.3"
