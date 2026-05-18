@@ -93,6 +93,10 @@ function getGlobalBinDir(): string {
     if (pnpmHome) {
       return path.join(pnpmHome, 'bin');
     }
+    console.warn(
+      '⚠️ Could not detect global pnpm bin directory. ' +
+        'Set PNPM_HOME if global installs fail.',
+    );
     return '';
   }
 }
@@ -117,6 +121,7 @@ function installPackageFile(rootDir: string, packageFile: string): void {
     execFileSync('pnpm', ['add', '-g', packagePath], {
       stdio: 'inherit',
       env,
+      shell: true,
     });
     console.log('✅ Package installed globally');
   } catch (err) {
