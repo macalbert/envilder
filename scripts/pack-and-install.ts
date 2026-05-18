@@ -85,6 +85,18 @@ function createPackage(rootDir: string): string {
   }
 }
 
+function getGlobalBinDir(): string {
+  try {
+    return execSync('pnpm bin -g', { encoding: 'utf8' }).trim();
+  } catch {
+    const pnpmHome = process.env.PNPM_HOME;
+    if (pnpmHome) {
+      return path.join(pnpmHome, 'bin');
+    }
+    return '';
+  }
+}
+
 function installPackageFile(rootDir: string, packageFile: string): void {
   console.log('🔧 Installing package globally...');
   const packagePath = path.join(rootDir, packageFile);
@@ -96,7 +108,12 @@ function installPackageFile(rootDir: string, packageFile: string): void {
 
   console.log(`Installing from package: ${packagePath}`);
   try {
-    execSync(`pnpm add -g "${packagePath}"`, { stdio: 'inherit' });
+    const globalBinDir = getGlobalBinDir();
+    const env = { ...process.env };
+    if (globalBinDir && !process.env.PATH?.includes(globalBinDir)) {
+      env.PATH = `${globalBinDir}${path.delimiter}${process.env.PATH}`;
+    }
+    execSync(`pnpm add -g "${packagePath}"`, { stdio: 'inherit', env });
     console.log('✅ Package installed globally');
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
