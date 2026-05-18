@@ -519,7 +519,7 @@ envilder --push --provider=azure \\
 
         <h3>{t.docs.sdkDotnetOneLiner}</h3>
         <p>{t.docs.sdkDotnetOneLinerDesc}</p>
-        <CodeBlock lang="csharp" code={`using Envilder.Application;
+        <CodeBlock lang="csharp" code={`using Envilder;
 
 // Resolve secrets and inject into Environment
 Envilder.Load("envilder.json");
@@ -528,15 +528,14 @@ var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");`} />
 
         <h3>{t.docs.sdkDotnetResolve}</h3>
         <p>{t.docs.sdkDotnetResolveDesc}</p>
-        <CodeBlock lang="csharp" code={`using Envilder.Application;
+        <CodeBlock lang="csharp" code={`using Envilder;
 
 var secrets = Envilder.ResolveFile("envilder.json");
 var dbPassword = secrets["DB_PASSWORD"];`} />
 
         <h3>{t.docs.sdkDotnetFluent}</h3>
         <p>{t.docs.sdkDotnetFluentDesc}</p>
-        <CodeBlock lang="csharp" code={`using Envilder.Application;
-using Envilder.Domain;
+        <CodeBlock lang="csharp" code={`using Envilder;
 
 var secrets = Envilder.FromMapFile("envilder.json")
     .WithProvider(SecretProviderType.Azure)
@@ -550,7 +549,7 @@ Envilder.FromMapFile("envilder.json")
 
         <h3>{t.docs.sdkDotnetEnvLoading}</h3>
         <p>{t.docs.sdkDotnetEnvLoadingDesc}</p>
-        <CodeBlock lang="csharp" code={`using Envilder.Application;
+        <CodeBlock lang="csharp" code={`using Envilder;
 
 var env = Environment.GetEnvironmentVariable("APP_ENV") ?? "development";
 
@@ -563,22 +562,20 @@ Envilder.Load(env, new Dictionary<string, string?>
 
         <h3>{t.docs.sdkDotnetValidation}</h3>
         <p>{t.docs.sdkDotnetValidationDesc}</p>
-        <CodeBlock lang="csharp" code={`using Envilder.Application;
+        <CodeBlock lang="csharp" code={`using Envilder;
 
 var secrets = Envilder.ResolveFile("envilder.json");
 secrets.ValidateSecrets(); // throws SecretValidationException if any value is empty`} />
 
         <h3>{t.docs.sdkDotnetQuickStartConfig}</h3>
         <p>{t.docs.sdkDotnetQuickStartConfigDesc}</p>
-        <CodeBlock lang="csharp" code={`using Envilder.Infrastructure.Configuration;
-
-var builder = WebApplication.CreateBuilder(args);
+        <CodeBlock lang="csharp" code={`var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvilder("envilder.json");
 var app = builder.Build();`} />
 
         <h3>{t.docs.sdkDotnetQuickStartResolve}</h3>
         <p>{t.docs.sdkDotnetQuickStartResolveDesc}</p>
-        <CodeBlock lang="csharp" code={`using Envilder.Application;
+        <CodeBlock lang="csharp" code={`using Envilder;
 
 var secrets = await Envilder.ResolveFileAsync("envilder.json");
 EnvilderClient.InjectIntoEnvironment(secrets);`} />
