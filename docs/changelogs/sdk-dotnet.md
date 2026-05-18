@@ -29,6 +29,11 @@ With:
 using Envilder;
 ```
 
+`AddEnvilder()` extension methods now live in `Microsoft.Extensions.Configuration`
+and `Microsoft.Extensions.DependencyInjection` — no Envilder-specific import needed.
+ASP.NET projects already include these namespaces via global usings; console apps
+may need to add them explicitly.
+
 ---
 
 ## [0.3.0] - 2026-05-03
