@@ -324,6 +324,7 @@ packages:
   '@aws-sdk/core@3.974.9':
     resolution: {integrity: sha512-bXxosFunr+v/kqNb99r1NRkrVBha7CG036fRSpWGbC1A/e363XFQN6wcZMx7MYTdRr1tYwNnkrWX2xc1rT3BCQ==}
     engines: {node: '>=20.0.0'}
+    deprecated: Deprecated due to an error deserialization bug in JSON 1.0 protocol services, see https://github.com/aws/aws-sdk-js-v3/pull/8031. Newer version available.
 
   '@aws-sdk/credential-provider-cognito-identity@3.972.32':
     resolution: {integrity: sha512-u0NdqmO0h1nPoElB66FDuZKGDibn3VTE18DzFw4nH6LHebeIw9r+n2o9ap+fLZA/6H/tmdqw5fpgwYt/bb6eYQ==}
