@@ -1,6 +1,6 @@
 // Use Envilder as an IConfiguration source
 #:package Microsoft.Extensions.Configuration@10.*
-#:package Envilder@0.3.0
+#:package Envilder@0.4.0
 #:property PublishAot=false
 
 using Envilder;

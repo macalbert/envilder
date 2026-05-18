@@ -1,5 +1,5 @@
 // One-liner: resolve secrets and inject into environment variables
-#:package Envilder@0.3.0
+#:package Envilder@0.4.0
 #:property PublishAot=false
 
 using static Envilder.Envilder;

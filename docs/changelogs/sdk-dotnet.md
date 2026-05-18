@@ -1,3 +1,37 @@
+## [0.4.0] - 2026-05-18
+
+### Changed
+
+* **BREAKING: Root namespace for public API** — All consumer-facing types
+  moved from `Envilder.Application` / `Envilder.Domain` to the root
+  `Envilder` namespace. Consumers now only need `using Envilder;` (or
+  `using static Envilder.Envilder;` for static imports)
+* **Extension methods follow .NET conventions** —
+  `AddEnvilder()` for `IConfigurationBuilder` moved to
+  `Microsoft.Extensions.Configuration` namespace;
+  `AddEnvilder()` for `IServiceCollection` moved to
+  `Microsoft.Extensions.DependencyInjection` namespace.
+  Both are now discoverable without any Envilder-specific using
+
+### Migration
+
+Replace:
+
+```csharp
+using Envilder.Application;
+using Envilder.Domain;
+using Envilder.Infrastructure.Configuration;
+using Envilder.Infrastructure.DependencyInjection;
+```
+
+With:
+
+```csharp
+using Envilder;
+```
+
+---
+
 ## [0.3.0] - 2026-05-03
 
 ### Added
