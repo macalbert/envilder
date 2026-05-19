@@ -16,7 +16,7 @@ catalogs:
       specifier: ^4.1.2
       version: 4.1.5
     aws-cdk-lib:
-      specifier: ^2.254.0
+      specifier: ^2.245.0
       version: 2.254.0
     constructs:
       specifier: ^10.4.2
