@@ -1,6 +1,6 @@
 namespace Microsoft.Extensions.DependencyInjection;
 
-using Envilder;
+using global::Envilder;
 using global::Envilder.Infrastructure;
 using System;
 using System.IO;
@@ -9,7 +9,7 @@ using System.IO;
 /// Extension methods for registering Envilder services in an
 /// <see cref="IServiceCollection"/> dependency injection container.
 /// </summary>
-public static class ServiceCollectionExtensions
+public static class EnvilderServiceCollectionExtensions
 {
 	/// <summary>
 	/// Parses the map file at <paramref name="mapFilePath"/>, creates an
