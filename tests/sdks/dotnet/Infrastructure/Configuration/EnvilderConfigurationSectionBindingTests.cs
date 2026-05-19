@@ -1,10 +1,8 @@
 namespace Envilder.Tests.Infrastructure.Configuration;
 
 using AwesomeAssertions;
-using Envilder.Application;
-using Envilder.Domain;
-using Envilder.Domain.Ports;
-using Envilder.Infrastructure.Configuration;
+using global::Envilder.Domain.Ports;
+using global::Envilder.Infrastructure.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

@@ -1,7 +1,6 @@
 namespace Envilder.Tests.Application;
 
 using AwesomeAssertions;
-using Envilder.Application;
 
 public class SecretValidationExtensionsTests
 {

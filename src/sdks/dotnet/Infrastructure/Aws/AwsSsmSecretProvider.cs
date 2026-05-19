@@ -2,7 +2,7 @@ namespace Envilder.Infrastructure.Aws;
 
 using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
-using Envilder.Domain.Ports;
+using global::Envilder.Domain.Ports;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

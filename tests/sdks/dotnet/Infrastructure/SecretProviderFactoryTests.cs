@@ -1,11 +1,10 @@
 namespace Envilder.Tests.Infrastructure;
 
 using AwesomeAssertions;
-using Envilder.Domain;
-using Envilder.Infrastructure;
-using Envilder.Infrastructure.Aws;
-using Envilder.Infrastructure.Azure;
-using Envilder.Tests.Fixtures;
+using global::Envilder.Infrastructure;
+using global::Envilder.Infrastructure.Aws;
+using global::Envilder.Infrastructure.Azure;
+using global::Envilder.Tests.Fixtures;
 
 [Collection(nameof(ContainersCollection))]
 public class SecretProviderFactoryTests : IDisposable

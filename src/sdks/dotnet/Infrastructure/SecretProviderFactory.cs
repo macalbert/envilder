@@ -3,12 +3,11 @@ namespace Envilder.Infrastructure;
 using Amazon;
 using Amazon.Runtime.CredentialManagement;
 using Amazon.SimpleSystemsManagement;
-using Envilder.Domain;
-using Envilder.Domain.Ports;
-using Envilder.Infrastructure.Aws;
-using Envilder.Infrastructure.Azure;
 using global::Azure.Identity;
 using global::Azure.Security.KeyVault.Secrets;
+using global::Envilder.Domain.Ports;
+using global::Envilder.Infrastructure.Aws;
+using global::Envilder.Infrastructure.Azure;
 using System;
 
 /// <summary>

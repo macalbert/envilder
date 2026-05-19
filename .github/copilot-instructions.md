@@ -220,7 +220,7 @@ but have **no code dependency** on the TypeScript core.
   (async `GetSecretAsync` + sync `GetSecret`), `MapFileConfig`,
   `EnvilderOptions`, `ParsedMapFile`, `SecretProviderType` enum
 - **Application** (`Application/`):
-  - `Envilder` — Static one-liner facade (`Load`, `ResolveFile`, `FromMapFile` + env-routing overloads)
+  - `Env` — Static one-liner facade (`Load`, `ResolveFile`, `FromMapFile` + env-routing overloads)
   - `EnvilderBuilder` — Fluent builder (`WithProvider`, `WithProfile`, `WithVaultUrl` → `Resolve`/`Inject`)
   - `EnvilderClient` — Core resolver (resolves mappings, `InjectIntoEnvironment` static method)
   - `MapFileParser` — Parses `$config` + variable mappings from JSON
@@ -241,10 +241,10 @@ but have **no code dependency** on the TypeScript core.
     `RequestFailedException(404)` → `null`. `GetSecret` (sync):
     uses native `SecretClient.GetSecret()` (no deadlock risk)
   - `Configuration/` —
-    `ConfigurationBuilderExtensions.AddEnvilder(mapFilePath, options?)`
+    `EnvilderConfigurationBuilderExtensions.AddEnvilder(mapFilePath, options?)`
     integrates into `IConfigurationBuilder` pipeline; creates provider
     internally via factory
-  - `DependencyInjection/ServiceCollectionExtensions` —
+  - `DependencyInjection/EnvilderServiceCollectionExtensions` —
     `IServiceCollection.AddEnvilder(mapFilePath, options?)`
     for ASP.NET DI
 

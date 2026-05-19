@@ -1,9 +1,7 @@
 namespace Envilder.Tests.Application;
 
 using AwesomeAssertions;
-using Envilder.Application;
-using Envilder.Domain;
-using Envilder.Domain.Ports;
+using global::Envilder.Domain.Ports;
 using NSubstitute;
 
 public class EnvilderClientTests : IDisposable

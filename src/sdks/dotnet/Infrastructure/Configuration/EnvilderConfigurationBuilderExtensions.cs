@@ -1,8 +1,8 @@
-namespace Envilder.Infrastructure.Configuration;
+namespace Microsoft.Extensions.Configuration;
 
-using Envilder.Application;
-using Envilder.Domain;
-using Microsoft.Extensions.Configuration;
+using global::Envilder;
+using global::Envilder.Infrastructure;
+using global::Envilder.Infrastructure.Configuration;
 using System;
 using System.IO;
 
@@ -10,7 +10,7 @@ using System.IO;
 /// Extension methods for integrating Envilder into the
 /// <see cref="IConfigurationBuilder"/> pipeline.
 /// </summary>
-public static class ConfigurationBuilderExtensions
+public static class EnvilderConfigurationBuilderExtensions
 {
 	/// <summary>
 	/// Adds an Envilder configuration source that reads a JSON map file from disk,

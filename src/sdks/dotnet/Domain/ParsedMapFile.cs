@@ -1,4 +1,4 @@
-namespace Envilder.Domain;
+namespace Envilder;
 
 using System.Collections.Generic;
 

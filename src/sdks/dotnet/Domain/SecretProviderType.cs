@@ -1,4 +1,4 @@
-namespace Envilder.Domain;
+namespace Envilder;
 
 /// <summary>
 /// Supported secret provider backends.

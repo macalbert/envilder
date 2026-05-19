@@ -2,9 +2,8 @@ namespace Envilder.Tests.Infrastructure;
 
 using Amazon.SimpleSystemsManagement;
 using AwesomeAssertions;
-using Envilder.Domain;
-using Envilder.Infrastructure;
-using Envilder.Tests.Fixtures;
+using global::Envilder.Infrastructure;
+using global::Envilder.Tests.Fixtures;
 
 [Collection(nameof(ContainersCollection))]
 public class SecretProviderFactoryAcceptanceTests : IAsyncLifetime

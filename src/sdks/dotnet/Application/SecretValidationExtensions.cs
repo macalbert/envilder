@@ -1,4 +1,4 @@
-namespace Envilder.Application;
+namespace Envilder;
 
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Linq;
 /// </summary>
 /// <example>
 /// <code>
-/// var secrets = Envilder.ResolveFile("envilder.json");
+/// var secrets = Env.ResolveFile("envilder.json");
 /// try
 /// {
 ///     secrets.ValidateSecrets();

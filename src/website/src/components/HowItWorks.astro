@@ -27,15 +27,13 @@ secrets = Envilder.from_map_file("envilder.json").resolve()`,
     label: t.howItWorks.sdkTabDotnet,
     lang: 'csharp',
     filename: 'Program.cs',
-    code: `using Envilder.Application;
-using Envilder.Infrastructure.Configuration;
+    code: `using Envilder;
 
 // Load into IConfiguration
 builder.Configuration.AddEnvilder("envilder.json");
 
-// Or resolve + inject into environment
-var secrets = await Envilder.ResolveFileAsync("envilder.json");
-EnvilderClient.InjectIntoEnvironment(secrets);`,
+// Or one-liner: resolve + inject into Environment
+Env.Load("envilder.json");`,
   },
   {
     label: t.howItWorks.sdkTabNodejs,
