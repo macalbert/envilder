@@ -14,7 +14,7 @@
     "@testcontainers/localstack": "^11.13.0",
     "@types/node": "catalog:",
     "@vitest/coverage-v8": "catalog:",
-    "testcontainers": "^11.13.0",
+    "testcontainers": "^12.0.0",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }
