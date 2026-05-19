@@ -1,4 +1,4 @@
-namespace Envilder.Application;
+namespace Envilder;
 
 using System;
 using System.Collections.Generic;

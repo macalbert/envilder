@@ -2,9 +2,7 @@ namespace Envilder.Tests.Infrastructure.Aws;
 
 using Amazon.SimpleSystemsManagement;
 using AwesomeAssertions;
-using Envilder.Application;
-using Envilder.Domain;
-using Envilder.Tests.Fixtures;
+using global::Envilder.Tests.Fixtures;
 
 [Collection(nameof(ContainersCollection))]
 public class AwsSsmAcceptanceTests

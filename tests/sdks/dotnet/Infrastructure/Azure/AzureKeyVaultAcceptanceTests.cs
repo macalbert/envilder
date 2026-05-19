@@ -1,10 +1,8 @@
 namespace Envilder.Tests.Infrastructure.Azure;
 
 using AwesomeAssertions;
-using Envilder.Application;
-using Envilder.Domain;
-using Envilder.Infrastructure.Azure;
-using Envilder.Tests.Fixtures;
+using global::Envilder.Infrastructure.Azure;
+using global::Envilder.Tests.Fixtures;
 
 [Collection(nameof(ContainersCollection))]
 public class AzureKeyVaultAcceptanceTests

@@ -1,8 +1,6 @@
 namespace Envilder.Tests.Application;
 
 using AwesomeAssertions;
-using Envilder.Application;
-using Envilder.Domain;
 
 public class MapFileParserTests
 {

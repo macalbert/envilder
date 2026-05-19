@@ -1,14 +1,14 @@
 // Environment-based routing: pick a different map file per environment
-#:package Envilder@0.3.0
+#:package Envilder@0.4.0
 #:package Microsoft.Extensions.Hosting.Abstractions@*
 #:property PublishAot=false
 
+using Envilder;
 using Microsoft.Extensions.Hosting;
-using static Envilder.Application.Envilder;
 
 var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? Environments.Production;
 
-var secrets = await LoadAsync(env, new Dictionary<string, string?>
+var secrets = await Env.LoadAsync(env, new Dictionary<string, string?>
 {
     [Environments.Development] = "../../../envilder.json",
     [Environments.Staging] = "../../../envilder.json",

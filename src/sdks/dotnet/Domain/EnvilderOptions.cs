@@ -1,4 +1,4 @@
-namespace Envilder.Domain;
+namespace Envilder;
 
 /// <summary>
 /// Runtime overrides supplied by the consumer (e.g. CLI flags).

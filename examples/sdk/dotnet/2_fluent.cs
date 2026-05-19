@@ -1,10 +1,10 @@
 // Fluent builder: override provider, profile, or vault URL
-#:package Envilder@0.3.0
+#:package Envilder@0.4.0
 #:property PublishAot=false
 
-using static Envilder.Application.Envilder;
+using Envilder;
 
-var secrets = await FromMapFile("../../../envilder.json")
+var secrets = await Env.FromMapFile("../../../envilder.json")
     .WithProfile("mac")
     .ResolveAsync();
 

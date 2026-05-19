@@ -1,10 +1,10 @@
 // One-liner: resolve secrets and inject into environment variables
-#:package Envilder@0.3.0
+#:package Envilder@0.4.0
 #:property PublishAot=false
 
-using static Envilder.Application.Envilder;
+using Envilder;
 
-var secrets = await LoadAsync("../../../envilder.json");
+var secrets = await Env.LoadAsync("../../../envilder.json");
 
 foreach (var key in secrets.Keys)
     Console.WriteLine($"{key} = {Environment.GetEnvironmentVariable(key)}");

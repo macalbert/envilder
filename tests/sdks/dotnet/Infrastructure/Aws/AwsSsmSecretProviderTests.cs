@@ -3,7 +3,7 @@ namespace Envilder.Tests.Infrastructure.Aws;
 using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
 using AwesomeAssertions;
-using Envilder.Infrastructure.Aws;
+using global::Envilder.Infrastructure.Aws;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 

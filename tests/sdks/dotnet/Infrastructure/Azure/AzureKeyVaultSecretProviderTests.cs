@@ -1,9 +1,9 @@
 namespace Envilder.Tests.Infrastructure.Azure;
 
 using AwesomeAssertions;
-using Envilder.Infrastructure.Azure;
 using global::Azure;
 using global::Azure.Security.KeyVault.Secrets;
+using global::Envilder.Infrastructure.Azure;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using System.Threading;
