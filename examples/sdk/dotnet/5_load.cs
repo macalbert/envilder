@@ -4,7 +4,7 @@
 
 using Envilder;
 
-var secrets = await Envilder.LoadAsync("../../../envilder.json");
+var secrets = await Env.LoadAsync("../../../envilder.json");
 
 foreach (var key in secrets.Keys)
     Console.WriteLine($"{key} = {Environment.GetEnvironmentVariable(key)}");

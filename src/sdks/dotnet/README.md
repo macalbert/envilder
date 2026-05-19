@@ -29,7 +29,7 @@ dotnet add package Envilder
 using Envilder;
 
 // Resolve secrets from the map file and inject into Environment
-Envilder.Load("envilder.json");
+Env.Load("envilder.json");
 
 // Access via standard environment variable API
 var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
@@ -40,7 +40,7 @@ var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 ```csharp
 using Envilder;
 
-var secrets = Envilder.ResolveFile("envilder.json");
+var secrets = Env.ResolveFile("envilder.json");
 var dbPassword = secrets["DB_PASSWORD"];
 ```
 
@@ -51,8 +51,8 @@ Every method has an async counterpart:
 ```csharp
 using Envilder;
 
-await Envilder.LoadAsync("envilder.json");
-var secrets = await Envilder.ResolveFileAsync("envilder.json");
+await Env.LoadAsync("envilder.json");
+var secrets = await Env.ResolveFileAsync("envilder.json");
 ```
 
 ### Fluent builder (with overrides)
@@ -63,23 +63,23 @@ Override the map file's `$config` at runtime — useful for switching providers,
 using Envilder;
 
 // Override provider + vault URL
-var secrets = Envilder.FromMapFile("envilder.json")
+var secrets = Env.FromMapFile("envilder.json")
     .WithProvider(SecretProviderType.Azure)
     .WithVaultUrl("https://my-vault.vault.azure.net")
     .Resolve();
 
 // Override AWS profile and inject
-Envilder.FromMapFile("envilder.json")
+Env.FromMapFile("envilder.json")
     .WithProfile("staging")
     .Inject();
 
 // Async versions
-var secrets = await Envilder.FromMapFile("envilder.json")
+var secrets = await Env.FromMapFile("envilder.json")
     .WithProvider(SecretProviderType.Azure)
     .WithVaultUrl("https://my-vault.vault.azure.net")
     .ResolveAsync();
 
-await Envilder.FromMapFile("envilder.json")
+await Env.FromMapFile("envilder.json")
     .WithProfile("staging")
     .InjectAsync();
 ```
@@ -95,7 +95,7 @@ using Envilder;
 var env = Environment.GetEnvironmentVariable("APP_ENV") ?? "development";
 
 // Resolve + inject
-Envilder.Load(env, new Dictionary<string, string?>
+Env.Load(env, new Dictionary<string, string?>
 {
     ["production"] = "prod-secrets.json",
     ["development"] = "dev-secrets.json",
@@ -106,7 +106,7 @@ Envilder.Load(env, new Dictionary<string, string?>
 Resolve without injecting:
 
 ```csharp
-var secrets = Envilder.ResolveFile(env, new Dictionary<string, string?>
+var secrets = Env.ResolveFile(env, new Dictionary<string, string?>
 {
     ["production"] = "prod-secrets.json",
     ["development"] = "dev-secrets.json",
@@ -127,7 +127,7 @@ Opt-in validation ensures all resolved secrets have non-empty values:
 ```csharp
 using Envilder;
 
-var secrets = Envilder.ResolveFile("envilder.json");
+var secrets = Env.ResolveFile("envilder.json");
 secrets.ValidateSecrets(); // throws SecretValidationException if any value is empty
 ```
 
@@ -188,7 +188,7 @@ var config = new ConfigurationBuilder()
 
 ## API Reference
 
-### Static facade (`Envilder`)
+### Static facade (``Env``)
 
 | Method | Description |
 |--------|-------------|

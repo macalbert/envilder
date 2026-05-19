@@ -5,6 +5,9 @@
 * **BREAKING: Root namespace for public API** — All consumer-facing types
   moved from `Envilder.Application` / `Envilder.Domain` to the root
   `Envilder` namespace. Consumers now only need `using Envilder;`
+* **BREAKING: Facade class renamed to `Env`** — The static facade class
+  is now `Env` instead of `Envilder` to avoid namespace/class name collision.
+  Use `Env.Load(...)`, `Env.ResolveFile(...)`, `Env.FromMapFile(...)` etc.
 * **Extension methods follow .NET conventions** —
   `AddEnvilder()` for `IConfigurationBuilder` moved to
   `Microsoft.Extensions.Configuration` namespace;
@@ -27,6 +30,18 @@ With:
 
 ```csharp
 using Envilder;
+```
+
+Replace facade calls:
+
+```csharp
+// Before
+Envilder.Load("envilder.json");
+Envilder.FromMapFile("envilder.json").Inject();
+
+// After
+Env.Load("envilder.json");
+Env.FromMapFile("envilder.json").Inject();
 ```
 
 `AddEnvilder()` extension methods now live in `Microsoft.Extensions.Configuration`

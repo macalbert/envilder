@@ -36,10 +36,10 @@ var app = builder.Build();
 // --- Or standalone (no ASP.NET) ---
 
 // One-liner: resolve + inject into Environment
-Envilder.Load("envilder.json");
+Env.Load("envilder.json");
 
 // Fluent builder with provider override
-Envilder.FromMapFile("envilder.json")
+Env.FromMapFile("envilder.json")
     .WithProvider(SecretProviderType.Azure)
     .WithVaultUrl("https://my-vault.vault.azure.net")
     .Inject();`,

@@ -7,7 +7,6 @@ using global::Envilder.Tests.Fixtures;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using EnvilderFacade = global::Envilder.Envilder;
 
 [Collection(nameof(ContainersCollection))]
 public class ConsumerExperienceTests : IAsyncLifetime
@@ -232,7 +231,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
             """);
 
 		// Act
-		var actual = EnvilderFacade.ResolveFile(mapFilePath);
+		var actual = Env.ResolveFile(mapFilePath);
 
 		// Assert
 		actual["FACADE_RESOLVE"].Should().Be(expectedValue);
@@ -254,7 +253,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
             """);
 
 		// Act
-		var actual = EnvilderFacade.Load(mapFilePath);
+		var actual = Env.Load(mapFilePath);
 
 		// Assert
 		actual["FACADE_LOAD"].Should().Be(expectedValue);
@@ -277,7 +276,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
             """);
 
 		// Act
-		var actual = await EnvilderFacade.ResolveFileAsync(mapFilePath);
+		var actual = await Env.ResolveFileAsync(mapFilePath);
 
 		// Assert
 		actual["FACADE_RESOLVE_ASYNC"].Should().Be(expectedValue);
@@ -299,7 +298,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
             """);
 
 		// Act
-		var actual = await EnvilderFacade.LoadAsync(mapFilePath);
+		var actual = await Env.LoadAsync(mapFilePath);
 
 		// Assert
 		actual["FACADE_LOAD_ASYNC"].Should().Be(expectedValue);
@@ -322,7 +321,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
             """);
 
 		// Act
-		var actual = EnvilderFacade.FromMapFile(mapFilePath).Resolve();
+		var actual = Env.FromMapFile(mapFilePath).Resolve();
 
 		// Assert
 		actual["BUILDER_RESOLVE"].Should().Be(expectedValue);
@@ -344,7 +343,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
             """);
 
 		// Act
-		var actual = EnvilderFacade.FromMapFile(mapFilePath).Inject();
+		var actual = Env.FromMapFile(mapFilePath).Inject();
 
 		// Assert
 		actual["BUILDER_INJECT"].Should().Be(expectedValue);
@@ -367,7 +366,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
             """);
 
 		// Act
-		var actual = await EnvilderFacade.FromMapFile(mapFilePath).ResolveAsync();
+		var actual = await Env.FromMapFile(mapFilePath).ResolveAsync();
 
 		// Assert
 		actual["BUILDER_RESOLVE_ASYNC"].Should().Be(expectedValue);
@@ -389,7 +388,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
             """);
 
 		// Act
-		var actual = await EnvilderFacade.FromMapFile(mapFilePath).InjectAsync();
+		var actual = await Env.FromMapFile(mapFilePath).InjectAsync();
 
 		// Assert
 		actual["BUILDER_INJECT_ASYNC"].Should().Be(expectedValue);
@@ -418,7 +417,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		};
 
 		// Act
-		var actual = EnvilderFacade.ResolveFile("production", envMapping);
+		var actual = Env.ResolveFile("production", envMapping);
 
 		// Assert
 		actual["ENV_ROUTE_RESOLVE"].Should().Be(expectedValue);
@@ -446,7 +445,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		};
 
 		// Act
-		var actual = EnvilderFacade.Load("production", envMapping);
+		var actual = Env.Load("production", envMapping);
 
 		// Assert
 		actual["ENV_ROUTE_LOAD"].Should().Be(expectedValue);
@@ -469,7 +468,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
             """);
 
 		// Act
-		var secrets = EnvilderFacade.ResolveFile(mapFilePath);
+		var secrets = Env.ResolveFile(mapFilePath);
 		var act = () => secrets.ValidateSecrets();
 
 		// Assert

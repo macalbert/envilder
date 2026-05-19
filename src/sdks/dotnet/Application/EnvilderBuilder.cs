@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 /// <summary>
 /// Fluent builder for configuring and resolving secrets from a map file.
-/// Obtain an instance via <see cref="Envilder.FromMapFile(string)"/>.
+/// Obtain an instance via <see cref="Env.FromMapFile(string)"/>.
 /// </summary>
 /// <example>
 /// <code>
-/// var secrets = Envilder.FromMapFile("envilder.json")
+/// var secrets = Env.FromMapFile("envilder.json")
 ///     .WithProvider(SecretProviderType.Azure)
 ///     .WithVaultUrl("https://my-vault.vault.azure.net")
 ///     .Resolve();
@@ -70,7 +70,7 @@ public class EnvilderBuilder
 	/// <returns>Resolved secrets keyed by environment variable name.</returns>
 	public IReadOnlyDictionary<string, string> Resolve()
 	{
-		Envilder.ValidateFileExists(_filePath);
+		Env.ValidateFileExists(_filePath);
 		var json = File.ReadAllText(_filePath);
 		var mapFile = new MapFileParser().Parse(json);
 		var provider = SecretProviderFactory.Create(mapFile.Config, _options);
@@ -85,8 +85,8 @@ public class EnvilderBuilder
 	public async Task<IReadOnlyDictionary<string, string>> ResolveAsync(
 		CancellationToken cancellationToken = default)
 	{
-		Envilder.ValidateFileExists(_filePath);
-		var json = await Envilder.ReadFileAsync(_filePath, cancellationToken).ConfigureAwait(false);
+		Env.ValidateFileExists(_filePath);
+		var json = await Env.ReadFileAsync(_filePath, cancellationToken).ConfigureAwait(false);
 		var mapFile = new MapFileParser().Parse(json);
 		var provider = SecretProviderFactory.Create(mapFile.Config, _options);
 		var secrets = await new EnvilderClient(provider).ResolveSecretsAsync(mapFile, cancellationToken).ConfigureAwait(false);

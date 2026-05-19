@@ -8,7 +8,7 @@ using Microsoft.Extensions.Hosting;
 
 var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? Environments.Production;
 
-var secrets = await Envilder.LoadAsync(env, new Dictionary<string, string?>
+var secrets = await Env.LoadAsync(env, new Dictionary<string, string?>
 {
     [Environments.Development] = "../../../envilder.json",
     [Environments.Staging] = "../../../envilder.json",

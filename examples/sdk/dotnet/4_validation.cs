@@ -4,7 +4,7 @@
 
 using Envilder;
 
-var secrets = await Envilder.ResolveFileAsync("../../../envilder.json");
+var secrets = await Env.ResolveFileAsync("../../../envilder.json");
 secrets.ValidateSecrets(); // throws SecretValidationException if any value is empty
 
 foreach (var (key, value) in secrets)
