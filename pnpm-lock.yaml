@@ -7,7 +7,7 @@ settings:
 catalogs:
   default:
     '@biomejs/biome':
-      specifier: ^2.4.15
+      specifier: ^2.4.9
       version: 2.4.15
     '@types/node':
       specifier: ^25.5.0
