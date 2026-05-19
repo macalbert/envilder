@@ -275,7 +275,7 @@ var config = new ConfigurationBuilder()
 var dbPassword = config["DB_PASSWORD"];
 
 // Option B: resolve + inject into environment
-Envilder.Load("envilder.json");
+Env.Load("envilder.json");
 var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 ```
 

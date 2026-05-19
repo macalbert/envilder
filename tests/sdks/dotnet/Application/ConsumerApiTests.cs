@@ -1,6 +1,7 @@
-namespace Envilder.Tests.Application;
+namespace ConsumerApi.Tests;
 
 using AwesomeAssertions;
+using Envilder;
 
 public class ConsumerApiTests
 {

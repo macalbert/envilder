@@ -188,7 +188,7 @@ var config = new ConfigurationBuilder()
 
 ## API Reference
 
-### Static facade (``Env``)
+### Static facade (`Env`)
 
 | Method | Description |
 |--------|-------------|
