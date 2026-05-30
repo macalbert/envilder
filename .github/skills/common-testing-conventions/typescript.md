@@ -131,7 +131,7 @@ it('Should_CreateLambda_When_StackSynthesized', () => {
 
   // Assert
   actual.hasResourceProperties('AWS::Lambda::Function', {
-    Runtime: 'nodejs20.x',
+    Runtime: 'nodejs22.x',
     Handler: 'index.handler',
   });
 });

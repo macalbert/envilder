@@ -88,7 +88,7 @@ jobs:
       - name: 🍄 Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "20.x"
+          node-version: "22.x"
           cache: "pnpm"
 
       - name: 📦 Install Dependencies
@@ -143,7 +143,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: "20.x"
+          node-version: "22.x"
           cache: "pnpm"
 
       - run: pnpm install --frozen-lockfile
@@ -265,7 +265,7 @@ steps:
 
   - uses: actions/setup-node@v6
     with:
-      node-version: "20.x"
+      node-version: \"22.x\"
       cache: "pnpm"
 
   - name: 📦 Install and Build Envilder
