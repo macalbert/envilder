@@ -15,12 +15,6 @@ catalogs:
     '@vitest/coverage-v8':
       specifier: ^4.1.2
       version: 4.1.5
-    aws-cdk-lib:
-      specifier: ^2.245.0
-      version: 2.254.0
-    constructs:
-      specifier: ^10.4.2
-      version: 10.6.0
     ts-node:
       specifier: ^10.9.2
       version: 10.9.2
