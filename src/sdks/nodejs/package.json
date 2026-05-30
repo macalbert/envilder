@@ -43,7 +43,7 @@
     "envilder"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.1057.0",

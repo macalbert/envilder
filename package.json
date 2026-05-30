@@ -107,7 +107,7 @@
     "@commitlint/cli": "^21.0.2",
     "@commitlint/config-conventional": "^21.0.2",
     "@secretlint/secretlint-rule-preset-recommend": "^13.0.2",
-    "@testcontainers/localstack": "^11.14.0",
+    "@testcontainers/localstack": "^12.0.1",
     "@types/node": "catalog:",
     "@vercel/ncc": "^0.38.4",
     "@vitest/coverage-v8": "catalog:",
@@ -116,13 +116,13 @@
     "glob": "^13.0.6",
     "lefthook": "^2.1.9",
     "secretlint": "^13.0.2",
-    "testcontainers": "^11.14.0",
+    "testcontainers": "^12.0.1",
     "ts-node": "catalog:",
     "tsx": "^4.22.3",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   }
 }
