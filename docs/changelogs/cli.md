@@ -9,8 +9,9 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ### Changed
 
-* **BREAKING: Require Node.js >= 22** — pnpm 11 and testcontainers v12
-  require Node.js 22+. The `engines` field now enforces `>=22.0.0`
+* **BREAKING: Require Node.js >= 22.12** — pnpm 11, testcontainers v12,
+  commander 15, and commitlint 21 require Node.js 22.12+. The `engines`
+  field now enforces `>=22.12.0`
   ([#291](https://github.com/macalbert/envilder/pull/291))
 
 ### Dependencies

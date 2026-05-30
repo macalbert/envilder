@@ -265,7 +265,7 @@ steps:
 
   - uses: actions/setup-node@v6
     with:
-      node-version: \"22.x\"
+      node-version: "22.x"
       cache: "pnpm"
 
   - name: 📦 Install and Build Envilder

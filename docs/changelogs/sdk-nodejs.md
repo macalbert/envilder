@@ -2,8 +2,14 @@
 
 ### Changed
 
-* **BREAKING: Require Node.js >= 22** — The `engines` field now enforces
-  `>=22`. This aligns with pnpm 11 and testcontainers v12 requirements
+* **Widen Node.js engine range** — The `engines` field now declares `>=18.0.0`
+  (the actual minimum required by dependencies). This maximizes consumer
+  compatibility per ADR-0009
+  ([#291](https://github.com/macalbert/envilder/pull/291))
+
+* **Pin dependencies to minimum viable versions** — AWS SDK `^3.700.0`, Azure
+  Identity `^4.5.0`, Azure Key Vault Secrets `^4.9.0` — avoids forcing
+  consumers to upgrade their cloud SDKs (ADR-0009)
   ([#291](https://github.com/macalbert/envilder/pull/291))
 
 ### Dependencies
