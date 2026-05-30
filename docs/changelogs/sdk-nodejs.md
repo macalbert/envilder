@@ -1,3 +1,18 @@
+## [0.3.0] - 2026-05-31
+
+### Changed
+
+* **BREAKING: Require Node.js >= 22** — The `engines` field now enforces
+  `>=22`. This aligns with pnpm 11 and testcontainers v12 requirements
+  ([#291](https://github.com/macalbert/envilder/pull/291))
+
+### Dependencies
+
+* Remove `rimraf` — replaced with zero-dependency `fs.rmSync` in clean script
+  ([#291](https://github.com/macalbert/envilder/pull/291))
+
+---
+
 ## [0.2.0] - 2026-05-03
 
 ### Added
