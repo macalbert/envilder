@@ -403,7 +403,7 @@ export const ca: Translations = {
     titleAccent: 'ara',
     subtitle: "En funcionament en menys d'un minut.",
     prerequisites: 'Prerequisits',
-    prereqNode: 'Node.js v20+',
+    prereqNode: 'Node.js v22.12+',
     prereqAws: 'AWS CLI configurat',
     prereqAzure: 'Azure CLI configurat',
     prereqIam: 'Permisos IAM:',
@@ -499,7 +499,7 @@ export const ca: Translations = {
     overviewSolution:
       "Amb Envilder, un model de mapeig és la font única de veritat. Els secrets es resolen des del teu vault al núvol sota demanda: mateix contracte, mateix comportament, ja sigui executant la CLI localment, la GitHub Action en CI o un SDK a l'inici de l'app.",
     reqTitle: 'Requisits',
-    reqNode: 'Node.js v20+',
+    reqNode: 'Node.js v22.12+',
     reqAws: 'AWS CLI',
     reqAzure: 'Azure CLI',
     reqAwsNote: 'per AWS SSM',

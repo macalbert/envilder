@@ -5,6 +5,24 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [0.11.0] - 2026-05-31
+
+### Changed
+
+* **BREAKING: Require Node.js >= 22.12** — pnpm 11, testcontainers v12,
+  commander 15, and commitlint 21 require Node.js 22.12+. The `engines`
+  field now enforces `>=22.12.0`
+  ([#291](https://github.com/macalbert/envilder/pull/291))
+
+### Dependencies
+
+* Update all devDependencies to latest (TypeScript 6.0.3, Biome 2.4.16,
+  testcontainers 12.0.1, pnpm 11.5.0)
+* Remove `rimraf` — replaced with zero-dependency `fs.rmSync` in clean scripts
+  ([#291](https://github.com/macalbert/envilder/pull/291))
+
+---
+
 ## [0.10.0] - 2026-05-03
 
 ### Added

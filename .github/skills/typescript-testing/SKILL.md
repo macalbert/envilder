@@ -275,7 +275,7 @@ describe('AppStack', () => {
 
     // Assert
     actual.hasResourceProperties('AWS::Lambda::Function', {
-      Runtime: 'nodejs20.x',
+      Runtime: 'nodejs22.x',
       Handler: 'index.handler',
     });
   });

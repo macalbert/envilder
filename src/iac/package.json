@@ -16,7 +16,7 @@
     "constructs": "catalog:"
   },
   "devDependencies": {
-    "aws-cdk": "^2.1114.1",
+    "aws-cdk": "^2.1125.0",
     "ts-node": "catalog:",
     "typescript": "catalog:"
   }

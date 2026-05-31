@@ -11,7 +11,7 @@
     "5_resolve": "tsx 5_resolve.ts"
   },
   "dependencies": {
-    "@envilder/sdk": "^0.2.0"
+    "@envilder/sdk": "^0.3.0"
   },
   "devDependencies": {
     "tsx": "^4.19.0"

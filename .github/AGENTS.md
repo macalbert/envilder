@@ -5,7 +5,7 @@ AWS SSM Parameter Store or Azure Key Vault via a Git-versioned map-file format.
 
 ## Setup
 
-- **Runtime**: Node.js 22+, pnpm 9+
+- **Runtime**: Node.js 22.12+, pnpm 11+
 - **Optional** (for e2e tests): Docker (LocalStack for AWS, Lowkey Vault for Azure)
 - Install: `pnpm install`
 

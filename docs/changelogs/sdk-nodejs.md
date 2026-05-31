@@ -1,3 +1,23 @@
+## [0.3.0] - 2026-05-31
+
+### Changed
+
+* **BREAKING: Require Node.js >= 22.12** — Aligns with the rest of the
+  monorepo. Node 18 and 20 are EOL; Node 22 is the only active LTS
+  ([#291](https://github.com/macalbert/envilder/pull/291))
+
+* **Pin dependencies to minimum viable versions** — AWS SDK `^3.700.0`, Azure
+  Identity `^4.5.0`, Azure Key Vault Secrets `^4.9.0` — avoids forcing
+  consumers to upgrade their cloud SDKs (ADR-0009)
+  ([#291](https://github.com/macalbert/envilder/pull/291))
+
+### Dependencies
+
+* Remove `rimraf` — replaced with zero-dependency `fs.rmSync` in clean script
+  ([#291](https://github.com/macalbert/envilder/pull/291))
+
+---
+
 ## [0.2.0] - 2026-05-03
 
 ### Added

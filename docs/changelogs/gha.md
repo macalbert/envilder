@@ -1,3 +1,17 @@
+## [0.11.0] - 2026-05-31
+
+### Changed
+
+* **BREAKING: Require Node.js >= 22.12** — GitHub Actions workflows updated
+  to use `node-version: "22.x"`. The bundled CLI now requires Node.js 22.12+
+  ([#291](https://github.com/macalbert/envilder/pull/291))
+
+### Dependencies
+
+* Bundle updated with latest CLI core (all dependencies at latest)
+
+---
+
 ## [0.10.0] - 2026-05-03
 
 ### Fixed
