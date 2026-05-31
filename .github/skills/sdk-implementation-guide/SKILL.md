@@ -23,8 +23,8 @@ wiring and publishing, see the `sdk-release-checklist` skill.
 
 Before starting, read:
 
-- [ADR-0003: SDK Architecture Pattern](../../../docs/architecture/adr/0003-sdk-architecture-pattern.md)
-- [ADR-0005: SDK Integration Tiers](../../../docs/architecture/adr/0005-sdk-integration-tiers.md)
+- [ADR-0003: SDK Architecture Pattern](../../../docs/adr/0003-sdk-architecture-pattern.md)
+- [ADR-0005: SDK Integration Tiers](../../../docs/adr/0005-sdk-integration-tiers.md)
 
 ## 1. Folder Structure
 

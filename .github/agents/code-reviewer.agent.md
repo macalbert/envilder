@@ -34,7 +34,7 @@ Load these skills for analysis criteria:
 ## Workflow
 
 1. **Identify scope** — list changed files from PR, commit range, or user input
-2. **Check ADRs** — read `docs/architecture/adr/` for decisions that apply to the changed area
+2. **Check ADRs** — read `docs/adr/` for decisions that apply to the changed area
 3. **Run 5 perspectives** in parallel (see `code-review-perspectives` skill)
 4. **Synthesize** — merge, deduplicate, assign severity, order by priority
 5. **Verify** — run tests, linter, formatter to confirm findings

@@ -45,7 +45,7 @@ progress.
 
 - Clarify the behavior to implement with the user
 - Identify the domain area, layer, and affected files
-- Check `docs/architecture/adr/` for decisions that constrain the design
+- Check `docs/adr/` for decisions that constrain the design
 - Check existing tests for coverage gaps
 
 ### 2. Plan the TDD Cycles
