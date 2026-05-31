@@ -3,9 +3,9 @@ import type { Translations } from './types';
 export const en: Translations = {
   homeMeta: {
     title:
-      'Envilder: one model to resolve secrets across every environment and runtime.',
+      'Envilder: standardize how your applications consume secrets across every environment and runtime.',
     description:
-      'A model-driven configuration resolution system. Define secret mappings once and resolve them consistently: CLI, CI/CD, or application runtime. Powered by AWS SSM, Azure Key Vault, and GCP Secret Manager.',
+      'Define your environment contract once and resolve it consistently across local development, CI/CD, and runtime. Using AWS SSM Parameter Store and Azure Key Vault.',
   },
   nav: {
     features: 'Features',
@@ -31,19 +31,20 @@ export const en: Translations = {
     ariaTheme: 'Theme',
   },
   hero: {
-    openSource: 'Open Source · MIT',
-    title1: 'The .env file is',
-    title2: 'a security incident',
-    titleAccent: 'waiting to happen.',
-    description: 'Envilder pulls secrets from ',
-    descAws: 'AWS',
-    descAzure: 'Azure',
-    descOr: 'or',
-    descSuffix: ' straight into your app. No files, no SaaS, no leaks.',
+    openSource: 'Open Source · MIT · AWS SSM · Azure Key Vault',
+    title1: 'Standardize how',
+    title2: 'your apps consume',
+    titleAccent: 'secrets.',
+    description:
+      'Stop reinventing secret loading in every project. Define one environment contract and resolve it everywhere.',
+    descAws: 'AWS SSM',
+    descAzure: 'Azure Key Vault',
+    descOr: '·',
+    descSuffix: ' · GitHub Action · Runtime SDKs',
     getStarted: '▶ Get started',
     viewOnGithub: '★ View on GitHub',
-    terminalComment1: '# 1. One mapping model for every environment',
-    terminalComment2: '# 2. Resolve secrets with the CLI',
+    terminalComment1: '# 1. One environment contract per app',
+    terminalComment2: '# 2. Resolve the contract',
     terminalFetched1: ' Fetched DB_PASSWORD → ···pass',
     terminalFetched2: ' Fetched API_KEY     → ···key',
     terminalWritten: ' Environment file written to .env',
@@ -54,6 +55,8 @@ export const en: Translations = {
   sponsors: {
     title: 'Sponsors',
     localstackAlt: 'LocalStack',
+    awsCreditsAlt: 'AWS Open Source Credits Program',
+    awsCreditsLabel: 'AWS Open Source Credits',
   },
   problemSolution: {
     title: 'Why secret management ',
@@ -100,6 +103,36 @@ export const en: Translations = {
         title: 'Your cloud, no middleman',
         description:
           'AWS SSM, Azure Key Vault, or GCP. No SaaS proxy. Secrets stay in your infrastructure. Native IAM/RBAC access control.',
+      },
+    ],
+  },
+  beforeAfter: {
+    title: 'Without a standard, ',
+    titleAccent: 'every project drifts.',
+    subtitle:
+      'Envilder turns scattered secret-loading conventions into one versioned contract that works across development, pipelines, and runtime.',
+    columnWithout: 'Without a standard',
+    columnWith: 'With Envilder',
+    rows: [
+      {
+        without:
+          'Developers copy .env files or follow outdated READMEs.',
+        with: 'One contract declares what secrets the app needs.',
+      },
+      {
+        without:
+          'CI/CD has its own secret names and integration.',
+        with: 'The same contract resolves in GitHub Actions.',
+      },
+      {
+        without:
+          'Each app implements its own loading logic.',
+        with: 'Runtime SDKs load from the same contract.',
+      },
+      {
+        without:
+          'The real config is scattered across tribal knowledge.',
+        with: 'The contract is in Git, reviewable in PRs.',
       },
     ],
   },

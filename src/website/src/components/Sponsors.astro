@@ -29,6 +29,14 @@ const t = useTranslations(lang);
         alt={t.sponsors.localstackAlt}
       />
     </a>
+    <a
+      href="https://aws.amazon.com/blogs/opensource/aws-cloud-credits-for-open-source-projects-affirming-our-commitment/"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="sponsor-link aws-credits-link"
+    >
+      <span class="aws-credits-badge">{t.sponsors.awsCreditsLabel}</span>
+    </a>
   </div>
 </section>
 
@@ -64,6 +72,21 @@ const t = useTranslations(lang);
 
   .sponsor-link:hover {
     opacity: 1;
+  }
+
+  .aws-credits-badge {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+    padding: var(--space-xs) var(--space-sm);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  .aws-credits-link:hover .aws-credits-badge {
+    color: var(--color-text);
+    border-color: var(--color-primary);
   }
 
   .sponsor-logo {

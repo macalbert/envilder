@@ -1,0 +1,127 @@
+---
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="section" id="before-after">
+  <div class="container">
+    <div class="section-title">
+      <h2>{t.beforeAfter.title}<span>{t.beforeAfter.titleAccent}</span></h2>
+      <p class="section-subtitle">
+        {t.beforeAfter.subtitle}
+      </p>
+    </div>
+
+    <div class="comparison">
+      <div class="comparison-column comparison-without">
+        <h3 class="comparison-heading comparison-heading-without">
+          {t.beforeAfter.columnWithout}
+        </h3>
+        <ul class="comparison-list">
+          {t.beforeAfter.rows.map((row) => (
+            <li class="comparison-item">{row.without}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="comparison-column comparison-with">
+        <h3 class="comparison-heading comparison-heading-with">
+          {t.beforeAfter.columnWith}
+        </h3>
+        <ul class="comparison-list">
+          {t.beforeAfter.rows.map((row) => (
+            <li class="comparison-item">{row.with}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+    margin-top: var(--space-2xl);
+  }
+
+  @media (min-width: 768px) {
+    .comparison {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-xl);
+    }
+  }
+
+  .comparison-column {
+    border: 1px solid var(--color-border);
+    padding: var(--space-xl);
+    background: var(--color-surface);
+  }
+
+  .comparison-without {
+    border-color: var(--color-error);
+  }
+
+  .comparison-with {
+    border-color: var(--color-success);
+  }
+
+  .comparison-heading {
+    font-family: var(--font-pixel);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .comparison-heading-without {
+    color: var(--color-error);
+    border-bottom-color: var(--color-error);
+  }
+
+  .comparison-heading-with {
+    color: var(--color-success);
+    border-bottom-color: var(--color-success);
+  }
+
+  .comparison-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .comparison-item {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    padding-left: var(--space-md);
+    position: relative;
+  }
+
+  .comparison-without .comparison-item::before {
+    content: '✗';
+    position: absolute;
+    left: 0;
+    color: var(--color-error);
+    font-weight: bold;
+  }
+
+  .comparison-with .comparison-item::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--color-success);
+    font-weight: bold;
+  }
+</style>

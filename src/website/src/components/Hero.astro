@@ -26,8 +26,12 @@ const version = `v${__APP_VERSION__}`;
       </h1>
 
       <p class="hero-description">
-        {t.hero.description}<strong>{t.hero.descAws}</strong> {t.hero.descOr} <strong>{t.hero.descAzure}</strong>{t.hero.descSuffix}
+        {t.hero.description}
       </p>
+
+      <div class="hero-tech-line">
+        <strong>{t.hero.descAws}</strong> {t.hero.descOr} <strong>{t.hero.descAzure}</strong>{t.hero.descSuffix}
+      </div>
 
       <div class="hero-actions">
         <a href="#get-started" class="btn btn-primary">
@@ -165,6 +169,17 @@ const version = `v${__APP_VERSION__}`;
   }
 
   .hero-description strong {
+    color: var(--color-secondary);
+  }
+
+  .hero-tech-line {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+  }
+
+  .hero-tech-line strong {
     color: var(--color-secondary);
   }
 

@@ -2,9 +2,10 @@ import type { Translations } from './types';
 
 export const ca: Translations = {
   homeMeta: {
-    title: 'Envilder: un model per resoldre secrets a cada entorn i runtime.',
+    title:
+      'Envilder: estandarditza com les teves aplicacions consumeixen secrets a cada entorn i runtime.',
     description:
-      "Un sistema de resolució de configuració basat en un model. Defineix els mapeigs de secrets una vegada i resol-los de forma consistent: CLI, CI/CD o runtime d'aplicació. Basat en AWS SSM, Azure Key Vault i GCP Secret Manager.",
+      "Defineix el contracte d'entorn una vegada i resol-lo de forma consistent en desenvolupament local, CI/CD i runtime. Amb AWS SSM Parameter Store i Azure Key Vault.",
   },
   nav: {
     features: 'Funcionalitats',
@@ -30,20 +31,20 @@ export const ca: Translations = {
     ariaTheme: 'Tema',
   },
   hero: {
-    openSource: 'Codi obert · MIT',
-    title1: 'El fitxer .env és',
-    title2: 'un incident de seguretat',
-    titleAccent: 'esperant a passar.',
-    description: "Envilder llegeix els teus secrets directament d'",
-    descAws: 'AWS',
-    descAzure: 'Azure',
-    descOr: 'o',
-    descSuffix:
-      ' cap a la teva app. Sense fitxers, sense SaaS, sense filtracions.',
+    openSource: 'Codi obert · MIT · AWS SSM · Azure Key Vault',
+    title1: 'Estandarditza com',
+    title2: 'les teves apps consumeixen',
+    titleAccent: 'secrets.',
+    description:
+      'Deixa de reinventar la càrrega de secrets a cada projecte. Defineix un contracte d\'entorn i resol-lo a tot arreu.',
+    descAws: 'AWS SSM',
+    descAzure: 'Azure Key Vault',
+    descOr: '·',
+    descSuffix: ' · GitHub Action · SDKs de runtime',
     getStarted: '▶ Comença',
     viewOnGithub: '★ Veure a GitHub',
-    terminalComment1: '# 1. Un model de mapeig per a cada entorn',
-    terminalComment2: '# 2. Resol secrets amb la CLI',
+    terminalComment1: "# 1. Un contracte d'entorn per app",
+    terminalComment2: '# 2. Resol el contracte',
     terminalFetched1: ' Obtingut DB_PASSWORD → ···pass',
     terminalFetched2: ' Obtingut API_KEY     → ···key',
     terminalWritten: " Fitxer d'entorn escrit a .env",
@@ -54,6 +55,8 @@ export const ca: Translations = {
   sponsors: {
     title: 'Sponsors',
     localstackAlt: 'LocalStack',
+    awsCreditsAlt: 'AWS Open Source Credits Program',
+    awsCreditsLabel: 'AWS Open Source Credits',
   },
   problemSolution: {
     title: 'Per què la gestió de secrets ',
@@ -100,6 +103,36 @@ export const ca: Translations = {
         title: 'El teu núvol, sense intermediaris',
         description:
           "AWS SSM, Azure Key Vault o GCP. Sense proxy SaaS. Els secrets es queden a la teva infraestructura. Control d'accés natiu IAM/RBAC.",
+      },
+    ],
+  },
+  beforeAfter: {
+    title: 'Sense un estàndard, ',
+    titleAccent: 'cada projecte deriva.',
+    subtitle:
+      'Envilder converteix convencions disperses de càrrega de secrets en un contracte versionat que funciona en desenvolupament, pipelines i runtime.',
+    columnWithout: 'Sense un estàndard',
+    columnWith: 'Amb Envilder',
+    rows: [
+      {
+        without:
+          'Els developers copien fitxers .env o segueixen READMEs desactualitzats.',
+        with: "Un contracte declara quins secrets necessita l'aplicació.",
+      },
+      {
+        without:
+          'CI/CD té els seus propis noms de secrets i integracions.',
+        with: 'El mateix contracte es resol a GitHub Actions.',
+      },
+      {
+        without:
+          'Cada app implementa la seva pròpia lògica de càrrega.',
+        with: 'Els SDKs de runtime carreguen des del mateix contracte.',
+      },
+      {
+        without:
+          'La configuració real queda dispersa en coneixement tribal.',
+        with: 'El contracte viu a Git i es pot revisar en PRs.',
       },
     ],
   },
