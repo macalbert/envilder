@@ -36,7 +36,7 @@ export const ca: Translations = {
     title2: 'les teves apps consumeixen',
     titleAccent: 'secrets.',
     description:
-      'Deixa de reinventar la càrrega de secrets a cada projecte. Defineix un contracte d\'entorn i resol-lo a tot arreu.',
+      "Deixa de reinventar la càrrega de secrets a cada projecte. Defineix un contracte d'entorn i resol-lo a tot arreu.",
     descAws: 'AWS SSM',
     descAzure: 'Azure Key Vault',
     descOr: '·',
@@ -120,18 +120,15 @@ export const ca: Translations = {
         with: "Un contracte declara quins secrets necessita l'aplicació.",
       },
       {
-        without:
-          'CI/CD té els seus propis noms de secrets i integracions.',
+        without: 'CI/CD té els seus propis noms de secrets i integracions.',
         with: 'El mateix contracte es resol a GitHub Actions.',
       },
       {
-        without:
-          'Cada app implementa la seva pròpia lògica de càrrega.',
+        without: 'Cada app implementa la seva pròpia lògica de càrrega.',
         with: 'Els SDKs de runtime carreguen des del mateix contracte.',
       },
       {
-        without:
-          'La configuració real queda dispersa en coneixement tribal.',
+        without: 'La configuració real queda dispersa en coneixement tribal.',
         with: 'El contracte viu a Git i es pot revisar en PRs.',
       },
     ],

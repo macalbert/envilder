@@ -120,18 +120,15 @@ export const es: Translations = {
         with: 'Un contrato declara qué secretos necesita la aplicación.',
       },
       {
-        without:
-          'CI/CD tiene sus propios nombres de secretos e integraciones.',
+        without: 'CI/CD tiene sus propios nombres de secretos e integraciones.',
         with: 'El mismo contrato se resuelve en GitHub Actions.',
       },
       {
-        without:
-          'Cada app implementa su propia lógica de carga.',
+        without: 'Cada app implementa su propia lógica de carga.',
         with: 'Los SDKs de runtime cargan desde el mismo contrato.',
       },
       {
-        without:
-          'La configuración real queda dispersa en conocimiento tribal.',
+        without: 'La configuración real queda dispersa en conocimiento tribal.',
         with: 'El contrato vive en Git y se puede revisar en PRs.',
       },
     ],

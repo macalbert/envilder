@@ -115,23 +115,19 @@ export const en: Translations = {
     columnWith: 'With Envilder',
     rows: [
       {
-        without:
-          'Developers copy .env files or follow outdated READMEs.',
+        without: 'Developers copy .env files or follow outdated READMEs.',
         with: 'One contract declares what secrets the app needs.',
       },
       {
-        without:
-          'CI/CD has its own secret names and integration.',
+        without: 'CI/CD has its own secret names and integration.',
         with: 'The same contract resolves in GitHub Actions.',
       },
       {
-        without:
-          'Each app implements its own loading logic.',
+        without: 'Each app implements its own loading logic.',
         with: 'Runtime SDKs load from the same contract.',
       },
       {
-        without:
-          'The real config is scattered across tribal knowledge.',
+        without: 'The real config is scattered across tribal knowledge.',
         with: 'The contract is in Git, reviewable in PRs.',
       },
     ],
