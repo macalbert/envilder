@@ -11,7 +11,7 @@ Part of the [Envilder](https://github.com/macalbert/envilder) project.
 
 ## Prerequisites
 
-- Node.js 22+
+- Node.js 22.12+
 - **AWS provider**: AWS credentials configured (CLI, environment variables, or IAM role)
 - **Azure provider**: Azure credentials via `az login`, managed identity, or environment variables
 

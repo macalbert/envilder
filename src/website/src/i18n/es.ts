@@ -403,7 +403,7 @@ export const es: Translations = {
     titleAccent: 'ahora',
     subtitle: 'En funcionamiento en menos de un minuto.',
     prerequisites: 'Prerrequisitos',
-    prereqNode: 'Node.js v22+',
+    prereqNode: 'Node.js v22.12+',
     prereqAws: 'AWS CLI configurado',
     prereqAzure: 'Azure CLI configurado',
     prereqIam: 'Permisos IAM:',
@@ -499,7 +499,7 @@ export const es: Translations = {
     overviewSolution:
       'Con Envilder, un modelo de mapeo es la fuente única de verdad. Los secretos se resuelven desde tu vault en la nube bajo demanda: mismo contrato, mismo comportamiento, ya sea ejecutando la CLI localmente, la GitHub Action en CI o un SDK al iniciar la app.',
     reqTitle: 'Requisitos',
-    reqNode: 'Node.js v22+',
+    reqNode: 'Node.js v22.12+',
     reqAws: 'AWS CLI',
     reqAzure: 'Azure CLI',
     reqAwsNote: 'para AWS SSM',

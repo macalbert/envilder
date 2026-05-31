@@ -5,7 +5,7 @@
 
 Before you install Envilder, make sure you have:
 
-- **Node.js v22+**
+- **Node.js v22.12+**
   - Download and install from [nodejs.org](https://nodejs.org/) (choose your OS and follow their instructions).
 
 ### For AWS SSM (default provider)
@@ -253,7 +253,7 @@ npm install @envilder/sdk
 
 Requirements:
 
-- Node.js 22+
+- Node.js 22.12+
 - **AWS provider**: AWS credentials configured via CLI, environment
   variables, or IAM role
 - **Azure provider**: Azure credentials via `az login`, managed identity,

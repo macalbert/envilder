@@ -109,7 +109,7 @@ npm install -g envilder
 
 > 💡 **No install needed?** `npx envilder` works out of the box.
 >
-> **Requirements:** Node.js v22+. AWS CLI or Azure CLI configured.
+> **Requirements:** Node.js v22.12+. AWS CLI or Azure CLI configured.
 > See [full requirements](docs/requirements-installation.md).
 
 ### 🤖 GitHub Action

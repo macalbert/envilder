@@ -4,7 +4,7 @@
 
 | Tool | Version | Purpose |
 |------|---------|---------|
-| **Node.js** | 22+ | CLI, GHA, Node.js SDK, IaC, Website |
+| **Node.js** | 22.12+ | CLI, GHA, Node.js SDK, IaC, Website |
 | **pnpm** | 11+ | Monorepo package manager |
 | **Docker** | Latest | Acceptance tests (TestContainers) |
 | **.NET** | 10+ | .NET SDK |

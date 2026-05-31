@@ -63,8 +63,10 @@ updated freely to latest — they don't affect consumers.
 
 ### Rule 4: Document the minimum in acceptance tests
 
-Acceptance tests run against the declared minimum dependency versions (via
-lockfile or explicit version resolution) to catch accidental use of newer APIs.
+Acceptance tests SHOULD run against the declared minimum dependency versions
+(via lockfile or explicit version resolution) to catch accidental use of newer
+APIs. This is a target policy — implementation of a lowest-version resolver in
+CI is planned but not yet enforced.
 
 ## Consequences
 
