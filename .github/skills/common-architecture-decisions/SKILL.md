@@ -27,15 +27,15 @@ behind tooling choices and architectural patterns before proposing changes.
 
 | ADR | Title | Scope | Key Decision |
 | --- | ----- | ----- | ------------ |
-| [ADR-0001](../../../docs/architecture/adr/0001-sdk-acceptance-test-infrastructure.md) | SDK Acceptance Test Infrastructure | All SDKs | TestContainers + LocalStack + Lowkey Vault; container wrappers with explicit lifecycle; `envilder.json` as single source for test tokens |
-| [ADR-0002](../../../docs/architecture/adr/0002-test-tooling-per-stack.md) | Test Tooling per Stack | All stacks | Vitest (TS), xUnit+NSubstitute+AwesomeAssertions (NET), pytest+unittest.mock (Py) |
-| [ADR-0003](../../../docs/architecture/adr/0003-sdk-architecture-pattern.md) | SDK Architecture Pattern | All SDKs | Three-layer (Domain→App→Infra), no DI framework, facade as primary API, internal factory |
-| [ADR-0004](../../../docs/architecture/adr/0004-code-quality-tooling.md) | Code Quality and Formatting | All stacks | Biome (TS), dotnet format (.NET), black+isort (Py); Secretlint for credentials |
-| [ADR-0005](../../../docs/architecture/adr/0005-sdk-integration-tiers.md) | SDK Integration Tiers | All SDKs | Three tiers (Facade, Builder, Framework); Tier 3 separate package; .NET exception; community-driven |
-| [ADR-0006](../../../docs/architecture/adr/0006-monorepo-structure.md) | Monorepo Structure | All components | Single repo, independent releases per component via version-bump detection, no orchestrator |
-| [ADR-0007](../../../docs/architecture/adr/0007-trunk-based-development.md) | Trunk-Based Development | All components | Single main branch, short-lived feature branches, squash merge, feature flags for incomplete work |
-| [ADR-0008](../../../docs/architecture/adr/0008-map-file-schema.md) | Map-File Schema Specification | All components | JSON Schema v1, `$` prefix reserved, `$config` strict fields, `file` provider for testing (planned), `EnvilderOptions.FromFile` (planned) |
-| [ADR-0009](../../../docs/architecture/adr/0009-sdk-dependency-compatibility-policy.md) | SDK Dependency Compatibility Policy | All SDKs | Minimum viable engine + dep versions in published SDKs; devDeps unconstrained; acceptance tests verify minimum |
+| [ADR-0001](../../../docs/adr/0001-sdk-acceptance-test-infrastructure.md) | SDK Acceptance Test Infrastructure | All SDKs | TestContainers + LocalStack + Lowkey Vault; container wrappers with explicit lifecycle; `envilder.json` as single source for test tokens |
+| [ADR-0002](../../../docs/adr/0002-test-tooling-per-stack.md) | Test Tooling per Stack | All stacks | Vitest (TS), xUnit+NSubstitute+AwesomeAssertions (NET), pytest+unittest.mock (Py) |
+| [ADR-0003](../../../docs/adr/0003-sdk-architecture-pattern.md) | SDK Architecture Pattern | All SDKs | Three-layer (Domain→App→Infra), no DI framework, facade as primary API, internal factory |
+| [ADR-0004](../../../docs/adr/0004-code-quality-tooling.md) | Code Quality and Formatting | All stacks | Biome (TS), dotnet format (.NET), black+isort (Py); Secretlint for credentials |
+| [ADR-0005](../../../docs/adr/0005-sdk-integration-tiers.md) | SDK Integration Tiers | All SDKs | Three tiers (Facade, Builder, Framework); Tier 3 separate package; .NET exception; community-driven |
+| [ADR-0006](../../../docs/adr/0006-monorepo-structure.md) | Monorepo Structure | All components | Single repo, independent releases per component via version-bump detection, no orchestrator |
+| [ADR-0007](../../../docs/adr/0007-trunk-based-development.md) | Trunk-Based Development | All components | Single main branch, short-lived feature branches, squash merge, feature flags for incomplete work |
+| [ADR-0008](../../../docs/adr/0008-map-file-schema.md) | Map-File Schema Specification | All components | JSON Schema v1, `$` prefix reserved, `$config` strict fields, `file` provider for testing (planned), `EnvilderOptions.FromFile` (planned) |
+| [ADR-0009](../../../docs/adr/0009-sdk-dependency-compatibility-policy.md) | SDK Dependency Compatibility Policy | All SDKs | Minimum viable engine + dep versions in published SDKs; devDeps unconstrained; acceptance tests verify minimum |
 
 ## Quick Reference: Test Doubles per Stack
 
@@ -66,7 +66,7 @@ behind tooling choices and architectural patterns before proposing changes.
 
 ## Creating a New ADR
 
-Use the format in `docs/architecture/adr/`:
+Use the format in `docs/adr/`:
 
 ```markdown
 # ADR-NNNN: Title

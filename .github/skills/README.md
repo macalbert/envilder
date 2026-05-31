@@ -129,7 +129,7 @@ user-invocable: true
 
 1. **Naming**: lowercase + hyphens, max 64 chars. Category prefix groups related
    skills (`code-*`, `common-*`, `sdk-*`, `website-*`, `workflow-*`, `doc-*`).
-2. **ADR-awareness**: Agents check `docs/architecture/adr/` before proposing
+2. **ADR-awareness**: Agents check `docs/adr/` before proposing
    structural changes.
 3. **Domain vocabulary**: Use terms from `CONTEXT.md` (map file, provider,
    facade, port, adapter, etc.).
