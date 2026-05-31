@@ -18,51 +18,78 @@ const t = useTranslations(lang);
       </p>
     </div>
 
-    <div class="comparison">
-      <div class="comparison-column comparison-without">
-        <h3 class="comparison-heading comparison-heading-without">
-          {t.beforeAfter.columnWithout}
-        </h3>
-        <ul class="comparison-list">
-          {t.beforeAfter.rows.map((row) => (
-            <li class="comparison-item">{row.without}</li>
-          ))}
-        </ul>
-      </div>
+    <div class="comparison-headers">
+      <h3 class="comparison-heading comparison-heading-without">
+        {t.beforeAfter.columnWithout}
+      </h3>
+      <h3 class="comparison-heading comparison-heading-with">
+        {t.beforeAfter.columnWith}
+      </h3>
+    </div>
 
-      <div class="comparison-column comparison-with">
-        <h3 class="comparison-heading comparison-heading-with">
-          {t.beforeAfter.columnWith}
-        </h3>
-        <ul class="comparison-list">
-          {t.beforeAfter.rows.map((row) => (
-            <li class="comparison-item">{row.with}</li>
-          ))}
-        </ul>
-      </div>
+    <div class="comparison">
+      {t.beforeAfter.rows.map((row) => (
+        <div class="comparison-row">
+          <div class="comparison-card comparison-without">
+            <span class="status-icon">✗</span>
+            <p class="comparison-text">{row.without}</p>
+          </div>
+          <div class="comparison-card comparison-with">
+            <span class="status-icon">✓</span>
+            <p class="comparison-text">{row.with}</p>
+          </div>
+        </div>
+      ))}
     </div>
   </div>
 </section>
 
 <style>
   .comparison {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
     margin-top: var(--space-2xl);
   }
 
+  .comparison-headers {
+    display: none;
+  }
+
   @media (min-width: 768px) {
+    .comparison-headers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-xl);
+      margin-top: var(--space-2xl);
+      margin-bottom: var(--space-md);
+    }
+
     .comparison {
+      margin-top: 0;
+    }
+  }
+
+  .comparison-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  @media (min-width: 768px) {
+    .comparison-row {
       grid-template-columns: 1fr 1fr;
       gap: var(--space-xl);
     }
   }
 
-  .comparison-column {
+  .comparison-card {
     border: 1px solid var(--color-border);
-    padding: var(--space-xl);
+    padding: var(--space-lg);
     background: var(--color-surface);
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-start;
   }
 
   .comparison-without {
@@ -78,7 +105,6 @@ const t = useTranslations(lang);
     font-size: 0.7rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    margin-bottom: var(--space-lg);
     padding-bottom: var(--space-sm);
     border-bottom: 1px solid var(--color-border);
   }
@@ -93,35 +119,24 @@ const t = useTranslations(lang);
     border-bottom-color: var(--color-success);
   }
 
-  .comparison-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
+  .status-icon {
+    font-weight: bold;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    line-height: 1;
   }
 
-  .comparison-item {
+  .comparison-without .status-icon {
+    color: var(--color-error);
+  }
+
+  .comparison-with .status-icon {
+    color: var(--color-success);
+  }
+
+  .comparison-text {
     font-size: 0.9rem;
     line-height: 1.6;
-    padding-left: var(--space-md);
-    position: relative;
-  }
-
-  .comparison-without .comparison-item::before {
-    content: '✗';
-    position: absolute;
-    left: 0;
-    color: var(--color-error);
-    font-weight: bold;
-  }
-
-  .comparison-with .comparison-item::before {
-    content: '✓';
-    position: absolute;
-    left: 0;
-    color: var(--color-success);
-    font-weight: bold;
+    margin: 0;
   }
 </style>
