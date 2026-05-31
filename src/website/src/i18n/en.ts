@@ -402,7 +402,7 @@ export const en: Translations = {
     titleAccent: 'started',
     subtitle: 'Up and running in under a minute.',
     prerequisites: 'Prerequisites',
-    prereqNode: 'Node.js v20+',
+    prereqNode: 'Node.js v22+',
     prereqAws: 'AWS CLI configured',
     prereqAzure: 'Azure CLI configured',
     prereqIam: 'IAM permissions:',
@@ -497,7 +497,7 @@ export const en: Translations = {
     overviewSolution:
       'With Envilder, one mapping model is the single source of truth. Secrets are resolved from your cloud vault on demand: same contract, same behavior, whether you run the CLI locally, the GitHub Action in CI, or an SDK at app startup.',
     reqTitle: 'Requirements',
-    reqNode: 'Node.js v20+',
+    reqNode: 'Node.js v22+',
     reqAws: 'AWS CLI',
     reqAzure: 'Azure CLI',
     reqAwsNote: 'for AWS SSM',
