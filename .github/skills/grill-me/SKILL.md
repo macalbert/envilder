@@ -23,7 +23,7 @@ instead.
 - Ask questions **one at a time**
 - For each question, provide your **recommended answer** with brief rationale
 - If a question can be answered by **exploring the codebase**, explore it instead of asking
-- Reference existing ADRs in `docs/architecture/adr/` — don't re-litigate settled decisions
+- Reference existing ADRs in `docs/adr/` — don't re-litigate settled decisions
 - Use project domain vocabulary (map-file, provider, facade, etc.)
 - When a decision crystallizes that contradicts an existing ADR, flag it explicitly
 - Stop when all branches are resolved or user says "enough"

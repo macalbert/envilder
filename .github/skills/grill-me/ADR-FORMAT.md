@@ -1,7 +1,7 @@
 # ADR Format
 
-ADRs live in `docs/adr/` (or `docs/architecture/adr/`) and use sequential
-numbering: `0001-slug.md`, `0002-slug.md`, etc.
+ADRs live in `docs/adr/` and use sequential numbering:
+`0001-slug.md`, `0002-slug.md`, etc.
 
 Create the `docs/adr/` directory lazily — only when the first ADR is needed.
 
