@@ -510,6 +510,22 @@ export interface HomeMetaTranslations {
 export interface SponsorsTranslations {
   title: string;
   localstackAlt: string;
+  awsCreditsAlt: string;
+  awsCreditsLabel: string;
+}
+
+export interface BeforeAfterRow {
+  without: string;
+  with: string;
+}
+
+export interface BeforeAfterTranslations {
+  title: string;
+  titleAccent: string;
+  subtitle: string;
+  columnWithout: string;
+  columnWith: string;
+  rows: BeforeAfterRow[];
 }
 
 export interface Translations {
@@ -520,6 +536,7 @@ export interface Translations {
   trust: TrustTranslations;
   sponsors: SponsorsTranslations;
   problemSolution: ProblemSolutionTranslations;
+  beforeAfter: BeforeAfterTranslations;
   howItWorks: HowItWorksTranslations;
   features: FeaturesTranslations;
   demo: DemoTranslations;

@@ -3,9 +3,9 @@ import type { Translations } from './types';
 export const es: Translations = {
   homeMeta: {
     title:
-      'Envilder: un modelo para resolver secretos en cada entorno y runtime.',
+      'Envilder: estandariza cómo tus aplicaciones consumen secretos en cada entorno y runtime.',
     description:
-      'Un sistema de resolución de configuración basado en un modelo. Define los mapeos de secretos una vez y resuélvelos de forma consistente: CLI, CI/CD o runtime de aplicación. Basado en AWS SSM, Azure Key Vault y GCP Secret Manager.',
+      'Define tu contrato de entorno una vez y resuélvelo de forma consistente en desarrollo local, CI/CD y runtime. Con AWS SSM Parameter Store y Azure Key Vault.',
   },
   nav: {
     features: 'Funcionalidades',
@@ -31,19 +31,20 @@ export const es: Translations = {
     ariaTheme: 'Tema',
   },
   hero: {
-    openSource: 'Código abierto · MIT',
-    title1: 'El archivo .env es',
-    title2: 'un incidente de seguridad',
-    titleAccent: 'esperando a pasar.',
-    description: 'Envilder lee tus secretos directamente de ',
-    descAws: 'AWS',
-    descAzure: 'Azure',
-    descOr: 'o',
-    descSuffix: ' hacia tu app. Sin archivos, sin SaaS, sin filtraciones.',
+    openSource: 'Código abierto · MIT · AWS SSM · Azure Key Vault',
+    title1: 'Estandariza cómo',
+    title2: 'tus apps consumen',
+    titleAccent: 'secretos.',
+    description:
+      'Deja de reinventar la carga de secretos en cada proyecto. Define un contrato de entorno y resuélvelo en todas partes.',
+    descAws: 'AWS SSM',
+    descAzure: 'Azure Key Vault',
+    descOr: '·',
+    descSuffix: ' · GitHub Action · SDKs de runtime',
     getStarted: '▶ Empezar',
     viewOnGithub: '★ Ver en GitHub',
-    terminalComment1: '# 1. Un modelo de mapeo para cada entorno',
-    terminalComment2: '# 2. Resuelve secretos con la CLI',
+    terminalComment1: '# 1. Un contrato de entorno por app',
+    terminalComment2: '# 2. Resuelve el contrato',
     terminalFetched1: ' Obtenido DB_PASSWORD → ···pass',
     terminalFetched2: ' Obtenido API_KEY     → ···key',
     terminalWritten: ' Archivo de entorno escrito en .env',
@@ -54,6 +55,8 @@ export const es: Translations = {
   sponsors: {
     title: 'Sponsors',
     localstackAlt: 'LocalStack',
+    awsCreditsAlt: 'AWS Open Source Credits Program',
+    awsCreditsLabel: 'AWS Open Source Credits',
   },
   problemSolution: {
     title: 'Por qué la gestión de secretos ',
@@ -100,6 +103,33 @@ export const es: Translations = {
         title: 'Tu nube, sin intermediarios',
         description:
           'AWS SSM, Azure Key Vault o GCP. Sin proxy SaaS. Los secretos se quedan en tu infraestructura. Control de acceso nativo IAM/RBAC.',
+      },
+    ],
+  },
+  beforeAfter: {
+    title: 'Sin un estándar, ',
+    titleAccent: 'cada proyecto deriva.',
+    subtitle:
+      'Envilder convierte convenciones dispersas de carga de secretos en un contrato versionado que funciona en desarrollo, pipelines y runtime.',
+    columnWithout: 'Sin un estándar',
+    columnWith: 'Con Envilder',
+    rows: [
+      {
+        without:
+          'Los developers copian archivos .env o siguen READMEs desactualizados.',
+        with: 'Un contrato declara qué secretos necesita la aplicación.',
+      },
+      {
+        without: 'CI/CD tiene sus propios nombres de secretos e integraciones.',
+        with: 'El mismo contrato se resuelve en GitHub Actions.',
+      },
+      {
+        without: 'Cada app implementa su propia lógica de carga.',
+        with: 'Los SDKs de runtime cargan desde el mismo contrato.',
+      },
+      {
+        without: 'La configuración real queda dispersa en conocimiento tribal.',
+        with: 'El contrato vive en Git y se puede revisar en PRs.',
       },
     ],
   },
