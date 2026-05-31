@@ -2,9 +2,8 @@
 
 ### Changed
 
-* **Widen Node.js engine range** — The `engines` field now declares `>=18.0.0`
-  (the actual minimum required by dependencies). This maximizes consumer
-  compatibility per ADR-0009
+* **BREAKING: Require Node.js >= 22.12** — Aligns with the rest of the
+  monorepo. Node 18 and 20 are EOL; Node 22 is the only active LTS
   ([#291](https://github.com/macalbert/envilder/pull/291))
 
 * **Pin dependencies to minimum viable versions** — AWS SDK `^3.700.0`, Azure

@@ -27,19 +27,21 @@ different requirements — those only affect contributors, not consumers.
 
 ## Decision
 
-### Rule 1: Minimum viable engine version
+### Rule 1: Track active LTS for engine version
 
-The SDK `engines` field declares the **lowest runtime version the code actually
-requires** — not the version the dev toolchain needs.
+All components (CLI, GHA, SDKs) declare the **current active LTS** as the
+engine floor. We do not support EOL runtimes — maintaining compatibility with
+dead versions adds testing burden without real user benefit.
 
-| SDK | Engine floor rationale |
-| --- | --------------------- |
-| Node.js | Lowest Node.js version supported by all declared dependencies |
-| .NET | Lowest TFM where all APIs used are available |
-| Python | Lowest version supported by all declared dependencies |
+| Runtime | Policy |
+| ------- | ------ |
+| Node.js | `>=` current Active LTS minor (currently `>=22.12.0`) |
+| .NET | Lowest in-support TFM |
+| Python | Lowest in-support minor |
 
-**The root `package.json` (dev tool)** can and should require whatever the
-toolchain needs (currently `>=22.12.0`). This is not consumer-facing.
+This applies uniformly — SDKs and dev tools share the same engine floor.
+The only exception is CI publish workflows, which may use Node `current`
+(e.g., 24) for build speed.
 
 ### Rule 2: Minimum viable dependency versions
 
