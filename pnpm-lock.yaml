@@ -175,7 +175,7 @@ importers:
         version: 3.7.3
       astro:
         specifier: ^6.4.2
-        version: 6.4.3(@azure/identity@4.13.1)(@azure/keyvault-secrets@4.11.2)(@types/node@25.9.1)(jiti@2.6.1)(rollup@4.61.0)(tsx@4.22.4)(yaml@2.9.0)
+        version: 6.4.4(@azure/identity@4.13.1)(@azure/keyvault-secrets@4.11.2)(@types/node@25.9.1)(jiti@2.6.1)(rollup@4.61.0)(tsx@4.22.4)(yaml@2.9.0)
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.9
@@ -1761,8 +1761,8 @@ packages:
     resolution: {integrity: sha512-Z7tMw1ytTXt5jqMcOP+OQteU1VuNK9Y02uuJtKQ1Sv69jXQKKg5cibLwGJow8yzZP+eAc18EmLGPal0bp36rvQ==}
     engines: {node: '>=8'}
 
-  astro@6.4.3:
-    resolution: {integrity: sha512-heArIk8zLcxuoj1WgBH2zGdAD8zKSU1mEcBvS6hYMEHRPlbtvB+4Y8ri9Z27hzeryvGaFgrH32zjghEfV2y07g==}
+  astro@6.4.4:
+    resolution: {integrity: sha512-hVe8tq3lqt/Dr0UyB//yUmQSlHMTU8scTiF/vQddQVahLE4TTaSdH5H0nb7OvRcwo0UmlAO8DWYar4jNaS7H+A==}
     engines: {node: '>=22.12.0', npm: '>=9.6.5', pnpm: '>=7.1.0'}
     hasBin: true
 
@@ -5472,7 +5472,7 @@ snapshots:
 
   astral-regex@2.0.0: {}
 
-  astro@6.4.3(@azure/identity@4.13.1)(@azure/keyvault-secrets@4.11.2)(@types/node@25.9.1)(jiti@2.6.1)(rollup@4.61.0)(tsx@4.22.4)(yaml@2.9.0):
+  astro@6.4.4(@azure/identity@4.13.1)(@azure/keyvault-secrets@4.11.2)(@types/node@25.9.1)(jiti@2.6.1)(rollup@4.61.0)(tsx@4.22.4)(yaml@2.9.0):
     dependencies:
       '@astrojs/compiler': 4.0.0
       '@astrojs/internal-helpers': 0.10.0
