@@ -131,13 +131,13 @@ export const en: Translations = {
     title: 'Why ',
     titleAccent: 'Envilder?',
     subtitle:
-      'Envilder is a resolution layer over your existing secret manager. Secrets stay in your cloud — the JSON mapping is just the contract that keeps every environment consistent.',
+      'Envilder is a resolution layer over your existing secret manager. Secrets stay in your cloud. The JSON mapping is just the contract that keeps every environment consistent.',
     highlights: [
       {
         icon: '🧱',
         title: 'Zero Infrastructure',
         description:
-          'No servers, no proxies, no SaaS middleman. Built on AWS SSM and Azure Key Vault — services you already use and pay for.',
+          'No servers, no proxies, no SaaS middleman. Built on AWS SSM and Azure Key Vault, services you already use and pay for.',
       },
       {
         icon: '📋',
@@ -149,7 +149,7 @@ export const en: Translations = {
         icon: '🔄',
         title: 'Safe Secret Rotation',
         description:
-          'Rotate values in AWS SSM or Azure Key Vault. Every consumer — local, CI/CD, and runtime — resolves the new value automatically. No .env rewrites, no pipeline changes.',
+          'Rotate values in AWS SSM or Azure Key Vault. Every consumer (local, CI/CD, and runtime) resolves the new value automatically. No .env rewrites, no pipeline changes.',
       },
       {
         icon: '☁️',
@@ -182,7 +182,7 @@ export const en: Translations = {
         icon: '🔒',
         title: 'Native IAM & RBAC',
         description:
-          'AWS IAM policies or Azure RBAC — no extra auth layer needed.',
+          'AWS IAM policies or Azure RBAC. No extra auth layer needed.',
       },
       {
         icon: '📊',

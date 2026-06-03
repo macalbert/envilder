@@ -131,13 +131,13 @@ export const es: Translations = {
     title: 'Por qué ',
     titleAccent: 'Envilder?',
     subtitle:
-      'Envilder es una capa de resolución sobre tu gestor de secretos existente. Los secretos se quedan en tu nube — el mapeo JSON es solo el contrato que mantiene cada entorno consistente.',
+      'Envilder es una capa de resolución sobre tu gestor de secretos existente. Los secretos se quedan en tu nube. El mapeo JSON es solo el contrato que mantiene cada entorno consistente.',
     highlights: [
       {
         icon: '🧱',
         title: 'Cero infraestructura',
         description:
-          'Sin servidores, sin proxies, sin SaaS intermediario. Construido sobre AWS SSM y Azure Key Vault — servicios que ya usas y pagas.',
+          'Sin servidores, sin proxies, sin SaaS intermediario. Construido sobre AWS SSM y Azure Key Vault, servicios que ya usas y pagas.',
       },
       {
         icon: '📋',
@@ -149,7 +149,7 @@ export const es: Translations = {
         icon: '🔄',
         title: 'Rotación de secretos segura',
         description:
-          'Rota valores en AWS SSM o Azure Key Vault. Cada consumidor — local, CI/CD y runtime — resuelve el nuevo valor automáticamente. Sin reescribir .env, sin cambios en los pipelines.',
+          'Rota valores en AWS SSM o Azure Key Vault. Cada consumidor (local, CI/CD y runtime) resuelve el nuevo valor automáticamente. Sin reescribir .env, sin cambios en los pipelines.',
       },
       {
         icon: '☁️',
@@ -182,7 +182,7 @@ export const es: Translations = {
         icon: '🔒',
         title: 'IAM y RBAC nativo',
         description:
-          'Políticas IAM de AWS o RBAC de Azure — sin capa de auth extra.',
+          'Políticas IAM de AWS o RBAC de Azure. Sin capa de auth extra.',
       },
       {
         icon: '📊',
