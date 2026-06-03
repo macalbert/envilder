@@ -31,7 +31,7 @@ const pushSingleCmd =
   'envilder --push --key=API_KEY --value={SECRET} --secret-path=/myapp/api/key';
 
 const awsVerifyCmd = `# 1. Create a test parameter
-aws ssm put-parameter --name "/test/hello" --value "world" --type SecureString
+aws ssm put-parameter --name "/test/hello" --value "world" --type SecureString --overwrite
 
 # 2. Create a minimal map file
 echo '{ "HELLO": "/test/hello" }' > test-map.json
@@ -235,8 +235,8 @@ print(secrets["HELLO"])  # world`} />
         <p>{t.docs.azureSetupCheck}</p>
         <CodeBlock lang="bash" code={azVaultShow} />
         <ul class="docs-list">
-          <li><code>true</code> → <strong>{t.docs.azureRbacTrue}</strong></li>
-          <li><code>false</code> / <code>null</code> → <strong>{t.docs.azureRbacFalse}</strong></li>
+          <li><strong>{t.docs.azureRbacTrue}</strong></li>
+          <li><strong>{t.docs.azureRbacFalse}</strong></li>
         </ul>
 
         <h4>{t.docs.azureOptionA}</h4>
