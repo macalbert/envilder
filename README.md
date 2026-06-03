@@ -6,7 +6,8 @@
 
 <p align="center">
   <b>One model. Your secrets. Every runtime.</b><br>
-  <span>Define secret mappings once. Resolve them consistently from AWS SSM or Azure Key Vault.</span>
+  <span>Define secret mappings once. Resolve them consistently from AWS SSM or Azure Key Vault.</span><br>
+  <a href="https://envilder.com"><strong>Website & docs → envilder.com</strong></a>
 </p>
 
 [![npm version](https://img.shields.io/npm/v/envilder.svg)](https://www.npmjs.com/package/envilder)
