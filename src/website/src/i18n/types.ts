@@ -529,8 +529,6 @@ export interface SponsorsTranslations {
   awsCreditsLabel: string;
 }
 
-
-
 export interface Translations {
   homeMeta: HomeMetaTranslations;
   nav: NavLinks;

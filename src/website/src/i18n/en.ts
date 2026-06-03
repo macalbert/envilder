@@ -163,32 +163,38 @@ export const en: Translations = {
       {
         icon: '⚙️',
         title: 'GitHub Action',
-        description: 'Pull secrets in CI/CD workflows. Same mapping, zero manual intervention.',
+        description:
+          'Pull secrets in CI/CD workflows. Same mapping, zero manual intervention.',
       },
       {
         icon: '🔄',
         title: 'Bidirectional Sync',
-        description: 'Pull to .env or push .env values back to your cloud provider via CLI.',
+        description:
+          'Pull to .env or push .env values back to your cloud provider via CLI.',
       },
       {
         icon: '🔌',
         title: 'Secrets Never Touch Disk',
-        description: 'Runtime SDKs load secrets directly into memory at app startup. No .env files written to disk.',
+        description:
+          'Runtime SDKs load secrets directly into memory at app startup. No .env files written to disk.',
       },
       {
         icon: '🔒',
         title: 'Native IAM & RBAC',
-        description: 'AWS IAM policies or Azure RBAC — no extra auth layer needed.',
+        description:
+          'AWS IAM policies or Azure RBAC — no extra auth layer needed.',
       },
       {
         icon: '📊',
         title: 'Full Audit Trail',
-        description: 'Every access logged in CloudTrail or Azure Monitor automatically.',
+        description:
+          'Every access logged in CloudTrail or Azure Monitor automatically.',
       },
       {
         icon: '👤',
         title: 'AWS Profile Support',
-        description: 'Switch between AWS CLI profiles for multi-account setups.',
+        description:
+          'Switch between AWS CLI profiles for multi-account setups.',
       },
     ],
   },
@@ -506,9 +512,9 @@ export const en: Translations = {
     awsSetupVerifyTitle: '3. Create a test parameter and verify',
     awsSetupVerifyDesc:
       'Create a parameter in SSM, then pull it with Envilder to confirm everything works:',
-    awsSetupVerifySuccess:
-      'If you see ✔ Fetched, your AWS setup is complete.',
-    awsSetupVerifySdk: 'Or load secrets directly from your app with the Python SDK:',
+    awsSetupVerifySuccess: 'If you see ✔ Fetched, your AWS setup is complete.',
+    awsSetupVerifySdk:
+      'Or load secrets directly from your app with the Python SDK:',
     // Azure setup
     azureSetupTitle: 'Azure setup',
     azureSetupIntro:
@@ -535,7 +541,8 @@ export const en: Translations = {
       'Create a secret in Key Vault, then pull it with Envilder to confirm everything works:',
     azureSetupVerifySuccess:
       'If you see ✔ Fetched, your Azure setup is complete.',
-    azureSetupVerifySdk: 'Or load secrets directly from your app with the Python SDK:',
+    azureSetupVerifySdk:
+      'Or load secrets directly from your app with the Python SDK:',
     mapTitle: 'Mapping file',
     mapIntro:
       "The mapping file (envilder.json) is the core of Envilder. It's a JSON file that maps environment variable names (keys) to secret paths (values) in your cloud provider.",

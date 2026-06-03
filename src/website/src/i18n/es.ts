@@ -163,32 +163,38 @@ export const es: Translations = {
       {
         icon: '⚙️',
         title: 'GitHub Action',
-        description: 'Obtiene secretos en workflows CI/CD. Mismo mapeo, cero intervención manual.',
+        description:
+          'Obtiene secretos en workflows CI/CD. Mismo mapeo, cero intervención manual.',
       },
       {
         icon: '🔄',
         title: 'Sincronización bidireccional',
-        description: 'Obtiene en .env o sube valores .env a tu proveedor en la nube vía CLI.',
+        description:
+          'Obtiene en .env o sube valores .env a tu proveedor en la nube vía CLI.',
       },
       {
         icon: '🔌',
         title: 'Los secretos no tocan disco',
-        description: 'SDKs de runtime cargan secretos directamente en memoria al iniciar la app. Sin archivos .env escritos a disco.',
+        description:
+          'SDKs de runtime cargan secretos directamente en memoria al iniciar la app. Sin archivos .env escritos a disco.',
       },
       {
         icon: '🔒',
         title: 'IAM y RBAC nativo',
-        description: 'Políticas IAM de AWS o RBAC de Azure — sin capa de auth extra.',
+        description:
+          'Políticas IAM de AWS o RBAC de Azure — sin capa de auth extra.',
       },
       {
         icon: '📊',
         title: 'Trazabilidad completa',
-        description: 'Cada acceso registrado en CloudTrail o Azure Monitor automáticamente.',
+        description:
+          'Cada acceso registrado en CloudTrail o Azure Monitor automáticamente.',
       },
       {
         icon: '👤',
         title: 'Soporte de perfiles AWS',
-        description: 'Cambia entre perfiles AWS CLI para configuraciones multi-cuenta.',
+        description:
+          'Cambia entre perfiles AWS CLI para configuraciones multi-cuenta.',
       },
     ],
   },
@@ -496,26 +502,31 @@ export const es: Translations = {
     awsSetupCredTitle: '1. Configura las credenciales',
     awsSetupCredDesc:
       'Envilder usa tus credenciales AWS CLI. Configura el perfil por defecto:',
-    awsSetupCredProfile: 'O usa un perfil con nombre para configuraciones multi-cuenta:',
+    awsSetupCredProfile:
+      'O usa un perfil con nombre para configuraciones multi-cuenta:',
     awsSetupPermTitle: '2. Otorga permisos IAM',
-    awsSetupPermDesc: 'Tu usuario o rol IAM necesita acceso a los parámetros SSM:',
+    awsSetupPermDesc:
+      'Tu usuario o rol IAM necesita acceso a los parámetros SSM:',
     awsSetupPermOperation: 'Operación',
     awsSetupPermPermission: 'Permiso',
     awsSetupPermPull: 'Pull',
     awsSetupPermPush: 'Push',
-    awsSetupPolicyExample: 'Ejemplo de política IAM (limita a tu prefijo de ruta):',
+    awsSetupPolicyExample:
+      'Ejemplo de política IAM (limita a tu prefijo de ruta):',
     awsSetupVerifyTitle: '3. Crea un parámetro de prueba y verifica',
     awsSetupVerifyDesc:
       'Crea un parámetro en SSM y luego haz pull con Envilder para confirmar que todo funciona:',
     awsSetupVerifySuccess:
       'Si ves ✔ Fetched, la configuración AWS está completa.',
-    awsSetupVerifySdk: 'O carga secretos directamente desde tu app con el Python SDK:',
+    awsSetupVerifySdk:
+      'O carga secretos directamente desde tu app con el Python SDK:',
     // Azure setup
     azureSetupTitle: 'Configuración Azure',
     azureSetupIntro:
       'Todo lo que necesitas para usar Envilder con Azure Key Vault.',
     azureSetupCredTitle: '1. Autentícate con Azure',
-    azureSetupCredDesc: 'Envilder usa Azure Default Credentials. Inicia sesión con:',
+    azureSetupCredDesc:
+      'Envilder usa Azure Default Credentials. Inicia sesión con:',
     azureSetupCredVault:
       'Proporciona la URL del vault vía $config en el archivo de mapeo o el flag --vault-url.',
     azureSetupAccessTitle: '2. Configura el acceso al vault',
@@ -536,7 +547,8 @@ export const es: Translations = {
       'Crea un secreto en Key Vault y luego haz pull con Envilder para confirmar que todo funciona:',
     azureSetupVerifySuccess:
       'Si ves ✔ Fetched, la configuración Azure está completa.',
-    azureSetupVerifySdk: 'O carga secretos directamente desde tu app con el Python SDK:',
+    azureSetupVerifySdk:
+      'O carga secretos directamente desde tu app con el Python SDK:',
     mapTitle: 'Archivo de mapeo',
     mapIntro:
       'El archivo de mapeo (envilder.json) es el núcleo de Envilder. Es un archivo JSON que mapea nombres de variables de entorno (claves) a rutas de secretos (valores) en tu proveedor en la nube.',

@@ -149,7 +149,7 @@ export const ca: Translations = {
         icon: '🔄',
         title: 'Rotació de secrets segura',
         description:
-          "Rota valors a AWS SSM o Azure Key Vault. Cada consumidor — local, CI/CD i runtime — resol el nou valor automàticament. Sense reescriure .env, sense canvis als pipelines.",
+          'Rota valors a AWS SSM o Azure Key Vault. Cada consumidor — local, CI/CD i runtime — resol el nou valor automàticament. Sense reescriure .env, sense canvis als pipelines.',
       },
       {
         icon: '☁️',
@@ -163,32 +163,38 @@ export const ca: Translations = {
       {
         icon: '⚙️',
         title: 'GitHub Action',
-        description: 'Obté secrets en workflows CI/CD. Mateix mapeig, zero intervenció manual.',
+        description:
+          'Obté secrets en workflows CI/CD. Mateix mapeig, zero intervenció manual.',
       },
       {
         icon: '🔄',
         title: 'Sincronització bidireccional',
-        description: 'Obté a .env o puja valors .env al teu proveïdor al núvol via CLI.',
+        description:
+          'Obté a .env o puja valors .env al teu proveïdor al núvol via CLI.',
       },
       {
         icon: '🔌',
         title: 'Els secrets no toquen disc',
-        description: "SDKs de runtime carreguen secrets directament a memòria a l'inici de l'app. Sense fitxers .env escrits a disc.",
+        description:
+          "SDKs de runtime carreguen secrets directament a memòria a l'inici de l'app. Sense fitxers .env escrits a disc.",
       },
       {
         icon: '🔒',
         title: 'IAM i RBAC natiu',
-        description: "Polítiques IAM d'AWS o RBAC d'Azure — sense capa d'auth extra.",
+        description:
+          "Polítiques IAM d'AWS o RBAC d'Azure — sense capa d'auth extra.",
       },
       {
         icon: '📊',
-        title: "Traçabilitat completa",
-        description: 'Cada accés registrat a CloudTrail o Azure Monitor automàticament.',
+        title: 'Traçabilitat completa',
+        description:
+          'Cada accés registrat a CloudTrail o Azure Monitor automàticament.',
       },
       {
         icon: '👤',
         title: 'Suport de perfils AWS',
-        description: 'Canvia entre perfils AWS CLI per a configuracions multi-compte.',
+        description:
+          'Canvia entre perfils AWS CLI per a configuracions multi-compte.',
       },
     ],
   },
@@ -496,26 +502,31 @@ export const ca: Translations = {
     awsSetupCredTitle: '1. Configura les credencials',
     awsSetupCredDesc:
       'Envilder utilitza les teves credencials AWS CLI. Configura el perfil per defecte:',
-    awsSetupCredProfile: 'O utilitza un perfil amb nom per a configuracions multi-compte:',
+    awsSetupCredProfile:
+      'O utilitza un perfil amb nom per a configuracions multi-compte:',
     awsSetupPermTitle: '2. Atorga permisos IAM',
-    awsSetupPermDesc: 'El teu usuari o rol IAM necessita accés als paràmetres SSM:',
+    awsSetupPermDesc:
+      'El teu usuari o rol IAM necessita accés als paràmetres SSM:',
     awsSetupPermOperation: 'Operació',
     awsSetupPermPermission: 'Permís',
     awsSetupPermPull: 'Pull',
     awsSetupPermPush: 'Push',
-    awsSetupPolicyExample: 'Exemple de política IAM (limita al teu prefix de ruta):',
+    awsSetupPolicyExample:
+      'Exemple de política IAM (limita al teu prefix de ruta):',
     awsSetupVerifyTitle: '3. Crea un paràmetre de prova i verifica',
     awsSetupVerifyDesc:
       'Crea un paràmetre a SSM i després fes pull amb Envilder per confirmar que tot funciona:',
     awsSetupVerifySuccess:
       'Si veus ✔ Fetched, la configuració AWS està completa.',
-    awsSetupVerifySdk: 'O carrega secrets directament des de la teva app amb el Python SDK:',
+    awsSetupVerifySdk:
+      'O carrega secrets directament des de la teva app amb el Python SDK:',
     // Azure setup
     azureSetupTitle: 'Configuració Azure',
     azureSetupIntro:
       'Tot el que necessites per usar Envilder amb Azure Key Vault.',
     azureSetupCredTitle: "1. Autentica't amb Azure",
-    azureSetupCredDesc: 'Envilder utilitza Azure Default Credentials. Inicia sessió amb:',
+    azureSetupCredDesc:
+      'Envilder utilitza Azure Default Credentials. Inicia sessió amb:',
     azureSetupCredVault:
       "Proporciona l'URL del vault via $config al fitxer de mapeig o el flag --vault-url.",
     azureSetupAccessTitle: "2. Configura l'accés al vault",
@@ -536,7 +547,8 @@ export const ca: Translations = {
       'Crea un secret a Key Vault i després fes pull amb Envilder per confirmar que tot funciona:',
     azureSetupVerifySuccess:
       'Si veus ✔ Fetched, la configuració Azure està completa.',
-    azureSetupVerifySdk: 'O carrega secrets directament des de la teva app amb el Python SDK:',
+    azureSetupVerifySdk:
+      'O carrega secrets directament des de la teva app amb el Python SDK:',
     mapTitle: 'Fitxer de mapeig',
     mapIntro:
       "El fitxer de mapeig (envilder.json) és el nucli d'Envilder. És un fitxer JSON que mapeja noms de variables d'entorn (claus) a rutes de secrets (valors) al teu proveïdor al núvol.",
