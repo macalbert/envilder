@@ -18,9 +18,10 @@ const t = useTranslations(lang);
       </p>
     </div>
 
-    <div class="grid-4 features-grid">
-      {t.features.features.map((f) => (
-        <div class:list={['pixel-card', 'feature-card', { 'feature-coming-soon': f.badge }]}>
+    <!-- Tier 1: Hero highlights (2x2 grid, bigger cards) -->
+    <div class="grid-2 highlights-grid">
+      {t.features.highlights.map((f) => (
+        <div class:list={['pixel-card', 'highlight-card', { 'feature-coming-soon': f.badge }]}>
           <span class="pixel-icon">{f.icon}</span>
           <div class="feature-title-row">
             <h3>{f.title}</h3>
@@ -30,22 +31,42 @@ const t = useTranslations(lang);
         </div>
       ))}
     </div>
+
+    <!-- Tier 2: Compact extras -->
+    <div class="extras-section">
+      <h3 class="extras-heading">{t.features.extrasTitle}</h3>
+      <div class="extras-grid">
+        {t.features.extras.map((f) => (
+          <div class="extra-item">
+            <span class="extra-icon">{f.icon}</span>
+            <div class="extra-content">
+              <strong>{f.title}</strong>
+              <span class="extra-desc">{f.description}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   </div>
 </section>
 
 <style>
-  .feature-card h3 {
+  .highlights-grid {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .highlight-card h3 {
     margin-bottom: var(--space-sm);
     color: var(--color-text);
   }
 
-  .feature-card p {
-    font-size: 0.85rem;
-    line-height: 1.6;
+  .highlight-card p {
+    font-size: 0.9rem;
+    line-height: 1.7;
   }
 
-  .feature-card .pixel-icon {
-    font-size: 1.5rem;
+  .highlight-card .pixel-icon {
+    font-size: 1.8rem;
   }
 
   .feature-title-row {
@@ -63,5 +84,66 @@ const t = useTranslations(lang);
   .badge-small {
     font-size: 0.55rem;
     padding: 2px 6px;
+  }
+
+  .extras-section {
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-xl);
+  }
+
+  .extras-heading {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    margin-bottom: var(--space-lg);
+  }
+
+  .extras-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  @media (min-width: 640px) {
+    .extras-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .extras-grid {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+  }
+
+  .extra-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: var(--space-sm) 0;
+  }
+
+  .extra-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .extra-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .extra-content strong {
+    font-size: 0.8rem;
+    color: var(--color-text);
+  }
+
+  .extra-desc {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
   }
 </style>

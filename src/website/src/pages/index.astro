@@ -1,17 +1,12 @@
 ---
-import BeforeAfter from '../components/BeforeAfter.astro';
 import DemoVideo from '../components/DemoVideo.astro';
 import FeaturesGrid from '../components/FeaturesGrid.astro';
 import Footer from '../components/Footer.astro';
-import GetStarted from '../components/GetStarted.astro';
-import GitHubAction from '../components/GitHubAction.astro';
 import Hero from '../components/Hero.astro';
 import HowItWorks from '../components/HowItWorks.astro';
 import Navbar from '../components/Navbar.astro';
 import ProblemSolution from '../components/ProblemSolution.astro';
 import Providers from '../components/Providers.astro';
-import Roadmap from '../components/Roadmap.astro';
-import Sdks from '../components/Sdks.astro';
 import Sponsors from '../components/Sponsors.astro';
 import TrustBadges from '../components/TrustBadges.astro';
 import { useTranslations } from '../i18n/utils';
@@ -32,15 +27,10 @@ const t = useTranslations(lang);
     <TrustBadges lang={lang} />
     <Sponsors lang={lang} />
     <ProblemSolution lang={lang} />
-    <BeforeAfter lang={lang} />
     <FeaturesGrid lang={lang} />
     <HowItWorks lang={lang} />
     <DemoVideo lang={lang} />
     <Providers lang={lang} />
-    <Sdks lang={lang} />
-    <GitHubAction lang={lang} />
-    <Roadmap lang={lang} />
-    <GetStarted lang={lang} />
   </main>
   <Footer lang={lang} />
 </BaseLayout>
