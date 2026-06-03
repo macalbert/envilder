@@ -1,0 +1,75 @@
+---
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="section" id="governance">
+  <div class="container">
+    <div class="section-title">
+      <h2>{t.governance.title}<span>{t.governance.titleAccent}</span></h2>
+      <p class="section-subtitle">
+        {t.governance.subtitle}
+      </p>
+    </div>
+
+    <p class="governance-positioning">{t.governance.positioning}</p>
+
+    <div class="grid-3 governance-grid">
+      {t.governance.benefits.map((b) => (
+        <div class="pixel-card governance-card">
+          <span class="pixel-icon">{b.icon}</span>
+          <h3>{b.title}</h3>
+          <p>{b.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .governance-positioning {
+    text-align: center;
+    font-size: clamp(0.95rem, 2vw, 1.1rem);
+    line-height: 1.7;
+    max-width: 720px;
+    margin: 0 auto var(--space-2xl);
+    color: var(--color-text-muted);
+  }
+
+  .governance-card h3 {
+    margin-bottom: var(--space-sm);
+    color: var(--color-text);
+  }
+
+  .governance-card p {
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .governance-card .pixel-icon {
+    font-size: 1.5rem;
+  }
+
+  .governance-card {
+    border-color: var(--color-accent);
+  }
+
+  .governance-card::before {
+    border-color: var(--color-accent);
+  }
+
+  .governance-card:hover {
+    border-color: var(--color-accent);
+    box-shadow: 4px 4px 0 rgba(138, 154, 108, 0.4);
+  }
+
+  .governance-card:hover::before {
+    border-color: var(--color-accent);
+  }
+</style>

@@ -24,7 +24,6 @@ export interface ThemeTranslations {
 }
 
 export interface HeroTranslations {
-  openSource: string;
   title1: string;
   title2: string;
   titleAccent: string;
@@ -58,8 +57,6 @@ export interface ProblemSolutionTranslations {
   titleSuffix: string;
   subtitle: string;
   problems: ProblemItem[];
-  arrowText: string;
-  solutions: ProblemItem[];
 }
 
 export interface StepItem {
@@ -92,11 +89,19 @@ export interface FeatureItem {
   badge?: string;
 }
 
+export interface FeatureExtraItem {
+  icon: string;
+  title: string;
+  description: string;
+}
+
 export interface FeaturesTranslations {
   title: string;
   titleAccent: string;
   subtitle: string;
-  features: FeatureItem[];
+  highlights: FeatureItem[];
+  extras: FeatureExtraItem[];
+  extrasTitle: string;
 }
 
 export interface DemoTranslations {
@@ -261,22 +266,20 @@ export interface DocsTranslations {
   sidebarGettingStarted: string;
   sidebarRequirements: string;
   sidebarInstallation: string;
-  sidebarCredentials: string;
-  sidebarPermissions: string;
+  sidebarAwsSetup: string;
+  sidebarAzureSetup: string;
   sidebarCli: string;
   sidebarMappingFile: string;
   sidebarPullCommand: string;
   sidebarPushCommand: string;
   sidebarPushSingle: string;
+  sidebarConfigPriority: string;
   sidebarGha: string;
   sidebarGhaSetup: string;
   sidebarGhaBasic: string;
   sidebarGhaMultiEnv: string;
   sidebarGhaAzure: string;
   sidebarGhaInputs: string;
-  sidebarReference: string;
-  sidebarConfigPriority: string;
-  sidebarAzureSetup: string;
   // Overview
   overviewTitle: string;
   overviewDesc: string;
@@ -293,26 +296,45 @@ export interface DocsTranslations {
   reqInstallGuide: string;
   // Installation
   installTitle: string;
-  // Credentials
-  credTitle: string;
-  credAwsTitle: string;
-  credAwsDesc: string;
-  credAwsProfile: string;
-  credAzureTitle: string;
-  credAzureDesc: string;
-  credAzureVault: string;
-  // Permissions
-  permTitle: string;
-  permAwsTitle: string;
-  permAwsDesc: string;
-  permOperation: string;
-  permPermission: string;
-  permPull: string;
-  permPush: string;
-  permPolicyExample: string;
-  permAzureTitle: string;
-  permAzureRbac: string;
-  permAzurePullNote: string;
+  // AWS setup
+  awsSetupTitle: string;
+  awsSetupIntro: string;
+  awsSetupCredTitle: string;
+  awsSetupCredDesc: string;
+  awsSetupCredProfile: string;
+  awsSetupPermTitle: string;
+  awsSetupPermDesc: string;
+  awsSetupPermOperation: string;
+  awsSetupPermPermission: string;
+  awsSetupPermPull: string;
+  awsSetupPermPush: string;
+  awsSetupPolicyExample: string;
+  awsSetupVerifyTitle: string;
+  awsSetupVerifyDesc: string;
+  awsSetupVerifySuccess: string;
+  awsSetupVerifySdk: string;
+  // Azure setup
+  azureSetupTitle: string;
+  azureSetupIntro: string;
+  azureSetupCredTitle: string;
+  azureSetupCredDesc: string;
+  azureSetupCredVault: string;
+  azureSetupAccessTitle: string;
+  azureSetupCheck: string;
+  azureRbacTrue: string;
+  azureRbacFalse: string;
+  azureOptionA: string;
+  azureOptionB: string;
+  azureSetupPermTitle: string;
+  azureSetupPermOperation: string;
+  azureSetupPermPermission: string;
+  azureSetupPermPull: string;
+  azureSetupPermPush: string;
+  azureSetupPullNote: string;
+  azureSetupVerifyTitle: string;
+  azureSetupVerifyDesc: string;
+  azureSetupVerifySuccess: string;
+  azureSetupVerifySdk: string;
   // Mapping file
   mapTitle: string;
   mapIntro: string;
@@ -432,20 +454,13 @@ export interface DocsTranslations {
   ghaInputProvider: string;
   ghaInputVault: string;
   ghaOutputEnvPath: string;
-  // Reference
+  // Config priority
   configPriorityTitle: string;
   configPriorityDesc: string;
   configPriority1: string;
   configPriority2: string;
   configPriority3: string;
   configPriorityExplain: string;
-  azureSetupTitle: string;
-  azureSetupCheck: string;
-  azureRbacTrue: string;
-  azureRbacFalse: string;
-  azureOptionA: string;
-  azureOptionB: string;
-  azureAccessNote: string;
   // SDKs
   sidebarSdks: string;
   sidebarSdkDotnet: string;
@@ -514,20 +529,6 @@ export interface SponsorsTranslations {
   awsCreditsLabel: string;
 }
 
-export interface BeforeAfterRow {
-  without: string;
-  with: string;
-}
-
-export interface BeforeAfterTranslations {
-  title: string;
-  titleAccent: string;
-  subtitle: string;
-  columnWithout: string;
-  columnWith: string;
-  rows: BeforeAfterRow[];
-}
-
 export interface Translations {
   homeMeta: HomeMetaTranslations;
   nav: NavLinks;
@@ -536,7 +537,6 @@ export interface Translations {
   trust: TrustTranslations;
   sponsors: SponsorsTranslations;
   problemSolution: ProblemSolutionTranslations;
-  beforeAfter: BeforeAfterTranslations;
   howItWorks: HowItWorksTranslations;
   features: FeaturesTranslations;
   demo: DemoTranslations;
