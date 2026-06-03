@@ -30,26 +30,43 @@ const azVaultPolicy = `az keyvault set-policy \\
 const pushSingleCmd =
   'envilder --push --key=API_KEY --value={SECRET} --secret-path=/myapp/api/key';
 
+const awsVerifyCmd = `# 1. Create a test parameter
+aws ssm put-parameter --name "/test/hello" --value "world" --type SecureString --overwrite
+
+# 2. Create a minimal map file
+echo '{ "HELLO": "/test/hello" }' > test-map.json
+
+# 3. Pull with Envilder
+envilder --map=test-map.json --envfile=.env`;
+
+const azureVerifyCmd = `# 1. Create a test secret
+az keyvault secret set --vault-name {VAULT_NAME} --name "test-hello" --value "world"
+
+# 2. Create a minimal map file
+echo '{ "$config": { "provider": "azure", "vaultUrl": "https://{VAULT_NAME}.vault.azure.net" }, "HELLO": "test-hello" }' > test-map.json
+
+# 3. Pull with Envilder
+envilder --map=test-map.json --envfile=.env`;
+
 const sectionOrder = [
   { id: 'overview', label: t.docs.overviewTitle },
   { id: 'requirements', label: t.docs.sidebarRequirements },
+  { id: 'aws-setup', label: t.docs.sidebarAwsSetup },
+  { id: 'azure-setup', label: t.docs.sidebarAzureSetup },
   { id: 'installation', label: t.docs.sidebarInstallation },
-  { id: 'credentials', label: t.docs.sidebarCredentials },
-  { id: 'permissions', label: t.docs.sidebarPermissions },
   { id: 'mapping-file', label: t.docs.sidebarMappingFile },
   { id: 'pull-command', label: t.docs.sidebarPullCommand },
   { id: 'push-command', label: t.docs.sidebarPushCommand },
   { id: 'push-single', label: t.docs.sidebarPushSingle },
+  { id: 'config-priority', label: t.docs.sidebarConfigPriority },
   { id: 'sdk-dotnet', label: t.docs.sidebarSdkDotnet },
   { id: 'sdk-python', label: t.docs.sidebarSdkPython },
   { id: 'sdk-nodejs', label: t.docs.sidebarSdkNodejs },
   { id: 'gha-setup', label: t.docs.sidebarGhaSetup },
   { id: 'gha-basic', label: t.docs.sidebarGhaBasic },
-  { id: 'gha-multi-env', label: t.docs.sidebarGhaMultiEnv },
   { id: 'gha-azure', label: t.docs.sidebarGhaAzure },
+  { id: 'gha-multi-env', label: t.docs.sidebarGhaMultiEnv },
   { id: 'gha-inputs', label: t.docs.sidebarGhaInputs },
-  { id: 'config-priority', label: t.docs.sidebarConfigPriority },
-  { id: 'azure-setup', label: t.docs.sidebarAzureSetup },
 ];
 ---
 
@@ -62,15 +79,16 @@ const sectionOrder = [
         <optgroup label={t.docs.sidebarGettingStarted}>
           <option value="overview">{t.docs.overviewTitle}</option>
           <option value="requirements">{t.docs.sidebarRequirements}</option>
+          <option value="aws-setup">{t.docs.sidebarAwsSetup}</option>
+          <option value="azure-setup">{t.docs.sidebarAzureSetup}</option>
           <option value="installation">{t.docs.sidebarInstallation}</option>
-          <option value="credentials">{t.docs.sidebarCredentials}</option>
-          <option value="permissions">{t.docs.sidebarPermissions}</option>
         </optgroup>
         <optgroup label={t.docs.sidebarCli}>
           <option value="mapping-file">{t.docs.sidebarMappingFile}</option>
           <option value="pull-command">{t.docs.sidebarPullCommand}</option>
           <option value="push-command">{t.docs.sidebarPushCommand}</option>
           <option value="push-single">{t.docs.sidebarPushSingle}</option>
+          <option value="config-priority">{t.docs.sidebarConfigPriority}</option>
         </optgroup>
         <optgroup label={t.docs.sidebarSdks}>
           <option value="sdk-dotnet">{t.docs.sidebarSdkDotnet}</option>
@@ -80,13 +98,9 @@ const sectionOrder = [
         <optgroup label={t.docs.sidebarGha}>
           <option value="gha-setup">{t.docs.sidebarGhaSetup}</option>
           <option value="gha-basic">{t.docs.sidebarGhaBasic}</option>
-          <option value="gha-multi-env">{t.docs.sidebarGhaMultiEnv}</option>
           <option value="gha-azure">{t.docs.sidebarGhaAzure}</option>
+          <option value="gha-multi-env">{t.docs.sidebarGhaMultiEnv}</option>
           <option value="gha-inputs">{t.docs.sidebarGhaInputs}</option>
-        </optgroup>
-        <optgroup label={t.docs.sidebarReference}>
-          <option value="config-priority">{t.docs.sidebarConfigPriority}</option>
-          <option value="azure-setup">{t.docs.sidebarAzureSetup}</option>
         </optgroup>
       </select>
     </div>
@@ -98,9 +112,9 @@ const sectionOrder = [
         <ul>
           <li><a href="#overview" data-section="overview">{t.docs.overviewTitle}</a></li>
           <li><a href="#requirements" data-section="requirements">{t.docs.sidebarRequirements}</a></li>
+          <li><a href="#aws-setup" data-section="aws-setup">{t.docs.sidebarAwsSetup}</a></li>
+          <li><a href="#azure-setup" data-section="azure-setup">{t.docs.sidebarAzureSetup}</a></li>
           <li><a href="#installation" data-section="installation">{t.docs.sidebarInstallation}</a></li>
-          <li><a href="#credentials" data-section="credentials">{t.docs.sidebarCredentials}</a></li>
-          <li><a href="#permissions" data-section="permissions">{t.docs.sidebarPermissions}</a></li>
         </ul>
 
         <p class="nav-section-title">{t.docs.sidebarCli}</p>
@@ -109,6 +123,7 @@ const sectionOrder = [
           <li><a href="#pull-command" data-section="pull-command">{t.docs.sidebarPullCommand}</a></li>
           <li><a href="#push-command" data-section="push-command">{t.docs.sidebarPushCommand}</a></li>
           <li><a href="#push-single" data-section="push-single">{t.docs.sidebarPushSingle}</a></li>
+          <li><a href="#config-priority" data-section="config-priority">{t.docs.sidebarConfigPriority}</a></li>
         </ul>
 
         <p class="nav-section-title">{t.docs.sidebarSdks}</p>
@@ -122,15 +137,9 @@ const sectionOrder = [
         <ul>
           <li><a href="#gha-setup" data-section="gha-setup">{t.docs.sidebarGhaSetup}</a></li>
           <li><a href="#gha-basic" data-section="gha-basic">{t.docs.sidebarGhaBasic}</a></li>
-          <li><a href="#gha-multi-env" data-section="gha-multi-env">{t.docs.sidebarGhaMultiEnv}</a></li>
           <li><a href="#gha-azure" data-section="gha-azure">{t.docs.sidebarGhaAzure}</a></li>
+          <li><a href="#gha-multi-env" data-section="gha-multi-env">{t.docs.sidebarGhaMultiEnv}</a></li>
           <li><a href="#gha-inputs" data-section="gha-inputs">{t.docs.sidebarGhaInputs}</a></li>
-        </ul>
-
-        <p class="nav-section-title">{t.docs.sidebarReference}</p>
-        <ul>
-          <li><a href="#config-priority" data-section="config-priority">{t.docs.sidebarConfigPriority}</a></li>
-          <li><a href="#azure-setup" data-section="azure-setup">{t.docs.sidebarAzureSetup}</a></li>
         </ul>
       </nav>
     </aside>
@@ -171,6 +180,94 @@ const sectionOrder = [
         </ul>
       </section>
 
+      <section id="aws-setup" class="docs-section">
+        <h2>{t.docs.awsSetupTitle}</h2>
+        <p>{t.docs.awsSetupIntro}</p>
+
+        <h3>{t.docs.awsSetupCredTitle}</h3>
+        <p>{t.docs.awsSetupCredDesc}</p>
+        <CodeBlock lang="bash" code="aws configure" />
+        <p>{t.docs.awsSetupCredProfile}</p>
+        <CodeBlock lang="bash" code="aws configure --profile dev-account" />
+
+        <h3>{t.docs.awsSetupPermTitle}</h3>
+        <p>{t.docs.awsSetupPermDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.awsSetupPermOperation}</th><th>{t.docs.awsSetupPermPermission}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>{t.docs.awsSetupPermPull}</td><td><code>ssm:GetParameter</code></td></tr>
+            <tr><td>{t.docs.awsSetupPermPush}</td><td><code>ssm:PutParameter</code></td></tr>
+          </tbody>
+        </table>
+        <p>{t.docs.awsSetupPolicyExample}</p>
+        <CodeBlock lang="json" code={`{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": ["ssm:GetParameter", "ssm:PutParameter"],
+    "Resource": "arn:aws:ssm:us-east-1:123456789012:parameter/myapp/*"
+  }]
+}`} />
+
+        <h3>{t.docs.awsSetupVerifyTitle}</h3>
+        <p>{t.docs.awsSetupVerifyDesc}</p>
+        <CodeBlock lang="bash" code={awsVerifyCmd} />
+        <p class="note">{t.docs.awsSetupVerifySuccess}</p>
+        <p>{t.docs.awsSetupVerifySdk}</p>
+        <CodeBlock lang="python" code={`from envilder import Envilder
+
+secrets = Envilder.load("test-map.json")
+print(secrets["HELLO"])  # world`} />
+      </section>
+
+      <section id="azure-setup" class="docs-section">
+        <h2>{t.docs.azureSetupTitle}</h2>
+        <p>{t.docs.azureSetupIntro}</p>
+
+        <h3>{t.docs.azureSetupCredTitle}</h3>
+        <p>{t.docs.azureSetupCredDesc}</p>
+        <CodeBlock lang="bash" code="az login" />
+        <p>{t.docs.azureSetupCredVault}</p>
+
+        <h3>{t.docs.azureSetupAccessTitle}</h3>
+        <p>{t.docs.azureSetupCheck}</p>
+        <CodeBlock lang="bash" code={azVaultShow} />
+        <ul class="docs-list">
+          <li><strong>{t.docs.azureRbacTrue}</strong></li>
+          <li><strong>{t.docs.azureRbacFalse}</strong></li>
+        </ul>
+
+        <h4>{t.docs.azureOptionA}</h4>
+        <CodeBlock lang="bash" code={azRbacAssign} />
+
+        <h4>{t.docs.azureOptionB}</h4>
+        <CodeBlock lang="bash" code={azVaultPolicy} />
+
+        <h3>{t.docs.azureSetupPermTitle}</h3>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.azureSetupPermOperation}</th><th>{t.docs.azureSetupPermPermission}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>{t.docs.azureSetupPermPull}</td><td><strong>Get</strong></td></tr>
+            <tr><td>{t.docs.azureSetupPermPush}</td><td><strong>Set</strong></td></tr>
+          </tbody>
+        </table>
+        <p class="note">{t.docs.azureSetupPullNote}</p>
+
+        <h3>{t.docs.azureSetupVerifyTitle}</h3>
+        <p>{t.docs.azureSetupVerifyDesc}</p>
+        <CodeBlock lang="bash" code={azureVerifyCmd} />
+        <p class="note">{t.docs.azureSetupVerifySuccess}</p>
+        <p>{t.docs.azureSetupVerifySdk}</p>
+        <CodeBlock lang="python" code={`from envilder import Envilder
+
+secrets = Envilder.load("test-map.json")
+print(secrets["HELLO"])  # world`} />
+      </section>
+
       <section id="installation" class="docs-section">
         <h2>{t.docs.installTitle}</h2>
         <div class="install-options">
@@ -187,63 +284,6 @@ const sectionOrder = [
             <CodeBlock lang="bash" code="npx envilder --help" />
           </div>
         </div>
-      </section>
-
-      <section id="credentials" class="docs-section">
-        <h2>{t.docs.credTitle}</h2>
-
-        <h3>{t.docs.credAwsTitle}</h3>
-        <p>{t.docs.credAwsDesc}</p>
-        <CodeBlock lang="bash" code="aws configure" />
-        <p>{t.docs.credAwsProfile}</p>
-        <CodeBlock lang="bash" code={`aws configure --profile dev-account
-
-# Then pass it to envilder
-envilder --map=envilder.json --envfile=.env --profile=dev-account`} />
-
-        <h3>{t.docs.credAzureTitle}</h3>
-        <p>{t.docs.credAzureDesc}</p>
-        <CodeBlock lang="bash" code="az login" />
-        <p>{t.docs.credAzureVault}</p>
-      </section>
-
-      <section id="permissions" class="docs-section">
-        <h2>{t.docs.permTitle}</h2>
-
-        <h3>{t.docs.permAwsTitle}</h3>
-        <p>{t.docs.permAwsDesc}</p>
-        <table class="docs-table">
-          <thead>
-            <tr><th>{t.docs.permOperation}</th><th>{t.docs.permPermission}</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>{t.docs.permPull}</td><td><code>ssm:GetParameter</code></td></tr>
-            <tr><td>{t.docs.permPush}</td><td><code>ssm:PutParameter</code></td></tr>
-          </tbody>
-        </table>
-        <p>{t.docs.permPolicyExample}</p>
-        <CodeBlock lang="json" code={`{
-  "Version": "2012-10-17",
-  "Statement": [{
-    "Effect": "Allow",
-    "Action": ["ssm:GetParameter", "ssm:PutParameter"],
-    "Resource": "arn:aws:ssm:us-east-1:123456789012:parameter/myapp/*"
-  }]
-}`} />
-
-        <h3>{t.docs.permAzureTitle}</h3>
-        <table class="docs-table">
-          <thead>
-            <tr><th>{t.docs.permOperation}</th><th>{t.docs.permPermission}</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>{t.docs.permPull}</td><td><strong>Get</strong></td></tr>
-            <tr><td>{t.docs.permPush}</td><td><strong>Set</strong></td></tr>
-          </tbody>
-        </table>
-        <p>{t.docs.permAzureRbac}</p>
-        <CodeBlock lang="bash" code={azRbacAssign} />
-        <p class="note">{t.docs.permAzurePullNote}</p>
       </section>
 
       <!-- ───── CLI ───── -->
@@ -505,6 +545,17 @@ envilder --push --provider=azure \\
         </table>
       </section>
 
+      <section id="config-priority" class="docs-section">
+        <h2>{t.docs.configPriorityTitle}</h2>
+        <p>{t.docs.configPriorityDesc}</p>
+        <div class="priority-stack">
+          <div class="priority-item priority-1">1. {t.docs.configPriority1}</div>
+          <div class="priority-item priority-2">2. {t.docs.configPriority2}</div>
+          <div class="priority-item priority-3">3. {t.docs.configPriority3}</div>
+        </div>
+        <p>{t.docs.configPriorityExplain}</p>
+      </section>
+
       <!-- ───── SDKs ───── -->
 
       <section id="sdk-dotnet" class="docs-section">
@@ -756,6 +807,47 @@ jobs:
       - run: pnpm deploy`} />
       </section>
 
+      <section id="gha-azure" class="docs-section">
+        <h2>{t.docs.ghaAzureTitle}</h2>
+        <CodeBlock lang="yaml" filename=".github/workflows/deploy-azure.yml" code={`name: Deploy with Azure Key Vault
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: \${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: \${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: \${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Pull Secrets from Azure Key Vault
+        uses: macalbert/envilder/github-action@v0
+        with:
+          map-file: config/envilder.json
+          env-file: .env
+          provider: azure
+          vault-url: https://my-vault.vault.azure.net
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22.x"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm deploy`} />
+      </section>
+
       <section id="gha-multi-env" class="docs-section">
         <h2>{t.docs.ghaMultiEnvTitle}</h2>
         <CodeBlock lang="yaml" filename=".github/workflows/deploy-env.yml" code={`name: Deploy to Environment
@@ -799,47 +891,6 @@ jobs:
       - run: pnpm deploy`} />
       </section>
 
-      <section id="gha-azure" class="docs-section">
-        <h2>{t.docs.ghaAzureTitle}</h2>
-        <CodeBlock lang="yaml" filename=".github/workflows/deploy-azure.yml" code={`name: Deploy with Azure Key Vault
-
-on:
-  push:
-    branches: [main]
-
-permissions:
-  id-token: write
-  contents: read
-
-jobs:
-  deploy:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          client-id: \${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: \${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: \${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Pull Secrets from Azure Key Vault
-        uses: macalbert/envilder/github-action@v0
-        with:
-          map-file: config/envilder.json
-          env-file: .env
-          provider: azure
-          vault-url: https://my-vault.vault.azure.net
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "22.x"
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm deploy`} />
-      </section>
-
       <section id="gha-inputs" class="docs-section">
         <h2>{t.docs.ghaInputsTitle}</h2>
 
@@ -865,36 +916,6 @@ jobs:
             <tr><td><code>env-file-path</code></td><td>{t.docs.ghaOutputEnvPath}</td></tr>
           </tbody>
         </table>
-      </section>
-
-      <!-- ───── REFERENCE ───── -->
-
-      <section id="config-priority" class="docs-section">
-        <h2>{t.docs.configPriorityTitle}</h2>
-        <p>{t.docs.configPriorityDesc}</p>
-        <div class="priority-stack">
-          <div class="priority-item priority-1">1. {t.docs.configPriority1}</div>
-          <div class="priority-item priority-2">2. {t.docs.configPriority2}</div>
-          <div class="priority-item priority-3">3. {t.docs.configPriority3}</div>
-        </div>
-        <p>{t.docs.configPriorityExplain}</p>
-      </section>
-
-      <section id="azure-setup" class="docs-section">
-        <h2>{t.docs.azureSetupTitle}</h2>
-        <p>{t.docs.azureSetupCheck}</p>
-        <CodeBlock lang="bash" code={azVaultShow} />
-        <ul class="docs-list">
-          <li><code>true</code> → <strong>{t.docs.azureRbacTrue}</strong></li>
-          <li><code>false</code> / <code>null</code> → <strong>{t.docs.azureRbacFalse}</strong></li>
-        </ul>
-
-        <h3>{t.docs.azureOptionA}</h3>
-        <CodeBlock lang="bash" code={azRbacAssign} />
-
-        <h3>{t.docs.azureOptionB}</h3>
-        <CodeBlock lang="bash" code={azVaultPolicy} />
-        <p class="note">{t.docs.azureAccessNote}</p>
       </section>
 
       <!-- Prev/Next pager -->
