@@ -5,8 +5,8 @@
 </p>
 
 <p align="center">
-  <b>One model. Your secrets. Every runtime.</b><br>
-  <span>Define secret mappings once. Resolve them consistently from AWS SSM or Azure Key Vault.</span><br>
+  <b>One secret mapping for local dev, CI/CD, and runtime.</b><br>
+  <span>Define secrets once in <code>envilder.json</code>. Resolve them consistently from AWS SSM or Azure Key Vault.</span><br>
   <a href="https://envilder.com"><strong>Website & docs → envilder.com</strong></a>
 </p>
 
@@ -22,19 +22,17 @@ Your new developer joins the team. They need environment variables to run the ap
 What happens next? Someone sends API keys over Slack. Someone else digs up a wiki page
 with outdated credentials. Forty-five minutes later, their `.env` file is "probably correct".
 
-**Envilder fixes this in one command.**
+**Envilder fixes this with one versioned mapping contract.**
 
 You create a JSON mapping between variable names and cloud secret paths. Envilder resolves
 them from AWS SSM or Azure Key Vault. The same mapping file works in local dev (CLI),
 CI/CD (GitHub Action), and application startup (runtime SDKs).
 
 ```bash
-envilder --map=envilder.json --envfile=.env
+npx envilder --map=envilder.json --envfile=.env
 ```
 
-No SaaS middleman. No vendor lock-in. Secrets stay in your cloud.
-
----
+No SaaS middleman. No duplicated config. No `.env` drift. Secrets stay in your cloud.
 
 ## The problem
 
@@ -43,44 +41,51 @@ No SaaS middleman. No vendor lock-in. Secrets stay in your cloud.
   machine. It's slow, error-prone, and insecure.
 - **Every environment has its own workflow.** Local dev reads `.env` files. CI/CD uses vault
   integrations. Production has its own method. Same app, three different secret workflows.
-- **No single source of truth.** Without a versioned contract, dev/staging/production configs
-  drift apart. Deployments break. Nobody knows which config is correct.
+- **No single mapping contract.** Your cloud provider may be the source of truth for secret
+  values, but each environment still needs to know how application variables map to those
+  secrets. Without a versioned contract, dev, staging, and production configurations drift apart.
 
 ## How Envilder solves it
 
-- 📋 **One mapping file for everything.** A single `envilder.json` defines what secrets your app
-  needs. Git-versioned, PR-reviewable, the same across every environment.
+- 📋 **One mapping contract for everything.** A single `envilder.json` defines what secrets your app
+  needs and where they live. Git-versioned, PR-reviewable, and reused across environments.
 - ⚡ **Works everywhere your code runs.** CLI for local dev, GitHub Action for CI/CD, runtime SDKs
   for application startup. Same file, same result.
+- 🔄 **Rotate secrets without config drift.** Keep application-facing variable names stable while
+  rotating real secret values in AWS SSM or Azure Key Vault. Local dev, CI/CD, and runtime keep
+  using the same mapping contract.
 - 🛡️ **Your cloud, zero infrastructure.** Secrets stay in AWS SSM or Azure Key Vault. No SaaS
   proxy, no extra servers, no data to migrate.
-
----
 
 ## ⚙️ Features
 
 | Feature | Description |
 |---------|-------------|
-| 📋 **Declarative Mapping** | One JSON file defines all secrets. Git-versioned, PR-reviewable, diff-able |
-| ☁️ **Multi-Provider** | AWS SSM + Azure Key Vault. No vendor lock-in |
+| 📋 **Declarative Mapping** | One JSON file defines how application variables map to cloud secrets. Git-versioned, PR-reviewable, and diff-able |
+| ☁️ **Cloud-native Providers** | AWS SSM and Azure Key Vault today |
 | 🔌 **Runtime SDKs** | Load secrets into memory at app startup: [.NET](./src/sdks/dotnet/README.md), [Python](./src/sdks/python/README.md), [Node.js](./src/sdks/nodejs/README.md). No `.env` on disk |
 | ⚙️ **GitHub Action** | Pull secrets in CI/CD. Same mapping, zero manual config |
-| 🔄 **Bidirectional Sync** | Pull secrets to `.env` or push values back to the cloud |
+| 🔄 **Pull & Controlled Push** | Pull secrets to `.env`, or intentionally push local values to your cloud provider when bootstrapping or rotating |
 | 🧱 **Zero Infrastructure** | No servers, no proxies, no SaaS. Uses cloud services you already have |
-
----
 
 ## 🚀 Quick Start
 
-### 🎥 See it in action
+### 1. Run with npx
 
-Watch how easy it is to automate your .env management in less than 1 minute:  
+```bash
+npx envilder --version
+```
 
-![Watch the video](https://github.com/user-attachments/assets/9f194143-117d-49f3-a6fb-f400040ea514)
+Or install globally:
 
-### 🏁 Get Started (2 steps)
+```bash
+npm install -g envilder
+```
 
-**1. Create a mapping file** (`envilder.json`):
+> **Requirements:** Node.js v22.12+. AWS CLI or Azure CLI configured.
+> See [full requirements](docs/requirements-installation.md).
+
+### 2. Create a mapping file (`envilder.json`)
 
 ```json
 {
@@ -90,7 +95,7 @@ Watch how easy it is to automate your .env management in less than 1 minute:
 }
 ```
 
-**2. Generate your `.env` file:**
+### 3. Generate your `.env` file
 
 ```bash
 npx envilder --map=envilder.json --envfile=.env
@@ -102,63 +107,11 @@ Add `.env` to `.gitignore`. The mapping file is versioned and reviewable in PRs.
 > 💡 Using Azure Key Vault? Add a `$config` section to your mapping file.
 > See [Mapping File Format](#️-mapping-file-format) below.
 
-### 💾 Installation
+### 🎥 See it in action
 
-```bash
-npm install -g envilder
-```
+Watch how easy it is to automate your `.env` management in less than 1 minute:
 
-> 💡 **No install needed?** `npx envilder` works out of the box.
->
-> **Requirements:** Node.js v22.12+. AWS CLI or Azure CLI configured.
-> See [full requirements](docs/requirements-installation.md).
-
-### 🤖 GitHub Action
-
-**AWS SSM (default):**
-
-```yaml
-- name: Configure AWS Credentials
-  uses: aws-actions/configure-aws-credentials@v5
-  with:
-    role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-    aws-region: us-east-1
-
-- name: Pull secrets from AWS SSM
-  uses: macalbert/envilder/github-action@v0.8.0
-  with:
-    map-file: envilder.json
-    env-file: .env
-```
-
-**Azure Key Vault:**
-
-```yaml
-- name: Azure Login
-  uses: azure/login@v2
-  with:
-    client-id: ${{ secrets.AZURE_CLIENT_ID }}
-    tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-- name: Pull secrets from Azure Key Vault
-  uses: macalbert/envilder/github-action@v0.8.0
-  with:
-    map-file: envilder.json
-    env-file: .env
-    provider: azure
-    vault-url: ${{ secrets.AZURE_KEY_VAULT_URL }}
-```
-
-📖 **[Full GitHub Action docs](./github-action/README.md)**
-
-### 📚 More resources
-
-- [📖 Full Documentation](https://envilder.com): the complete guide at envilder.com
-- [Push Command Guide](docs/push-command.md)
-- [Pull Command Guide](docs/pull-command.md)
-
----
+![Watch the video](https://github.com/user-attachments/assets/9f194143-117d-49f3-a6fb-f400040ea514)
 
 ## 🗺️ Mapping File Format
 
@@ -248,8 +201,6 @@ envilder --map=envilder.json --envfile=.env
 # Overrides provider and vault URL from the map file
 envilder --provider=azure --vault-url=https://other-vault.vault.azure.net --map=envilder.json --envfile=.env
 ```
-
----
 
 ## 🧩 Runtime SDKs
 
@@ -345,13 +296,56 @@ const secrets = await Envilder.fromMapFile('envilder.json')
 
 📖 **[Full Node.js SDK docs](./src/sdks/nodejs/README.md)** · 💡 **[Examples](./examples/sdk/nodejs/)**
 
----
+## 🤖 GitHub Action
+
+**AWS SSM (default):**
+
+```yaml
+- name: Configure AWS Credentials
+  uses: aws-actions/configure-aws-credentials@v5
+  with:
+    role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+    aws-region: us-east-1
+
+- name: Pull secrets from AWS SSM
+  uses: macalbert/envilder/github-action@v0.11.0
+  with:
+    map-file: envilder.json
+    env-file: .env
+```
+
+**Azure Key Vault:**
+
+```yaml
+- name: Azure Login
+  uses: azure/login@v2
+  with:
+    client-id: ${{ secrets.AZURE_CLIENT_ID }}
+    tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+- name: Pull secrets from Azure Key Vault
+  uses: macalbert/envilder/github-action@v0.11.0
+  with:
+    map-file: envilder.json
+    env-file: .env
+    provider: azure
+    vault-url: ${{ secrets.AZURE_KEY_VAULT_URL }}
+```
+
+📖 **[Full GitHub Action docs](./github-action/README.md)**
+
+### 📚 More resources
+
+- [📖 Full Documentation](https://envilder.com): the complete guide at envilder.com
+- [Push Command Guide](docs/push-command.md)
+- [Pull Command Guide](docs/pull-command.md)
 
 ## 🛠️ How it works
 
 ```mermaid
 graph LR
-    A["Mapping Model (envilder.json)"] --> B[Envilder]:::core
+    A["Mapping Contract<br/>(envilder.json)"] --> B[Envilder]:::core
     B --> C["CLI → .env file"]
     B --> D["GitHub Action → CI/CD"]
     B --> E["SDK → app memory"]
@@ -364,66 +358,40 @@ graph LR
 1. **Define**: create an `envilder.json` mapping env var names to cloud secret paths
 2. **Resolve**: Envilder fetches each secret from your cloud vault
 3. **Deliver**: secrets arrive as a `.env` file (CLI/GHA) or in-memory (SDKs)
-4. **Push**: rotate or add secrets from your local environment back to the cloud
+4. **Rotate**: update secret values in your cloud provider while keeping the same
+   application-facing mapping
+5. **Bootstrap**: optionally push local values to your cloud provider when intentionally
+   setting up or rotating secrets
 
----
+## What Envilder is not
 
-## 🔍 Envilder vs. Alternatives
+Envilder is not a secrets manager. It does not replace Vault, Infisical, or Doppler.
 
-Envilder is not a secrets manager. It is a **configuration resolution layer** that reads from your
-existing cloud vault and delivers secrets where they're needed (`.env` file, CI/CD, app memory).
-No SaaS backend. No extra servers.
+It also does not replace AWS SSM or Azure Key Vault — it works on top of them. Envilder does not
+store secrets, proxy requests, or introduce a SaaS control plane.
 
-| | Envilder | dotenvx | Infisical |
-|-|----------|---------|-----------|
-| **Source of truth** | Your cloud (SSM / Key Vault) | Encrypted `.env` in git | Infisical backend |
-| **Declarative mapping** | ✅ JSON file | ❌ | ❌ |
-| **Multi-cloud** | ✅ AWS + Azure | ❌ | ✅ |
-| **Runtime SDKs** | ✅ .NET, Python, Node.js | ✅ Node.js | ✅ 6+ languages |
-| **Requires SaaS** | ❌ | ❌ | Optional |
-| **Infrastructure** | None | None | Server required |
+Your cloud provider remains the source of truth. Envilder provides the mapping and resolution
+layer that makes those secrets usable consistently across local development, CI/CD, and runtime.
 
-> **When Envilder shines:** you already have secrets in AWS SSM or Azure Key Vault and want
-> a versioned mapping file that resolves them everywhere: local dev, CI/CD, and app runtime.
-> No data to migrate. No servers to deploy. No vendor to depend on.
-
-For detailed tool-by-tool comparison including
-[chamber](https://github.com/segmentio/chamber) and
-[aws-vault](https://github.com/99designs/aws-vault),
-see [envilder.com](https://envilder.com).
-
----
+Use Envilder when your secrets already live in your cloud provider and you want one versioned
+`envilder.json` mapping contract everywhere your code runs.
 
 ## 🏁 What's Next
 
-Envilder already covers the full dev-to-production lifecycle with CLI, GitHub Action,
-and runtime SDKs for .NET, Python, and Node.js. Here's what's coming:
+Envilder already covers CLI, GitHub Action, and runtime SDKs for .NET, Python, and Node.js.
 
-| Status | Feature |
-|--------|---------|
-| ✅ | Pull & Push: bidirectional sync between `.env` and cloud vault |
-| ✅ | Multi-provider: AWS SSM + Azure Key Vault |
-| ✅ | GitHub Action for CI/CD |
-| ✅ | .NET, Python, and Node.js SDKs |
-| 🚧 | Go and Java SDKs |
-| 🚧 | GCP Secret Manager |
-| 🚧 | Exec mode (inject secrets without writing to disk) |
+Next priorities include Go and Java SDKs, GCP Secret Manager, HashiCorp Vault, and exec mode.
 
-👉 **[Full roadmap with priorities](./ROADMAP.md)**
-
----
+See the [full roadmap](./ROADMAP.md).
 
 ## 🤝 Contributing
 
-All help is welcome! PRs, issues, ideas.
+All contributions are welcome: PRs, issues, docs, examples, and feedback from real usage.
 
-- 🔧 Use our [Pull Request Template](.github/pull_request_template.md)
-- 🧪 Add tests where possible
-- 💬 Feedback and discussion welcome
-- 🏗️ Check our [Architecture Documentation](./docs/architecture/README.md)
-- 🔒 Review our [Security Policy](./docs/SECURITY.md)
+Good first contributions include trying Envilder with an existing AWS SSM or Azure Key Vault
+setup, improving examples, testing the GitHub Action, or reviewing SDK ergonomics.
 
----
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## 💜 Sponsors
 
@@ -447,8 +415,6 @@ All help is welcome! PRs, issues, ideas.
     AWS Open Source Credits Program
   </a>.
 </p>
-
----
 
 ## 📜 License
 
