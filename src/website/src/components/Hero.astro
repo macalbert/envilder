@@ -8,17 +8,11 @@ interface Props {
 
 const { lang = 'en' } = Astro.props;
 const t = useTranslations(lang);
-const version = `v${__APP_VERSION__}`;
 ---
 
 <section class="hero scanlines" id="hero">
   <div class="container hero-container">
     <div class="hero-content">
-      <div class="hero-badges">
-        <span class="badge badge-primary">{version}</span>
-        <span class="badge">{t.hero.openSource}</span>
-      </div>
-
       <h1 class="hero-title">
         {t.hero.title1}<br />
         {t.hero.title2}<br />
@@ -145,12 +139,6 @@ const version = `v${__APP_VERSION__}`;
     display: flex;
     flex-direction: column;
     gap: var(--space-lg);
-  }
-
-  .hero-badges {
-    display: flex;
-    gap: var(--space-sm);
-    flex-wrap: wrap;
   }
 
   .hero-title {

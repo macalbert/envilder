@@ -31,7 +31,6 @@ export const en: Translations = {
     ariaTheme: 'Theme',
   },
   hero: {
-    openSource: 'Open Source · MIT · AWS SSM · Azure Key Vault',
     title1: 'Standardize how',
     title2: 'your apps consume',
     titleAccent: 'secrets.',
@@ -84,53 +83,6 @@ export const en: Translations = {
           'No single source of truth for what secrets an app needs. Dev, staging, and production desync. Deployments fail. Nobody knows which config is correct.',
       },
     ],
-    arrowText: '▼ envilder fixes this ▼',
-    solutions: [
-      {
-        icon: '🛡️',
-        title: 'One model, one source of truth',
-        description:
-          'A single mapping file defines what secrets your app needs. Git-versioned. PR-reviewable. The same contract across every environment.',
-      },
-      {
-        icon: '⚡',
-        title: 'Consistent resolution everywhere',
-        description:
-          'CLI for local dev, GitHub Action for CI/CD, runtime SDKs for app startup. Same mapping, same behavior, same result.',
-      },
-      {
-        icon: '🤖',
-        title: 'Your cloud, no middleman',
-        description:
-          'AWS SSM, Azure Key Vault, or GCP. No SaaS proxy. Secrets stay in your infrastructure. Native IAM/RBAC access control.',
-      },
-    ],
-  },
-  beforeAfter: {
-    title: 'Without a standard, ',
-    titleAccent: 'every project drifts.',
-    subtitle:
-      'Envilder turns scattered secret-loading conventions into one versioned contract that works across development, pipelines, and runtime.',
-    columnWithout: 'Without a standard',
-    columnWith: 'With Envilder',
-    rows: [
-      {
-        without: 'Developers copy .env files or follow outdated READMEs.',
-        with: 'One contract declares what secrets the app needs.',
-      },
-      {
-        without: 'CI/CD has its own secret names and integration.',
-        with: 'The same contract resolves in GitHub Actions.',
-      },
-      {
-        without: 'Each app implements its own loading logic.',
-        with: 'Runtime SDKs load from the same contract.',
-      },
-      {
-        without: 'The real config is scattered across tribal knowledge.',
-        with: 'The contract is in Git, reviewable in PRs.',
-      },
-    ],
   },
   howItWorks: {
     title: 'How it ',
@@ -176,64 +128,67 @@ export const en: Translations = {
     pushTerminalPushed3: '✔ Pushed SECRET_TOKEN → /my-app/prod/secret-token',
   },
   features: {
-    title: 'Built for ',
-    titleAccent: 'real teams',
+    title: 'Why ',
+    titleAccent: 'Envilder?',
     subtitle:
-      'A configuration resolution system designed for security, consistency, and multi-runtime execution.',
-    features: [
-      {
-        icon: '📋',
-        title: 'Single Mapping Model',
-        description:
-          'One JSON contract defines all secrets. Git-versioned, PR-reviewable, diff-able across environments. The model is the product.',
-      },
-      {
-        icon: '🔌',
-        title: 'Runtime SDKs',
-        description:
-          'Load secrets directly into memory at app startup: Python, .NET, Node.js, Go, Java. No .env files written to disk. No secrets left behind.',
-      },
-      {
-        icon: '☁️',
-        title: 'Multi-Provider',
-        description:
-          'AWS SSM, Azure Key Vault, and GCP Secret Manager (coming soon). Your cloud, your rules. No vendor lock-in.',
-      },
-      {
-        icon: '⚙️',
-        title: 'GitHub Action',
-        description:
-          'Pull secrets in CI/CD workflows. Same mapping, zero manual intervention. Drop-in integration.',
-      },
-      {
-        icon: '🔄',
-        title: 'Bidirectional Sync',
-        description:
-          'Pull secrets to .env files or push .env values back to your cloud provider. Full round-trip support via CLI.',
-      },
-      {
-        icon: '🔒',
-        title: 'IAM & RBAC Access',
-        description:
-          'Native cloud access control. AWS IAM policies or Azure RBAC define who reads what. No extra auth layer.',
-      },
-      {
-        icon: '📊',
-        title: 'Fully Auditable',
-        description:
-          'Every read and write is logged in AWS CloudTrail or Azure Monitor. Complete trace of who accessed what and when.',
-      },
+      'Envilder is a resolution layer over your existing secret manager. Secrets stay in your cloud — the JSON mapping is just the contract that keeps every environment consistent.',
+    highlights: [
       {
         icon: '🧱',
         title: 'Zero Infrastructure',
         description:
-          'No servers, no proxies, no SaaS. Built on native cloud services you already use and pay for.',
+          'No servers, no proxies, no SaaS middleman. Built on AWS SSM and Azure Key Vault — services you already use and pay for.',
+      },
+      {
+        icon: '📋',
+        title: 'One File, All Secrets',
+        description:
+          'A single JSON contract defines every secret for every environment. Git-versioned, PR-reviewable, diff-able. Your team reviews secret changes in the same PR as the code.',
+      },
+      {
+        icon: '🔄',
+        title: 'Safe Secret Rotation',
+        description:
+          'Rotate values in AWS SSM or Azure Key Vault. Every consumer — local, CI/CD, and runtime — resolves the new value automatically. No .env rewrites, no pipeline changes.',
+      },
+      {
+        icon: '☁️',
+        title: 'Multi-Cloud, No Lock-in',
+        description:
+          'AWS SSM, Azure Key Vault, GCP Secret Manager (coming soon). Switch providers without changing your app code. Your cloud, your rules.',
+      },
+    ],
+    extrasTitle: 'Also included',
+    extras: [
+      {
+        icon: '⚙️',
+        title: 'GitHub Action',
+        description: 'Pull secrets in CI/CD workflows. Same mapping, zero manual intervention.',
+      },
+      {
+        icon: '🔄',
+        title: 'Bidirectional Sync',
+        description: 'Pull to .env or push .env values back to your cloud provider via CLI.',
+      },
+      {
+        icon: '🔌',
+        title: 'Secrets Never Touch Disk',
+        description: 'Runtime SDKs load secrets directly into memory at app startup. No .env files written to disk.',
+      },
+      {
+        icon: '🔒',
+        title: 'Native IAM & RBAC',
+        description: 'AWS IAM policies or Azure RBAC — no extra auth layer needed.',
+      },
+      {
+        icon: '📊',
+        title: 'Full Audit Trail',
+        description: 'Every access logged in CloudTrail or Azure Monitor automatically.',
       },
       {
         icon: '👤',
         title: 'AWS Profile Support',
-        description:
-          'Multi-account setups? Use --profile to switch between AWS CLI profiles. Perfect for multi-stage environments.',
+        description: 'Switch between AWS CLI profiles for multi-account setups.',
       },
     ],
   },
@@ -503,22 +458,20 @@ export const en: Translations = {
     sidebarGettingStarted: 'Getting started',
     sidebarRequirements: 'Requirements',
     sidebarInstallation: 'Installation',
-    sidebarCredentials: 'Cloud credentials',
-    sidebarPermissions: 'IAM permissions',
+    sidebarAwsSetup: 'AWS setup',
+    sidebarAzureSetup: 'Azure setup',
     sidebarCli: 'CLI',
     sidebarMappingFile: 'Mapping file',
     sidebarPullCommand: 'Pull command',
     sidebarPushCommand: 'Push command',
     sidebarPushSingle: 'Push single',
+    sidebarConfigPriority: 'Config priority',
     sidebarGha: 'GitHub Action',
     sidebarGhaSetup: 'Setup',
-    sidebarGhaBasic: 'Basic example',
-    sidebarGhaMultiEnv: 'Multi-environment',
+    sidebarGhaBasic: 'AWS example',
     sidebarGhaAzure: 'Azure example',
+    sidebarGhaMultiEnv: 'Multi-environment',
     sidebarGhaInputs: 'Inputs & outputs',
-    sidebarReference: 'Reference',
-    sidebarConfigPriority: 'Config priority',
-    sidebarAzureSetup: 'Azure setup',
     overviewTitle: 'What is Envilder?',
     overviewDesc:
       'Envilder is a model-driven configuration resolution system. You define a JSON mapping between variable names and cloud secret paths, and Envilder resolves them consistently: via the CLI for local dev, the GitHub Action for CI/CD, or runtime SDKs for application startup. It works with AWS SSM Parameter Store and Azure Key Vault.',
@@ -535,27 +488,54 @@ export const en: Translations = {
     reqDownload: 'Download',
     reqInstallGuide: 'Install guide',
     installTitle: 'Installation',
-    credTitle: 'Cloud credentials',
-    credAwsTitle: 'AWS (default)',
-    credAwsDesc:
+    // AWS setup
+    awsSetupTitle: 'AWS setup',
+    awsSetupIntro:
+      'Everything you need to use Envilder with AWS SSM Parameter Store.',
+    awsSetupCredTitle: '1. Configure credentials',
+    awsSetupCredDesc:
       'Envilder uses your AWS CLI credentials. Set up the default profile:',
-    credAwsProfile: 'Or use a named profile:',
-    credAzureTitle: 'Azure Key Vault',
-    credAzureDesc: 'Envilder uses Azure Default Credentials. Log in with:',
-    credAzureVault:
-      'Provide the vault URL via $config in your map file or the --vault-url flag.',
-    permTitle: 'IAM permissions',
-    permAwsTitle: 'AWS',
-    permAwsDesc: 'Your IAM user or role needs:',
-    permOperation: 'Operation',
-    permPermission: 'Permission',
-    permPull: 'Pull',
-    permPush: 'Push',
-    permPolicyExample: 'Example IAM policy:',
-    permAzureTitle: 'Azure',
-    permAzureRbac: 'Recommended: assign Key Vault Secrets Officer via RBAC:',
-    permAzurePullNote:
-      'For pull-only access, Key Vault Secrets User is sufficient.',
+    awsSetupCredProfile: 'Or use a named profile for multi-account setups:',
+    awsSetupPermTitle: '2. Grant IAM permissions',
+    awsSetupPermDesc: 'Your IAM user or role needs access to SSM parameters:',
+    awsSetupPermOperation: 'Operation',
+    awsSetupPermPermission: 'Permission',
+    awsSetupPermPull: 'Pull',
+    awsSetupPermPush: 'Push',
+    awsSetupPolicyExample: 'Example IAM policy (scope to your path prefix):',
+    awsSetupVerifyTitle: '3. Create a test parameter and verify',
+    awsSetupVerifyDesc:
+      'Create a parameter in SSM, then pull it with Envilder to confirm everything works:',
+    awsSetupVerifySuccess:
+      'If you see ✔ Fetched, your AWS setup is complete.',
+    awsSetupVerifySdk: 'Or load secrets directly from your app with the Python SDK:',
+    // Azure setup
+    azureSetupTitle: 'Azure setup',
+    azureSetupIntro:
+      'Everything you need to use Envilder with Azure Key Vault.',
+    azureSetupCredTitle: '1. Authenticate with Azure',
+    azureSetupCredDesc: 'Envilder uses Azure Default Credentials. Log in with:',
+    azureSetupCredVault:
+      'Provide the vault URL via $config in your map file or the --vault-url CLI flag.',
+    azureSetupAccessTitle: '2. Configure vault access',
+    azureSetupCheck: 'Check which access model your vault uses:',
+    azureRbacTrue: 'true → Azure RBAC (recommended)',
+    azureRbacFalse: 'false / null → Vault Access Policy (classic)',
+    azureOptionA: 'Option A: Azure RBAC (recommended)',
+    azureOptionB: 'Option B: Vault Access Policy',
+    azureSetupPermTitle: '3. Required permissions',
+    azureSetupPermOperation: 'Operation',
+    azureSetupPermPermission: 'Permission',
+    azureSetupPermPull: 'Pull',
+    azureSetupPermPush: 'Push',
+    azureSetupPullNote:
+      'For pull-only access, Key Vault Secrets User role is sufficient.',
+    azureSetupVerifyTitle: '4. Create a test secret and verify',
+    azureSetupVerifyDesc:
+      'Create a secret in Key Vault, then pull it with Envilder to confirm everything works:',
+    azureSetupVerifySuccess:
+      'If you see ✔ Fetched, your Azure setup is complete.',
+    azureSetupVerifySdk: 'Or load secrets directly from your app with the Python SDK:',
     mapTitle: 'Mapping file',
     mapIntro:
       "The mapping file (envilder.json) is the core of Envilder. It's a JSON file that maps environment variable names (keys) to secret paths (values) in your cloud provider.",
@@ -694,14 +674,6 @@ export const en: Translations = {
     configPriority3: 'Defaults (AWS)',
     configPriorityExplain:
       'This means --provider=azure on the CLI will override "provider": "aws" in $config.',
-    azureSetupTitle: 'Azure Key Vault setup',
-    azureSetupCheck: 'Check which access model your vault uses:',
-    azureRbacTrue: 'true → Azure RBAC (recommended)',
-    azureRbacFalse: 'false / null → Vault Access Policy (classic)',
-    azureOptionA: 'Option A: Azure RBAC (recommended)',
-    azureOptionB: 'Option B: Vault Access Policy',
-    azureAccessNote:
-      'For pull-only access, get list is enough. Add set for push.',
     // SDKs
     sidebarSdks: 'SDKs',
     sidebarSdkDotnet: '.NET SDK',

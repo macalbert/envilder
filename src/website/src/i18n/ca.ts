@@ -31,7 +31,6 @@ export const ca: Translations = {
     ariaTheme: 'Tema',
   },
   hero: {
-    openSource: 'Codi obert · MIT · AWS SSM · Azure Key Vault',
     title1: 'Estandarditza com',
     title2: 'les teves apps consumeixen',
     titleAccent: 'secrets.',
@@ -84,54 +83,6 @@ export const ca: Translations = {
           'Sense una font única de veritat sobre quins secrets necessita una app. Dev, staging i producció es desincronitzen. Els desplegaments fallen. Ningú sap quina config és la correcta.',
       },
     ],
-    arrowText: '▼ envilder ho soluciona ▼',
-    solutions: [
-      {
-        icon: '🛡️',
-        title: 'Un model, una font de veritat',
-        description:
-          'Un únic fitxer de mapeig defineix quins secrets necessita la teva app. Versionat a Git. Revisable en PRs. El mateix contracte a cada entorn.',
-      },
-      {
-        icon: '⚡',
-        title: 'Resolució consistent a tot arreu',
-        description:
-          "CLI per a desenvolupament local, GitHub Action per a CI/CD, SDKs de runtime per a l'inici de l'app. Mateix mapeig, mateix comportament, mateix resultat.",
-      },
-      {
-        icon: '🤖',
-        title: 'El teu núvol, sense intermediaris',
-        description:
-          "AWS SSM, Azure Key Vault o GCP. Sense proxy SaaS. Els secrets es queden a la teva infraestructura. Control d'accés natiu IAM/RBAC.",
-      },
-    ],
-  },
-  beforeAfter: {
-    title: 'Sense un estàndard, ',
-    titleAccent: 'cada projecte deriva.',
-    subtitle:
-      'Envilder converteix convencions disperses de càrrega de secrets en un contracte versionat que funciona en desenvolupament, pipelines i runtime.',
-    columnWithout: 'Sense un estàndard',
-    columnWith: 'Amb Envilder',
-    rows: [
-      {
-        without:
-          'Els developers copien fitxers .env o segueixen READMEs desactualitzats.',
-        with: "Un contracte declara quins secrets necessita l'aplicació.",
-      },
-      {
-        without: 'CI/CD té els seus propis noms de secrets i integracions.',
-        with: 'El mateix contracte es resol a GitHub Actions.',
-      },
-      {
-        without: 'Cada app implementa la seva pròpia lògica de càrrega.',
-        with: 'Els SDKs de runtime carreguen des del mateix contracte.',
-      },
-      {
-        without: 'La configuració real queda dispersa en coneixement tribal.',
-        with: 'El contracte viu a Git i es pot revisar en PRs.',
-      },
-    ],
   },
   howItWorks: {
     title: 'Com ',
@@ -177,64 +128,67 @@ export const ca: Translations = {
     pushTerminalPushed3: '✔ Pujat SECRET_TOKEN → /my-app/prod/secret-token',
   },
   features: {
-    title: 'Fet per a ',
-    titleAccent: 'equips reals',
+    title: 'Per què ',
+    titleAccent: 'Envilder?',
     subtitle:
-      'Un sistema de resolució de configuració dissenyat per a seguretat, consistència i execució multi-runtime.',
-    features: [
-      {
-        icon: '📋',
-        title: 'Model de mapeig únic',
-        description:
-          'Un contracte JSON defineix tots els secrets. Versionat a Git, revisable en PRs, comparable entre entorns. El model és el producte.',
-      },
-      {
-        icon: '🔌',
-        title: 'SDKs de runtime',
-        description:
-          "Carrega secrets directament a memòria a l'inici de l'app: Python, .NET, Node.js, Go, Java. Sense fitxers .env a disc. Sense secrets residuals.",
-      },
-      {
-        icon: '☁️',
-        title: 'Multi-Proveïdor',
-        description:
-          'AWS SSM, Azure Key Vault i GCP Secret Manager (pròximament). El teu núvol, les teves regles. Sense dependència de proveïdor.',
-      },
-      {
-        icon: '⚙️',
-        title: 'GitHub Action',
-        description:
-          'Obté secrets en workflows CI/CD. Mateix mapeig, zero intervenció manual. Integració directa.',
-      },
-      {
-        icon: '🔄',
-        title: 'Sincronització bidireccional',
-        description:
-          "Obté secrets a fitxers .env o puja valors .env al teu proveïdor al núvol. Suport complet d'anada i tornada via CLI.",
-      },
-      {
-        icon: '🔒',
-        title: 'Accés IAM i RBAC',
-        description:
-          "Control d'accés natiu del núvol. Les polítiques IAM d'AWS o RBAC d'Azure defineixen qui llegeix què. Sense capa d'auth extra.",
-      },
-      {
-        icon: '📊',
-        title: 'Totalment auditable',
-        description:
-          'Cada lectura i escriptura queda registrada a AWS CloudTrail o Azure Monitor. Traçabilitat completa de qui ha accedit a què i quan.',
-      },
+      'Envilder és una capa de resolució sobre el teu gestor de secrets existent. Els secrets es queden al teu núvol — el mapeig JSON és només el contracte que manté cada entorn consistent.',
+    highlights: [
       {
         icon: '🧱',
         title: 'Zero infraestructura',
         description:
-          'Sense servidors, sense proxies, sense SaaS. Construït sobre serveis natius del núvol que ja utilitzes i pagues.',
+          'Sense servidors, sense proxies, sense SaaS intermediari. Construït sobre AWS SSM i Azure Key Vault — serveis que ja utilitzes i pagues.',
+      },
+      {
+        icon: '📋',
+        title: 'Un fitxer, tots els secrets',
+        description:
+          'Un sol contracte JSON defineix cada secret per a cada entorn. Versionat a Git, revisable en PRs, comparable. El teu equip revisa canvis de secrets al mateix PR que el codi.',
+      },
+      {
+        icon: '🔄',
+        title: 'Rotació de secrets segura',
+        description:
+          "Rota valors a AWS SSM o Azure Key Vault. Cada consumidor — local, CI/CD i runtime — resol el nou valor automàticament. Sense reescriure .env, sense canvis als pipelines.",
+      },
+      {
+        icon: '☁️',
+        title: 'Multi-Cloud, sense lock-in',
+        description:
+          "AWS SSM, Azure Key Vault, GCP Secret Manager (pròximament). Canvia de proveïdor sense modificar el codi de l'app. El teu núvol, les teves regles.",
+      },
+    ],
+    extrasTitle: 'També inclou',
+    extras: [
+      {
+        icon: '⚙️',
+        title: 'GitHub Action',
+        description: 'Obté secrets en workflows CI/CD. Mateix mapeig, zero intervenció manual.',
+      },
+      {
+        icon: '🔄',
+        title: 'Sincronització bidireccional',
+        description: 'Obté a .env o puja valors .env al teu proveïdor al núvol via CLI.',
+      },
+      {
+        icon: '🔌',
+        title: 'Els secrets no toquen disc',
+        description: "SDKs de runtime carreguen secrets directament a memòria a l'inici de l'app. Sense fitxers .env escrits a disc.",
+      },
+      {
+        icon: '🔒',
+        title: 'IAM i RBAC natiu',
+        description: "Polítiques IAM d'AWS o RBAC d'Azure — sense capa d'auth extra.",
+      },
+      {
+        icon: '📊',
+        title: "Traçabilitat completa",
+        description: 'Cada accés registrat a CloudTrail o Azure Monitor automàticament.',
       },
       {
         icon: '👤',
         title: 'Suport de perfils AWS',
-        description:
-          'Configuració multi-compte? Utilitza --profile per canviar entre perfils AWS CLI. Perfecte per a entorns multi-etapa.',
+        description: 'Canvia entre perfils AWS CLI per a configuracions multi-compte.',
       },
     ],
   },
@@ -505,22 +459,20 @@ export const ca: Translations = {
     sidebarGettingStarted: 'Primers passos',
     sidebarRequirements: 'Requisits',
     sidebarInstallation: 'Instal·lació',
-    sidebarCredentials: 'Credencials del núvol',
-    sidebarPermissions: 'Permisos IAM',
+    sidebarAwsSetup: 'Configuració AWS',
+    sidebarAzureSetup: 'Configuració Azure',
     sidebarCli: 'CLI',
     sidebarMappingFile: 'Fitxer de mapeig',
     sidebarPullCommand: 'Comanda pull',
     sidebarPushCommand: 'Comanda push',
     sidebarPushSingle: 'Push individual',
+    sidebarConfigPriority: 'Prioritat de config',
     sidebarGha: 'GitHub Action',
     sidebarGhaSetup: 'Configuració',
-    sidebarGhaBasic: 'Exemple bàsic',
-    sidebarGhaMultiEnv: 'Multi-entorn',
+    sidebarGhaBasic: 'Exemple AWS',
     sidebarGhaAzure: 'Exemple Azure',
+    sidebarGhaMultiEnv: 'Multi-entorn',
     sidebarGhaInputs: 'Inputs i outputs',
-    sidebarReference: 'Referència',
-    sidebarConfigPriority: 'Prioritat de config',
-    sidebarAzureSetup: 'Configuració Azure',
     overviewTitle: 'Què és Envilder?',
     overviewDesc:
       "Envilder és un sistema de resolució de configuració basat en un model. Defineixes un mapeig JSON entre noms de variables i rutes de secrets al núvol, i Envilder els resol de forma consistent: via la CLI per a desenvolupament local, la GitHub Action per a CI/CD o els SDKs de runtime per a l'inici de l'aplicació. Funciona amb AWS SSM Parameter Store i Azure Key Vault.",
@@ -537,28 +489,54 @@ export const ca: Translations = {
     reqDownload: 'Descarregar',
     reqInstallGuide: "Guia d'instal·lació",
     installTitle: 'Instal·lació',
-    credTitle: 'Credencials del núvol',
-    credAwsTitle: 'AWS (per defecte)',
-    credAwsDesc:
+    // AWS setup
+    awsSetupTitle: 'Configuració AWS',
+    awsSetupIntro:
+      'Tot el que necessites per usar Envilder amb AWS SSM Parameter Store.',
+    awsSetupCredTitle: '1. Configura les credencials',
+    awsSetupCredDesc:
       'Envilder utilitza les teves credencials AWS CLI. Configura el perfil per defecte:',
-    credAwsProfile: 'O utilitza un perfil amb nom:',
-    credAzureTitle: 'Azure Key Vault',
-    credAzureDesc:
-      'Envilder utilitza Azure Default Credentials. Inicia sessió amb:',
-    credAzureVault:
+    awsSetupCredProfile: 'O utilitza un perfil amb nom per a configuracions multi-compte:',
+    awsSetupPermTitle: '2. Atorga permisos IAM',
+    awsSetupPermDesc: 'El teu usuari o rol IAM necessita accés als paràmetres SSM:',
+    awsSetupPermOperation: 'Operació',
+    awsSetupPermPermission: 'Permís',
+    awsSetupPermPull: 'Pull',
+    awsSetupPermPush: 'Push',
+    awsSetupPolicyExample: 'Exemple de política IAM (limita al teu prefix de ruta):',
+    awsSetupVerifyTitle: '3. Crea un paràmetre de prova i verifica',
+    awsSetupVerifyDesc:
+      'Crea un paràmetre a SSM i després fes pull amb Envilder per confirmar que tot funciona:',
+    awsSetupVerifySuccess:
+      'Si veus ✔ Fetched, la configuració AWS està completa.',
+    awsSetupVerifySdk: 'O carrega secrets directament des de la teva app amb el Python SDK:',
+    // Azure setup
+    azureSetupTitle: 'Configuració Azure',
+    azureSetupIntro:
+      'Tot el que necessites per usar Envilder amb Azure Key Vault.',
+    azureSetupCredTitle: "1. Autentica't amb Azure",
+    azureSetupCredDesc: 'Envilder utilitza Azure Default Credentials. Inicia sessió amb:',
+    azureSetupCredVault:
       "Proporciona l'URL del vault via $config al fitxer de mapeig o el flag --vault-url.",
-    permTitle: 'Permisos IAM',
-    permAwsTitle: 'AWS',
-    permAwsDesc: 'El teu usuari o rol IAM necessita:',
-    permOperation: 'Operació',
-    permPermission: 'Permís',
-    permPull: 'Pull',
-    permPush: 'Push',
-    permPolicyExample: 'Exemple de política IAM:',
-    permAzureTitle: 'Azure',
-    permAzureRbac: 'Recomanat: assigna Key Vault Secrets Officer via RBAC:',
-    permAzurePullNote:
-      'Per accés només de lectura, Key Vault Secrets User és suficient.',
+    azureSetupAccessTitle: "2. Configura l'accés al vault",
+    azureSetupCheck: "Comprova quin model d'accés utilitza el teu vault:",
+    azureRbacTrue: 'true → Azure RBAC (recomanat)',
+    azureRbacFalse: 'false / null → Vault Access Policy (clàssic)',
+    azureOptionA: 'Opció A: Azure RBAC (recomanat)',
+    azureOptionB: 'Opció B: Vault Access Policy',
+    azureSetupPermTitle: '3. Permisos necessaris',
+    azureSetupPermOperation: 'Operació',
+    azureSetupPermPermission: 'Permís',
+    azureSetupPermPull: 'Pull',
+    azureSetupPermPush: 'Push',
+    azureSetupPullNote:
+      'Per accés només de lectura, el rol Key Vault Secrets User és suficient.',
+    azureSetupVerifyTitle: '4. Crea un secret de prova i verifica',
+    azureSetupVerifyDesc:
+      'Crea un secret a Key Vault i després fes pull amb Envilder per confirmar que tot funciona:',
+    azureSetupVerifySuccess:
+      'Si veus ✔ Fetched, la configuració Azure està completa.',
+    azureSetupVerifySdk: 'O carrega secrets directament des de la teva app amb el Python SDK:',
     mapTitle: 'Fitxer de mapeig',
     mapIntro:
       "El fitxer de mapeig (envilder.json) és el nucli d'Envilder. És un fitxer JSON que mapeja noms de variables d'entorn (claus) a rutes de secrets (valors) al teu proveïdor al núvol.",
@@ -701,14 +679,6 @@ export const ca: Translations = {
     configPriority3: 'Per defecte (AWS)',
     configPriorityExplain:
       'Això vol dir que --provider=azure a la CLI sobreescriurà "provider": "aws" a $config.',
-    azureSetupTitle: "Configuració d'Azure Key Vault",
-    azureSetupCheck: "Comprova quin model d'accés utilitza el teu vault:",
-    azureRbacTrue: 'true → Azure RBAC (recomanat)',
-    azureRbacFalse: 'false / null → Vault Access Policy (clàssic)',
-    azureOptionA: 'Opció A: Azure RBAC (recomanat)',
-    azureOptionB: 'Opció B: Vault Access Policy',
-    azureAccessNote:
-      'Per accés només de lectura, get list és suficient. Afegeix set per push.',
     // SDKs
     sidebarSdks: 'SDKs',
     sidebarSdkDotnet: '.NET SDK',
