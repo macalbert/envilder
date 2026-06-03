@@ -137,7 +137,7 @@ export const ca: Translations = {
         icon: '🧱',
         title: 'Zero infraestructura',
         description:
-          'Sense servidors, sense proxies, sense SaaS intermediari. Construït sobre AWS SSM i Azure Key Vault, serveis que ja utilitzes i pagues.'
+          'Sense servidors, sense proxies, sense SaaS intermediari. Construït sobre AWS SSM i Azure Key Vault, serveis que ja utilitzes i pagues.',
       },
       {
         icon: '📋',
@@ -149,7 +149,7 @@ export const ca: Translations = {
         icon: '🔄',
         title: 'Rotació de secrets segura',
         description:
-          'Rota valors a AWS SSM o Azure Key Vault. Cada consumidor (local, CI/CD i runtime) resol el nou valor automàticament. Sense reescriure .env, sense canvis als pipelines.'
+          'Rota valors a AWS SSM o Azure Key Vault. Cada consumidor (local, CI/CD i runtime) resol el nou valor automàticament. Sense reescriure .env, sense canvis als pipelines.',
       },
       {
         icon: '☁️',
