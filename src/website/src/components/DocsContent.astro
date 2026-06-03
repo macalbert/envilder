@@ -807,6 +807,47 @@ jobs:
       - run: pnpm deploy`} />
       </section>
 
+      <section id="gha-azure" class="docs-section">
+        <h2>{t.docs.ghaAzureTitle}</h2>
+        <CodeBlock lang="yaml" filename=".github/workflows/deploy-azure.yml" code={`name: Deploy with Azure Key Vault
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: \${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: \${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: \${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Pull Secrets from Azure Key Vault
+        uses: macalbert/envilder/github-action@v0
+        with:
+          map-file: config/envilder.json
+          env-file: .env
+          provider: azure
+          vault-url: https://my-vault.vault.azure.net
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22.x"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm deploy`} />
+      </section>
+
       <section id="gha-multi-env" class="docs-section">
         <h2>{t.docs.ghaMultiEnvTitle}</h2>
         <CodeBlock lang="yaml" filename=".github/workflows/deploy-env.yml" code={`name: Deploy to Environment
@@ -841,47 +882,6 @@ jobs:
         with:
           map-file: config/\${{ inputs.environment }}/envilder.json
           env-file: .env
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "22.x"
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm deploy`} />
-      </section>
-
-      <section id="gha-azure" class="docs-section">
-        <h2>{t.docs.ghaAzureTitle}</h2>
-        <CodeBlock lang="yaml" filename=".github/workflows/deploy-azure.yml" code={`name: Deploy with Azure Key Vault
-
-on:
-  push:
-    branches: [main]
-
-permissions:
-  id-token: write
-  contents: read
-
-jobs:
-  deploy:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          client-id: \${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: \${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: \${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Pull Secrets from Azure Key Vault
-        uses: macalbert/envilder/github-action@v0
-        with:
-          map-file: config/envilder.json
-          env-file: .env
-          provider: azure
-          vault-url: https://my-vault.vault.azure.net
 
       - uses: actions/setup-node@v6
         with:

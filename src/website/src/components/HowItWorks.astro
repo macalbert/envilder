@@ -536,33 +536,35 @@ ${t.howItWorks.pushTerminalPushed3}`} />
 
 <script>
   function initHiwSdkTabs() {
-    const wrapper = document.querySelector('.step-sdk .sdk-tabs-wrapper');
-    if (!wrapper || (wrapper as HTMLElement).dataset.hiwSdkInit) return;
-    (wrapper as HTMLElement).dataset.hiwSdkInit = 'true';
+    const wrappers = document.querySelectorAll('.step-sdk .sdk-tabs-wrapper');
+    wrappers.forEach((wrapper) => {
+      if ((wrapper as HTMLElement).dataset.hiwSdkInit) return;
+      (wrapper as HTMLElement).dataset.hiwSdkInit = 'true';
 
-    const tabs = wrapper.querySelectorAll<HTMLButtonElement>('.sdk-tab:not(:disabled)');
-    const panels = wrapper.querySelectorAll<HTMLElement>('.sdk-panel');
+      const tabs = wrapper.querySelectorAll<HTMLButtonElement>('.sdk-tab:not(:disabled)');
+      const panels = wrapper.querySelectorAll<HTMLElement>('.sdk-panel');
 
-    function activateTab(tab: HTMLButtonElement) {
-      const id = tab.getAttribute('data-hiw-sdk-tab');
+      function activateTab(tab: HTMLButtonElement) {
+        const id = tab.getAttribute('data-hiw-sdk-tab');
 
-      tabs.forEach((t) => {
-        t.classList.remove('active');
-        t.setAttribute('aria-selected', 'false');
-        t.setAttribute('tabindex', '-1');
+        tabs.forEach((t) => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+          t.setAttribute('tabindex', '-1');
+        });
+        panels.forEach((p) => p.classList.remove('active'));
+
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        tab.setAttribute('tabindex', '0');
+
+        const panel = wrapper.querySelector(`[data-hiw-sdk-panel="${id}"]`);
+        if (panel) panel.classList.add('active');
+      }
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => activateTab(tab));
       });
-      panels.forEach((p) => p.classList.remove('active'));
-
-      tab.classList.add('active');
-      tab.setAttribute('aria-selected', 'true');
-      tab.setAttribute('tabindex', '0');
-
-      const panel = wrapper?.querySelector(`[data-hiw-sdk-panel="${id}"]`);
-      if (panel) panel.classList.add('active');
-    }
-
-    tabs.forEach((tab) => {
-      tab.addEventListener('click', () => activateTab(tab));
     });
   }
 
