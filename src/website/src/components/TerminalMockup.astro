@@ -27,21 +27,21 @@ const { title = 'bash' } = Astro.props;
 
 <style>
   .terminal {
-    background: var(--color-code-bg);
-    border: 2px solid var(--color-code-border, var(--color-border));
+    background: var(--term-bg);
+    border: 2px solid var(--term-border);
     overflow: hidden;
     box-shadow: var(--pixel-shadow);
     width: 100%;
-    color: var(--color-code-text, var(--color-text));
+    color: var(--term-text);
   }
 
   .terminal-header {
-    background: var(--color-code-header);
+    background: var(--term-header);
     padding: var(--space-sm) var(--space-md);
     display: flex;
     align-items: center;
     gap: var(--space-sm);
-    border-bottom: 2px solid var(--color-code-border, var(--color-border));
+    border-bottom: 2px solid var(--term-border);
   }
 
   .terminal-dots {
@@ -52,17 +52,17 @@ const { title = 'bash' } = Astro.props;
   .dot {
     width: 10px;
     height: 10px;
-    border-radius: 0;
+    border-radius: 50%;
   }
 
-  .dot-red    { background: var(--color-error); }
-  .dot-yellow { background: var(--color-warning); }
-  .dot-green  { background: var(--color-success); }
+  .dot-red    { background: var(--term-red); }
+  .dot-yellow { background: var(--term-yellow); }
+  .dot-green  { background: var(--term-green); }
 
   .terminal-title {
     font-family: var(--font-mono);
     font-size: 0.75rem;
-    color: var(--color-code-text-dim, var(--color-text-dim));
+    color: var(--term-dim);
   }
 
   .terminal-spacer {
@@ -82,34 +82,41 @@ const { title = 'bash' } = Astro.props;
   }
 
   .terminal-body :global(.prompt) {
-    color: var(--color-success);
+    color: var(--term-prompt);
+    font-weight: 700;
+  }
+
+  .terminal-body :global(.prompt)::before {
+    content: "envilder ~ ";
+    color: var(--term-path);
+    font-weight: 400;
   }
 
   .terminal-body :global(.command) {
-    color: var(--color-code-text, var(--color-text));
+    color: var(--term-text);
   }
 
   .terminal-body :global(.flag) {
-    color: var(--color-secondary);
+    color: var(--term-flag);
   }
 
   .terminal-body :global(.output) {
-    color: var(--color-code-text-muted, var(--color-text-muted));
+    color: var(--term-muted);
   }
 
   .terminal-body :global(.comment) {
-    color: var(--color-code-text-dim, var(--color-text-dim));
+    color: var(--term-dim);
   }
 
   .terminal-body :global(.highlight) {
-    color: var(--color-primary);
+    color: var(--term-highlight);
   }
 
   .terminal-body :global(.cursor) {
     display: inline-block;
     width: 8px;
     height: 1.1em;
-    background: var(--color-primary);
+    background: var(--term-highlight);
     vertical-align: text-bottom;
     animation: blink 1s step-end infinite;
   }
