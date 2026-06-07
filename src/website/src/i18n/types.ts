@@ -34,11 +34,21 @@ export interface HeroTranslations {
   descSuffix: string;
   getStarted: string;
   viewOnGithub: string;
+  tabCli: string;
+  tabCliDesc: string;
+  tabSetup: string;
+  tabSetupDesc: string;
+  tabNode: string;
+  tabNodeDesc: string;
+  tabPython: string;
+  tabPythonDesc: string;
+  tabDotnet: string;
+  tabDotnetDesc: string;
   terminalComment1: string;
   terminalComment2: string;
-  terminalFetched1: string;
-  terminalFetched2: string;
-  terminalWritten: string;
+  setupComment1: string;
+  setupComment2: string;
+  sdkCommentLoad: string;
 }
 
 export interface TrustTranslations {

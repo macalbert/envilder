@@ -58,6 +58,23 @@ html.smooth-scroll {
   --color-code-text-dim: var(--color-text-dim);
   --color-code-border: var(--color-border);
   --color-sponsor: #db61a2; /* GitHub sponsor pink */
+  --color-prompt: #d782c4; /* terminal prompt accent (Starship-style) */
+  --color-path: #6fb6b0; /* terminal directory segment (teal) */
+
+  /* Terminal — always dark, Game Boy green accents */
+  --term-bg: #12180f;
+  --term-header: #1a2216;
+  --term-border: #2c3e28;
+  --term-text: #c8d8a8;
+  --term-muted: #8ca870;
+  --term-dim: #5f774d;
+  --term-flag: #a2cd41;
+  --term-highlight: #77be48;
+  --term-prompt: #d782c4;
+  --term-path: #6fb6b0;
+  --term-red: #c25b4a;
+  --term-yellow: #cddc39;
+  --term-green: #77be48;
 
   /* Typography */
   --font-pixel: "Press Start 2P", monospace;
@@ -126,6 +143,23 @@ html.smooth-scroll {
   --color-code-bg: #e6e4ee; /* lavender-tinted code block */
   --color-code-header: #dddae8; /* slightly deeper header */
   --color-sponsor: #c74b8e; /* GitHub sponsor pink — light */
+  --color-prompt: #b0468a; /* terminal prompt accent (Starship-style) */
+  --color-path: #3f7d8c; /* terminal directory segment (teal) */
+
+  /* Terminal — stays dark in light theme, SNES violet accents */
+  --term-bg: #1b1830;
+  --term-header: #241f3c;
+  --term-border: #383152;
+  --term-text: #e3e0f2;
+  --term-muted: #aaa3c8;
+  --term-dim: #7d7699;
+  --term-flag: #b5b6e4;
+  --term-highlight: #9a8fe6;
+  --term-prompt: #d782c4;
+  --term-path: #6fb6b0;
+  --term-red: #d27a7a;
+  --term-yellow: #d8c870;
+  --term-green: #8fc89c;
 
   --pixel-shadow: 4px 4px 0 var(--color-border);
   --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);
