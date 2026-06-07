@@ -254,4 +254,30 @@ describe('Cli', () => {
       'Invalid --map value: path must not be empty.',
     );
   });
+
+  it('Should_NotRequireMapFile_When_PushSingleAndEnvilderJsonDoesNotExist', async () => {
+    // Arrange
+    const { existsSync } = await import('node:fs');
+    vi.mocked(existsSync).mockReturnValue(false);
+
+    process.argv = [
+      'node',
+      'cli.js',
+      '--push',
+      '--key',
+      'API_KEY',
+      '--value',
+      'secret',
+      '--secret-path',
+      '/my/path',
+    ];
+
+    // Act
+    await main();
+
+    // Assert
+    expect(mocks.mockCommandHandler.handleCommand).toHaveBeenCalledWith(
+      expect.objectContaining({ mode: OperationMode.PUSH_SINGLE }),
+    );
+  });
 });

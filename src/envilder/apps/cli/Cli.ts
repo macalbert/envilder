@@ -115,7 +115,12 @@ export async function main() {
         vaultUrl,
         ...options
       }: CliOptions & { provider?: string; vaultUrl?: string }) => {
-        const resolvedMap = resolveMapFile(options.map);
+        const isPushSingle = Boolean(
+          options.key && options.value && options.secretPath,
+        );
+        const resolvedMap = isPushSingle
+          ? options.map
+          : resolveMapFile(options.map);
         const resolvedEnvfile = options.envfile ?? DEFAULT_ENV_FILE;
 
         const resolvedOptions: CliOptions = {
@@ -160,9 +165,7 @@ function resolveMapFile(mapOption: string | undefined): string | undefined {
   if (mapOption !== undefined) {
     const trimmed = mapOption.trim();
     if (trimmed.length === 0) {
-      throw new Error(
-        'Invalid --map value: path must not be empty.',
-      );
+      throw new Error('Invalid --map value: path must not be empty.');
     }
     return trimmed;
   }
