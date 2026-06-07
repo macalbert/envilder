@@ -54,7 +54,7 @@ export const ca: Translations = {
     tabDotnetDesc: 'en runtime',
     terminalComment1: '# 1. Mapeja variables a rutes SSM',
     terminalComment2: '# 2. Resol els secrets cap a .env',
-    setupComment1: "# AWS CLI configurat amb permisos a SSM",
+    setupComment1: '# AWS CLI configurat amb permisos a SSM',
     setupComment2: '# Puja cada secret a SSM Parameter Store',
     sdkCommentLoad: '# Carrega el mateix contracte en runtime',
   },

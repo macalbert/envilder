@@ -10,7 +10,11 @@ const { lang = 'en' } = Astro.props;
 const t = useTranslations(lang);
 
 type Seg = { text: string; cls: string; instant?: boolean };
-type Line = { kind: 'type' | 'output' | 'blank'; segments?: Seg[]; delay?: number };
+type Line = {
+  kind: 'type' | 'output' | 'blank';
+  segments?: Seg[];
+  delay?: number;
+};
 type Scene = {
   id: string;
   name: string;
@@ -23,7 +27,9 @@ const jsonLines: Line[] = [
   { kind: 'output', delay: 140, segments: [{ text: '{', cls: 'output' }] },
   {
     kind: 'output',
-    segments: [{ text: '  "OPENAI_API_KEY": "/openai/prod/api-key"', cls: 'output' }],
+    segments: [
+      { text: '  "OPENAI_API_KEY": "/openai/prod/api-key"', cls: 'output' },
+    ],
   },
   { kind: 'output', segments: [{ text: '}', cls: 'output' }] },
 ];
@@ -35,7 +41,10 @@ const scenes: Scene[] = [
     desc: t.hero.tabSetupDesc,
     icon: '/AWS.svg',
     lines: [
-      { kind: 'type', segments: [{ text: t.hero.setupComment1, cls: 'comment' }] },
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.setupComment1, cls: 'comment' }],
+      },
       {
         kind: 'type',
         delay: 500,
@@ -48,7 +57,12 @@ const scenes: Scene[] = [
       { kind: 'output', delay: 500, segments: [{ text: '{', cls: 'output' }] },
       {
         kind: 'output',
-        segments: [{ text: '    "UserId": "AROAADALOVELACE1815:ada.lovelace",', cls: 'output' }],
+        segments: [
+          {
+            text: '    "UserId": "AROAADALOVELACE1815:ada.lovelace",',
+            cls: 'output',
+          },
+        ],
       },
       {
         kind: 'output',
@@ -65,7 +79,10 @@ const scenes: Scene[] = [
       },
       { kind: 'output', segments: [{ text: '}', cls: 'output' }] },
       { kind: 'blank' },
-      { kind: 'type', segments: [{ text: t.hero.setupComment2, cls: 'comment' }] },
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.setupComment2, cls: 'comment' }],
+      },
       {
         kind: 'type',
         delay: 500,
@@ -99,7 +116,10 @@ const scenes: Scene[] = [
     desc: t.hero.tabCliDesc,
     icon: '/favicon.svg',
     lines: [
-      { kind: 'type', segments: [{ text: t.hero.terminalComment1, cls: 'comment' }] },
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.terminalComment1, cls: 'comment' }],
+      },
       {
         kind: 'type',
         delay: 500,
@@ -111,7 +131,10 @@ const scenes: Scene[] = [
       },
       ...jsonLines,
       { kind: 'blank' },
-      { kind: 'type', segments: [{ text: t.hero.terminalComment2, cls: 'comment' }] },
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.terminalComment2, cls: 'comment' }],
+      },
       {
         kind: 'type',
         delay: 600,
@@ -148,7 +171,10 @@ const scenes: Scene[] = [
     desc: t.hero.tabNodeDesc,
     icon: '/sdk-logo.svg',
     lines: [
-      { kind: 'type', segments: [{ text: t.hero.sdkCommentLoad, cls: 'comment' }] },
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.sdkCommentLoad, cls: 'comment' }],
+      },
       {
         kind: 'type',
         delay: 300,
@@ -210,7 +236,10 @@ const scenes: Scene[] = [
     desc: t.hero.tabPythonDesc,
     icon: '/sdk-python.svg',
     lines: [
-      { kind: 'type', segments: [{ text: t.hero.sdkCommentLoad, cls: 'comment' }] },
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.sdkCommentLoad, cls: 'comment' }],
+      },
       {
         kind: 'type',
         delay: 300,
@@ -270,7 +299,10 @@ const scenes: Scene[] = [
     desc: t.hero.tabDotnetDesc,
     icon: '/sdk-dotnet.svg',
     lines: [
-      { kind: 'type', segments: [{ text: t.hero.sdkCommentLoad, cls: 'comment' }] },
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.sdkCommentLoad, cls: 'comment' }],
+      },
       {
         kind: 'type',
         delay: 300,
@@ -330,11 +362,20 @@ const scenes: Scene[] = [
       {
         kind: 'output',
         delay: 550,
-        segments: [{ text: 'OPENAI_API_KEY = sk-proj-1ts4f4k3s3cr3tv4lu3', cls: 'output' }],
+        segments: [
+          {
+            text: 'OPENAI_API_KEY = sk-proj-1ts4f4k3s3cr3tv4lu3',
+            cls: 'output',
+          },
+        ],
       },
     ],
   },
 ];
+
+// Escape `<` so the serialized scenes can never break out of the
+// <script type="application/json"> tag (e.g. a stray "</script>").
+const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
 ---
 
 <section class="hero scanlines" id="hero">
@@ -396,15 +437,18 @@ const scenes: Scene[] = [
       <script
         type="application/json"
         id="hero-term-data"
-        set:html={JSON.stringify(scenes)}
+        set:html={scenesJson}
       />
 
-      <div class="hero-term-modes" role="tablist" aria-label="envilder">
+      <div
+        class="hero-term-modes"
+        role="group"
+        aria-label="Terminal demo scene"
+      >
         {scenes.map((scene, i) => (
           <button
             class:list={['hero-term-mode', { active: i === 0 }]}
-            role="tab"
-            aria-selected={i === 0 ? 'true' : 'false'}
+            aria-pressed={i === 0 ? 'true' : 'false'}
             data-hero-mode={scene.id}
             type="button"
           >
@@ -652,9 +696,15 @@ const scenes: Scene[] = [
       new Promise<void>((resolve) => setTimeout(resolve, ms));
 
     function waitWhilePaused(): Promise<void> {
-      if (!paused) return Promise.resolve();
+      if (!paused || isStale()) return Promise.resolve();
       return new Promise<void>((resolve) => {
-        const check = () => (paused ? setTimeout(check, 120) : resolve());
+        const check = () => {
+          if (paused && !isStale()) {
+            setTimeout(check, 120);
+          } else {
+            resolve();
+          }
+        };
         check();
       });
     }
@@ -667,7 +717,7 @@ const scenes: Scene[] = [
       modes.forEach((m, i) => {
         const active = i === index;
         m.classList.toggle('active', active);
-        m.setAttribute('aria-selected', active ? 'true' : 'false');
+        m.setAttribute('aria-pressed', active ? 'true' : 'false');
       });
     }
 
@@ -844,6 +894,7 @@ const scenes: Scene[] = [
       cursor.className = 'cursor';
 
       if (await playScene(scene, cursor, id)) {
+        if (!alive(id)) return;
         appendPromptLine(cursor);
         scheduleNext(index);
       }
