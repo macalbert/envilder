@@ -241,4 +241,17 @@ describe('Cli', () => {
       expect.objectContaining({ envfile: '.env' }),
     );
   });
+
+  it('Should_ThrowError_When_MapOptionIsEmptyString', async () => {
+    // Arrange
+    process.argv = ['node', 'cli.js', '--map', '   ', '--envfile', '.env'];
+
+    // Act
+    const action = () => main();
+
+    // Assert
+    await expect(action).rejects.toThrow(
+      'Invalid --map value: path must not be empty.',
+    );
+  });
 });

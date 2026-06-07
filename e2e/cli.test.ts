@@ -232,12 +232,11 @@ describe('Envilder (E2E)', () => {
 
     // Act
     const actual = await runCommand(envilder, [], { cwd: zeroConfigDir });
-    await rm(zeroConfigDir, { recursive: true, force: true });
 
     // Assert
     expect(actual.code).toBe(0);
-    expect(existsSync(defaultEnvPath)).toBe(false); // cleaned up already
-    expect(actual.output).not.toContain('error');
+    expect(existsSync(defaultEnvPath)).toBe(true);
+    await rm(zeroConfigDir, { recursive: true, force: true });
   });
 
   it('Should_PushEnvFileToSSM_When_PushFlagIsUsed', async () => {

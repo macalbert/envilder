@@ -158,7 +158,13 @@ export async function main() {
 
 function resolveMapFile(mapOption: string | undefined): string | undefined {
   if (mapOption !== undefined) {
-    return mapOption;
+    const trimmed = mapOption.trim();
+    if (trimmed.length === 0) {
+      throw new Error(
+        'Invalid --map value: path must not be empty.',
+      );
+    }
+    return trimmed;
   }
 
   const defaultPath = join(process.cwd(), DEFAULT_MAP_FILE);
