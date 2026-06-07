@@ -19,6 +19,14 @@ vi.mock(
   },
 );
 
+vi.mock('node:fs', async () => {
+  const actual = await vi.importActual('node:fs');
+  return {
+    ...(actual as object),
+    existsSync: vi.fn().mockReturnValue(true),
+  };
+});
+
 function patchWithMocks() {
   const mockCommandHandler = {
     handleCommand: vi.fn().mockResolvedValue(undefined),
@@ -180,5 +188,57 @@ describe('Cli', () => {
     // Assert
     expect(infraSpy).toHaveBeenCalled();
     expect(infraSpy).toHaveBeenCalledWith(expect.any(Object), {});
+  });
+
+  it('Should_UseDefaultMapFile_When_MapOptionIsOmittedAndEnvilderJsonExists', async () => {
+    // Arrange
+    const { existsSync } = await import('node:fs');
+    vi.mocked(existsSync).mockReturnValue(true);
+
+    process.argv = ['node', 'cli.js', '--envfile', '.env'];
+
+    const fromCliOptionsSpy = vi.spyOn(DispatchActionCommand, 'fromCliOptions');
+
+    // Act
+    await main();
+
+    // Assert
+    expect(fromCliOptionsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ map: 'envilder.json' }),
+    );
+  });
+
+  it('Should_ThrowError_When_MapOptionIsOmittedAndEnvilderJsonDoesNotExist', async () => {
+    // Arrange
+    const { existsSync } = await import('node:fs');
+    vi.mocked(existsSync).mockReturnValue(false);
+
+    process.argv = ['node', 'cli.js'];
+
+    // Act
+    const action = () => main();
+
+    // Assert
+    await expect(action).rejects.toThrow(
+      'No map file found. Provide --map or create envilder.json in the current directory.',
+    );
+  });
+
+  it('Should_UseDefaultEnvfile_When_EnvfileOptionIsOmitted', async () => {
+    // Arrange
+    const { existsSync } = await import('node:fs');
+    vi.mocked(existsSync).mockReturnValue(true);
+
+    process.argv = ['node', 'cli.js', '--map', 'map.json'];
+
+    const fromCliOptionsSpy = vi.spyOn(DispatchActionCommand, 'fromCliOptions');
+
+    // Act
+    await main();
+
+    // Assert
+    expect(fromCliOptionsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ envfile: '.env' }),
+    );
   });
 });

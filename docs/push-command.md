@@ -10,6 +10,13 @@ or Azure Key Vault) using a mapping file.
 ## Usage
 
 ```bash
+# Zero-config: uses envilder.json and .env by default
+envilder --push
+```
+
+With explicit paths:
+
+```bash
 envilder --push --envfile=.env --map=envilder.json
 ```
 
@@ -104,7 +111,13 @@ And your `envilder.json` file contains:
 }
 ```
 
-Running this command:
+Running this command (uses `envilder.json` and `.env` by default):
+
+```bash
+envilder --push
+```
+
+Or with explicit paths:
 
 ```bash
 envilder --push --envfile=.env --map=envilder.json
@@ -147,8 +160,8 @@ Will push:
 | `--provider`  | Optional: Cloud provider `aws` (default) or `azure`        |
 | `--vault-url` | Optional: Azure Key Vault URL (overrides `$config.vaultUrl`)|
 | `--profile`   | Optional: AWS CLI profile to use (AWS only)                |
-| `--envfile`   | Required: Path to your local .env file                     |
-| `--map`       | Required: Path to your parameter mapping JSON file         |
+| `--envfile`   | Optional: Path to your local .env file (default: `.env`)   |
+| `--map`       | Optional: Path to your parameter mapping JSON file (default: `envilder.json`) |
 
 ### Push Single Mode Options
 
@@ -164,7 +177,13 @@ Will push:
 
 ### Push Mode Examples
 
-**Push from .env file (multiple variables):**
+**Push from .env file (multiple variables, zero-config):**
+
+```bash
+envilder --push
+```
+
+With explicit paths:
 
 ```bash
 envilder --push --envfile=.env --map=envilder.json

@@ -414,7 +414,7 @@ export const es: Translations = {
     quickStart: 'Inicio rápido',
     step1:
       'Crea un envilder.json que mapee variables de entorno a rutas de secretos',
-    step2: 'Ejecuta envilder --map=envilder.json --envfile=.env',
+    step2: 'Ejecuta envilder',
     step3: 'Tu archivo .env está listo ✔',
     terminalTitle: 'Inicio rápido',
     commentInstall: '# Instalar globalmente',

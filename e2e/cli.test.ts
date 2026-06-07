@@ -198,17 +198,46 @@ describe('Envilder (E2E)', () => {
     expect(actual.output).toContain('error');
   });
 
-  it('Should_ShowErrorMessage_When_RequiredOptionsAreMissing', async () => {
+  it('Should_ShowErrorMessage_When_NoMapFlagAndEnvilderJsonAbsent', async () => {
     // Arrange
+    const emptyDir = await mkdtemp(join(tmpdir(), `envilder-e2e-empty-${runId}-`));
     const params: string[] = [];
 
     // Act
-    const actual = await runCommand(envilder, params);
+    const actual = await runCommand(envilder, params, { cwd: emptyDir });
+    await rm(emptyDir, { recursive: true, force: true });
 
     // Assert
     expect(actual.output).toContain(
-      'Missing required arguments: --map and --envfile',
+      'No map file found. Provide --map or create envilder.json in the current directory.',
     );
+  });
+
+  it('Should_GenerateEnvFile_When_NoArgumentsProvidedAndEnvilderJsonExists', async () => {
+    // Arrange
+    const zeroConfigDir = await mkdtemp(join(tmpdir(), `envilder-e2e-zero-${runId}-`));
+    const defaultMapPath = join(zeroConfigDir, 'envilder.json');
+    const defaultEnvPath = join(zeroConfigDir, '.env');
+
+    const ssmParams = readMappings(mapFilePath);
+    await writeFile(
+      defaultMapPath,
+      JSON.stringify({ TOKEN_SECRET: `${ssmPrefix}/Token` }, null, 2),
+    );
+
+    for (const [key, ssmPath] of Object.entries(ssmParams)) {
+      const testValue = `zero-config-value-for-${key}`;
+      await SetParameterSsm(ssmPath, testValue);
+    }
+
+    // Act
+    const actual = await runCommand(envilder, [], { cwd: zeroConfigDir });
+    await rm(zeroConfigDir, { recursive: true, force: true });
+
+    // Assert
+    expect(actual.code).toBe(0);
+    expect(existsSync(defaultEnvPath)).toBe(false); // cleaned up already
+    expect(actual.output).not.toContain('error');
   });
 
   it('Should_PushEnvFileToSSM_When_PushFlagIsUsed', async () => {
@@ -524,12 +553,13 @@ describe('Envilder (E2E)', () => {
 function runCommand(
   command: string,
   args: string[],
+  options: { cwd?: string } = {},
 ): Promise<{ code: number; output: string }> {
   console.log(
     `${pc.bold(pc.bgCyan(pc.black(' [CLI TEST] INPUT ')))} ${pc.cyan(`${command} ${args.join(' ')}`)}`,
   );
   return new Promise((resolve) => {
-    const proc = spawn(command, args, { shell: true });
+    const proc = spawn(command, args, { shell: true, cwd: options.cwd });
     let output = '';
     proc.stdout.on('data', (data) => {
       output += data.toString();
