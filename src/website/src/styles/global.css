@@ -61,20 +61,22 @@ html.smooth-scroll {
   --color-prompt: #d782c4; /* terminal prompt accent (Starship-style) */
   --color-path: #6fb6b0; /* terminal directory segment (teal) */
 
-  /* Terminal — always dark, Game Boy green accents */
-  --term-bg: #12180f;
-  --term-header: #1a2216;
-  --term-border: #2c3e28;
-  --term-text: #c8d8a8;
-  --term-muted: #8ca870;
-  --term-dim: #5f774d;
-  --term-flag: #a2cd41;
-  --term-highlight: #77be48;
-  --term-prompt: #d782c4;
-  --term-path: #6fb6b0;
-  --term-red: #c25b4a;
-  --term-yellow: #cddc39;
-  --term-green: #77be48;
+  /* Terminal — fixed dark palette (Windows Terminal style).
+   * Defined ONCE here and never overridden per theme, so the terminal
+   * looks identical in both Game Boy and SNES themes. */
+  --term-bg: #1e1e2e;
+  --term-header: #181825;
+  --term-border: #313244;
+  --term-text: #cdd6f4;
+  --term-muted: #a6adc8;
+  --term-dim: #6c7086;
+  --term-flag: #a6e3a1;
+  --term-highlight: #cba6f7;
+  --term-prompt: #f5c2e7;
+  --term-path: #94e2d5;
+  --term-red: #f38ba8;
+  --term-yellow: #f9e2af;
+  --term-green: #a6e3a1;
 
   /* Typography */
   --font-pixel: "Press Start 2P", monospace;
@@ -145,21 +147,6 @@ html.smooth-scroll {
   --color-sponsor: #c74b8e; /* GitHub sponsor pink — light */
   --color-prompt: #b0468a; /* terminal prompt accent (Starship-style) */
   --color-path: #3f7d8c; /* terminal directory segment (teal) */
-
-  /* Terminal — stays dark in light theme, SNES violet accents */
-  --term-bg: #1b1830;
-  --term-header: #241f3c;
-  --term-border: #383152;
-  --term-text: #e3e0f2;
-  --term-muted: #aaa3c8;
-  --term-dim: #7d7699;
-  --term-flag: #b5b6e4;
-  --term-highlight: #9a8fe6;
-  --term-prompt: #d782c4;
-  --term-path: #6fb6b0;
-  --term-red: #d27a7a;
-  --term-yellow: #d8c870;
-  --term-green: #8fc89c;
 
   --pixel-shadow: 4px 4px 0 var(--color-border);
   --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);

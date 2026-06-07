@@ -549,7 +549,7 @@ const scenes: Scene[] = [
     flex: 1 1 0;
     min-width: 0;
     padding: var(--space-sm) var(--space-xs);
-    background: transparent;
+    background: var(--color-surface);
     border: 1px solid var(--color-border);
     color: var(--color-text-muted);
     cursor: pointer;
@@ -558,13 +558,14 @@ const scenes: Scene[] = [
 
   .hero-term-mode:hover {
     color: var(--color-text);
+    background: var(--color-surface-alt);
     border-color: var(--color-border-light, var(--color-border));
   }
 
   .hero-term-mode.active {
     color: var(--color-text);
     border-color: var(--color-primary);
-    background: var(--color-code-bg);
+    background: var(--color-surface-alt);
   }
 
   .hero-term-mode-icon {
