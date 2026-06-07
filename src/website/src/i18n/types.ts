@@ -49,6 +49,7 @@ export interface HeroTranslations {
   setupComment1: string;
   setupComment2: string;
   sdkCommentLoad: string;
+  terminalSceneLabel: string;
 }
 
 export interface TrustTranslations {

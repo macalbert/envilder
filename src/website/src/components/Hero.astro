@@ -443,7 +443,7 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       <div
         class="hero-term-modes"
         role="group"
-        aria-label="Terminal demo scene"
+        aria-label={t.hero.terminalSceneLabel}
       >
         {scenes.map((scene, i) => (
           <button

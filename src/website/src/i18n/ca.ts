@@ -57,6 +57,7 @@ export const ca: Translations = {
     setupComment1: '# AWS CLI configurat amb permisos a SSM',
     setupComment2: '# Puja cada secret a SSM Parameter Store',
     sdkCommentLoad: '# Carrega el mateix contracte en runtime',
+    terminalSceneLabel: 'Escena de demostració del terminal',
   },
   trust: {
     label: 'COMPATIBLE AMB',
