@@ -25,6 +25,7 @@ import {
   describe,
   expect,
   it,
+  onTestFinished,
 } from 'vitest';
 import { Startup } from '../src/envilder/apps/cli/Startup';
 import { DispatchActionCommand } from '../src/envilder/core/application/dispatch/DispatchActionCommand';
@@ -200,12 +201,14 @@ describe('Envilder (E2E)', () => {
 
   it('Should_ShowErrorMessage_When_NoMapFlagAndEnvilderJsonAbsent', async () => {
     // Arrange
-    const emptyDir = await mkdtemp(join(tmpdir(), `envilder-e2e-empty-${runId}-`));
+    const emptyDir = await mkdtemp(
+      join(tmpdir(), `envilder-e2e-empty-${runId}-`),
+    );
+    onTestFinished(() => rm(emptyDir, { recursive: true, force: true }));
     const params: string[] = [];
 
     // Act
     const actual = await runCommand(envilder, params, { cwd: emptyDir });
-    await rm(emptyDir, { recursive: true, force: true });
 
     // Assert
     expect(actual.output).toContain(
@@ -215,7 +218,10 @@ describe('Envilder (E2E)', () => {
 
   it('Should_GenerateEnvFile_When_NoArgumentsProvidedAndEnvilderJsonExists', async () => {
     // Arrange
-    const zeroConfigDir = await mkdtemp(join(tmpdir(), `envilder-e2e-zero-${runId}-`));
+    const zeroConfigDir = await mkdtemp(
+      join(tmpdir(), `envilder-e2e-zero-${runId}-`),
+    );
+    onTestFinished(() => rm(zeroConfigDir, { recursive: true, force: true }));
     const defaultMapPath = join(zeroConfigDir, 'envilder.json');
     const defaultEnvPath = join(zeroConfigDir, '.env');
 
@@ -236,7 +242,6 @@ describe('Envilder (E2E)', () => {
     // Assert
     expect(actual.code).toBe(0);
     expect(existsSync(defaultEnvPath)).toBe(true);
-    await rm(zeroConfigDir, { recursive: true, force: true });
   });
 
   it('Should_PushEnvFileToSSM_When_PushFlagIsUsed', async () => {
