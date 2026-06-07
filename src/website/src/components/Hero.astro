@@ -8,6 +8,374 @@ interface Props {
 
 const { lang = 'en' } = Astro.props;
 const t = useTranslations(lang);
+
+type Seg = { text: string; cls: string; instant?: boolean };
+type Line = {
+  kind: 'type' | 'output' | 'blank';
+  segments?: Seg[];
+  delay?: number;
+};
+type Scene = {
+  id: string;
+  name: string;
+  desc: string;
+  icon: string;
+  lines: Line[];
+};
+
+const jsonLines: Line[] = [
+  { kind: 'output', delay: 140, segments: [{ text: '{', cls: 'output' }] },
+  {
+    kind: 'output',
+    segments: [
+      { text: '  "OPENAI_API_KEY": "/openai/prod/api-key"', cls: 'output' },
+    ],
+  },
+  { kind: 'output', segments: [{ text: '}', cls: 'output' }] },
+];
+
+const scenes: Scene[] = [
+  {
+    id: 'setup',
+    name: t.hero.tabSetup,
+    desc: t.hero.tabSetupDesc,
+    icon: '/AWS.svg',
+    lines: [
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.setupComment1, cls: 'comment' }],
+      },
+      {
+        kind: 'type',
+        delay: 500,
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' aws sts ', cls: 'command' },
+          { text: 'get-caller-identity', cls: 'flag' },
+        ],
+      },
+      { kind: 'output', delay: 500, segments: [{ text: '{', cls: 'output' }] },
+      {
+        kind: 'output',
+        segments: [
+          {
+            text: '    "UserId": "AROAADALOVELACE1815DC",',
+            cls: 'output',
+          },
+        ],
+      },
+      {
+        kind: 'output',
+        segments: [{ text: '    "Account": "123456789012",', cls: 'output' }],
+      },
+      {
+        kind: 'output',
+        segments: [
+          {
+            text: '    "Arn": "arn:aws:sts::123456789012:assumed-role/secrets-role/ada.lovelace"',
+            cls: 'output',
+          },
+        ],
+      },
+      { kind: 'output', segments: [{ text: '}', cls: 'output' }] },
+      { kind: 'blank' },
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.setupComment2, cls: 'comment' }],
+      },
+      {
+        kind: 'type',
+        delay: 500,
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' npx envilder', cls: 'command' },
+          { text: ' --push', cls: 'flag' },
+          { text: ' --key', cls: 'flag' },
+          { text: '=OPENAI_API_KEY', cls: 'command' },
+          { text: ' --value', cls: 'flag' },
+          { text: '=sk-proj-1ts4f4k3s3cr3tv4lu3', cls: 'command' },
+          { text: ' --secret-path', cls: 'flag' },
+          { text: '=/openai/prod/api-key', cls: 'command' },
+        ],
+      },
+      {
+        kind: 'output',
+        delay: 450,
+        segments: [
+          {
+            text: 'Pushed OPENAI_API_KEY=************************lu3 to secret store at path *****************key',
+            cls: 'output',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'cli',
+    name: t.hero.tabCli,
+    desc: t.hero.tabCliDesc,
+    icon: '/favicon.svg',
+    lines: [
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.terminalComment1, cls: 'comment' }],
+      },
+      {
+        kind: 'type',
+        delay: 500,
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' cat ', cls: 'command' },
+          { text: 'envilder.json', cls: 'flag' },
+        ],
+      },
+      ...jsonLines,
+      { kind: 'blank' },
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.terminalComment2, cls: 'comment' }],
+      },
+      {
+        kind: 'type',
+        delay: 600,
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' npx envilder', cls: 'command' },
+          { text: ' --map', cls: 'flag' },
+          { text: '=envilder.json', cls: 'command' },
+          { text: ' --envfile', cls: 'flag' },
+          { text: '=.env', cls: 'command' },
+        ],
+      },
+      { kind: 'blank' },
+      {
+        kind: 'output',
+        delay: 550,
+        segments: [
+          { text: 'OPENAI_API_KEY', cls: 'command' },
+          { text: '=************************lu3', cls: 'output' },
+        ],
+      },
+      {
+        kind: 'output',
+        delay: 220,
+        segments: [
+          { text: "Environment File generated at '.env'", cls: 'highlight' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'nodejs',
+    name: t.hero.tabNode,
+    desc: t.hero.tabNodeDesc,
+    icon: '/sdk-logo.svg',
+    lines: [
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.sdkCommentLoad, cls: 'comment' }],
+      },
+      {
+        kind: 'type',
+        delay: 300,
+        segments: [
+          { text: 'import { Envilder } from ', cls: 'command' },
+          { text: "'@envilder/sdk'", cls: 'flag' },
+          { text: ';', cls: 'command' },
+        ],
+      },
+      { kind: 'blank' },
+      {
+        kind: 'type',
+        delay: 500,
+        segments: [
+          { text: 'const secrets = ', cls: 'command' },
+          { text: 'await', cls: 'flag' },
+          { text: ' Envilder.', cls: 'command' },
+          { text: 'load', cls: 'highlight' },
+          { text: '(', cls: 'command' },
+          { text: "'envilder.json'", cls: 'flag' },
+          { text: ');', cls: 'command' },
+        ],
+      },
+      {
+        kind: 'type',
+        delay: 600,
+        segments: [
+          { text: 'console.', cls: 'command' },
+          { text: 'log', cls: 'highlight' },
+          { text: '(secrets);', cls: 'command' },
+        ],
+      },
+      { kind: 'blank' },
+      {
+        kind: 'type',
+        delay: 500,
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' node ', cls: 'command' },
+          { text: 'config.ts', cls: 'flag' },
+        ],
+      },
+      { kind: 'blank' },
+      {
+        kind: 'output',
+        delay: 550,
+        segments: [
+          {
+            text: "Map(1) { 'OPENAI_API_KEY' => 'sk-proj-1ts4f4k3s3cr3tv4lu3' }",
+            cls: 'output',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'python',
+    name: t.hero.tabPython,
+    desc: t.hero.tabPythonDesc,
+    icon: '/sdk-python.svg',
+    lines: [
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.sdkCommentLoad, cls: 'comment' }],
+      },
+      {
+        kind: 'type',
+        delay: 300,
+        segments: [
+          { text: 'from', cls: 'flag' },
+          { text: ' envilder ', cls: 'command' },
+          { text: 'import', cls: 'flag' },
+          { text: ' Envilder', cls: 'command' },
+        ],
+      },
+      { kind: 'blank' },
+      {
+        kind: 'type',
+        delay: 500,
+        segments: [
+          { text: 'secrets = Envilder.', cls: 'command' },
+          { text: 'load', cls: 'highlight' },
+          { text: '(', cls: 'command' },
+          { text: '"envilder.json"', cls: 'flag' },
+          { text: ')', cls: 'command' },
+        ],
+      },
+      {
+        kind: 'type',
+        delay: 600,
+        segments: [
+          { text: 'print', cls: 'highlight' },
+          { text: '(secrets)', cls: 'command' },
+        ],
+      },
+      { kind: 'blank' },
+      {
+        kind: 'type',
+        delay: 500,
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' python ', cls: 'command' },
+          { text: 'settings.py', cls: 'flag' },
+        ],
+      },
+      { kind: 'blank' },
+      {
+        kind: 'output',
+        delay: 550,
+        segments: [
+          {
+            text: "{'OPENAI_API_KEY': 'sk-proj-1ts4f4k3s3cr3tv4lu3'}",
+            cls: 'output',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'dotnet',
+    name: t.hero.tabDotnet,
+    desc: t.hero.tabDotnetDesc,
+    icon: '/sdk-dotnet.svg',
+    lines: [
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.sdkCommentLoad, cls: 'comment' }],
+      },
+      {
+        kind: 'type',
+        delay: 300,
+        segments: [
+          { text: 'using', cls: 'flag' },
+          { text: ' Envilder;', cls: 'command' },
+        ],
+      },
+      { kind: 'blank' },
+      {
+        kind: 'type',
+        delay: 500,
+        segments: [
+          { text: 'var', cls: 'flag' },
+          { text: ' secrets = ', cls: 'command' },
+          { text: 'await', cls: 'flag' },
+          { text: ' Env.', cls: 'command' },
+          { text: 'LoadAsync', cls: 'highlight' },
+          { text: '(', cls: 'command' },
+          { text: '"envilder.json"', cls: 'flag' },
+          { text: ');', cls: 'command' },
+        ],
+      },
+      {
+        kind: 'type',
+        delay: 500,
+        segments: [
+          { text: 'foreach', cls: 'flag' },
+          { text: ' (', cls: 'command' },
+          { text: 'var', cls: 'flag' },
+          { text: ' (key, value) ', cls: 'command' },
+          { text: 'in', cls: 'flag' },
+          { text: ' secrets)', cls: 'command' },
+        ],
+      },
+      {
+        kind: 'type',
+        delay: 600,
+        segments: [
+          { text: '    Console.', cls: 'command' },
+          { text: 'WriteLine', cls: 'highlight' },
+          { text: '($', cls: 'command' },
+          { text: '"{key} = {value}"', cls: 'flag' },
+          { text: ');', cls: 'command' },
+        ],
+      },
+      { kind: 'blank' },
+      {
+        kind: 'type',
+        delay: 500,
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' dotnet run', cls: 'command' },
+        ],
+      },
+      { kind: 'blank' },
+      {
+        kind: 'output',
+        delay: 550,
+        segments: [
+          {
+            text: 'OPENAI_API_KEY = sk-proj-1ts4f4k3s3cr3tv4lu3',
+            cls: 'output',
+          },
+        ],
+      },
+    ],
+  },
+];
+
+// Escape `<` so the serialized scenes can never break out of the
+// <script type="application/json"> tag (e.g. a stray "</script>").
+const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
 ---
 
 <section class="hero scanlines" id="hero">
@@ -43,59 +411,58 @@ const t = useTranslations(lang);
 
       <div class="hero-install">
         <code class="install-cmd">
-          <span class="prompt">$</span> npm install -g envilder
+          <span class="prompt">❯</span> npm install -g envilder
         </code>
       </div>
     </div>
 
     <div class="hero-terminal">
       <TerminalMockup title="envilder">
-        <span class="line">
-          <span class="comment">{t.hero.terminalComment1}</span>
-        </span>
-        <span class="line">
-          <span class="prompt">$</span>
-          <span class="command"> cat </span>
-          <span class="flag">envilder.json</span>
-        </span>
-        <span class="line">
-          <span class="output">{'{'}</span>
-        </span>
-        <span class="line">
-          <span class="output">  "DB_PASSWORD": "/app/prod/db-pass",</span>
-        </span>
-        <span class="line">
-          <span class="output">  "API_KEY":     "/app/prod/api-key"</span>
-        </span>
-        <span class="line">
-          <span class="output">{'}'}</span>
-        </span>
-        <span class="line">&nbsp;</span>
-        <span class="line">
-          <span class="comment">{t.hero.terminalComment2}</span>
-        </span>
-        <span class="line">
-          <span class="prompt">$</span><span class="command"> envilder</span><span class="flag"> --map</span><span class="command">=envilder.json</span><span class="flag"> --envfile</span><span class="command">=.env</span>
-        </span>
-        <span class="line">&nbsp;</span>
-        <span class="line">
-          <span class="highlight">✔</span>
-          <span class="output">{t.hero.terminalFetched1}</span>
-        </span>
-        <span class="line">
-          <span class="highlight">✔</span>
-          <span class="output">{t.hero.terminalFetched2}</span>
-        </span>
-        <span class="line">
-          <span class="highlight">✔</span>
-          <span class="output">{t.hero.terminalWritten}</span>
-        </span>
-        <span class="line">&nbsp;</span>
-        <span class="line">
-          <span class="prompt">$</span>
-          <span class="cursor"></span>
-        </span>
+        <div class="hero-term-screen" data-hero-screen aria-live="off">
+          {scenes[0].lines.map((line) =>
+            line.kind === 'blank' ? (
+              <span class="line">&nbsp;</span>
+            ) : (
+              <span class="line">
+                {line.segments?.map((seg) => (
+                  <span class={seg.cls}>{seg.text}</span>
+                ))}
+              </span>
+            ),
+          )}
+          <span class="line"><span class="prompt">❯</span><span class="cursor"></span></span>
+        </div>
       </TerminalMockup>
+
+      <script
+        type="application/json"
+        id="hero-term-data"
+        set:html={scenesJson}
+      />
+
+      <div
+        class="hero-term-modes"
+        role="group"
+        aria-label={t.hero.terminalSceneLabel}
+      >
+        {scenes.map((scene, i) => (
+          <button
+            class:list={['hero-term-mode', { active: i === 0 }]}
+            aria-pressed={i === 0 ? 'true' : 'false'}
+            data-hero-mode={scene.id}
+            type="button"
+          >
+            <img
+              src={scene.icon}
+              alt=""
+              class="hero-term-mode-icon"
+              width="18"
+              height="18"
+            />
+            <span class="hero-term-mode-name">{scene.name}</span>
+          </button>
+        ))}
+      </div>
     </div>
   </div>
 
@@ -191,11 +558,84 @@ const t = useTranslations(lang);
   }
 
   .install-cmd .prompt {
-    color: var(--color-success);
+    color: var(--color-prompt);
+    font-weight: 700;
   }
 
   .hero-terminal {
     width: 100%;
+  }
+
+  .hero-term-screen {
+    display: block;
+    min-height: 21em;
+  }
+
+  .hero-term-screen :global(.line) {
+    display: block;
+    min-height: 1.8em;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .hero-term-modes {
+    display: flex;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+    flex-wrap: wrap;
+  }
+
+  .hero-term-mode {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+
+  .hero-term-mode:hover {
+    color: var(--color-text);
+    background: var(--color-surface-alt);
+    border-color: var(--color-border-light, var(--color-border));
+  }
+
+  .hero-term-mode.active {
+    color: var(--color-text);
+    border-color: var(--color-primary);
+    background: var(--color-surface-alt);
+  }
+
+  .hero-term-mode-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    flex-shrink: 0;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+  }
+
+  .hero-term-mode.active .hero-term-mode-icon {
+    opacity: 1;
+  }
+
+  .hero-term-mode-name {
+    font-family: var(--font-pixel);
+    font-size: 0.5rem;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-term-screen :global(.cursor) {
+      animation: none;
+    }
   }
 
   @media (min-width: 1024px) {
@@ -204,3 +644,306 @@ const t = useTranslations(lang);
     }
   }
 </style>
+
+<script>
+  type Seg = { text: string; cls: string; instant?: boolean };
+  type Line = {
+    kind: 'type' | 'output' | 'blank';
+    segments?: Seg[];
+    delay?: number;
+  };
+  type Scene = { id: string; name: string; desc: string; lines: Line[] };
+
+  function initHeroTerminal() {
+    const wrapper = document.querySelector<HTMLElement>('.hero-terminal');
+    if (!wrapper || wrapper.dataset.heroTermInit) return;
+
+    const screen = wrapper.querySelector<HTMLElement>('[data-hero-screen]');
+    const dataEl = wrapper.querySelector<HTMLElement>('#hero-term-data');
+    const modes = Array.from(
+      wrapper.querySelectorAll<HTMLButtonElement>('.hero-term-mode'),
+    );
+    if (!screen || !dataEl || modes.length === 0) return;
+
+    let scenes: Scene[];
+    try {
+      scenes = JSON.parse(dataEl.textContent || '[]') as Scene[];
+    } catch {
+      return;
+    }
+    if (scenes.length === 0) return;
+
+    wrapper.dataset.heroTermInit = 'true';
+
+    // Each init claims a global generation token. Any previously running
+    // playback loop (e.g. left over from an Astro view transition) sees a
+    // newer generation and bails out, so only one loop ever drives the screen.
+    const globalState = window as unknown as { __heroTermGen?: number };
+    const generation = (globalState.__heroTermGen ?? 0) + 1;
+    globalState.__heroTermGen = generation;
+    const isStale = () => generation !== globalState.__heroTermGen;
+
+    // Astro client-side navigation may swap to a page without this script, so
+    // no new init runs to claim a fresh generation. Bumping the token on
+    // `astro:after-swap` makes any pending scheduleNext() autoplay go stale
+    // immediately, preventing timers from firing against a detached DOM.
+    document.addEventListener(
+      'astro:after-swap',
+      () => {
+        globalState.__heroTermGen = (globalState.__heroTermGen ?? 0) + 1;
+      },
+      { once: true },
+    );
+
+    const reduceMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches;
+
+    let runId = 0;
+    let current = 0;
+    let paused = false;
+    let holdTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const sleep = (ms: number) =>
+      new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+    function waitWhilePaused(): Promise<void> {
+      if (!paused || isStale()) return Promise.resolve();
+      return new Promise<void>((resolve) => {
+        const check = () => {
+          if (paused && !isStale()) {
+            setTimeout(check, 120);
+          } else {
+            resolve();
+          }
+        };
+        check();
+      });
+    }
+
+    function typeDelay(): number {
+      return 18 + Math.random() * 30;
+    }
+
+    function setActiveMode(index: number) {
+      modes.forEach((m, i) => {
+        const active = i === index;
+        m.classList.toggle('active', active);
+        m.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+    }
+
+    function makeLineEl(): HTMLElement {
+      const el = document.createElement('span');
+      el.className = 'line';
+      screen!.appendChild(el);
+      return el;
+    }
+
+    function renderInstant(scene: Scene) {
+      screen!.innerHTML = '';
+      for (const line of scene.lines) {
+        const el = makeLineEl();
+        if (line.kind === 'blank') {
+          el.innerHTML = '&nbsp;';
+          continue;
+        }
+        for (const seg of line.segments || []) {
+          const span = document.createElement('span');
+          span.className = seg.cls;
+          span.textContent = seg.text;
+          el.appendChild(span);
+        }
+      }
+      const prompt = makeLineEl();
+      prompt.innerHTML =
+        '<span class="prompt">❯</span><span class="cursor"></span>';
+    }
+
+    function scheduleNext(index: number) {
+      if (reduceMotion) return;
+      holdTimer = setTimeout(() => {
+        play((index + 1) % scenes.length);
+      }, 7000);
+    }
+
+    // A playback is "alive" while it owns the current run id and no newer
+    // generation has superseded it. Centralising the guard keeps every loop
+    // body simple (complexity 1 instead of repeated `||` checks).
+    function alive(id: number): boolean {
+      return id === runId && !isStale();
+    }
+
+    function appendSeg(el: HTMLElement, seg: Seg, before?: Node): HTMLElement {
+      const span = document.createElement('span');
+      span.className = seg.cls;
+      if (before) {
+        el.insertBefore(span, before);
+      } else {
+        el.appendChild(span);
+      }
+      return span;
+    }
+
+    // Prints consecutive output lines in one shot and returns the next index.
+    function dumpOutputRun(lines: Line[], start: number): number {
+      let i = start;
+      while (i < lines.length && lines[i].kind === 'output') {
+        const el = makeLineEl();
+        for (const seg of lines[i].segments ?? []) {
+          appendSeg(el, seg).textContent = seg.text;
+        }
+        i += 1;
+      }
+      return i;
+    }
+
+    async function typeSegment(
+      el: HTMLElement,
+      seg: Seg,
+      cursor: HTMLElement,
+      id: number,
+    ): Promise<boolean> {
+      const span = appendSeg(el, seg, cursor);
+      if (seg.instant) {
+        span.textContent = seg.text;
+        return true;
+      }
+      for (const ch of seg.text) {
+        await waitWhilePaused();
+        if (!alive(id)) return false;
+        span.textContent += ch;
+        await sleep(typeDelay());
+      }
+      return true;
+    }
+
+    async function typeCommandLine(
+      line: Line,
+      cursor: HTMLElement,
+      id: number,
+    ): Promise<boolean> {
+      const el = makeLineEl();
+      el.appendChild(cursor);
+      for (const seg of line.segments ?? []) {
+        if (!(await typeSegment(el, seg, cursor, id))) return false;
+      }
+      await sleep(line.delay ?? 280);
+      return true;
+    }
+
+    function appendBlankLine(): void {
+      makeLineEl().innerHTML = '&nbsp;';
+    }
+
+    function appendPromptLine(cursor: HTMLElement): void {
+      const prompt = makeLineEl();
+      const dollar = document.createElement('span');
+      dollar.className = 'prompt';
+      dollar.textContent = '❯';
+      prompt.appendChild(dollar);
+      prompt.appendChild(cursor);
+    }
+
+    // Renders a single line and returns the next index, or -1 if a newer
+    // run superseded this one.
+    async function playLine(
+      lines: Line[],
+      i: number,
+      cursor: HTMLElement,
+      id: number,
+    ): Promise<number> {
+      const line = lines[i];
+
+      if (line.kind === 'output') {
+        await sleep(line.delay ?? 450);
+        if (!alive(id)) return -1;
+        return dumpOutputRun(lines, i);
+      }
+
+      if (line.kind === 'blank') {
+        appendBlankLine();
+        await sleep(150);
+        return i + 1;
+      }
+
+      if (!(await typeCommandLine(line, cursor, id))) return -1;
+      return i + 1;
+    }
+
+    // Plays one scene to completion. Returns false if a newer run took over.
+    async function playScene(
+      scene: Scene,
+      cursor: HTMLElement,
+      id: number,
+    ): Promise<boolean> {
+      const lines = scene.lines;
+      let i = 0;
+      while (i < lines.length) {
+        await waitWhilePaused();
+        if (!alive(id)) return false;
+        i = await playLine(lines, i, cursor, id);
+        if (i < 0) return false;
+      }
+      return true;
+    }
+
+    async function play(index: number) {
+      if (isStale()) return;
+      const id = ++runId;
+      if (holdTimer) clearTimeout(holdTimer);
+      current = index;
+      setActiveMode(index);
+
+      const scene = scenes[index];
+      if (reduceMotion) {
+        renderInstant(scene);
+        return;
+      }
+
+      // Wait for any pause to lift before clearing the screen, so an
+      // auto-rotation that fires while the user is hovering does not blank
+      // the terminal until they unpause.
+      await waitWhilePaused();
+      if (!alive(id)) return;
+
+      screen!.innerHTML = '';
+      const cursor = document.createElement('span');
+      cursor.className = 'cursor';
+
+      if (await playScene(scene, cursor, id)) {
+        if (!alive(id)) return;
+        appendPromptLine(cursor);
+        scheduleNext(index);
+      }
+    }
+
+    modes.forEach((mode, index) => {
+      mode.addEventListener('click', () => {
+        play(index);
+      });
+    });
+
+    // Pause only while the user hovers/focuses the terminal itself, so the
+    // mode buttons can switch scenes without stalling playback.
+    const hoverTarget = screen.closest('.terminal') ?? screen;
+    hoverTarget.addEventListener('mouseenter', () => {
+      paused = true;
+    });
+    hoverTarget.addEventListener('mouseleave', () => {
+      paused = false;
+    });
+    hoverTarget.addEventListener('focusin', () => {
+      paused = true;
+    });
+    hoverTarget.addEventListener('focusout', () => {
+      paused = false;
+    });
+
+    wrapper.dataset.heroStarted = 'true';
+    play(0);
+  }
+
+  document.addEventListener('astro:page-load', initHeroTerminal);
+  initHeroTerminal();
+</script>
