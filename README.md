@@ -105,7 +105,8 @@ npm install -g envilder
 npx envilder
 ```
 
-That's it. With `envilder.json` in your current directory, no flags are needed — `--map` defaults to `envilder.json` and `--envfile` defaults to `.env`. Your secrets are pulled from AWS SSM and written to `.env`.
+That's it. With `envilder.json` in your current directory, no flags are needed — `--map` defaults to `envilder.json` and
+`--envfile` defaults to `.env`. Your secrets are pulled from AWS SSM and written to `.env`.
 Add `.env` to `.gitignore`. The mapping file is versioned and reviewable in PRs.
 
 > 💡 Using Azure Key Vault? Add a `$config` section to your mapping file.
