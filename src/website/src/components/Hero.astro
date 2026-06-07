@@ -683,6 +683,18 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
     globalState.__heroTermGen = generation;
     const isStale = () => generation !== globalState.__heroTermGen;
 
+    // Astro client-side navigation may swap to a page without this script, so
+    // no new init runs to claim a fresh generation. Bumping the token on
+    // `astro:after-swap` makes any pending scheduleNext() autoplay go stale
+    // immediately, preventing timers from firing against a detached DOM.
+    document.addEventListener(
+      'astro:after-swap',
+      () => {
+        globalState.__heroTermGen = (globalState.__heroTermGen ?? 0) + 1;
+      },
+      { once: true },
+    );
+
     const reduceMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)',
     ).matches;
@@ -888,6 +900,12 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
         renderInstant(scene);
         return;
       }
+
+      // Wait for any pause to lift before clearing the screen, so an
+      // auto-rotation that fires while the user is hovering does not blank
+      // the terminal until they unpause.
+      await waitWhilePaused();
+      if (!alive(id)) return;
 
       screen!.innerHTML = '';
       const cursor = document.createElement('span');
