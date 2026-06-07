@@ -705,6 +705,127 @@ const scenes: Scene[] = [
       }, 7000);
     }
 
+    // A playback is "alive" while it owns the current run id and no newer
+    // generation has superseded it. Centralising the guard keeps every loop
+    // body simple (complexity 1 instead of repeated `||` checks).
+    function alive(id: number): boolean {
+      return id === runId && !isStale();
+    }
+
+    function appendSeg(el: HTMLElement, seg: Seg, before?: Node): HTMLElement {
+      const span = document.createElement('span');
+      span.className = seg.cls;
+      if (before) {
+        el.insertBefore(span, before);
+      } else {
+        el.appendChild(span);
+      }
+      return span;
+    }
+
+    // Prints consecutive output lines in one shot and returns the next index.
+    function dumpOutputRun(lines: Line[], start: number): number {
+      let i = start;
+      while (i < lines.length && lines[i].kind === 'output') {
+        const el = makeLineEl();
+        for (const seg of lines[i].segments ?? []) {
+          appendSeg(el, seg).textContent = seg.text;
+        }
+        i += 1;
+      }
+      return i;
+    }
+
+    async function typeSegment(
+      el: HTMLElement,
+      seg: Seg,
+      cursor: HTMLElement,
+      id: number,
+    ): Promise<boolean> {
+      const span = appendSeg(el, seg, cursor);
+      if (seg.instant) {
+        span.textContent = seg.text;
+        return true;
+      }
+      for (const ch of seg.text) {
+        await waitWhilePaused();
+        if (!alive(id)) return false;
+        span.textContent += ch;
+        await sleep(typeDelay());
+      }
+      return true;
+    }
+
+    async function typeCommandLine(
+      line: Line,
+      cursor: HTMLElement,
+      id: number,
+    ): Promise<boolean> {
+      const el = makeLineEl();
+      el.appendChild(cursor);
+      for (const seg of line.segments ?? []) {
+        if (!(await typeSegment(el, seg, cursor, id))) return false;
+      }
+      await sleep(line.delay ?? 280);
+      return true;
+    }
+
+    function appendBlankLine(): void {
+      makeLineEl().innerHTML = '&nbsp;';
+    }
+
+    function appendPromptLine(cursor: HTMLElement): void {
+      const prompt = makeLineEl();
+      const dollar = document.createElement('span');
+      dollar.className = 'prompt';
+      dollar.textContent = '❯';
+      prompt.appendChild(dollar);
+      prompt.appendChild(cursor);
+    }
+
+    // Renders a single line and returns the next index, or -1 if a newer
+    // run superseded this one.
+    async function playLine(
+      lines: Line[],
+      i: number,
+      cursor: HTMLElement,
+      id: number,
+    ): Promise<number> {
+      const line = lines[i];
+
+      if (line.kind === 'output') {
+        await sleep(line.delay ?? 450);
+        if (!alive(id)) return -1;
+        return dumpOutputRun(lines, i);
+      }
+
+      if (line.kind === 'blank') {
+        appendBlankLine();
+        await sleep(150);
+        return i + 1;
+      }
+
+      if (!(await typeCommandLine(line, cursor, id))) return -1;
+      return i + 1;
+    }
+
+    // Plays one scene to completion. Returns false if a newer run took over.
+    async function playScene(
+      scene: Scene,
+      cursor: HTMLElement,
+      id: number,
+    ): Promise<boolean> {
+      const lines = scene.lines;
+      let i = 0;
+      while (i < lines.length) {
+        await waitWhilePaused();
+        if (!alive(id)) return false;
+        i = await playLine(lines, i, cursor, id);
+        if (i < 0) return false;
+      }
+      return true;
+    }
+
     async function play(index: number) {
       if (isStale()) return;
       const id = ++runId;
@@ -713,7 +834,6 @@ const scenes: Scene[] = [
       setActiveMode(index);
 
       const scene = scenes[index];
-
       if (reduceMotion) {
         renderInstant(scene);
         return;
@@ -723,76 +843,10 @@ const scenes: Scene[] = [
       const cursor = document.createElement('span');
       cursor.className = 'cursor';
 
-      const lines = scene.lines;
-      let i = 0;
-
-      while (i < lines.length) {
-        if (id !== runId || isStale()) return;
-        await waitWhilePaused();
-        if (id !== runId || isStale()) return;
-
-        const line = lines[i];
-
-        // A run of consecutive output lines is printed in one shot — exactly
-        // like a real shell dumping a command's result — after a short
-        // "execution" pause.
-        if (line.kind === 'output') {
-          await sleep(line.delay ?? 450);
-          if (id !== runId || isStale()) return;
-          while (i < lines.length && lines[i].kind === 'output') {
-            const el = makeLineEl();
-            for (const seg of lines[i].segments || []) {
-              const span = document.createElement('span');
-              span.className = seg.cls;
-              span.textContent = seg.text;
-              el.appendChild(span);
-            }
-            i += 1;
-          }
-          continue;
-        }
-
-        if (line.kind === 'blank') {
-          const el = makeLineEl();
-          el.innerHTML = '&nbsp;';
-          await sleep(150);
-          i += 1;
-          continue;
-        }
-
-        const el = makeLineEl();
-        el.appendChild(cursor);
-
-        for (const seg of line.segments || []) {
-          const span = document.createElement('span');
-          span.className = seg.cls;
-          el.insertBefore(span, cursor);
-
-          if (seg.instant) {
-            span.textContent = seg.text;
-            continue;
-          }
-
-          for (const ch of seg.text) {
-            if (id !== runId || isStale()) return;
-            await waitWhilePaused();
-            if (id !== runId || isStale()) return;
-            span.textContent += ch;
-            await sleep(typeDelay());
-          }
-        }
-        await sleep(line.delay ?? 280);
-        i += 1;
+      if (await playScene(scene, cursor, id)) {
+        appendPromptLine(cursor);
+        scheduleNext(index);
       }
-
-      const prompt = makeLineEl();
-      const dollar = document.createElement('span');
-      dollar.className = 'prompt';
-      dollar.textContent = '❯';
-      prompt.appendChild(dollar);
-      prompt.appendChild(cursor);
-
-      if (id === runId && !isStale()) scheduleNext(index);
     }
 
     modes.forEach((mode, index) => {
