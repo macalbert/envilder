@@ -280,4 +280,31 @@ describe('Cli', () => {
       expect.objectContaining({ mode: OperationMode.PUSH_SINGLE }),
     );
   });
+
+  it('Should_ReadDefaultMapConfig_When_PushSingleAndEnvilderJsonExists', async () => {
+    // Arrange
+    const { existsSync } = await import('node:fs');
+    vi.mocked(existsSync).mockReturnValue(true);
+
+    process.argv = [
+      'node',
+      'cli.js',
+      '--push',
+      '--key',
+      'API_KEY',
+      '--value',
+      'secret',
+      '--secret-path',
+      '/my/path',
+    ];
+    const fromCliOptionsSpy = vi.spyOn(DispatchActionCommand, 'fromCliOptions');
+
+    // Act
+    await main();
+
+    // Assert
+    expect(fromCliOptionsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ map: 'envilder.json' }),
+    );
+  });
 });

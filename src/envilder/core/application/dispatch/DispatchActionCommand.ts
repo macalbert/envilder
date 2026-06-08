@@ -25,7 +25,7 @@ export class DispatchActionCommand {
     );
   }
 
-  private static determineOperationMode(options: CliOptions): OperationMode {
+  static determineOperationMode(options: CliOptions): OperationMode {
     if (options.key && options.value && options.secretPath) {
       return OperationMode.PUSH_SINGLE;
     }

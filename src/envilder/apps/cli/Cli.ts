@@ -9,6 +9,8 @@ import { DispatchActionCommand } from '../../core/application/dispatch/DispatchA
 import type { DispatchActionCommandHandler } from '../../core/application/dispatch/DispatchActionCommandHandler.js';
 import type { CliOptions } from '../../core/domain/CliOptions.js';
 import type { MapFileConfig } from '../../core/domain/MapFileConfig.js';
+import { OperationMode } from '../../core/domain/OperationMode.js';
+import type { ILogger } from '../../core/domain/ports/ILogger.js';
 import { PackageVersionReader } from '../../core/infrastructure/package/PackageVersionReader.js';
 import { readMapFileConfig } from '../../core/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../core/types.js';
@@ -115,12 +117,11 @@ export async function main() {
         vaultUrl,
         ...options
       }: CliOptions & { provider?: string; vaultUrl?: string }) => {
-        const isPushSingle = Boolean(
-          options.key && options.value && options.secretPath,
-        );
-        const resolvedMap = isPushSingle
-          ? options.map
-          : resolveMapFile(options.map);
+        const mode = DispatchActionCommand.determineOperationMode(options);
+        const isPushSingle = mode === OperationMode.PUSH_SINGLE;
+        const resolvedMap = resolveMapFile(options.map, {
+          required: !isPushSingle,
+        });
         const resolvedEnvfile = options.envfile ?? DEFAULT_ENV_FILE;
 
         const resolvedOptions: CliOptions = {
@@ -154,6 +155,15 @@ export async function main() {
           .configureInfrastructure(config, infraOptions)
           .create();
 
+        if (isPushSingle && resolvedMap) {
+          const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
+          const providerName = config.provider ?? 'aws';
+          const vaultInfo = config.vaultUrl ? `, vault=${config.vaultUrl}` : '';
+          logger.info(
+            `Using configuration from ${resolvedMap}: provider=${providerName}${vaultInfo}`,
+          );
+        }
+
         await executeCommand(resolvedOptions);
       },
     );
@@ -161,7 +171,10 @@ export async function main() {
   await program.parseAsync(process.argv);
 }
 
-function resolveMapFile(mapOption: string | undefined): string | undefined {
+function resolveMapFile(
+  mapOption: string | undefined,
+  options: { required: boolean } = { required: true },
+): string | undefined {
   if (mapOption !== undefined) {
     const trimmed = mapOption.trim();
     if (trimmed.length === 0) {
@@ -173,6 +186,10 @@ function resolveMapFile(mapOption: string | undefined): string | undefined {
   const defaultPath = join(process.cwd(), DEFAULT_MAP_FILE);
   if (existsSync(defaultPath)) {
     return DEFAULT_MAP_FILE;
+  }
+
+  if (!options.required) {
+    return undefined;
   }
 
   throw new Error(
