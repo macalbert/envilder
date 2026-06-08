@@ -130,7 +130,13 @@ Will push:
 
 ### Single Variable Push
 
-Push a single environment variable directly to your cloud provider without using any files.
+Push a single environment variable directly to your cloud provider without using a `.env` file.
+
+> **Provider resolution:** If an `envilder.json` exists in the current directory, its `$config`
+> section (`provider`, `vaultUrl`, `profile`) is read and applied so the single push targets the
+> same provider as the rest of your project. The resolved provider is logged before the push.
+> When no `envilder.json` is present, AWS SSM is used unless you pass `--provider`. CLI flags always
+> override `$config`.
 
 ```mermaid
 graph LR
@@ -151,6 +157,10 @@ envilder --push --key=API_KEY --value=abc123 --secret-path=/myapp/api/key
 Will push:
 
 - Value `abc123` to secret path `/myapp/api/key`
+
+When an `envilder.json` with an Azure `$config` is present in the current directory, the same command
+targets Azure Key Vault automatically (logged as `Using configuration from envilder.json: provider=azure, ...`).
+Pass `--provider`/`--vault-url` to override.
 
 ### Push Mode Options
 
@@ -174,6 +184,7 @@ Will push:
 | `--key`      | Required: Environment variable name                        |
 | `--value`    | Required: Value to store in your cloud provider            |
 | `--secret-path` | Required: Full secret path in your cloud provider       |
+| `--map`       | Optional: Map file to read `$config` from (default: `envilder.json` if present; never required for single push) |
 
 ### Push Mode Examples
 
