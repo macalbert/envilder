@@ -298,6 +298,10 @@ describe('Envilder (E2E)', () => {
     // Arrange
     const key = 'SINGLE_VARIABLE';
     const value = 'single-value-test';
+    const isolatedDir = await mkdtemp(
+      join(tmpdir(), `envilder-e2e-single-${runId}-`),
+    );
+    onTestFinished(() => rm(isolatedDir, { recursive: true, force: true }));
 
     const params = [
       '--key',
@@ -309,7 +313,7 @@ describe('Envilder (E2E)', () => {
     ];
 
     // Act
-    const actual = await runCommand(envilder, params);
+    const actual = await runCommand(envilder, params, { cwd: isolatedDir });
 
     // Assert
     expect(actual.code).toBe(0);
