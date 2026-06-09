@@ -177,7 +177,7 @@ Pass `--provider`/`--vault-url` to override.
 
 | Option        | Description                                                |
 |-------------- | ---------------------------------------------------------- |
-| `--push`      | Required: Enables push mode                                |
+| `--push`      | Optional: For single-variable push, `--key` + `--value` + `--secret-path` already activate push mode |
 | `--provider`  | Optional: Cloud provider `aws` (default) or `azure`        |
 | `--vault-url` | Optional: Azure Key Vault URL (overrides `$config.vaultUrl`)|
 | `--profile`   | Optional: AWS CLI profile to use (AWS only)                |
