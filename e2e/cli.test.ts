@@ -25,6 +25,7 @@ import {
   describe,
   expect,
   it,
+  onTestFinished,
 } from 'vitest';
 import { Startup } from '../src/envilder/apps/cli/Startup';
 import { DispatchActionCommand } from '../src/envilder/core/application/dispatch/DispatchActionCommand';
@@ -198,17 +199,50 @@ describe('Envilder (E2E)', () => {
     expect(actual.output).toContain('error');
   });
 
-  it('Should_ShowErrorMessage_When_RequiredOptionsAreMissing', async () => {
+  it('Should_ShowErrorMessage_When_NoMapFlagAndEnvilderJsonAbsent', async () => {
     // Arrange
+    const emptyDir = await mkdtemp(
+      join(tmpdir(), `envilder-e2e-empty-${runId}-`),
+    );
+    onTestFinished(() => rm(emptyDir, { recursive: true, force: true }));
     const params: string[] = [];
 
     // Act
-    const actual = await runCommand(envilder, params);
+    const actual = await runCommand(envilder, params, { cwd: emptyDir });
 
     // Assert
+    expect(actual.code).not.toBe(0);
     expect(actual.output).toContain(
-      'Missing required arguments: --map and --envfile',
+      'No map file found. Provide --map or create envilder.json in the current directory.',
     );
+  });
+
+  it('Should_GenerateEnvFile_When_NoArgumentsProvidedAndEnvilderJsonExists', async () => {
+    // Arrange
+    const zeroConfigDir = await mkdtemp(
+      join(tmpdir(), `envilder-e2e-zero-${runId}-`),
+    );
+    onTestFinished(() => rm(zeroConfigDir, { recursive: true, force: true }));
+    const defaultMapPath = join(zeroConfigDir, 'envilder.json');
+    const defaultEnvPath = join(zeroConfigDir, '.env');
+
+    const ssmParams = readMappings(mapFilePath);
+    await writeFile(
+      defaultMapPath,
+      JSON.stringify({ TOKEN_SECRET: `${ssmPrefix}/Token` }, null, 2),
+    );
+
+    for (const [key, ssmPath] of Object.entries(ssmParams)) {
+      const testValue = `zero-config-value-for-${key}`;
+      await SetParameterSsm(ssmPath, testValue);
+    }
+
+    // Act
+    const actual = await runCommand(envilder, [], { cwd: zeroConfigDir });
+
+    // Assert
+    expect(actual.code).toBe(0);
+    expect(existsSync(defaultEnvPath)).toBe(true);
   });
 
   it('Should_PushEnvFileToSSM_When_PushFlagIsUsed', async () => {
@@ -265,6 +299,10 @@ describe('Envilder (E2E)', () => {
     // Arrange
     const key = 'SINGLE_VARIABLE';
     const value = 'single-value-test';
+    const isolatedDir = await mkdtemp(
+      join(tmpdir(), `envilder-e2e-single-${runId}-`),
+    );
+    onTestFinished(() => rm(isolatedDir, { recursive: true, force: true }));
 
     const params = [
       '--key',
@@ -276,7 +314,7 @@ describe('Envilder (E2E)', () => {
     ];
 
     // Act
-    const actual = await runCommand(envilder, params);
+    const actual = await runCommand(envilder, params, { cwd: isolatedDir });
 
     // Assert
     expect(actual.code).toBe(0);
@@ -524,12 +562,13 @@ describe('Envilder (E2E)', () => {
 function runCommand(
   command: string,
   args: string[],
+  options: { cwd?: string } = {},
 ): Promise<{ code: number; output: string }> {
   console.log(
     `${pc.bold(pc.bgCyan(pc.black(' [CLI TEST] INPUT ')))} ${pc.cyan(`${command} ${args.join(' ')}`)}`,
   );
   return new Promise((resolve) => {
-    const proc = spawn(command, args, { shell: true });
+    const proc = spawn(command, args, { shell: true, cwd: options.cwd });
     let output = '';
     proc.stdout.on('data', (data) => {
       output += data.toString();

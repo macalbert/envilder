@@ -29,6 +29,10 @@ them from AWS SSM or Azure Key Vault. The same mapping file works in local dev (
 CI/CD (GitHub Action), and application startup (runtime SDKs).
 
 ```bash
+# Zero-config: uses envilder.json and .env by default
+npx envilder
+
+# Or with explicit paths
 npx envilder --map=envilder.json --envfile=.env
 ```
 
@@ -98,10 +102,11 @@ npm install -g envilder
 ### 3. Generate your `.env` file
 
 ```bash
-npx envilder --map=envilder.json --envfile=.env
+npx envilder
 ```
 
-That's it. Your secrets are pulled from AWS SSM and written to `.env`.
+That's it. With `envilder.json` in your current directory, no flags are needed — `--map` defaults to `envilder.json` and
+`--envfile` defaults to `.env`. Your secrets are pulled from AWS SSM and written to `.env`.
 Add `.env` to `.gitignore`. The mapping file is versioned and reviewable in PRs.
 
 > 💡 Using Azure Key Vault? Add a `$config` section to your mapping file.
