@@ -281,10 +281,18 @@ describe('Cli', () => {
     );
   });
 
-  it('Should_ReadDefaultMapConfig_When_PushSingleAndEnvilderJsonExists', async () => {
+  it('Should_ApplyDefaultMapConfig_When_PushSingleAndEnvilderJsonExists', async () => {
     // Arrange
     const { existsSync } = await import('node:fs');
     vi.mocked(existsSync).mockReturnValue(true);
+    const { readMapFileConfig } = await import(
+      '../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore'
+    );
+    vi.mocked(readMapFileConfig).mockResolvedValue({
+      provider: 'azure',
+      vaultUrl: 'https://test.vault.azure.net',
+    });
+    const infraSpy = vi.spyOn(Startup.prototype, 'configureInfrastructure');
 
     process.argv = [
       'node',
@@ -297,14 +305,17 @@ describe('Cli', () => {
       '--secret-path',
       '/my/path',
     ];
-    const fromCliOptionsSpy = vi.spyOn(DispatchActionCommand, 'fromCliOptions');
 
     // Act
     await main();
 
     // Assert
-    expect(fromCliOptionsSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ map: 'envilder.json' }),
+    expect(infraSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        provider: 'azure',
+        vaultUrl: 'https://test.vault.azure.net',
+      }),
+      expect.any(Object),
     );
   });
 });
