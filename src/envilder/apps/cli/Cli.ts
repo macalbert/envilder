@@ -155,13 +155,14 @@ export async function main() {
           .configureInfrastructure(config, infraOptions)
           .create();
 
-        if (isPushSingle && resolvedMap) {
+        if (isPushSingle) {
           const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
           const providerName = config.provider ?? 'aws';
           const vaultInfo = config.vaultUrl ? `, vault=${config.vaultUrl}` : '';
-          logger.info(
-            `Using configuration from ${resolvedMap}: provider=${providerName}${vaultInfo}`,
-          );
+          const source = resolvedMap
+            ? `configuration from ${resolvedMap}`
+            : 'configuration';
+          logger.info(`Using ${source}: provider=${providerName}${vaultInfo}`);
         }
 
         await executeCommand(resolvedOptions);
