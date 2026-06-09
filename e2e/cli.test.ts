@@ -211,6 +211,7 @@ describe('Envilder (E2E)', () => {
     const actual = await runCommand(envilder, params, { cwd: emptyDir });
 
     // Assert
+    expect(actual.code).not.toBe(0);
     expect(actual.output).toContain(
       'No map file found. Provide --map or create envilder.json in the current directory.',
     );
