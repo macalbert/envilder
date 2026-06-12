@@ -14,6 +14,6 @@
     "@envilder/sdk": "^0.3.0"
   },
   "devDependencies": {
-    "tsx": "^4.19.0"
+    "tsx": "^4.22.4"
   }
 }
