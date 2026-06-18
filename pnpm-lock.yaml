@@ -175,7 +175,7 @@ importers:
         version: 3.7.3
       astro:
         specifier: ^6.4.4
-        version: 6.4.6(@azure/identity@4.13.1)(@azure/keyvault-secrets@4.11.2)(@types/node@25.9.3)(jiti@2.6.1)(rollup@4.62.0)(tsx@4.22.4)(yaml@2.9.0)
+        version: 6.4.8(@azure/identity@4.13.1)(@azure/keyvault-secrets@4.11.2)(@types/node@25.9.3)(jiti@2.6.1)(rollup@4.62.0)(tsx@4.22.4)(yaml@2.9.0)
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.9
@@ -1772,8 +1772,8 @@ packages:
     resolution: {integrity: sha512-Z7tMw1ytTXt5jqMcOP+OQteU1VuNK9Y02uuJtKQ1Sv69jXQKKg5cibLwGJow8yzZP+eAc18EmLGPal0bp36rvQ==}
     engines: {node: '>=8'}
 
-  astro@6.4.6:
-    resolution: {integrity: sha512-48OBTBKR9ctbf+DQxpOuxGl8ebfn59zTuNQMBzptmG/Mi/H8IdfMSbJgGuX1I/4U6g9yazG1p4BHlf4+2hWU4Q==}
+  astro@6.4.8:
+    resolution: {integrity: sha512-KK5lX90uU9EeVaTjINyj3sy9/NFXVa59aowaqbWBDDKLXZh4rr7GwIaCFYVetE22MJtsCNFerQXn0vlCLmpP/Q==}
     engines: {node: '>=22.12.0', npm: '>=9.6.5', pnpm: '>=7.1.0'}
     hasBin: true
 
@@ -3183,11 +3183,6 @@ packages:
     engines: {node: '>=22.0.0'}
     hasBin: true
 
-  semver@7.8.1:
-    resolution: {integrity: sha512-rkVq3IXh+4FDGch+KwzX3aV9W3kO54GyEgpvBzSyctDA6Xtd7RJQV1xmXbeQp5v7+VzLOfVqiutSE6GICgPFvg==}
-    engines: {node: '>=10'}
-    hasBin: true
-
   semver@7.8.4:
     resolution: {integrity: sha512-rUCObTnP32Q08R2uuIrt7r9PlEonuTmtuXYcW6s5kjdlj3xbnwe+21yXptAUYcMAABLkYYTtnmzb3w3EDZfueA==}
     engines: {node: '>=10'}
@@ -4444,7 +4439,7 @@ snapshots:
   '@commitlint/is-ignored@21.0.2':
     dependencies:
       '@commitlint/types': 21.0.1
-      semver: 7.8.1
+      semver: 7.8.4
 
   '@commitlint/lint@21.0.2':
     dependencies:
@@ -5508,7 +5503,7 @@ snapshots:
 
   astral-regex@2.0.0: {}
 
-  astro@6.4.6(@azure/identity@4.13.1)(@azure/keyvault-secrets@4.11.2)(@types/node@25.9.3)(jiti@2.6.1)(rollup@4.62.0)(tsx@4.22.4)(yaml@2.9.0):
+  astro@6.4.8(@azure/identity@4.13.1)(@azure/keyvault-secrets@4.11.2)(@types/node@25.9.3)(jiti@2.6.1)(rollup@4.62.0)(tsx@4.22.4)(yaml@2.9.0):
     dependencies:
       '@astrojs/compiler': 4.0.0
       '@astrojs/internal-helpers': 0.10.0
@@ -7267,8 +7262,6 @@ snapshots:
       read-pkg: 10.1.0
     transitivePeerDependencies:
       - supports-color
-
-  semver@7.8.1: {}
 
   semver@7.8.4: {}
 
