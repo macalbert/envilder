@@ -41,7 +41,7 @@ jobs:
 
     steps:
       - name: 🧱 Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: 🛠️ Setup .NET
         uses: actions/setup-dotnet@v5
@@ -113,7 +113,7 @@ jobs:
           echo "- status = ${{needs.test-dotnet-sdk.outputs.status}}"
           echo "::endgroup::"
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/download-artifact@v8
         with:
