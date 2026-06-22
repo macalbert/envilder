@@ -1,0 +1,39 @@
+# PR size labeling — parametrizable thresholds for the label-by-size job
+# in .github/workflows/pr-labeler.yml.
+#
+# Model: the changed-line count sets the BASE size. If the change is spread
+# across many files, the size is bumped up by ONE bucket (never more) — a wide
+# PR is a bit harder to review, but a mechanical rename across many files is
+# not automatically "huge". Lines lead; files nudge. Both ignore the generated
+# / lock files under `exclude`. Tune everything here; the workflow needs no edits.
+
+# Files whose changes do NOT count toward the size.
+# Shell-style globs where `*` also spans `/` (e.g. `*pnpm-lock.yaml` matches any path).
+exclude:
+  - "*package-lock.json"
+  - "*pnpm-lock.yaml"
+  - "*yarn.lock"
+  - "*uv.lock"
+  - "*.snap"
+  - "*.svg"
+  - "*.received.*"
+  - "*.verified.*"
+
+# Base size from changed lines (additions + deletions). Value = lower bound.
+# Anchored to code-review research: defect detection degrades past ~200 lines,
+# and ~400 lines is the practical ceiling for one effective review.
+lines:
+  XS: 0      # 0–9
+  S: 10      # 10–49
+  M: 50      # 50–199
+  L: 200     # 200–399
+  XL: 400    # 400+
+
+# File spread. If the file-count bucket is higher than the line bucket, the
+# size is bumped up one level. Value = lower bound (XS = 0–1 file).
+files:
+  XS: 0      # 0–1
+  S: 2       # 2–4
+  M: 5       # 5–9
+  L: 10      # 10–24
+  XL: 25     # 25+
