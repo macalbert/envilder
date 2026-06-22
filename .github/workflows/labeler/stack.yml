@@ -11,6 +11,7 @@ dotnet:
       - any-glob-to-any-file:
           - "**/*.cs"
           - "**/*.csproj"
+          - "**/*.sln"
           - "**/*.slnx"
           - "**/*.props"
           - "global.json"
