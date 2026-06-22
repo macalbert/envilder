@@ -1,0 +1,99 @@
+# Stack / area labels applied automatically from the files a PR touches.
+# Consumed by actions/labeler@v5 (see .github/workflows/pr-labeler.yml).
+# Patterns are name-agnostic: they match by structure, not by the product
+# folder name, so they keep working after the template is renamed.
+#
+# Polyglot monorepo: .NET (C#), Python, TypeScript (React frontend + AWS CDK
+# IaC), shell / PowerShell scripts, Docker, and cross-cutting build tooling.
+
+dotnet:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.cs"
+          - "**/*.csproj"
+          - "**/*.slnx"
+          - "**/*.props"
+          - "global.json"
+
+react:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/apps/frontend/**"
+
+iac:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/src/iac/**"
+
+python:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.py"
+          - "pyproject.toml"
+          - "uv.lock"
+
+shell:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.sh"
+          - "**/*.ps1"
+          - "**/*.psm1"
+          - "scripts/**"
+
+docker:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/Dockerfile"
+          - "**/Dockerfile.*"
+          - "**/*.dcproj"
+          - "**/docker-compose*.yml"
+          - "**/.dockerignore"
+
+npm:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/package.json"
+          - "**/pnpm-lock.yaml"
+          - "pnpm-workspace.yaml"
+
+e2e:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/test/e2e/**"
+
+github-actions:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/**"
+
+build:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "Makefile"
+          - "biome.json"
+          - "tsconfig.json"
+          - "lefthook.yml"
+          - ".editorconfig"
+          - ".nvmrc"
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+          - "docs/**"
+
+skills:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/skills/**"
+
+ai-workspace:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/ai-process*/**"
+          - "docs/ai-workflows.md"
+
+shared:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "shared/**"
