@@ -1,0 +1,201 @@
+name: 🏷️ PR Labeler
+
+# Three-layer auto-labeling, re-evaluated on every push and title/body edit:
+#   1. Stack labels from the files a PR touches (actions/labeler + labeler/stack.yml)
+#   2. Type labels from the Conventional Commit type in the PR title (feat -> enhancement, ...)
+#   3. Size label from the changed-line count (labeler/size.yml)
+# Layers 2 and 3 are mutating: stale labels are removed when the title or diff changes.
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
+      - ready_for_review
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  label-by-stack:
+    name: Label by stack (changed files)
+    runs-on: ubuntu-latest
+    # Fork PRs get a read-only GITHUB_TOKEN on pull_request, so label mutations
+    # fail. Skip them: labeling only runs for PRs from branches in this repo.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: 🏷️ Apply stack labels
+        uses: actions/labeler@v5
+        with:
+          configuration-path: .github/workflows/labeler/stack.yml
+          sync-labels: true
+
+  label-by-type:
+    name: Label by commit type
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: 🏷️ Reconcile Conventional Commit type labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          set -euo pipefail
+
+          # Title-owned type labels this job reconciles on every run.
+          # 'documentation' is intentionally excluded: it is owned by the stack
+          # labeler (any *.md change), so the two jobs never fight over it.
+          managed=(enhancement bug style refactor test chore)
+
+          # Type = text before the first '(', ':' or '!'
+          type="$(printf '%s' "$PR_TITLE" | sed -E 's/[(:!].*$//' | tr -d '[:space:]')"
+          declare -A type_to_label=(
+            [feat]=enhancement
+            [fix]=bug
+            [style]=style
+            [refactor]=refactor
+            [test]=test
+            [chore]=chore
+          )
+          desired="${type_to_label[$type]:-}"
+
+          # Breaking change per Conventional Commits: a '!' before the ':' in the
+          # title, OR a real footer line 'BREAKING CHANGE:' / 'BREAKING-CHANGE:'
+          # (uppercase, start of line, with colon) — not the phrase in prose.
+          breaking=false
+          if printf '%s' "$PR_TITLE" | grep -qE '^[a-z]+(\(.+\))?!:'; then
+            breaking=true
+          elif printf '%s' "$PR_BODY" | grep -qE '^BREAKING[ -]CHANGE:'; then
+            breaking=true
+          fi
+
+          mapfile -t current < <(gh pr view "$PR_NUMBER" --json labels --jq '.labels[].name')
+          has() { local x; for x in "${current[@]}"; do [[ "$x" == "$1" ]] && return 0; done; return 1; }
+
+          args=()
+          for l in "${managed[@]}"; do
+            if [[ "$l" == "$desired" ]]; then
+              has "$l" || args+=(--add-label "$l")
+            else
+              has "$l" && args+=(--remove-label "$l")
+            fi
+          done
+
+          if [[ "$breaking" == true ]]; then
+            has "breaking-change" || args+=(--add-label "breaking-change")
+          else
+            has "breaking-change" && args+=(--remove-label "breaking-change")
+          fi
+
+          if [[ ${#args[@]} -eq 0 ]]; then
+            echo "Type labels in sync (type='${type}', desired='${desired:-none}', breaking=${breaking})"
+            exit 0
+          fi
+
+          echo "Reconciling type labels: ${args[*]}"
+          gh pr edit "$PR_NUMBER" "${args[@]}"
+
+  label-by-size:
+    name: Label by PR size
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: 🏷️ Compute size and apply label
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          # Read size.yml from the BASE ref (immutable — a PR cannot lower its
+          # own thresholds). Fall back to the PR head only when the file is not
+          # on base yet (the bootstrap PR that introduces size.yml).
+          cfg_path=".github/workflows/labeler/size.yml"
+          fetch_cfg() {
+            gh api "repos/${GH_REPO}/contents/${cfg_path}?ref=$1" \
+              --jq '.content' 2>/dev/null | base64 -d
+          }
+          raw="$(fetch_cfg "$BASE_SHA" || true)"
+          if [[ -z "$raw" ]]; then
+            raw="$(fetch_cfg "$HEAD_SHA" || true)"
+          fi
+          if [[ -z "$raw" ]]; then
+            echo "Could not read ${cfg_path} from base or head; skipping size label."
+            exit 0
+          fi
+
+          # Normalize config to JSON once, then drive everything with jq.
+          # yq ships preinstalled on GitHub-hosted ubuntu-latest runners.
+          json="$(yq -o=json '.' <<< "$raw")"
+
+          mapfile -t excludes < <(jq -r '.exclude[]?' <<< "$json")
+
+          lines=0
+          files=0
+          while IFS=$'\t' read -r path adds dels; do
+            skip=false
+            for pat in "${excludes[@]}"; do
+              case "$path" in
+                $pat) skip=true; break ;;
+              esac
+            done
+            [[ "$skip" == true ]] && continue
+            lines=$(( lines + adds + dels ))
+            files=$(( files + 1 ))
+          done < <(gh pr view "$PR_NUMBER" --json files \
+                     --jq '.files[] | [.path, .additions, .deletions] | @tsv')
+
+          # Ordered bucket names (XS..XL); both dimensions share the same names.
+          mapfile -t names < <(jq -r '.lines | to_entries | sort_by(.value) | .[].key' <<< "$json")
+          maxrank=$(( ${#names[@]} - 1 ))
+
+          # rank_for <value> <dimension> -> bucket index (0 = XS .. maxrank = XL)
+          rank_for() {
+            local value="$1" dim="$2" rank=0 i=0
+            while IFS=$'\t' read -r _ bmin; do
+              if (( value >= bmin )); then rank="$i"; fi
+              i=$(( i + 1 ))
+            done < <(jq -r --arg d "$dim" \
+                       '.[$d] | to_entries | sort_by(.value) | .[] | [.key, (.value | tostring)] | @tsv' <<< "$json")
+            printf '%s' "$rank"
+          }
+
+          lrank="$(rank_for "$lines" lines)"
+          frank="$(rank_for "$files" files)"
+
+          # Lines set the base size; a wider file spread bumps it up ONE level.
+          final="$lrank"
+          if (( frank > lrank )); then
+            final=$(( lrank + 1 ))
+          fi
+          if (( final > maxrank )); then
+            final="$maxrank"
+          fi
+
+          label="size/${names[$final]}"
+          echo "lines=${lines} (${names[$lrank]}), files=${files} (${names[$frank]}) -> ${label}"
+
+          # Remove any stale size/* labels, then apply the current one.
+          while read -r current; do
+            [[ -z "$current" ]] && continue
+            if [[ "$current" != "$label" ]]; then
+              gh pr edit "$PR_NUMBER" --remove-label "$current"
+            fi
+          done < <(gh pr view "$PR_NUMBER" --json labels \
+                     --jq '.labels[].name | select(startswith("size/"))')
+
+          gh pr edit "$PR_NUMBER" --add-label "$label"
