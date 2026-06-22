@@ -59,6 +59,7 @@ npm:
 e2e:
   - changed-files:
       - any-glob-to-any-file:
+          - "e2e/**"
           - "**/test/e2e/**"
 
 github-actions:
