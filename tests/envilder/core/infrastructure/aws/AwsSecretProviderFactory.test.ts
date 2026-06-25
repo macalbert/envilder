@@ -1,4 +1,4 @@
-import { fromIni } from '@aws-sdk/credential-providers';
+import { fromIni, fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { describe, expect, it, vi } from 'vitest';
 import { createAwsSecretProvider } from '../../../../../src/envilder/core/infrastructure/aws/AwsSecretProviderFactory.js';
 
@@ -12,7 +12,11 @@ vi.mock('@aws-sdk/credential-providers', () => {
     accessKeyId: 'fake',
     secretAccessKey: 'fake',
   }));
-  return { fromIni };
+  const fromNodeProviderChain = vi.fn(() => ({
+    accessKeyId: 'fake',
+    secretAccessKey: 'fake',
+  }));
+  return { fromIni, fromNodeProviderChain };
 });
 
 describe('createAwsSecretProvider', () => {
@@ -39,5 +43,19 @@ describe('createAwsSecretProvider', () => {
     // Assert
     expect(actual).toBeDefined();
     expect(fromIni).not.toHaveBeenCalled();
+  });
+
+  it('Should_UseSsoCapableCredentialChain_When_ProfileProvided', () => {
+    // Arrange
+    const config = { provider: 'aws', profile: 'myprofile' };
+
+    // Act
+    const actual = createAwsSecretProvider(config);
+
+    // Assert
+    expect(actual).toBeDefined();
+    expect(fromNodeProviderChain).toHaveBeenCalledWith({
+      profile: 'myprofile',
+    });
   });
 });

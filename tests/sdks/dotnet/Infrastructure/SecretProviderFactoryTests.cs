@@ -214,6 +214,35 @@ public class SecretProviderFactoryTests : IDisposable
 			.Subject.Should().BeOfType<AwsSsmSecretProvider>();
 	}
 
+	[Fact]
+	public void Should_ResolveAwsProvider_When_SsoProfileConfigured()
+	{
+		// Arrange
+		_tempDirToDelete = Path.Combine(Path.GetTempPath(), $"envilder-test-{Guid.NewGuid()}");
+		Directory.CreateDirectory(_tempDirToDelete);
+		var credentialsFile = Path.Combine(_tempDirToDelete, "credentials");
+		File.WriteAllText(credentialsFile, string.Join('\n',
+			"[sso-profile]",
+			"sso_start_url=https://example.awsapps.com/start",
+			"sso_region=us-east-1",
+			"sso_account_id=123456789012",
+			"sso_role_name=AdministratorAccess",
+			"region=us-east-1"));
+		OverrideEnvironmentVariable("AWS_SHARED_CREDENTIALS_FILE", credentialsFile);
+		var config = new MapFileConfig
+		{
+			Provider = SecretProviderType.Aws,
+			Profile = "sso-profile",
+		};
+
+		// Act
+		var act = () => SecretProviderFactory.Create(config);
+
+		// Assert
+		act.Should().NotThrow()
+			.Subject.Should().BeOfType<AwsSsmSecretProvider>();
+	}
+
 	private void OverrideEnvironmentVariable(string name, string? value)
 	{
 		_savedEnvVars.Add((name, Environment.GetEnvironmentVariable(name)));
