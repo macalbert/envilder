@@ -63,6 +63,10 @@ await Envilder.fromMapFile('envilder.json')
   .inject();
 ```
 
+> **AWS SSO / assumed-role profiles:** `withProfile()` and `$config.profile`
+> support SSO, IAM Identity Center, and assumed-role profiles. Make sure you
+> have an active SSO session first (e.g. `aws sso login --profile <name>`).
+
 ### Environment-based loading
 
 Route secret loading based on your current environment. Each environment

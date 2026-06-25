@@ -368,6 +368,7 @@ export interface DocsTranslations {
   mapAwsProfileTitle: string;
   mapAwsProfileDesc: string;
   mapAwsProfileExplain: string;
+  mapAwsProfileSso: string;
   mapAzureTitle: string;
   mapAzureDesc: string;
   mapAzureWarningTitle: string;

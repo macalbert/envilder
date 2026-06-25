@@ -84,6 +84,11 @@ await Env.FromMapFile("envilder.json")
     .InjectAsync();
 ```
 
+> **AWS SSO / assumed-role profiles:** `WithProfile()` and `$config.profile`
+> support SSO, IAM Identity Center, and assumed-role profiles (the required
+> `AWSSDK.SSO` and `AWSSDK.SSOOIDC` dependencies are bundled). Make sure you
+> have an active SSO session first (e.g. `aws sso login --profile <name>`).
+
 ### Environment-based loading
 
 Route secret loading based on your current environment. Each environment maps to its own

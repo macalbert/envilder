@@ -70,6 +70,11 @@ secrets = (
 )
 ```
 
+> **AWS SSO / assumed-role profiles:** `with_profile()` and `$config.profile`
+> support SSO, IAM Identity Center, and assumed-role profiles (resolved
+> natively by boto3). Make sure you have an active SSO session first
+> (e.g. `aws sso login --profile <name>`).
+
 ### Environment-based loading
 
 Route secret loading based on your current environment. Each environment
