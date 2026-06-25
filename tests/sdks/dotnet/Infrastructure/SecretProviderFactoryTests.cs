@@ -229,6 +229,10 @@ public class SecretProviderFactoryTests : IDisposable
 			"sso_role_name=AdministratorAccess",
 			"region=us-east-1"));
 		OverrideEnvironmentVariable("AWS_SHARED_CREDENTIALS_FILE", credentialsFile);
+		OverrideEnvironmentVariable("AWS_CONFIG_FILE", Path.Combine(_tempDirToDelete, "config"));
+		OverrideEnvironmentVariable("AWS_PROFILE", null);
+		OverrideEnvironmentVariable("USERPROFILE", _tempDirToDelete);
+		OverrideEnvironmentVariable("HOME", _tempDirToDelete);
 		var config = new MapFileConfig
 		{
 			Provider = SecretProviderType.Aws,
