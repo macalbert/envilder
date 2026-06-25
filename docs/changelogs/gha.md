@@ -1,3 +1,15 @@
+## [0.11.1] - 2026-06-25
+
+### Fixed
+
+* **AWS SSO / assumed-role profiles now resolve correctly** — The bundled CLI
+  now resolves SSO, IAM Identity Center, and assumed-role profiles (via the
+  `profile` input or `$config.profile`) through the full AWS provider chain
+  instead of silently falling back to the default credentials
+  ([#364](https://github.com/macalbert/envilder/issues/364))
+
+---
+
 ## [0.11.0] - 2026-05-31
 
 ### Changed

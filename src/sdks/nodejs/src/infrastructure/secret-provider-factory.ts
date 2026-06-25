@@ -1,5 +1,5 @@
 import { SSMClient } from '@aws-sdk/client-ssm';
-import { fromIni } from '@aws-sdk/credential-providers';
+import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { DefaultAzureCredential } from '@azure/identity';
 import { SecretClient } from '@azure/keyvault-secrets';
 import type { EnvilderOptions } from '../domain/envilder-options.js';
@@ -46,7 +46,9 @@ function createAzureProvider(
 }
 
 function createAwsProvider(profile: string | undefined): AwsSsmSecretProvider {
-  const clientOptions = profile ? { credentials: fromIni({ profile }) } : {};
+  const clientOptions = profile
+    ? { credentials: fromNodeProviderChain({ profile }) }
+    : {};
   const client = new SSMClient(clientOptions);
   return new AwsSsmSecretProvider(client);
 }
