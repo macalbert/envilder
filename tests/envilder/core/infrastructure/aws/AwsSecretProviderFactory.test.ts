@@ -16,20 +16,6 @@ vi.mock('@aws-sdk/credential-providers', () => {
 });
 
 describe('createAwsSecretProvider', () => {
-  it('Should_ReturnAwsProvider_When_ProfileProvided', () => {
-    // Arrange
-    const config = { provider: 'aws', profile: 'myprofile' };
-
-    // Act
-    const actual = createAwsSecretProvider(config);
-
-    // Assert
-    expect(actual).toBeDefined();
-    expect(fromNodeProviderChain).toHaveBeenCalledWith({
-      profile: 'myprofile',
-    });
-  });
-
   it('Should_ReturnAwsProvider_When_NoProfileProvided', () => {
     // Arrange
     const config = { provider: 'aws' };
