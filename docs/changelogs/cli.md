@@ -5,6 +5,20 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [0.11.1] - 2026-06-25
+
+### Fixed
+
+* **AWS SSO / assumed-role profiles now resolve correctly** — Selecting an
+  SSO, IAM Identity Center, or assumed-role profile (via `--profile` or
+  `$config.profile`) now resolves credentials through the full AWS provider
+  chain instead of silently falling back to the default credentials.
+  Previously these profiles were ignored, reading and writing secrets against
+  the wrong AWS account
+  ([#364](https://github.com/macalbert/envilder/issues/364))
+
+---
+
 ## [0.11.0] - 2026-05-31
 
 ### Changed

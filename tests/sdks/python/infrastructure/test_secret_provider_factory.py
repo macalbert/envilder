@@ -178,3 +178,23 @@ class TestSecretProviderFactory:
         # Assert
         with pytest.raises(ValueError, match="Vault URL.*AWS"):
             action()
+
+    @patch("envilder.infrastructure.secret_provider_factory.boto3")
+    def Should_ResolveProfileViaBoto3Session_When_ProfileProvided(
+        self, mock_boto3
+    ) -> None:
+        # Arrange
+        mock_session = Mock()
+        mock_boto3.Session.return_value = mock_session
+        mock_session.client.return_value = Mock()
+        config = MapFileConfig(
+            provider=SecretProviderType.AWS,
+            profile="sso-profile",
+        )
+
+        # Act
+        actual = _SecretProviderFactory.create(config)
+
+        # Assert
+        assert isinstance(actual, AwsSsmSecretProvider)
+        mock_boto3.Session.assert_called_once_with(profile_name="sso-profile")

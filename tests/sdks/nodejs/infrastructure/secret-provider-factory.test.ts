@@ -1,3 +1,4 @@
+import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { describe, expect, it, vi } from 'vitest';
 import { SecretProviderType } from '../../../../src/sdks/nodejs/src/domain/secret-provider-type.js';
 import { AzureKeyVaultSecretProvider } from '../../../../src/sdks/nodejs/src/infrastructure/azure/azure-key-vault-secret-provider.js';
@@ -28,7 +29,7 @@ vi.mock('@aws-sdk/client-ssm', () => ({
 }));
 
 vi.mock('@aws-sdk/credential-providers', () => ({
-  fromIni: vi.fn().mockReturnValue({}),
+  fromNodeProviderChain: vi.fn().mockReturnValue({}),
 }));
 
 // Mock Azure SDK
@@ -133,5 +134,20 @@ describe('SecretProviderFactory', () => {
 
     // Assert
     expect(actual).toBeInstanceOf(AzureKeyVaultSecretProvider);
+  });
+
+  it('Should_UseSsoCapableCredentialChain_When_ProfileProvided', () => {
+    // Arrange
+    vi.mocked(fromNodeProviderChain).mockClear();
+    const config = { provider: SecretProviderType.Aws, profile: 'sso-profile' };
+
+    // Act
+    createSecretProvider(config);
+
+    // Assert
+    expect(fromNodeProviderChain).toHaveBeenCalledWith({
+      profile: 'sso-profile',
+    });
+    expect(fromNodeProviderChain).toHaveBeenCalledTimes(1);
   });
 });
