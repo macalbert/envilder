@@ -33,7 +33,7 @@ jobs:
     if: github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - name: 🏷️ Apply stack labels
-        uses: actions/labeler@v6
+        uses: actions/labeler@v5
         with:
           configuration-path: .github/workflows/labeler/stack.yml
           sync-labels: true
