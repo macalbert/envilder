@@ -194,8 +194,16 @@ public class SecretProviderFactoryTests : IDisposable
 	public void Should_SelectAwsProvider_When_NoAwsRegionConfigured()
 	{
 		// Arrange
-		CreateIsolatedAwsHome();
-		OverrideEnvironmentVariable("AWS_SHARED_CREDENTIALS_FILE", Path.Combine(_tempDirToDelete!, "credentials"));
+		_tempDirToDelete = Path.Combine(Path.GetTempPath(), $"envilder-test-{Guid.NewGuid()}");
+		Directory.CreateDirectory(_tempDirToDelete);
+
+		OverrideEnvironmentVariable("AWS_DEFAULT_REGION", null);
+		OverrideEnvironmentVariable("AWS_REGION", null);
+		OverrideEnvironmentVariable("AWS_PROFILE", null);
+		OverrideEnvironmentVariable("AWS_CONFIG_FILE", Path.Combine(_tempDirToDelete, "config"));
+		OverrideEnvironmentVariable("AWS_SHARED_CREDENTIALS_FILE", Path.Combine(_tempDirToDelete, "credentials"));
+		OverrideEnvironmentVariable("USERPROFILE", _tempDirToDelete);
+		OverrideEnvironmentVariable("HOME", _tempDirToDelete);
 		var config = new MapFileConfig();
 
 		// Act
@@ -204,51 +212,6 @@ public class SecretProviderFactoryTests : IDisposable
 		// Assert
 		act.Should().NotThrow()
 			.Subject.Should().BeOfType<AwsSsmSecretProvider>();
-	}
-
-	[Fact]
-	public void Should_ResolveAwsProvider_When_SsoProfileConfigured()
-	{
-		// Arrange
-		CreateIsolatedAwsHome();
-		WriteSsoProfileToCredentialsFile("sso-profile");
-		var config = new MapFileConfig
-		{
-			Provider = SecretProviderType.Aws,
-			Profile = "sso-profile",
-		};
-
-		// Act
-		var act = () => SecretProviderFactory.Create(config);
-
-		// Assert
-		act.Should().NotThrow()
-			.Subject.Should().BeOfType<AwsSsmSecretProvider>();
-	}
-
-	private void CreateIsolatedAwsHome()
-	{
-		_tempDirToDelete = Path.Combine(Path.GetTempPath(), $"envilder-test-{Guid.NewGuid()}");
-		Directory.CreateDirectory(_tempDirToDelete);
-		OverrideEnvironmentVariable("AWS_PROFILE", null);
-		OverrideEnvironmentVariable("AWS_REGION", null);
-		OverrideEnvironmentVariable("AWS_DEFAULT_REGION", null);
-		OverrideEnvironmentVariable("AWS_CONFIG_FILE", Path.Combine(_tempDirToDelete, "config"));
-		OverrideEnvironmentVariable("USERPROFILE", _tempDirToDelete);
-		OverrideEnvironmentVariable("HOME", _tempDirToDelete);
-	}
-
-	private void WriteSsoProfileToCredentialsFile(string profileName)
-	{
-		var credentialsFile = Path.Combine(_tempDirToDelete!, "credentials");
-		File.WriteAllText(credentialsFile, string.Join('\n',
-			$"[{profileName}]",
-			"sso_start_url=https://example.awsapps.com/start",
-			"sso_region=us-east-1",
-			"sso_account_id=123456789012",
-			"sso_role_name=AdministratorAccess",
-			"region=us-east-1"));
-		OverrideEnvironmentVariable("AWS_SHARED_CREDENTIALS_FILE", credentialsFile);
 	}
 
 	private void OverrideEnvironmentVariable(string name, string? value)

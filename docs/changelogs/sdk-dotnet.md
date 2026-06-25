@@ -1,16 +1,3 @@
-## [0.4.1] - 2026-06-25
-
-### Fixed
-
-* **AWS SSO / assumed-role profiles now resolve at runtime** — Added the
-  `AWSSDK.SSO` and `AWSSDK.SSOOIDC` dependencies so SSO and IAM Identity
-  Center profiles (via `WithProfile()` or `$config.profile`) build their
-  credentials at runtime. Previously these profiles threw
-  `Assembly AWSSDK.SSOOIDC could not be found`
-  ([#364](https://github.com/macalbert/envilder/issues/364))
-
----
-
 ## [0.4.0] - 2026-05-18
 
 ### Changed

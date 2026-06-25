@@ -1,9 +1,3 @@
-<p align="center">
-  <a href="https://github.com/macalbert/envilder">
-    <img src="https://github.com/user-attachments/assets/8a7188ef-9d8d-45fb-8c37-3af718fb5103" alt="Envilder" width="640">
-  </a>
-</p>
-
 # Envilder Node.js SDK
 
 [![Coverage Report](https://img.shields.io/badge/coverage-report-green.svg)](https://macalbert.github.io/envilder/nodejs/)
@@ -68,10 +62,6 @@ await Envilder.fromMapFile('envilder.json')
   .withProfile('staging')
   .inject();
 ```
-
-> **AWS SSO / assumed-role profiles:** `withProfile()` and `$config.profile`
-> support SSO, IAM Identity Center, and assumed-role profiles. Make sure you
-> have an active SSO session first (e.g. `aws sso login --profile <name>`).
 
 ### Environment-based loading
 

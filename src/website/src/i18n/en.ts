@@ -581,8 +581,6 @@ export const en: Translations = {
       'To use a specific AWS CLI profile (useful for multi-account setups), add profile to $config:',
     mapAwsProfileExplain:
       'This tells Envilder to use the prod-account profile from your ~/.aws/credentials file instead of the default profile.',
-    mapAwsProfileSso:
-      'SSO, IAM Identity Center, and assumed-role profiles work the same way — just make sure you have an active SSO session (run aws sso login --profile prod-account) before running Envilder.',
     mapAzureTitle: 'Azure Key Vault',
     mapAzureDesc:
       'For Azure Key Vault, set provider to "azure" and provide the vaultUrl:',

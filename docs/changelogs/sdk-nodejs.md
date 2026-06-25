@@ -1,16 +1,3 @@
-## [0.3.1] - 2026-06-25
-
-### Fixed
-
-* **AWS SSO / assumed-role profiles now resolve correctly** — `withProfile()`
-  and `$config.profile` now resolve credentials through the full AWS provider
-  chain (`fromNodeProviderChain`), including SSO token resolution. Previously
-  SSO and assumed-role profiles were silently ignored, falling back to the
-  default credentials
-  ([#364](https://github.com/macalbert/envilder/issues/364))
-
----
-
 ## [0.3.0] - 2026-05-31
 
 ### Changed

@@ -1,9 +1,3 @@
-<p align="center">
-  <a href="https://github.com/macalbert/envilder">
-    <img src="https://github.com/user-attachments/assets/8a7188ef-9d8d-45fb-8c37-3af718fb5103" alt="Envilder" width="640">
-  </a>
-</p>
-
 # Envilder Python SDK
 
 [![Coverage Report](https://img.shields.io/badge/coverage-report-green.svg)](https://macalbert.github.io/envilder/python/)
@@ -75,11 +69,6 @@ secrets = (
     .inject()
 )
 ```
-
-> **AWS SSO / assumed-role profiles:** `with_profile()` and `$config.profile`
-> support SSO, IAM Identity Center, and assumed-role profiles (resolved
-> natively by boto3). Make sure you have an active SSO session first
-> (e.g. `aws sso login --profile <name>`).
 
 ### Environment-based loading
 

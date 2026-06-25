@@ -71,10 +71,6 @@ SECRET_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
 
 > **Azure:** Provide the vault URL via `$config.vaultUrl` in your map file or use `--vault-url`.
 > CLI flags (`--provider`, `--vault-url`, `--profile`) override `$config` values in the map file.
->
-> **AWS SSO / assumed-role profiles:** SSO, IAM Identity Center, and
-> assumed-role profiles are fully supported. Make sure you have an active SSO
-> session first (e.g. `aws sso login --profile <name>`) before pulling.
 
 ### Pull Mode Examples
 

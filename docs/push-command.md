@@ -50,10 +50,6 @@ Add `$config` to your map file to target Azure Key Vault:
 ```
 
 > CLI flags (`--provider`, `--vault-url`, `--profile`) override `$config` values in the map file.
->
-> **AWS SSO / assumed-role profiles:** SSO, IAM Identity Center, and
-> assumed-role profiles are fully supported. Make sure you have an active SSO
-> session first (e.g. `aws sso login --profile <name>`) before pushing.
 
 ## .env File Example
 

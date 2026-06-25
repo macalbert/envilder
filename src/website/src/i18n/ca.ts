@@ -590,8 +590,6 @@ export const ca: Translations = {
       'Per utilitzar un perfil AWS CLI específic (útil per a configuracions multi-compte), afegeix profile a $config:',
     mapAwsProfileExplain:
       'Això indica a Envilder que utilitzi el perfil prod-account del teu fitxer ~/.aws/credentials en lloc del perfil per defecte.',
-    mapAwsProfileSso:
-      "Els perfils SSO, IAM Identity Center i de rol assumit (assumed-role) funcionen igual — només cal tenir una sessió SSO activa (executa aws sso login --profile prod-account) abans d'executar Envilder.",
     mapAzureTitle: 'Azure Key Vault',
     mapAzureDesc:
       'Per Azure Key Vault, estableix provider a "azure" i proporciona el vaultUrl:',
