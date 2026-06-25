@@ -7,10 +7,9 @@ import { AwsSsmSecretProvider } from './AwsSsmSecretProvider.js';
 export function createAwsSecretProvider(
   config: MapFileConfig,
 ): ISecretProvider {
-  const ssm = config.profile
-    ? new SSM({
-        credentials: fromNodeProviderChain({ profile: config.profile }),
-      })
+  const profile = config.profile?.trim();
+  const ssm = profile
+    ? new SSM({ credentials: fromNodeProviderChain({ profile }) })
     : new SSM();
   return new AwsSsmSecretProvider(ssm);
 }
