@@ -5,7 +5,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
-## [Unreleased]
+## [0.11.1] - 2026-06-25
 
 ### Fixed
 
