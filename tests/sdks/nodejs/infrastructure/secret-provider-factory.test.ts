@@ -29,7 +29,6 @@ vi.mock('@aws-sdk/client-ssm', () => ({
 }));
 
 vi.mock('@aws-sdk/credential-providers', () => ({
-  fromIni: vi.fn().mockReturnValue({}),
   fromNodeProviderChain: vi.fn().mockReturnValue({}),
 }));
 

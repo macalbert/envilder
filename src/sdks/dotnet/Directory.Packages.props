@@ -6,6 +6,8 @@
   </PropertyGroup>
   <ItemGroup Label="AWS">
     <PackageVersion Include="AWSSDK.SimpleSystemsManagement" Version="4.0.8.7" />
+    <PackageVersion Include="AWSSDK.SSO" Version="4.0.3.8" />
+    <PackageVersion Include="AWSSDK.SSOOIDC" Version="4.0.4.10" />
   </ItemGroup>
   <ItemGroup Label="Azure">
     <PackageVersion Include="Azure.Identity" Version="1.21.0" />

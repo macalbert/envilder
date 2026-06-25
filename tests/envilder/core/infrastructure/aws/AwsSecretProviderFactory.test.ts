@@ -1,4 +1,4 @@
-import { fromIni, fromNodeProviderChain } from '@aws-sdk/credential-providers';
+import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { describe, expect, it, vi } from 'vitest';
 import { createAwsSecretProvider } from '../../../../../src/envilder/core/infrastructure/aws/AwsSecretProviderFactory.js';
 
@@ -8,15 +8,11 @@ vi.mock('@aws-sdk/client-ssm', () => {
 });
 
 vi.mock('@aws-sdk/credential-providers', () => {
-  const fromIni = vi.fn(() => ({
-    accessKeyId: 'fake',
-    secretAccessKey: 'fake',
-  }));
   const fromNodeProviderChain = vi.fn(() => ({
     accessKeyId: 'fake',
     secretAccessKey: 'fake',
   }));
-  return { fromIni, fromNodeProviderChain };
+  return { fromNodeProviderChain };
 });
 
 describe('createAwsSecretProvider', () => {
@@ -29,20 +25,22 @@ describe('createAwsSecretProvider', () => {
 
     // Assert
     expect(actual).toBeDefined();
-    expect(fromIni).toHaveBeenCalledWith({ profile: 'myprofile' });
+    expect(fromNodeProviderChain).toHaveBeenCalledWith({
+      profile: 'myprofile',
+    });
   });
 
   it('Should_ReturnAwsProvider_When_NoProfileProvided', () => {
     // Arrange
     const config = { provider: 'aws' };
-    vi.mocked(fromIni).mockClear();
+    vi.mocked(fromNodeProviderChain).mockClear();
 
     // Act
     const actual = createAwsSecretProvider(config);
 
     // Assert
     expect(actual).toBeDefined();
-    expect(fromIni).not.toHaveBeenCalled();
+    expect(fromNodeProviderChain).not.toHaveBeenCalled();
   });
 
   it('Should_UseSsoCapableCredentialChain_When_ProfileProvided', () => {
