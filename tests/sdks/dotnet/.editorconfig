@@ -263,3 +263,9 @@ csharp_prefer_static_anonymous_function = true:suggestion
 dotnet_diagnostic.xUnit1048.severity = error
 dotnet_diagnostic.xUnit1051.severity = suggestion
 dotnet_diagnostic.CA2016.severity = error
+
+# These E2E tests intentionally exercise the synchronous SDK API
+# (e.g. Env.Load, Env.ResolveFile, builder.Resolve/Inject) to verify the
+# sync-over-async surface works for consumers. Suppress VSTHRD103 so the
+# analyzer does not flag (or auto-rewrite) these deliberate sync calls.
+dotnet_diagnostic.VSTHRD103.severity = none

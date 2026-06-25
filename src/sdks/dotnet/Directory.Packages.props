@@ -20,7 +20,7 @@
     <PackageVersion Include="System.Text.Json" Version="10.0.9" />
   </ItemGroup>
   <ItemGroup Label="Code quality">
-    <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15" />
+    <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="18.7.23" />
   </ItemGroup>
   <ItemGroup Label="Testing">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.6.0" />
