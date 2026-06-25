@@ -31,6 +31,7 @@ describe('createAwsSecretProvider', () => {
 
   it('Should_UseSsoCapableCredentialChain_When_ProfileProvided', () => {
     // Arrange
+    vi.mocked(fromNodeProviderChain).mockClear();
     const config = { provider: 'aws', profile: 'myprofile' };
 
     // Act
@@ -41,5 +42,6 @@ describe('createAwsSecretProvider', () => {
     expect(fromNodeProviderChain).toHaveBeenCalledWith({
       profile: 'myprofile',
     });
+    expect(fromNodeProviderChain).toHaveBeenCalledTimes(1);
   });
 });
