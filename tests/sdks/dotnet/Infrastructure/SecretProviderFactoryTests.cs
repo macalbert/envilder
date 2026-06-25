@@ -195,8 +195,6 @@ public class SecretProviderFactoryTests : IDisposable
 	{
 		// Arrange
 		CreateIsolatedAwsHome();
-		OverrideEnvironmentVariable("AWS_DEFAULT_REGION", null);
-		OverrideEnvironmentVariable("AWS_REGION", null);
 		OverrideEnvironmentVariable("AWS_SHARED_CREDENTIALS_FILE", Path.Combine(_tempDirToDelete!, "credentials"));
 		var config = new MapFileConfig();
 
@@ -233,6 +231,8 @@ public class SecretProviderFactoryTests : IDisposable
 		_tempDirToDelete = Path.Combine(Path.GetTempPath(), $"envilder-test-{Guid.NewGuid()}");
 		Directory.CreateDirectory(_tempDirToDelete);
 		OverrideEnvironmentVariable("AWS_PROFILE", null);
+		OverrideEnvironmentVariable("AWS_REGION", null);
+		OverrideEnvironmentVariable("AWS_DEFAULT_REGION", null);
 		OverrideEnvironmentVariable("AWS_CONFIG_FILE", Path.Combine(_tempDirToDelete, "config"));
 		OverrideEnvironmentVariable("USERPROFILE", _tempDirToDelete);
 		OverrideEnvironmentVariable("HOME", _tempDirToDelete);

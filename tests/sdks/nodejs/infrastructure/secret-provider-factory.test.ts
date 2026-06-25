@@ -148,5 +148,6 @@ describe('SecretProviderFactory', () => {
     expect(fromNodeProviderChain).toHaveBeenCalledWith({
       profile: 'sso-profile',
     });
+    expect(fromNodeProviderChain).toHaveBeenCalledTimes(1);
   });
 });
