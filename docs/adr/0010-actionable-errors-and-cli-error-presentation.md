@@ -62,10 +62,10 @@ What is "unified" is the *contract*, not the code: identical error types,
 identical structured data, and identical default-message wording across the CLI
 and every SDK. The rich, interactive presentation is exclusive to the CLI.
 
-### 5. Message quality bar
+### 5. Message standards
 
 Every error message and remediation — CLI output and SDK error text alike — must
-clear this bar:
+meet these standards:
 
 - **Plain and direct.** Written for a broad developer audience; no internal
   jargon, no provider stack-trace noise leaking through. A reader should
