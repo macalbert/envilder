@@ -3,6 +3,8 @@
  * are expired or invalid (for example, an expired SSO session).
  */
 export class ExpiredCredentialsError extends Error {
+  readonly cause?: unknown;
+
   constructor(cause?: unknown) {
     super(
       'AWS credentials are expired or invalid. Your security token or SSO ' +
@@ -10,9 +12,7 @@ export class ExpiredCredentialsError extends Error {
         '(for SSO, run: aws sso login).',
     );
     this.name = 'ExpiredCredentialsError';
-    if (cause !== undefined) {
-      (this as { cause?: unknown }).cause = cause;
-    }
+    this.cause = cause;
   }
 }
 
@@ -22,28 +22,21 @@ const EXPIRED_CREDENTIAL_ERROR_NAMES = new Set([
   'UnrecognizedClientException',
   'InvalidClientTokenId',
   'InvalidSignatureException',
-  'CredentialsProviderError',
-  'TokenRefreshRequired',
   'RequestExpired',
+  'CredentialsProviderError',
+  'ProviderError',
+  'TokenProviderError',
+  'TokenRefreshRequired',
 ]);
-
-const EXPIRED_CREDENTIAL_MESSAGE_PATTERN =
-  /expired|security token.*invalid|invalid.*security token|could not load credentials|sso session|token has expired|refresh.*failed/i;
 
 /**
  * Detects whether an unknown error represents expired or invalid AWS
- * credentials, by inspecting its error name and message.
+ * credentials, by inspecting its AWS error name.
  */
 export function isExpiredCredentialsError(error: unknown): boolean {
-  if (typeof error !== 'object' || error === null) {
+  if (typeof error !== 'object' || error === null || !('name' in error)) {
     return false;
   }
-  const name =
-    'name' in error ? String((error as { name?: unknown }).name) : '';
-  if (EXPIRED_CREDENTIAL_ERROR_NAMES.has(name)) {
-    return true;
-  }
-  const message =
-    'message' in error ? String((error as { message?: unknown }).message) : '';
-  return EXPIRED_CREDENTIAL_MESSAGE_PATTERN.test(message);
+  const name = String((error as { name?: unknown }).name);
+  return EXPIRED_CREDENTIAL_ERROR_NAMES.has(name);
 }

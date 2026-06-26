@@ -13,12 +13,31 @@ public class ExpiredCredentialsException : Exception
 		"session may have expired. Refresh your credentials and retry " +
 		"(for SSO, run: aws sso login).";
 
-	/// <summary>
-	/// Initializes a new instance wrapping the underlying AWS exception.
-	/// </summary>
+	/// <summary>Initializes a new instance with the default remediation message.</summary>
+	public ExpiredCredentialsException()
+		: base(RemediationMessage)
+	{
+	}
+
+	/// <summary>Initializes a new instance with a custom message.</summary>
+	/// <param name="message">The error message.</param>
+	public ExpiredCredentialsException(string message)
+		: base(message)
+	{
+	}
+
+	/// <summary>Initializes a new instance wrapping the underlying AWS exception.</summary>
 	/// <param name="innerException">The original AWS SDK exception.</param>
 	public ExpiredCredentialsException(Exception innerException)
 		: base(RemediationMessage, innerException)
+	{
+	}
+
+	/// <summary>Initializes a new instance with a custom message and inner exception.</summary>
+	/// <param name="message">The error message.</param>
+	/// <param name="innerException">The original AWS SDK exception.</param>
+	public ExpiredCredentialsException(string message, Exception innerException)
+		: base(message, innerException)
 	{
 	}
 }

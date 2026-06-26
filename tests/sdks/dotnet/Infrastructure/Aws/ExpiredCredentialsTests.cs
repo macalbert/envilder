@@ -32,14 +32,15 @@ public class ExpiredCredentialsTests
 	}
 
 	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
-	public async Task Should_ThrowExpiredCredentialsException_When_GetParameterFailsWithExpiredSsoMessage()
+	public async Task Should_ThrowExpiredCredentialsException_When_InnerExceptionHasExpiredErrorCode()
 	{
 		// Arrange
 		var ssmClient = Substitute.For<IAmazonSimpleSystemsManagement>();
-		var ssoExpiredException = new AmazonClientException(
-			"Token for SSO session is expired and could not be refreshed");
+		var wrappedExpiredException = new AmazonClientException(
+			"Unable to load credentials",
+			new AmazonServiceException("token expired") { ErrorCode = "ExpiredTokenException" });
 		ssmClient.GetParameterAsync(Arg.Any<GetParameterRequest>(), Arg.Any<CancellationToken>())
-			.ThrowsAsync(ssoExpiredException);
+			.ThrowsAsync(wrappedExpiredException);
 		var sut = new AwsSsmSecretProvider(ssmClient);
 
 		// Act
@@ -83,5 +84,26 @@ public class ExpiredCredentialsTests
 
 		// Assert
 		await act.Should().ThrowAsync<AmazonServiceException>();
+	}
+
+	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
+	public void Should_ThrowExpiredCredentialsException_When_GetSecretFailsWithExpiredToken()
+	{
+		// Arrange
+		var ssmClient = Substitute.For<IAmazonSimpleSystemsManagement>();
+		var expiredTokenException = new AmazonServiceException("The security token included in the request is expired")
+		{
+			ErrorCode = "ExpiredTokenException",
+		};
+		ssmClient.GetParameterAsync(Arg.Any<GetParameterRequest>(), Arg.Any<CancellationToken>())
+			.ThrowsAsync(expiredTokenException);
+		var sut = new AwsSsmSecretProvider(ssmClient);
+
+		// Act
+		var act = () => sut.GetSecret("/p");
+
+		// Assert
+		act.Should().Throw<ExpiredCredentialsException>()
+			.WithMessage("*aws sso login*");
 	}
 }
