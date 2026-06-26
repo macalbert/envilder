@@ -80,9 +80,8 @@ export class FileVariableStore implements IVariableStore {
     destination: string,
     envVariables: Record<string, string>,
   ): Promise<void> {
-    const envContent = Object.entries(envVariables)
-      .map(([key, value]) => `${key}=${this.escapeEnvValue(value)}`)
-      .join('\n');
+    const existingContent = await this.readExistingEnvContent(destination);
+    const envContent = this.buildEnvContent(existingContent, envVariables);
 
     try {
       await fs.writeFile(destination, envContent);
@@ -94,6 +93,54 @@ export class FileVariableStore implements IVariableStore {
         `Failed to write environment file: ${errorMessage}`,
       );
     }
+  }
+
+  private async readExistingEnvContent(
+    destination: string,
+  ): Promise<string | null> {
+    try {
+      return await fs.readFile(destination, 'utf-8');
+    } catch {
+      return null;
+    }
+  }
+
+  private buildEnvContent(
+    existingContent: string | null,
+    envVariables: Record<string, string>,
+  ): string {
+    const pending = { ...envVariables };
+
+    if (existingContent === null) {
+      return Object.entries(pending)
+        .map(([key, value]) => `${key}=${this.escapeEnvValue(value)}`)
+        .join('\n');
+    }
+
+    const assignmentRegex = /^(\s*(?:export\s+)?)([\w.-]+)(\s*=\s*)(.*)$/;
+    const mergedLines = existingContent.split('\n').map((line) => {
+      const match = assignmentRegex.exec(line);
+      if (match === null) {
+        return line;
+      }
+      const [, prefix, key, separator] = match;
+      if (!Object.hasOwn(pending, key)) {
+        return line;
+      }
+      const value = this.escapeEnvValue(pending[key]);
+      delete pending[key];
+      return `${prefix}${key}${separator}${value}`;
+    });
+
+    let result = mergedLines.join('\n');
+    const appended = Object.entries(pending).map(
+      ([key, value]) => `${key}=${this.escapeEnvValue(value)}`,
+    );
+    if (appended.length > 0) {
+      const separator = result.length > 0 && !result.endsWith('\n') ? '\n' : '';
+      result += separator + appended.join('\n');
+    }
+    return result;
   }
 
   private escapeEnvValue(value: string): string {

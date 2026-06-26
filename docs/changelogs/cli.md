@@ -5,6 +5,20 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [0.12.0] - 2026-06-26
+
+### Changed
+
+* **Preserve existing `.env` formatting on pull** — When the target `.env`
+  file already exists, Envilder now updates values in place instead of
+  rewriting the file from scratch. Full-line comments, blank lines, key
+  ordering, `export` prefixes, and surrounding spacing are preserved; only
+  the values of mapped keys are replaced, and new keys are appended at the
+  end. (Inline comments after a value, e.g. `KEY=val # note`, are not
+  preserved.)
+
+---
+
 ## [0.11.0] - 2026-05-31
 
 ### Changed

@@ -177,6 +177,83 @@ describe('FileVariableStore', () => {
         'Failed to write environment file: String error',
       );
     });
+
+    it('Should_PreserveCommentsAndOrder_When_UpdatingExistingEnvFile', async () => {
+      // Arrange
+      const existing = [
+        '# Database configuration',
+        'DB_HOST=old-host',
+        '',
+        '# Auth section',
+        'API_KEY=old-key',
+      ].join('\n');
+      mockInMemoryFiles.set(mockEnvFilePath, existing);
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, {
+        DB_HOST: 'new-host',
+        API_KEY: 'new-key',
+      });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath);
+      expect(actual).toBe(
+        [
+          '# Database configuration',
+          'DB_HOST=new-host',
+          '',
+          '# Auth section',
+          'API_KEY=new-key',
+        ].join('\n'),
+      );
+    });
+
+    it('Should_PreserveKeySpacing_When_UpdatingExistingEnvFile', async () => {
+      // Arrange
+      mockInMemoryFiles.set(mockEnvFilePath, 'export DB_HOST = old-host');
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { DB_HOST: 'new-host' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath);
+      expect(actual).toBe('export DB_HOST = new-host');
+    });
+
+    it('Should_AppendNewKeys_When_KeysNotInExistingEnvFile', async () => {
+      // Arrange
+      mockInMemoryFiles.set(
+        mockEnvFilePath,
+        ['# Existing', 'DB_HOST=old-host'].join('\n'),
+      );
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, {
+        DB_HOST: 'new-host',
+        NEW_VAR: 'new-value',
+      });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath);
+      expect(actual).toBe(
+        ['# Existing', 'DB_HOST=new-host', 'NEW_VAR=new-value'].join('\n'),
+      );
+    });
+
+    it('Should_PreserveTrailingNewline_When_AppendingNewKeys', async () => {
+      // Arrange
+      mockInMemoryFiles.set(mockEnvFilePath, 'DB_HOST=old-host\n');
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, {
+        DB_HOST: 'new-host',
+        NEW_VAR: 'new-value',
+      });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath);
+      expect(actual).toBe('DB_HOST=new-host\nNEW_VAR=new-value');
+    });
   });
 
   describe('loadMapFile', () => {
