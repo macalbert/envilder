@@ -35,3 +35,11 @@ these terms consistently to avoid drift.
 | **Lowkey Vault** | Local Azure Key Vault emulator for acceptance tests. Runs in Docker via TestContainers. |
 | **Container wrapper** | Test helper class with explicit `start()`/`stop()` lifecycle managing a TestContainer instance. |
 | **Conformance fixture** | Shared test data (input map + expected output) validating SDK behavior across languages. |
+
+## Output & Errors
+
+| Term | Definition |
+|------|-----------|
+| **CLI output** | Proactive, human-facing console messages (info, success, progress) shown to an interactive terminal user. CLI-only. SDKs never emit it — they stay silent-by-default. |
+| **Error message** | The human-readable text carried by a thrown error/exception. Emitted by both the CLI and every SDK. Must be clear and actionable. This is the only channel through which SDKs participate in messaging. |
+| **SSO session expired** | Condition where the AWS SSO / IAM Identity Center cached token is missing or expired (the user never ran `aws sso login`, or it lapsed). Modeled as a dedicated typed error (`SsoSessionExpiredError`) in the CLI core and each SDK, carrying a standard, actionable message. |
