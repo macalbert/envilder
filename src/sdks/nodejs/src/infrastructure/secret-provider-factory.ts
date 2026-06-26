@@ -1,5 +1,4 @@
 import { SSMClient } from '@aws-sdk/client-ssm';
-import { fromIni } from '@aws-sdk/credential-providers';
 import { DefaultAzureCredential } from '@azure/identity';
 import { SecretClient } from '@azure/keyvault-secrets';
 import type { EnvilderOptions } from '../domain/envilder-options.js';
@@ -45,9 +44,25 @@ function createAzureProvider(
   return new AzureKeyVaultSecretProvider(client);
 }
 
+export async function resolveRegionWithFallback(
+  profile?: string,
+): Promise<string> {
+  if (process.env.AWS_REGION) {
+    return process.env.AWS_REGION;
+  }
+  if (process.env.AWS_DEFAULT_REGION) {
+    return process.env.AWS_DEFAULT_REGION;
+  }
+  try {
+    return await new SSMClient(profile ? { profile } : {}).config.region();
+  } catch {
+    return 'us-east-1';
+  }
+}
+
 function createAwsProvider(profile: string | undefined): AwsSsmSecretProvider {
-  const clientOptions = profile ? { credentials: fromIni({ profile }) } : {};
-  const client = new SSMClient(clientOptions);
+  const region = () => resolveRegionWithFallback(profile);
+  const client = new SSMClient(profile ? { profile, region } : { region });
   return new AwsSsmSecretProvider(client);
 }
 

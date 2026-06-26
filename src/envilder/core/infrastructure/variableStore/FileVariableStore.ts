@@ -80,9 +80,8 @@ export class FileVariableStore implements IVariableStore {
     destination: string,
     envVariables: Record<string, string>,
   ): Promise<void> {
-    const envContent = Object.entries(envVariables)
-      .map(([key, value]) => `${key}=${this.escapeEnvValue(value)}`)
-      .join('\n');
+    const existingContent = await this.readExistingEnvContent(destination);
+    const envContent = this.buildEnvContent(existingContent, envVariables);
 
     try {
       await fs.writeFile(destination, envContent);
@@ -94,6 +93,94 @@ export class FileVariableStore implements IVariableStore {
         `Failed to write environment file: ${errorMessage}`,
       );
     }
+  }
+
+  private async readExistingEnvContent(
+    destination: string,
+  ): Promise<string | null> {
+    try {
+      return await fs.readFile(destination, 'utf-8');
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        (error as NodeJS.ErrnoException).code === 'ENOENT'
+      ) {
+        return null;
+      }
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to read environment file: ${message}`);
+      throw new EnvironmentFileError(
+        `Failed to read environment file: ${message}`,
+      );
+    }
+  }
+
+  private buildEnvContent(
+    existingContent: string | null,
+    envVariables: Record<string, string>,
+  ): string {
+    const pending = { ...envVariables };
+
+    if (existingContent === null) {
+      return Object.entries(pending)
+        .map(([key, value]) => `${key}=${this.escapeEnvValue(value)}`)
+        .join('\n');
+    }
+
+    const newline = existingContent.includes('\r\n') ? '\r\n' : '\n';
+    const hasTrailingNewline = /\r?\n$/.test(existingContent);
+    const lines = existingContent === '' ? [] : existingContent.split(/\r?\n/);
+    if (hasTrailingNewline) {
+      lines.pop();
+    }
+
+    const assignmentRegex = /^(\s*(?:export\s+)?)([\w.-]+)(\s*=\s*)(.*)$/;
+    const updatedKeys = new Set<string>();
+    const mergedLines = lines.map((line) => {
+      const match = assignmentRegex.exec(line);
+      if (match === null) {
+        return line;
+      }
+      const [, prefix, key, separator, originalValue] = match;
+      if (!Object.hasOwn(pending, key)) {
+        return line;
+      }
+      updatedKeys.add(key);
+      const value = this.formatValue(pending[key], originalValue);
+      return `${prefix}${key}${separator}${value}`;
+    });
+    for (const key of updatedKeys) {
+      delete pending[key];
+    }
+
+    const appended = Object.entries(pending).map(
+      ([key, value]) => `${key}=${this.escapeEnvValue(value)}`,
+    );
+    const allLines =
+      appended.length > 0 ? [...mergedLines, ...appended] : mergedLines;
+    const result = allLines.join(newline);
+    return hasTrailingNewline ? result + newline : result;
+  }
+
+  private formatValue(newValue: string, originalValue: string): string {
+    const trimmed = originalValue.trim();
+    const quote = trimmed[0];
+    const isQuoted =
+      trimmed.length >= 2 &&
+      (quote === '"' || quote === "'") &&
+      trimmed[trimmed.length - 1] === quote;
+    // Only keep the original quotes when the new value can be wrapped safely.
+    // A value containing the same quote, a backslash, or a newline would
+    // produce a string dotenv cannot parse back, so fall back to the
+    // unquoted escaped form instead of corrupting the value.
+    const isSafeToWrap =
+      !newValue.includes(quote) &&
+      !newValue.includes('\\') &&
+      !/[\r\n]/.test(newValue);
+    if (isQuoted && isSafeToWrap) {
+      return `${quote}${newValue}${quote}`;
+    }
+    return this.escapeEnvValue(newValue);
   }
 
   private escapeEnvValue(value: string): string {

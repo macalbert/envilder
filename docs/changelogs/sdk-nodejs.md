@@ -1,3 +1,19 @@
+## [0.3.1] - 2026-06-26
+
+### Fixed
+
+* **Honor the `profile` option for the AWS region, not just credentials** —
+  When a profile was set via the `profile` option or `$config.profile`, the
+  SDK applied it to credentials only; the AWS SDK fell back to the default
+  profile's region and silently read SSM parameters from the wrong
+  account-region. The SDK now sets `AWS_PROFILE` so the AWS SDK resolves both
+  the profile's region and its (SSO-capable) credentials natively. Region
+  resolution order is `AWS_REGION` > `AWS_DEFAULT_REGION` > profile
+  region > `us-east-1` fallback
+  ([#382](https://github.com/macalbert/envilder/issues/382))
+
+---
+
 ## [0.3.0] - 2026-05-31
 
 ### Changed

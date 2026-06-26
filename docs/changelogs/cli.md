@@ -5,6 +5,46 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [0.12.1] - 2026-06-26
+
+### Fixed
+
+* **Honor `$config.profile` for the AWS region, not just credentials** —
+  When a map file set an AWS profile via `$config.profile`, Envilder applied
+  it to credentials only; the AWS SDK fell back to the default profile's
+  region and silently read or wrote SSM parameters in the wrong
+  account-region. Envilder now sets `AWS_PROFILE` so the AWS SDK resolves
+  both the profile's region and its (SSO-capable) credentials natively.
+  Region resolution order is `AWS_REGION` > `AWS_DEFAULT_REGION` >
+  profile region > `us-east-1` fallback
+  ([#382](https://github.com/macalbert/envilder/issues/382))
+
+### Added
+
+* **Log the effective AWS identity before resolving secrets** —
+  Before the first read or write, Envilder logs
+  `AWS identity → account=… region=… profile=…` so a misrouted account
+  or region is immediately visible. The account is read from the active
+  credentials, falling back to an STS `GetCallerIdentity` call when not
+  present, then `unknown`
+  ([#382](https://github.com/macalbert/envilder/issues/382))
+
+---
+
+## [0.12.0] - 2026-06-26
+
+### Changed
+
+* **Preserve existing `.env` formatting on pull** — When the target `.env`
+  file already exists, Envilder now updates values in place instead of
+  rewriting the file from scratch. Full-line comments, blank lines, key
+  ordering, `export` prefixes, and surrounding spacing are preserved; only
+  the values of mapped keys are replaced, and new keys are appended at the
+  end. (Inline comments after a value, e.g. `KEY=val # note`, are not
+  preserved.)
+
+---
+
 ## [0.11.0] - 2026-05-31
 
 ### Changed
