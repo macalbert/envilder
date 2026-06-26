@@ -153,4 +153,26 @@ describe('DispatchActionCommandHandler', () => {
     // Assert
     expect(mockSecretProvider.logIdentity).toHaveBeenCalled();
   });
+
+  it('Should_NotLogIdentity_When_RequiredArgumentsAreMissing', async () => {
+    // Arrange
+    const command = new DispatchActionCommand(
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      OperationMode.PULL_SECRETS_TO_ENV,
+    );
+
+    // Act
+    const action = () => sut.handleCommand(command);
+
+    // Assert
+    await expect(action).rejects.toThrow(
+      'Missing required arguments: --map and --envfile',
+    );
+    expect(mockSecretProvider.logIdentity).not.toHaveBeenCalled();
+  });
 });

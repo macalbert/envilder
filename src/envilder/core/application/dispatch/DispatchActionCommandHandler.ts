@@ -25,6 +25,8 @@ export class DispatchActionCommandHandler {
   ) {}
 
   async handleCommand(command: DispatchActionCommand): Promise<void> {
+    this.validateRequiredArguments(command);
+
     if (this.secretProvider.logIdentity) {
       await this.secretProvider.logIdentity();
     }
@@ -44,27 +46,28 @@ export class DispatchActionCommandHandler {
     }
   }
 
+  private validateRequiredArguments(command: DispatchActionCommand): void {
+    if (command.mode === OperationMode.PUSH_SINGLE) {
+      this.validatePushSingleOptions(command);
+      return;
+    }
+
+    this.validateMapAndEnvFileOptions(command);
+  }
+
   private async handlePushSingle(
     command: DispatchActionCommand,
   ): Promise<void> {
-    if (!command.key || !command.value || !command.secretPath) {
-      throw new InvalidArgumentError(
-        'Missing required arguments: --key, --value, and --secret-path',
-      );
-    }
-
     const pushSingleCommand = PushSingleCommand.create(
-      command.key,
-      command.value,
-      command.secretPath,
+      command.key as string,
+      command.value as string,
+      command.secretPath as string,
     );
 
     await this.pushSingleHandler.handle(pushSingleCommand);
   }
 
   private async handlePush(command: DispatchActionCommand): Promise<void> {
-    this.validateMapAndEnvFileOptions(command);
-
     const pushEnvToSecretsCommand = PushEnvToSecretsCommand.create(
       command.map as string,
       command.envfile as string,
@@ -74,14 +77,20 @@ export class DispatchActionCommandHandler {
   }
 
   private async handlePull(command: DispatchActionCommand): Promise<void> {
-    this.validateMapAndEnvFileOptions(command);
-
     const pullSecretsToEnvCommand = PullSecretsToEnvCommand.create(
       command.map as string,
       command.envfile as string,
     );
 
     await this.pullHandler.handle(pullSecretsToEnvCommand);
+  }
+
+  private validatePushSingleOptions(command: DispatchActionCommand): void {
+    if (!command.key || !command.value || !command.secretPath) {
+      throw new InvalidArgumentError(
+        'Missing required arguments: --key, --value, and --secret-path',
+      );
+    }
   }
 
   private validateMapAndEnvFileOptions(command: DispatchActionCommand): void {
