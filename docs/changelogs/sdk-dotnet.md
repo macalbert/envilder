@@ -1,3 +1,14 @@
+## [0.5.0] - 2026-06-26
+
+### Added
+
+* **New `ExpiredCredentialsException`** — Thrown by the AWS SSM provider
+  on expired or invalid credentials (e.g. an expired SSO session), with
+  an actionable message guiding you to refresh credentials (e.g. run
+  `aws sso login`)
+
+---
+
 ## [0.4.0] - 2026-05-18
 
 ### Changed

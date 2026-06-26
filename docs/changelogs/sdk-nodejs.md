@@ -1,3 +1,14 @@
+## [0.4.0] - 2026-06-26
+
+### Added
+
+* **New exported `ExpiredCredentialsError`** — Thrown by the AWS SSM
+  provider when credentials or the security token are expired or
+  invalid (e.g. an expired SSO session), with an actionable message
+  guiding you to refresh credentials (e.g. run `aws sso login`)
+
+---
+
 ## [0.3.1] - 2026-06-26
 
 ### Fixed

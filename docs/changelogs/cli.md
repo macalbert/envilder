@@ -5,6 +5,35 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [0.13.0] - 2026-06-26
+
+### Added
+
+* **Colorized `AWS identity` banner** — The
+  `AWS identity → account=… region=… profile=…` line is now colorized.
+  `account` and `region` render in red when they resolve to `unknown`,
+  signalling that authentication failed
+  ([#382](https://github.com/macalbert/envilder/issues/382))
+
+### Changed
+
+* **Print the `AWS identity` banner before resolving secrets** — The
+  banner is now printed before secrets are resolved, so it always
+  appears first. Previously it could surface mid-output because secrets
+  resolve in parallel
+  ([#382](https://github.com/macalbert/envilder/issues/382))
+
+### Fixed
+
+* **Clear error for expired or invalid AWS credentials** — Expired or
+  invalid AWS credentials (e.g. an expired SSO session) now produce a
+  clear, actionable `ExpiredCredentialsError` telling you to refresh
+  credentials (e.g. run `aws sso login`), instead of being masked as a
+  misleading `ParameterNotFound`. The pull command now fails fast in
+  this case
+
+---
+
 ## [0.12.1] - 2026-06-26
 
 ### Fixed
