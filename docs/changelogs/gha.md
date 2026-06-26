@@ -1,3 +1,21 @@
+## [0.12.0] - 2026-06-26
+
+### Changed
+
+* **Preserve existing `.env` formatting on pull** — When the target `.env`
+  file already exists, the action now updates values in place instead of
+  rewriting the file from scratch. Full-line comments, blank lines, key
+  ordering, `export` prefixes, and surrounding spacing are preserved; only
+  the values of mapped keys are replaced, and new keys are appended at the
+  end. (Inline comments after a value, e.g. `KEY=val # note`, are not
+  preserved.)
+
+### Dependencies
+
+* Bundle updated with latest CLI core
+
+---
+
 ## [0.11.0] - 2026-05-31
 
 ### Changed
