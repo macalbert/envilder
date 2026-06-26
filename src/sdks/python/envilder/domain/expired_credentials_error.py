@@ -5,21 +5,12 @@ from __future__ import annotations
 _EXPIRED_ERROR_CODES = {
     "ExpiredTokenException",
     "ExpiredToken",
-    "UnrecognizedClient",
-    "UnrecognizedClientException",
-    "InvalidClientTokenId",
-    "InvalidSignatureException",
-    "RequestExpired",
 }
 
 _EXPIRED_EXCEPTION_NAMES = {
-    "NoCredentialsError",
-    "PartialCredentialsError",
-    "CredentialRetrievalError",
     "TokenRetrievalError",
     "UnauthorizedSSOTokenError",
     "SSOTokenLoadError",
-    "RefreshWithMFAUnsupportedError",
 }
 
 _REMEDIATION = (

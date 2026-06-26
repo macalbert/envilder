@@ -24,13 +24,13 @@ describe('AwsSsmSecretProvider expired credentials', () => {
     await expect(act).rejects.toThrow('aws sso login');
   });
 
-  it('Should_ThrowExpiredCredentialsError_When_CredentialsProviderErrorIndicatesExpiredSso', async () => {
+  it('Should_ThrowExpiredCredentialsError_When_TokenProviderErrorIndicatesExpiredSso', async () => {
     // Arrange
     const send = vi.fn();
     const client = { send } as unknown as SSMClient;
     send.mockRejectedValue(
       Object.assign(new Error('Token is expired and refresh failed'), {
-        name: 'CredentialsProviderError',
+        name: 'TokenProviderError',
       }),
     );
     const sut = new AwsSsmSecretProvider(client);

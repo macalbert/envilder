@@ -10,18 +10,12 @@ internal static class ExpiredCredentialsDetector
 	{
 		"ExpiredTokenException",
 		"ExpiredToken",
-		"UnrecognizedClient",
-		"UnrecognizedClientException",
-		"InvalidClientTokenId",
-		"InvalidSignatureException",
-		"RequestExpired",
 	};
 
 	private static readonly HashSet<string> ExpiredExceptionTypeNames = new(StringComparer.OrdinalIgnoreCase)
 	{
 		"ExpiredTokenException",
 		"UnauthorizedException",
-		"UnauthorizedClientException",
 		"InvalidGrantException",
 	};
 

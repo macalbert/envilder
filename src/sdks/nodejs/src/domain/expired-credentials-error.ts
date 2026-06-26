@@ -19,12 +19,6 @@ export class ExpiredCredentialsError extends Error {
 const EXPIRED_CREDENTIAL_ERROR_NAMES = new Set([
   'ExpiredToken',
   'ExpiredTokenException',
-  'UnrecognizedClientException',
-  'InvalidClientTokenId',
-  'InvalidSignatureException',
-  'RequestExpired',
-  'CredentialsProviderError',
-  'ProviderError',
   'TokenProviderError',
   'TokenRefreshRequired',
 ]);
