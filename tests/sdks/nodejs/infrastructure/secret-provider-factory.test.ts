@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SecretProviderType } from '../../../../src/sdks/nodejs/src/domain/secret-provider-type.js';
 import { AzureKeyVaultSecretProvider } from '../../../../src/sdks/nodejs/src/infrastructure/azure/azure-key-vault-secret-provider.js';
 import { createSecretProvider } from '../../../../src/sdks/nodejs/src/infrastructure/secret-provider-factory.js';
@@ -27,10 +27,6 @@ vi.mock('@aws-sdk/client-ssm', () => ({
   SSMClient: class {},
 }));
 
-vi.mock('@aws-sdk/credential-providers', () => ({
-  fromIni: vi.fn().mockReturnValue({}),
-}));
-
 // Mock Azure SDK
 vi.mock('@azure/identity', () => ({
   DefaultAzureCredential: class {},
@@ -41,6 +37,20 @@ vi.mock('@azure/keyvault-secrets', () => ({
 }));
 
 describe('SecretProviderFactory', () => {
+  let savedAwsProfile: string | undefined;
+
+  beforeEach(() => {
+    savedAwsProfile = process.env.AWS_PROFILE;
+  });
+
+  afterEach(() => {
+    if (savedAwsProfile === undefined) {
+      delete process.env.AWS_PROFILE;
+    } else {
+      process.env.AWS_PROFILE = savedAwsProfile;
+    }
+  });
+
   it('Should_CreateAwsProvider_When_NoProviderSpecified', () => {
     // Arrange
     const config = {};
@@ -133,5 +143,18 @@ describe('SecretProviderFactory', () => {
 
     // Assert
     expect(actual).toBeInstanceOf(AzureKeyVaultSecretProvider);
+  });
+
+  it('Should_SetAwsProfileEnv_When_ProfileProvided', () => {
+    // Arrange
+    delete process.env.AWS_PROFILE;
+    const config = { provider: SecretProviderType.Aws };
+    const options = { profile: 'developer' };
+
+    // Act
+    createSecretProvider(config, options);
+
+    // Assert
+    expect(process.env.AWS_PROFILE).toBe('developer');
   });
 });

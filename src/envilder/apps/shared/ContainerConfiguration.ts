@@ -23,10 +23,11 @@ export type InfrastructureOptions = AzureProviderOptions;
 type ProviderFactory = (
   config: MapFileConfig,
   options: InfrastructureOptions,
+  logger: ILogger,
 ) => ISecretProvider;
 
 const providerFactories: Record<string, ProviderFactory> = {
-  aws: (config) => createAwsSecretProvider(config),
+  aws: (config, _options, logger) => createAwsSecretProvider(config, logger),
   azure: (config, options) => createAzureSecretProvider(config, options),
 };
 
@@ -39,6 +40,8 @@ export function configureInfrastructureServices(
     container.bind<ILogger>(TYPES.ILogger).to(ConsoleLogger).inSingletonScope();
   }
 
+  const logger = container.get<ILogger>(TYPES.ILogger);
+
   if (!container.isBound(TYPES.IVariableStore)) {
     container
       .bind<IVariableStore>(TYPES.IVariableStore)
@@ -49,7 +52,6 @@ export function configureInfrastructureServices(
   const selectedProvider = config.provider?.toLowerCase() || 'aws';
 
   if (config.profile && selectedProvider !== 'aws') {
-    const logger = container.get<ILogger>(TYPES.ILogger);
     logger.warn(
       `--profile is only supported with the aws provider` +
         ` and will be ignored` +
@@ -65,7 +67,7 @@ export function configureInfrastructureServices(
         ` ${Object.keys(providerFactories).join(', ')}`,
     );
   }
-  const secretProvider = factory(config, options);
+  const secretProvider = factory(config, options, logger);
 
   container
     .bind<ISecretProvider>(TYPES.ISecretProvider)

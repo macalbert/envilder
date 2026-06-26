@@ -1,3 +1,28 @@
+## [0.12.1] - 2026-06-26
+
+### Fixed
+
+* **Honor `$config.profile` for the AWS region, not just credentials** —
+  When a map file set an AWS profile via `$config.profile`, the action
+  applied it to credentials only; the AWS SDK fell back to the default
+  profile's region and silently read SSM parameters from the wrong
+  account-region. The action now sets `AWS_PROFILE` so the AWS SDK resolves
+  both the profile's region and its (SSO-capable) credentials natively.
+  Region resolution order is `AWS_REGION` > profile region > `us-east-1`
+  fallback ([#382](https://github.com/macalbert/envilder/issues/382))
+
+### Added
+
+* **Log the effective AWS identity before resolving secrets** —
+  Before the first read, the action logs
+  `AWS identity → account=… region=… profile=…` so a misrouted account
+  or region is immediately visible. The account is read from the active
+  credentials, falling back to an STS `GetCallerIdentity` call when not
+  present, then `unknown`
+  ([#382](https://github.com/macalbert/envilder/issues/382))
+
+---
+
 ## [0.12.0] - 2026-06-26
 
 ### Changed

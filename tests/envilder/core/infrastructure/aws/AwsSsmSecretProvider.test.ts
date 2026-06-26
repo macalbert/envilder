@@ -4,12 +4,14 @@ import {
   PutParameterCommand,
   SSM,
 } from '@aws-sdk/client-ssm';
+import { STS } from '@aws-sdk/client-sts';
 import {
   LocalstackContainer,
   type StartedLocalStackContainer,
 } from '@testcontainers/localstack';
 import {
   afterAll,
+  afterEach,
   beforeAll,
   beforeEach,
   describe,
@@ -28,15 +30,31 @@ const NON_EXISTENT_PARAM = '/test/non-existent-param';
 // Unit tests with mocks
 describe('AwsSsmSecretProvider (unit tests)', () => {
   let mockSendFn: ReturnType<typeof vi.fn>;
+  let mockStsSendFn: ReturnType<typeof vi.fn>;
+  let mockRegionFn: ReturnType<typeof vi.fn>;
+  let mockCredentialsFn: ReturnType<typeof vi.fn>;
+  let mockLogger: {
+    info: ReturnType<typeof vi.fn>;
+    warn: ReturnType<typeof vi.fn>;
+    error: ReturnType<typeof vi.fn>;
+  };
   let mockSsm: SSM;
   let sut: AwsSsmSecretProvider;
 
   beforeEach(() => {
     mockSendFn = vi.fn();
+    mockRegionFn = vi.fn().mockResolvedValue('us-east-1');
+    mockCredentialsFn = vi.fn().mockResolvedValue({
+      accountId: '123456789012',
+    });
     mockSsm = {
       send: mockSendFn,
+      config: { region: mockRegionFn, credentials: mockCredentialsFn },
     } as unknown as SSM;
-    sut = new AwsSsmSecretProvider(mockSsm);
+    mockStsSendFn = vi.fn();
+    const mockSts = { send: mockStsSendFn } as unknown as STS;
+    mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+    sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts);
   });
 
   describe('getSecret', () => {
@@ -136,6 +154,97 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       await expect(action()).rejects.toThrow('Access denied');
     });
   });
+
+  describe('identity logging', () => {
+    let originalAwsProfile: string | undefined;
+
+    beforeEach(() => {
+      originalAwsProfile = process.env.AWS_PROFILE;
+    });
+
+    afterEach(() => {
+      if (originalAwsProfile === undefined) {
+        delete process.env.AWS_PROFILE;
+      } else {
+        process.env.AWS_PROFILE = originalAwsProfile;
+      }
+    });
+
+    it('Should_LogAccountRegionProfile_When_FirstSecretRead', async () => {
+      // Arrange
+      process.env.AWS_PROFILE = 'developer';
+      mockRegionFn.mockResolvedValue('us-east-1');
+      mockCredentialsFn.mockResolvedValue({ accountId: '123456789012' });
+      mockSendFn.mockResolvedValue({ Parameter: { Value: 'v' } });
+
+      // Act
+      await sut.getSecret('x');
+
+      // Assert
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'AWS identity → account=123456789012 region=us-east-1 profile=developer',
+      );
+    });
+
+    it('Should_LogAccountFromSts_When_AccountIdMissing', async () => {
+      // Arrange
+      process.env.AWS_PROFILE = 'developer';
+      mockCredentialsFn.mockResolvedValueOnce({});
+      mockStsSendFn.mockResolvedValue({ Account: '999999999999' });
+      mockSendFn.mockResolvedValue({ Parameter: { Value: 'v' } });
+
+      // Act
+      await sut.getSecret('x');
+
+      // Assert
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'AWS identity → account=999999999999 region=us-east-1 profile=developer',
+      );
+    });
+
+    it('Should_LogUnknownAccount_When_CredentialsAndStsFail', async () => {
+      // Arrange
+      process.env.AWS_PROFILE = 'developer';
+      mockCredentialsFn.mockRejectedValueOnce(new Error('no creds'));
+      mockStsSendFn.mockRejectedValue(new Error('sts down'));
+      mockSendFn.mockResolvedValue({ Parameter: { Value: 'v' } });
+
+      // Act
+      await sut.getSecret('x');
+
+      // Assert
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'AWS identity → account=unknown region=us-east-1 profile=developer',
+      );
+    });
+
+    it('Should_LogIdentityOnlyOnce_When_MultipleSecretsRead', async () => {
+      // Arrange
+      process.env.AWS_PROFILE = 'developer';
+      mockSendFn.mockResolvedValue({ Parameter: { Value: 'v' } });
+
+      // Act
+      await sut.getSecret('a');
+      await sut.getSecret('b');
+
+      // Assert
+      expect(mockLogger.info).toHaveBeenCalledTimes(1);
+    });
+
+    it('Should_DefaultProfile_When_AwsProfileNotSet', async () => {
+      // Arrange
+      delete process.env.AWS_PROFILE;
+      mockSendFn.mockResolvedValue({ Parameter: { Value: 'v' } });
+
+      // Act
+      await sut.getSecret('x');
+
+      // Assert
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'AWS identity → account=123456789012 region=us-east-1 profile=default',
+      );
+    });
+  });
 });
 
 // Integration tests with LocalStack — requires Docker
@@ -143,6 +252,8 @@ describe('AwsSsmSecretProvider (integration with LocalStack)', () => {
   let container: StartedLocalStackContainer;
   let endpoint: string;
   let ssmClient: SSM;
+  let stsClient: STS;
+  const mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
 
   beforeAll(async () => {
     if (!process.env.LOCALSTACK_AUTH_TOKEN) {
@@ -160,6 +271,9 @@ describe('AwsSsmSecretProvider (integration with LocalStack)', () => {
     ssmClient = new SSM({
       endpoint,
     });
+    stsClient = new STS({
+      endpoint,
+    });
     await ssmClient.send(
       new PutParameterCommand({
         Name: PARAM_NAME,
@@ -175,7 +289,7 @@ describe('AwsSsmSecretProvider (integration with LocalStack)', () => {
 
   it('Should_ReturnSecretValue_When_ParameterExists', async () => {
     // Arrange
-    const sut = new AwsSsmSecretProvider(ssmClient);
+    const sut = new AwsSsmSecretProvider(ssmClient, mockLogger, stsClient);
 
     // Act
     const actual = await sut.getSecret(PARAM_NAME);
@@ -186,7 +300,7 @@ describe('AwsSsmSecretProvider (integration with LocalStack)', () => {
 
   it('Should_ReturnUndefined_When_ParameterDoesNotExist', async () => {
     // Arrange
-    const sut = new AwsSsmSecretProvider(ssmClient);
+    const sut = new AwsSsmSecretProvider(ssmClient, mockLogger, stsClient);
 
     // Act
     const actual = await sut.getSecret(NON_EXISTENT_PARAM);
@@ -197,7 +311,7 @@ describe('AwsSsmSecretProvider (integration with LocalStack)', () => {
 
   it('Should_StoreSecretValue_When_SetSecretIsCalled', async () => {
     // Arrange
-    const sut = new AwsSsmSecretProvider(ssmClient);
+    const sut = new AwsSsmSecretProvider(ssmClient, mockLogger, stsClient);
     const paramName = '/test/new-secret';
     const paramValue = 'new-secret-value';
 
@@ -215,7 +329,7 @@ describe('AwsSsmSecretProvider (integration with LocalStack)', () => {
 
   it('Should_UpdateSecretValue_When_SecretAlreadyExists', async () => {
     // Arrange
-    const sut = new AwsSsmSecretProvider(ssmClient);
+    const sut = new AwsSsmSecretProvider(ssmClient, mockLogger, stsClient);
     const paramName = '/test/update-secret';
     const initialValue = 'initial-value';
     const updatedValue = 'updated-value';
