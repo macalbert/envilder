@@ -2,7 +2,6 @@ from unittest.mock import Mock
 
 import pytest
 from botocore.exceptions import ClientError, TokenRetrievalError
-
 from envilder.domain.expired_credentials_error import ExpiredCredentialsError
 from envilder.infrastructure.aws.aws_ssm_secret_provider import (
     AwsSsmSecretProvider,
@@ -20,7 +19,8 @@ class TestExpiredCredentials:
                 "Error": {
                     "Code": "ExpiredTokenException",
                     "Message": (
-                        "The security token included in the request " "is expired"
+                        "The security token included in the request "
+                        "is expired"
                     ),
                 }
             },
