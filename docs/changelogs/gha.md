@@ -3,7 +3,7 @@
 ### Added
 
 * **Colorized `AWS identity` banner** — The
-  `AWS identity → account=… region=… profile=…` line is now colorized.
+  `☁ AWS identity · account=… · region=… · profile=…` line is now colorized.
   `account` and `region` render in red when they resolve to `unknown`,
   signalling that authentication failed
   ([#382](https://github.com/macalbert/envilder/issues/382))
