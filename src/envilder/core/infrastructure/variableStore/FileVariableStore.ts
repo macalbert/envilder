@@ -100,8 +100,18 @@ export class FileVariableStore implements IVariableStore {
   ): Promise<string | null> {
     try {
       return await fs.readFile(destination, 'utf-8');
-    } catch {
-      return null;
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        (error as NodeJS.ErrnoException).code === 'ENOENT'
+      ) {
+        return null;
+      }
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to read environment file: ${message}`);
+      throw new EnvironmentFileError(
+        `Failed to read environment file: ${message}`,
+      );
     }
   }
 
@@ -117,30 +127,52 @@ export class FileVariableStore implements IVariableStore {
         .join('\n');
     }
 
+    const newline = existingContent.includes('\r\n') ? '\r\n' : '\n';
+    const hasTrailingNewline = /\r?\n$/.test(existingContent);
+    const lines = existingContent.split(/\r?\n/);
+    if (hasTrailingNewline) {
+      lines.pop();
+    }
+
     const assignmentRegex = /^(\s*(?:export\s+)?)([\w.-]+)(\s*=\s*)(.*)$/;
-    const mergedLines = existingContent.split('\n').map((line) => {
+    const updatedKeys = new Set<string>();
+    const mergedLines = lines.map((line) => {
       const match = assignmentRegex.exec(line);
       if (match === null) {
         return line;
       }
-      const [, prefix, key, separator] = match;
+      const [, prefix, key, separator, originalValue] = match;
       if (!Object.hasOwn(pending, key)) {
         return line;
       }
-      const value = this.escapeEnvValue(pending[key]);
-      delete pending[key];
+      updatedKeys.add(key);
+      const value = this.formatValue(pending[key], originalValue);
       return `${prefix}${key}${separator}${value}`;
     });
+    for (const key of updatedKeys) {
+      delete pending[key];
+    }
 
-    let result = mergedLines.join('\n');
     const appended = Object.entries(pending).map(
       ([key, value]) => `${key}=${this.escapeEnvValue(value)}`,
     );
-    if (appended.length > 0) {
-      const separator = result.length > 0 && !result.endsWith('\n') ? '\n' : '';
-      result += separator + appended.join('\n');
+    const allLines =
+      appended.length > 0 ? [...mergedLines, ...appended] : mergedLines;
+    const result = allLines.join(newline);
+    return hasTrailingNewline ? result + newline : result;
+  }
+
+  private formatValue(newValue: string, originalValue: string): string {
+    const trimmed = originalValue.trim();
+    const quote = trimmed[0];
+    const isQuoted =
+      trimmed.length >= 2 &&
+      (quote === '"' || quote === "'") &&
+      trimmed[trimmed.length - 1] === quote;
+    if (isQuoted) {
+      return `${quote}${newValue}${quote}`;
     }
-    return result;
+    return this.escapeEnvValue(newValue);
   }
 
   private escapeEnvValue(value: string): string {

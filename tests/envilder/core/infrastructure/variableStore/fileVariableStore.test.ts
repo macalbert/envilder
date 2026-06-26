@@ -21,9 +21,11 @@ vi.mock('node:fs/promises', async () => {
         return Promise.resolve(mockInMemoryFiles.get(path));
       }
       // For non-existent files, behave like real fs
-      return Promise.reject(
-        new Error(`ENOENT: no such file or directory, open '${path}'`),
-      );
+      const error = new Error(
+        `ENOENT: no such file or directory, open '${path}'`,
+      ) as NodeJS.ErrnoException;
+      error.code = 'ENOENT';
+      return Promise.reject(error);
     }),
     access: vi.fn((path) => {
       if (mockInMemoryFiles.has(path)) {
@@ -252,7 +254,92 @@ describe('FileVariableStore', () => {
 
       // Assert
       const actual = mockInMemoryFiles.get(mockEnvFilePath);
-      expect(actual).toBe('DB_HOST=new-host\nNEW_VAR=new-value');
+      expect(actual).toBe('DB_HOST=new-host\nNEW_VAR=new-value\n');
+    });
+
+    it('Should_PreserveCRLFLineEndings_When_UpdatingExistingEnvFile', async () => {
+      // Arrange
+      const existing = [
+        '# Database configuration',
+        'DB_HOST=old-host',
+        '',
+        '# Auth section',
+        'API_KEY=old-key',
+      ].join('\r\n');
+      mockInMemoryFiles.set(mockEnvFilePath, existing);
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, {
+        DB_HOST: 'new-host',
+        API_KEY: 'new-key',
+      });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath);
+      expect(actual).toBe(
+        [
+          '# Database configuration',
+          'DB_HOST=new-host',
+          '',
+          '# Auth section',
+          'API_KEY=new-key',
+        ].join('\r\n'),
+      );
+    });
+
+    it('Should_UpdateAllOccurrences_When_DuplicateKeysExist', async () => {
+      // Arrange
+      mockInMemoryFiles.set(
+        mockEnvFilePath,
+        ['DB_HOST=old1', 'DB_HOST=old2'].join('\n'),
+      );
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { DB_HOST: 'new-host' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath);
+      expect(actual).toBe(['DB_HOST=new-host', 'DB_HOST=new-host'].join('\n'));
+    });
+
+    it('Should_PreserveDoubleQuotes_When_UpdatingQuotedValue', async () => {
+      // Arrange
+      mockInMemoryFiles.set(mockEnvFilePath, 'DB_HOST="old-host"');
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { DB_HOST: 'new-host' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath);
+      expect(actual).toBe('DB_HOST="new-host"');
+    });
+
+    it('Should_PreserveSingleQuotes_When_UpdatingQuotedValue', async () => {
+      // Arrange
+      mockInMemoryFiles.set(mockEnvFilePath, "DB_HOST='old-host'");
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { DB_HOST: 'new-host' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath);
+      expect(actual).toBe("DB_HOST='new-host'");
+    });
+
+    it('Should_ThrowError_When_ReadingExistingEnvFileFailsWithNonEnoent', async () => {
+      // Arrange
+      const error = new Error('Permission denied') as NodeJS.ErrnoException;
+      error.code = 'EACCES';
+      vi.mocked(fs.readFile).mockRejectedValueOnce(error);
+
+      // Act
+      const action = () =>
+        sut.saveEnvironment(mockEnvFilePath, { TEST: 'value' });
+
+      // Assert
+      await expect(action()).rejects.toThrow(
+        'Failed to read environment file: Permission denied',
+      );
     });
   });
 
