@@ -44,19 +44,25 @@ function createAzureProvider(
   return new AzureKeyVaultSecretProvider(client);
 }
 
-export async function resolveRegionWithFallback(): Promise<string> {
+export async function resolveRegionWithFallback(
+  profile?: string,
+): Promise<string> {
+  if (process.env.AWS_REGION) {
+    return process.env.AWS_REGION;
+  }
+  if (process.env.AWS_DEFAULT_REGION) {
+    return process.env.AWS_DEFAULT_REGION;
+  }
   try {
-    return await new SSMClient({}).config.region();
+    return await new SSMClient(profile ? { profile } : {}).config.region();
   } catch {
     return 'us-east-1';
   }
 }
 
 function createAwsProvider(profile: string | undefined): AwsSsmSecretProvider {
-  if (profile) {
-    process.env.AWS_PROFILE = profile;
-  }
-  const client = new SSMClient({ region: resolveRegionWithFallback });
+  const region = () => resolveRegionWithFallback(profile);
+  const client = new SSMClient(profile ? { profile, region } : { region });
   return new AwsSsmSecretProvider(client);
 }
 

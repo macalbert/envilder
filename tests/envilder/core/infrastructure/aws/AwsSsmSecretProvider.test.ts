@@ -11,7 +11,6 @@ import {
 } from '@testcontainers/localstack';
 import {
   afterAll,
-  afterEach,
   beforeAll,
   beforeEach,
   describe,
@@ -33,6 +32,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
   let mockStsSendFn: ReturnType<typeof vi.fn>;
   let mockRegionFn: ReturnType<typeof vi.fn>;
   let mockCredentialsFn: ReturnType<typeof vi.fn>;
+  let mockSts: STS;
   let mockLogger: {
     info: ReturnType<typeof vi.fn>;
     warn: ReturnType<typeof vi.fn>;
@@ -52,7 +52,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       config: { region: mockRegionFn, credentials: mockCredentialsFn },
     } as unknown as SSM;
     mockStsSendFn = vi.fn();
-    const mockSts = { send: mockStsSendFn } as unknown as STS;
+    mockSts = { send: mockStsSendFn } as unknown as STS;
     mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
     sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts);
   });
@@ -156,23 +156,9 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
   });
 
   describe('identity logging', () => {
-    let originalAwsProfile: string | undefined;
-
-    beforeEach(() => {
-      originalAwsProfile = process.env.AWS_PROFILE;
-    });
-
-    afterEach(() => {
-      if (originalAwsProfile === undefined) {
-        delete process.env.AWS_PROFILE;
-      } else {
-        process.env.AWS_PROFILE = originalAwsProfile;
-      }
-    });
-
     it('Should_LogAccountRegionProfile_When_FirstSecretRead', async () => {
       // Arrange
-      process.env.AWS_PROFILE = 'developer';
+      sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts, 'developer');
       mockRegionFn.mockResolvedValue('us-east-1');
       mockCredentialsFn.mockResolvedValue({ accountId: '123456789012' });
       mockSendFn.mockResolvedValue({ Parameter: { Value: 'v' } });
@@ -188,7 +174,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
 
     it('Should_LogAccountFromSts_When_AccountIdMissing', async () => {
       // Arrange
-      process.env.AWS_PROFILE = 'developer';
+      sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts, 'developer');
       mockCredentialsFn.mockResolvedValueOnce({});
       mockStsSendFn.mockResolvedValue({ Account: '999999999999' });
       mockSendFn.mockResolvedValue({ Parameter: { Value: 'v' } });
@@ -204,7 +190,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
 
     it('Should_LogUnknownAccount_When_CredentialsAndStsFail', async () => {
       // Arrange
-      process.env.AWS_PROFILE = 'developer';
+      sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts, 'developer');
       mockCredentialsFn.mockRejectedValueOnce(new Error('no creds'));
       mockStsSendFn.mockRejectedValue(new Error('sts down'));
       mockSendFn.mockResolvedValue({ Parameter: { Value: 'v' } });
@@ -220,7 +206,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
 
     it('Should_LogIdentityOnlyOnce_When_MultipleSecretsRead', async () => {
       // Arrange
-      process.env.AWS_PROFILE = 'developer';
+      sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts, 'developer');
       mockSendFn.mockResolvedValue({ Parameter: { Value: 'v' } });
 
       // Act
@@ -231,9 +217,9 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       expect(mockLogger.info).toHaveBeenCalledTimes(1);
     });
 
-    it('Should_DefaultProfile_When_AwsProfileNotSet', async () => {
+    it('Should_DefaultProfile_When_NoProfileProvided', async () => {
       // Arrange
-      delete process.env.AWS_PROFILE;
+      sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts);
       mockSendFn.mockResolvedValue({ Parameter: { Value: 'v' } });
 
       // Act

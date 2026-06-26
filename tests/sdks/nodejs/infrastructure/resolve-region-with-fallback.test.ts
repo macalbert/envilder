@@ -44,12 +44,11 @@ describe('resolveRegionWithFallback', () => {
     writeFileSync(credentialsFile, '');
     process.env.AWS_CONFIG_FILE = configFile;
     process.env.AWS_SHARED_CREDENTIALS_FILE = credentialsFile;
-    process.env.AWS_PROFILE = 'developer';
     delete process.env.AWS_REGION;
     delete process.env.AWS_DEFAULT_REGION;
 
     // Act
-    const actual = await resolveRegionWithFallback();
+    const actual = await resolveRegionWithFallback('developer');
 
     // Assert
     expect(actual).toBe('us-east-1');
@@ -66,12 +65,11 @@ describe('resolveRegionWithFallback', () => {
     writeFileSync(credentialsFile, '');
     process.env.AWS_CONFIG_FILE = configFile;
     process.env.AWS_SHARED_CREDENTIALS_FILE = credentialsFile;
-    process.env.AWS_PROFILE = 'noregion';
     delete process.env.AWS_REGION;
     delete process.env.AWS_DEFAULT_REGION;
 
     // Act
-    const actual = await resolveRegionWithFallback();
+    const actual = await resolveRegionWithFallback('noregion');
 
     // Assert
     expect(actual).toBe('us-east-1');
@@ -85,14 +83,31 @@ describe('resolveRegionWithFallback', () => {
     writeFileSync(credentialsFile, '');
     process.env.AWS_CONFIG_FILE = configFile;
     process.env.AWS_SHARED_CREDENTIALS_FILE = credentialsFile;
-    process.env.AWS_PROFILE = 'developer';
     process.env.AWS_REGION = 'eu-central-1';
     delete process.env.AWS_DEFAULT_REGION;
 
     // Act
-    const actual = await resolveRegionWithFallback();
+    const actual = await resolveRegionWithFallback('developer');
 
     // Assert
     expect(actual).toBe('eu-central-1');
+  });
+
+  it('Should_PreferAwsDefaultRegion_When_OnlyAwsDefaultRegionIsSet', async () => {
+    // Arrange
+    const configFile = join(tempDir, 'config');
+    const credentialsFile = join(tempDir, 'credentials');
+    writeFileSync(configFile, '[profile developer]\nregion = us-east-1');
+    writeFileSync(credentialsFile, '');
+    process.env.AWS_CONFIG_FILE = configFile;
+    process.env.AWS_SHARED_CREDENTIALS_FILE = credentialsFile;
+    delete process.env.AWS_REGION;
+    process.env.AWS_DEFAULT_REGION = 'ap-southeast-2';
+
+    // Act
+    const actual = await resolveRegionWithFallback('developer');
+
+    // Assert
+    expect(actual).toBe('ap-southeast-2');
   });
 });

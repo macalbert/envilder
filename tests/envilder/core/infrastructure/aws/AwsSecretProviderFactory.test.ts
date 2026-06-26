@@ -51,12 +51,11 @@ describe('AwsSecretProviderFactory', () => {
     it('Should_ResolveProfileRegion_When_ProfileHasRegionInConfig', async () => {
       // Arrange
       writeFileSync(configPath, '[profile developer]\nregion = us-east-1\n');
-      process.env.AWS_PROFILE = 'developer';
       delete process.env.AWS_REGION;
       delete process.env.AWS_DEFAULT_REGION;
 
       // Act
-      const actual = await resolveRegionWithFallback();
+      const actual = await resolveRegionWithFallback('developer');
 
       // Assert
       expect(actual).toBe('us-east-1');
@@ -68,12 +67,11 @@ describe('AwsSecretProviderFactory', () => {
         configPath,
         '[profile noregion]\nsso_account_id = 123456789012\n',
       );
-      process.env.AWS_PROFILE = 'noregion';
       delete process.env.AWS_REGION;
       delete process.env.AWS_DEFAULT_REGION;
 
       // Act
-      const actual = await resolveRegionWithFallback();
+      const actual = await resolveRegionWithFallback('noregion');
 
       // Assert
       expect(actual).toBe('us-east-1');
@@ -82,22 +80,34 @@ describe('AwsSecretProviderFactory', () => {
     it('Should_PreferAwsRegionEnv_When_AwsRegionIsSet', async () => {
       // Arrange
       writeFileSync(configPath, '[profile developer]\nregion = us-east-1\n');
-      process.env.AWS_PROFILE = 'developer';
       process.env.AWS_REGION = 'eu-central-1';
       delete process.env.AWS_DEFAULT_REGION;
 
       // Act
-      const actual = await resolveRegionWithFallback();
+      const actual = await resolveRegionWithFallback('developer');
 
       // Assert
       expect(actual).toBe('eu-central-1');
+    });
+
+    it('Should_PreferAwsDefaultRegion_When_OnlyAwsDefaultRegionIsSet', async () => {
+      // Arrange
+      writeFileSync(configPath, '[profile developer]\nregion = us-east-1\n');
+      delete process.env.AWS_REGION;
+      process.env.AWS_DEFAULT_REGION = 'ap-southeast-2';
+
+      // Act
+      const actual = await resolveRegionWithFallback('developer');
+
+      // Assert
+      expect(actual).toBe('ap-southeast-2');
     });
   });
 
   describe('createAwsSecretProvider', () => {
     const mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
 
-    it('Should_SetAwsProfileEnv_When_ProfileProvided', () => {
+    it('Should_NotMutateAwsProfileEnv_When_ProfileProvided', () => {
       // Arrange
       delete process.env.AWS_PROFILE;
 
@@ -108,7 +118,7 @@ describe('AwsSecretProviderFactory', () => {
       );
 
       // Assert
-      expect(process.env.AWS_PROFILE).toBe('developer');
+      expect(process.env.AWS_PROFILE).toBeUndefined();
     });
 
     it('Should_NotSetAwsProfile_When_NoProfileProvided', () => {

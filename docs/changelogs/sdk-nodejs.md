@@ -8,7 +8,8 @@
   profile's region and silently read SSM parameters from the wrong
   account-region. The SDK now sets `AWS_PROFILE` so the AWS SDK resolves both
   the profile's region and its (SSO-capable) credentials natively. Region
-  resolution order is `AWS_REGION` > profile region > `us-east-1` fallback
+  resolution order is `AWS_REGION` > `AWS_DEFAULT_REGION` > profile
+  region > `us-east-1` fallback
   ([#382](https://github.com/macalbert/envilder/issues/382))
 
 ---

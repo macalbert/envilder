@@ -15,12 +15,14 @@ export class AwsSsmSecretProvider implements ISecretProvider {
   private ssm: SSM;
   private logger: ILogger;
   private sts: STS;
+  private profile?: string;
   private identityLogged = false;
 
-  constructor(ssm: SSM, logger: ILogger, sts: STS) {
+  constructor(ssm: SSM, logger: ILogger, sts: STS, profile?: string) {
     this.ssm = ssm;
     this.logger = logger;
     this.sts = sts;
+    this.profile = profile;
   }
 
   async getSecret(name: string): Promise<string | undefined> {
@@ -65,9 +67,11 @@ export class AwsSsmSecretProvider implements ISecretProvider {
       return;
     }
     this.identityLogged = true;
-    const region = await this.resolveRegion();
-    const account = await this.resolveAccount();
-    const profile = process.env.AWS_PROFILE ?? 'default';
+    const [region, account] = await Promise.all([
+      this.resolveRegion(),
+      this.resolveAccount(),
+    ]);
+    const profile = this.profile ?? 'default';
     this.logger.info(
       `AWS identity → account=${account} region=${region} profile=${profile}`,
     );

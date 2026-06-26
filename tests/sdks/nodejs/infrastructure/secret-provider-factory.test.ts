@@ -145,7 +145,7 @@ describe('SecretProviderFactory', () => {
     expect(actual).toBeInstanceOf(AzureKeyVaultSecretProvider);
   });
 
-  it('Should_SetAwsProfileEnv_When_ProfileProvided', () => {
+  it('Should_NotMutateAwsProfileEnv_When_ProfileProvided', () => {
     // Arrange
     delete process.env.AWS_PROFILE;
     const config = { provider: SecretProviderType.Aws };
@@ -155,6 +155,6 @@ describe('SecretProviderFactory', () => {
     createSecretProvider(config, options);
 
     // Assert
-    expect(process.env.AWS_PROFILE).toBe('developer');
+    expect(process.env.AWS_PROFILE).toBeUndefined();
   });
 });
