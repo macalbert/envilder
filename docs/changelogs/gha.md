@@ -44,7 +44,7 @@
 
 * **Log the effective AWS identity before resolving secrets** —
   Before the first read, the action logs
-  `AWS identity → account=… region=… profile=…` so a misrouted account
+  `☁ AWS identity · account=… · region=… · profile=…` so a misrouted account
   or region is immediately visible. The account is read from the active
   credentials, falling back to an STS `GetCallerIdentity` call when not
   present, then `unknown`
