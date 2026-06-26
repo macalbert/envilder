@@ -42,9 +42,9 @@ messages, and lets SDK consumers `catch` it programmatically.
 
 ### 2. Single CLI error-presentation point
 
-The CLI's lone catch site (`apps/cli/Index.ts` `main().catch(...)`) is refactored
+The CLI's lone catch site (`src/envilder/apps/cli/Index.ts` `main().catch(...)`) is refactored
 into a dedicated `CliErrorPresenter`. This is the **one place** that maps an
-error type to its interactive rendering: icon, colour, layout, remediation hint,
+error type to its interactive rendering: icon, color, layout, remediation hint,
 and — for `SsoSessionExpiredError` — the optional `aws sso login` redirect.
 Centralizing here means the CLI's wording and styling are restyled in one spot,
 not scattered per error.
@@ -78,9 +78,9 @@ meet these standards:
   precise).
 - **Keyword-anchored.** Surface the concrete nouns that let a user search/act:
   the profile name, the command to run, the provider.
-- **CLI = aesthetically formatted** (colour, icon, layout, indentation) via the
+- **CLI = aesthetically formatted** (color, icon, layout, indentation) via the
   `CliErrorPresenter`. **SDK = clean plain text** in the thrown error — no ANSI
-  colour (it may land in logs/JSON), but the same clarity and steps.
+  color (it may land in logs/JSON), but the same clarity and steps.
 
 ## Consequences
 
