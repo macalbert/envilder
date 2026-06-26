@@ -129,7 +129,7 @@ export class FileVariableStore implements IVariableStore {
 
     const newline = existingContent.includes('\r\n') ? '\r\n' : '\n';
     const hasTrailingNewline = /\r?\n$/.test(existingContent);
-    const lines = existingContent.split(/\r?\n/);
+    const lines = existingContent === '' ? [] : existingContent.split(/\r?\n/);
     if (hasTrailingNewline) {
       lines.pop();
     }
@@ -169,7 +169,15 @@ export class FileVariableStore implements IVariableStore {
       trimmed.length >= 2 &&
       (quote === '"' || quote === "'") &&
       trimmed[trimmed.length - 1] === quote;
-    if (isQuoted) {
+    // Only keep the original quotes when the new value can be wrapped safely.
+    // A value containing the same quote, a backslash, or a newline would
+    // produce a string dotenv cannot parse back, so fall back to the
+    // unquoted escaped form instead of corrupting the value.
+    const isSafeToWrap =
+      !newValue.includes(quote) &&
+      !newValue.includes('\\') &&
+      !/[\r\n]/.test(newValue);
+    if (isQuoted && isSafeToWrap) {
       return `${quote}${newValue}${quote}`;
     }
     return this.escapeEnvValue(newValue);

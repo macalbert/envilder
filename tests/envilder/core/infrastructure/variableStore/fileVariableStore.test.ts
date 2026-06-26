@@ -326,6 +326,30 @@ describe('FileVariableStore', () => {
       expect(actual).toBe("DB_HOST='new-host'");
     });
 
+    it('Should_FallBackToUnquoted_When_NewValueContainsTheQuoteCharacter', async () => {
+      // Arrange
+      mockInMemoryFiles.set(mockEnvFilePath, 'DB_HOST="old-host"');
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { DB_HOST: 'has"quote' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath);
+      expect(actual).toBe('DB_HOST=has"quote');
+    });
+
+    it('Should_NotAddLeadingBlankLine_When_ExistingFileIsEmpty', async () => {
+      // Arrange
+      mockInMemoryFiles.set(mockEnvFilePath, '');
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { NEW_VAR: 'new-value' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath);
+      expect(actual).toBe('NEW_VAR=new-value');
+    });
+
     it('Should_ThrowError_When_ReadingExistingEnvFileFailsWithNonEnoent', async () => {
       // Arrange
       const error = new Error('Permission denied') as NodeJS.ErrnoException;
