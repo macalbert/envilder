@@ -62,6 +62,26 @@ What is "unified" is the *contract*, not the code: identical error types,
 identical structured data, and identical default-message wording across the CLI
 and every SDK. The rich, interactive presentation is exclusive to the CLI.
 
+### 5. Message quality bar
+
+Every error message and remediation — CLI output and SDK error text alike — must
+clear this bar:
+
+- **Plain and direct.** Written for a broad developer audience; no internal
+  jargon, no provider stack-trace noise leaking through. A reader should
+  understand what went wrong without prior Envilder knowledge.
+- **Actionable, step-by-step.** State the problem in one line, then the exact
+  steps to fix it (e.g. *"Run `aws sso login --profile dev`, then retry"*).
+  Never just report a failure without a path forward.
+- **Professional and calm.** No blame, no cute noise in the *failure* path
+  (the playful tone in the success path stays; errors are reassuring and
+  precise).
+- **Keyword-anchored.** Surface the concrete nouns that let a user search/act:
+  the profile name, the command to run, the provider.
+- **CLI = aesthetically formatted** (colour, icon, layout, indentation) via the
+  `CliErrorPresenter`. **SDK = clean plain text** in the thrown error — no ANSI
+  colour (it may land in logs/JSON), but the same clarity and steps.
+
 ## Consequences
 
 - **More public API surface per stack** — each runtime gains new public error
