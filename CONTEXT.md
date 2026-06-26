@@ -16,6 +16,7 @@ these terms consistently to avoid drift.
 | **Port** | Interface defining a capability boundary (e.g., `ISecretProvider`, `IVariableStore`, `ILogger`). Domain-owned, infrastructure-implemented. |
 | **Adapter** | Concrete implementation of a port for a specific technology (e.g., `AwsSsmSecretProvider`). |
 | **Map file config (`$config`)** | Optional section inside a map file declaring provider type, vault URL, AWS profile, etc. Merged with CLI flags (flags win). |
+| **Local override map file** | A personal, gitignored map file whose name is derived from a base map file by inserting `.local` before the extension (`XXXXX.json` → `XXXXX.local.json`, same directory). When present, it is always layered on top of the base: `$config` is replaced wholesale, variable mappings are merged per key. Never committed; never affects other developers. The override itself has no further override. |
 
 ## SDK Terms
 
