@@ -6,6 +6,7 @@ from envilder.application.secret_validation import (
     validate_secrets,
 )
 from envilder.domain.envilder_options import EnvilderOptions
+from envilder.domain.expired_credentials_error import ExpiredCredentialsError
 from envilder.domain.map_file_config import MapFileConfig
 from envilder.domain.parsed_map_file import ParsedMapFile
 from envilder.domain.ports.secret_provider import ISecretProvider
@@ -23,6 +24,7 @@ __all__ = [
     "Envilder",
     "EnvilderClient",
     "EnvilderOptions",
+    "ExpiredCredentialsError",
     "ISecretProvider",
     "MapFileConfig",
     "MapFileParser",

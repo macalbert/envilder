@@ -1,6 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { InvalidArgumentError } from '../../domain/errors/DomainErrors.js';
 import { OperationMode } from '../../domain/OperationMode.js';
+import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import { TYPES } from '../../types.js';
 import { PullSecretsToEnvCommand } from '../pullSecretsToEnv/PullSecretsToEnvCommand.js';
 import type { PullSecretsToEnvCommandHandler } from '../pullSecretsToEnv/PullSecretsToEnvCommandHandler.js';
@@ -19,9 +20,14 @@ export class DispatchActionCommandHandler {
     private readonly pushHandler: PushEnvToSecretsCommandHandler,
     @inject(TYPES.PushSingleCommandHandler)
     private readonly pushSingleHandler: PushSingleCommandHandler,
+    @inject(TYPES.ISecretProvider)
+    private readonly secretProvider: ISecretProvider,
   ) {}
 
   async handleCommand(command: DispatchActionCommand): Promise<void> {
+    if (this.secretProvider.logIdentity) {
+      await this.secretProvider.logIdentity();
+    }
     switch (command.mode) {
       case OperationMode.PUSH_SINGLE:
         await this.handlePushSingle(command);

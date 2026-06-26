@@ -40,3 +40,19 @@ export class ParameterNotFoundError extends DomainError {
 
   readonly paramName: string;
 }
+
+/**
+ * Error thrown when AWS credentials or the security token are expired or invalid.
+ */
+export class ExpiredCredentialsError extends DomainError {
+  constructor(cause?: unknown) {
+    super(
+      'AWS credentials are expired or invalid. Your security token or SSO ' +
+        'session may have expired. Refresh your credentials and retry ' +
+        '(for SSO, run: aws sso login).',
+    );
+    if (cause !== undefined) {
+      (this as { cause?: unknown }).cause = cause;
+    }
+  }
+}

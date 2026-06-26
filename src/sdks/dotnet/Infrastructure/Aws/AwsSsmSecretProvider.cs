@@ -42,6 +42,10 @@ public class AwsSsmSecretProvider : ISecretProvider
 		{
 			return null;
 		}
+		catch (Exception ex) when (ExpiredCredentialsDetector.IsExpiredCredentials(ex))
+		{
+			throw new ExpiredCredentialsException(ex);
+		}
 	}
 
 	/// <inheritdoc />
@@ -63,6 +67,10 @@ public class AwsSsmSecretProvider : ISecretProvider
 		catch (ParameterNotFoundException)
 		{
 			return null;
+		}
+		catch (Exception ex) when (ExpiredCredentialsDetector.IsExpiredCredentials(ex))
+		{
+			throw new ExpiredCredentialsException(ex);
 		}
 	}
 }

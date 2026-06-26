@@ -9,6 +9,7 @@ export {
   validateSecrets,
 } from './application/secret-validation.js';
 export type { EnvilderOptions } from './domain/envilder-options.js';
+export { ExpiredCredentialsError } from './domain/expired-credentials-error.js';
 export type { MapFileConfig } from './domain/map-file-config.js';
 export type { ParsedMapFile } from './domain/parsed-map-file.js';
 export type { ISecretProvider } from './domain/ports/secret-provider.js';

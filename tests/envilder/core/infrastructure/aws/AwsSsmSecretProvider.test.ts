@@ -18,6 +18,10 @@ import {
   it,
   vi,
 } from 'vitest';
+import {
+  ExpiredCredentialsError,
+  SecretOperationError,
+} from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import { AwsSsmSecretProvider } from '../../../../../src/envilder/core/infrastructure/aws/AwsSsmSecretProvider';
 
 // Constants for integration tests
@@ -25,6 +29,9 @@ const LOCALSTACK_IMAGE = 'localstack/localstack:stable';
 const PARAM_NAME = '/test/secret';
 const PARAM_VALUE = 'super-secret-value';
 const NON_EXISTENT_PARAM = '/test/non-existent-param';
+
+const stripAnsi = (value: string): string =>
+  value.replace(new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g'), '');
 
 // Unit tests with mocks
 describe('AwsSsmSecretProvider (unit tests)', () => {
@@ -119,6 +126,36 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
         'Failed to get secret *******ram: String error',
       );
     });
+
+    it('Should_ThrowExpiredCredentialsError_When_GetSecretFailsWithExpiredToken', async () => {
+      // Arrange
+      mockSendFn.mockRejectedValueOnce(
+        Object.assign(
+          new Error('The security token included in the request is expired'),
+          { name: 'ExpiredTokenException' },
+        ),
+      );
+
+      // Act
+      const error = await sut.getSecret('/p').catch((e: unknown) => e);
+
+      // Assert
+      expect(error).toBeInstanceOf(ExpiredCredentialsError);
+      expect((error as Error).message).toContain('aws sso login');
+    });
+
+    it('Should_StillThrowSecretOperationError_When_NonCredentialErrorOccurs', async () => {
+      // Arrange
+      mockSendFn.mockRejectedValueOnce(
+        Object.assign(new Error('boom'), { name: 'InternalServerError' }),
+      );
+
+      // Act
+      const action = () => sut.getSecret('/p');
+
+      // Assert
+      await expect(action()).rejects.toThrow(SecretOperationError);
+    });
   });
 
   describe('setSecret', () => {
@@ -153,6 +190,22 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       // Assert
       await expect(action()).rejects.toThrow('Access denied');
     });
+
+    it('Should_ThrowExpiredCredentialsError_When_SetSecretFailsWithExpiredToken', async () => {
+      // Arrange
+      mockSendFn.mockRejectedValueOnce(
+        Object.assign(
+          new Error('The security token included in the request is expired'),
+          { name: 'ExpiredTokenException' },
+        ),
+      );
+
+      // Act
+      const action = () => sut.setSecret('/p', 'v');
+
+      // Assert
+      await expect(action()).rejects.toThrow(ExpiredCredentialsError);
+    });
   });
 
   describe('identity logging', () => {
@@ -167,8 +220,9 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       await sut.getSecret('x');
 
       // Assert
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'AWS identity → account=123456789012 region=us-east-1 profile=developer',
+      const logged = stripAnsi(vi.mocked(mockLogger.info).mock.calls[0][0]);
+      expect(logged).toBe(
+        '☁ AWS identity · account=123456789012 · region=us-east-1 · profile=developer',
       );
     });
 
@@ -183,8 +237,9 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       await sut.getSecret('x');
 
       // Assert
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'AWS identity → account=999999999999 region=us-east-1 profile=developer',
+      const logged = stripAnsi(vi.mocked(mockLogger.info).mock.calls[0][0]);
+      expect(logged).toBe(
+        '☁ AWS identity · account=999999999999 · region=us-east-1 · profile=developer',
       );
     });
 
@@ -199,8 +254,9 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       await sut.getSecret('x');
 
       // Assert
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'AWS identity → account=unknown region=us-east-1 profile=developer',
+      const logged = stripAnsi(vi.mocked(mockLogger.info).mock.calls[0][0]);
+      expect(logged).toBe(
+        '☁ AWS identity · account=unknown · region=us-east-1 · profile=developer',
       );
     });
 
@@ -226,8 +282,9 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       await sut.getSecret('x');
 
       // Assert
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'AWS identity → account=123456789012 region=us-east-1 profile=default',
+      const logged = stripAnsi(vi.mocked(mockLogger.info).mock.calls[0][0]);
+      expect(logged).toBe(
+        '☁ AWS identity · account=123456789012 · region=us-east-1 · profile=default',
       );
     });
   });

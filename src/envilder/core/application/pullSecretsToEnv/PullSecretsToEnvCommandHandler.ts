@@ -1,5 +1,6 @@
 import { inject, injectable } from 'inversify';
 import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
+import { ExpiredCredentialsError } from '../../domain/errors/DomainErrors.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
@@ -116,11 +117,15 @@ export class PullSecretsToEnvCommandHandler {
       this.logger.info(`${envVariable.name}=${envVariable.maskedValue}`);
 
       return null;
-    } catch (_error) {
+    } catch (error) {
+      if (error instanceof ExpiredCredentialsError) {
+        throw error;
+      }
+      const message = error instanceof Error ? error.message : String(error);
       this.logger.error(
-        `${PullSecretsToEnvCommandHandler.ERROR_MESSAGES.ERROR_FETCHING}'${secretName}'`,
+        `${PullSecretsToEnvCommandHandler.ERROR_MESSAGES.ERROR_FETCHING}'${secretName}': ${message}`,
       );
-      return `ParameterNotFound: ${secretName}`;
+      return `${secretName}: ${message}`;
     }
   }
 }

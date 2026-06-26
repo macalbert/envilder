@@ -1,4 +1,8 @@
 import { GetParametersCommand, type SSMClient } from '@aws-sdk/client-ssm';
+import {
+  ExpiredCredentialsError,
+  isExpiredCredentialsError,
+} from '../../domain/expired-credentials-error.js';
 import type { ISecretProvider } from '../../domain/ports/secret-provider.js';
 
 const SSM_BATCH_SIZE = 10;
@@ -36,17 +40,24 @@ export class AwsSsmSecretProvider implements ISecretProvider {
 
     for (let i = 0; i < names.length; i += SSM_BATCH_SIZE) {
       const batch = names.slice(i, i + SSM_BATCH_SIZE);
-      const response = await this.ssmClient.send(
-        new GetParametersCommand({
-          Names: batch,
-          WithDecryption: true,
-        }),
-      );
+      try {
+        const response = await this.ssmClient.send(
+          new GetParametersCommand({
+            Names: batch,
+            WithDecryption: true,
+          }),
+        );
 
-      for (const param of response.Parameters ?? []) {
-        if (param.Name && param.Value != null) {
-          result.set(param.Name, param.Value);
+        for (const param of response.Parameters ?? []) {
+          if (param.Name && param.Value != null) {
+            result.set(param.Name, param.Value);
+          }
         }
+      } catch (error) {
+        if (isExpiredCredentialsError(error)) {
+          throw new ExpiredCredentialsError(error);
+        }
+        throw error;
       }
     }
 

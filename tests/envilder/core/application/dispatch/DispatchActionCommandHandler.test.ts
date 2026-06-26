@@ -5,6 +5,7 @@ import type { PullSecretsToEnvCommandHandler } from '../../../../../src/envilder
 import type { PushEnvToSecretsCommandHandler } from '../../../../../src/envilder/core/application/pushEnvToSecrets/PushEnvToSecretsCommandHandler';
 import type { PushSingleCommandHandler } from '../../../../../src/envilder/core/application/pushSingle/PushSingleCommandHandler';
 import { OperationMode } from '../../../../../src/envilder/core/domain/OperationMode';
+import type { ISecretProvider } from '../../../../../src/envilder/core/domain/ports/ISecretProvider';
 
 const mockPullHandler = {
   handle: vi.fn(),
@@ -18,11 +19,18 @@ const mockPushSingleHandler = {
   handle: vi.fn(),
 } as unknown as PushSingleCommandHandler;
 
+const mockSecretProvider = {
+  getSecret: vi.fn(),
+  setSecret: vi.fn(),
+  logIdentity: vi.fn(),
+} as unknown as ISecretProvider;
+
 describe('DispatchActionCommandHandler', () => {
   const sut = new DispatchActionCommandHandler(
     mockPullHandler,
     mockPushHandler,
     mockPushSingleHandler,
+    mockSecretProvider,
   );
 
   beforeEach(() => {
@@ -125,5 +133,24 @@ describe('DispatchActionCommandHandler', () => {
     await expect(action).rejects.toThrow(
       'Missing required arguments: --map and --envfile',
     );
+  });
+
+  it('Should_LogIdentity_When_HandlingAnyCommand', async () => {
+    // Arrange
+    const command = new DispatchActionCommand(
+      'path/to/map.json',
+      'path/to/.env',
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      OperationMode.PULL_SECRETS_TO_ENV,
+    );
+
+    // Act
+    await sut.handleCommand(command);
+
+    // Assert
+    expect(mockSecretProvider.logIdentity).toHaveBeenCalled();
   });
 });

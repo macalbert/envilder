@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import { PullSecretsToEnvCommand } from '../../../../../src/envilder/core/application/pullSecretsToEnv/PullSecretsToEnvCommand';
 import { PullSecretsToEnvCommandHandler } from '../../../../../src/envilder/core/application/pullSecretsToEnv/PullSecretsToEnvCommandHandler';
+import { ExpiredCredentialsError } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import type { ILogger } from '../../../../../src/envilder/core/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../../../src/envilder/core/domain/ports/ISecretProvider';
 import type { IVariableStore } from '../../../../../src/envilder/core/domain/ports/IVariableStore';
@@ -119,7 +120,7 @@ describe('PullSecretsToEnvCommandHandler', () => {
     // Assert
     await expect(action).rejects.toThrow('Some secrets could not be fetched');
     expect(mockLogger.error).toHaveBeenCalledWith(
-      "Error fetching secret: 'non-existent parameter'",
+      "Error fetching secret: 'non-existent parameter': ParameterNotFound: non-existent parameter",
     );
   });
 
@@ -165,5 +166,27 @@ describe('PullSecretsToEnvCommandHandler', () => {
 
     // Assert
     expect(mockLogger.info).toHaveBeenCalledWith('PASSWORD=***********ord');
+  });
+
+  it('Should_PropagateExpiredCredentialsError_When_SecretFetchFails', async () => {
+    // Arrange
+    const paramMapContent = {
+      NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
+    };
+    mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
+    mockEnvFileManager.getEnvironment.mockResolvedValue({});
+    vi.mocked(mockSecretProvider.getSecret).mockRejectedValue(
+      new ExpiredCredentialsError(),
+    );
+    const command = PullSecretsToEnvCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
+
+    // Act
+    const action = () => sut.handle(command);
+
+    // Assert
+    await expect(action).rejects.toThrow(ExpiredCredentialsError);
   });
 });
