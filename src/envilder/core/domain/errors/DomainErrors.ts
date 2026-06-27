@@ -56,3 +56,31 @@ export class ExpiredCredentialsError extends DomainError {
     this.cause = cause;
   }
 }
+
+/**
+ * Error thrown when the AWS SSO session could not be resolved or loaded.
+ */
+export class SsoSessionExpiredError extends DomainError {
+  readonly profileName?: string;
+  readonly cause?: unknown;
+
+  constructor(profileName?: string, cause?: unknown) {
+    super(SsoSessionExpiredError.buildMessage(profileName));
+    this.profileName = profileName;
+    this.cause = cause;
+  }
+
+  private static buildMessage(profileName?: string): string {
+    if (profileName) {
+      return (
+        `Your AWS SSO session for profile '${profileName}' could not be ` +
+        `loaded or has expired. Run: aws sso login --profile ${profileName} ` +
+        'and then re-run this command.'
+      );
+    }
+    return (
+      'Your AWS SSO session could not be loaded or has expired. Run: ' +
+      'aws sso login and then re-run this command.'
+    );
+  }
+}

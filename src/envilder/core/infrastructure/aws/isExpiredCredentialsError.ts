@@ -1,8 +1,6 @@
 const EXPIRED_CREDENTIAL_ERROR_NAMES = new Set([
   'ExpiredToken',
   'ExpiredTokenException',
-  'TokenProviderError',
-  'TokenRefreshRequired',
 ]);
 
 export function isExpiredCredentialsError(error: unknown): boolean {

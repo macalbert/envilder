@@ -21,6 +21,7 @@ import {
 import {
   ExpiredCredentialsError,
   SecretOperationError,
+  SsoSessionExpiredError,
 } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import { AwsSsmSecretProvider } from '../../../../../src/envilder/core/infrastructure/aws/AwsSsmSecretProvider';
 
@@ -144,6 +145,23 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       expect((error as Error).message).toContain('aws sso login');
     });
 
+    it('Should_ThrowSsoSessionExpiredError_When_GetSecretFailsWithTokenProviderError', async () => {
+      // Arrange
+      sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts, 'developer');
+      mockSendFn.mockRejectedValueOnce(
+        Object.assign(new Error('SSO session is expired'), {
+          name: 'TokenProviderError',
+        }),
+      );
+
+      // Act
+      const error = await sut.getSecret('/p').catch((e: unknown) => e);
+
+      // Assert
+      expect(error).toBeInstanceOf(SsoSessionExpiredError);
+      expect((error as SsoSessionExpiredError).profileName).toBe('developer');
+    });
+
     it('Should_StillThrowSecretOperationError_When_NonCredentialErrorOccurs', async () => {
       // Arrange
       mockSendFn.mockRejectedValueOnce(
@@ -205,6 +223,22 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
 
       // Assert
       await expect(action()).rejects.toThrow(ExpiredCredentialsError);
+    });
+
+    it('Should_ThrowSsoSessionExpiredError_When_SetSecretFailsWithTokenRefreshRequired', async () => {
+      // Arrange
+      sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts, 'developer');
+      mockSendFn.mockRejectedValueOnce(
+        Object.assign(new Error('token refresh required'), {
+          name: 'TokenRefreshRequired',
+        }),
+      );
+
+      // Act
+      const action = () => sut.setSecret('/p', 'v');
+
+      // Assert
+      await expect(action()).rejects.toThrow(SsoSessionExpiredError);
     });
   });
 

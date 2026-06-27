@@ -10,10 +10,12 @@ import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
 import {
   ExpiredCredentialsError,
   SecretOperationError,
+  SsoSessionExpiredError,
 } from '../../domain/errors/DomainErrors.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import { isExpiredCredentialsError } from './isExpiredCredentialsError.js';
+import { isSsoSessionExpiredError } from './isSsoSessionExpiredError.js';
 
 @injectable()
 export class AwsSsmSecretProvider implements ISecretProvider {
@@ -48,6 +50,9 @@ export class AwsSsmSecretProvider implements ISecretProvider {
       ) {
         return undefined;
       }
+      if (isSsoSessionExpiredError(error)) {
+        throw new SsoSessionExpiredError(this.profile, error);
+      }
       if (isExpiredCredentialsError(error)) {
         throw new ExpiredCredentialsError(error);
       }
@@ -70,6 +75,9 @@ export class AwsSsmSecretProvider implements ISecretProvider {
     try {
       await this.ssm.send(command);
     } catch (error) {
+      if (isSsoSessionExpiredError(error)) {
+        throw new SsoSessionExpiredError(this.profile, error);
+      }
       if (isExpiredCredentialsError(error)) {
         throw new ExpiredCredentialsError(error);
       }
