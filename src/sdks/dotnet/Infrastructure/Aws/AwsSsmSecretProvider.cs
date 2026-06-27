@@ -15,14 +15,17 @@ using System.Threading.Tasks;
 public class AwsSsmSecretProvider : ISecretProvider
 {
 	private readonly IAmazonSimpleSystemsManagement _ssmClient;
+	private readonly string? _profile;
 
 	/// <summary>
 	/// Initializes a new instance using the supplied SSM client.
 	/// </summary>
 	/// <param name="ssmClient">A configured <see cref="IAmazonSimpleSystemsManagement"/> instance.</param>
-	public AwsSsmSecretProvider(IAmazonSimpleSystemsManagement ssmClient)
+	/// <param name="profile">The AWS profile in use, surfaced when an SSO session has expired.</param>
+	public AwsSsmSecretProvider(IAmazonSimpleSystemsManagement ssmClient, string? profile = null)
 	{
 		_ssmClient = ssmClient ?? throw new ArgumentNullException(nameof(ssmClient));
+		_profile = profile;
 	}
 
 	/// <inheritdoc />
@@ -41,6 +44,10 @@ public class AwsSsmSecretProvider : ISecretProvider
 		catch (ParameterNotFoundException)
 		{
 			return null;
+		}
+		catch (Exception ex) when (SsoSessionExpiredDetector.IsSsoSessionExpired(ex))
+		{
+			throw new SsoSessionExpiredException(_profile, ex);
 		}
 		catch (Exception ex) when (ExpiredCredentialsDetector.IsExpiredCredentials(ex))
 		{
@@ -67,6 +74,10 @@ public class AwsSsmSecretProvider : ISecretProvider
 		catch (ParameterNotFoundException)
 		{
 			return null;
+		}
+		catch (Exception ex) when (SsoSessionExpiredDetector.IsSsoSessionExpired(ex))
+		{
+			throw new SsoSessionExpiredException(_profile, ex);
 		}
 		catch (Exception ex) when (ExpiredCredentialsDetector.IsExpiredCredentials(ex))
 		{
