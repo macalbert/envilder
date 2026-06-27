@@ -11,6 +11,7 @@ import type { MapFileConfig } from '../../core/domain/MapFileConfig.js';
 import { PackageVersionReader } from '../../core/infrastructure/package/PackageVersionReader.js';
 import { readMapFileConfig } from '../../core/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../core/types.js';
+import { executeWithSsoRecovery } from './SsoLoginRecovery.js';
 import { Startup } from './Startup.js';
 
 let serviceProvider: Container;
@@ -136,7 +137,7 @@ export async function main() {
           .configureInfrastructure(config, infraOptions)
           .create();
 
-        await executeCommand(options);
+        await executeWithSsoRecovery(() => executeCommand(options));
       },
     );
 

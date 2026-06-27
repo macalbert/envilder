@@ -7,8 +7,12 @@
 
 import { main } from './Cli.js';
 import { presentError } from './CliErrorPresenter.js';
+import { SilentExitError } from './SilentExitError.js';
 
 main().catch((error) => {
+  if (error instanceof SilentExitError) {
+    process.exit(error.code);
+  }
   console.error(presentError(error));
   process.exit(1);
 });
