@@ -36,9 +36,42 @@ Actionable failure conditions are modeled as typed errors extending the existing
 message** built in its constructor — exactly the pattern already used by
 `ParameterNotFoundError` (which carries `paramName`).
 
-The first instance is `SsoSessionExpiredError`, carrying the `profileName`. This
-lets the CLI react by **type** (robust) instead of string-matching provider
-messages, and lets SDK consumers `catch` it programmatically.
+Two **sibling** typed errors cover expired AWS credentials. They both extend
+`DomainError` directly — there is **no inheritance between them** (a consumer that
+wants to treat both alike catches both explicitly):
+
+- **`ExpiredCredentialsError`** — the general case: credentials were resolved but
+  the security token is no longer valid (AWS rejects the request with
+  `ExpiredToken` / `ExpiredTokenException`). Carries the underlying `cause`.
+- **`SsoSessionExpiredError`** — the specific case: the AWS SSO / IAM Identity
+  Center session could not be **resolved or loaded** (the cached token is missing
+  or expired). Carries the `profileName`.
+
+Reacting by **type** is robust — the CLI and SDK consumers never string-match
+provider messages.
+
+#### Detection mirrors the AWS taxonomy
+
+The boundary between the two is **AWS's own classification**, not a semantic line
+we invent. AWS already separates *SSO-token* failures from *STS-expired-token*
+failures, and we respect that 1:1:
+
+| AWS signal | Maps to |
+| --- | --- |
+| SSO token resolution/load failure (`UnauthorizedSSOTokenError`, `SSOTokenLoadError`, `TokenRetrievalError`, AWS SDK v3 / .NET equivalents) | `SsoSessionExpiredError` |
+| Service rejects a resolved token (`ExpiredToken`, `ExpiredTokenException`) | `ExpiredCredentialsError` |
+
+Detection reads only **stable, structured signals** (the response `Code` for
+service errors; the exception class name for client token errors) — never message
+text. **Graceful degradation is mandatory:** if AWS renames an exception, the
+unknown signal simply stops matching and bubbles up unchanged — never a crash,
+never a mislabel. Splitting into two siblings adds no new fragility: the same
+name-based signals are merely routed to two buckets instead of one.
+
+The `profileName` on `SsoSessionExpiredError` comes from the map file's
+`$config.profile`. When `$config` carries no profile (credentials from env vars /
+instance role), `profileName` is absent and the remediation degrades to a bare
+`aws sso login`.
 
 ### 2. Single CLI error-presentation point
 
@@ -48,6 +81,19 @@ error type to its interactive rendering: icon, color, layout, remediation hint,
 and — for `SsoSessionExpiredError` — the optional `aws sso login` redirect.
 Centralizing here means the CLI's wording and styling are restyled in one spot,
 not scattered per error.
+
+#### The `aws sso login` redirect (CLI-only)
+
+On `SsoSessionExpiredError`, when **both** `stdout` and `stdin` are a TTY, the
+presenter prompts (`Run 'aws sso login --profile X' now? [y/N]`, default **No**).
+On `y` it launches the AWS CLI via `spawn('aws', ['sso', 'login', '--profile', X],
+{ stdio: 'inherit' })` — an **argument array, never a shell string**, so the
+profile value cannot be interpreted as a command. The child is **awaited**: the
+AWS CLI blocks through the browser/MFA flow, so its **exit code is the success
+signal**. On exit `0`, the pull is **retried exactly once** — a second
+`SsoSessionExpiredError` is presented without re-offering the redirect (no loops).
+Non-TTY contexts (CI, pipes) skip the prompt entirely; a missing `aws` binary
+(`ENOENT`) degrades to the manual remediation text.
 
 ### 3. SDKs replicate the pattern, not the presentation
 
@@ -75,7 +121,10 @@ meet these standards:
   Never just report a failure without a path forward.
 - **Professional and calm.** No blame, no cute noise in the *failure* path
   (the playful tone in the success path stays; errors are reassuring and
-  precise).
+  precise). The post-redirect **recovery** beats (session restored, secrets
+  resolved) are success-path output and may carry the project's retro tone
+  (e.g. `1-UP! SSO session restored.`, `Level cleared.`); the error block that
+  precedes them stays plain.
 - **Keyword-anchored.** Surface the concrete nouns that let a user search/act:
   the profile name, the command to run, the provider.
 - **CLI = aesthetically formatted** (color, icon, layout, indentation) via the
