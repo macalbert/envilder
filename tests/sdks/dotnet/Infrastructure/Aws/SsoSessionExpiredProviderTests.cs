@@ -2,6 +2,7 @@ namespace Envilder.Tests.Infrastructure.Aws;
 
 using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
+using Amazon.SSOOIDC.Model;
 using AwesomeAssertions;
 using global::Envilder.Infrastructure.Aws;
 using NSubstitute;
@@ -15,7 +16,7 @@ public class SsoSessionExpiredProviderTests
 		// Arrange
 		var ssmClient = Substitute.For<IAmazonSimpleSystemsManagement>();
 		ssmClient.GetParameterAsync(Arg.Any<GetParameterRequest>(), Arg.Any<CancellationToken>())
-			.ThrowsAsync(new UnauthorizedClientException());
+			.ThrowsAsync(new UnauthorizedClientException("sso token rejected"));
 		var sut = new AwsSsmSecretProvider(ssmClient, "staging");
 
 		// Act
@@ -33,7 +34,7 @@ public class SsoSessionExpiredProviderTests
 		// Arrange
 		var ssmClient = Substitute.For<IAmazonSimpleSystemsManagement>();
 		ssmClient.GetParameterAsync(Arg.Any<GetParameterRequest>(), Arg.Any<CancellationToken>())
-			.ThrowsAsync(new UnauthorizedClientException());
+			.ThrowsAsync(new UnauthorizedClientException("sso token rejected"));
 		var sut = new AwsSsmSecretProvider(ssmClient, "staging");
 
 		// Act
@@ -50,7 +51,7 @@ public class SsoSessionExpiredProviderTests
 		// Arrange
 		var ssmClient = Substitute.For<IAmazonSimpleSystemsManagement>();
 		ssmClient.GetParameterAsync(Arg.Any<GetParameterRequest>(), Arg.Any<CancellationToken>())
-			.ThrowsAsync(new InvalidGrantException());
+			.ThrowsAsync(new InvalidGrantException("invalid grant"));
 		var sut = new AwsSsmSecretProvider(ssmClient);
 
 		// Act
@@ -59,13 +60,5 @@ public class SsoSessionExpiredProviderTests
 		// Assert
 		var assertion = await act.Should().ThrowAsync<SsoSessionExpiredException>();
 		assertion.Which.ProfileName.Should().BeNull();
-	}
-
-	private sealed class UnauthorizedClientException : Exception
-	{
-	}
-
-	private sealed class InvalidGrantException : Exception
-	{
 	}
 }

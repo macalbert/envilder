@@ -1,6 +1,7 @@
 namespace Envilder.Tests.Infrastructure.Aws;
 
 using Amazon.Runtime;
+using Amazon.SSOOIDC.Model;
 using AwesomeAssertions;
 using global::Envilder.Infrastructure.Aws;
 
@@ -10,7 +11,7 @@ public class ExpiredCredentialsDetectorTests
 	public void Should_ReturnFalse_When_ExceptionTypeNameIsUnauthorizedClientException()
 	{
 		// Arrange
-		var exception = new UnauthorizedClientException();
+		var exception = new UnauthorizedClientException("sso token rejected");
 
 		// Act
 		var actual = ExpiredCredentialsDetector.IsExpiredCredentials(exception);
@@ -23,7 +24,7 @@ public class ExpiredCredentialsDetectorTests
 	public void Should_ReturnFalse_When_ExceptionTypeNameIsInvalidGrantException()
 	{
 		// Arrange
-		var exception = new InvalidGrantException();
+		var exception = new InvalidGrantException("invalid grant");
 
 		// Act
 		var actual = ExpiredCredentialsDetector.IsExpiredCredentials(exception);
@@ -43,13 +44,5 @@ public class ExpiredCredentialsDetectorTests
 
 		// Assert
 		actual.Should().BeTrue();
-	}
-
-	private sealed class UnauthorizedClientException : Exception
-	{
-	}
-
-	private sealed class InvalidGrantException : Exception
-	{
 	}
 }

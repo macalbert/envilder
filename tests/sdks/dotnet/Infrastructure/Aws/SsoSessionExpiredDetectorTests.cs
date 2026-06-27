@@ -1,6 +1,7 @@
 namespace Envilder.Tests.Infrastructure.Aws;
 
 using Amazon.Runtime;
+using Amazon.SSOOIDC.Model;
 using AwesomeAssertions;
 using global::Envilder.Infrastructure.Aws;
 
@@ -10,7 +11,7 @@ public class SsoSessionExpiredDetectorTests
 	public void Should_ReturnTrue_When_ExceptionTypeNameIsUnauthorizedClientException()
 	{
 		// Arrange
-		var exception = new UnauthorizedClientException();
+		var exception = new UnauthorizedClientException("sso token rejected");
 
 		// Act
 		var actual = SsoSessionExpiredDetector.IsSsoSessionExpired(exception);
@@ -23,7 +24,7 @@ public class SsoSessionExpiredDetectorTests
 	public void Should_ReturnTrue_When_ExceptionTypeNameIsInvalidGrantException()
 	{
 		// Arrange
-		var exception = new InvalidGrantException();
+		var exception = new InvalidGrantException("invalid grant");
 
 		// Act
 		var actual = SsoSessionExpiredDetector.IsSsoSessionExpired(exception);
@@ -36,7 +37,7 @@ public class SsoSessionExpiredDetectorTests
 	public void Should_ReturnTrue_When_SsoExceptionIsNestedInInnerChain()
 	{
 		// Arrange
-		var exception = new Exception("outer", new UnauthorizedClientException());
+		var exception = new Exception("outer", new UnauthorizedClientException("sso token rejected"));
 
 		// Act
 		var actual = SsoSessionExpiredDetector.IsSsoSessionExpired(exception);
@@ -66,13 +67,5 @@ public class SsoSessionExpiredDetectorTests
 
 		// Assert
 		actual.Should().BeFalse();
-	}
-
-	private sealed class UnauthorizedClientException : Exception
-	{
-	}
-
-	private sealed class InvalidGrantException : Exception
-	{
 	}
 }
