@@ -15,6 +15,28 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   signalling that authentication failed
   ([#382](https://github.com/macalbert/envilder/issues/382))
 
+* **Dedicated `SsoSessionExpiredError` for expired SSO sessions** —
+  Failures to resolve or load an AWS SSO session now surface as a
+  dedicated `SsoSessionExpiredError` (a sibling of
+  `ExpiredCredentialsError`) carrying the AWS profile from
+  `$config.profile`. The message is calm and actionable, telling you to
+  run `aws sso login --profile <name>`. A plain expired session token
+  still surfaces as `ExpiredCredentialsError`
+  ([#374](https://github.com/macalbert/envilder/issues/374))
+
+* **Calm, actionable error blocks via `CliErrorPresenter`** — Credential
+  errors now render through a single `CliErrorPresenter` that prints a
+  calm, colorized, actionable error block instead of a raw stack trace
+  ([#374](https://github.com/macalbert/envilder/issues/374))
+
+* **TTY-gated `aws sso login` redirect with auto-retry** — On an
+  `SsoSessionExpiredError` in an interactive terminal, the CLI offers to
+  run `aws sso login` for you — spawned safely with array arguments,
+  never through a shell — and retries the pull once after a successful
+  login. Non-interactive runs (CI, pipes) never prompt and just present
+  the actionable message
+  ([#375](https://github.com/macalbert/envilder/issues/375))
+
 ### Changed
 
 * **Print the `AWS identity` banner before resolving secrets** — The
@@ -26,7 +48,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 ### Fixed
 
 * **Clear error for expired or invalid AWS credentials** — Expired or
-  invalid AWS credentials (e.g. an expired SSO session) now produce a
+  invalid AWS credentials (e.g. an expired session token) now produce a
   clear, actionable `ExpiredCredentialsError` telling you to refresh
   credentials (e.g. run `aws sso login`), instead of being masked as a
   misleading `ParameterNotFound`. The pull command now fails fast in

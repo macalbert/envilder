@@ -19,10 +19,18 @@
 ### Fixed
 
 * **Clear error for expired or invalid AWS credentials** — Expired or
-  invalid AWS credentials (e.g. an expired SSO session) now produce a
+  invalid AWS credentials (e.g. an expired session token) now produce a
   clear, actionable `ExpiredCredentialsError` during the pull, telling
   you to refresh credentials (e.g. run `aws sso login`), instead of
   being masked as a misleading `ParameterNotFound`
+
+* **Expired SSO sessions surface as `SsoSessionExpiredError`** — When an
+  AWS SSO session can no longer be resolved, the action now fails with a
+  clear, actionable `SsoSessionExpiredError` that names the AWS profile
+  and the `aws sso login` command to run, instead of being lumped in
+  with a generic `ExpiredCredentialsError`. The action runs
+  non-interactively, so it presents the message only — it never prompts
+  or redirects
 
 ---
 

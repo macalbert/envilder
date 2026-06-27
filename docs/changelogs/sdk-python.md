@@ -4,8 +4,15 @@
 
 * **New `ExpiredCredentialsError`** — Exported from `envilder` and
   raised by the AWS SSM provider on expired or invalid credentials
-  (e.g. an expired SSO session), with an actionable message guiding you
+  (e.g. an expired session token), with an actionable message guiding you
   to refresh credentials (e.g. run `aws sso login`)
+
+* **New `SsoSessionExpiredError`** — Exported from `envilder` and raised
+  by the AWS SSM provider when an AWS SSO session can no longer be
+  resolved, with an actionable message that names the AWS profile and the
+  `aws sso login --profile <name>` command to run. A plain expired
+  session token still raises `ExpiredCredentialsError`
+  ([#378](https://github.com/macalbert/envilder/issues/378))
 
 ---
 

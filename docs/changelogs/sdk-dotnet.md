@@ -3,9 +3,16 @@
 ### Added
 
 * **New `ExpiredCredentialsException`** — Thrown by the AWS SSM provider
-  on expired or invalid credentials (e.g. an expired SSO session), with
+  on expired or invalid credentials (e.g. an expired session token), with
   an actionable message guiding you to refresh credentials (e.g. run
   `aws sso login`)
+
+* **New `SsoSessionExpiredException`** — Thrown by the AWS SSM provider
+  when an AWS SSO session can no longer be resolved, exposing the AWS
+  profile via `ProfileName` and an actionable message that names the
+  `aws sso login --profile <name>` command to run. A plain expired
+  session token still throws `ExpiredCredentialsException`
+  ([#377](https://github.com/macalbert/envilder/issues/377))
 
 ---
 

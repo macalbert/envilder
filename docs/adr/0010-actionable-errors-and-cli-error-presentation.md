@@ -54,12 +54,17 @@ provider messages.
 
 The boundary between the two is **AWS's own classification**, not a semantic line
 we invent. AWS already separates *SSO-token* failures from *STS-expired-token*
-failures, and we respect that 1:1:
+failures, and we respect that 1:1. The exact signal names are **per stack**,
+because each SDK surfaces its own native error names:
 
-| AWS signal | Maps to |
-| --- | --- |
-| SSO token resolution/load failure (`UnauthorizedSSOTokenError`, `SSOTokenLoadError`, `TokenRetrievalError`, AWS SDK v3 / .NET equivalents) | `SsoSessionExpiredError` |
-| Service rejects a resolved token (`ExpiredToken`, `ExpiredTokenException`) | `ExpiredCredentialsError` |
+| Stack | SSO-resolution signals → `SsoSessionExpiredError` | STS expired-token → `ExpiredCredentialsError` |
+| --- | --- | --- |
+| CLI core + Node (AWS SDK v3) | `TokenProviderError`, `TokenRefreshRequired` | code `ExpiredToken`, `ExpiredTokenException` |
+| Python (boto3) | `TokenRetrievalError`, `UnauthorizedSSOTokenError`, `SSOTokenLoadError` | code `ExpiredToken`, `ExpiredTokenException` |
+| .NET (AWS SDK for .NET) | type `UnauthorizedException`, `InvalidGrantException` | code `ExpiredToken`, `ExpiredTokenException` |
+
+(.NET names the exception `SsoSessionExpiredException` / `ExpiredCredentialsException`
+to follow the `Exception` suffix convention.)
 
 Detection reads only **stable, structured signals** (the response `Code` for
 service errors; the exception class name for client token errors) — never message
