@@ -7,10 +7,10 @@ using global::Envilder.Infrastructure.Aws;
 public class SsoSessionExpiredDetectorTests
 {
 	[Fact]
-	public void Should_ReturnTrue_When_ExceptionTypeNameIsUnauthorizedException()
+	public void Should_ReturnTrue_When_ExceptionTypeNameIsUnauthorizedClientException()
 	{
 		// Arrange
-		var exception = new UnauthorizedException();
+		var exception = new UnauthorizedClientException();
 
 		// Act
 		var actual = SsoSessionExpiredDetector.IsSsoSessionExpired(exception);
@@ -36,7 +36,7 @@ public class SsoSessionExpiredDetectorTests
 	public void Should_ReturnTrue_When_SsoExceptionIsNestedInInnerChain()
 	{
 		// Arrange
-		var exception = new Exception("outer", new UnauthorizedException());
+		var exception = new Exception("outer", new UnauthorizedClientException());
 
 		// Act
 		var actual = SsoSessionExpiredDetector.IsSsoSessionExpired(exception);
@@ -68,7 +68,7 @@ public class SsoSessionExpiredDetectorTests
 		actual.Should().BeFalse();
 	}
 
-	private sealed class UnauthorizedException : Exception
+	private sealed class UnauthorizedClientException : Exception
 	{
 	}
 

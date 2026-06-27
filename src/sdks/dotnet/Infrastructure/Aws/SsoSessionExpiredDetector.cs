@@ -7,7 +7,7 @@ internal static class SsoSessionExpiredDetector
 {
 	private static readonly HashSet<string> SsoSessionExpiredTypeNames = new(StringComparer.OrdinalIgnoreCase)
 	{
-		"UnauthorizedException",
+		"UnauthorizedClientException",
 		"InvalidGrantException",
 	};
 

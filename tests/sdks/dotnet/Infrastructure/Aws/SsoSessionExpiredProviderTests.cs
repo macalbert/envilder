@@ -15,7 +15,7 @@ public class SsoSessionExpiredProviderTests
 		// Arrange
 		var ssmClient = Substitute.For<IAmazonSimpleSystemsManagement>();
 		ssmClient.GetParameterAsync(Arg.Any<GetParameterRequest>(), Arg.Any<CancellationToken>())
-			.ThrowsAsync(new UnauthorizedException());
+			.ThrowsAsync(new UnauthorizedClientException());
 		var sut = new AwsSsmSecretProvider(ssmClient, "staging");
 
 		// Act
@@ -33,7 +33,7 @@ public class SsoSessionExpiredProviderTests
 		// Arrange
 		var ssmClient = Substitute.For<IAmazonSimpleSystemsManagement>();
 		ssmClient.GetParameterAsync(Arg.Any<GetParameterRequest>(), Arg.Any<CancellationToken>())
-			.ThrowsAsync(new UnauthorizedException());
+			.ThrowsAsync(new UnauthorizedClientException());
 		var sut = new AwsSsmSecretProvider(ssmClient, "staging");
 
 		// Act
@@ -61,7 +61,7 @@ public class SsoSessionExpiredProviderTests
 		assertion.Which.ProfileName.Should().BeNull();
 	}
 
-	private sealed class UnauthorizedException : Exception
+	private sealed class UnauthorizedClientException : Exception
 	{
 	}
 

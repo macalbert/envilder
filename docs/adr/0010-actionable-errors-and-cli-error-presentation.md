@@ -61,7 +61,7 @@ because each SDK surfaces its own native error names:
 | --- | --- | --- |
 | CLI core + Node (AWS SDK v3) | `TokenProviderError`, `TokenRefreshRequired` | code `ExpiredToken`, `ExpiredTokenException` |
 | Python (boto3) | `TokenRetrievalError`, `UnauthorizedSSOTokenError`, `SSOTokenLoadError` | code `ExpiredToken`, `ExpiredTokenException` |
-| .NET (AWS SDK for .NET) | type `UnauthorizedException`, `InvalidGrantException` | code `ExpiredToken`, `ExpiredTokenException` |
+| .NET (AWS SDK for .NET) | type `UnauthorizedClientException`, `InvalidGrantException` | code `ExpiredToken`, `ExpiredTokenException` |
 
 (.NET names the exception `SsoSessionExpiredException` / `ExpiredCredentialsException`
 to follow the `Exception` suffix convention.)

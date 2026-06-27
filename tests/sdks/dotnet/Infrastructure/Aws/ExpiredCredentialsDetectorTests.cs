@@ -7,10 +7,10 @@ using global::Envilder.Infrastructure.Aws;
 public class ExpiredCredentialsDetectorTests
 {
 	[Fact]
-	public void Should_ReturnFalse_When_ExceptionTypeNameIsUnauthorizedException()
+	public void Should_ReturnFalse_When_ExceptionTypeNameIsUnauthorizedClientException()
 	{
 		// Arrange
-		var exception = new UnauthorizedException();
+		var exception = new UnauthorizedClientException();
 
 		// Act
 		var actual = ExpiredCredentialsDetector.IsExpiredCredentials(exception);
@@ -45,7 +45,7 @@ public class ExpiredCredentialsDetectorTests
 		actual.Should().BeTrue();
 	}
 
-	private sealed class UnauthorizedException : Exception
+	private sealed class UnauthorizedClientException : Exception
 	{
 	}
 
