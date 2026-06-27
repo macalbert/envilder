@@ -14,6 +14,7 @@ export type { MapFileConfig } from './domain/map-file-config.js';
 export type { ParsedMapFile } from './domain/parsed-map-file.js';
 export type { ISecretProvider } from './domain/ports/secret-provider.js';
 export { SecretProviderType } from './domain/secret-provider-type.js';
+export { SsoSessionExpiredError } from './domain/sso-session-expired-error.js';
 
 // Infrastructure (for advanced usage)
 export { AwsSsmSecretProvider } from './infrastructure/aws/aws-ssm-secret-provider.js';

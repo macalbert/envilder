@@ -1,6 +1,7 @@
 import type { SSMClient } from '@aws-sdk/client-ssm';
 import { describe, expect, it, vi } from 'vitest';
 import { ExpiredCredentialsError } from '../../../../../src/sdks/nodejs/src/domain/expired-credentials-error.js';
+import { SsoSessionExpiredError } from '../../../../../src/sdks/nodejs/src/domain/sso-session-expired-error.js';
 import { AwsSsmSecretProvider } from '../../../../../src/sdks/nodejs/src/infrastructure/aws/aws-ssm-secret-provider.js';
 
 describe('AwsSsmSecretProvider expired credentials', () => {
@@ -24,7 +25,7 @@ describe('AwsSsmSecretProvider expired credentials', () => {
     await expect(act).rejects.toThrow('aws sso login');
   });
 
-  it('Should_ThrowExpiredCredentialsError_When_TokenProviderErrorIndicatesExpiredSso', async () => {
+  it('Should_ThrowSsoSessionExpiredError_When_TokenProviderErrorIndicatesExpiredSso', async () => {
     // Arrange
     const send = vi.fn();
     const client = { send } as unknown as SSMClient;
@@ -33,13 +34,14 @@ describe('AwsSsmSecretProvider expired credentials', () => {
         name: 'TokenProviderError',
       }),
     );
-    const sut = new AwsSsmSecretProvider(client);
+    const sut = new AwsSsmSecretProvider(client, 'staging');
 
     // Act
     const act = sut.getSecrets(['/a']);
 
     // Assert
-    await expect(act).rejects.toThrow(ExpiredCredentialsError);
+    await expect(act).rejects.toThrow(SsoSessionExpiredError);
+    await expect(act).rejects.toMatchObject({ profileName: 'staging' });
   });
 
   it('Should_RethrowOriginalError_When_ErrorIsNotCredentialRelated', async () => {
