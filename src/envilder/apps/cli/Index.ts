@@ -6,9 +6,9 @@
  */
 
 import { main } from './Cli.js';
+import { presentError } from './CliErrorPresenter.js';
 
 main().catch((error) => {
-  console.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
-  console.error(error instanceof Error ? error.message : String(error));
+  console.error(presentError(error));
   process.exit(1);
 });
