@@ -7,12 +7,6 @@ _EXPIRED_ERROR_CODES = {
     "ExpiredToken",
 }
 
-_EXPIRED_EXCEPTION_NAMES = {
-    "TokenRetrievalError",
-    "UnauthorizedSSOTokenError",
-    "SSOTokenLoadError",
-}
-
 _REMEDIATION = (
     "AWS credentials are expired or invalid. Your security token or SSO "
     "session may have expired. Refresh your credentials and retry "
@@ -45,9 +39,10 @@ class ExpiredCredentialsError(Exception):
 def is_expired_credentials_error(error: BaseException) -> bool:
     """Detect whether an exception is an expired/invalid AWS credential.
 
-    Relies only on stable, structured signals: the exception class name
-    and the boto ``response`` error code. Message text is intentionally
-    not inspected because its wording is unstable across SDK versions.
+    Relies only on the stable boto ``response`` error code. Message text
+    is intentionally not inspected because its wording is unstable across
+    SDK versions, and SSO token-resolution failures are handled
+    separately by ``is_sso_session_expired_error``.
 
     Args:
         error: The exception raised by a boto3/botocore call.
@@ -55,8 +50,6 @@ def is_expired_credentials_error(error: BaseException) -> bool:
     Returns:
         ``True`` when the error indicates expired or invalid credentials.
     """
-    if type(error).__name__ in _EXPIRED_EXCEPTION_NAMES:
-        return True
     response = getattr(error, "response", None)
     if isinstance(response, dict):
         code = response.get("Error", {}).get("Code")

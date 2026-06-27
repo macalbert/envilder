@@ -3,6 +3,7 @@ from unittest.mock import Mock
 import pytest
 from botocore.exceptions import ClientError, TokenRetrievalError
 from envilder.domain.expired_credentials_error import ExpiredCredentialsError
+from envilder.domain.sso_session_expired_error import SsoSessionExpiredError
 from envilder.infrastructure.aws.aws_ssm_secret_provider import (
     AwsSsmSecretProvider,
 )
@@ -35,7 +36,7 @@ class TestExpiredCredentials:
         with pytest.raises(ExpiredCredentialsError, match="aws sso login"):
             action()
 
-    def Should_RaiseExpiredCredentialsError_When_BotoCredentialErrorOccurs(
+    def Should_RaiseSsoSessionExpiredError_When_SsoTokenRetrievalFails(
         self,
     ) -> None:
         # Arrange
@@ -44,14 +45,15 @@ class TestExpiredCredentials:
             provider="sso",
             error_msg="Token has expired and refresh failed",
         )
-        sut = AwsSsmSecretProvider(ssm_client)
+        sut = AwsSsmSecretProvider(ssm_client, "staging")
 
         # Act
         action = lambda: sut.get_secret("/Test/Token")
 
         # Assert
-        with pytest.raises(ExpiredCredentialsError):
+        with pytest.raises(SsoSessionExpiredError) as exc_info:
             action()
+        assert exc_info.value.profile_name == "staging"
 
     def Should_ReturnNone_When_ParameterNotFound(self) -> None:
         # Arrange
