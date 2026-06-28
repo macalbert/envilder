@@ -225,12 +225,12 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       await expect(action()).rejects.toThrow(ExpiredCredentialsError);
     });
 
-    it('Should_ThrowSsoSessionExpiredError_When_SetSecretFailsWithTokenRefreshRequired', async () => {
+    it('Should_ThrowSsoSessionExpiredError_When_SetSecretFailsWithTokenProviderError', async () => {
       // Arrange
       sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts, 'developer');
       mockSendFn.mockRejectedValueOnce(
-        Object.assign(new Error('token refresh required'), {
-          name: 'TokenRefreshRequired',
+        Object.assign(new Error('sso token could not be loaded'), {
+          name: 'TokenProviderError',
         }),
       );
 

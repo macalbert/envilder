@@ -40,17 +40,4 @@ describe('isExpiredCredentialsError', () => {
     // Assert
     expect(actual).toBe(false);
   });
-
-  it('Should_ReturnFalse_When_ErrorNameIsTokenRefreshRequired', () => {
-    // Arrange
-    const error = Object.assign(new Error('token refresh required'), {
-      name: 'TokenRefreshRequired',
-    });
-
-    // Act
-    const actual = isExpiredCredentialsError(error);
-
-    // Assert
-    expect(actual).toBe(false);
-  });
 });

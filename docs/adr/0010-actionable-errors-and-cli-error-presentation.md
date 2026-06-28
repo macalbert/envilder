@@ -59,7 +59,7 @@ because each SDK surfaces its own native error names:
 
 | Stack | SSO-resolution signals → `SsoSessionExpiredError` | STS expired-token → `ExpiredCredentialsError` |
 | --- | --- | --- |
-| CLI core + Node (AWS SDK v3) | `TokenProviderError`, `TokenRefreshRequired` | code `ExpiredToken`, `ExpiredTokenException` |
+| CLI core + Node (AWS SDK v3) | `TokenProviderError` | code `ExpiredToken`, `ExpiredTokenException` |
 | Python (boto3) | `TokenRetrievalError`, `UnauthorizedSSOTokenError`, `SSOTokenLoadError` | code `ExpiredToken`, `ExpiredTokenException` |
 | .NET (AWS SDK for .NET) | type `UnauthorizedClientException`, `InvalidGrantException` | code `ExpiredToken`, `ExpiredTokenException` |
 

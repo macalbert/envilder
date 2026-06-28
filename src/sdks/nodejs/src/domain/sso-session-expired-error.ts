@@ -28,10 +28,7 @@ export class SsoSessionExpiredError extends Error {
   }
 }
 
-const SSO_SESSION_EXPIRED_ERROR_NAMES = new Set([
-  'TokenProviderError',
-  'TokenRefreshRequired',
-]);
+const SSO_SESSION_EXPIRED_ERROR_NAMES = new Set(['TokenProviderError']);
 
 /**
  * Detects whether an unknown error represents an expired or unresolved AWS SSO
