@@ -91,7 +91,7 @@ importers:
         version: 13.0.2
       '@testcontainers/localstack':
         specifier: ^12.0.1
-        version: 12.0.1
+        version: 12.0.3
       '@types/node':
         specifier: 'catalog:'
         version: 25.9.1
@@ -1394,9 +1394,6 @@ packages:
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
-
-  '@testcontainers/localstack@12.0.1':
-    resolution: {integrity: sha512-0VRwXxFv/zeKRZaIVhfjWd4VpIPHsijkXXti/LY6i7q1+twC4Big1w4MOaxSnXBDgoHUk88/5or8TGWCokgkYw==}
 
   '@testcontainers/localstack@12.0.3':
     resolution: {integrity: sha512-FD7xb9T2izsv9fcHI/X9AajsiDgMLG0iCqT6QtOHdfXD8vmiRNut5o5e9Jhp8DPMf4pfatMDLtXZZx5vsNK2bw==}
@@ -5069,15 +5066,6 @@ snapshots:
       tslib: 2.8.1
 
   '@standard-schema/spec@1.1.0': {}
-
-  '@testcontainers/localstack@12.0.1':
-    dependencies:
-      testcontainers: 12.0.1
-    transitivePeerDependencies:
-      - bare-abort-controller
-      - bare-buffer
-      - react-native-b4a
-      - supports-color
 
   '@testcontainers/localstack@12.0.3':
     dependencies:
