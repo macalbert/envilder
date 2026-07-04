@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import { PullSecretsToEnvCommand } from '../../../../../src/envilder/core/application/pullSecretsToEnv/PullSecretsToEnvCommand';
 import { PullSecretsToEnvCommandHandler } from '../../../../../src/envilder/core/application/pullSecretsToEnv/PullSecretsToEnvCommandHandler';
-import { ExpiredCredentialsError } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
+import { ExpiredCredentialsError, SsoSessionExpiredError } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import type { ILogger } from '../../../../../src/envilder/core/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../../../src/envilder/core/domain/ports/ISecretProvider';
 import type { IVariableStore } from '../../../../../src/envilder/core/domain/ports/IVariableStore';
@@ -188,5 +188,27 @@ describe('PullSecretsToEnvCommandHandler', () => {
 
     // Assert
     await expect(action).rejects.toThrow(ExpiredCredentialsError);
+  });
+
+  it('Should_PropagateSsoSessionExpiredError_When_SecretFetchFails', async () => {
+    // Arrange
+    const paramMapContent = {
+      NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
+    };
+    mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
+    mockEnvFileManager.getEnvironment.mockResolvedValue({});
+    vi.mocked(mockSecretProvider.getSecret).mockRejectedValue(
+      new SsoSessionExpiredError('developer'),
+    );
+    const command = PullSecretsToEnvCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
+
+    // Act
+    const action = () => sut.handle(command);
+
+    // Assert
+    await expect(action).rejects.toThrow(SsoSessionExpiredError);
   });
 });

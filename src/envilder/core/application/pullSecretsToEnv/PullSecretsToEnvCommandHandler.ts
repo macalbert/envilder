@@ -1,6 +1,9 @@
 import { inject, injectable } from 'inversify';
 import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
-import { ExpiredCredentialsError } from '../../domain/errors/DomainErrors.js';
+import {
+  ExpiredCredentialsError,
+  SsoSessionExpiredError,
+} from '../../domain/errors/DomainErrors.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
@@ -118,7 +121,10 @@ export class PullSecretsToEnvCommandHandler {
 
       return null;
     } catch (error) {
-      if (error instanceof ExpiredCredentialsError) {
+      if (
+        error instanceof ExpiredCredentialsError ||
+        error instanceof SsoSessionExpiredError
+      ) {
         throw error;
       }
       const message = error instanceof Error ? error.message : String(error);
