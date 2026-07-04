@@ -14,40 +14,45 @@ export function presentError(error: unknown): string {
   return renderFallback(error);
 }
 
+function gameOver(title: string): string {
+  return pc.bold(pc.red(`\u{1F4A5} GAME OVER \u2014 ${title}`));
+}
+
 function renderSsoSessionExpired(error: SsoSessionExpiredError): string {
   const body = error.profileName
-    ? `Your AWS SSO session for profile "${pc.magenta(error.profileName)}" is missing or has expired.`
-    : 'Your AWS SSO session is missing or has expired.';
+    ? `  ${pc.dim('Your AWS SSO session for profile ')}${pc.magenta(`"${error.profileName}"`)}${pc.dim(' ran out of lives.')}`
+    : `  ${pc.dim('Your AWS SSO session ran out of lives.')}`;
   const command = error.profileName
     ? `aws sso login --profile ${error.profileName}`
     : 'aws sso login';
 
   return [
-    pc.bold(pc.red('✖ SSO session expired')),
+    gameOver('SSO session expired'),
     '',
-    `  ${body}`,
+    body,
     '',
-    `  ${pc.bold('How to fix:')}`,
-    `  ${pc.dim('→ ')}${pc.cyan(command)}`,
-    `  ${pc.dim('then re-run your envilder command.')}`,
+    `  ${pc.bold(pc.yellow('\u2B95 CONTINUE?'))}`,
+    `  ${pc.dim('   Run:  ')}${pc.cyan(command)}`,
+    `  ${pc.dim('   then re-run your envilder command.')}`,
   ].join('\n');
 }
 
 function renderExpiredCredentials(): string {
   return [
-    pc.bold(pc.red('✖ AWS credentials expired')),
+    gameOver('AWS credentials expired'),
     '',
-    '  Your security token or session is no longer valid.',
+    `  ${pc.dim('Your security token ran out of time.')}`,
     '',
-    `  ${pc.bold('How to fix:')}`,
-    `  ${pc.dim('→ ')}Refresh your credentials and retry (for SSO: aws sso login).`,
+    `  ${pc.bold(pc.yellow('\u2B95 CONTINUE?'))}`,
+    `  ${pc.dim('   Refresh your credentials and retry ')}${pc.dim('(for SSO: ')}${pc.cyan('aws sso login')}${pc.dim(').')}`,
   ].join('\n');
 }
 
 function renderFallback(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
   return [
-    '🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥',
-    message,
+    gameOver('you fell down the wrong pipe!'),
+    '',
+    `  ${pc.dim(message)}`,
   ].join('\n');
 }

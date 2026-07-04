@@ -1,10 +1,23 @@
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import { PullSecretsToEnvCommand } from '../../../../../src/envilder/core/application/pullSecretsToEnv/PullSecretsToEnvCommand';
 import { PullSecretsToEnvCommandHandler } from '../../../../../src/envilder/core/application/pullSecretsToEnv/PullSecretsToEnvCommandHandler';
-import { ExpiredCredentialsError, SsoSessionExpiredError } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
+import {
+  ExpiredCredentialsError,
+  SsoSessionExpiredError,
+} from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import type { ILogger } from '../../../../../src/envilder/core/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../../../src/envilder/core/domain/ports/ISecretProvider';
 import type { IVariableStore } from '../../../../../src/envilder/core/domain/ports/IVariableStore';
+
+const ANSI_PATTERN = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g');
+
+function strip(value: unknown): string {
+  return String(value).replace(ANSI_PATTERN, '');
+}
+
+function loggedLines(mock: Mock): string[] {
+  return mock.mock.calls.map((call) => strip(call[0]));
+}
 
 const testValues: Record<string, string> = {
   '/path/to/ssm/email': 'mockedEmail@example.com',
@@ -19,7 +32,7 @@ describe('PullSecretsToEnvCommandHandler', () => {
     getEnvironment: Mock;
     saveEnvironment: Mock;
   };
-  let mockLogger: ILogger;
+  let mockLogger: ILogger & { info: Mock; warn: Mock; error: Mock };
   let sut: PullSecretsToEnvCommandHandler;
 
   const mockMapPath = './tests/envilder.json';
@@ -64,10 +77,8 @@ describe('PullSecretsToEnvCommandHandler', () => {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
       NEXT_PUBLIC_CREDENTIAL_PASSWORD: '/path/to/ssm/password',
     };
-
     mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
     mockEnvFileManager.getEnvironment.mockResolvedValue({});
-
     const command = PullSecretsToEnvCommand.create(
       mockMapPath,
       mockEnvFilePath,
@@ -94,9 +105,11 @@ describe('PullSecretsToEnvCommandHandler', () => {
         NEXT_PUBLIC_CREDENTIAL_PASSWORD: 'mockedPassword',
       },
     );
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      `Environment File generated at '${mockEnvFilePath}'`,
+    const summaryLine = loggedLines(mockLogger.info).find((line) =>
+      line.includes('LEVEL CLEARED'),
     );
+    expect(summaryLine).toContain('2/2 secrets loaded');
+    expect(summaryLine).toContain(mockEnvFilePath);
   });
 
   it('Should_ThrowError_When_SecretIsNotFound', async () => {
@@ -105,10 +118,8 @@ describe('PullSecretsToEnvCommandHandler', () => {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
       NON_EXISTENT_PARAM: 'non-existent parameter',
     };
-
     mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
     mockEnvFileManager.getEnvironment.mockResolvedValue({});
-
     const command = PullSecretsToEnvCommand.create(
       mockMapPath,
       mockEnvFilePath,
@@ -120,7 +131,9 @@ describe('PullSecretsToEnvCommandHandler', () => {
     // Assert
     await expect(action).rejects.toThrow('Some secrets could not be fetched');
     expect(mockLogger.error).toHaveBeenCalledWith(
-      "Error fetching secret: 'non-existent parameter': ParameterNotFound: non-existent parameter",
+      expect.stringContaining(
+        'non-existent parameter: ParameterNotFound: non-existent parameter',
+      ),
     );
   });
 
@@ -129,10 +142,8 @@ describe('PullSecretsToEnvCommandHandler', () => {
     const paramMapContent = {
       EMPTY_PARAM: '/path/to/ssm/password_no_value',
     };
-
     mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
     mockEnvFileManager.getEnvironment.mockResolvedValue({});
-
     const command = PullSecretsToEnvCommand.create(
       mockMapPath,
       mockEnvFilePath,
@@ -142,9 +153,10 @@ describe('PullSecretsToEnvCommandHandler', () => {
     await sut.handle(command);
 
     // Assert
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      "Warning: No value found for: '/path/to/ssm/password_no_value'",
+    const warningLine = loggedLines(mockLogger.info).find((line) =>
+      line.includes('EMPTY_PARAM'),
     );
+    expect(warningLine).toContain('no value found');
   });
 
   it('Should_LogMaskedValue_When_SecretIsSet', async () => {
@@ -152,10 +164,8 @@ describe('PullSecretsToEnvCommandHandler', () => {
     const paramMapContent = {
       PASSWORD: '/path/to/ssm/password',
     };
-
     mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
     mockEnvFileManager.getEnvironment.mockResolvedValue({});
-
     const command = PullSecretsToEnvCommand.create(
       mockMapPath,
       mockEnvFilePath,
@@ -165,7 +175,10 @@ describe('PullSecretsToEnvCommandHandler', () => {
     await sut.handle(command);
 
     // Assert
-    expect(mockLogger.info).toHaveBeenCalledWith('PASSWORD=***********ord');
+    const resolvedLine = loggedLines(mockLogger.info).find((line) =>
+      line.includes('PASSWORD'),
+    );
+    expect(resolvedLine).toContain('***********ord');
   });
 
   it('Should_PropagateExpiredCredentialsError_When_SecretFetchFails', async () => {

@@ -1,4 +1,5 @@
 import { inject, injectable } from 'inversify';
+import pc from 'picocolors';
 import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
 import {
   ExpiredCredentialsError,
@@ -10,18 +11,20 @@ import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
 import { TYPES } from '../../types.js';
 import type { PullSecretsToEnvCommand } from './PullSecretsToEnvCommand.js';
 
+type ResolvedOutcome = { status: 'resolved'; envVar: string; masked: string };
+type WarningOutcome = { status: 'warning'; envVar: string };
+type ErrorOutcome = { status: 'error'; message: string };
+type SecretOutcome = ResolvedOutcome | WarningOutcome | ErrorOutcome;
+
 @injectable()
 export class PullSecretsToEnvCommandHandler {
   private static readonly ERROR_MESSAGES = {
     FETCH_FAILED: 'Failed to generate environment file: ',
     PARAM_NOT_FOUND: 'Some secrets could not be fetched:\n',
-    NO_VALUE_FOUND: 'Warning: No value found for: ',
-    ERROR_FETCHING: 'Error fetching secret: ',
   };
 
-  private static readonly SUCCESS_MESSAGES = {
-    ENV_GENERATED: 'Environment File generated at ',
-  };
+  private static readonly LABEL_WIDTH = 20;
+  private static readonly RULE = pc.yellow('\u2501'.repeat(60));
 
   constructor(
     @inject(TYPES.ISecretProvider)
@@ -41,11 +44,18 @@ export class PullSecretsToEnvCommandHandler {
     try {
       const { requestVariables, currentVariables } =
         await this.loadVariables(command);
-      const envilded = await this.envild(requestVariables, currentVariables);
-      await this.saveEnvFile(command.envFilePath, envilded);
+      const { variables, resolvedCount, totalCount } = await this.envild(
+        requestVariables,
+        currentVariables,
+      );
+      await this.saveEnvFile(command.envFilePath, variables);
 
       this.logger.info(
-        `${PullSecretsToEnvCommandHandler.SUCCESS_MESSAGES.ENV_GENERATED}'${command.envFilePath}'`,
+        PullSecretsToEnvCommandHandler.buildSummary(
+          resolvedCount,
+          totalCount,
+          command.envFilePath,
+        ),
       );
     } catch (_error) {
       const errorMessage =
@@ -81,45 +91,60 @@ export class PullSecretsToEnvCommandHandler {
   private async envild(
     paramMap: Record<string, string>,
     existingEnvVariables: Record<string, string>,
-  ): Promise<Record<string, string>> {
-    const secretProcessingPromises = Object.entries(paramMap).map(
-      async ([envVar, secretName]) => {
-        return this.processSecret(envVar, secretName, existingEnvVariables);
-      },
+  ): Promise<{
+    variables: Record<string, string>;
+    resolvedCount: number;
+    totalCount: number;
+  }> {
+    const outcomes = await Promise.all(
+      Object.entries(paramMap).map(([envVar, secretName]) =>
+        this.processSecret(envVar, secretName, existingEnvVariables),
+      ),
     );
 
-    const results = await Promise.all(secretProcessingPromises);
+    const resolved = outcomes.filter(
+      (outcome): outcome is ResolvedOutcome => outcome.status === 'resolved',
+    );
+    const warnings = outcomes.filter(
+      (outcome): outcome is WarningOutcome => outcome.status === 'warning',
+    );
+    const errors = outcomes.filter(
+      (outcome): outcome is ErrorOutcome => outcome.status === 'error',
+    );
 
-    const errors = results.filter((error) => error !== null) as string[];
+    this.logResolved(resolved);
+    this.logWarnings(warnings);
 
     if (errors.length > 0) {
       throw new Error(
-        `${PullSecretsToEnvCommandHandler.ERROR_MESSAGES.PARAM_NOT_FOUND}${errors.join('\n')}`,
+        `${PullSecretsToEnvCommandHandler.ERROR_MESSAGES.PARAM_NOT_FOUND}${errors
+          .map((outcome) => outcome.message)
+          .join('\n')}`,
       );
     }
-    return existingEnvVariables;
+
+    return {
+      variables: existingEnvVariables,
+      resolvedCount: resolved.length,
+      totalCount: Object.keys(paramMap).length,
+    };
   }
 
   private async processSecret(
     envVar: string,
     secretName: string,
     existingEnvVariables: Record<string, string>,
-  ): Promise<string | null> {
+  ): Promise<SecretOutcome> {
     try {
       const value = await this.secretProvider.getSecret(secretName);
       if (!value) {
-        this.logger.warn(
-          `${PullSecretsToEnvCommandHandler.ERROR_MESSAGES.NO_VALUE_FOUND}'${secretName}'`,
-        );
-        return null;
+        return { status: 'warning', envVar };
       }
 
       existingEnvVariables[envVar] = value;
+      const masked = new EnvironmentVariable(envVar, value, true).maskedValue;
 
-      const envVariable = new EnvironmentVariable(envVar, value, true);
-      this.logger.info(`${envVariable.name}=${envVariable.maskedValue}`);
-
-      return null;
+      return { status: 'resolved', envVar, masked };
     } catch (error) {
       if (
         error instanceof ExpiredCredentialsError ||
@@ -128,10 +153,53 @@ export class PullSecretsToEnvCommandHandler {
         throw error;
       }
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.error(
-        `${PullSecretsToEnvCommandHandler.ERROR_MESSAGES.ERROR_FETCHING}'${secretName}': ${message}`,
-      );
-      return `${secretName}: ${message}`;
+      return { status: 'error', message: `${secretName}: ${message}` };
     }
+  }
+
+  private logResolved(resolved: ResolvedOutcome[]): void {
+    if (resolved.length === 0) {
+      return;
+    }
+
+    this.logger.info(pc.bold(pc.yellow('\u{1FA99} RESOLVING SECRETS')));
+    this.logger.info(PullSecretsToEnvCommandHandler.RULE);
+    for (const outcome of resolved) {
+      this.logger.info(
+        `  ${pc.green('\u2713 ')}${pc.bold(
+          PullSecretsToEnvCommandHandler.pad(outcome.envVar),
+        )}${pc.dim('\u2192 ')}${pc.dim(outcome.masked)}`,
+      );
+    }
+  }
+
+  private logWarnings(warnings: WarningOutcome[]): void {
+    if (warnings.length === 0) {
+      return;
+    }
+
+    this.logger.info(pc.bold(pc.yellow('\u{1F344} WARNINGS')));
+    this.logger.info(PullSecretsToEnvCommandHandler.RULE);
+    for (const outcome of warnings) {
+      this.logger.info(
+        `  ${pc.yellow('\u26A0 ')}${pc.bold(
+          PullSecretsToEnvCommandHandler.pad(outcome.envVar),
+        )}${pc.dim('no value found \u2014 skipped')}`,
+      );
+    }
+  }
+
+  private static pad(name: string): string {
+    return name.padEnd(PullSecretsToEnvCommandHandler.LABEL_WIDTH);
+  }
+
+  private static buildSummary(
+    resolvedCount: number,
+    totalCount: number,
+    envFilePath: string,
+  ): string {
+    return `${pc.bold(pc.green('\u2B50 LEVEL CLEARED'))}${pc.dim(
+      `  \u2014  ${resolvedCount}/${totalCount} secrets loaded \u00B7 `,
+    )}${pc.bold(envFilePath)}${pc.dim(' written')}`;
   }
 }

@@ -12,7 +12,7 @@ function stripAnsi(value: string): string {
 }
 
 describe('CliErrorPresenter', () => {
-  it('Should_RenderSsoBlockWithProfile_When_SsoSessionExpiredErrorHasProfile', () => {
+  it('Should_RenderGameOverSsoBlockWithProfile_When_SsoSessionExpiredErrorHasProfile', () => {
     // Arrange
     const error = new SsoSessionExpiredError('dev');
 
@@ -20,16 +20,17 @@ describe('CliErrorPresenter', () => {
     const actual = stripAnsi(presentError(error));
 
     // Assert
-    expect(actual).toContain('✖ SSO session expired');
+    expect(actual).toContain('GAME OVER');
+    expect(actual).toContain('SSO session expired');
     expect(actual).toContain(
-      'Your AWS SSO session for profile "dev" is missing or has expired.',
+      'Your AWS SSO session for profile "dev" ran out of lives.',
     );
-    expect(actual).toContain('How to fix:');
-    expect(actual).toContain('→ aws sso login --profile dev');
+    expect(actual).toContain('CONTINUE?');
+    expect(actual).toContain('Run:  aws sso login --profile dev');
     expect(actual).toContain('then re-run your envilder command.');
   });
 
-  it('Should_RenderSsoBlockWithoutProfile_When_SsoSessionExpiredErrorHasNoProfile', () => {
+  it('Should_RenderGameOverSsoBlockWithoutProfile_When_SsoSessionExpiredErrorHasNoProfile', () => {
     // Arrange
     const error = new SsoSessionExpiredError();
 
@@ -37,13 +38,14 @@ describe('CliErrorPresenter', () => {
     const actual = stripAnsi(presentError(error));
 
     // Assert
-    expect(actual).toContain('✖ SSO session expired');
-    expect(actual).toContain('Your AWS SSO session is missing or has expired.');
-    expect(actual).toContain('→ aws sso login');
+    expect(actual).toContain('GAME OVER');
+    expect(actual).toContain('SSO session expired');
+    expect(actual).toContain('Your AWS SSO session ran out of lives.');
+    expect(actual).toContain('Run:  aws sso login');
     expect(actual).not.toContain('--profile');
   });
 
-  it('Should_RenderCredentialsBlock_When_ExpiredCredentialsError', () => {
+  it('Should_RenderGameOverCredentialsBlock_When_ExpiredCredentialsError', () => {
     // Arrange
     const error = new ExpiredCredentialsError();
 
@@ -51,17 +53,16 @@ describe('CliErrorPresenter', () => {
     const actual = stripAnsi(presentError(error));
 
     // Assert
-    expect(actual).toContain('✖ AWS credentials expired');
+    expect(actual).toContain('GAME OVER');
+    expect(actual).toContain('AWS credentials expired');
+    expect(actual).toContain('Your security token ran out of time.');
+    expect(actual).toContain('CONTINUE?');
     expect(actual).toContain(
-      'Your security token or session is no longer valid.',
-    );
-    expect(actual).toContain('How to fix:');
-    expect(actual).toContain(
-      '→ Refresh your credentials and retry (for SSO: aws sso login).',
+      'Refresh your credentials and retry (for SSO: aws sso login).',
     );
   });
 
-  it('Should_RenderMarioFallback_When_GenericError', () => {
+  it('Should_RenderWrongPipeFallback_When_GenericError', () => {
     // Arrange
     const error = new Error('boom');
 
@@ -69,8 +70,8 @@ describe('CliErrorPresenter', () => {
     const actual = stripAnsi(presentError(error));
 
     // Assert
-    expect(actual).toBe(
-      '🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥\nboom',
-    );
+    expect(actual).toContain('GAME OVER');
+    expect(actual).toContain('you fell down the wrong pipe!');
+    expect(actual).toContain('boom');
   });
 });

@@ -124,12 +124,15 @@ meet these standards:
 - **Actionable, step-by-step.** State the problem in one line, then the exact
   steps to fix it (e.g. *"Run `aws sso login --profile dev`, then retry"*).
   Never just report a failure without a path forward.
-- **Professional and calm.** No blame, no cute noise in the *failure* path
-  (the playful tone in the success path stays; errors are reassuring and
-  precise). The post-redirect **recovery** beats (session restored, secrets
-  resolved) are success-path output and may carry the project's retro tone
-  (e.g. `1-UP! SSO session restored.`, `Level cleared.`); the error block that
-  precedes them stays plain.
+- **Playful yet actionable.** Every CLI message — including the *failure* path —
+  carries the project's subtle retro video-game spirit (e.g. `💥 GAME OVER`,
+  *"ran out of lives"*, `⭐ LEVEL CLEARED`), while staying blame-free and precise.
+  The theme never costs clarity: each error still states the concrete problem and
+  the exact remediation command (e.g. *"Run `aws sso login --profile dev`, then
+  re-run your envilder command."*). The post-redirect **recovery** beats (session
+  restored, secrets resolved) share the same tone. **SDK** error text stays plain
+  — no ANSI, no game motifs (it may land in logs/JSON) — but carries identical
+  clarity and the same actionable steps.
 - **Keyword-anchored.** Surface the concrete nouns that let a user search/act:
   the profile name, the command to run, the provider.
 - **CLI = aesthetically formatted** (color, icon, layout, indentation) via the
