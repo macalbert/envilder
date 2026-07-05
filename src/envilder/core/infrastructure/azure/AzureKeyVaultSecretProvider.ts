@@ -1,11 +1,11 @@
 import type { SecretClient } from '@azure/keyvault-secrets';
 import { injectable } from 'inversify';
-import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
 import {
   InvalidArgumentError,
   SecretOperationError,
 } from '../../domain/errors/DomainErrors.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
+import { describeError } from '../describeError.js';
 
 @injectable()
 export class AzureKeyVaultSecretProvider implements ISecretProvider {
@@ -30,11 +30,7 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
       ) {
         return undefined;
       }
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      throw new SecretOperationError(
-        `Failed to get secret ${EnvironmentVariable.maskSecretPath(name)}: ${errorMessage}`,
-      );
+      throw new SecretOperationError(describeError(error));
     }
   }
 

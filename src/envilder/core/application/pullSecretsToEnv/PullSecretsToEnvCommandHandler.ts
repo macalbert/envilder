@@ -3,6 +3,7 @@ import pc from 'picocolors';
 import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
 import {
   ExpiredCredentialsError,
+  SecretsFetchError,
   SsoSessionExpiredError,
 } from '../../domain/errors/DomainErrors.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
@@ -13,16 +14,16 @@ import type { PullSecretsToEnvCommand } from './PullSecretsToEnvCommand.js';
 
 type ResolvedOutcome = { status: 'resolved'; envVar: string; masked: string };
 type WarningOutcome = { status: 'warning'; envVar: string };
-type ErrorOutcome = { status: 'error'; message: string };
+type ErrorOutcome = {
+  status: 'error';
+  envVar: string;
+  path: string;
+  reason: string;
+};
 type SecretOutcome = ResolvedOutcome | WarningOutcome | ErrorOutcome;
 
 @injectable()
 export class PullSecretsToEnvCommandHandler {
-  private static readonly ERROR_MESSAGES = {
-    FETCH_FAILED: 'Failed to generate environment file: ',
-    PARAM_NOT_FOUND: 'Some secrets could not be fetched:\n',
-  };
-
   private static readonly LABEL_WIDTH = 20;
   private static readonly RULE = pc.yellow('\u2501'.repeat(60));
 
@@ -41,30 +42,21 @@ export class PullSecretsToEnvCommandHandler {
    * @param command - The PullSecretsToEnvCommand containing mapPath and envFilePath
    */
   async handle(command: PullSecretsToEnvCommand): Promise<void> {
-    try {
-      const { requestVariables, currentVariables } =
-        await this.loadVariables(command);
-      const { variables, resolvedCount, totalCount } = await this.envild(
-        requestVariables,
-        currentVariables,
-      );
-      await this.saveEnvFile(command.envFilePath, variables);
+    const { requestVariables, currentVariables } =
+      await this.loadVariables(command);
+    const { variables, resolvedCount, totalCount } = await this.envild(
+      requestVariables,
+      currentVariables,
+    );
+    await this.saveEnvFile(command.envFilePath, variables);
 
-      this.logger.info(
-        PullSecretsToEnvCommandHandler.buildSummary(
-          resolvedCount,
-          totalCount,
-          command.envFilePath,
-        ),
-      );
-    } catch (_error) {
-      const errorMessage =
-        _error instanceof Error ? _error.message : String(_error);
-      this.logger.error(
-        `${PullSecretsToEnvCommandHandler.ERROR_MESSAGES.FETCH_FAILED}${errorMessage}`,
-      );
-      throw _error;
-    }
+    this.logger.info(
+      PullSecretsToEnvCommandHandler.buildSummary(
+        resolvedCount,
+        totalCount,
+        command.envFilePath,
+      ),
+    );
   }
 
   private async loadVariables(command: PullSecretsToEnvCommand): Promise<{
@@ -116,10 +108,12 @@ export class PullSecretsToEnvCommandHandler {
     this.logWarnings(warnings);
 
     if (errors.length > 0) {
-      throw new Error(
-        `${PullSecretsToEnvCommandHandler.ERROR_MESSAGES.PARAM_NOT_FOUND}${errors
-          .map((outcome) => outcome.message)
-          .join('\n')}`,
+      throw new SecretsFetchError(
+        errors.map((error) => ({
+          envVar: error.envVar,
+          path: error.path,
+          reason: error.reason,
+        })),
       );
     }
 
@@ -152,8 +146,8 @@ export class PullSecretsToEnvCommandHandler {
       ) {
         throw error;
       }
-      const message = error instanceof Error ? error.message : String(error);
-      return { status: 'error', message: `${secretName}: ${message}` };
+      const reason = error instanceof Error ? error.message : String(error);
+      return { status: 'error', envVar, path: secretName, reason };
     }
   }
 

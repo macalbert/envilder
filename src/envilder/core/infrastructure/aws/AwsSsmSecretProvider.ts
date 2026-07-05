@@ -6,7 +6,6 @@ import {
 import { GetCallerIdentityCommand, type STS } from '@aws-sdk/client-sts';
 import { injectable } from 'inversify';
 import pc from 'picocolors';
-import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
 import {
   ExpiredCredentialsError,
   SecretOperationError,
@@ -14,6 +13,7 @@ import {
 } from '../../domain/errors/DomainErrors.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
+import { describeError } from '../describeError.js';
 import { isExpiredCredentialsError } from './isExpiredCredentialsError.js';
 import { isSsoSessionExpiredError } from './isSsoSessionExpiredError.js';
 
@@ -56,11 +56,7 @@ export class AwsSsmSecretProvider implements ISecretProvider {
       if (isExpiredCredentialsError(error)) {
         throw new ExpiredCredentialsError(error);
       }
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      throw new SecretOperationError(
-        `Failed to get secret ${EnvironmentVariable.maskSecretPath(name)}: ${errorMessage}`,
-      );
+      throw new SecretOperationError(describeError(error));
     }
   }
 

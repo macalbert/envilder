@@ -74,10 +74,13 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
       mockGetSecretFn.mockRejectedValueOnce(error);
 
       // Act
-      const action = sut.getSecret('test-secret');
+      const thrown = await sut
+        .getSecret('test-secret')
+        .catch((e: unknown) => e);
 
       // Assert
-      await expect(action).rejects.toThrow(SecretOperationError);
+      expect(thrown).toBeInstanceOf(SecretOperationError);
+      expect((thrown as Error).message).toBe('Network error');
     });
 
     it('Should_ThrowSecretOperationError_When_NonErrorObjectIsThrown', async () => {

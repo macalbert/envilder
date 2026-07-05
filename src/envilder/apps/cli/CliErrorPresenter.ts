@@ -1,6 +1,7 @@
 import pc from 'picocolors';
 import {
   ExpiredCredentialsError,
+  SecretsFetchError,
   SsoSessionExpiredError,
 } from '../../core/domain/errors/DomainErrors.js';
 
@@ -10,6 +11,9 @@ export function presentError(error: unknown): string {
   }
   if (error instanceof ExpiredCredentialsError) {
     return renderExpiredCredentials();
+  }
+  if (error instanceof SecretsFetchError) {
+    return renderSecretsFetchError(error);
   }
   return renderFallback(error);
 }
@@ -54,5 +58,23 @@ function renderFallback(error: unknown): string {
     gameOver('you fell down the wrong pipe!'),
     '',
     `  ${pc.dim(message)}`,
+  ].join('\n');
+}
+
+function renderSecretsFetchError(error: SecretsFetchError): string {
+  const rule = pc.red('\u2501'.repeat(60));
+  const failureLines = error.failures.map(
+    (failure) =>
+      `  ${pc.red('\u2717 ')}${pc.bold(failure.envVar.padEnd(20))}${pc.dim('\u2192 ')}${pc.dim(failure.path)}`,
+  );
+  const reasons = [...new Set(error.failures.map((failure) => failure.reason))];
+  const reasonLines = reasons.map((reason) => `     ${pc.dim(reason)}`);
+  return [
+    gameOver('some secrets could not be fetched'),
+    rule,
+    ...failureLines,
+    '',
+    `  ${pc.bold(pc.yellow('\u2B95 WHY?'))}`,
+    ...reasonLines,
   ].join('\n');
 }

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { presentError } from '../../../../src/envilder/apps/cli/CliErrorPresenter';
 import {
   ExpiredCredentialsError,
+  SecretsFetchError,
   SsoSessionExpiredError,
 } from '../../../../src/envilder/core/domain/errors/DomainErrors';
 
@@ -73,5 +74,47 @@ describe('CliErrorPresenter', () => {
     expect(actual).toContain('GAME OVER');
     expect(actual).toContain('you fell down the wrong pipe!');
     expect(actual).toContain('boom');
+  });
+
+  it('Should_RenderGameOverFetchBlock_When_SecretsFetchError', () => {
+    // Arrange
+    const error = new SecretsFetchError([
+      {
+        envVar: 'DB_URL',
+        path: '/app/db/url',
+        reason: 'ParameterNotFound: /app/db/url',
+      },
+      { envVar: 'API_KEY', path: '/app/api/key', reason: 'AccessDenied' },
+    ]);
+
+    // Act
+    const actual = stripAnsi(presentError(error));
+
+    // Assert
+    expect(actual).toContain('GAME OVER');
+    expect(actual).toContain('some secrets could not be fetched');
+    expect(actual).toContain('DB_URL');
+    expect(actual).toContain('/app/db/url');
+    expect(actual).toContain('API_KEY');
+    expect(actual).toContain('/app/api/key');
+    expect(actual).toContain('WHY?');
+    expect(actual).toContain('ParameterNotFound: /app/db/url');
+    expect(actual).toContain('AccessDenied');
+  });
+
+  it('Should_ListEachDistinctReason_When_FailuresHaveDistinctReasons', () => {
+    // Arrange
+    const error = new SecretsFetchError([
+      { envVar: 'A', path: '/a', reason: 'ParameterNotFound' },
+      { envVar: 'B', path: '/b', reason: 'ParameterNotFound' },
+      { envVar: 'C', path: '/c', reason: 'AccessDenied' },
+    ]);
+
+    // Act
+    const actual = stripAnsi(presentError(error));
+
+    // Assert
+    expect(actual.split('ParameterNotFound').length - 1).toBe(1);
+    expect(actual).toContain('AccessDenied');
   });
 });

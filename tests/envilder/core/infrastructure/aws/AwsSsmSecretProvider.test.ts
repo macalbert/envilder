@@ -107,12 +107,10 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       mockSendFn.mockRejectedValueOnce(error);
 
       // Act
-      const action = () => sut.getSecret('test-param');
+      const thrown = await sut.getSecret('test-param').catch((e: unknown) => e);
 
       // Assert
-      await expect(action()).rejects.toThrow(
-        'Failed to get secret *******ram: Network error',
-      );
+      expect((thrown as Error).message).toBe('Network error');
     });
 
     it('Should_HandleNonErrorObject_When_ErrorIsThrown', async () => {
@@ -120,12 +118,10 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       mockSendFn.mockRejectedValueOnce('String error');
 
       // Act
-      const action = () => sut.getSecret('test-param');
+      const thrown = await sut.getSecret('test-param').catch((e: unknown) => e);
 
       // Assert
-      await expect(action()).rejects.toThrow(
-        'Failed to get secret *******ram: String error',
-      );
+      expect((thrown as Error).message).toBe('String error');
     });
 
     it('Should_ThrowExpiredCredentialsError_When_GetSecretFailsWithExpiredToken', async () => {

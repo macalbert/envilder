@@ -84,3 +84,21 @@ export class SsoSessionExpiredError extends DomainError {
     );
   }
 }
+
+/**
+ * Describes a single secret that could not be resolved during a pull operation.
+ */
+export type SecretFetchFailure = {
+  envVar: string;
+  path: string;
+  reason: string;
+};
+
+/**
+ * Error thrown when one or more secrets could not be fetched during a pull.
+ */
+export class SecretsFetchError extends DomainError {
+  constructor(readonly failures: ReadonlyArray<SecretFetchFailure>) {
+    super('Some secrets could not be fetched');
+  }
+}

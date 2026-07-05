@@ -3,6 +3,7 @@ import { PullSecretsToEnvCommand } from '../../../../../src/envilder/core/applic
 import { PullSecretsToEnvCommandHandler } from '../../../../../src/envilder/core/application/pullSecretsToEnv/PullSecretsToEnvCommandHandler';
 import {
   ExpiredCredentialsError,
+  SecretsFetchError,
   SsoSessionExpiredError,
 } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import type { ILogger } from '../../../../../src/envilder/core/domain/ports/ILogger';
@@ -112,7 +113,7 @@ describe('PullSecretsToEnvCommandHandler', () => {
     expect(summaryLine).toContain(mockEnvFilePath);
   });
 
-  it('Should_ThrowError_When_SecretIsNotFound', async () => {
+  it('Should_ThrowSecretsFetchError_When_SecretIsNotFound', async () => {
     // Arrange
     const paramMapContent = {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
@@ -126,15 +127,15 @@ describe('PullSecretsToEnvCommandHandler', () => {
     );
 
     // Act
-    const action = () => sut.handle(command);
+    const thrown = await sut.handle(command).catch((e: unknown) => e);
 
     // Assert
-    await expect(action).rejects.toThrow('Some secrets could not be fetched');
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'non-existent parameter: ParameterNotFound: non-existent parameter',
-      ),
-    );
+    expect(thrown).toBeInstanceOf(SecretsFetchError);
+    expect((thrown as SecretsFetchError).failures).toContainEqual({
+      envVar: 'NON_EXISTENT_PARAM',
+      path: 'non-existent parameter',
+      reason: 'ParameterNotFound: non-existent parameter',
+    });
   });
 
   it('Should_LogWarning_When_SecretHasNoValue', async () => {
