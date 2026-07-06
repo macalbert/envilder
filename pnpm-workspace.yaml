@@ -16,19 +16,17 @@ allowBuilds:
   ssh2: true
 
 catalog:
-  '@biomejs/biome': ^2.4.16
+  '@biomejs/biome': ~2.4.16
   typescript: ^6.0.3
   ts-node: ^10.9.2
-  '@types/node': ^25.9.1
-  vitest: ^4.1.7
-  '@vitest/coverage-v8': ^4.1.7
-  aws-cdk-lib: ^2.257.0
+  '@types/node': ^26.1.0
+  vitest: ^4.1.9
+  '@vitest/coverage-v8': ^4.1.9
+  aws-cdk-lib: ^2.261.0
   constructs: ^10.6.0
 
 overrides:
   defu: ">=6.1.5"
-  esbuild: "^0.28.1"
   lodash: ">=4.18.0"
   "undici@7": "^7.28.0"
-  vite: "^7.3.2"
   yaml: ">=2.8.3"
