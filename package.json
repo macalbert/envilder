@@ -1,7 +1,7 @@
 {
   "name": "envilder",
   "version": "0.13.0",
-  "packageManager": "pnpm@11.5.1+sha512.93f7b57422ea7068257235b4c16eb60762eb68e1dc23723199cc739043ea9be2c4143274a399d8c6defa2b1176226d9ca1c4b63482d6200c1a8fbaa78c1d1485",
+  "packageManager": "pnpm@11.10.0+sha512.0b7f8b98060031904c017e3a41eb187a16d40eeb829b95c4f8cb03681761fc4ab53dd219115b9b447f4dce1a05a214764461e7d3703392a9f32f9511ce8c86c8",
   "description": "A CLI and GitHub Action that securely centralizes your environment variables from AWS SSM or Azure Key Vault as a single source of truth",
   "homepage": "https://envilder.com",
   "author": {
@@ -91,9 +91,9 @@
   ],
   "type": "module",
   "dependencies": {
-    "@aws-sdk/client-ssm": "^3.1063.0",
-    "@aws-sdk/client-sts": "^3.1075.0",
-    "@aws-sdk/credential-providers": "^3.1063.0",
+    "@aws-sdk/client-ssm": "^3.1079.0",
+    "@aws-sdk/client-sts": "^3.1079.0",
+    "@aws-sdk/credential-providers": "^3.1079.0",
     "@azure/core-rest-pipeline": "^1.23.0",
     "@azure/identity": "^4.13.1",
     "@azure/keyvault-secrets": "^4.11.2",
@@ -105,10 +105,10 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
-    "@commitlint/cli": "^21.0.2",
-    "@commitlint/config-conventional": "^21.0.2",
+    "@commitlint/cli": "^21.2.0",
+    "@commitlint/config-conventional": "^21.2.0",
     "@secretlint/secretlint-rule-preset-recommend": "^13.0.2",
-    "@testcontainers/localstack": "^12.0.1",
+    "@testcontainers/localstack": "^12.0.4",
     "@types/node": "catalog:",
     "@vercel/ncc": "^0.44.0",
     "@vitest/coverage-v8": "catalog:",
@@ -117,9 +117,9 @@
     "glob": "^13.0.6",
     "lefthook": "^2.1.9",
     "secretlint": "^13.0.2",
-    "testcontainers": "^12.0.1",
+    "testcontainers": "^12.0.4",
     "ts-node": "catalog:",
-    "tsx": "^4.22.3",
+    "tsx": "^4.23.0",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
