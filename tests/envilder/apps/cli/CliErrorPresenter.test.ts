@@ -117,4 +117,34 @@ describe('CliErrorPresenter', () => {
     expect(actual.split('ParameterNotFound').length - 1).toBe(1);
     expect(actual).toContain('AccessDenied');
   });
+
+  it('Should_HighlightReasonInRed_When_ReasonIsAccessDenied', () => {
+    // Arrange
+    const error = new SecretsFetchError([
+      { envVar: 'API_KEY', path: '/app/api/key', reason: 'AccessDenied' },
+    ]);
+
+    // Act
+    const actual = presentError(error);
+
+    // Assert
+    expect(actual).toContain(`${String.fromCharCode(27)}[31m`);
+    expect(stripAnsi(actual)).toContain('AccessDenied');
+  });
+
+  it('Should_NotHighlightReasonInRed_When_ReasonIsNotAccessDenied', () => {
+    // Arrange
+    const error = new SecretsFetchError([
+      { envVar: 'DB_URL', path: '/app/db/url', reason: 'ParameterNotFound' },
+    ]);
+
+    // Act
+    const actual = presentError(error);
+    const reasonLine = actual
+      .split('\n')
+      .find((line) => stripAnsi(line).includes('ParameterNotFound'));
+
+    // Assert
+    expect(reasonLine).not.toContain(`${String.fromCharCode(27)}[31m`);
+  });
 });

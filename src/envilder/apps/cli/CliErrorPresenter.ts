@@ -61,6 +61,12 @@ function renderFallback(error: unknown): string {
   ].join('\n');
 }
 
+const ACCESS_DENIED_PATTERN = /access.?denied|not authorized|forbidden/i;
+
+function isAccessDeniedReason(reason: string): boolean {
+  return ACCESS_DENIED_PATTERN.test(reason);
+}
+
 function renderSecretsFetchError(error: SecretsFetchError): string {
   const rule = pc.red('\u2501'.repeat(60));
   const failureLines = error.failures.map(
@@ -68,7 +74,11 @@ function renderSecretsFetchError(error: SecretsFetchError): string {
       `  ${pc.red('\u2717 ')}${pc.bold(failure.envVar.padEnd(20))}${pc.dim('\u2192 ')}${pc.dim(failure.path)}`,
   );
   const reasons = [...new Set(error.failures.map((failure) => failure.reason))];
-  const reasonLines = reasons.map((reason) => `     ${pc.dim(reason)}`);
+  const reasonLines = reasons.map((reason) =>
+    isAccessDeniedReason(reason)
+      ? `     ${pc.bold(pc.red(reason))}`
+      : `     ${pc.dim(reason)}`,
+  );
   return [
     gameOver('some secrets could not be fetched'),
     rule,

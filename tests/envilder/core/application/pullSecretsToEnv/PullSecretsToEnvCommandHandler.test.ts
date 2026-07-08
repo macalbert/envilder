@@ -160,6 +160,28 @@ describe('PullSecretsToEnvCommandHandler', () => {
     expect(warningLine).toContain('no value found');
   });
 
+  it('Should_IncludeSecretPath_When_LoggingWarningForEmptySecret', async () => {
+    // Arrange
+    const paramMapContent = {
+      EMPTY_PARAM: '/path/to/ssm/password_no_value',
+    };
+    mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
+    mockEnvFileManager.getEnvironment.mockResolvedValue({});
+    const command = PullSecretsToEnvCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    const warningLine = loggedLines(mockLogger.info).find((line) =>
+      line.includes('EMPTY_PARAM'),
+    );
+    expect(warningLine).toContain('/path/to/ssm/password_no_value');
+  });
+
   it('Should_LogMaskedValue_When_SecretIsSet', async () => {
     // Arrange
     const paramMapContent = {

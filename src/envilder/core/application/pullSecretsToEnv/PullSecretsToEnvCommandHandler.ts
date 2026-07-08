@@ -13,7 +13,7 @@ import { TYPES } from '../../types.js';
 import type { PullSecretsToEnvCommand } from './PullSecretsToEnvCommand.js';
 
 type ResolvedOutcome = { status: 'resolved'; envVar: string; masked: string };
-type WarningOutcome = { status: 'warning'; envVar: string };
+type WarningOutcome = { status: 'warning'; envVar: string; path: string };
 type ErrorOutcome = {
   status: 'error';
   envVar: string;
@@ -132,7 +132,7 @@ export class PullSecretsToEnvCommandHandler {
     try {
       const value = await this.secretProvider.getSecret(secretName);
       if (!value) {
-        return { status: 'warning', envVar };
+        return { status: 'warning', envVar, path: secretName };
       }
 
       existingEnvVariables[envVar] = value;
@@ -178,7 +178,7 @@ export class PullSecretsToEnvCommandHandler {
       this.logger.info(
         `  ${pc.yellow('\u26A0 ')}${pc.bold(
           PullSecretsToEnvCommandHandler.pad(outcome.envVar),
-        )}${pc.dim('no value found \u2014 skipped')}`,
+        )}${pc.dim(`no value found (path: ${outcome.path}) \u2014 skipped`)}`,
       );
     }
   }
