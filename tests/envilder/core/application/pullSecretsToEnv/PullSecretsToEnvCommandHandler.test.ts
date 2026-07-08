@@ -1,22 +1,25 @@
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import { PullSecretsToEnvCommand } from '../../../../../src/envilder/core/application/pullSecretsToEnv/PullSecretsToEnvCommand';
 import { PullSecretsToEnvCommandHandler } from '../../../../../src/envilder/core/application/pullSecretsToEnv/PullSecretsToEnvCommandHandler';
-import {
-  ExpiredCredentialsError,
-  SecretsFetchError,
-  SsoSessionExpiredError,
-} from '../../../../../src/envilder/core/domain/errors/DomainErrors';
+import
+  {
+    ExpiredCredentialsError,
+    SecretsFetchError,
+    SsoSessionExpiredError,
+  } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import type { ILogger } from '../../../../../src/envilder/core/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../../../src/envilder/core/domain/ports/ISecretProvider';
 import type { IVariableStore } from '../../../../../src/envilder/core/domain/ports/IVariableStore';
 
 const ANSI_PATTERN = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g');
 
-function strip(value: unknown): string {
+function strip(value: unknown): string
+{
   return String(value).replace(ANSI_PATTERN, '');
 }
 
-function loggedLines(mock: Mock): string[] {
+function loggedLines(mock: Mock): string[]
+{
   return mock.mock.calls.map((call) => strip(call[0]));
 }
 
@@ -26,23 +29,27 @@ const testValues: Record<string, string> = {
   '/path/to/ssm/password_no_value': '',
 };
 
-describe('PullSecretsToEnvCommandHandler', () => {
+describe('PullSecretsToEnvCommandHandler', () =>
+{
   let mockSecretProvider: ISecretProvider;
   let mockEnvFileManager: IVariableStore & {
     getMapping: Mock;
     getEnvironment: Mock;
     saveEnvironment: Mock;
   };
-  let mockLogger: ILogger & { info: Mock; warn: Mock; error: Mock };
+  let mockLogger: ILogger & { info: Mock; warn: Mock; error: Mock; };
   let sut: PullSecretsToEnvCommandHandler;
 
   const mockMapPath = './tests/envilder.json';
   const mockEnvFilePath = './tests/env-file.env';
 
-  beforeEach(() => {
+  beforeEach(() =>
+  {
     mockSecretProvider = {
-      getSecret: vi.fn(async (name: string): Promise<string | undefined> => {
-        if (Object.hasOwn(testValues, name)) {
+      getSecret: vi.fn(async (name: string): Promise<string | undefined> =>
+      {
+        if (Object.hasOwn(testValues, name))
+        {
           return testValues[name];
         }
         throw new Error(`ParameterNotFound: ${name}`);
@@ -72,7 +79,8 @@ describe('PullSecretsToEnvCommandHandler', () => {
     );
   });
 
-  it('Should_GenerateEnvFileFromSecrets_When_ValidSecretsAreProvided', async () => {
+  it('Should_GenerateEnvFileFromSecrets_When_ValidSecretsAreProvided', async () =>
+  {
     // Arrange
     const paramMapContent = {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
@@ -113,7 +121,8 @@ describe('PullSecretsToEnvCommandHandler', () => {
     expect(summaryLine).toContain(mockEnvFilePath);
   });
 
-  it('Should_ThrowSecretsFetchError_When_SecretIsNotFound', async () => {
+  it('Should_ThrowSecretsFetchError_When_SecretIsNotFound', async () =>
+  {
     // Arrange
     const paramMapContent = {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
@@ -138,7 +147,8 @@ describe('PullSecretsToEnvCommandHandler', () => {
     });
   });
 
-  it('Should_LogWarning_When_SecretHasNoValue', async () => {
+  it('Should_LogWarning_When_SecretHasNoValue', async () =>
+  {
     // Arrange
     const paramMapContent = {
       EMPTY_PARAM: '/path/to/ssm/password_no_value',
@@ -154,13 +164,14 @@ describe('PullSecretsToEnvCommandHandler', () => {
     await sut.handle(command);
 
     // Assert
-    const warningLine = loggedLines(mockLogger.info).find((line) =>
+    const warningLine = loggedLines(mockLogger.warn).find((line) =>
       line.includes('EMPTY_PARAM'),
     );
     expect(warningLine).toContain('no value found');
   });
 
-  it('Should_IncludeSecretPath_When_LoggingWarningForEmptySecret', async () => {
+  it('Should_IncludeSecretPath_When_LoggingWarningForEmptySecret', async () =>
+  {
     // Arrange
     const paramMapContent = {
       EMPTY_PARAM: '/path/to/ssm/password_no_value',
@@ -176,13 +187,62 @@ describe('PullSecretsToEnvCommandHandler', () => {
     await sut.handle(command);
 
     // Assert
-    const warningLine = loggedLines(mockLogger.info).find((line) =>
+    const warningLine = loggedLines(mockLogger.warn).find((line) =>
       line.includes('EMPTY_PARAM'),
     );
     expect(warningLine).toContain('/path/to/ssm/password_no_value');
   });
 
-  it('Should_LogMaskedValue_When_SecretIsSet', async () => {
+  it('Should_LogNotFoundWarningInRed_When_SecretDoesNotExist', async () =>
+  {
+    // Arrange
+    const paramMapContent = {
+      MISSING_PARAM: '/path/to/ssm/missing',
+    };
+    mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
+    mockEnvFileManager.getEnvironment.mockResolvedValue({});
+    vi.mocked(mockSecretProvider.getSecret).mockResolvedValueOnce(undefined);
+    const command = PullSecretsToEnvCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    const warningLine = mockLogger.warn.mock.calls
+      .map((call) => String(call[0]))
+      .find((line) => line.includes('MISSING_PARAM'));
+    expect(warningLine).toContain(`${String.fromCharCode(27)}[31m`);
+    expect(strip(warningLine)).toContain('secret not found');
+  });
+
+  it('Should_LogWarningInYellow_When_SecretExistsButIsEmpty', async () =>
+  {
+    // Arrange
+    const paramMapContent = {
+      EMPTY_PARAM: '/path/to/ssm/password_no_value',
+    };
+    mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
+    mockEnvFileManager.getEnvironment.mockResolvedValue({});
+    const command = PullSecretsToEnvCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    const warningLine = mockLogger.warn.mock.calls
+      .map((call) => String(call[0]))
+      .find((line) => line.includes('EMPTY_PARAM'));
+    expect(warningLine).not.toContain(`${String.fromCharCode(27)}[31m`);
+  });
+
+  it('Should_LogMaskedValue_When_SecretIsSet', async () =>
+  {
     // Arrange
     const paramMapContent = {
       PASSWORD: '/path/to/ssm/password',
@@ -204,7 +264,8 @@ describe('PullSecretsToEnvCommandHandler', () => {
     expect(resolvedLine).toContain('***********ord');
   });
 
-  it('Should_PropagateExpiredCredentialsError_When_SecretFetchFails', async () => {
+  it('Should_PropagateExpiredCredentialsError_When_SecretFetchFails', async () =>
+  {
     // Arrange
     const paramMapContent = {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
@@ -226,7 +287,8 @@ describe('PullSecretsToEnvCommandHandler', () => {
     await expect(action).rejects.toThrow(ExpiredCredentialsError);
   });
 
-  it('Should_PropagateSsoSessionExpiredError_When_SecretFetchFails', async () => {
+  it('Should_PropagateSsoSessionExpiredError_When_SecretFetchFails', async () =>
+  {
     // Arrange
     const paramMapContent = {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
