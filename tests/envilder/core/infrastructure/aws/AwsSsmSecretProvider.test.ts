@@ -107,7 +107,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       const thrown = await sut.getSecret('test-param').catch((e: unknown) => e);
 
       // Assert
-      expect((thrown as Error).message).toBe('Network error');
+      expect((thrown as Error).message).toBe('*******ram: Network error');
     });
 
     it('Should_HandleNonErrorObject_When_ErrorIsThrown', async () => {
@@ -118,7 +118,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       const thrown = await sut.getSecret('test-param').catch((e: unknown) => e);
 
       // Assert
-      expect((thrown as Error).message).toBe('String error');
+      expect((thrown as Error).message).toBe('*******ram: String error');
     });
 
     it('Should_ThrowExpiredCredentialsError_When_GetSecretFailsWithExpiredToken', async () => {
