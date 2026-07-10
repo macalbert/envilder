@@ -134,8 +134,34 @@ describe('PullSecretsToEnvCommandHandler', () => {
     expect(thrown).toBeInstanceOf(SecretsFetchError);
     expect((thrown as SecretsFetchError).failures).toContainEqual({
       envVar: 'NON_EXISTENT_PARAM',
-      path: 'non-existent parameter',
+      path: EnvironmentVariable.maskSecretPath('non-existent parameter'),
       reason: 'ParameterNotFound: non-existent parameter',
+    });
+  });
+
+  it('Should_StripDuplicatedMaskedPathPrefixFromReason_When_SecretOperationErrorMessageIncludesIt', async () => {
+    // Arrange
+    const secretPath = '/path/to/ssm/db-password';
+    const maskedPath = EnvironmentVariable.maskSecretPath(secretPath);
+    mockSecretProvider.getSecret = vi.fn(async () => {
+      throw new Error(`${maskedPath}: AccessDenied`);
+    });
+    const paramMapContent = { DB_PASSWORD: secretPath };
+    mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
+    mockEnvFileManager.getEnvironment.mockResolvedValue({});
+    const command = PullSecretsToEnvCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
+
+    // Act
+    const thrown = await sut.handle(command).catch((e: unknown) => e);
+
+    // Assert
+    expect((thrown as SecretsFetchError).failures).toContainEqual({
+      envVar: 'DB_PASSWORD',
+      path: maskedPath,
+      reason: 'AccessDenied',
     });
   });
 

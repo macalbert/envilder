@@ -158,9 +158,24 @@ export class PullSecretsToEnvCommandHandler {
       ) {
         throw error;
       }
-      const reason = error instanceof Error ? error.message : String(error);
-      return { status: 'error', envVar, path: secretName, reason };
+      const maskedPath = EnvironmentVariable.maskSecretPath(secretName);
+      const reason = PullSecretsToEnvCommandHandler.describeErrorReason(
+        error,
+        maskedPath,
+      );
+      return { status: 'error', envVar, path: maskedPath, reason };
     }
+  }
+
+  private static describeErrorReason(
+    error: unknown,
+    maskedPath: string,
+  ): string {
+    const message = error instanceof Error ? error.message : String(error);
+    const duplicatedPrefix = `${maskedPath}: `;
+    return message.startsWith(duplicatedPrefix)
+      ? message.slice(duplicatedPrefix.length)
+      : message;
   }
 
   private logSecretsSection(
