@@ -165,6 +165,34 @@ describe('PullSecretsToEnvCommandHandler', () => {
     });
   });
 
+  it('Should_NotProduceBlankReason_When_SecretProviderThrowsAggregateErrorWithEmptyMessage', async () => {
+    // Arrange
+    const secretPath = '/path/to/ssm/db-password';
+    mockSecretProvider.getSecret = vi.fn(async () => {
+      throw new AggregateError(
+        [new Error('connect ECONNREFUSED 127.0.0.1:9999')],
+        '',
+      );
+    });
+    const paramMapContent = { DB_PASSWORD: secretPath };
+    mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
+    mockEnvFileManager.getEnvironment.mockResolvedValue({});
+    const command = PullSecretsToEnvCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
+
+    // Act
+    const thrown = await sut.handle(command).catch((e: unknown) => e);
+
+    // Assert
+    expect((thrown as SecretsFetchError).failures).toContainEqual({
+      envVar: 'DB_PASSWORD',
+      path: EnvironmentVariable.maskSecretPath(secretPath),
+      reason: 'connect ECONNREFUSED 127.0.0.1:9999',
+    });
+  });
+
   it('Should_LogWarning_When_SecretHasNoValue', async () => {
     // Arrange
     const paramMapContent = {

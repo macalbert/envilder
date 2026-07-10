@@ -101,9 +101,7 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
       mockGetSecretFn.mockRejectedValueOnce(new Error('Network error'));
 
       // Act
-      const thrown = await sut
-        .getSecret(originalName)
-        .catch((e: unknown) => e);
+      const thrown = await sut.getSecret(originalName).catch((e: unknown) => e);
 
       // Assert
       expect((thrown as Error).message).toBe(

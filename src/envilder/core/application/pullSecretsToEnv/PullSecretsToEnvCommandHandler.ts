@@ -9,6 +9,7 @@ import {
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
+import { describeError } from '../../infrastructure/describeError.js';
 import { TYPES } from '../../types.js';
 import type { PullSecretsToEnvCommand } from './PullSecretsToEnvCommand.js';
 
@@ -171,7 +172,7 @@ export class PullSecretsToEnvCommandHandler {
     error: unknown,
     maskedPath: string,
   ): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = describeError(error);
     const duplicatedPrefix = `${maskedPath}: `;
     return message.startsWith(duplicatedPrefix)
       ? message.slice(duplicatedPrefix.length)
