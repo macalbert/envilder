@@ -19,7 +19,7 @@ export function presentError(error: unknown): string {
 }
 
 function gameOver(title: string): string {
-  return pc.bold(pc.red(`\u{1F4A5} GAME OVER \u2014 ${title}`));
+  return `\n${pc.bold(pc.red(`\u{1F4A5} GAME OVER \u2014 ${title}`))}`;
 }
 
 function renderSsoSessionExpired(error: SsoSessionExpiredError): string {
@@ -38,6 +38,7 @@ function renderSsoSessionExpired(error: SsoSessionExpiredError): string {
     `  ${pc.bold(pc.yellow('\u2B95 CONTINUE?'))}`,
     `  ${pc.dim('   Run:  ')}${pc.cyan(command)}`,
     `  ${pc.dim('   then re-run your envilder command.')}`,
+    '',
   ].join('\n');
 }
 
@@ -49,6 +50,7 @@ function renderExpiredCredentials(): string {
     '',
     `  ${pc.bold(pc.yellow('\u2B95 CONTINUE?'))}`,
     `  ${pc.dim('   Refresh your credentials and retry ')}${pc.dim('(for SSO: ')}${pc.cyan('aws sso login')}${pc.dim(').')}`,
+    '',
   ].join('\n');
 }
 
@@ -58,6 +60,7 @@ function renderFallback(error: unknown): string {
     gameOver('you fell down the wrong pipe!'),
     '',
     `  ${pc.dim(message)}`,
+    '',
   ].join('\n');
 }
 
@@ -86,5 +89,6 @@ function renderSecretsFetchError(error: SecretsFetchError): string {
     '',
     `  ${pc.bold(pc.yellow('\u2B95 WHY?'))}`,
     ...reasonLines,
+    '',
   ].join('\n');
 }

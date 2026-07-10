@@ -105,6 +105,7 @@ export class AwsSsmSecretProvider implements ISecretProvider {
     const regionValue =
       region === 'unknown' ? pc.red(region) : pc.yellow(region);
     return (
+      '\n' +
       pc.bold(pc.cyan('☁ AWS identity')) +
       sep +
       pc.dim('account=') +

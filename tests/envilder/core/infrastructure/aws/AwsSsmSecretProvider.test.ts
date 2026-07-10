@@ -23,6 +23,7 @@ import {
   SecretOperationError,
   SsoSessionExpiredError,
 } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
+import type { ILogger } from '../../../../../src/envilder/core/domain/ports/ILogger';
 import { AwsSsmSecretProvider } from '../../../../../src/envilder/core/infrastructure/aws/AwsSsmSecretProvider';
 
 // Constants for integration tests
@@ -41,11 +42,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
   let mockRegionFn: ReturnType<typeof vi.fn>;
   let mockCredentialsFn: ReturnType<typeof vi.fn>;
   let mockSts: STS;
-  let mockLogger: {
-    info: ReturnType<typeof vi.fn>;
-    warn: ReturnType<typeof vi.fn>;
-    error: ReturnType<typeof vi.fn>;
-  };
+  let mockLogger: ILogger;
   let mockSsm: SSM;
   let sut: AwsSsmSecretProvider;
 
@@ -252,7 +249,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       // Assert
       const logged = stripAnsi(vi.mocked(mockLogger.info).mock.calls[0][0]);
       expect(logged).toBe(
-        '☁ AWS identity · account=123456789012 · region=us-east-1 · profile=developer',
+        '\n☁ AWS identity · account=123456789012 · region=us-east-1 · profile=developer',
       );
     });
 
@@ -269,7 +266,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       // Assert
       const logged = stripAnsi(vi.mocked(mockLogger.info).mock.calls[0][0]);
       expect(logged).toBe(
-        '☁ AWS identity · account=999999999999 · region=us-east-1 · profile=developer',
+        '\n☁ AWS identity · account=999999999999 · region=us-east-1 · profile=developer',
       );
     });
 
@@ -286,7 +283,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       // Assert
       const logged = stripAnsi(vi.mocked(mockLogger.info).mock.calls[0][0]);
       expect(logged).toBe(
-        '☁ AWS identity · account=unknown · region=us-east-1 · profile=developer',
+        '\n☁ AWS identity · account=unknown · region=us-east-1 · profile=developer',
       );
     });
 
@@ -314,7 +311,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       // Assert
       const logged = stripAnsi(vi.mocked(mockLogger.info).mock.calls[0][0]);
       expect(logged).toBe(
-        '☁ AWS identity · account=123456789012 · region=us-east-1 · profile=default',
+        '\n☁ AWS identity · account=123456789012 · region=us-east-1 · profile=default',
       );
     });
   });

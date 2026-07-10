@@ -109,8 +109,7 @@ export class PullSecretsToEnvCommandHandler {
       (outcome): outcome is ErrorOutcome => outcome.status === 'error',
     );
 
-    this.logResolved(resolved);
-    this.logWarnings(warnings);
+    this.logSecretsSection(resolved, warnings);
 
     if (errors.length > 0) {
       throw new SecretsFetchError(
@@ -164,12 +163,15 @@ export class PullSecretsToEnvCommandHandler {
     }
   }
 
-  private logResolved(resolved: ResolvedOutcome[]): void {
-    if (resolved.length === 0) {
+  private logSecretsSection(
+    resolved: ResolvedOutcome[],
+    warnings: WarningOutcome[],
+  ): void {
+    if (resolved.length === 0 && warnings.length === 0) {
       return;
     }
 
-    this.logger.info(pc.bold(pc.yellow('\u{1FA99} RESOLVING SECRETS')));
+    this.logger.info(`\n${pc.bold(pc.yellow('\u{1FA99}  RESOLVING SECRETS'))}`);
     this.logger.info(PullSecretsToEnvCommandHandler.RULE);
     for (const outcome of resolved) {
       this.logger.info(
@@ -178,15 +180,10 @@ export class PullSecretsToEnvCommandHandler {
         )}${pc.dim('\u2192 ')}${pc.dim(outcome.masked)}`,
       );
     }
+    this.logWarnings(warnings);
   }
 
   private logWarnings(warnings: WarningOutcome[]): void {
-    if (warnings.length === 0) {
-      return;
-    }
-
-    this.logger.warn(pc.bold(pc.yellow('\u{1F344} WARNINGS')));
-    this.logger.warn(PullSecretsToEnvCommandHandler.RULE);
     for (const outcome of warnings) {
       if (outcome.reason === 'not-found') {
         this.logger.warn(
@@ -213,8 +210,8 @@ export class PullSecretsToEnvCommandHandler {
     totalCount: number,
     envFilePath: string,
   ): string {
-    return `${pc.bold(pc.green('\u2B50 LEVEL CLEARED'))}${pc.dim(
+    return `\n${pc.bold(pc.green('\u2B50 LEVEL CLEARED'))}${pc.dim(
       `  \u2014  ${resolvedCount}/${totalCount} secrets loaded \u00B7 `,
-    )}${pc.bold(envFilePath)}${pc.dim(' written')}`;
+    )}${pc.bold(envFilePath)}${pc.dim(' written')}\n`;
   }
 }
