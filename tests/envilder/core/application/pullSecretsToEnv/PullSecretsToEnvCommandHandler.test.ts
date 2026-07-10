@@ -113,7 +113,7 @@ describe('PullSecretsToEnvCommandHandler', () => {
     expect(summaryLine).toContain(mockEnvFilePath);
   });
 
-  it('Should_ThrowSecretsFetchError_When_SecretIsNotFound', async () => {
+  it('Should_ThrowSecretsFetchError_When_SecretProviderThrows', async () => {
     // Arrange
     const paramMapContent = {
       NEXT_PUBLIC_CREDENTIAL_EMAIL: '/path/to/ssm/email',
