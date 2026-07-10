@@ -3,7 +3,7 @@ import {
   ExpiredCredentialsError,
   SecretsFetchError,
   SsoSessionExpiredError,
-} from '../../core/domain/errors/DomainErrors.js';
+} from '../../../core/domain/errors/DomainErrors.js';
 
 export function presentError(error: unknown): string {
   if (error instanceof SsoSessionExpiredError) {

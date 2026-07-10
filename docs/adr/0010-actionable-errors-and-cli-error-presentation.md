@@ -80,7 +80,7 @@ instance role), `profileName` is absent and the remediation degrades to a bare
 
 ### 2. Single CLI error-presentation point
 
-The CLI's lone catch site (`src/envilder/apps/cli/Index.ts` `main().catch(...)`) is refactored
+The CLI's lone catch site (`src/envilder/apps/cli/entry/Index.ts` `main().catch(...)`) is refactored
 into a dedicated `CliErrorPresenter`. This is the **one place** that maps an
 error type to its interactive rendering: icon, color, layout, remediation hint,
 and — for `SsoSessionExpiredError` — the optional `aws sso login` redirect.

@@ -1,11 +1,11 @@
 import 'reflect-metadata';
 import { Container } from 'inversify';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { Startup } from '../../../../src/envilder/apps/cli/Startup.js';
-import type { DispatchActionCommandHandler } from '../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler.js';
-import type { ILogger } from '../../../../src/envilder/core/domain/ports/ILogger.js';
-import type { ISecretProvider } from '../../../../src/envilder/core/domain/ports/ISecretProvider.js';
-import { TYPES } from '../../../../src/envilder/core/types.js';
+import { Startup } from '../../../../../src/envilder/apps/cli/bootstrap/Startup.js';
+import type { DispatchActionCommandHandler } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler.js';
+import type { ILogger } from '../../../../../src/envilder/core/domain/ports/ILogger.js';
+import type { ISecretProvider } from '../../../../../src/envilder/core/domain/ports/ISecretProvider.js';
+import { TYPES } from '../../../../../src/envilder/core/types.js';
 
 describe('Startup', () => {
   let startup: Startup;

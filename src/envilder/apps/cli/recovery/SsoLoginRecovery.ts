@@ -1,8 +1,8 @@
 import { spawn } from 'node:child_process';
 import { createInterface } from 'node:readline';
-import { SsoSessionExpiredError } from '../../core/domain/errors/DomainErrors.js';
-import { presentError } from './CliErrorPresenter.js';
-import { SilentExitError } from './SilentExitError.js';
+import { SsoSessionExpiredError } from '../../../core/domain/errors/DomainErrors.js';
+import { presentError } from '../errors/CliErrorPresenter.js';
+import { SilentExitError } from '../errors/SilentExitError.js';
 
 const AWS_CLI_NOT_FOUND = -1;
 const LOGIN_FAILED = 1;

@@ -48,7 +48,7 @@ For each feature area, identify the authoritative source:
 
 | Area | Source of Truth |
 |------|-----------------|
-| CLI flags/options | `src/envilder/apps/cli/Cli.ts` |
+| CLI flags/options | `src/envilder/apps/cli/entry/Cli.ts` |
 | GHA inputs | `github-action/action.yml` |
 | SDK public API | SDK source code (`src/sdks/{runtime}/`) |
 | Providers | `src/envilder/core/infrastructure/` |

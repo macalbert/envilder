@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { presentError } from '../../../../src/envilder/apps/cli/CliErrorPresenter';
+import { presentError } from '../../../../../src/envilder/apps/cli/errors/CliErrorPresenter';
 import {
   ExpiredCredentialsError,
   SecretsFetchError,
   SsoSessionExpiredError,
-} from '../../../../src/envilder/core/domain/errors/DomainErrors';
+} from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 
 const ANSI_PATTERN = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g');
 

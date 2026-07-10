@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
-import { SilentExitError } from '../../../../src/envilder/apps/cli/SilentExitError';
+import { SilentExitError } from '../../../../../src/envilder/apps/cli/errors/SilentExitError';
 import {
   buildLoginArgs,
   executeWithSsoRecovery,
   type RecoveryDeps,
-} from '../../../../src/envilder/apps/cli/SsoLoginRecovery';
-import { SsoSessionExpiredError } from '../../../../src/envilder/core/domain/errors/DomainErrors';
+} from '../../../../../src/envilder/apps/cli/recovery/SsoLoginRecovery';
+import { SsoSessionExpiredError } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 
 describe('SsoLoginRecovery', () => {
   it('Should_RethrowSsoError_When_NotInteractive', async () => {

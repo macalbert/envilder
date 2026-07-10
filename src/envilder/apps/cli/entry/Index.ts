@@ -5,9 +5,9 @@
  * This file is executed when the CLI runs
  */
 
+import { presentError } from '../errors/CliErrorPresenter.js';
+import { SilentExitError } from '../errors/SilentExitError.js';
 import { main } from './Cli.js';
-import { presentError } from './CliErrorPresenter.js';
-import { SilentExitError } from './SilentExitError.js';
 
 main().catch((error) => {
   if (error instanceof SilentExitError) {

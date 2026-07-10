@@ -1,10 +1,10 @@
 import { Container } from 'inversify';
-import type { MapFileConfig } from '../../core/domain/MapFileConfig.js';
+import type { MapFileConfig } from '../../../core/domain/MapFileConfig.js';
 import {
   configureApplicationServices,
   configureInfrastructureServices,
   type InfrastructureOptions,
-} from '../shared/ContainerConfiguration.js';
+} from '../../shared/ContainerConfiguration.js';
 
 export class Startup {
   private readonly container: Container;
