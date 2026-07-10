@@ -9,13 +9,13 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ### Added
 
-* **Colorized `AWS identity` banner** — The
+* **Colorized `AWS identity` banner**: The
   `☁ AWS identity · account=… · region=… · profile=…` line is now colorized.
   `account` and `region` render in red when they resolve to `unknown`,
   signalling that authentication failed
   ([#382](https://github.com/macalbert/envilder/issues/382))
 
-* **Dedicated `SsoSessionExpiredError` for expired SSO sessions** —
+* **Dedicated `SsoSessionExpiredError` for expired SSO sessions**:
   Failures to resolve or load an AWS SSO session now surface as a
   dedicated `SsoSessionExpiredError` (a sibling of
   `ExpiredCredentialsError`) carrying the AWS profile from
@@ -24,22 +24,22 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   still surfaces as `ExpiredCredentialsError`
   ([#374](https://github.com/macalbert/envilder/issues/374))
 
-* **Calm, actionable error blocks via `CliErrorPresenter`** — Credential
+* **Calm, actionable error blocks via `CliErrorPresenter`**: Credential
   errors now render through a single `CliErrorPresenter` that prints a
   calm, colorized, actionable error block instead of a raw stack trace
   ([#374](https://github.com/macalbert/envilder/issues/374))
 
-* **TTY-gated `aws sso login` redirect with auto-retry** — On an
+* **TTY-gated `aws sso login` redirect with auto-retry**: On an
   `SsoSessionExpiredError` in an interactive terminal, the CLI offers to
-  run `aws sso login` for you — spawned safely with array arguments,
-  never through a shell — and retries the pull once after a successful
+  run `aws sso login` for you (spawned safely with array arguments,
+  never through a shell) and retries the pull once after a successful
   login. Non-interactive runs (CI, pipes) never prompt and just present
   the actionable message
   ([#375](https://github.com/macalbert/envilder/issues/375))
 
 ### Changed
 
-* **Print the `AWS identity` banner before resolving secrets** — The
+* **Print the `AWS identity` banner before resolving secrets**: The
   banner is now printed before secrets are resolved, so it always
   appears first. Previously it could surface mid-output because secrets
   resolve in parallel
@@ -47,7 +47,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ### Fixed
 
-* **Clear error for expired or invalid AWS credentials** — Expired or
+* **Clear error for expired or invalid AWS credentials**: Expired or
   invalid AWS credentials (e.g. an expired session token) now produce a
   clear, actionable `ExpiredCredentialsError` telling you to refresh
   credentials (e.g. run `aws sso login`), instead of being masked as a
@@ -60,7 +60,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ### Fixed
 
-* **Honor `$config.profile` for the AWS region, not just credentials** —
+* **Honor `$config.profile` for the AWS region, not just credentials**:
   When a map file set an AWS profile via `$config.profile`, Envilder applied
   it to credentials only; the AWS SDK fell back to the default profile's
   region and silently read or wrote SSM parameters in the wrong
@@ -72,7 +72,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ### Added
 
-* **Log the effective AWS identity before resolving secrets** —
+* **Log the effective AWS identity before resolving secrets**:
   Before the first read or write, Envilder logs
   `☁ AWS identity · account=… · region=… · profile=…` so a misrouted account
   or region is immediately visible. The account is read from the active
@@ -86,7 +86,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ### Changed
 
-* **Preserve existing `.env` formatting on pull** — When the target `.env`
+* **Preserve existing `.env` formatting on pull**: When the target `.env`
   file already exists, Envilder now updates values in place instead of
   rewriting the file from scratch. Full-line comments, blank lines, key
   ordering, `export` prefixes, and surrounding spacing are preserved; only
@@ -100,7 +100,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ### Changed
 
-* **BREAKING: Require Node.js >= 22.12** — pnpm 11, testcontainers v12,
+* **BREAKING: Require Node.js >= 22.12**: pnpm 11, testcontainers v12,
   commander 15, and commitlint 21 require Node.js 22.12+. The `engines`
   field now enforces `>=22.12.0`
   ([#291](https://github.com/macalbert/envilder/pull/291))
@@ -109,7 +109,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 * Update all devDependencies to latest (TypeScript 6.0.3, Biome 2.4.16,
   testcontainers 12.0.1, pnpm 11.5.0)
-* Remove `rimraf` — replaced with zero-dependency `fs.rmSync` in clean scripts
+* Remove `rimraf`: replaced with zero-dependency `fs.rmSync` in clean scripts
   ([#291](https://github.com/macalbert/envilder/pull/291))
 
 ---
@@ -118,17 +118,17 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ### Added
 
-* **Map-file JSON Schema** — A formal JSON Schema specification for map files,
+* **Map-file JSON Schema**: A formal JSON Schema specification for map files,
   published at `https://envilder.com/schema/map-file.v1.json`. Add
   `"$schema": "https://envilder.com/schema/map-file.v1.json"` to any map file
   for IDE autocomplete, inline documentation, and validation
   ([#218](https://github.com/macalbert/envilder/pull/218))
-* **Schema contract tests** — 39 tests validating the JSON Schema across all
+* **Schema contract tests**: 39 tests validating the JSON Schema across all
   providers (AWS, Azure, GCP, HashiCorp Vault, file)
 
 ### Fixed
 
-* **Reserved key filtering** — All `$`-prefixed keys (e.g. `$schema`) are now
+* **Reserved key filtering**: All `$`-prefixed keys (e.g. `$schema`) are now
   excluded from variable mappings. Previously only `$config` was filtered,
   causing `$schema` to leak into environment variables
   ([#218](https://github.com/macalbert/envilder/pull/218))
@@ -147,7 +147,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ### Added
 
-* **Runtime SDKs now available** — Load secrets directly into your application
+* **Runtime SDKs now available**: Load secrets directly into your application
   at startup, no `.env` file needed:
 
   **.NET** ([NuGet](https://www.nuget.org/packages/Envilder)):
@@ -180,7 +180,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ### Changed
 
-* **README rewritten** — Streamlined messaging, accurate comparison
+* **README rewritten**: Streamlined messaging, accurate comparison
   tables, simplified quick start (2 steps), and reduced noise
 
 ### Fixed
@@ -204,11 +204,11 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ### Added
 
-* **LocalStack sponsor section** — Added sponsor section to website homepage and README with LocalStack logos
+* **LocalStack sponsor section**: Added sponsor section to website homepage and README with LocalStack logos
   (dark, light, color variants) and a new `Sponsors.astro` component
   ([#136](https://github.com/macalbert/envilder/pull/136))
-* **Website test suite** — Added `tests/website/` with Vitest coverage for i18n utilities and Markdown helpers
-* **`BackToTop` component** — New scroll-to-top button component for the documentation website
+* **Website test suite**: Added `tests/website/` with Vitest coverage for i18n utilities and Markdown helpers
+* **`BackToTop` component**: New scroll-to-top button component for the documentation website
 
 ### Changed
 
@@ -216,7 +216,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   * Core domain layer moved from `src/envilder/` to `src/envilder/core/`
   * Website moved from `src/apps/website/` to `src/website/`
   * All imports, `tsconfig.json`, `package.json`, and workspace config updated accordingly
-* **Website UX improvements** — `DocsContent`, `HowItWorks`, `ThemeSwitcher`, `TerminalMockup`, and
+* **Website UX improvements**: `DocsContent`, `HowItWorks`, `ThemeSwitcher`, `TerminalMockup`, and
   `BaseLayout` components updated; global CSS expanded; i18n keys added for new content
 
 ### Fixed
@@ -242,7 +242,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ### Added
 
-* **Documentation website** — Full Astro-based docs site deployed at [envilder.com](https://envilder.com),
+* **Documentation website**: Full Astro-based docs site deployed at [envilder.com](https://envilder.com),
   with multi-language support (EN, ES, CA), dark/retro and light themes, and a dedicated changelog page
 
 ### Changed
@@ -265,20 +265,20 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ### Added
 
-* **`$config` section in map files** — Map files now support an optional `$config` key to declare provider
+* **`$config` section in map files**: Map files now support an optional `$config` key to declare provider
   and connection details inline (e.g., `"provider": "azure"`, `"vaultUrl": "https://..."`,
   `"profile": "dev-account"`)
-* New CLI flag `--vault-url <url>` — Azure Key Vault URL, overrides `$config.vaultUrl` in the map file
+* New CLI flag `--vault-url <url>`: Azure Key Vault URL, overrides `$config.vaultUrl` in the map file
 * Precedence chain: CLI flags > `$config` in map file > defaults
 * Backward compatible: existing map files without `$config` continue to work (defaults to AWS provider)
-* **Azure Key Vault support** — Use `--provider=azure` to pull/push secrets from Azure Key Vault ([#90](https://github.com/macalbert/envilder/pull/90))
+* **Azure Key Vault support**: Use `--provider=azure` to pull/push secrets from Azure Key Vault ([#90](https://github.com/macalbert/envilder/pull/90))
 * New infrastructure adapter: `AzureKeyVaultSecretProvider` implementing `ISecretProvider`
 * New CLI option `--provider <name>` to select cloud provider (`aws` or `azure`, default: `aws`)
 * Azure authentication via `DefaultAzureCredential` (supports Azure CLI, managed identity, etc.)
 
 ### Changed
 
-* **CLI flag `--ssm-path` renamed to `--secret-path`** — The old flag is still accepted as a deprecated
+* **CLI flag `--ssm-path` renamed to `--secret-path`**: The old flag is still accepted as a deprecated
   alias and prints a warning. It will be removed in a future release.
 * `configureInfrastructureServices()` now receives a single `MapFileConfig` object instead of separate parameters
 * CLI reads `$config` from the map file and merges with CLI flags
@@ -548,7 +548,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ### Added
 
-* **push:** Introduced Push Mode — sync local `.env` variables to AWS SSM Parameter Store ([#57](https://github.com/macalbert/envilder/pull/57))
+* **push:** Introduced Push Mode: sync local `.env` variables to AWS SSM Parameter Store ([#57](https://github.com/macalbert/envilder/pull/57))
 
 ---
 
