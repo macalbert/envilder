@@ -7,8 +7,8 @@
 
 import { main } from './Gha.js';
 
-main().catch((error) => {
-  console.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
-  console.error(error instanceof Error ? error.message : String(error));
+main().catch(() => {
+  // Gha.ts already logged an actionable message via presentGhaError()
+  // before rethrowing; this handler only needs to set the exit code.
   process.exit(1);
 });

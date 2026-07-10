@@ -8,6 +8,7 @@ import type { ILogger } from '../../core/domain/ports/ILogger.js';
 import { ConsoleLogger } from '../../core/infrastructure/logger/ConsoleLogger.js';
 import { readMapFileConfig } from '../../core/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../core/types.js';
+import { presentGhaError } from './GhaErrorPresenter.js';
 import { Startup } from './Startup.js';
 
 /**
@@ -89,8 +90,9 @@ export async function main() {
 
     logger.info('✅ Secrets pulled successfully!');
   } catch (error) {
-    logger.error('🚨 Uh-oh! Looks like Mario fell into the wrong pipe! 🍄💥');
-    logger.error(error instanceof Error ? error.message : String(error));
+    for (const line of presentGhaError(error)) {
+      logger.error(line);
+    }
     throw error;
   }
 }

@@ -4,6 +4,7 @@ import { Startup } from '../../../../src/envilder/apps/gha/Startup';
 import { DispatchActionCommand } from '../../../../src/envilder/core/application/dispatch/DispatchActionCommand';
 import { DispatchActionCommandHandler } from '../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
 import type { CliOptions } from '../../../../src/envilder/core/domain/CliOptions';
+import { SecretsFetchError } from '../../../../src/envilder/core/domain/errors/DomainErrors';
 import * as FileVariableStore from '../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore';
 
 vi.mock(
@@ -105,6 +106,46 @@ describe('GitHubAction', () => {
 
     // Assert
     await expect(action()).rejects.toThrow('Missing required inputs');
+  });
+
+  it('Should_LogFailureListAndThrow_When_SecretsFetchErrorIsThrown', async () => {
+    // Arrange
+    process.env.INPUT_MAP_FILE = 'test-map.json';
+    process.env.INPUT_ENV_FILE = 'test.env';
+    const fetchError = new SecretsFetchError([
+      { envVar: 'DB_URL', path: '/app/db/url', reason: 'ParameterNotFound' },
+    ]);
+    mocks.mockCommandHandler.handleCommand.mockRejectedValue(fetchError);
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    // Act
+    const action = () => main();
+
+    // Assert
+    await expect(action()).rejects.toBe(fetchError);
+    const loggedLines = consoleSpy.mock.calls.map((call) => call[0] as string);
+    expect(loggedLines.some((line) => line.includes('GAME OVER'))).toBe(true);
+    expect(loggedLines.some((line) => line.includes('DB_URL'))).toBe(true);
+  });
+
+  it('Should_LogGenericGameOverMessageWithoutMarioReference_When_UnknownErrorIsThrown', async () => {
+    // Arrange
+    process.env.INPUT_MAP_FILE = 'test-map.json';
+    process.env.INPUT_ENV_FILE = 'test.env';
+    const genericError = new Error('Connection timeout');
+    mocks.mockCommandHandler.handleCommand.mockRejectedValue(genericError);
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    // Act
+    const action = () => main();
+
+    // Assert
+    await expect(action()).rejects.toBe(genericError);
+    const loggedLines = consoleSpy.mock.calls
+      .map((call) => call[0] as string)
+      .join('\n');
+    expect(loggedLines).toContain('GAME OVER');
+    expect(loggedLines).not.toContain('Mario');
   });
 
   it('Should_AlwaysUsePullMode_When_ActionIsInvoked', async () => {
