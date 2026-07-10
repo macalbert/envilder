@@ -14,17 +14,17 @@ one named profile, and because `$config.profile` takes precedence over the
 `src/envilder/core/infrastructure/aws/AwsSecretProviderFactory.ts`, a hardcoded
 profile actively defeats each developer's own credentials. Beyond the profile,
 developers occasionally need to redirect a single mapping to a personal secret
-path, switch provider locally, or add a machine-only variable — without editing
+path, switch provider locally, or add a machine-only variable: without editing
 the shared file or polluting a PR.
 
 Two narrower mechanisms exist but do not cover the general case:
 
 1. **`AWS_PROFILE`** resolves the profile case once the committed file stops
-   hardcoding `profile` — but only the profile, nothing else.
+   hardcoding `profile`: but only the profile, nothing else.
 2. **One map file per environment + `--map`** selects a whole file, but offers no
    layering: a developer cannot keep the shared mappings and override just one.
 
-The need is a **personal, gitignored layer** on top of the committed base — the
+The need is a **personal, gitignored layer** on top of the committed base: the
 same mental model as dotenv's `.env.local`.
 
 ## Decision
@@ -71,8 +71,8 @@ which auto-loads across CLIs, frameworks, and running apps alike.
 
 ### 5. Guardrails
 
-Because the override can redirect *which cloud identity and which secrets* load —
-not merely override a literal value as dotenv does — three guardrails are
+Because the override can redirect *which cloud identity and which secrets* load,
+not merely override a literal value as dotenv does: three guardrails are
 mandatory:
 
 - **Visible warning on every application.** Whenever a local override is merged,
@@ -100,7 +100,7 @@ file presence; the opt-out is explicit.
   mappings, switch provider, or add machine-only variables.
 - **CLI-only override.** Lowest blast radius and naturally git-protected (CLI/GHA
   run from git checkouts where gitignored files are absent). Rejected because it
-  breaks the "if it exists, it wins" rule precisely in the SDK — the most natural
+  breaks the "if it exists, it wins" rule precisely in the SDK: the most natural
   place a developer runs their own app locally.
 - **Field-level `$config` merge.** Rejected: produces incoherent cross-provider
   configs (see §2).
@@ -113,14 +113,14 @@ file presence; the opt-out is explicit.
   a built artifact (missing `.dockerignore`), an SDK will apply it in production.
   This is the same risk the dotenv `.env.local` ecosystem accepts; it is mitigated
   by the mandatory warning, the `ENVILDER_NO_LOCAL` opt-out, and documented
-  `.dockerignore` guidance — not eliminated.
-- **The SDK silent-by-default rule gains one documented exception** — the local
+  `.dockerignore` guidance: not eliminated.
+- **The SDK silent-by-default rule gains one documented exception**: the local
   override warning.
 - **New merge surface across four codebases.** The CLI core and each SDK gain
   identical layering + precedence + cross-provider validation logic, kept aligned
   as a shared convention (not shared code, per ADR-0003).
 - **The committed `envilder.json` should stop hardcoding a personal `profile`**,
-  so that `AWS_PROFILE` and the local override — not a baked-in value — drive the
+  so that `AWS_PROFILE` and the local override: not a baked-in value: drive the
   per-developer profile.
 
 ## Relationship to ADR-0010

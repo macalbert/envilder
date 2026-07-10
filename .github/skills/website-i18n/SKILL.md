@@ -29,7 +29,7 @@ system. Never hardcode text in components.
 | Pages (default locale) | `src/website/src/pages/*.astro` |
 | Pages (other locales) | `src/website/src/pages/<locale>/*.astro` |
 
-## Adding New Translations — 4-Step Workflow
+## Adding New Translations: 4-Step Workflow
 
 ### 1. Define the type
 
@@ -47,9 +47,9 @@ section: {
 
 Update **all** locale files in `src/website/src/i18n/`:
 
-- `en.ts` — English (source)
-- `ca.ts` — Catalan
-- `es.ts` — Spanish
+- `en.ts`: English (source)
+- `ca.ts`: Catalan
+- `es.ts`: Spanish
 
 TypeScript will error if any locale is missing a key defined in `types.ts`.
 
@@ -86,11 +86,11 @@ Product names, CLI flags, code tokens, and acronyms stay in English:
 
 ## Constraints
 
-- Never hardcode user-visible text — always use i18n keys
-- Never hardcode version numbers — use `__SDK_*_VERSION__` / `__APP_VERSION__`
+- Never hardcode user-visible text: always use i18n keys
+- Never hardcode version numbers: use `__SDK_*_VERSION__` / `__APP_VERSION__`
   globals from `astro.config.mjs`
 - All 3 locales must be updated simultaneously (TypeScript catches mismatches)
-- Preserve existing key structure — add new keys, don't rename existing ones
+- Preserve existing key structure: add new keys, don't rename existing ones
   without updating all references
 
 ## Verification

@@ -13,10 +13,10 @@ for AWS SSM Parameter Store and Azure Key Vault.
 Acceptance tests must exercise real cloud provider interactions against
 emulators:
 
-- **AWS SSM** via [LocalStack](https://localstack.cloud/) — requires
+- **AWS SSM** via [LocalStack](https://localstack.cloud/): requires
   `LOCALSTACK_AUTH_TOKEN` (pro feature: SSM SecureString)
 - **Azure Key Vault** via
-  [Lowkey Vault](https://github.com/nagyesta/lowkey-vault) — emulates Key Vault
+  [Lowkey Vault](https://github.com/nagyesta/lowkey-vault): emulates Key Vault
   with `DefaultAzureCredential` support
 
 Each SDK has its own test runner and language, but the infrastructure patterns
@@ -29,17 +29,17 @@ must be consistent to reduce cognitive overhead and ensure parity.
 Each SDK implements its own container wrapper classes with explicit
 `start()`/`stop()` lifecycle (not framework-managed). Two wrappers per SDK:
 
-- **`LocalStackContainer`** — Starts LocalStack, resolves
+- **`LocalStackContainer`**: Starts LocalStack, resolves
   `LOCALSTACK_AUTH_TOKEN` from `envilder.json`, exposes SSM client and
   provider.
-- **`LowkeyVaultContainer`** — Starts Lowkey Vault (`nagyesta/lowkey-vault`),
+- **`LowkeyVaultContainer`**: Starts Lowkey Vault (`nagyesta/lowkey-vault`),
   configures `IDENTITY_ENDPOINT`/`IDENTITY_HEADER` env vars for
   `DefaultAzureCredential`, exposes SecretClient and provider.
 
 ### 2. Root `envilder.json` as Single Source of Truth
 
 All SDK test containers resolve `LOCALSTACK_AUTH_TOKEN` from the root
-`envilder.json` at the repository root. There are no copies — each container
+`envilder.json` at the repository root. There are no copies: each container
 wrapper navigates to the root file via a relative path. This file:
 
 - Has `$config.profile` for local development (e.g., `"mac"`)
@@ -57,7 +57,7 @@ wrapper navigates to the root file via a relative path. This file:
 > [LocalStack](https://localstack.cloud/) license token required for
 > SSM SecureString support. The token stored in this project's SSM Parameter
 > Store belongs to the project maintainer. If you want to run the AWS acceptance
-> tests locally, you need your own LocalStack token — store it in AWS SSM (or
+> tests locally, you need your own LocalStack token: store it in AWS SSM (or
 > Azure Key Vault) under a path of your choice, update your personal
 > `envilder.json` profile and parameter path accordingly, and ensure your AWS
 > credentials can resolve it. Without a valid token, LocalStack will start but

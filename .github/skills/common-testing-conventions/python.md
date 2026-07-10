@@ -213,7 +213,7 @@ markers = [
 ]
 ```
 
-## Test Cleanup — No `try/catch/finally` in Tests
+## Test Cleanup: No `try/catch/finally` in Tests
 
 **NEVER** use `try/except`, `try/finally`, `if`, or any control flow inside test functions.
 Use pytest fixtures with `yield` for setup/teardown:
@@ -225,7 +225,7 @@ Use pytest fixtures with `yield` for setup/teardown:
 | Shared resource | Session/module-scoped `yield` fixture |
 
 ```python
-# GOOD — cleanup via yield fixture
+# GOOD: cleanup via yield fixture
 @pytest.fixture
 def aws_env(localstack_url: str) -> Generator[None, None, None]:
     original = {k: os.environ.get(k) for k in ENV_VARS}
@@ -245,7 +245,7 @@ def Should_ResolveSecret_When_EnvConfigured(aws_env: None) -> None:
     # Assert
     assert actual["DB_URL"] == expected
 
-# BAD — try/finally in test body
+# BAD: try/finally in test body
 def Should_ResolveSecret_When_EnvConfigured() -> None:
     original = os.environ.get("AWS_ENDPOINT_URL")
     try:

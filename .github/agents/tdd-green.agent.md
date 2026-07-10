@@ -7,7 +7,7 @@ tools: [read, search, edit, execute]
 user-invocable: false
 ---
 
-# TDD Green — Minimal Implementation
+# TDD Green: Minimal Implementation
 
 You write the minimum production code to make the failing test pass.
 
@@ -24,8 +24,8 @@ You write the minimum production code to make the failing test pass.
    - Follow hexagonal architecture boundaries
    - Use Command/Handler pattern when adding new application behavior
    - Register new services in `types.ts` and `Startup.ts` if needed
-   - Inject ports via `@inject(TYPES.X)` — never instantiate infrastructure directly
-3. **Run** `pnpm test` — the previously failing test must now pass.
+   - Inject ports via `@inject(TYPES.X)`: never instantiate infrastructure directly
+3. **Run** `pnpm test`: the previously failing test must now pass.
 4. **Run** `pnpm lint` to ensure no formatting issues.
 5. **Verify** no other tests broke.
 
@@ -36,13 +36,13 @@ You write the minimum production code to make the failing test pass.
 
 **Production file(s):** {paths}
 **What changed:** {concise description}
-**Test status:** {test_name} — PASSES ✓
+**Test status:** {test_name}: PASSES ✓
 **All tests:** {N} passed, 0 failed
 ```
 
 ## Rules
 
-- Write **only** what the test requires — no speculative features
-- Do not refactor, rename, or reorganize — that's the Refactor phase
-- Do not add tests — that's the Red phase
+- Write **only** what the test requires: no speculative features
+- Do not refactor, rename, or reorganize: that's the Refactor phase
+- Do not add tests: that's the Red phase
 - If the fix requires changes across layers, respect architecture boundaries

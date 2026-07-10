@@ -24,11 +24,11 @@ Create or update a GitHub pull request for the current branch.
    - Bash/Zsh: `gh pr view --json number,title,url 2>/dev/null`
 4. Get the **final diff** against base to understand what the PR actually
    changes: `git diff <base>...HEAD --stat` (three-dot merge-base diff).
-   Use this — not the commit list — as the source of truth for the PR body.
+   Use this: not the commit list: as the source of truth for the PR body.
    Commits may include merge commits or changes already in main.
 5. Optionally get commits for context: `git log <base>..HEAD --oneline`
 6. Generate PR title and body following the [template](./reference.md).
-   **The template is mandatory** — all four sections (Summary, Changes, Testing,
+   **The template is mandatory**: all four sections (Summary, Changes, Testing,
    Related) must appear in every PR body, exactly in that order.
    **The body must describe the final diff vs base**, not individual commits.
 7. Create or update the PR using `--body-file` (see [constraints](#constraints)).
@@ -47,20 +47,20 @@ If the branch has a single commit, use that commit's message as the title.
 
 - Never force-push or amend published commits
 - Always target `main` unless the user specifies otherwise
-- **Always use `--body-file` with a temp file** — never pass markdown inline
+- **Always use `--body-file` with a temp file**: never pass markdown inline
   via `--body` (PowerShell corrupts backticks in inline strings)
-- **Never use the VS Code PR creation tool** — always use `gh` CLI with
+- **Never use the VS Code PR creation tool**: always use `gh` CLI with
   `--body-file` to ensure template compliance and avoid encoding issues
-- **All four template sections are mandatory** — do not skip, reorder, or
+- **All four template sections are mandatory**: do not skip, reorder, or
   replace with freeform text
 - If `gh` CLI is not available, output the title and body for manual creation
-- **Never use PowerShell here-strings (`@"..."@`) to generate the PR body** —
+- **Never use PowerShell here-strings (`@"..."@`) to generate the PR body**:
   use `create_file` to write the `.pr-body.md` file directly instead.
   Here-strings corrupt backticks (`` ` `` becomes escape char, e.g. `` `0 `` =
   NUL), arrows (`→`), em-dashes (`—`), and other non-ASCII characters.
-- **Avoid non-ASCII characters in PR bodies** — use plain ASCII alternatives:
+- **Avoid non-ASCII characters in PR bodies**: use plain ASCII alternatives:
   `to` instead of `→`, `--` instead of `—`, etc.
-- **Never hard-wrap prose at a fixed column width** — write each Summary
+- **Never hard-wrap prose at a fixed column width**: write each Summary
   sentence and each Changes bullet as a single unbroken line, no matter how
   long. GitHub renders a single `\n` inside a paragraph or list item as a
   visible line break, so hard-wrapped text (e.g. wrapped at ~80 chars) shows

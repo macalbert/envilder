@@ -27,7 +27,7 @@ All work happens in feature branches that merge to `main` via pull request.
 | Naming | `{usergithub}/{type}/{name}` (e.g., `macalbert/feat/go-sdk`) |
 | Lifetime | < 2-3 days (shorter is better) |
 | Merge strategy | Squash merge by default (clean linear history) |
-| Direct push to main | Never — always via PR |
+| Direct push to main | Never: always via PR |
 
 ### 3. Quality Gates Before Merge
 
@@ -87,28 +87,28 @@ without the branch management overhead. Release branches add complexity when
 
 ### Positive
 
-- Fast feedback loop — changes integrate into main within hours, not days
-- No merge hell — short branches rarely conflict
-- Always deployable — any commit on main can be released
-- Simple mental model — one branch, one truth
-- Clean history — squash merge keeps the log readable
+- Fast feedback loop: changes integrate into main within hours, not days
+- No merge hell: short branches rarely conflict
+- Always deployable: any commit on main can be released
+- Simple mental model: one branch, one truth
+- Clean history: squash merge keeps the log readable
 
 ### Negative
 
-- Requires discipline — incomplete features must use flags, not long branches
-- CI must be fast — slow pipelines block the entire workflow
+- Requires discipline: incomplete features must use flags, not long branches
+- CI must be fast: slow pipelines block the entire workflow
 - Not suitable for maintaining multiple major versions simultaneously
 
 ## When to Reconsider
 
 Reconsidering TBD is effectively a step backwards from Continuous Delivery.
 The only valid reason would be the emergence of a branching strategy that is
-objectively superior to TBD for continuous delivery — which is unlikely given
+objectively superior to TBD for continuous delivery: which is unlikely given
 TBD+CD is the current industry gold standard.
 
 Practical scenarios that might force adaptation (not abandonment):
 
-- Maintaining multiple major versions simultaneously (v1.x + v2.x) — would
+- Maintaining multiple major versions simultaneously (v1.x + v2.x): would
   require long-lived support branches alongside TBD on main
 - Team scaling issues where merge queues or stricter branch protection become
-  necessary — these are additive (complement TBD, not replace it)
+  necessary: these are additive (complement TBD, not replace it)

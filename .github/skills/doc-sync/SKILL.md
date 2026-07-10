@@ -4,7 +4,7 @@ description: 'Audit and synchronize documentation across website, READMEs, and d
 argument-hint: 'feature area to audit or "full" for complete audit'
 ---
 
-# Doc Sync — Cross-Surface Documentation Alignment
+# Doc Sync: Cross-Surface Documentation Alignment
 
 Audit and synchronize documentation across all surfaces to prevent drift.
 
@@ -58,14 +58,14 @@ For each feature area, identify the authoritative source:
 
 For each documentation surface, check:
 
-- [ ] **Code examples compile/run** — verify syntax matches current API
-- [ ] **CLI flags match** — documented flags exist in `Cli.ts`
-- [ ] **GHA inputs match** — documented inputs exist in `action.yml`
-- [ ] **SDK methods match** — documented methods exist in source
-- [ ] **Install commands correct** — package names, versions, registries
-- [ ] **Provider names consistent** — `aws`/`azure` naming across all docs
-- [ ] **Links not broken** — internal cross-references resolve
-- [ ] **i18n complete** — all 3 locales (en, ca, es) have matching keys
+- [ ] **Code examples compile/run**: verify syntax matches current API
+- [ ] **CLI flags match**: documented flags exist in `Cli.ts`
+- [ ] **GHA inputs match**: documented inputs exist in `action.yml`
+- [ ] **SDK methods match**: documented methods exist in source
+- [ ] **Install commands correct**: package names, versions, registries
+- [ ] **Provider names consistent**: `aws`/`azure` naming across all docs
+- [ ] **Links not broken**: internal cross-references resolve
+- [ ] **i18n complete**: all 3 locales (en, ca, es) have matching keys
 
 ### 4. Report Drift
 
@@ -82,8 +82,8 @@ Present findings in a structured table:
 
 ## Alignment Actions
 
-1. {file} — {what to update}
-2. {file} — {what to update}
+1. {file}: {what to update}
+2. {file}: {what to update}
 ```
 
 ### 5. Apply Fixes

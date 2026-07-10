@@ -86,7 +86,7 @@ confidence level across unit, integration, and e2e coverage.
 
 ## Anti-Pattern: Duplicate Act/Assert Blocks
 
-**Wrong** — two Acts and Asserts in one test:
+**Wrong**: two Acts and Asserts in one test:
 
 ```typescript
 it('Should_HandleParameters_When_Called', async () => {
@@ -107,7 +107,7 @@ it('Should_HandleParameters_When_Called', async () => {
 });
 ```
 
-**Correct** — split into two focused tests:
+**Correct**: split into two focused tests:
 
 ```typescript
 it('Should_SaveEnvironment_When_CommandAProvided', async () => {

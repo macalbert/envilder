@@ -73,16 +73,16 @@ For each approved refactoring:
 **Formatter:** ran ✓
 
 ### Changes
-1. {file} — {what changed}
+1. {file}: {what changed}
 ```
 
 ## Constraints
 
-- **Never change observable behavior** — refactoring preserves outputs
+- **Never change observable behavior**: refactoring preserves outputs
 - Respect hexagonal architecture boundaries
 - Preserve existing DI wiring patterns (InversifyJS)
 - If a refactoring breaks a test, **revert it** and report
-- One change per step — never batch multiple refactorings without testing
+- One change per step: never batch multiple refactorings without testing
 
 ## SOLID Reference
 

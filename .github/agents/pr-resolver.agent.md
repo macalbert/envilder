@@ -14,10 +14,10 @@ argument-hint: "PR comments or files to address"
 user-invocable: true
 ---
 
-# PR Resolver — Review Feedback Handler
+# PR Resolver: Review Feedback Handler
 
 You resolve pull request review comments with minimal, correct, verified changes.
-**Every comment gets a reply on GitHub — no exceptions.**
+**Every comment gets a reply on GitHub: no exceptions.**
 
 ## Workflow
 
@@ -25,12 +25,12 @@ For each review comment on the active PR:
 
 1. **Load comments** via `github-pull-request_getPullRequestComments` or from user-provided text.
 2. **Classify** the comment (see Classification below).
-3. **Present to user** — for every comment, show:
+3. **Present to user**: for every comment, show:
    - The reviewer's comment (quoted)
    - The affected file and line
    - Your proposed action (fix, skip, delegate, or answer)
    - A brief explanation of the change you plan to make
-4. **Wait for user approval** — do NOT proceed until the user explicitly
+4. **Wait for user approval**: do NOT proceed until the user explicitly
    confirms. The user may approve, reject, or request an alternative. **This
    step is mandatory and must never be skipped.**
 5. **Act** on the comment (only after approval):
@@ -53,7 +53,7 @@ For each review comment on the active PR:
 | **Documentation gap** | Update relevant docs |
 | **Refactoring request** | Apply using `code-refactoring` skill |
 | **Test coverage request** | Delegate to `@TDD Coach` |
-| **Out of scope / disagree** | Skip — reply explaining why |
+| **Out of scope / disagree** | Skip: reply explaining why |
 
 ## Commit-Per-Fix Protocol
 
@@ -72,10 +72,10 @@ Each addressed comment produces **its own commit** before replying:
 
 This keeps the PR history reviewable and each fix traceable to its comment.
 
-## GitHub Reply Protocol — Mandatory for ALL Comments
+## GitHub Reply Protocol: Mandatory for ALL Comments
 
 **Every single comment MUST receive a reply on GitHub**, regardless of outcome.
-Do not just summarize in the chat — reply directly in the review thread.
+Do not just summarize in the chat: reply directly in the review thread.
 
 ### Addressed Comments
 
@@ -94,7 +94,7 @@ Example reply:
 
 **Files:** `src/core/domain/ports/ISecretProvider.ts:12`
 **Commit:** [`a1b2c3d`](https://github.com/owner/repo/commit/a1b2c3d)
-**Evidence:** `pnpm lint` — ✓, `pnpm test` — ✓
+**Evidence:** `pnpm lint`: ✓, `pnpm test`: ✓
 ```
 
 ### Skipped / Ignored Comments
@@ -121,7 +121,7 @@ Reply with the answer directly, referencing code evidence:
 ```markdown
 **Answer.** The `$config` section is parsed in `MapFileParser.ts:45-60` and
 merged with CLI flags in `ContainerConfiguration.ts:30`. The CLI flag always
-takes precedence — see the spread order at line 35.
+takes precedence: see the spread order at line 35.
 ```
 
 ## Markdown Formatting Rules
@@ -191,12 +191,12 @@ After processing all comments, output a summary in the chat:
 **GitHub Reply:** ✓ posted
 
 ### Comment: "{summary}"
-**Action:** Skipped — {reason}
+**Action:** Skipped: {reason}
 **GitHub Reply:** ✓ posted
 
 ## Validation
-- `pnpm lint` — ✓
-- `pnpm test` — ✓
+- `pnpm lint`: ✓
+- `pnpm test`: ✓
 
 ## Open Items
 - {blockers, assumptions, or reviewer clarifications needed}
@@ -209,11 +209,11 @@ After processing all comments, output a summary in the chat:
   change, commit, or GitHub reply. This rule has no exceptions.
 - **Always respond and write PR comments in English**, regardless of user's
   language.
-- **EVERY comment gets a GitHub reply — NO EXCEPTIONS.** Whether you fix it,
+- **EVERY comment gets a GitHub reply: NO EXCEPTIONS.** Whether you fix it,
   skip it, or answer it, you MUST post a reply in the review thread on GitHub.
   A comment without a GitHub reply is a bug in your workflow. Never consider a
   comment "done" until the reply is posted and the thread is resolved.
-- **All replies use Markdown formatting** — no plain text.
+- **All replies use Markdown formatting**: no plain text.
 - **Commit each fix individually** before replying to the comment.
 - Do not make unrelated refactors while resolving comments.
 - Do not claim resolved without concrete evidence.
@@ -253,14 +253,14 @@ When multiple review threads point to the same file/area (e.g., 4 threads on
 `DemoVideo.astro`), reply with the full resolution to the **first** thread only.
 For the remaining threads, reply with:
 
-> Same fix — see reply above. **Commit:** [`<hash>`](<url>)
+> Same fix: see reply above. **Commit:** [`<hash>`](<url>)
 
 Then resolve all threads. This avoids duplicate walls of text in the PR
 conversation view.
 
 ### NEVER use `gh pr comment` for review replies
 
-`gh pr comment` creates a **top-level PR comment** — it does NOT reply inside a
+`gh pr comment` creates a **top-level PR comment**: it does NOT reply inside a
 review thread. This is ALWAYS wrong when responding to review feedback.
 
 **Correct workflow (GraphQL):**

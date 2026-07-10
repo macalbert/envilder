@@ -15,7 +15,7 @@ These are **rules**, not guidelines.
 ### NO Comments Except AAA Markers
 
 * **NEVER write XML summaries** on test methods or test classes
-* **NEVER write explanatory comments** — code must be self-explanatory
+* **NEVER write explanatory comments**: code must be self-explanatory
 * **Only `// Arrange`, `// Act`, `// Assert`** comments are allowed in tests
 * The test name `Should_X_When_Y` already documents the intent
 
@@ -47,19 +47,19 @@ These are **rules**, not guidelines.
 * Each phase **MUST** be separated with comments
 * **Never mix phases**
 * **Each comment (`// Arrange`, `// Act`, `// Assert`) appears AT MOST ONCE
-  per test** — if you need two actions or two asserts, write two tests
+  per test**: if you need two actions or two asserts, write two tests
 * **Act = one single invocation on the SUT.** Multiple statements in Act only
   if they are genuinely part of the same logical action (rare and exceptional).
   Two independent operations = two tests.
 * **All assertions belong in Assert only.** No `.Should()` in Arrange or Act.
   If you need a precondition check, extract it to a separate test or use a
-  guard clause that throws — not an assertion.
-* **AAA markers are mandatory in ALL tests** — including structural guards,
+  guard clause that throws: not an assertion.
+* **AAA markers are mandatory in ALL tests**: including structural guards,
   static completeness checks, and data validation tests. No exceptions.
 * **No `if`, `switch`, or conditional logic** inside Arrange, Act, or Assert
-* **No `try/catch/finally`** inside tests — use `IAsyncLifetime` or
+* **No `try/catch/finally`** inside tests: use `IAsyncLifetime` or
   `IDisposable` for teardown
-* **No `// Act & Assert` combined blocks** — Act and Assert are ALWAYS separate
+* **No `// Act & Assert` combined blocks**: Act and Assert are ALWAYS separate
 * For exceptions: `act.Should().ThrowAsync<T>()` (AwesomeAssertions)
 * Omit comment if section is empty
 * If a test needs branching, split it into separate tests
@@ -98,7 +98,7 @@ Should_{ExpectedBehavior}_When_{Condition}
 * **NO** natural language
 * **NO** vague names (`Should_Work`, `TestHandler`)
 * **NO** missing `When` clause
-* Method names only — xUnit uses `[Fact]` or `[Theory]`, not description strings
+* Method names only: xUnit uses `[Fact]` or `[Theory]`, not description strings
 
 ---
 

@@ -3,14 +3,14 @@
 Envilder is evolving from a CLI tool into a **multi-runtime secret management platform**.
 The goal: one declarative map-file format becomes the universal standard for resolving
 environment variables from cloud secret stores (AWS SSM Parameter Store, AWS Secrets Manager,
-Azure Key Vault, GCP Secret Manager) — whether in local development, CI/CD pipelines,
+Azure Key Vault, GCP Secret Manager): whether in local development, CI/CD pipelines,
 or directly inside application code at runtime.
 
 > **Vision:** One map-file. Every cloud. Every language. Every runtime.
 >
 > **Note:** This roadmap contains ideas and potential features based on initial vision and community feedback.
 > Not all features are guaranteed to be implemented. Priorities may change based on user needs, feedback,
-> and real-world usage patterns. Your input matters—feel free to share your thoughts and suggestions!
+> and real-world usage patterns. Your input matters. Feel free to share your thoughts and suggestions!
 
 ---
 
@@ -29,20 +29,20 @@ or directly inside application code at runtime.
 | **Azure Key Vault** | Multi-backend via `$config` map-file section ([#90](https://github.com/macalbert/envilder/pull/90)) |
 | **Documentation website** | [envilder.com](https://envilder.com) |
 | **Onboarding documentation** | [Setup guide](./docs/requirements-installation.md) |
-| **.NET SDK** (`Envilder`) | First runtime SDK — load secrets into `IConfiguration` or `EnvilderClient`. AWS SSM + Azure Key Vault. [Documentation](./src/sdks/dotnet/README.md) |
-| **Python SDK** (`envilder`) | Runtime library for Python — Django, FastAPI, data pipelines. Sync API with `EnvilderClient`, `MapFileParser`, `SecretProviderFactory`. AWS SSM + Azure Key Vault. Published to PyPI. [Documentation](./src/sdks/python/README.md) |
-| **Node.js SDK** (`@envilder/sdk`) | Runtime library for Node.js — load secrets directly into `process.env` from a map-file. AWS SSM + Azure Key Vault. Published to npm. [Documentation](./src/sdks/nodejs/README.md) |
+| **.NET SDK** (`Envilder`) | First runtime SDK: load secrets into `IConfiguration` or `EnvilderClient`. AWS SSM + Azure Key Vault. [Documentation](./src/sdks/dotnet/README.md) |
+| **Python SDK** (`envilder`) | Runtime library for Python: Django, FastAPI, data pipelines. Sync API with `EnvilderClient`, `MapFileParser`, `SecretProviderFactory`. AWS SSM + Azure Key Vault. Published to PyPI. [Documentation](./src/sdks/python/README.md) |
+| **Node.js SDK** (`@envilder/sdk`) | Runtime library for Node.js: load secrets directly into `process.env` from a map-file. AWS SSM + Azure Key Vault. Published to npm. [Documentation](./src/sdks/nodejs/README.md) |
 
 ### 🔥 Up Next
 
 | Feature | Priority | Notes |
 |---------|----------|-------|
-| **Go SDK** (`envilder`) | 🔴 High | Runtime library for Go — cloud-native apps, Kubernetes tooling. Published as Go module |
-| **Java SDK** (`envilder`) | 🔴 High | Runtime library for Java/Kotlin — Spring Boot, Android backends. Published to Maven Central |
-| **Map-file JSON Schema** | 🔴 High | Formal spec for the map-file format at `spec/` — serves as the contract between all SDKs and tools |
+| **Go SDK** (`envilder`) | 🔴 High | Runtime library for Go: cloud-native apps, Kubernetes tooling. Published as Go module |
+| **Java SDK** (`envilder`) | 🔴 High | Runtime library for Java/Kotlin: Spring Boot, Android backends. Published to Maven Central |
+| **Map-file JSON Schema** | 🔴 High | Formal spec for the map-file format at `spec/`: serves as the contract between all SDKs and tools |
 | **SDK conformance tests** | 🔴 High | Language-agnostic test fixtures (JSON input → expected output) that all SDKs must pass |
 | **Exec mode** (`--exec`) | 🟡 Medium | Inject secrets into a child process env without writing to disk (`envilder exec -- node server.js`) |
-| **GCP Secret Manager** | 🟡 Medium | Third cloud provider — similar DX to AWS SSM. Completes the multi-cloud trident (AWS + Azure + GCP) |
+| **GCP Secret Manager** | 🟡 Medium | Third cloud provider: similar DX to AWS SSM. Completes the multi-cloud trident (AWS + Azure + GCP) |
 | **AWS Secrets Manager** | 🟡 Medium | Support AWS Secrets Manager alongside SSM Parameter Store for teams using JSON-structured secrets |
 | **Check/sync mode** (`--check`) | 🟡 Medium | Validate cloud secrets vs local `.env`, fail CI if out-of-sync |
 
@@ -74,7 +74,7 @@ envilder.json (universal contract)
 
 ### SDK Rollout
 
-All five SDKs are developed **in parallel** — same map-file contract, same conformance tests, shipped simultaneously:
+All five SDKs are developed **in parallel**: same map-file contract, same conformance tests, shipped simultaneously:
 
 | SDK | Package | Registry |
 |-----|---------|----------|
@@ -86,10 +86,10 @@ All five SDKs are developed **in parallel** — same map-file contract, same con
 
 ### Monorepo Principles
 
-- **One map-file spec** — formal JSON Schema at `spec/` is the source of truth for all SDKs
-- **Conformance tests** — language-agnostic fixtures that every SDK must pass
-- **Independent versioning** — each SDK has its own semver (`sdk-node@1.2.0`, `sdk-py@0.3.0`)
-- **Shared test infrastructure** — LocalStack (AWS) and Lowkey Vault (Azure) via Docker Compose serve all SDKs
+- **One map-file spec**: formal JSON Schema at `spec/` is the source of truth for all SDKs
+- **Conformance tests**: language-agnostic fixtures that every SDK must pass
+- **Independent versioning**: each SDK has its own semver (`sdk-node@1.2.0`, `sdk-py@0.3.0`)
+- **Shared test infrastructure**: LocalStack (AWS) and Lowkey Vault (Azure) via Docker Compose serve all SDKs
 
 ---
 

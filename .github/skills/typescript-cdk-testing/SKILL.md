@@ -81,8 +81,8 @@ function normalizeTemplate(template: Template): object {
 
 **Normalize these properties:**
 
-- `S3Key` — Lambda deployment artifact hash
-- `SourceObjectKeys` — Asset hashes
+- `S3Key`: Lambda deployment artifact hash
+- `SourceObjectKeys`: Asset hashes
 - Any `Fn::Join` with account-specific values
 
 ### Updating Snapshots
@@ -96,7 +96,7 @@ pnpm test -- -u
 **Rules:**
 
 - Review snapshot diffs carefully before approving
-- Never update snapshots to suppress failures — understand the change first
+- Never update snapshots to suppress failures: understand the change first
 - Commit updated snapshots alongside the code that caused the change
 
 ## Fine-Grained Assertions (Secondary Pattern)
@@ -155,11 +155,11 @@ describe("LambdaStack", () => {
 
 | Scenario | Pattern |
 | --- | --- |
-| New stack or construct | **Snapshot** — captures full baseline |
-| Specific security property (e.g., encryption) | **Assertion** — explicit check won't be missed |
-| Resource count verification | **Assertion** — `resourceCountIs` |
-| Cross-resource references | **Assertion** — verify `Ref`/`Fn::GetAtt` |
-| Infrastructure refactor (same output) | **Snapshot** — confirms no drift |
+| New stack or construct | **Snapshot**: captures full baseline |
+| Specific security property (e.g., encryption) | **Assertion**: explicit check won't be missed |
+| Resource count verification | **Assertion**: `resourceCountIs` |
+| Cross-resource references | **Assertion**: verify `Ref`/`Fn::GetAtt` |
+| Infrastructure refactor (same output) | **Snapshot**: confirms no drift |
 | Config-driven resource creation | **Snapshot** + **assertion** for critical properties |
 
 ## Test Naming
@@ -173,7 +173,7 @@ it("Should_CreateDeadLetterQueue_When_SqsHasMaxReceiveCount", ...)
 it("Should_RestrictPublicAccess_When_S3BucketIsCreated", ...)
 ```
 
-## Test Data — Config Objects
+## Test Data: Config Objects
 
 Use realistic config objects that match the config-driven infrastructure pattern:
 

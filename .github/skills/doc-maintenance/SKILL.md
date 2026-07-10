@@ -58,7 +58,7 @@ Use these categories matching existing style:
 - Group under the current release section or create a new one when requested
 
 ```markdown
-## [1.2.0] — 2026-05-01
+## [1.2.0]: 2026-05-01
 
 ### Added
 
@@ -76,16 +76,16 @@ Use these categories matching existing style:
 3. **Update** the smallest set of sections needed for correctness
 4. **Cross-check** consistency across related docs (use `doc-sync` skill
    for comprehensive audit)
-5. **Validate** — run `pnpm lint` to check formatting and consistency
-6. **Summarize** — list updated files and what was synchronized
+5. **Validate**: run `pnpm lint` to check formatting and consistency
+6. **Summarize**: list updated files and what was synchronized
 
 ## Constraints
 
-- **Never invent features** — document only what exists in code
+- **Never invent features**: document only what exists in code
 - **Verify claims** against current source files before writing
 - **Preserve existing structure** and tone unless explicitly asked to refactor
-- **Prefer documentation-only edits** — don't modify source unless asked
-- **Keep examples minimal and runnable** — avoid hypothetical code
+- **Prefer documentation-only edits**: don't modify source unless asked
+- **Keep examples minimal and runnable**: avoid hypothetical code
 - **Don't modify ROADMAP.md** without explicit request (it's strategic)
 
 ## Validation

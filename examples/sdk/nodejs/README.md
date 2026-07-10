@@ -1,4 +1,4 @@
-# Envilder Node.js SDK — Examples
+# Envilder Node.js SDK: Examples
 
 Minimal examples showing how to load secrets from AWS SSM Parameter Store using the Node.js SDK.
 

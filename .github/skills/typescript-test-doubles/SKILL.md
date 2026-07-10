@@ -11,7 +11,7 @@ This skill defines how to use test doubles in TypeScript (Vitest).
 
 ## Test Doubles Types
 
-### 1. Mock — vi.fn()
+### 1. Mock: vi.fn()
 
 Use `vi.fn()` to create mock functions for port interfaces.
 
@@ -34,7 +34,7 @@ const mockLogger: ILogger = {
 };
 ```
 
-### 2. Stub — mockResolvedValue / mockReturnValue
+### 2. Stub: mockResolvedValue / mockReturnValue
 
 Use return value methods to configure stubs.
 
@@ -54,7 +54,7 @@ mockProvider.getSecret
   .mockResolvedValueOnce('second');
 ```
 
-### 3. Spy — vi.spyOn()
+### 3. Spy: vi.spyOn()
 
 Use `vi.spyOn()` to observe calls on real objects without replacing behavior.
 
@@ -69,7 +69,7 @@ expect(spy).toHaveBeenCalledWith('Processing...');
 spy.mockRestore();
 ```
 
-### 4. Module Mock — vi.mock()
+### 4. Module Mock: vi.mock()
 
 Use `vi.mock()` to replace entire modules.
 
@@ -84,7 +84,7 @@ vi.mock('@aws-sdk/client-ssm', () => ({
 }));
 ```
 
-### 5. Error Simulation — mockRejectedValue
+### 5. Error Simulation: mockRejectedValue
 
 Use `mockRejectedValue()` to simulate failures.
 
