@@ -10,7 +10,7 @@ from envilder.infrastructure.aws.aws_ssm_secret_provider import (
 
 
 class TestExpiredCredentials:
-    def Should_RaiseExpiredCredentialsError_When_ClientErrorIsExpiredToken(
+    def Should_RaiseExpiredCredentialsError_When_ClientErrorIsExpiredTokenException(
         self,
     ) -> None:
         # Arrange
