@@ -1,15 +1,15 @@
 import 'reflect-metadata';
 import type { Container } from 'inversify';
-import { DispatchActionCommand } from '../../core/application/dispatch/DispatchActionCommand.js';
-import type { DispatchActionCommandHandler } from '../../core/application/dispatch/DispatchActionCommandHandler.js';
-import type { CliOptions } from '../../core/domain/CliOptions.js';
-import type { MapFileConfig } from '../../core/domain/MapFileConfig.js';
-import type { ILogger } from '../../core/domain/ports/ILogger.js';
-import { ConsoleLogger } from '../../core/infrastructure/logger/ConsoleLogger.js';
-import { readMapFileConfig } from '../../core/infrastructure/variableStore/FileVariableStore.js';
-import { TYPES } from '../../core/types.js';
-import { presentGhaError } from './GhaErrorPresenter.js';
-import { Startup } from './Startup.js';
+import { DispatchActionCommand } from '../../../core/application/dispatch/DispatchActionCommand.js';
+import type { DispatchActionCommandHandler } from '../../../core/application/dispatch/DispatchActionCommandHandler.js';
+import type { CliOptions } from '../../../core/domain/CliOptions.js';
+import type { MapFileConfig } from '../../../core/domain/MapFileConfig.js';
+import type { ILogger } from '../../../core/domain/ports/ILogger.js';
+import { ConsoleLogger } from '../../../core/infrastructure/logger/ConsoleLogger.js';
+import { readMapFileConfig } from '../../../core/infrastructure/variableStore/FileVariableStore.js';
+import { TYPES } from '../../../core/types.js';
+import { Startup } from '../bootstrap/Startup.js';
+import { presentGhaError } from '../errors/GhaErrorPresenter.js';
 
 /**
  * Reads GitHub Actions inputs from environment variables.

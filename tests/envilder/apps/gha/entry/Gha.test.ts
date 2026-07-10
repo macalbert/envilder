@@ -1,17 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { main } from '../../../../src/envilder/apps/gha/Gha';
-import { Startup } from '../../../../src/envilder/apps/gha/Startup';
-import { DispatchActionCommand } from '../../../../src/envilder/core/application/dispatch/DispatchActionCommand';
-import { DispatchActionCommandHandler } from '../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
-import type { CliOptions } from '../../../../src/envilder/core/domain/CliOptions';
-import { SecretsFetchError } from '../../../../src/envilder/core/domain/errors/DomainErrors';
-import * as FileVariableStore from '../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore';
+import { Startup } from '../../../../../src/envilder/apps/gha/bootstrap/Startup';
+import { main } from '../../../../../src/envilder/apps/gha/entry/Gha';
+import { DispatchActionCommand } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommand';
+import { DispatchActionCommandHandler } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
+import type { CliOptions } from '../../../../../src/envilder/core/domain/CliOptions';
+import { SecretsFetchError } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
+import * as FileVariableStore from '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore';
 
 vi.mock(
-  '../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore',
+  '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore',
   async () => {
     const actual = await vi.importActual(
-      '../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore',
+      '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore',
     );
     return {
       ...(actual as object),

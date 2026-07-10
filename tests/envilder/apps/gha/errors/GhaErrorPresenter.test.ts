@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { presentGhaError } from '../../../../src/envilder/apps/gha/GhaErrorPresenter';
-import { SecretsFetchError } from '../../../../src/envilder/core/domain/errors/DomainErrors';
+import { presentGhaError } from '../../../../../src/envilder/apps/gha/errors/GhaErrorPresenter';
+import { SecretsFetchError } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 
 describe('GhaErrorPresenter', () => {
   it('Should_RenderFailureListWithReasons_When_SecretsFetchErrorIsGiven', () => {

@@ -1,4 +1,4 @@
-import { SecretsFetchError } from '../../core/domain/errors/DomainErrors.js';
+import { SecretsFetchError } from '../../../core/domain/errors/DomainErrors.js';
 
 /**
  * Renders an error into log lines for the GitHub Action, keeping the

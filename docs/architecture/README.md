@@ -60,7 +60,7 @@ style DOMAIN fill:#2E7D32,stroke:#2E7D32,color:#FFFFFF
 subgraph PRESENTERS["Presenters"]
     direction LR
     CLI[CLI Application<br/>apps/cli/entry/Cli.ts]
-    GHA[GitHub Action<br/>apps/gha/Gha.ts]
+    GHA[GitHub Action<br/>apps/gha/entry/Gha.ts]
     DI[InversifyJS Container<br/>Shared ContainerConfiguration]
 end
 class CLI,GHA,DI node
