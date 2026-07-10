@@ -80,7 +80,9 @@ export class AwsSsmSecretProvider implements ISecretProvider {
       if (isExpiredCredentialsError(error)) {
         throw new ExpiredCredentialsError(error);
       }
-      throw error;
+      throw new SecretOperationError(
+        `${EnvironmentVariable.maskSecretPath(name)}: ${describeError(error)}`,
+      );
     }
   }
 
