@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { Startup } from '../../../../../src/envilder/apps/cli/bootstrap/Startup';
 import { main } from '../../../../../src/envilder/apps/cli/entry/Cli';
+import { Startup } from '../../../../../src/envilder/apps/cli/Startup';
 import { DispatchActionCommand } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommand';
 import { DispatchActionCommandHandler } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
 import { OperationMode } from '../../../../../src/envilder/core/domain/OperationMode';

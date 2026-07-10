@@ -8,8 +8,8 @@ import type { ILogger } from '../../../core/domain/ports/ILogger.js';
 import { ConsoleLogger } from '../../../core/infrastructure/logger/ConsoleLogger.js';
 import { readMapFileConfig } from '../../../core/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../../core/types.js';
-import { Startup } from '../bootstrap/Startup.js';
 import { presentGhaError } from '../errors/GhaErrorPresenter.js';
+import { Startup } from '../Startup.js';
 
 /**
  * Reads GitHub Actions inputs from environment variables.

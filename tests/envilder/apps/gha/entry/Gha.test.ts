@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { Startup } from '../../../../../src/envilder/apps/gha/bootstrap/Startup';
 import { main } from '../../../../../src/envilder/apps/gha/entry/Gha';
+import { Startup } from '../../../../../src/envilder/apps/gha/Startup';
 import { DispatchActionCommand } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommand';
 import { DispatchActionCommandHandler } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
 import type { CliOptions } from '../../../../../src/envilder/core/domain/CliOptions';

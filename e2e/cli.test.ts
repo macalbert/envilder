@@ -26,7 +26,7 @@ import {
   expect,
   it,
 } from 'vitest';
-import { Startup } from '../src/envilder/apps/cli/bootstrap/Startup';
+import { Startup } from '../src/envilder/apps/cli/Startup';
 import { DispatchActionCommand } from '../src/envilder/core/application/dispatch/DispatchActionCommand';
 import type { DispatchActionCommandHandler } from '../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
 import { TYPES } from '../src/envilder/core/types';
