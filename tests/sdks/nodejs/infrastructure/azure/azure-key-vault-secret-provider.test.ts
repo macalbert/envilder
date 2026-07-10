@@ -21,12 +21,12 @@ describe('AzureKeyVaultSecretProvider', () => {
 
   it('Should_OmitMissing_When_SecretNotFound', async () => {
     // Arrange
-    const mockGetSecret = vi.fn().mockImplementation(async (name: string) => {
-      if (name === 'missing') {
-        throw Object.assign(new Error('Not found'), { statusCode: 404 });
-      }
-      return { value: 'found-value' };
-    });
+    const mockGetSecret = vi
+      .fn()
+      .mockResolvedValueOnce({ value: 'found-value' }) // db-url
+      .mockRejectedValueOnce(
+        Object.assign(new Error('Not found'), { statusCode: 404 }),
+      ); // missing
     const mockClient = { getSecret: mockGetSecret };
     const sut = new AzureKeyVaultSecretProvider(mockClient);
 
