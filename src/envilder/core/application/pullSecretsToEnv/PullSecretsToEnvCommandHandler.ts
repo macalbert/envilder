@@ -185,18 +185,19 @@ export class PullSecretsToEnvCommandHandler {
 
   private logWarnings(warnings: WarningOutcome[]): void {
     for (const outcome of warnings) {
+      const maskedPath = EnvironmentVariable.maskSecretPath(outcome.path);
       if (outcome.reason === 'not-found') {
         this.logger.warn(
           `  ${pc.red('\u2717 ')}${pc.bold(
             pc.red(PullSecretsToEnvCommandHandler.pad(outcome.envVar)),
-          )} ${pc.red(`secret not found (path: ${outcome.path}) \u2014 skipped`)}`,
+          )} ${pc.red(`secret not found (path: ${maskedPath}) \u2014 skipped`)}`,
         );
         continue;
       }
       this.logger.warn(
         `  ${pc.yellow('\u26A0 ')}${pc.bold(
           PullSecretsToEnvCommandHandler.pad(outcome.envVar),
-        )} ${pc.dim(`no value found (path: ${outcome.path}) \u2014 skipped`)}`,
+        )} ${pc.dim(`no value found (path: ${maskedPath}) \u2014 skipped`)}`,
       );
     }
   }

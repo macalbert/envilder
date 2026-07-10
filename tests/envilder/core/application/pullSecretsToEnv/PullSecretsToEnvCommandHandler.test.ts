@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import { PullSecretsToEnvCommand } from '../../../../../src/envilder/core/application/pullSecretsToEnv/PullSecretsToEnvCommand';
 import { PullSecretsToEnvCommandHandler } from '../../../../../src/envilder/core/application/pullSecretsToEnv/PullSecretsToEnvCommandHandler';
+import { EnvironmentVariable } from '../../../../../src/envilder/core/domain/EnvironmentVariable';
 import {
   ExpiredCredentialsError,
   SecretsFetchError,
@@ -160,7 +161,7 @@ describe('PullSecretsToEnvCommandHandler', () => {
     expect(warningLine).toContain('no value found');
   });
 
-  it('Should_IncludeSecretPath_When_LoggingWarningForEmptySecret', async () => {
+  it('Should_MaskSecretPath_When_LoggingWarningForEmptySecret', async () => {
     // Arrange
     const paramMapContent = {
       EMPTY_PARAM: '/path/to/ssm/password_no_value',
@@ -179,7 +180,10 @@ describe('PullSecretsToEnvCommandHandler', () => {
     const warningLine = loggedLines(mockLogger.warn).find((line) =>
       line.includes('EMPTY_PARAM'),
     );
-    expect(warningLine).toContain('/path/to/ssm/password_no_value');
+    expect(warningLine).toContain(
+      EnvironmentVariable.maskSecretPath('/path/to/ssm/password_no_value'),
+    );
+    expect(warningLine).not.toContain('/path/to/ssm/password_no_value');
   });
 
   it('Should_LogNotFoundWarningInRed_When_SecretDoesNotExist', async () => {
