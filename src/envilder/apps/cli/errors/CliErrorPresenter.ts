@@ -4,6 +4,7 @@ import {
   SecretsFetchError,
   SsoSessionExpiredError,
 } from '../../../core/domain/errors/DomainErrors.js';
+import { describeError } from '../../../core/infrastructure/describeError.js';
 
 export function presentError(error: unknown): string {
   if (error instanceof SsoSessionExpiredError) {
@@ -55,7 +56,7 @@ function renderExpiredCredentials(): string {
 }
 
 function renderFallback(error: unknown): string {
-  const message = error instanceof Error ? error.message : String(error);
+  const message = describeError(error);
   return [
     gameOver('you fell down the wrong pipe!'),
     '',

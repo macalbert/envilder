@@ -76,6 +76,20 @@ describe('CliErrorPresenter', () => {
     expect(actual).toContain('boom');
   });
 
+  it('Should_RenderInnerReason_When_FallbackErrorIsAggregateErrorWithEmptyMessage', () => {
+    // Arrange
+    const error = new AggregateError(
+      [new Error('connect ECONNREFUSED 127.0.0.1:9999')],
+      '',
+    );
+
+    // Act
+    const actual = stripAnsi(presentError(error));
+
+    // Assert
+    expect(actual).toContain('connect ECONNREFUSED 127.0.0.1:9999');
+  });
+
   it('Should_RenderGameOverFetchBlock_When_SecretsFetchError', () => {
     // Arrange
     const error = new SecretsFetchError([

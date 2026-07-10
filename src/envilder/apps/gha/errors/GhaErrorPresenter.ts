@@ -1,4 +1,5 @@
 import { SecretsFetchError } from '../../../core/domain/errors/DomainErrors.js';
+import { describeError } from '../../../core/infrastructure/describeError.js';
 
 /**
  * Renders an error into log lines for the GitHub Action, keeping the
@@ -28,7 +29,7 @@ function renderSecretsFetchError(error: SecretsFetchError): string[] {
 }
 
 function renderFallback(error: unknown): string[] {
-  const message = error instanceof Error ? error.message : String(error);
+  const message = describeError(error);
   return [
     '\u{1F6A8} GAME OVER \u2014 fell down the wrong pipe! \u{1F344}\u{1F4A5}',
     message,

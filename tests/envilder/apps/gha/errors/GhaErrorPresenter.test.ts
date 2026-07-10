@@ -57,4 +57,18 @@ describe('GhaErrorPresenter', () => {
     // Assert
     expect(actual).toContain('plain string failure');
   });
+
+  it('Should_RenderInnerReason_When_FallbackErrorIsAggregateErrorWithEmptyMessage', () => {
+    // Arrange
+    const error = new AggregateError(
+      [new Error('connect ECONNREFUSED 127.0.0.1:9999')],
+      '',
+    );
+
+    // Act
+    const actual = presentGhaError(error);
+
+    // Assert
+    expect(actual).toContain('connect ECONNREFUSED 127.0.0.1:9999');
+  });
 });
