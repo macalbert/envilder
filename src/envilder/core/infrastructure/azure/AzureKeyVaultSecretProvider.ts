@@ -1,5 +1,6 @@
 import type { SecretClient } from '@azure/keyvault-secrets';
 import { injectable } from 'inversify';
+import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
 import {
   InvalidArgumentError,
   SecretOperationError,
@@ -30,7 +31,9 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
       ) {
         return undefined;
       }
-      throw new SecretOperationError(describeError(error));
+      throw new SecretOperationError(
+        `${EnvironmentVariable.maskSecretPath(secretName)}: ${describeError(error)}`,
+      );
     }
   }
 

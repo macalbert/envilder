@@ -80,7 +80,7 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
 
       // Assert
       expect(thrown).toBeInstanceOf(SecretOperationError);
-      expect((thrown as Error).message).toBe('Network error');
+      expect((thrown as Error).message).toBe('********ret: Network error');
     });
 
     it('Should_ThrowSecretOperationError_When_NonErrorObjectIsThrown', async () => {
