@@ -561,7 +561,6 @@ async function cleanUpSystem() {
     try {
       execSync('pnpm remove -g envilder', {
         stdio: 'pipe',
-        shell: true,
       });
     } catch {
       // Ignore errors if not installed

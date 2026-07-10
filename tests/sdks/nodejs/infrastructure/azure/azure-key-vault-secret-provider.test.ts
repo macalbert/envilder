@@ -1,3 +1,4 @@
+import type { SecretClient } from '@azure/keyvault-secrets';
 import { describe, expect, it, vi } from 'vitest';
 import { AzureKeyVaultSecretProvider } from '../../../../../src/sdks/nodejs/src/infrastructure/azure/azure-key-vault-secret-provider.js';
 
@@ -7,7 +8,9 @@ describe('AzureKeyVaultSecretProvider', () => {
     const mockGetSecret = vi.fn().mockImplementation(async (name: string) => ({
       value: name === 'db-url' ? 'postgres://localhost' : 'sk-123',
     }));
-    const mockClient = { getSecret: mockGetSecret };
+    const mockClient = {
+      getSecret: mockGetSecret,
+    } as unknown as SecretClient;
     const sut = new AzureKeyVaultSecretProvider(mockClient);
 
     // Act
@@ -27,7 +30,9 @@ describe('AzureKeyVaultSecretProvider', () => {
       .mockRejectedValueOnce(
         Object.assign(new Error('Not found'), { statusCode: 404 }),
       ); // missing
-    const mockClient = { getSecret: mockGetSecret };
+    const mockClient = {
+      getSecret: mockGetSecret,
+    } as unknown as SecretClient;
     const sut = new AzureKeyVaultSecretProvider(mockClient);
 
     // Act
@@ -44,7 +49,9 @@ describe('AzureKeyVaultSecretProvider', () => {
     const mockGetSecret = vi.fn().mockImplementation(async (name: string) => {
       return { value: `value-${name}` };
     });
-    const mockClient = { getSecret: mockGetSecret };
+    const mockClient = {
+      getSecret: mockGetSecret,
+    } as unknown as SecretClient;
     const sut = new AzureKeyVaultSecretProvider(mockClient);
 
     // Act
@@ -56,7 +63,7 @@ describe('AzureKeyVaultSecretProvider', () => {
 
   it('Should_ReturnEmptyMap_When_NamesIsEmpty', async () => {
     // Arrange
-    const mockClient = { getSecret: vi.fn() };
+    const mockClient = { getSecret: vi.fn() } as unknown as SecretClient;
     const sut = new AzureKeyVaultSecretProvider(mockClient);
 
     // Act
@@ -69,7 +76,8 @@ describe('AzureKeyVaultSecretProvider', () => {
 
   it('Should_ThrowError_When_SecretClientIsNull', () => {
     // Act
-    const act = () => new AzureKeyVaultSecretProvider(null);
+    const act = () =>
+      new AzureKeyVaultSecretProvider(null as unknown as SecretClient);
 
     // Assert
     expect(act).toThrow('secretClient cannot be null');
@@ -77,7 +85,7 @@ describe('AzureKeyVaultSecretProvider', () => {
 
   it('Should_ThrowError_When_AnyNameIsEmpty', async () => {
     // Arrange
-    const mockClient = { getSecret: vi.fn() };
+    const mockClient = { getSecret: vi.fn() } as unknown as SecretClient;
     const sut = new AzureKeyVaultSecretProvider(mockClient);
 
     // Act
@@ -93,7 +101,9 @@ describe('AzureKeyVaultSecretProvider', () => {
       statusCode: 403,
     });
     const mockGetSecret = vi.fn().mockRejectedValue(error);
-    const mockClient = { getSecret: mockGetSecret };
+    const mockClient = {
+      getSecret: mockGetSecret,
+    } as unknown as SecretClient;
     const sut = new AzureKeyVaultSecretProvider(mockClient);
 
     // Act
