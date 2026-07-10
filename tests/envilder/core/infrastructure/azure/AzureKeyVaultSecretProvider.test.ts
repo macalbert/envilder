@@ -10,6 +10,7 @@ import {
   it,
   vi,
 } from 'vitest';
+import { EnvironmentVariable } from '../../../../../src/envilder/core/domain/EnvironmentVariable';
 import {
   InvalidArgumentError,
   SecretOperationError,
@@ -92,6 +93,22 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
 
       // Assert
       await expect(action).rejects.toThrow(SecretOperationError);
+    });
+
+    it('Should_ReferenceOriginalName_When_NormalizedNameDiffersAndErrorOccurs', async () => {
+      // Arrange
+      const originalName = '/App/DB_Password';
+      mockGetSecretFn.mockRejectedValueOnce(new Error('Network error'));
+
+      // Act
+      const thrown = await sut
+        .getSecret(originalName)
+        .catch((e: unknown) => e);
+
+      // Assert
+      expect((thrown as Error).message).toBe(
+        `${EnvironmentVariable.maskSecretPath(originalName)}: Network error`,
+      );
     });
 
     it('Should_NormalizeSecretName_When_NameContainsSlashes', async () => {

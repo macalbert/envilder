@@ -32,7 +32,7 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
         return undefined;
       }
       throw new SecretOperationError(
-        `${EnvironmentVariable.maskSecretPath(secretName)}: ${describeError(error)}`,
+        `${EnvironmentVariable.maskSecretPath(name)}: ${describeError(error)}`,
       );
     }
   }
