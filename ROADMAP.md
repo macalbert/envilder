@@ -16,8 +16,6 @@ or directly inside application code at runtime.
 
 ## Feature Status & Roadmap
 
-<!-- markdownlint-disable MD013 -->
-
 ### ✅ Shipped
 
 | Feature | Notes |
@@ -55,8 +53,6 @@ or directly inside application code at runtime.
 | **Auto-discovery mode** (`--auto`) | Medium | Fetch all parameters matching a given prefix (e.g., `/my-app/prod/*`) |
 | **Exec with refresh** (`--refresh-interval`) | Low | Kill & restart child process periodically with fresh secrets (requires `--exec`) |
 | **Hierarchical mapping** | Low | Per-environment `envilder.json` with inheritance/overrides |
-
-<!-- markdownlint-enable MD013 -->
 
 ---
 
