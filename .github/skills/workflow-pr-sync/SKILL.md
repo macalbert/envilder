@@ -60,6 +60,12 @@ If the branch has a single commit, use that commit's message as the title.
   NUL), arrows (`→`), em-dashes (`—`), and other non-ASCII characters.
 - **Avoid non-ASCII characters in PR bodies** — use plain ASCII alternatives:
   `to` instead of `→`, `--` instead of `—`, etc.
+- **Never hard-wrap prose at a fixed column width** — write each Summary
+  sentence and each Changes bullet as a single unbroken line, no matter how
+  long. GitHub renders a single `\n` inside a paragraph or list item as a
+  visible line break, so hard-wrapped text (e.g. wrapped at ~80 chars) shows
+  up as broken, choppy lines instead of flowing text. Only insert a real
+  newline between sections or between separate bullets.
 
 ## Commands
 
