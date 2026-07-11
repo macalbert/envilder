@@ -7,6 +7,7 @@ from envilder.domain.sso_session_expired_error import SsoSessionExpiredError
 from envilder.infrastructure.aws.aws_ssm_secret_provider import (
     AwsSsmSecretProvider,
 )
+from mypy_boto3_ssm import SSMClient
 
 
 class TestExpiredCredentials:
@@ -14,7 +15,7 @@ class TestExpiredCredentials:
         self,
     ) -> None:
         # Arrange
-        ssm_client = Mock()
+        ssm_client = Mock(spec=SSMClient)
         ssm_client.get_parameter.side_effect = ClientError(
             error_response={
                 "Error": {
@@ -40,7 +41,7 @@ class TestExpiredCredentials:
         self,
     ) -> None:
         # Arrange
-        ssm_client = Mock()
+        ssm_client = Mock(spec=SSMClient)
         ssm_client.get_parameter.side_effect = TokenRetrievalError(
             provider="sso",
             error_msg="Token has expired and refresh failed",
@@ -57,7 +58,7 @@ class TestExpiredCredentials:
 
     def Should_ReturnNone_When_ParameterNotFound(self) -> None:
         # Arrange
-        ssm_client = Mock()
+        ssm_client = Mock(spec=SSMClient)
         ssm_client.get_parameter.side_effect = ClientError(
             error_response={"Error": {"Code": "ParameterNotFound"}},
             operation_name="GetParameter",
@@ -74,7 +75,7 @@ class TestExpiredCredentials:
         self,
     ) -> None:
         # Arrange
-        ssm_client = Mock()
+        ssm_client = Mock(spec=SSMClient)
         ssm_client.get_parameter.side_effect = ClientError(
             error_response={
                 "Error": {"Code": "InternalServerError", "Message": "boom"}

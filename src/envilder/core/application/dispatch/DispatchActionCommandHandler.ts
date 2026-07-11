@@ -27,7 +27,7 @@ export class DispatchActionCommandHandler {
   async handleCommand(command: DispatchActionCommand): Promise<void> {
     this.validateRequiredArguments(command);
 
-    if (this.secretProvider.logIdentity) {
+    if (typeof this.secretProvider.logIdentity === 'function') {
       await this.secretProvider.logIdentity();
     }
     switch (command.mode) {
@@ -59,34 +59,43 @@ export class DispatchActionCommandHandler {
   private async handlePushSingle(
     command: DispatchActionCommand,
   ): Promise<void> {
+    this.validatePushSingleOptions(command);
     const pushSingleCommand = PushSingleCommand.create(
-      command.key as string,
-      command.value as string,
-      command.secretPath as string,
+      command.key,
+      command.value,
+      command.secretPath,
     );
 
     await this.pushSingleHandler.handle(pushSingleCommand);
   }
 
   private async handlePush(command: DispatchActionCommand): Promise<void> {
+    this.validateMapAndEnvFileOptions(command);
     const pushEnvToSecretsCommand = PushEnvToSecretsCommand.create(
-      command.map as string,
-      command.envfile as string,
+      command.map,
+      command.envfile,
     );
 
     await this.pushHandler.handle(pushEnvToSecretsCommand);
   }
 
   private async handlePull(command: DispatchActionCommand): Promise<void> {
+    this.validateMapAndEnvFileOptions(command);
     const pullSecretsToEnvCommand = PullSecretsToEnvCommand.create(
-      command.map as string,
-      command.envfile as string,
+      command.map,
+      command.envfile,
     );
 
     await this.pullHandler.handle(pullSecretsToEnvCommand);
   }
 
-  private validatePushSingleOptions(command: DispatchActionCommand): void {
+  private validatePushSingleOptions(
+    command: DispatchActionCommand,
+  ): asserts command is DispatchActionCommand & {
+    key: string;
+    value: string;
+    secretPath: string;
+  } {
     if (!command.key || !command.value || !command.secretPath) {
       throw new InvalidArgumentError(
         'Missing required arguments: --key, --value, and --secret-path',
@@ -94,7 +103,12 @@ export class DispatchActionCommandHandler {
     }
   }
 
-  private validateMapAndEnvFileOptions(command: DispatchActionCommand): void {
+  private validateMapAndEnvFileOptions(
+    command: DispatchActionCommand,
+  ): asserts command is DispatchActionCommand & {
+    map: string;
+    envfile: string;
+  } {
     if (!command.map || !command.envfile) {
       throw new InvalidArgumentError(
         'Missing required arguments: --map and --envfile',
