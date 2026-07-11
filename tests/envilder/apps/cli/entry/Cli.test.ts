@@ -255,6 +255,19 @@ describe('Cli', () => {
     );
   });
 
+  it('Should_ThrowError_When_EnvfileOptionIsEmptyString', async () => {
+    // Arrange
+    process.argv = ['node', 'cli.js', '--map', 'map.json', '--envfile', '   '];
+
+    // Act
+    const action = () => main();
+
+    // Assert
+    await expect(action).rejects.toThrow(
+      'Invalid --envfile value: path must not be empty.',
+    );
+  });
+
   it('Should_NotRequireMapFile_When_PushSingleAndEnvilderJsonDoesNotExist', async () => {
     // Arrange
     const { existsSync } = await import('node:fs');

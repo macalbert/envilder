@@ -58,7 +58,7 @@ export async function main() {
     ${pc.cyan('envilder --push --key=API_KEY --value=s3cret --secret-path=/my/path')}
 
   ${pc.blue('>')} ${pc.bold('Use Azure Key Vault')}
-    ${pc.cyan('envilder --provider=azure')}
+    ${pc.cyan('envilder --provider=azure --vault-url=https://my-vault.vault.azure.net')}
 `;
 
   program
@@ -123,7 +123,7 @@ export async function main() {
         const resolvedMap = resolveMapFile(options.map, {
           required: !isPushSingle,
         });
-        const resolvedEnvfile = options.envfile ?? DEFAULT_ENV_FILE;
+        const resolvedEnvfile = resolveEnvfile(options.envfile);
 
         const resolvedOptions: CliOptions = {
           ...options,
@@ -197,6 +197,19 @@ function resolveMapFile(
   throw new Error(
     `No map file found. Provide --map or create ${DEFAULT_MAP_FILE} in the current directory.`,
   );
+}
+
+function resolveEnvfile(envfileOption: string | undefined): string {
+  if (envfileOption === undefined) {
+    return DEFAULT_ENV_FILE;
+  }
+
+  const trimmed = envfileOption.trim();
+  if (trimmed.length === 0) {
+    throw new Error('Invalid --envfile value: path must not be empty.');
+  }
+
+  return trimmed;
 }
 
 function readPackageVersion(): Promise<string> {
