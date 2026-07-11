@@ -45,7 +45,7 @@ Run independently, then synthesize into a deduplicated prioritised report.
 
 - Biome style (single quotes, semicolons, 2-space indent, trailing commas)
 - Test naming: `Should_<Expected>_When_<Condition>`
-- AAA markers: `// Arrange`, `// Act`, `// Assert` — each at most once per test
+- AAA markers: `// Arrange`, `// Act`, `// Assert`: each at most once per test
 - InversifyJS decorator usage: `@injectable()`, `@inject(TYPES.X)`
 - Conventional commits in PR title
 
@@ -54,7 +54,7 @@ Run independently, then synthesize into a deduplicated prioritised report.
 See `code-quality-crap` skill for formula and thresholds.
 
 - Flag methods with cyclomatic complexity ≥ 4 lacking proportional coverage
-- Flag methods with complexity ≥ 6 — recommend extraction
+- Flag methods with complexity ≥ 6: recommend extraction
 
 ## Severity Model
 
@@ -78,7 +78,7 @@ See `code-quality-crap` skill for formula and thresholds.
 ```text
 ## Findings
 
-### [Critical/High/Medium/Low] — {title}
+### [Critical/High/Medium/Low]: {title}
 **File:** {path}:{line}
 **Why:** {explanation}
 **Fix:** {direction}
@@ -87,16 +87,16 @@ See `code-quality-crap` skill for formula and thresholds.
 - {assumptions or clarifications needed}
 
 ## Summary
-{1-2 sentence overview — AFTER findings, not before}
+{1-2 sentence overview: AFTER findings, not before}
 ```
 
 ## Verification
 
 After analysis, verify findings before reporting:
 
-1. `pnpm test` — confirm test suite passes
-2. `biome check && tsc --noEmit` — lint compliance (no modifications)
-3. `pnpm format:check` — formatting (no modifications)
+1. `pnpm test`: confirm test suite passes
+2. `biome check && tsc --noEmit`: lint compliance (no modifications)
+3. `pnpm format:check`: formatting (no modifications)
 4. Browser checks for website/UI changes (Playwright)
 5. Stack-specific: `dotnet build`/`dotnet test`, `make check-sdk-python`
 
@@ -106,4 +106,4 @@ Only report **confirmed** findings. Downgrade unverified suspicions.
 
 - Do not report style-only nits unless they block quality gates
 - State assumptions explicitly
-- Never modify files during review — read-only analysis only
+- Never modify files during review: read-only analysis only

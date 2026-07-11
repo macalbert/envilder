@@ -1,4 +1,4 @@
-# Python Testing — Real Examples
+# Python Testing: Real Examples
 
 Examples extracted from the codebase to illustrate patterns described in SKILL.md.
 

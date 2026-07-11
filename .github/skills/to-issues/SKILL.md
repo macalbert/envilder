@@ -2,7 +2,7 @@
 name: to-issues
 description: >-
   Break a plan or feature into vertical-slice GitHub issues. Each issue is a
-  tracer bullet — independently deliverable, testable, and mergeable.
+  tracer bullet: independently deliverable, testable, and mergeable.
   Use when decomposing work from ROADMAP.md, a PRD, or a conversation.
 ---
 
@@ -20,7 +20,7 @@ scope and boundaries. Check ROADMAP.md and existing issues for overlap.
 
 ### 2. Slice Vertically
 
-Each issue must be a **tracer bullet** — a thin vertical slice that:
+Each issue must be a **tracer bullet**: a thin vertical slice that:
 
 - Touches all necessary layers (domain → application → infrastructure → entry point)
 - Is independently testable and mergeable
@@ -65,7 +65,7 @@ Show the full issue list as a numbered table before creating anything:
 ```text
 | # | Title | Scope | Depends On |
 |---|-------|-------|------------|
-| 1 | feat(sdk-dotnet): add ISecretProvider port | Domain | — |
+| 1 | feat(sdk-dotnet): add ISecretProvider port | Domain | n/a |
 | 2 | feat(sdk-dotnet): implement AWS SSM provider | Infra | #1 |
 ```
 
@@ -73,8 +73,8 @@ Wait for user confirmation. Then create issues via `gh issue create`.
 
 ## Rules
 
-- **Max 8 issues per plan** — if more are needed, split into phases
-- **Each issue ≤ 1 day of work** — if larger, slice thinner
+- **Max 8 issues per plan**: if more are needed, split into phases
+- **Each issue ≤ 1 day of work**: if larger, slice thinner
 - Use Conventional Commit format for titles
 - Reference ADRs in technical notes when relevant
 - Label issues with `needs-triage` unless user specifies otherwise

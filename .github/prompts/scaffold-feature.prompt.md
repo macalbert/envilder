@@ -81,7 +81,7 @@ After generating files, suggest:
 
 ## Constraints
 
-- Follow hexagonal architecture — no infrastructure imports in domain or application
+- Follow hexagonal architecture: no infrastructure imports in domain or application
 - Use InversifyJS decorators (`@injectable()`, `@inject()`)
 - One command + one handler per feature
 - Mirror `src/` structure under `tests/` for test files

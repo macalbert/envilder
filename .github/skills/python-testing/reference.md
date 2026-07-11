@@ -1,4 +1,4 @@
-# Python Testing — Quick Reference
+# Python Testing: Quick Reference
 
 ## pytest Configuration
 

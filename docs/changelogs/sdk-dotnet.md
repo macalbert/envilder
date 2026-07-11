@@ -1,14 +1,32 @@
+## [0.5.0] - 2026-06-26
+
+### Added
+
+* **New `ExpiredCredentialsException`**: Thrown by the AWS SSM provider
+  on expired or invalid credentials (e.g. an expired session token), with
+  an actionable message guiding you to refresh credentials (e.g. run
+  `aws sso login`)
+
+* **New `SsoSessionExpiredException`**: Thrown by the AWS SSM provider
+  when an AWS SSO session can no longer be resolved, exposing the AWS
+  profile via `ProfileName` and an actionable message that names the
+  `aws sso login --profile <name>` command to run. A plain expired
+  session token still throws `ExpiredCredentialsException`
+  ([#377](https://github.com/macalbert/envilder/issues/377))
+
+---
+
 ## [0.4.0] - 2026-05-18
 
 ### Changed
 
-* **BREAKING: Root namespace for public API** — All consumer-facing types
+* **BREAKING: Root namespace for public API**: All consumer-facing types
   moved from `Envilder.Application` / `Envilder.Domain` to the root
   `Envilder` namespace. Consumers now only need `using Envilder;`
-* **BREAKING: Facade class renamed to `Env`** — The static facade class
+* **BREAKING: Facade class renamed to `Env`**: The static facade class
   is now `Env` instead of `Envilder` to avoid namespace/class name collision.
   Use `Env.Load(...)`, `Env.ResolveFile(...)`, `Env.FromMapFile(...)` etc.
-* **Extension methods follow .NET conventions** —
+* **Extension methods follow .NET conventions**:
   `AddEnvilder()` for `IConfigurationBuilder` moved to
   `Microsoft.Extensions.Configuration` namespace;
   `AddEnvilder()` for `IServiceCollection` moved to
@@ -45,7 +63,7 @@ Env.FromMapFile("envilder.json").Inject();
 ```
 
 `AddEnvilder()` extension methods now live in `Microsoft.Extensions.Configuration`
-and `Microsoft.Extensions.DependencyInjection` — no Envilder-specific import needed.
+and `Microsoft.Extensions.DependencyInjection`: no Envilder-specific import needed.
 ASP.NET projects already include these namespaces via global usings; console apps
 may need to add them explicitly.
 
@@ -55,13 +73,13 @@ may need to add them explicitly.
 
 ### Added
 
-* **Map-file JSON Schema support** — Map files can now include
+* **Map-file JSON Schema support**: Map files can now include
   `"$schema": "https://envilder.com/schema/map-file.v1.json"` for IDE
   autocomplete and validation without affecting secret resolution
 
 ### Fixed
 
-* **Reserved key filtering** — All `$`-prefixed keys are now excluded from
+* **Reserved key filtering**: All `$`-prefixed keys are now excluded from
   variable mappings. Previously only `$config` was filtered
   ([#218](https://github.com/macalbert/envilder/pull/218))
 
@@ -71,50 +89,50 @@ may need to add them explicitly.
 
 ### Added
 
-* **Static facade** — `Envilder` class with one-liner API for resolving and injecting secrets
-* `ResolveFile(path)` / `ResolveFileAsync(path)` — Resolve secrets from a map file
-* `Load(path)` / `LoadAsync(path)` — Resolve and inject secrets into `Environment`
-* `ResolveFile(env, mapping)` / `Load(env, mapping)` — Environment-routed overloads
-* `FromMapFile(path)` — Fluent builder with `.WithProvider()`, `.WithProfile()`, `.WithVaultUrl()`
-* `EnvilderBuilder.Resolve()` / `ResolveAsync()` / `Inject()` / `InjectAsync()` — Fluent terminal methods
-* `ISecretProvider.GetSecret(name)` — Synchronous secret retrieval (new interface method)
-* `AwsSsmSecretProvider.GetSecret(name)` — Sync AWS SSM implementation
-* `AzureKeyVaultSecretProvider.GetSecret(name)` — Sync Azure Key Vault implementation
-* `EnvilderClient.ResolveSecrets(mapFile)` — Sync secret resolution
+* **Static facade**: `Envilder` class with one-liner API for resolving and injecting secrets
+* `ResolveFile(path)` / `ResolveFileAsync(path)`: Resolve secrets from a map file
+* `Load(path)` / `LoadAsync(path)`: Resolve and inject secrets into `Environment`
+* `ResolveFile(env, mapping)` / `Load(env, mapping)`: Environment-routed overloads
+* `FromMapFile(path)`: Fluent builder with `.WithProvider()`, `.WithProfile()`, `.WithVaultUrl()`
+* `EnvilderBuilder.Resolve()` / `ResolveAsync()` / `Inject()` / `InjectAsync()`: Fluent terminal methods
+* `ISecretProvider.GetSecret(name)`: Synchronous secret retrieval (new interface method)
+* `AwsSsmSecretProvider.GetSecret(name)`: Sync AWS SSM implementation
+* `AzureKeyVaultSecretProvider.GetSecret(name)`: Sync Azure Key Vault implementation
+* `EnvilderClient.ResolveSecrets(mapFile)`: Sync secret resolution
 
 ### Changed
 
-* **Simplify `AddEnvilder` extensions** — `IConfigurationBuilder.AddEnvilder()` and
+* **Simplify `AddEnvilder` extensions**: `IConfigurationBuilder.AddEnvilder()` and
   `IServiceCollection.AddEnvilder()` now accept `(string mapFilePath, EnvilderOptions? options)`
   instead of requiring a manually-created `ISecretProvider`
   ([#167](https://github.com/macalbert/envilder/pull/167))
-* **Cross-provider validation** — `SecretProviderFactory` now rejects invalid combinations:
+* **Cross-provider validation**: `SecretProviderFactory` now rejects invalid combinations:
   AWS profile with Azure provider, or Vault URL with AWS provider
   ([#167](https://github.com/macalbert/envilder/pull/167))
 
 ### Breaking
 
-* `SecretProviderFactory` is now `internal` — External code that referenced this type
+* `SecretProviderFactory` is now `internal`: External code that referenced this type
   directly will no longer compile. Use the `Envilder` facade, `EnvilderBuilder`
   (`Envilder.FromMapFile(...)`), or the `AddEnvilder(string, EnvilderOptions?)` extensions instead
   ([#167](https://github.com/macalbert/envilder/pull/167))
-* `ISecretProvider.GetSecret(string name)` — New required interface method. External
+* `ISecretProvider.GetSecret(string name)`: New required interface method. External
   implementations of `ISecretProvider` must add a synchronous `GetSecret` method
   (return `null` for missing secrets, matching the `GetSecretAsync` contract)
-* `ServiceCollectionExtensions.AddEnvilder(string, ISecretProvider)` signature removed — Use
+* `ServiceCollectionExtensions.AddEnvilder(string, ISecretProvider)` signature removed. Use
   `AddEnvilder(string, EnvilderOptions?)` instead
-* `ConfigurationBuilderExtensions.AddEnvilder(string, ISecretProvider)` signature removed — Use
+* `ConfigurationBuilderExtensions.AddEnvilder(string, ISecretProvider)` signature removed. Use
   `AddEnvilder(string, EnvilderOptions?)` instead
 
 ### Fixed
 
-* **Delegate default AWS region resolution to the AWS SDK** — When no profile is set, the
+* **Delegate default AWS region resolution to the AWS SDK**: When no profile is set, the
   factory no longer manually resolves the region via `ResolveRegion()`. Instead it creates a
   plain `AmazonSimpleSystemsManagementClient()` which uses the full AWS SDK resolution chain
   (env vars → `~/.aws/config` → instance metadata), correctly picking up the default config
   file settings
   ([#166](https://github.com/macalbert/envilder/pull/166))
-* **Respect `AWS_SHARED_CREDENTIALS_FILE` for profile resolution** — `CredentialProfileStoreChain`
+* **Respect `AWS_SHARED_CREDENTIALS_FILE` for profile resolution**: `CredentialProfileStoreChain`
   now receives the credentials file path from the `AWS_SHARED_CREDENTIALS_FILE` environment
   variable, fixing profile discovery when credentials are stored at non-default locations
   ([#166](https://github.com/macalbert/envilder/pull/166))
@@ -130,16 +148,16 @@ may need to add them explicitly.
 
 ### Added
 
-* **Initial release** — Runtime library for loading secrets from AWS SSM Parameter Store or Azure Key Vault
+* **Initial release**: Runtime library for loading secrets from AWS SSM Parameter Store or Azure Key Vault
   directly into .NET applications ([#147](https://github.com/macalbert/envilder/pull/147))
-* `EnvilderClient` — Resolves secrets from a map-file and returns them as a dictionary
-* `MapFileParser` — Parses `envilder.json` files with `$config` section and variable mappings
-* `SecretProviderFactory` — Creates the appropriate secret provider based on configuration
-* `AwsSsmSecretProvider` — Fetches secrets from AWS SSM Parameter Store
-* `AzureKeyVaultSecretProvider` — Fetches secrets from Azure Key Vault
-* `IConfiguration` extensions — Load secrets directly into .NET configuration
-* `IServiceCollection` extensions — Register Envilder in the DI container
-* `EnvilderOptions` — Runtime overrides for provider, vault URL, and AWS profile
+* `EnvilderClient`: Resolves secrets from a map-file and returns them as a dictionary
+* `MapFileParser`: Parses `envilder.json` files with `$config` section and variable mappings
+* `SecretProviderFactory`: Creates the appropriate secret provider based on configuration
+* `AwsSsmSecretProvider`: Fetches secrets from AWS SSM Parameter Store
+* `AzureKeyVaultSecretProvider`: Fetches secrets from Azure Key Vault
+* `IConfiguration` extensions: Load secrets directly into .NET configuration
+* `IServiceCollection` extensions: Register Envilder in the DI container
+* `EnvilderOptions`: Runtime overrides for provider, vault URL, and AWS profile
 * Targets .NET Standard 2.0 (compatible with .NET 6+, .NET Framework 4.6.1+)
 * Published to NuGet as `Envilder`
 

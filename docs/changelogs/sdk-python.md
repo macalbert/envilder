@@ -1,14 +1,32 @@
+## [0.5.0] - 2026-06-26
+
+### Added
+
+* **New `ExpiredCredentialsError`**: Exported from `envilder` and
+  raised by the AWS SSM provider on expired or invalid credentials
+  (e.g. an expired session token), with an actionable message guiding you
+  to refresh credentials (e.g. run `aws sso login`)
+
+* **New `SsoSessionExpiredError`**: Exported from `envilder` and raised
+  by the AWS SSM provider when an AWS SSO session can no longer be
+  resolved, with an actionable message that names the AWS profile and the
+  `aws sso login --profile <name>` command to run. A plain expired
+  session token still raises `ExpiredCredentialsError`
+  ([#378](https://github.com/macalbert/envilder/issues/378))
+
+---
+
 ## [0.4.0] - 2026-05-03
 
 ### Added
 
-* **Map-file JSON Schema support** — Map files can now include
+* **Map-file JSON Schema support**: Map files can now include
   `"$schema": "https://envilder.com/schema/map-file.v1.json"` for IDE
   autocomplete and validation without affecting secret resolution
 
 ### Fixed
 
-* **Reserved key filtering** — All `$`-prefixed keys are now excluded from
+* **Reserved key filtering**: All `$`-prefixed keys are now excluded from
   variable mappings. Previously only `$config` was filtered
   ([#218](https://github.com/macalbert/envilder/pull/218))
 
@@ -18,17 +36,17 @@
 
 ### Changed
 
-* **Encapsulate `SecretProviderFactory`** — Renamed to `_SecretProviderFactory` and removed
+* **Encapsulate `SecretProviderFactory`**: Renamed to `_SecretProviderFactory` and removed
   from public re-exports; consumers should use the `Envilder` facade instead of creating
   providers manually
   ([#167](https://github.com/macalbert/envilder/pull/167))
-* **Cross-provider validation** — `_SecretProviderFactory.create()` now rejects invalid
+* **Cross-provider validation**: `_SecretProviderFactory.create()` now rejects invalid
   combinations: AWS profile with Azure provider, or vault URL with AWS provider
   ([#167](https://github.com/macalbert/envilder/pull/167))
 
 ### Fixed
 
-* **Delegate default AWS region resolution to boto3** — When no profile is set, the factory
+* **Delegate default AWS region resolution to boto3**: When no profile is set, the factory
   no longer manually resolves the region from environment variables. Instead it creates a plain
   `boto3.Session()` which uses the full AWS SDK resolution chain (env vars → `~/.aws/config` →
   instance metadata), correctly picking up the default config file settings
@@ -40,7 +58,7 @@
 
 ### Fixed
 
-* **Remove `mypy-boto3-ssm` runtime dependency** — `AwsSsmSecretProvider` imported
+* **Remove `mypy-boto3-ssm` runtime dependency**: `AwsSsmSecretProvider` imported
   `mypy_boto3_ssm.SSMClient` at runtime, but the package is a dev-only type stub.
   Consumers installing `envilder` from PyPI got `ModuleNotFoundError`. Replaced with
   `botocore.client.BaseClient` which is already bundled with `boto3`
@@ -52,11 +70,11 @@
 
 ### Added
 
-* **Environment-based loading** — `Envilder.load(env, env_mapping)` and
+* **Environment-based loading**: `Envilder.load(env, env_mapping)` and
   `Envilder.resolve_file(env, env_mapping)` accept a dictionary mapping environment names to
   map file paths (or `None` to skip). Enables environment-aware secret loading without
   external branching logic ([#163](https://github.com/macalbert/envilder/pull/163))
-* **Source validation** — Empty or whitespace-only file paths in `env_mapping` now raise
+* **Source validation**: Empty or whitespace-only file paths in `env_mapping` now raise
   `ValueError` with a descriptive message including the environment key
 
 ---
@@ -65,10 +83,10 @@
 
 ### Added
 
-* **Fluent API facade** — `Envilder` high-level entry point with `load()`, `resolve_file()`,
+* **Fluent API facade**: `Envilder` high-level entry point with `load()`, `resolve_file()`,
   and `from_map_file()` methods, plus fluent override methods (`with_provider()`, `with_vault_url()`,
   `with_profile()`) ([#161](https://github.com/macalbert/envilder/pull/161))
-* **Facade docstrings** — All public methods on the `Envilder` facade now have docstrings with
+* **Facade docstrings**: All public methods on the `Envilder` facade now have docstrings with
   usage examples, improving IDE tooltips and `help()` output for external consumers
 
 ---
@@ -77,18 +95,18 @@
 
 ### Added
 
-* **Initial release** — Runtime library for loading secrets from AWS SSM Parameter Store or
+* **Initial release**: Runtime library for loading secrets from AWS SSM Parameter Store or
   Azure Key Vault directly into Python applications
   ([#157](https://github.com/macalbert/envilder/pull/157))
-* `Envilder` facade — High-level entry point with `load()`, `resolve_file()`, and `from_map_file()` methods
-* `EnvilderClient` — Resolves secrets from a map-file and injects them into `os.environ`
-* `MapFileParser` — Parses `envilder.json` files with `$config` section and variable mappings
-* `SecretProviderFactory` — Creates the appropriate secret provider based on configuration
-* `AwsSsmSecretProvider` — Fetches secrets from AWS SSM Parameter Store via boto3
-* `AzureKeyVaultSecretProvider` — Fetches secrets from Azure Key Vault
-* `EnvilderOptions` — Runtime overrides for provider, vault URL, and AWS profile
-* Synchronous API — no async/await, uses boto3 natively
-* Protocol-based ports — Python `Protocol` instead of ABC
+* `Envilder` facade: High-level entry point with `load()`, `resolve_file()`, and `from_map_file()` methods
+* `EnvilderClient`: Resolves secrets from a map-file and injects them into `os.environ`
+* `MapFileParser`: Parses `envilder.json` files with `$config` section and variable mappings
+* `SecretProviderFactory`: Creates the appropriate secret provider based on configuration
+* `AwsSsmSecretProvider`: Fetches secrets from AWS SSM Parameter Store via boto3
+* `AzureKeyVaultSecretProvider`: Fetches secrets from Azure Key Vault
+* `EnvilderOptions`: Runtime overrides for provider, vault URL, and AWS profile
+* Synchronous API: no async/await, uses boto3 natively
+* Protocol-based ports: Python `Protocol` instead of ABC
 * Python 3.10+ with full type annotations (`py.typed`)
 * Published to PyPI as `envilder`
 

@@ -40,7 +40,7 @@ tests/sdks/{lang}/
 ## envilder.json Pattern
 
 All SDKs reference the **root** `envilder.json` at the repository root
-directly. Container wrappers navigate to it via a relative path — there are no
+directly. Container wrappers navigate to it via a relative path: there are no
 copies per SDK test directory.
 
 ```json

@@ -4,14 +4,15 @@ import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import type { Container } from 'inversify';
 import pc from 'picocolors';
-import { DispatchActionCommand } from '../../core/application/dispatch/DispatchActionCommand.js';
-import type { DispatchActionCommandHandler } from '../../core/application/dispatch/DispatchActionCommandHandler.js';
-import type { CliOptions } from '../../core/domain/CliOptions.js';
-import type { MapFileConfig } from '../../core/domain/MapFileConfig.js';
-import { PackageVersionReader } from '../../core/infrastructure/package/PackageVersionReader.js';
-import { readMapFileConfig } from '../../core/infrastructure/variableStore/FileVariableStore.js';
-import { TYPES } from '../../core/types.js';
-import { Startup } from './Startup.js';
+import { DispatchActionCommand } from '../../../core/application/dispatch/DispatchActionCommand.js';
+import type { DispatchActionCommandHandler } from '../../../core/application/dispatch/DispatchActionCommandHandler.js';
+import type { CliOptions } from '../../../core/domain/CliOptions.js';
+import type { MapFileConfig } from '../../../core/domain/MapFileConfig.js';
+import { PackageVersionReader } from '../../../core/infrastructure/package/PackageVersionReader.js';
+import { readMapFileConfig } from '../../../core/infrastructure/variableStore/FileVariableStore.js';
+import { TYPES } from '../../../core/types.js';
+import { executeWithSsoRecovery } from '../recovery/SsoLoginRecovery.js';
+import { Startup } from '../Startup.js';
 
 let serviceProvider: Container;
 
@@ -136,7 +137,7 @@ export async function main() {
           .configureInfrastructure(config, infraOptions)
           .create();
 
-        await executeCommand(options);
+        await executeWithSsoRecovery(() => executeCommand(options));
       },
     );
 
@@ -146,7 +147,7 @@ export async function main() {
 function readPackageVersion(): Promise<string> {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
-  const packageJsonPath = join(__dirname, '../../../../package.json');
+  const packageJsonPath = join(__dirname, '../../../../../package.json');
 
   return new PackageVersionReader().getVersion(packageJsonPath);
 }

@@ -7,7 +7,7 @@ tools: [read, search, edit, execute]
 user-invocable: false
 ---
 
-# TDD Red — Write One Failing Test
+# TDD Red: Write One Failing Test
 
 You write a single failing test that defines the expected behavior.
 
@@ -24,12 +24,12 @@ You write a single failing test that defines the expected behavior.
    Create it if it doesn't exist.
 2. **Write one test** following conventions:
    - Name: `Should_<Expected>_When_<Condition>`
-   - Structure: `// Arrange`, `// Act`, `// Assert` — each exactly once
+   - Structure: `// Arrange`, `// Act`, `// Assert`: each exactly once
    - Mock ports with `vi.fn()` for unit tests
    - Use `sut` for subject under test, `actual` for result
 3. **Run** `pnpm test` and capture output.
 4. **Verify failure:** The test must fail because the behavior is not yet
-   implemented — not because of a syntax error or wrong import.
+   implemented: not because of a syntax error or wrong import.
 5. **Run** `pnpm lint` to ensure no formatting issues.
 
 ## Output (to coordinator)
@@ -49,15 +49,15 @@ You write a single failing test that defines the expected behavior.
 Before reporting back:
 
 - [ ] Test describes behavior (WHAT), not implementation (HOW)
-- [ ] Test uses public interface only — no internal method calls
+- [ ] Test uses public interface only: no internal method calls
 - [ ] Test would survive an internal refactor without breaking
 - [ ] Mocks are preferably at system boundaries (ports: ISecretProvider,
-      IVariableStore, ILogger) — mocking own classes is acceptable when it
+      IVariableStore, ILogger): mocking own classes is acceptable when it
       avoids complex Arrange setup without losing behavioral confidence
 
 ## Rules
 
 - Write **exactly one** test per invocation
-- The test must **fail** — if it passes, the behavior already exists
+- The test must **fail**: if it passes, the behavior already exists
 - Do not write any production code
 - Do not modify existing tests unless the coordinator explicitly requests it

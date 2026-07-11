@@ -297,20 +297,17 @@ describe('PushEnvToSecretsCommandHandler', () => {
 
   it('Should_RetryAndSucceed_When_ThrottlingErrorIsTemporary', async () => {
     // Arrange
-    let attemptCount = 0;
     const throttlingError = {
       name: 'TooManyUpdates',
       message: 'Rate exceeded',
       $fault: 'client',
     };
 
-    mockSecretProvider.setSecret = vi.fn(async (): Promise<void> => {
-      attemptCount++;
-      if (attemptCount <= 2) {
-        throw throttlingError;
-      }
-      // Succeeds on the 3rd attempt
-    });
+    mockSecretProvider.setSecret = vi
+      .fn()
+      .mockRejectedValueOnce(throttlingError)
+      .mockRejectedValueOnce(throttlingError)
+      .mockResolvedValueOnce(undefined);
 
     mockVariableStore.getMapping.mockResolvedValue({
       TEST_ENV_VAR: '/path/to/ssm/test',
@@ -337,19 +334,17 @@ describe('PushEnvToSecretsCommandHandler', () => {
 
   it('Should_RetryAndSucceed_When_Azure429ThrottlingErrorIsTemporary', async () => {
     // Arrange
-    let attemptCount = 0;
     const azureThrottlingError = {
       name: 'RestError',
       message: 'Too many requests',
       statusCode: 429,
     };
 
-    mockSecretProvider.setSecret = vi.fn(async (): Promise<void> => {
-      attemptCount++;
-      if (attemptCount <= 2) {
-        throw azureThrottlingError;
-      }
-    });
+    mockSecretProvider.setSecret = vi
+      .fn()
+      .mockRejectedValueOnce(azureThrottlingError)
+      .mockRejectedValueOnce(azureThrottlingError)
+      .mockResolvedValueOnce(undefined);
 
     mockVariableStore.getMapping.mockResolvedValue({
       TEST_ENV_VAR: '/path/to/secret',
@@ -376,13 +371,12 @@ describe('PushEnvToSecretsCommandHandler', () => {
 
   it('Should_ProcessAllVariablesWithRetry_When_OneVariableFails', async () => {
     // Arrange
-    mockSecretProvider.setSecret = vi.fn(
-      async (path: string): Promise<void> => {
-        if (path === '/path/to/ssm/failing') {
-          throw new Error('Secret store error');
-        }
-      },
-    );
+    mockSecretProvider.setSecret = vi
+      .fn()
+      .mockResolvedValueOnce(undefined) // VAR_ONE
+      .mockResolvedValueOnce(undefined) // VAR_TWO
+      .mockRejectedValueOnce(new Error('Secret store error')) // FAILING_VAR
+      .mockResolvedValueOnce(undefined); // VAR_THREE
 
     mockVariableStore.getMapping.mockResolvedValue({
       VAR_ONE: '/path/to/ssm/one',

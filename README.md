@@ -367,7 +367,7 @@ graph LR
 
 Envilder is not a secrets manager. It does not replace Vault, Infisical, or Doppler.
 
-It also does not replace AWS SSM or Azure Key Vault — it works on top of them. Envilder does not
+It also does not replace AWS SSM or Azure Key Vault: it works on top of them. Envilder does not
 store secrets, proxy requests, or introduce a SaaS control plane.
 
 Your cloud provider remains the source of truth. Envilder provides the mapping and resolution

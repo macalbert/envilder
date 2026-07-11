@@ -7,7 +7,7 @@ name: "PR Review Response Conventions"
 
 Apply these rules when drafting responses to PR comments.
 
-**Every review comment MUST receive a reply on GitHub — no exceptions.**
+**Every review comment MUST receive a reply on GitHub: no exceptions.**
 Whether addressed, skipped, or answered, always post a reply in the review
 thread. A comment without a GitHub reply is never considered done.
 

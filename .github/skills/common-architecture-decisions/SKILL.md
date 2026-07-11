@@ -21,7 +21,7 @@ behind tooling choices and architectural patterns before proposing changes.
 - When reviewing code that seems inconsistent with project conventions
 - When adding a new SDK and need to follow established patterns
 - When onboarding and need to understand "why" behind technical choices
-- Before writing tests — check ADR-0002 for the correct tooling per stack
+- Before writing tests: check ADR-0002 for the correct tooling per stack
 
 ## ADR Index
 
@@ -87,4 +87,4 @@ What we chose and the details.
 ## When to Reconsider
 ```
 
-Number sequentially. Keep scope focused — one decision per ADR.
+Number sequentially. Keep scope focused: one decision per ADR.

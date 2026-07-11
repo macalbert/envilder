@@ -34,16 +34,16 @@ of **any** component: CLI, GitHub Action, or SDK (any runtime).
 
 ## Workflow
 
-### Step 1 — Bump Version
+### Step 1: Bump Version
 
 Update the canonical version source file for the component.
 
-### Step 2 — Changelog Entry
+### Step 2: Changelog Entry
 
 Add entry to `docs/changelogs/{component}.md` following `doc-maintenance` skill
 format (categories: Added/Changed/Fixed/Documentation/Dependencies/Security).
 
-### Step 3 — ROADMAP Update (if applicable)
+### Step 3: ROADMAP Update (if applicable)
 
 Check `ROADMAP.md` for related items:
 
@@ -51,7 +51,7 @@ Check `ROADMAP.md` for related items:
 - Update version references if roadmap tracks versions
 - Skip if the release has no roadmap-tracked features
 
-### Step 4 — Website Updates
+### Step 4: Website Updates
 
 #### For SDKs (delegate to `sdk-release-checklist` if new SDK)
 
@@ -73,16 +73,16 @@ Check `ROADMAP.md` for related items:
 - [ ] Update `github-action/action.yml` description/inputs
 - [ ] Update `github-action/README.md` and `docs/github-action.md`
 
-### Step 5 — Cross-Reference Check
+### Step 5: Cross-Reference Check
 
 - [ ] Root `README.md` reflects current capabilities
 - [ ] Examples in `examples/sdk/{runtime}/` match current API
 - [ ] SDK README (`src/sdks/{runtime}/README.md`) matches current API
 
-### Step 6 — Validate
+### Step 6: Validate
 
 ```bash
-# Build website — verifies versions resolve and pages render
+# Build website: verifies versions resolve and pages render
 cd src/website && pnpm build
 
 # Run doc-sync skill for comprehensive drift detection
@@ -139,6 +139,6 @@ Delegate to `doc-sync` skill for full cross-surface audit if uncertain.
 |--------------|-----------------|
 | Hardcoding version in website HTML | Use `__SDK_*_VERSION__` or `__CLI_VERSION__` globals |
 | Updating changelog but not docs | Always check if behavior/API changed → update docs |
-| Updating website but not SDK README | Both must match — SDK README is source of truth for API |
-| Skipping i18n for "minor" text changes | All 3 locales must stay in sync — TypeScript catches missing keys |
+| Updating website but not SDK README | Both must match: SDK README is source of truth for API |
+| Skipping i18n for "minor" text changes | All 3 locales must stay in sync: TypeScript catches missing keys |
 | Forgetting ROADMAP after completing a tracked feature | Check ROADMAP on every release |
