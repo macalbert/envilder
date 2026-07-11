@@ -205,10 +205,10 @@ Root `biome.json` enforces:
 ## TypeScript Strict Rules
 
 - Use `import type` for type-only imports.
-- TypeScript strict mode is enabled — respect all strict checks.
+- TypeScript strict mode is enabled: respect all strict checks.
 - Always run `pnpm format` after modifying TypeScript files.
 
-## Test Cleanup — No `try/catch/finally` in Tests
+## Test Cleanup: No `try/catch/finally` in Tests
 
 **NEVER** use `try/catch`, `try/finally`, `if`, or any control flow inside test functions.
 Use framework teardown mechanisms instead:
@@ -220,7 +220,7 @@ Use framework teardown mechanisms instead:
 | Vitest spy cleanup | `vi.restoreAllMocks()` in `afterEach` |
 
 ```typescript
-// GOOD — cleanup via afterEach
+// GOOD: cleanup via afterEach
 describe('resolve', () => {
   const originalEnv = process.env;
 
@@ -241,7 +241,7 @@ describe('resolve', () => {
   });
 });
 
-// BAD — try/finally in test body
+// BAD: try/finally in test body
 it('Should_ResolveSecret_When_EnvConfigured', async () => {
   const original = process.env.AWS_ENDPOINT_URL;
   try {

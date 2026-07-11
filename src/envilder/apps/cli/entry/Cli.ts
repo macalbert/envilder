@@ -5,16 +5,17 @@ import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import type { Container } from 'inversify';
 import pc from 'picocolors';
-import { DispatchActionCommand } from '../../core/application/dispatch/DispatchActionCommand.js';
-import type { DispatchActionCommandHandler } from '../../core/application/dispatch/DispatchActionCommandHandler.js';
-import type { CliOptions } from '../../core/domain/CliOptions.js';
-import type { MapFileConfig } from '../../core/domain/MapFileConfig.js';
-import { OperationMode } from '../../core/domain/OperationMode.js';
-import type { ILogger } from '../../core/domain/ports/ILogger.js';
-import { PackageVersionReader } from '../../core/infrastructure/package/PackageVersionReader.js';
-import { readMapFileConfig } from '../../core/infrastructure/variableStore/FileVariableStore.js';
-import { TYPES } from '../../core/types.js';
-import { Startup } from './Startup.js';
+import { DispatchActionCommand } from '../../../core/application/dispatch/DispatchActionCommand.js';
+import type { DispatchActionCommandHandler } from '../../../core/application/dispatch/DispatchActionCommandHandler.js';
+import type { CliOptions } from '../../../core/domain/CliOptions.js';
+import type { MapFileConfig } from '../../../core/domain/MapFileConfig.js';
+import { OperationMode } from '../../../core/domain/OperationMode.js';
+import type { ILogger } from '../../../core/domain/ports/ILogger.js';
+import { PackageVersionReader } from '../../../core/infrastructure/package/PackageVersionReader.js';
+import { readMapFileConfig } from '../../../core/infrastructure/variableStore/FileVariableStore.js';
+import { TYPES } from '../../../core/types.js';
+import { executeWithSsoRecovery } from '../recovery/SsoLoginRecovery.js';
+import { Startup } from '../Startup.js';
 
 const DEFAULT_MAP_FILE = 'envilder.json';
 const DEFAULT_ENV_FILE = '.env';
@@ -165,7 +166,7 @@ export async function main() {
           logger.info(`Using ${source}: provider=${providerName}${vaultInfo}`);
         }
 
-        await executeCommand(resolvedOptions);
+        await executeWithSsoRecovery(() => executeCommand(resolvedOptions));
       },
     );
 
@@ -201,7 +202,7 @@ function resolveMapFile(
 function readPackageVersion(): Promise<string> {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
-  const packageJsonPath = join(__dirname, '../../../../package.json');
+  const packageJsonPath = join(__dirname, '../../../../../package.json');
 
   return new PackageVersionReader().getVersion(packageJsonPath);
 }

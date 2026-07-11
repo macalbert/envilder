@@ -33,7 +33,7 @@ Exception: `// Arrange`, `// Act`, `// Assert` comments are REQUIRED in tests.
 | File | Description |
 | ---- | ----------- |
 | [dotnet.md](./dotnet.md) | .NET testing stack (xUnit, AwesomeAssertions, NSubstitute, Bogus, Verify.Xunit, WireMock, Testcontainers) |
-| [typescript.md](./typescript.md) | TypeScript testing stack — CLI, SDK, CDK, Website (Vitest, Playwright, Biome) |
+| [typescript.md](./typescript.md) | TypeScript testing stack: CLI, SDK, CDK, Website (Vitest, Playwright, Biome) |
 | [python.md](./python.md) | Python testing stack (pytest, Mock/AsyncMock, pytest-snapshot, black, mypy, Pydantic) |
 | [examples.md](./examples.md) | Full test examples for C# and TypeScript |
 | [reference.md](./reference.md) | Naming rules, anti-patterns, checklist |
@@ -64,20 +64,20 @@ public async Task Should_CreateGroup_When_RequestIsValid()
 
 **Rules:**
 
-- **Each comment (`// Arrange`, `// Act`, `// Assert`) appears AT MOST ONCE per test** — if you need two actions,
+- **Each comment (`// Arrange`, `// Act`, `// Assert`) appears AT MOST ONCE per test**: if you need two actions,
   write two tests
 - **Act = one single invocation on the SUT.** Multiple statements in Act only if they are genuinely
   part of the same logical action (rare and exceptional). Two independent operations = two tests.
-- **AAA markers are mandatory in ALL tests** — including structural guards,
+- **AAA markers are mandatory in ALL tests**: including structural guards,
   static completeness checks, and data validation tests. No exceptions.
 - Each section clearly separated by comments
 - Never mix phases
 - **All assertions belong in Assert only.** No `expect()`, `.Should()`, `assert`, or any verification
   statement in Arrange or Act. If you feel tempted to assert in Arrange (precondition check), extract
-  it to a separate test or use a guard clause that throws — not an assertion.
+  it to a separate test or use a guard clause that throws: not an assertion.
 - **No `if`, `switch`, or conditional logic** inside Arrange, Act, or Assert blocks
-- **No `try/catch/finally`** inside tests — use framework teardown (`IAsyncLifetime`, `[ClassCleanup]`, pytest `yield` fixtures)
-- **No `// Act & Assert` combined blocks** — Act and Assert are ALWAYS separate phases
+- **No `try/catch/finally`** inside tests: use framework teardown (`IAsyncLifetime`, `[ClassCleanup]`, pytest `yield` fixtures)
+- **No `// Act & Assert` combined blocks**: Act and Assert are ALWAYS separate phases
 - For exceptions: C# → `AwesomeAssertions` `.Should().ThrowAsync<T>()` | Python → `lambda` + `pytest.raises()` | Vitest
  → `expect(...).rejects.toThrow()`
 - Omit comment if section is empty
@@ -137,12 +137,12 @@ public class CreateGroupCommandHandlerTests
 
 See the dedicated supporting file for each stack:
 
-- **.NET Backend:** [dotnet.md](./dotnet.md) — xUnit, AwesomeAssertions, NSubstitute,
+- **.NET Backend:** [dotnet.md](./dotnet.md): xUnit, AwesomeAssertions, NSubstitute,
   AutoFixture, Bogus, Verify.Xunit, WireMock.Net, Testcontainers (PostgreSQL,
   LocalStack)
-- **TypeScript (CLI, SDK, CDK, Website):** [typescript.md](./typescript.md) — Vitest
+- **TypeScript (CLI, SDK, CDK, Website):** [typescript.md](./typescript.md): Vitest
   (CLI/SDK/CDK/Website), Playwright, Biome
-- **Python:** [python.md](./python.md) — pytest, pytest-asyncio, pytest-snapshot,
+- **Python:** [python.md](./python.md): pytest, pytest-asyncio, pytest-snapshot,
   unittest.mock, black, mypy, Pydantic
 
 ## Related Skills

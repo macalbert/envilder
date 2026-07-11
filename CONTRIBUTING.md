@@ -67,7 +67,7 @@ Non-JS SDKs use the **Makefile**:
 | SDK | Check | Format | Build | Test |
 |-----|-------|--------|-------|------|
 | .NET | `make check-sdk-dotnet` | `make format-sdk-dotnet` | `make build-sdk-dotnet` | `make test-sdk-dotnet` |
-| Python | `make check-sdk-python` | `make format-sdk-python` | — | `make test-sdk-python` |
+| Python | `make check-sdk-python` | `make format-sdk-python` | n/a | `make test-sdk-python` |
 | Node.js | `make check-sdk-nodejs` | `make format-sdk-nodejs` | `make build-sdk-nodejs` | `make test-sdk-nodejs` |
 | All | `make check-sdk` | `make format-sdk` | `make build-sdk` | `make test-sdk` |
 

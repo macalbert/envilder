@@ -81,12 +81,12 @@ confidence level across unit, integration, and e2e coverage.
 ## Quick Prompt Examples
 
 - "Use testing-conventions for `PullSecretsToEnvCommandHandler` and add missing error-path tests."
-- "Apply testing-conventions to review `tests/envilder/apps/gha/Gha.test.ts` for naming and AAA compliance."
+- "Apply testing-conventions to review `tests/envilder/apps/gha/entry/Gha.test.ts` for naming and AAA compliance."
 - "Use testing-conventions to design e2e coverage for SSM not-found behavior."
 
 ## Anti-Pattern: Duplicate Act/Assert Blocks
 
-**Wrong** — two Acts and Asserts in one test:
+**Wrong**: two Acts and Asserts in one test:
 
 ```typescript
 it('Should_HandleParameters_When_Called', async () => {
@@ -107,7 +107,7 @@ it('Should_HandleParameters_When_Called', async () => {
 });
 ```
 
-**Correct** — split into two focused tests:
+**Correct**: split into two focused tests:
 
 ```typescript
 it('Should_SaveEnvironment_When_CommandAProvided', async () => {

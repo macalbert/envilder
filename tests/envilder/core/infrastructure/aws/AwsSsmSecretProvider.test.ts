@@ -18,6 +18,12 @@ import {
   it,
   vi,
 } from 'vitest';
+import {
+  ExpiredCredentialsError,
+  SecretOperationError,
+  SsoSessionExpiredError,
+} from '../../../../../src/envilder/core/domain/errors/DomainErrors';
+import type { ILogger } from '../../../../../src/envilder/core/domain/ports/ILogger';
 import { AwsSsmSecretProvider } from '../../../../../src/envilder/core/infrastructure/aws/AwsSsmSecretProvider';
 
 // Constants for integration tests
@@ -26,6 +32,9 @@ const PARAM_NAME = '/test/secret';
 const PARAM_VALUE = 'super-secret-value';
 const NON_EXISTENT_PARAM = '/test/non-existent-param';
 
+const stripAnsi = (value: string): string =>
+  value.replace(new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g'), '');
+
 // Unit tests with mocks
 describe('AwsSsmSecretProvider (unit tests)', () => {
   let mockSendFn: ReturnType<typeof vi.fn>;
@@ -33,11 +42,7 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
   let mockRegionFn: ReturnType<typeof vi.fn>;
   let mockCredentialsFn: ReturnType<typeof vi.fn>;
   let mockSts: STS;
-  let mockLogger: {
-    info: ReturnType<typeof vi.fn>;
-    warn: ReturnType<typeof vi.fn>;
-    error: ReturnType<typeof vi.fn>;
-  };
+  let mockLogger: ILogger;
   let mockSsm: SSM;
   let sut: AwsSsmSecretProvider;
 
@@ -99,12 +104,10 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       mockSendFn.mockRejectedValueOnce(error);
 
       // Act
-      const action = () => sut.getSecret('test-param');
+      const thrown = await sut.getSecret('test-param').catch((e: unknown) => e);
 
       // Assert
-      await expect(action()).rejects.toThrow(
-        'Failed to get secret *******ram: Network error',
-      );
+      expect((thrown as Error).message).toBe('*******ram: Network error');
     });
 
     it('Should_HandleNonErrorObject_When_ErrorIsThrown', async () => {
@@ -112,12 +115,57 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       mockSendFn.mockRejectedValueOnce('String error');
 
       // Act
-      const action = () => sut.getSecret('test-param');
+      const thrown = await sut.getSecret('test-param').catch((e: unknown) => e);
 
       // Assert
-      await expect(action()).rejects.toThrow(
-        'Failed to get secret *******ram: String error',
+      expect((thrown as Error).message).toBe('*******ram: String error');
+    });
+
+    it('Should_ThrowExpiredCredentialsError_When_GetSecretFailsWithExpiredToken', async () => {
+      // Arrange
+      mockSendFn.mockRejectedValueOnce(
+        Object.assign(
+          new Error('The security token included in the request is expired'),
+          { name: 'ExpiredTokenException' },
+        ),
       );
+
+      // Act
+      const error = await sut.getSecret('/p').catch((e: unknown) => e);
+
+      // Assert
+      expect(error).toBeInstanceOf(ExpiredCredentialsError);
+      expect((error as Error).message).toContain('aws sso login');
+    });
+
+    it('Should_ThrowSsoSessionExpiredError_When_GetSecretFailsWithTokenProviderError', async () => {
+      // Arrange
+      sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts, 'developer');
+      mockSendFn.mockRejectedValueOnce(
+        Object.assign(new Error('SSO session is expired'), {
+          name: 'TokenProviderError',
+        }),
+      );
+
+      // Act
+      const error = await sut.getSecret('/p').catch((e: unknown) => e);
+
+      // Assert
+      expect(error).toBeInstanceOf(SsoSessionExpiredError);
+      expect((error as SsoSessionExpiredError).profileName).toBe('developer');
+    });
+
+    it('Should_StillThrowSecretOperationError_When_NonCredentialErrorOccurs', async () => {
+      // Arrange
+      mockSendFn.mockRejectedValueOnce(
+        Object.assign(new Error('boom'), { name: 'InternalServerError' }),
+      );
+
+      // Act
+      const action = () => sut.getSecret('/p');
+
+      // Assert
+      await expect(action()).rejects.toThrow(SecretOperationError);
     });
   });
 
@@ -142,16 +190,51 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       );
     });
 
-    it('Should_PropagateError_When_SetSecretFails', async () => {
+    it('Should_ThrowSecretOperationError_When_SetSecretFails', async () => {
       // Arrange
       const error = new Error('Access denied');
       mockSendFn.mockRejectedValueOnce(error);
 
       // Act
-      const action = () => sut.setSecret('test-param', 'test-value');
+      const thrown = await sut
+        .setSecret('test-param', 'test-value')
+        .catch((e: unknown) => e);
 
       // Assert
-      await expect(action()).rejects.toThrow('Access denied');
+      expect(thrown).toBeInstanceOf(SecretOperationError);
+      expect((thrown as Error).message).toContain('Access denied');
+    });
+
+    it('Should_ThrowExpiredCredentialsError_When_SetSecretFailsWithExpiredToken', async () => {
+      // Arrange
+      mockSendFn.mockRejectedValueOnce(
+        Object.assign(
+          new Error('The security token included in the request is expired'),
+          { name: 'ExpiredTokenException' },
+        ),
+      );
+
+      // Act
+      const action = () => sut.setSecret('/p', 'v');
+
+      // Assert
+      await expect(action()).rejects.toThrow(ExpiredCredentialsError);
+    });
+
+    it('Should_ThrowSsoSessionExpiredError_When_SetSecretFailsWithTokenProviderError', async () => {
+      // Arrange
+      sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts, 'developer');
+      mockSendFn.mockRejectedValueOnce(
+        Object.assign(new Error('sso token could not be loaded'), {
+          name: 'TokenProviderError',
+        }),
+      );
+
+      // Act
+      const action = () => sut.setSecret('/p', 'v');
+
+      // Assert
+      await expect(action()).rejects.toThrow(SsoSessionExpiredError);
     });
   });
 
@@ -167,8 +250,9 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       await sut.getSecret('x');
 
       // Assert
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'AWS identity → account=123456789012 region=us-east-1 profile=developer',
+      const logged = stripAnsi(vi.mocked(mockLogger.info).mock.calls[0][0]);
+      expect(logged).toBe(
+        '\n☁ AWS identity · account=123456789012 · region=us-east-1 · profile=developer',
       );
     });
 
@@ -183,8 +267,9 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       await sut.getSecret('x');
 
       // Assert
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'AWS identity → account=999999999999 region=us-east-1 profile=developer',
+      const logged = stripAnsi(vi.mocked(mockLogger.info).mock.calls[0][0]);
+      expect(logged).toBe(
+        '\n☁ AWS identity · account=999999999999 · region=us-east-1 · profile=developer',
       );
     });
 
@@ -199,8 +284,9 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       await sut.getSecret('x');
 
       // Assert
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'AWS identity → account=unknown region=us-east-1 profile=developer',
+      const logged = stripAnsi(vi.mocked(mockLogger.info).mock.calls[0][0]);
+      expect(logged).toBe(
+        '\n☁ AWS identity · account=unknown · region=us-east-1 · profile=developer',
       );
     });
 
@@ -226,8 +312,9 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       await sut.getSecret('x');
 
       // Assert
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'AWS identity → account=123456789012 region=us-east-1 profile=default',
+      const logged = stripAnsi(vi.mocked(mockLogger.info).mock.calls[0][0]);
+      expect(logged).toBe(
+        '\n☁ AWS identity · account=123456789012 · region=us-east-1 · profile=default',
       );
     });
   });

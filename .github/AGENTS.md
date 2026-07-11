@@ -27,7 +27,7 @@ Always run before committing: `pnpm lint && pnpm test && pnpm verify:gha`
 | SDK | Path | Build | Test |
 |-----|------|-------|------|
 | .NET | `src/sdks/dotnet/` | `dotnet build src/sdks/dotnet/Envilder.sln` | `dotnet test tests/sdks/dotnet/` |
-| Python | `src/sdks/python/` | — | `make test-sdk-python` (requires `uv`, Docker) |
+| Python | `src/sdks/python/` | n/a | `make test-sdk-python` (requires `uv`, Docker) |
 | Node.js | `src/sdks/nodejs/` | `cd src/sdks/nodejs && pnpm build` | `cd tests/sdks/nodejs && pnpm vitest run` |
 
 ## Project Structure
@@ -47,11 +47,11 @@ e2e/                         End-to-end tests (TestContainers)
 
 ## Gotchas
 
-- After any code change touching CLI or GHA, run `pnpm build:gha` — CI will
+- After any code change touching CLI or GHA, run `pnpm build:gha`: CI will
   reject stale bundles via `pnpm verify:gha`.
 - `pnpm format` **writes** files (Biome --write). Use `pnpm format:check` for
   validation only.
-- SDKs are independent — they share the map-file format but have zero code
+- SDKs are independent: they share the map-file format but have zero code
   dependency on the TypeScript core.
 - E2E tests require Docker running (LocalStack + Lowkey Vault containers).
 

@@ -1,16 +1,16 @@
 import { Command } from 'commander';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { main } from '../../../../src/envilder/apps/cli/Cli';
-import { Startup } from '../../../../src/envilder/apps/cli/Startup';
-import { DispatchActionCommand } from '../../../../src/envilder/core/application/dispatch/DispatchActionCommand';
-import { DispatchActionCommandHandler } from '../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
-import { OperationMode } from '../../../../src/envilder/core/domain/OperationMode';
+import { main } from '../../../../../src/envilder/apps/cli/entry/Cli';
+import { Startup } from '../../../../../src/envilder/apps/cli/Startup';
+import { DispatchActionCommand } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommand';
+import { DispatchActionCommandHandler } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
+import { OperationMode } from '../../../../../src/envilder/core/domain/OperationMode';
 
 vi.mock(
-  '../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore',
+  '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore',
   async () => {
     const actual = await vi.importActual(
-      '../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore',
+      '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore',
     );
     return {
       ...(actual as object),
@@ -286,7 +286,7 @@ describe('Cli', () => {
     const { existsSync } = await import('node:fs');
     vi.mocked(existsSync).mockReturnValue(true);
     const { readMapFileConfig } = await import(
-      '../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore'
+      '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore'
     );
     vi.mocked(readMapFileConfig).mockResolvedValue({
       provider: 'azure',

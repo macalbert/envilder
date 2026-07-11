@@ -88,6 +88,9 @@ describe('Envilder (E2E)', () => {
   beforeEach(async () => {
     await cleanUpSsm(mapFilePath, singleSsmPath);
     await cleanUpSsm(mapFileWithConfigPath);
+    if (existsSync(envFilePath)) {
+      await unlink(envFilePath);
+    }
   }, 60_000);
 
   afterEach(async () => {
@@ -140,10 +143,6 @@ describe('Envilder (E2E)', () => {
       await SetParameterSsm(ssmPath, testValue);
     }
 
-    if (existsSync(envFilePath)) {
-      await unlink(envFilePath);
-    }
-
     // Act
     const actual = await runCommand(envilder, params);
 
@@ -167,10 +166,6 @@ describe('Envilder (E2E)', () => {
     for (const [key, ssmPath] of Object.entries(ssmParams)) {
       const testValue = `test-value-for-${key}`;
       await SetParameterSsm(ssmPath, testValue);
-    }
-
-    if (existsSync(envFilePath)) {
-      await unlink(envFilePath);
     }
 
     // Act
@@ -357,11 +352,13 @@ describe('Envilder (E2E)', () => {
     let azureSecretClient: SecretClient;
     let azureMapFilePath: string;
     let azureEnvFilePath: string;
+    let noUrlMapPath: string;
     let originalTlsReject: string | undefined;
 
     beforeAll(async () => {
       azureMapFilePath = join(tempDir, 'envilder-azure.json');
       azureEnvFilePath = join(tempDir, 'azure-validation.env');
+      noUrlMapPath = join(tempDir, 'envilder-azure-no-url.json');
       originalTlsReject = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
       // Self-signed cert on a local test container — safe to skip validation
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -422,11 +419,17 @@ describe('Envilder (E2E)', () => {
       if (azureEnvFilePath && existsSync(azureEnvFilePath)) {
         await unlink(azureEnvFilePath);
       }
+      if (noUrlMapPath && existsSync(noUrlMapPath)) {
+        await unlink(noUrlMapPath);
+      }
     }, 60_000);
 
     beforeEach(async () => {
       if (existsSync(azureEnvFilePath)) {
         await unlink(azureEnvFilePath);
+      }
+      if (existsSync(noUrlMapPath)) {
+        await unlink(noUrlMapPath);
       }
     });
 
@@ -461,7 +464,6 @@ describe('Envilder (E2E)', () => {
     it('Should_PullFromAzureKeyVault_When_VaultUrlProvidedViaConfig', async () => {
       // Arrange
       await azureSecretClient.setSecret('test-secret', 'config-override-value');
-      const noUrlMapPath = join(tempDir, 'envilder-azure-no-url.json');
       writeFileSync(
         noUrlMapPath,
         JSON.stringify(
@@ -496,10 +498,6 @@ describe('Envilder (E2E)', () => {
       expect(existsSync(azureEnvFilePath)).toBe(true);
       const envValue = GetSecretFromKey(azureEnvFilePath, 'VAULT_SECRET');
       expect(envValue).toBe('config-override-value');
-
-      if (existsSync(noUrlMapPath)) {
-        await unlink(noUrlMapPath);
-      }
     });
 
     it('Should_PushEnvFileToAzureKeyVault_When_PushFlagWithAzureProvider', async () => {
@@ -602,7 +600,6 @@ async function cleanUpSystem() {
     try {
       execSync('pnpm remove -g envilder', {
         stdio: 'pipe',
-        shell: true,
       });
     } catch {
       // Ignore errors if not installed

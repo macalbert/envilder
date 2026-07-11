@@ -22,7 +22,7 @@ with dependency injection:
 
 ADR-0003 defines the public API surface (Simple, Fluent, Advanced levels) and
 the three-layer architecture. This ADR extends that by addressing how SDKs
-integrate with host application frameworks — specifically around DI containers
+integrate with host application frameworks: specifically around DI containers
 and configuration pipelines.
 
 ## Decision
@@ -51,26 +51,26 @@ mandatory for every SDK:
 
 .NET is the only runtime where Tier 3 extensions (`IServiceCollection.AddEnvilder()`,
 `IConfigurationBuilder.AddEnvilder()`) live inside the core package. Rationale:
-`IServiceCollection` is the universal DI standard in .NET — separating it would
+`IServiceCollection` is the universal DI standard in .NET: separating it would
 be over-engineering with no practical benefit.
 
 ### 4. Tier 3 Is Community-Driven
 
 Tier 3 will not be implemented for any new runtime until the community
 explicitly requests it via GitHub issues or discussions. The core SDK (Tier 1 +
-Tier 2) is sufficient for all use cases — Tier 3 is a convenience layer only.
+Tier 2) is sufficient for all use cases: Tier 3 is a convenience layer only.
 
 ### 5. Current State
 
 | Runtime | Tier 1 | Tier 2 | Tier 3 |
 | ------- | ------ | ------ | ------ |
 | .NET | ✅ | ✅ | ✅ (in core, exception) |
-| Python | ✅ | ✅ | — |
-| Node.js | ✅ | ✅ | — |
-| Go | Planned | Planned | — |
-| Java/Kotlin | Planned | Planned | — |
-| PHP | Planned | Planned | — |
-| Rust | Planned | Planned | — |
+| Python | ✅ | ✅ | n/a |
+| Node.js | ✅ | ✅ | n/a |
+| Go | Planned | Planned | n/a |
+| Java/Kotlin | Planned | Planned | n/a |
+| PHP | Planned | Planned | n/a |
+| Rust | Planned | Planned | n/a |
 
 ## Alternatives Considered
 
@@ -102,7 +102,7 @@ demand. Violates YAGNI.
 
 ### Positive
 
-- SDKs remain lightweight — no framework lock-in forced on consumers
+- SDKs remain lightweight: no framework lock-in forced on consumers
 - Clear separation of concerns: core secret loading vs framework wiring
 - Community-driven prioritization avoids wasted effort
 - .NET exception is pragmatic and matches ecosystem expectations

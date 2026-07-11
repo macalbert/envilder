@@ -18,7 +18,7 @@ These are **rules**, not guidelines.
 * **Do NOT write comments** except for AAA markers (`# Arrange`, `# Act`, `# Assert`)
 * The test name `Should_X_When_Y` already documents the intent
 
-**Exception — SDK public API:** Code under `src/sdks/*/` that is consumed by
+**Exception: SDK public API:** Code under `src/sdks/*/` that is consumed by
 external developers (e.g. facade classes, public entry points) **SHOULD** have
 docstrings with usage examples. External users rely on IDE tooltips and `help()`.
 This exception does **not** apply to tests or internal helpers.
@@ -60,11 +60,11 @@ class TestUserService:
 
 * Each phase **MUST** be separated with comments
 * **Never mix phases**
-* **Each comment (`# Arrange`, `# Act`, `# Assert`) appears AT MOST ONCE per test** — if you need two actions
+* **Each comment (`# Arrange`, `# Act`, `# Assert`) appears AT MOST ONCE per test**: if you need two actions
 or two asserts, write two tests
 * **No `if`, `switch`, or conditional logic** inside Arrange, Act, or Assert blocks
-* **No `try/catch/finally`** inside tests — use pytest fixtures with `yield` for teardown/cleanup
-* **No `# Act & Assert` combined blocks** — Act and Assert are ALWAYS separate
+* **No `try/catch/finally`** inside tests: use pytest fixtures with `yield` for teardown/cleanup
+* **No `# Act & Assert` combined blocks**: Act and Assert are ALWAYS separate
 * For exception testing, extract the action into a `lambda` before asserting
 * If no Arrange is needed, omit it
 * If there is no Assert, the test is invalid
@@ -163,7 +163,7 @@ async def Should_ReturnUser_When_UserExists(
 
 **Act and Assert MUST be separate.** Extract the action into a `lambda` in the Act phase.
 
-### ✅ CORRECT — separate Act and Assert
+### ✅ CORRECT: separate Act and Assert
 
 ```python
 def Should_RaiseValueError_When_NameIsEmpty(sut: GroupService) -> None:
@@ -178,7 +178,7 @@ def Should_RaiseValueError_When_NameIsEmpty(sut: GroupService) -> None:
         action()
 ```
 
-### ❌ FORBIDDEN — combined Act & Assert
+### ❌ FORBIDDEN: combined Act & Assert
 
 ```python
 def Should_RaiseValueError_When_NameIsEmpty(sut: GroupService) -> None:
@@ -196,7 +196,7 @@ def Should_RaiseValueError_When_NameIsEmpty(sut: GroupService) -> None:
 
 **Never use `try/finally` in tests.** Use pytest fixtures with `yield` for cleanup.
 
-### ✅ CORRECT — fixture with yield
+### ✅ CORRECT: fixture with yield
 
 ```python
 @pytest.fixture()
@@ -222,7 +222,7 @@ class TestEnvilderClient:
         assert os.environ["MY_TOKEN"] == "token-123"
 ```
 
-### ❌ FORBIDDEN — try/finally in test
+### ❌ FORBIDDEN: try/finally in test
 
 ```python
 def Should_SetEnvVars_When_InjectCalled(self) -> None:

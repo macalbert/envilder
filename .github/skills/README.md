@@ -11,11 +11,11 @@ User ──→ Agent (persona + workflow) ──→ loads Skills (domain knowled
                                     ──→ delegates to Sub-agents
 ```
 
-- **Skills** live in `.github/skills/{name}/SKILL.md` — domain knowledge,
+- **Skills** live in `.github/skills/{name}/SKILL.md`: domain knowledge,
   conventions, and procedures that agents load on demand.
-- **Agents** live in `.github/agents/{name}.agent.md` — personas with specific
+- **Agents** live in `.github/agents/{name}.agent.md`: personas with specific
   tools, workflows, and delegations.
-- **Instructions** live in `.github/instructions/` — always-on rules scoped by
+- **Instructions** live in `.github/instructions/`: always-on rules scoped by
   file pattern (architecture boundaries, coding conventions, git).
 
 ## Skills (24)
@@ -33,7 +33,7 @@ User ──→ Agent (persona + workflow) ──→ loads Skills (domain knowled
 
 | Skill | Purpose |
 |-------|---------|
-| `common-architecture-decisions` | ADR index — check before proposing changes |
+| `common-architecture-decisions` | ADR index: check before proposing changes |
 | `common-git` | Conventional commits, branching, PR workflow |
 | `common-security` | Secret handling, Secretlint, OIDC, input validation |
 | `common-testing-conventions` | AAA pattern, naming, assertions across all stacks |
@@ -81,7 +81,7 @@ User ──→ Agent (persona + workflow) ──→ loads Skills (domain knowled
 
 | Skill | Invocable | Purpose |
 |-------|-----------|---------|
-| `grill-me` | ✅ | Stress-test a plan — interview relentlessly |
+| `grill-me` | ✅ | Stress-test a plan: interview relentlessly |
 | `to-issues` | ✅ | Break plan into vertical-slice GitHub issues |
 | `zoom-out` | `/zoom-out` only | Map modules/callers at higher abstraction level |
 
@@ -90,9 +90,9 @@ User ──→ Agent (persona + workflow) ──→ loads Skills (domain knowled
 | Agent | Role | Delegates to |
 |-------|------|-------------|
 | **TDD Coach** | Orchestrates Red-Green-Refactor. Plans, delegates, never writes code. | TDD Red, TDD Green, TDD Refactor |
-| **TDD Red** | Writes one failing test | — |
-| **TDD Green** | Writes minimum code to pass | — |
-| **TDD Refactor** | Improves structure, keeps tests green | — |
+| **TDD Red** | Writes one failing test | n/a |
+| **TDD Green** | Writes minimum code to pass | n/a |
+| **TDD Refactor** | Improves structure, keeps tests green | n/a |
 | **Code Reviewer** | 5-perspective analysis + verification | TDD Coach, PR Resolver |
 | **Content Designer** | Website, docs, changelogs, translations, CSS | Code Reviewer |
 | **PR Resolver** | Processes PR review comments, commits fixes, replies on GitHub | TDD Coach |
@@ -133,17 +133,17 @@ user-invocable: true
    structural changes.
 3. **Domain vocabulary**: Use terms from `CONTEXT.md` (map file, provider,
    facade, port, adapter, etc.).
-4. **`common-*` skills are auto-loaded** (`user-invocable: false`) — they apply
+4. **`common-*` skills are auto-loaded** (`user-invocable: false`): they apply
    silently when relevant via instruction file `applyTo` patterns.
 5. **`disable-model-invocation: true`** means the skill is only triggered by the
-   user typing `/skill-name` — the model won't auto-load it.
+   user typing `/skill-name`: the model won't auto-load it.
 
 ## Influences
 
-- [Matt Pocock's skills](https://github.com/mattpocock/skills) — Patterns adopted:
+- [Matt Pocock's skills](https://github.com/mattpocock/skills): Patterns adopted:
   `grill-me`, `to-issues`, `zoom-out`, "build a feedback loop first" philosophy
   in bug investigation, deep modules heuristic in TDD planning, and the
   `CONTEXT.md` domain glossary convention.
-- [VS Code Copilot docs — Nested subagents](https://code.visualstudio.com/docs/copilot/agents/subagents#_nested-subagents) —
+- [VS Code Copilot docs: Nested subagents](https://code.visualstudio.com/docs/copilot/agents/subagents#_nested-subagents):
   Inspiration for the TDD Coach multi-agent architecture (coordinator +
   specialized workers).

@@ -27,7 +27,7 @@ environment variables from AWS SSM Parameter Store or Azure Key Vault.
 
 ### Three core problems solved
 
-1. **Security**: Secrets never live in `.env` files, git repos, or CI logs —
+1. **Security**: Secrets never live in `.env` files, git repos, or CI logs;
    fetched from cloud vault at runtime
 2. **Consistency**: One `envilder.json` = single source of truth for all
    environments (dev, staging, production)
@@ -43,14 +43,14 @@ Developers want to know **how it works** and **how to use it quickly**.
 - Show real CLI commands and `envilder.json` examples
 - Explain `--exec` mode, push mode, and GitHub Action inputs
 - Use terminal mockups (`TerminalMockup.astro`) for live demos
-- Keep language direct and concise — no marketing fluff
+- Keep language direct and concise: no marketing fluff
 - Include code blocks with copy buttons
 - Show common workflows (local dev, CI/CD, team onboarding)
 
 ### Key selling points
 
 - One command replaces manual secret management
-- Works with existing `.env` workflows — zero migration cost
+- Works with existing `.env` workflows: zero migration cost
 - Supports `--exec` mode to inject secrets without writing files
 - Type-safe configuration via `envilder.json`
 - Works locally, in CI, and in production
@@ -73,8 +73,8 @@ Leaders want to know **business impact** and **risk reduction**.
 - Zero secrets in source control (compliance-ready)
 - Multi-cloud support (AWS SSM + Azure Key Vault) without vendor lock-in
 - GitHub Action integration for CI/CD pipelines with no code changes
-- Open-source with MIT license — no licensing costs
-- Hexagonal architecture — easy to extend with new providers
+- Open-source with MIT license: no licensing costs
+- Hexagonal architecture: easy to extend with new providers
 - Runtime SDKs (.NET, Python, Node.js) for direct app integration
 
 ## Content Patterns
@@ -105,6 +105,6 @@ concern (security, DX, compliance, multi-cloud).
 
 - Never invent features not present in code
 - Never make unverifiable performance claims
-- Keep technical accuracy — verify against actual CLI flags and behavior
+- Keep technical accuracy: verify against actual CLI flags and behavior
 - Balance both audiences on the same page (don't alienate either)
 - Product names and CLI flags stay in English (see `website-i18n` skill)

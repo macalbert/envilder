@@ -14,11 +14,11 @@ These are **rules**, not guidelines.
 
 ### NO Comments Except AAA Markers
 
-* **Do NOT write explanatory comments** — code must be self-explanatory
+* **Do NOT write explanatory comments**: code must be self-explanatory
 * **Only `// Arrange`, `// Act`, `// Assert`** comments are allowed in tests
 * The test name `Should_X_When_Y` already documents the intent
 
-**Exception — SDK public API:** Code under `src/sdks/*/` consumed by
+**Exception: SDK public API:** Code under `src/sdks/*/` consumed by
 external developers (facade classes, public entry points) **SHOULD** have
 JSDoc with usage examples. This exception does **not** apply to tests or
 internal helpers.
@@ -48,19 +48,19 @@ internal helpers.
 * Each phase **MUST** be separated with comments
 * **Never mix phases**
 * **Each comment (`// Arrange`, `// Act`, `// Assert`) appears AT MOST ONCE
-  per test** — if you need two actions or two asserts, write two tests
+  per test**: if you need two actions or two asserts, write two tests
 * **Act = one single invocation on the SUT.** Multiple statements in Act only
   if they are genuinely part of the same logical action (rare and exceptional).
   Two independent operations = two tests.
 * **All assertions belong in Assert only.** No `expect()` in Arrange or Act.
   If you feel tempted to assert in Arrange (precondition check), extract it to
-  a separate test or use a guard clause that throws — not an assertion.
-* **AAA markers are mandatory in ALL tests** — including structural guards,
+  a separate test or use a guard clause that throws: not an assertion.
+* **AAA markers are mandatory in ALL tests**: including structural guards,
   static completeness checks, and data validation tests. No exceptions.
 * **No `if`, `switch`, or conditional logic** inside Arrange, Act, or Assert
-* **No `try/catch/finally`** inside tests — use `beforeEach`/`afterEach` for
+* **No `try/catch/finally`** inside tests: use `beforeEach`/`afterEach` for
   teardown
-* **No `// Act & Assert` combined blocks** — Act and Assert are ALWAYS separate
+* **No `// Act & Assert` combined blocks**: Act and Assert are ALWAYS separate
 * For exceptions: `expect(() => action()).toThrow()` or
   `await expect(asyncAction()).rejects.toThrow()`
 * Omit comment if section is empty
@@ -164,7 +164,7 @@ expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining('success'))
 
 **Act and Assert MUST be separate.** Wrap the action in Act, assert in Assert.
 
-### ✅ CORRECT — separate Act and Assert
+### ✅ CORRECT: separate Act and Assert
 
 ```typescript
 it('Should_ThrowInvalidArgument_When_ProviderIsUnsupported', () => {
@@ -179,7 +179,7 @@ it('Should_ThrowInvalidArgument_When_ProviderIsUnsupported', () => {
 });
 ```
 
-### ✅ CORRECT — async exceptions
+### ✅ CORRECT: async exceptions
 
 ```typescript
 it('Should_ThrowParameterNotFound_When_SSMKeyIsMissing', async () => {
@@ -194,7 +194,7 @@ it('Should_ThrowParameterNotFound_When_SSMKeyIsMissing', async () => {
 });
 ```
 
-### ❌ FORBIDDEN — combined Act & Assert
+### ❌ FORBIDDEN: combined Act & Assert
 
 ```typescript
 it('Should_ThrowError_When_Invalid', () => {

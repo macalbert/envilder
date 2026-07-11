@@ -59,8 +59,8 @@ style DOMAIN fill:#2E7D32,stroke:#2E7D32,color:#FFFFFF
 %% ================= PRESENTERS + DI (BLUE BG) =================
 subgraph PRESENTERS["Presenters"]
     direction LR
-    CLI[CLI Application<br/>apps/cli/Cli.ts]
-    GHA[GitHub Action<br/>apps/gha/Gha.ts]
+    CLI[CLI Application<br/>apps/cli/entry/Cli.ts]
+    GHA[GitHub Action<br/>apps/gha/entry/Gha.ts]
     DI[InversifyJS Container<br/>Shared ContainerConfiguration]
 end
 class CLI,GHA,DI node
@@ -186,11 +186,11 @@ src/sdks/dotnet/
 
 **Key differences from the TypeScript core:**
 
-* No DI framework — lightweight factory pattern (`SecretProviderFactory.Create()`)
-* Pull-only — SDKs do not support push mode
-* Silent by default — no logging unless the consumer configures it
-* `IConfiguration` integration — secrets can be bound to .NET configuration sections
-* `IServiceCollection` integration — one-line DI registration via `services.AddEnvilder()`
+* No DI framework: lightweight factory pattern (`SecretProviderFactory.Create()`)
+* Pull-only: SDKs do not support push mode
+* Silent by default: no logging unless the consumer configures it
+* `IConfiguration` integration: secrets can be bound to .NET configuration sections
+* `IServiceCollection` integration: one-line DI registration via `services.AddEnvilder()`
 
 **Data flow (SDK):**
 
@@ -210,11 +210,11 @@ src/sdks/python/envilder/
 
 **Key differences from the .NET SDK:**
 
-* Synchronous API — uses `boto3` natively (no async/await)
-* Protocol-based ports — Python `Protocol` instead of .NET interfaces
-* Factory pattern — `SecretProviderFactory.create(config, options)` with optional runtime overrides
-* `inject_into_environment()` — sets secrets directly into `os.environ`
-* Strict typing — `py.typed` marker, mypy strict mode
+* Synchronous API: uses `boto3` natively (no async/await)
+* Protocol-based ports: Python `Protocol` instead of .NET interfaces
+* Factory pattern: `SecretProviderFactory.create(config, options)` with optional runtime overrides
+* `inject_into_environment()`: sets secrets directly into `os.environ`
+* Strict typing: `py.typed` marker, mypy strict mode
 
 **Data flow (SDK):**
 

@@ -2,9 +2,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from botocore.exceptions import ClientError
+from botocore.exceptions import BotoCoreError, ClientError
 
+from envilder.domain.expired_credentials_error import (
+    ExpiredCredentialsError,
+    is_expired_credentials_error,
+)
 from envilder.domain.ports.secret_provider import ISecretProvider
+from envilder.domain.sso_session_expired_error import (
+    SsoSessionExpiredError,
+    is_sso_session_expired_error,
+)
 
 if TYPE_CHECKING:
     from mypy_boto3_ssm import SSMClient
@@ -17,10 +25,13 @@ class AwsSsmSecretProvider(ISecretProvider):
     ``SecureString`` values are returned in plain text.
     """
 
-    def __init__(self, ssm_client: SSMClient) -> None:
+    def __init__(
+        self, ssm_client: SSMClient, profile: str | None = None
+    ) -> None:
         if ssm_client is None:
             raise ValueError("ssm_client cannot be None")
         self._ssm_client = ssm_client
+        self._profile = profile
 
     def get_secret(self, name: str) -> str | None:
         if not name or not name.strip():
@@ -37,4 +48,14 @@ class AwsSsmSecretProvider(ISecretProvider):
             error = e.response.get("Error", {})
             if error.get("Code") == "ParameterNotFound":
                 return None
+            if is_sso_session_expired_error(e):
+                raise SsoSessionExpiredError(self._profile) from e
+            if is_expired_credentials_error(e):
+                raise ExpiredCredentialsError() from e
+            raise
+        except BotoCoreError as e:
+            if is_sso_session_expired_error(e):
+                raise SsoSessionExpiredError(self._profile) from e
+            if is_expired_credentials_error(e):
+                raise ExpiredCredentialsError() from e
             raise

@@ -1,4 +1,4 @@
-# PR Sync — Reference
+# PR Sync: Reference
 
 ## PR Body Template
 
@@ -52,7 +52,14 @@ PowerShell here-strings corrupt:
 3. Run: Remove-Item .pr-body.md
 ```
 
-**Avoid non-ASCII in PR bodies** — prefer `to` over `→`, `--` over `—`.
+**Avoid non-ASCII in PR bodies**: prefer `to` over `→`, `--` over `—`.
+
+**Never hard-wrap paragraph text.** Each sentence in Summary and each bullet
+in Changes/Testing/Related must be written as one continuous line, even if
+it's long. GitHub renders single `\n` characters inside a paragraph as actual
+line breaks, so manually wrapping at ~80 columns (like normal prose/code) makes
+the rendered PR body look choppy. Newlines should only separate sections or
+distinct list items.
 
 ```powershell
 # Create new PR:
@@ -69,8 +76,8 @@ Remove-Item .pr-body.md
 
 Before creating or updating a PR, verify:
 
-1. `pnpm format` — auto-format
-2. `pnpm lint` — secretlint + biome + tsc
-3. `pnpm test` — vitest with coverage
+1. `pnpm format`: auto-format
+2. `pnpm lint`: secretlint + biome + tsc
+3. `pnpm test`: vitest with coverage
 
 If any check fails, fix issues first.

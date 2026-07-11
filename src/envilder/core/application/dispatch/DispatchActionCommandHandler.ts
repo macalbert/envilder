@@ -1,6 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { InvalidArgumentError } from '../../domain/errors/DomainErrors.js';
 import { OperationMode } from '../../domain/OperationMode.js';
+import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import { TYPES } from '../../types.js';
 import { PullSecretsToEnvCommand } from '../pullSecretsToEnv/PullSecretsToEnvCommand.js';
 import type { PullSecretsToEnvCommandHandler } from '../pullSecretsToEnv/PullSecretsToEnvCommandHandler.js';
@@ -19,9 +20,16 @@ export class DispatchActionCommandHandler {
     private readonly pushHandler: PushEnvToSecretsCommandHandler,
     @inject(TYPES.PushSingleCommandHandler)
     private readonly pushSingleHandler: PushSingleCommandHandler,
+    @inject(TYPES.ISecretProvider)
+    private readonly secretProvider: ISecretProvider,
   ) {}
 
   async handleCommand(command: DispatchActionCommand): Promise<void> {
+    this.validateRequiredArguments(command);
+
+    if (typeof this.secretProvider.logIdentity === 'function') {
+      await this.secretProvider.logIdentity();
+    }
     switch (command.mode) {
       case OperationMode.PUSH_SINGLE:
         await this.handlePushSingle(command);
@@ -33,20 +41,25 @@ export class DispatchActionCommandHandler {
         await this.handlePull(command);
         break;
       default:
-        await this.handlePull(command);
-        break;
+        throw new InvalidArgumentError(
+          `Unsupported operation mode: ${command.mode}`,
+        );
     }
+  }
+
+  private validateRequiredArguments(command: DispatchActionCommand): void {
+    if (command.mode === OperationMode.PUSH_SINGLE) {
+      this.validatePushSingleOptions(command);
+      return;
+    }
+
+    this.validateMapAndEnvFileOptions(command);
   }
 
   private async handlePushSingle(
     command: DispatchActionCommand,
   ): Promise<void> {
-    if (!command.key || !command.value || !command.secretPath) {
-      throw new InvalidArgumentError(
-        'Missing required arguments: --key, --value, and --secret-path',
-      );
-    }
-
+    this.validatePushSingleOptions(command);
     const pushSingleCommand = PushSingleCommand.create(
       command.key,
       command.value,
@@ -58,10 +71,9 @@ export class DispatchActionCommandHandler {
 
   private async handlePush(command: DispatchActionCommand): Promise<void> {
     this.validateMapAndEnvFileOptions(command);
-
     const pushEnvToSecretsCommand = PushEnvToSecretsCommand.create(
-      command.map as string,
-      command.envfile as string,
+      command.map,
+      command.envfile,
     );
 
     await this.pushHandler.handle(pushEnvToSecretsCommand);
@@ -69,16 +81,34 @@ export class DispatchActionCommandHandler {
 
   private async handlePull(command: DispatchActionCommand): Promise<void> {
     this.validateMapAndEnvFileOptions(command);
-
     const pullSecretsToEnvCommand = PullSecretsToEnvCommand.create(
-      command.map as string,
-      command.envfile as string,
+      command.map,
+      command.envfile,
     );
 
     await this.pullHandler.handle(pullSecretsToEnvCommand);
   }
 
-  private validateMapAndEnvFileOptions(command: DispatchActionCommand): void {
+  private validatePushSingleOptions(
+    command: DispatchActionCommand,
+  ): asserts command is DispatchActionCommand & {
+    key: string;
+    value: string;
+    secretPath: string;
+  } {
+    if (!command.key || !command.value || !command.secretPath) {
+      throw new InvalidArgumentError(
+        'Missing required arguments: --key, --value, and --secret-path',
+      );
+    }
+  }
+
+  private validateMapAndEnvFileOptions(
+    command: DispatchActionCommand,
+  ): asserts command is DispatchActionCommand & {
+    map: string;
+    envfile: string;
+  } {
     if (!command.map || !command.envfile) {
       throw new InvalidArgumentError(
         'Missing required arguments: --map and --envfile',

@@ -7,7 +7,7 @@ tools: [read, search, edit, execute]
 user-invocable: false
 ---
 
-# TDD Refactor — Improve Structure
+# TDD Refactor: Improve Structure
 
 You improve production and test code structure while ensuring all tests remain
 green.
@@ -24,7 +24,7 @@ green.
    - Improve naming clarity
    - Extract helper methods if warranted
    - Simplify conditional logic
-   - **Shallow modules** — interface nearly as complex as implementation.
+   - **Shallow modules**: interface nearly as complex as implementation.
      Apply deletion test: if removing it concentrates complexity, keep it.
      If removing it just moves logic back to callers without loss, inline it.
    - Ensure test readability (clear AAA sections, descriptive names)
@@ -46,11 +46,11 @@ green.
 
 ## Rules
 
-- **Never change behavior** — only improve structure
+- **Never change behavior**: only improve structure
 - **Keep CRAP below 6.** See `code-quality-crap` skill for formula and
   thresholds. Extract complex branches into smaller methods. If the
   threshold cannot be met without adding tests, flag the coordinator
   to start a new Red cycle for coverage.
 - Run tests after **every** change, not just at the end
 - If unsure whether a change preserves behavior, skip it
-- Do not add new tests or features — that starts a new cycle
+- Do not add new tests or features: that starts a new cycle

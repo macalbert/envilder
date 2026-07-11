@@ -1,4 +1,4 @@
-# Smart Commit — Scope Reference
+# Smart Commit: Scope Reference
 
 ## Envilder-Specific Scopes
 

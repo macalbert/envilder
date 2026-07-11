@@ -5,7 +5,7 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/macalbert/envilder/blob/main/LICENSE)
 
 Securely load environment variables from **AWS SSM Parameter Store** or **Azure Key Vault** directly into your Node.js application.
-Zero vendor lock-in — secrets stay in your cloud.
+Zero vendor lock-in: secrets stay in your cloud.
 
 Part of the [Envilder](https://github.com/macalbert/envilder) project.
 
@@ -23,7 +23,7 @@ npm install @envilder/sdk
 
 ## Quick Start
 
-### One-liner — resolve + inject
+### One-liner: resolve + inject
 
 ```typescript
 import { Envilder } from '@envilder/sdk';
@@ -45,7 +45,7 @@ console.log(secrets.get('DB_PASSWORD')); // avoid logging secrets in production
 
 ### Fluent builder (with overrides)
 
-Override the map file's `$config` at runtime — useful for switching providers,
+Override the map file's `$config` at runtime: useful for switching providers,
 profiles, or vault URLs per environment:
 
 ```typescript

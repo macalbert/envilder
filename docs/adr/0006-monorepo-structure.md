@@ -59,7 +59,7 @@ workspaces` is used only for TypeScript components that benefit from it.
 | ------ | ------ |
 | Atomic cross-component changes | A single PR can touch CLI + SDK + docs + website together |
 | Conformance sharing | Map-file spec, test fixtures, and examples are shared without submodules |
-| Unified CI | One pipeline sees everything — a CLI change can trigger SDK tests |
+| Unified CI | One pipeline sees everything: a CLI change can trigger SDK tests |
 | Single source of truth | One ROADMAP, one changelog index, one architectural vision |
 | Contributor simplicity | One `git clone`, one repo to understand the full project |
 
@@ -72,7 +72,7 @@ releases.
 
 **Rejected:** Fragments the product vision. Cross-component changes require
 coordinated PRs across repos. Shared fixtures need git submodules or duplicated
-files. Multiplies CI configuration. Complicates onboarding — contributors need
+files. Multiplies CI configuration. Complicates onboarding: contributors need
 to clone N repos to understand the product.
 
 ### Monorepo with heavy tooling (Nx, Turborepo, Bazel)
@@ -97,16 +97,16 @@ worse. Updates require multi-step workflows instead of simple commits.
 
 ### Positive
 
-- One clone to get everything — fast onboarding
-- Shared CI infrastructure — one set of workflows, reusable across components
-- Atomic PRs across components — no coordination overhead
+- One clone to get everything: fast onboarding
+- Shared CI infrastructure: one set of workflows, reusable across components
+- Atomic PRs across components: no coordination overhead
 - Single point of documentation and architectural decisions
-- Encourages consistency — conventions are visible and enforceable repo-wide
+- Encourages consistency: conventions are visible and enforceable repo-wide
 
 ### Negative
 
 - Repository size grows over time (mitigated by sparse checkout if needed)
-- CI must be selective — running all tests on every PR is wasteful (solved with
+- CI must be selective: running all tests on every PR is wasteful (solved with
   path-based triggers)
 - Go module path requires vanity import (envilder.com/go) since the repo path
   would be too long
@@ -121,11 +121,11 @@ simplicity.
 
 The only valid reason to reconsider would be the emergence of a repository
 strategy that is objectively superior for multi-component projects with
-independent releases — which does not exist today.
+independent releases: which does not exist today.
 
 Practical scenarios that might force adaptation (not abandonment):
 
-- Git performance degradation due to size — mitigate with sparse checkout
+- Git performance degradation due to size: mitigate with sparse checkout
   before considering a split
-- CI bottlenecks from unrelated components — solve with path-based triggers,
+- CI bottlenecks from unrelated components: solve with path-based triggers,
   not repository splitting

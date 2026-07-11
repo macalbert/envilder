@@ -52,14 +52,14 @@ suggestions shown to the user (user invokes the next step manually).
 | Agent | Purpose | Can Edit? | Subagents | Next Step |
 |-------|---------|-----------|-----------|-----------|
 | **@TDD Coach** | Orchestrates TDD | No (coordinator) | TDD Red, TDD Green, TDD Refactor | `smart-commit` → `pr-sync`|
-| **@TDD Red** | Writes one failing test | Yes | — | *(worker, not user-invocable)* |
-| **@TDD Green** | Writes minimal passing code | Yes | — | *(worker, not user-invocable)* |
-| **@TDD Refactor** | Improves structure, keeps tests green | Yes | — | *(worker, not user-invocable)* |
+| **@TDD Red** | Writes one failing test | Yes | n/a | *(worker, not user-invocable)* |
+| **@TDD Green** | Writes minimal passing code | Yes | n/a | *(worker, not user-invocable)* |
+| **@TDD Refactor** | Improves structure, keeps tests green | Yes | n/a | *(worker, not user-invocable)* |
 | **@Code Reviewer** | Multi-perspective review | No (delegates via agents) | TDD Coach, Code Refactorer, Bug Hunter, PR Resolver, Document Maintainer, Website Designer, i18n Reviewer | `@PR Resolver` |
 | **@PR Resolver** | Resolves PR review comments | Yes | Bug Hunter, Code Reviewer, TDD Coach, Code Refactorer, Document Maintainer, Website Designer, i18n Reviewer | `smart-commit` |
 | **@Bug Hunter** | Reproduces and fixes bugs | No (coordinator) | TDD Red, TDD Green, TDD Refactor, TDD Coach, Code Reviewer, Code Refactorer | `smart-commit` |
-| **@Code Refactorer** | Code smell detection, SOLID improvements | Yes | — | `smart-commit` |
-| **@Document Maintainer** | Keeps docs in sync with code changes | Yes | — | — |
+| **@Code Refactorer** | Code smell detection, SOLID improvements | Yes | n/a | `smart-commit` |
+| **@Document Maintainer** | Keeps docs in sync with code changes | Yes | n/a | n/a |
 
 ## Prompts
 

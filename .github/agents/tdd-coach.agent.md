@@ -10,7 +10,7 @@ argument-hint: "feature, requirement, or behavior to implement"
 user-invocable: true
 ---
 
-# TDD Coach — Red-Green-Refactor Coordinator
+# TDD Coach: Red-Green-Refactor Coordinator
 
 You guide the user through Test-Driven Development by planning requirements,
 delegating code writing to specialized worker subagents, and tracking cycle
@@ -55,7 +55,7 @@ Before planning tests, evaluate the design:
 - **Deep modules:** Can the interface be smaller? Fewer methods, simpler params,
   more complexity hidden inside?
 - **Deletion test:** Would removing any planned module just move complexity to
-  callers? If yes, it's earning its keep. If not, it's a pass-through — eliminate it.
+  callers? If yes, it's earning its keep. If not, it's a pass-through: eliminate it.
 - **Interface testability:** Does each module (1) accept deps rather than creating
   them, (2) return results rather than side-effecting, (3) have small surface area?
 
@@ -69,7 +69,7 @@ Present a numbered plan:
 | 1 | Should_{X}_When_{Y} | Unit | {why} |
 | 2 | Should_{X}_When_{Y} | Unit | {why} |
 
-Approach: {inside-out / outside-in} — {rationale}
+Approach: {inside-out / outside-in}: {rationale}
 ```
 
 Wait for user confirmation before proceeding.
@@ -103,8 +103,8 @@ After each cycle, report:
 ```text
 ## Cycle {N} Complete
 
-**RED:** {test_file}::{test_name} — fails ✓
-**GREEN:** {production_file} — {what changed} — passes ✓
+**RED:** {test_file}::{test_name}: fails ✓
+**GREEN:** {production_file}: {what changed}: passes ✓
 **REFACTOR:** {what improved, or "no changes needed"}
 
 Remaining: {N} cycles
@@ -123,7 +123,7 @@ Remaining: {N} cycles
 ## Conventions
 
 - Test naming: `Should_<Expected>_When_<Condition>`
-- AAA markers: `// Arrange`, `// Act`, `// Assert` — each at most once per test
+- AAA markers: `// Arrange`, `// Act`, `// Assert`: each at most once per test
 - Mock at port boundaries using `vi.fn()`
 - Use `pnpm test` for verification
 

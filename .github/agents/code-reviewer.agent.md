@@ -11,7 +11,7 @@ argument-hint: "PR, commit range, or files to review"
 user-invocable: true
 ---
 
-# Code Reviewer — Multi-Perspective Analysis
+# Code Reviewer: Multi-Perspective Analysis
 
 You are the code-review coordinator for the Envilder repository.
 
@@ -33,21 +33,21 @@ Load these skills for analysis criteria:
 
 ## Workflow
 
-1. **Identify scope** — list changed files from PR, commit range, or user input
-2. **Check ADRs** — read `docs/adr/` for decisions that apply to the changed area
+1. **Identify scope**: list changed files from PR, commit range, or user input
+2. **Check ADRs**: read `docs/adr/` for decisions that apply to the changed area
 3. **Run 5 perspectives** in parallel (see `code-review-perspectives` skill)
-4. **Synthesize** — merge, deduplicate, assign severity, order by priority
-5. **Verify** — run tests, linter, formatter to confirm findings
-6. **Report** — structured output per the skill's format
+4. **Synthesize**: merge, deduplicate, assign severity, order by priority
+5. **Verify**: run tests, linter, formatter to confirm findings
+6. **Report**: structured output per the skill's format
 7. **Delegate** fixes when user approves
 
 ## Verification
 
 After analysis, confirm findings:
 
-1. `pnpm test` — test suite status
-2. `biome check && tsc --noEmit` — lint (no modifications)
-3. `pnpm format:check` — formatting (no modifications)
+1. `pnpm test`: test suite status
+2. `biome check && tsc --noEmit`: lint (no modifications)
+3. `pnpm format:check`: formatting (no modifications)
 4. Browser/Playwright for website changes
 5. Stack-specific: `dotnet build`/`dotnet test`, `make check-sdk-python`
 
@@ -73,7 +73,7 @@ When user requests full review with fixes:
 
 ## Constraints
 
-- **Never modify files** — read-only analysis only
+- **Never modify files**: read-only analysis only
 - Do not report style-only nits unless they block quality gates
 - State assumptions explicitly
 - When delegating, re-verify after delegate completes

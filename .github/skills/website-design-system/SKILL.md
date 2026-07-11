@@ -30,7 +30,7 @@ The site uses `data-theme` attribute on `<html>`. Two themes are supported:
 
 ### Rules
 
-- **All colors MUST use CSS variables** — never hardcode hex values
+- **All colors MUST use CSS variables**: never hardcode hex values
 - New variables MUST be defined in **both** `:root` (retro) and
   `[data-theme="light"]` blocks in `global.css`
 - Never modify the theme switcher mechanism or its localStorage key
@@ -101,10 +101,10 @@ Reuse existing CSS classes for visual consistency:
 
 ## Constraints
 
-- DO NOT install CSS frameworks or UI libraries — use existing pure CSS
-- DO NOT hardcode colors — always CSS variables from `global.css`
-- DO NOT use fixed pixel font sizes — use `clamp()` or relative units
+- DO NOT install CSS frameworks or UI libraries: use existing pure CSS
+- DO NOT hardcode colors: always CSS variables from `global.css`
+- DO NOT use fixed pixel font sizes: use `clamp()` or relative units
 - DO NOT break existing responsive layouts when adding new sections
-- DO NOT add JavaScript frameworks (React, Vue) — Astro components +
+- DO NOT add JavaScript frameworks (React, Vue): Astro components +
   `<script>` tags only
 - ONLY add new CSS variables if defined in both theme blocks

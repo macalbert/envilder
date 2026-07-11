@@ -16,6 +16,7 @@ these terms consistently to avoid drift.
 | **Port** | Interface defining a capability boundary (e.g., `ISecretProvider`, `IVariableStore`, `ILogger`). Domain-owned, infrastructure-implemented. |
 | **Adapter** | Concrete implementation of a port for a specific technology (e.g., `AwsSsmSecretProvider`). |
 | **Map file config (`$config`)** | Optional section inside a map file declaring provider type, vault URL, AWS profile, etc. Merged with CLI flags (flags win). |
+| **Local override map file** | A personal, gitignored map file whose name is derived from a base map file by inserting `.local` before the extension (`XXXXX.json` → `XXXXX.local.json`, same directory). When present, it is always layered on top of the base: `$config` is replaced wholesale, variable mappings are merged per key. Never committed; never affects other developers. The override itself has no further override. |
 
 ## SDK Terms
 
@@ -40,6 +41,7 @@ these terms consistently to avoid drift.
 
 | Term | Definition |
 |------|-----------|
-| **CLI output** | Proactive, human-facing console messages (info, success, progress) shown to an interactive terminal user. CLI-only. SDKs never emit it — they stay silent-by-default. |
+| **CLI output** | Proactive, human-facing console messages (info, success, progress) shown to an interactive terminal user. CLI-only. SDKs never emit it: they stay silent-by-default. |
 | **Error message** | The human-readable text carried by a thrown error/exception. Produced by both the CLI and every SDK. Must be clear and actionable. This is the only channel through which SDKs participate in messaging. |
-| **SSO session expired** | Condition where the AWS SSO / IAM Identity Center cached token is missing or expired (the user never ran `aws sso login`, or it lapsed). Per ADR-0010, this is to be modeled as a dedicated typed error (`SsoSessionExpiredError`) in the CLI core and each SDK, carrying a standard, actionable message. *(Planned — not yet implemented.)* |
+| **Expired credentials** | Condition where AWS credentials were resolved but the security token is no longer valid (AWS rejects the request with `ExpiredToken` / `ExpiredTokenException`). Modeled as `ExpiredCredentialsError` (`ExpiredCredentialsException` in .NET), carrying the underlying cause. The general sibling of *SSO session expired*. |
+| **SSO session expired** | Condition where the AWS SSO / IAM Identity Center session could not be resolved or loaded (the user never ran `aws sso login`, or the cached token lapsed). Per ADR-0010, modeled as a dedicated typed error (`SsoSessionExpiredError`; `SsoSessionExpiredException` in .NET) carrying the `profileName`, a **sibling** of *Expired credentials* (both extend `DomainError`, no inheritance between them). The detection boundary mirrors AWS's own taxonomy. |

@@ -6,7 +6,7 @@ description: >-
   or determining minimum test coverage requirements.
 ---
 
-# Code Quality — CRAP Score
+# Code Quality: CRAP Score
 
 CRAP (Change Risk Anti-Patterns) measures the risk of a method based on
 cyclomatic complexity and test coverage.
@@ -43,7 +43,7 @@ providing a safety margin:
 | 3 | 40%+ |
 | 4 | 60%+ |
 | 5 | 80%+ |
-| 6+ | **Not achievable** — must split to reduce complexity |
+| 6+ | **Not achievable**: must split to reduce complexity |
 
 ## Actions by Scenario
 
@@ -51,7 +51,7 @@ providing a safety margin:
 |----------|--------|
 | CRAP >= 6 due to high complexity | Extract complex branches into smaller methods |
 | CRAP >= 6 due to low coverage | Add tests (new Red/Green cycle) |
-| Complexity 6+ regardless of coverage | Must split — CRAP floor equals complexity |
+| Complexity 6+ regardless of coverage | Must split: CRAP floor equals complexity |
 
 ## Severity Classification
 

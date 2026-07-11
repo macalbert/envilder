@@ -17,7 +17,7 @@ Structured workflow for going from bug report to reproduction-ready TDD plan.
 - A user reports unexpected output or error
 - A test failure indicates a regression
 
-## Phase 1 — Build a Feedback Loop
+## Phase 1: Build a Feedback Loop
 
 **This is the skill.** Everything else is mechanical. Before investigating
 anything, establish a tight loop that lets you observe the bug:
@@ -32,7 +32,7 @@ anything, establish a tight loop that lets you observe the bug:
 
 If you can't reproduce → stop and report to the user immediately. No guessing.
 
-## Phase 2 — Gather Issue Details
+## Phase 2: Gather Issue Details
 
 **From GitHub issue:**
 
@@ -46,14 +46,14 @@ Extract: title, description, steps to reproduce, expected vs actual behavior.
 
 Summarize: what's happening, what should happen, reproduction conditions.
 
-## Phase 3 — Investigate and Locate
+## Phase 3: Investigate and Locate
 
-1. Identify the domain area — which handler, service, or component
-2. Read the affected code — understand current behavior
-3. Check existing tests — why didn't they catch this?
-4. Identify root cause — pinpoint the exact code path
+1. Identify the domain area: which handler, service, or component
+2. Read the affected code: understand current behavior
+3. Check existing tests: why didn't they catch this?
+4. Identify root cause: pinpoint the exact code path
 
-## Phase 4 — Present Analysis
+## Phase 4: Present Analysis
 
 Before writing any code, present findings:
 
@@ -62,7 +62,7 @@ Before writing any code, present findings:
 
 **Issue:** {title or summary}
 **Root cause:** {explanation}
-**Affected code:** {file}:{line range} — {what's wrong}
+**Affected code:** {file}:{line range}: {what's wrong}
 **Existing coverage:** {tests that exist but missed the bug}
 
 **Reproduction plan:**
@@ -76,14 +76,14 @@ Proceed with reproduction test? (Y/n)
 
 Wait for user confirmation before proceeding to TDD cycle.
 
-## Phase 5 — Handoff to TDD
+## Phase 5: Handoff to TDD
 
 After analysis is confirmed:
 
-1. **RED** — Write a failing test that reproduces the bug (asserts correct
+1. **RED**: Write a failing test that reproduces the bug (asserts correct
    behavior, fails because bug exists)
-2. **GREEN** — Fix the production code minimally
-3. **REFACTOR** — Clean up if needed
+2. **GREEN**: Fix the production code minimally
+3. **REFACTOR**: Clean up if needed
 
 ## Investigation Tools
 
@@ -94,10 +94,10 @@ After analysis is confirmed:
 
 ## Rules
 
-- **Never fix without reproducing first** — a failing test is mandatory
-- **One bug per cycle** — multiple bugs need separate investigations
-- **Present analysis before acting** — user validates understanding first
-- **Report blockers immediately** — if reproduction fails, stop and explain
+- **Never fix without reproducing first**: a failing test is mandatory
+- **One bug per cycle**: multiple bugs need separate investigations
+- **Present analysis before acting**: user validates understanding first
+- **Report blockers immediately**: if reproduction fails, stop and explain
 
 ## Summary Format
 
@@ -108,8 +108,8 @@ After fix is complete:
 
 **Issue:** {title}
 **Root cause:** {one-line explanation}
-**Red:** {test_file}::{test_name} — reproduced ✓
-**Green:** {production_file} — {what was fixed}
+**Red:** {test_file}::{test_name}: reproduced ✓
+**Green:** {production_file}: {what was fixed}
 **Refactor:** {what improved, or "no changes needed"}
-**Tests:** pnpm test — {N} passed, 0 failed
+**Tests:** pnpm test: {N} passed, 0 failed
 ```
