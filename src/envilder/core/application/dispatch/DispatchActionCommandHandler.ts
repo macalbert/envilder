@@ -41,8 +41,9 @@ export class DispatchActionCommandHandler {
         await this.handlePull(command);
         break;
       default:
-        await this.handlePull(command);
-        break;
+        throw new InvalidArgumentError(
+          `Unsupported operation mode: ${command.mode}`,
+        );
     }
   }
 

@@ -175,4 +175,26 @@ describe('DispatchActionCommandHandler', () => {
     );
     expect(mockSecretProvider.logIdentity).not.toHaveBeenCalled();
   });
+
+  it('Should_ThrowInvalidArgumentError_When_UnsupportedModeIsProvided', async () => {
+    // Arrange
+    const command = new DispatchActionCommand(
+      'path/to/map.json',
+      'path/to/.env',
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'UNKNOWN_MODE' as OperationMode,
+    );
+
+    // Act
+    const action = () => sut.handleCommand(command);
+
+    // Assert
+    await expect(action).rejects.toThrow(
+      'Unsupported operation mode: UNKNOWN_MODE',
+    );
+    expect(mockPullHandler.handle).not.toHaveBeenCalled();
+  });
 });
