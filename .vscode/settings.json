@@ -1,0 +1,10 @@
+{
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "file": ".github/skills/workflow-smart-commit/SKILL.md"
+    },
+    {
+      "file": ".github/instructions/git-conventions.instructions.md"
+    }
+  ]
+}
