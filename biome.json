@@ -11,14 +11,15 @@
       "!!**/.lock",
       "!!**/*.lock",
       "!!**/*-lock.*",
-      "!!**/*.md"
+      "!!**/*.md",
+      "!!**/*.svg"
     ],
     "ignoreUnknown": true
   },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "preset": "recommended"
     }
   },
   "formatter": {
