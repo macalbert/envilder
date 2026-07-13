@@ -35,6 +35,7 @@ jobs:
       - name: 🧱 Checkout
         uses: actions/checkout@v7
       - name: 🔍 Detect relevant changes
+        if: github.event_name == 'pull_request'
         uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -53,7 +54,7 @@ jobs:
   powerup-test:
     needs: changes
     runs-on: ubuntu-24.04
-    if: ${{ needs.changes.outputs.core == 'true' && !github.event.pull_request.draft }}
+    if: ${{ github.event_name == 'workflow_dispatch' || (needs.changes.outputs.core == 'true' && !github.event.pull_request.draft) }}
     timeout-minutes: 30
     env:
       LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}

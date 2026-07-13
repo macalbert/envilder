@@ -28,12 +28,16 @@ jobs:
   # instead, so the path check moves here and gates test-nodejs-sdk below.
   changes:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
     outputs:
       nodejs: ${{ steps.filter.outputs.nodejs }}
     steps:
       - name: 🧱 Checkout
         uses: actions/checkout@v7
       - name: 🔍 Detect relevant changes
+        if: github.event_name == 'pull_request'
         uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -46,7 +50,7 @@ jobs:
   test-nodejs-sdk:
     needs: changes
     runs-on: ubuntu-24.04
-    if: ${{ needs.changes.outputs.nodejs == 'true' && !github.event.pull_request.draft }}
+    if: ${{ github.event_name == 'workflow_dispatch' || (needs.changes.outputs.nodejs == 'true' && !github.event.pull_request.draft) }}
     timeout-minutes: 10
     env:
       LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
