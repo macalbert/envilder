@@ -16,19 +16,37 @@ on:
       - reopened
       - synchronize
       - ready_for_review
-    paths:
-      - '.github/workflows/tests-nodejs-sdk.yml'
-      - 'src/sdks/nodejs/**'
-      - 'tests/sdks/nodejs/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
   cancel-in-progress: true
 
 jobs:
-  test-nodejs-sdk:
+  # No `paths:` filter here on purpose: a required check gated by a
+  # workflow-level `paths:` filter never posts a status when skipped and
+  # blocks merging forever. A job-level `if:` skip reports "success"
+  # instead, so the path check moves here and gates test-nodejs-sdk below.
+  changes:
     runs-on: ubuntu-24.04
-    if: ${{ !github.event.pull_request.draft }}
+    outputs:
+      nodejs: ${{ steps.filter.outputs.nodejs }}
+    steps:
+      - name: 🧱 Checkout
+        uses: actions/checkout@v7
+      - name: 🔍 Detect relevant changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            nodejs:
+              - '.github/workflows/tests-nodejs-sdk.yml'
+              - 'src/sdks/nodejs/**'
+              - 'tests/sdks/nodejs/**'
+
+  test-nodejs-sdk:
+    needs: changes
+    runs-on: ubuntu-24.04
+    if: ${{ needs.changes.outputs.nodejs == 'true' && !github.event.pull_request.draft }}
     timeout-minutes: 10
     env:
       LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
