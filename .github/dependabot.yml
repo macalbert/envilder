@@ -4,21 +4,37 @@
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
 version: 2
-updates: 
+updates:
 - package-ecosystem: npm
   directory: "/"
   pull-request-branch-name:
     separator: "/"
   schedule:
-    interval: daily
+    interval: weekly
+    day: monday
     time: "10:00"
     timezone: Europe/Madrid
+  open-pull-requests-limit: 5
+  groups:
+    aws-sdk:
+      patterns:
+      - "@aws-sdk/*"
+    dev-minor-patch:
+      dependency-type: development
+      update-types:
+      - minor
+      - patch
+    prod-minor-patch:
+      dependency-type: production
+      update-types:
+      - minor
+      - patch
   labels:
   - "npm"
   - "dependencies"
   assignees:
   - macalbert
-    
+
 - package-ecosystem: nuget
   directories:
   - "/src/sdks/dotnet"
@@ -26,9 +42,28 @@ updates:
   pull-request-branch-name:
     separator: "/"
   schedule:
-    interval: daily
+    interval: weekly
+    day: monday
     time: "10:00"
     timezone: Europe/Madrid
+  open-pull-requests-limit: 5
+  groups:
+    aws-sdk:
+      patterns:
+      - "AWSSDK.*"
+    azure-sdk:
+      patterns:
+      - "Azure.*"
+    dev-minor-patch:
+      dependency-type: development
+      update-types:
+      - minor
+      - patch
+    prod-minor-patch:
+      dependency-type: production
+      update-types:
+      - minor
+      - patch
   labels:
   - "nuget"
   - "dependencies"
@@ -42,9 +77,28 @@ updates:
   pull-request-branch-name:
     separator: "/"
   schedule:
-    interval: daily
+    interval: weekly
+    day: monday
     time: "10:00"
     timezone: Europe/Madrid
+  open-pull-requests-limit: 5
+  groups:
+    aws-sdk:
+      patterns:
+      - "github.com/aws/aws-sdk-go-v2*"
+    azure-sdk:
+      patterns:
+      - "github.com/Azure/*"
+    dev-minor-patch:
+      dependency-type: development
+      update-types:
+      - minor
+      - patch
+    prod-minor-patch:
+      dependency-type: production
+      update-types:
+      - minor
+      - patch
   labels:
   - "go"
   - "dependencies"
@@ -58,9 +112,28 @@ updates:
   pull-request-branch-name:
     separator: "/"
   schedule:
-    interval: daily
+    interval: weekly
+    day: monday
     time: "10:00"
     timezone: Europe/Madrid
+  open-pull-requests-limit: 5
+  groups:
+    aws-sdk:
+      patterns:
+      - "software.amazon.awssdk:*"
+    azure-sdk:
+      patterns:
+      - "com.azure:*"
+    dev-minor-patch:
+      dependency-type: development
+      update-types:
+      - minor
+      - patch
+    prod-minor-patch:
+      dependency-type: production
+      update-types:
+      - minor
+      - patch
   labels:
   - "maven"
   - "dependencies"
@@ -74,9 +147,29 @@ updates:
   pull-request-branch-name:
     separator: "/"
   schedule:
-    interval: daily
+    interval: weekly
+    day: monday
     time: "10:00"
     timezone: Europe/Madrid
+  open-pull-requests-limit: 5
+  groups:
+    aws-sdk:
+      patterns:
+      - "boto3"
+      - "botocore"
+    azure-sdk:
+      patterns:
+      - "azure-*"
+    dev-minor-patch:
+      dependency-type: development
+      update-types:
+      - minor
+      - patch
+    prod-minor-patch:
+      dependency-type: production
+      update-types:
+      - minor
+      - patch
   labels:
   - "pip"
   - "dependencies"
@@ -90,9 +183,28 @@ updates:
   pull-request-branch-name:
     separator: "/"
   schedule:
-    interval: daily
+    interval: weekly
+    day: monday
     time: "10:00"
     timezone: Europe/Madrid
+  open-pull-requests-limit: 5
+  groups:
+    aws-sdk:
+      patterns:
+      - "@aws-sdk/*"
+    azure-sdk:
+      patterns:
+      - "@azure/*"
+    dev-minor-patch:
+      dependency-type: development
+      update-types:
+      - minor
+      - patch
+    prod-minor-patch:
+      dependency-type: production
+      update-types:
+      - minor
+      - patch
   labels:
   - "npm"
   - "dependencies"
@@ -104,9 +216,16 @@ updates:
   pull-request-branch-name:
     separator: "/"
   schedule:
-    interval: daily
+    interval: weekly
+    day: monday
     time: "10:00"
     timezone: Europe/Madrid
+  open-pull-requests-limit: 5
+  groups:
+    actions-minor-patch:
+      update-types:
+      - minor
+      - patch
   labels:
   - "github-actions"
   - "dependencies"
