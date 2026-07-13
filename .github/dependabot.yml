@@ -19,6 +19,15 @@ updates:
     aws-sdk:
       patterns:
       - "@aws-sdk/*"
+      update-types:
+      - minor
+      - patch
+    azure-sdk:
+      patterns:
+      - "@azure/*"
+      update-types:
+      - minor
+      - patch
     dev-minor-patch:
       dependency-type: development
       update-types:
@@ -51,9 +60,15 @@ updates:
     aws-sdk:
       patterns:
       - "AWSSDK.*"
+      update-types:
+      - minor
+      - patch
     azure-sdk:
       patterns:
       - "Azure.*"
+      update-types:
+      - minor
+      - patch
     dev-minor-patch:
       dependency-type: development
       update-types:
@@ -86,9 +101,15 @@ updates:
     aws-sdk:
       patterns:
       - "github.com/aws/aws-sdk-go-v2*"
+      update-types:
+      - minor
+      - patch
     azure-sdk:
       patterns:
       - "github.com/Azure/*"
+      update-types:
+      - minor
+      - patch
     dev-minor-patch:
       dependency-type: development
       update-types:
@@ -121,9 +142,15 @@ updates:
     aws-sdk:
       patterns:
       - "software.amazon.awssdk:*"
+      update-types:
+      - minor
+      - patch
     azure-sdk:
       patterns:
       - "com.azure:*"
+      update-types:
+      - minor
+      - patch
     dev-minor-patch:
       dependency-type: development
       update-types:
@@ -157,9 +184,15 @@ updates:
       patterns:
       - "boto3"
       - "botocore"
+      update-types:
+      - minor
+      - patch
     azure-sdk:
       patterns:
       - "azure-*"
+      update-types:
+      - minor
+      - patch
     dev-minor-patch:
       dependency-type: development
       update-types:
@@ -192,9 +225,15 @@ updates:
     aws-sdk:
       patterns:
       - "@aws-sdk/*"
+      update-types:
+      - minor
+      - patch
     azure-sdk:
       patterns:
       - "@azure/*"
+      update-types:
+      - minor
+      - patch
     dev-minor-patch:
       dependency-type: development
       update-types:

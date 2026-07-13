@@ -2,12 +2,28 @@ name: ⭐ Dependabot Auto-merge
 
 # Auto-merges Dependabot PRs once required checks are green, but only for
 # minor/patch bumps. Major version bumps are left open for manual review.
+#
+# Uses pull_request_target instead of pull_request: workflows triggered by
+# Dependabot via pull_request always get a read-only GITHUB_TOKEN regardless
+# of the permissions block, which would make `gh pr merge --auto` fail with
+# a permission error. pull_request_target grants the requested write
+# permissions instead. This is safe here because the job never checks out
+# or executes any code from the PR head.
+#
+# Gated on the PR author (not github.actor) so a maintainer clicking
+# "Update branch" (which re-triggers synchronize as its own actor) doesn't
+# skip this job on a Dependabot PR.
+#
+# go_modules and maven are excluded: there is no CI workflow for the Go or
+# Java SDKs yet, so no required status check would ever gate those PRs and
+# `--auto` would merge them without waiting for any test run.
+#
 # Requires "Allow auto-merge" enabled in repo settings and branch protection
 # with required status checks on main, otherwise this would merge without
 # waiting for CI.
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - reopened
@@ -25,7 +41,10 @@ jobs:
   automerge:
     name: Auto-merge minor/patch
     runs-on: ubuntu-latest
-    if: github.actor == 'dependabot[bot]'
+    if: |
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      !startsWith(github.event.pull_request.head.ref, 'dependabot/go_modules/') &&
+      !startsWith(github.event.pull_request.head.ref, 'dependabot/maven/')
     steps:
       - name: 📋 Fetch Dependabot metadata
         id: meta
