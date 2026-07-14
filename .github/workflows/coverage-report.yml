@@ -39,7 +39,7 @@ jobs:
         uses: pnpm/action-setup@v6
 
       - name: 🛠️ Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: "22.x"
           cache: "pnpm"
@@ -114,7 +114,7 @@ jobs:
         run: dotnet tool install --global dotnet-coverage
 
       - name: 🛠️ Setup Node.js (for extract-test-stats)
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: "22.x"
 
@@ -179,7 +179,7 @@ jobs:
         uses: astral-sh/setup-uv@v7
 
       - name: 🛠️ Setup Node.js (for extract-test-stats)
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: "22.x"
 
@@ -245,7 +245,7 @@ jobs:
         uses: pnpm/action-setup@v6
 
       - name: 🛠️ Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: "22.x"
           cache: "pnpm"
@@ -306,7 +306,7 @@ jobs:
         uses: pnpm/action-setup@v6
 
       - name: 🛠️ Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: "22.x"
           cache: "pnpm"
@@ -375,7 +375,7 @@ jobs:
           sparse-checkout: .github/workflows/coverage-report
 
       - name: 📗 Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: "22.x"
 
