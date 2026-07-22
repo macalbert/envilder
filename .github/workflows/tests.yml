@@ -17,25 +17,44 @@ on:
       - reopened
       - synchronize
       - ready_for_review
-    paths:
-      - ".github/workflows/tests.yml"
-      - "github-action/action.yml"
-      - "src/envilder/**"
-      - "tests/envilder/**"
-      - "e2e/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "tsconfig.json"
-      - "vite.config.ts"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
   cancel-in-progress: true
 
 jobs:
-  powerup-test:
+  # No `paths:` filter here on purpose: a required check gated by a
+  # workflow-level `paths:` filter never posts a status when skipped and
+  # blocks merging forever. A job-level `if:` skip reports "success"
+  # instead, so the path check moves here and gates powerup-test below.
+  changes:
     runs-on: ubuntu-24.04
-    if: ${{ !github.event.pull_request.draft }}
+    outputs:
+      core: ${{ steps.filter.outputs.core }}
+    steps:
+      - name: 🧱 Checkout
+        uses: actions/checkout@v7
+      - name: 🔍 Detect relevant changes
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            core:
+              - ".github/workflows/tests.yml"
+              - "github-action/action.yml"
+              - "src/envilder/**"
+              - "tests/envilder/**"
+              - "e2e/**"
+              - "package.json"
+              - "pnpm-lock.yaml"
+              - "tsconfig.json"
+              - "vite.config.ts"
+
+  powerup-test:
+    needs: changes
+    runs-on: ubuntu-24.04
+    if: ${{ github.event_name == 'workflow_dispatch' || (needs.changes.outputs.core == 'true' && !github.event.pull_request.draft) }}
     timeout-minutes: 30
     env:
       LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
@@ -48,7 +67,7 @@ jobs:
         uses: pnpm/action-setup@v6
 
       - name: 🍄 Grab a Mushroom (Setup Node.js with Cache)
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: "22.x"
           cache: "pnpm"
