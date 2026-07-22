@@ -15,19 +15,41 @@ on:
       - reopened
       - synchronize
       - ready_for_review
-    paths:
-      - '.github/workflows/tests-python-sdk.yml'
-      - 'src/sdks/python/**'
-      - 'tests/sdks/python/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
   cancel-in-progress: true
 
 jobs:
-  test-python-sdk:
+  # No `paths:` filter here on purpose: a required check gated by a
+  # workflow-level `paths:` filter never posts a status when skipped and
+  # blocks merging forever. A job-level `if:` skip reports "success"
+  # instead, so the path check moves here and gates test-python-sdk below.
+  changes:
     runs-on: ubuntu-24.04
-    if: ${{ !github.event.pull_request.draft }}
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      python: ${{ steps.filter.outputs.python }}
+    steps:
+      - name: 🧱 Checkout
+        uses: actions/checkout@v7
+      - name: 🔍 Detect relevant changes
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            python:
+              - '.github/workflows/tests-python-sdk.yml'
+              - 'src/sdks/python/**'
+              - 'tests/sdks/python/**'
+
+  test-python-sdk:
+    needs: changes
+    runs-on: ubuntu-24.04
+    if: ${{ github.event_name == 'workflow_dispatch' || (needs.changes.outputs.python == 'true' && !github.event.pull_request.draft) }}
     timeout-minutes: 10
 
     strategy:
