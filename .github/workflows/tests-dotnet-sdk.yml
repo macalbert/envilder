@@ -15,19 +15,41 @@ on:
       - reopened
       - synchronize
       - ready_for_review
-    paths:
-      - '.github/workflows/tests-dotnet-sdk.yml'
-      - 'src/sdks/dotnet/**'
-      - 'tests/sdks/dotnet/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
   cancel-in-progress: true
 
 jobs:
-  test-dotnet-sdk:
+  # No `paths:` filter here on purpose: a required check gated by a
+  # workflow-level `paths:` filter never posts a status when skipped and
+  # blocks merging forever. A job-level `if:` skip reports "success"
+  # instead, so the path check moves here and gates test-dotnet-sdk below.
+  changes:
     runs-on: ubuntu-24.04
-    if: ${{ !github.event.pull_request.draft }}
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      dotnet: ${{ steps.filter.outputs.dotnet }}
+    steps:
+      - name: 🧱 Checkout
+        uses: actions/checkout@v7
+      - name: 🔍 Detect relevant changes
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            dotnet:
+              - '.github/workflows/tests-dotnet-sdk.yml'
+              - 'src/sdks/dotnet/**'
+              - 'tests/sdks/dotnet/**'
+
+  test-dotnet-sdk:
+    needs: changes
+    runs-on: ubuntu-24.04
+    if: ${{ github.event_name == 'workflow_dispatch' || (needs.changes.outputs.dotnet == 'true' && !github.event.pull_request.draft) }}
     timeout-minutes: 10
     env:
       LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
