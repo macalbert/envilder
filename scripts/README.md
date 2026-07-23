@@ -37,7 +37,8 @@ making it fast to load and ready to use without any build steps for users.
 
 1. Uses esbuild to bundle compiled JavaScript + all dependencies → single minified `github-action/dist/index.js`
 2. Workflow checks if version tag already exists (skip if duplicate)
-3. Builds bundle with `pnpm build:gha` (includes `--minify` flag)
+3. Builds bundle with `pnpm build:gha`, with minification configured in the
+   esbuild script
 4. Commits only `github-action/dist/index.js` to current branch
 5. Creates version tag (e.g., `v0.7.0`)
 6. Pushes tag to GitHub
