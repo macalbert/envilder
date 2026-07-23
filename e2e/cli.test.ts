@@ -78,7 +78,7 @@ describe('Envilder (E2E)', () => {
 
     await cleanUpSystem();
     execSync('pnpm build', { cwd: rootDir, stdio: 'inherit' });
-    execSync('node --loader ts-node/esm scripts/pack-and-install.ts', {
+    execSync('pnpm exec tsx scripts/pack-and-install.ts', {
       cwd: rootDir,
       stdio: 'inherit',
     });
