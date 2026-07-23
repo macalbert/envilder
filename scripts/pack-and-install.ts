@@ -1,4 +1,4 @@
-#!/usr/bin/env node --loader=ts-node/esm
+#!/usr/bin/env tsx
 
 import { execFileSync, execSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
