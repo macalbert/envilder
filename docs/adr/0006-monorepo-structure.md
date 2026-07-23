@@ -23,7 +23,7 @@ Every component of the Envilder project lives in one Git repository:
 | Component | Path | Build System |
 | --------- | ---- | ------------ |
 | CLI (TypeScript) | `src/envilder/` | pnpm (root) |
-| GitHub Action | `github-action/` | esbuild bundle |
+| GitHub Action | `github-action/` | ncc bundle |
 | Website (Astro) | `src/website/` | pnpm workspace |
 | IaC (CDK) | `src/iac/` | pnpm workspace |
 | SDK .NET | `src/sdks/dotnet/` | dotnet |

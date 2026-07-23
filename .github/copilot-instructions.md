@@ -88,7 +88,7 @@ object passed to `configureInfrastructureServices()`. CLI flags override
 **Development**:
 
 - `pnpm build`: TypeScript compilation
-- `pnpm build:gha`: Bundle GitHub Action with esbuild into `github-action/dist/index.js`
+- `pnpm build:gha`: Bundle GitHub Action with `@vercel/ncc` into `github-action/dist/index.js`
 - `pnpm verify:gha`: Verify GHA bundle is up-to-date (fails if dist is stale)
 - `pnpm local:install`: Build + pack + install globally for local testing
 - `pnpm local:test-run`: Run CLI against `e2e/sample/envilder.json`

@@ -79,7 +79,7 @@ Non-JS SDKs use the **Makefile**:
 pnpm build                    # Compile TypeScript
 pnpm test                     # Unit tests + coverage
 pnpm test:ci                  # Tests with JUnit reporter
-pnpm build:gha                # Bundle GHA with esbuild
+pnpm build:gha                # Bundle GHA with ncc
 pnpm verify:gha               # Verify GHA bundle is fresh
 pnpm local:install             # Build + pack + install globally
 pnpm local:test-run            # Run CLI against sample map

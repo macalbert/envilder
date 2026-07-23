@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "aws-cdk": "^2.1129.0",
-    "tsx": "catalog:",
+    "ts-node": "catalog:",
     "typescript": "catalog:"
   }
 }

@@ -21,7 +21,7 @@ Behind the scene it runs:
 
 ```bash
 npm run build 
-pnpm exec tsx scripts/pack-and-install.ts
+node --loader ts-node/esm scripts/pack-and-install.ts
 ```
 
 You can also run this command directly if you prefer.
@@ -30,12 +30,12 @@ You can also run this command directly if you prefer.
 
 ### GitHub Action Publishing (`.github/workflows/publish-action.yml`)
 
-The GitHub Action publish workflow bundles the action into a single optimized minified file using esbuild,
+The GitHub Action publish workflow bundles the action into a single optimized minified file using `@vercel/ncc`,
 making it fast to load and ready to use without any build steps for users.
 
 **The Solution:**
 
-1. Uses esbuild to bundle compiled JavaScript + all dependencies → single minified `github-action/dist/index.js`
+1. Uses `@vercel/ncc` to bundle TypeScript + all dependencies → single minified `github-action/dist/index.js`
 2. Workflow checks if version tag already exists (skip if duplicate)
 3. Builds bundle with `pnpm build:gha` (includes `--minify` flag)
 4. Commits only `github-action/dist/index.js` to current branch
@@ -45,7 +45,7 @@ making it fast to load and ready to use without any build steps for users.
 This approach ensures:
 
 - ✅ Users can use the action immediately without building
-- ✅ Single optimized minified bundle with all dependencies
+- ✅ Single optimized minified bundle (~786KB with all dependencies)
 - ✅ Fast startup time (no node_modules resolution)
 - ✅ Version check prevents duplicate publishes
 - ✅ Repository stays ultra-clean (only index.js tracked, no source maps or type definitions)
