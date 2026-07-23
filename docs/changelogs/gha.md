@@ -4,7 +4,7 @@
 
 * **Bundle the GitHub Action with esbuild**: Replace the ncc bundler so the
   Action can build with TypeScript 7 while retaining a single minified
-  `dist/index.js` file.
+  `dist/index.js` file, and configure Node.js 22 before executing the bundle.
 
 * **Run development scripts with tsx**: Replace ts-node, which is incompatible
   with TypeScript 7, for local package installation and CDK execution.

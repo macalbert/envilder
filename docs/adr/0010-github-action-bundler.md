@@ -20,6 +20,9 @@ decorator metadata required by Inversify. The esbuild configuration emits an
 ES module targeted at Node.js 22 and provides `createRequire` for dependencies
 that dynamically load Node.js built-ins.
 
+The composite Action configures Node.js 22 before executing the bundle so its
+runtime contract matches the bundle target.
+
 Use tsx rather than ts-node for development scripts that execute TypeScript
 directly, because TypeScript 7 no longer provides the compiler API required by
 ts-node.
