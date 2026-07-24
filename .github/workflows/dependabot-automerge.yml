@@ -12,9 +12,7 @@ name: ⭐ Dependabot Auto-merge
 #
 # Gated on the PR author (not github.actor) so a maintainer clicking
 # "Update branch" (which re-triggers synchronize as its own actor) doesn't
-# skip this job on a Dependabot PR. Commit verification is skipped only to
-# allow maintainer repair commits on Dependabot PRs; the Dependabot PR author
-# validation remains required, and no PR head code is executed.
+# skip this job on a Dependabot PR.
 #
 # go_modules and maven are excluded: there is no CI workflow for the Go or
 # Java SDKs yet, so no required status check would ever gate those PRs and
@@ -53,7 +51,6 @@ jobs:
         uses: dependabot/fetch-metadata@v3
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
-          skip-commit-verification: true
 
       - name: ✅ Enable auto-merge
         if: steps.meta.outputs.update-type != 'version-update:semver-major'
