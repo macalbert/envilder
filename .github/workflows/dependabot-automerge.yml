@@ -1,26 +1,15 @@
-name: ⭐ Dependabot Auto-merge
+name: 🔎 Dependabot Update Review
 
-# Auto-merges Dependabot PRs once required checks are green, but only for
-# minor/patch bumps. Major version bumps are left open for manual review.
+# Validates Dependabot update metadata and reminds maintainers that updates
+# require manual review and merge.
 #
-# Uses pull_request_target instead of pull_request: workflows triggered by
-# Dependabot via pull_request always get a read-only GITHUB_TOKEN regardless
-# of the permissions block, which would make `gh pr merge --auto` fail with
-# a permission error. pull_request_target grants the requested write
-# permissions instead. This is safe here because the job never checks out
-# or executes any code from the PR head.
+# Uses pull_request_target to read Dependabot metadata with repository-scoped
+# read permissions. This is safe because the job never checks out or executes
+# any code from the PR head, and it never merges a pull request.
 #
 # Gated on the PR author (not github.actor) so a maintainer clicking
 # "Update branch" (which re-triggers synchronize as its own actor) doesn't
 # skip this job on a Dependabot PR.
-#
-# go_modules and maven are excluded: there is no CI workflow for the Go or
-# Java SDKs yet, so no required status check would ever gate those PRs and
-# `--auto` would merge them without waiting for any test run.
-#
-# Requires "Allow auto-merge" enabled in repo settings and branch protection
-# with required status checks on main, otherwise this would merge without
-# waiting for CI.
 
 on:
   pull_request_target:
@@ -30,31 +19,33 @@ on:
       - synchronize
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+  pull-requests: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
   cancel-in-progress: true
 
 jobs:
-  automerge:
-    name: Auto-merge minor/patch
+  review:
+    name: Review Dependabot update
     runs-on: ubuntu-latest
-    if: |
-      github.event.pull_request.user.login == 'dependabot[bot]' &&
-      !startsWith(github.event.pull_request.head.ref, 'dependabot/go_modules/') &&
-      !startsWith(github.event.pull_request.head.ref, 'dependabot/maven/')
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
     steps:
       - name: 📋 Fetch Dependabot metadata
         id: meta
+        # Maintainer repair commits can fail strict verification. Keep this
+        # nonfatal so the pull request remains available for manual review.
+        continue-on-error: true
         uses: dependabot/fetch-metadata@v3
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: ✅ Enable auto-merge
-        if: steps.meta.outputs.update-type != 'version-update:semver-major'
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh pr merge --auto --squash "$PR_URL"
+      - name: ⚠️ Warn when metadata cannot be verified
+        if: steps.meta.outcome == 'failure'
+        run: |
+          echo "::warning title=Metadata verification failed::Dependabot commit verification failed. Review the pull request manually."
+
+      - name: ℹ️ Require manual merge
+        run: |
+          echo "::notice title=Manual merge required::This workflow never enables auto-merge. Review and merge after required checks pass."
