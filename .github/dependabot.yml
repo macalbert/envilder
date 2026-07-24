@@ -15,6 +15,9 @@ updates:
     time: "10:00"
     timezone: Europe/Madrid
   open-pull-requests-limit: 5
+  cooldown:
+    default-days: 7
+    semver-major-days: 14
   groups:
     aws-sdk:
       patterns:
@@ -56,6 +59,9 @@ updates:
     time: "10:00"
     timezone: Europe/Madrid
   open-pull-requests-limit: 5
+  cooldown:
+    default-days: 7
+    semver-major-days: 14
   groups:
     aws-sdk:
       patterns:
@@ -97,6 +103,9 @@ updates:
     time: "10:00"
     timezone: Europe/Madrid
   open-pull-requests-limit: 5
+  cooldown:
+    default-days: 7
+    semver-major-days: 14
   groups:
     aws-sdk:
       patterns:
@@ -138,6 +147,9 @@ updates:
     time: "10:00"
     timezone: Europe/Madrid
   open-pull-requests-limit: 5
+  cooldown:
+    default-days: 7
+    semver-major-days: 14
   groups:
     aws-sdk:
       patterns:
@@ -179,6 +191,9 @@ updates:
     time: "10:00"
     timezone: Europe/Madrid
   open-pull-requests-limit: 5
+  cooldown:
+    default-days: 7
+    semver-major-days: 14
   groups:
     aws-sdk:
       patterns:
@@ -221,6 +236,9 @@ updates:
     time: "10:00"
     timezone: Europe/Madrid
   open-pull-requests-limit: 5
+  cooldown:
+    default-days: 7
+    semver-major-days: 14
   groups:
     aws-sdk:
       patterns:
@@ -260,6 +278,9 @@ updates:
     time: "10:00"
     timezone: Europe/Madrid
   open-pull-requests-limit: 5
+  cooldown:
+    default-days: 7
+    semver-major-days: 14
   groups:
     actions-minor-patch:
       update-types:
