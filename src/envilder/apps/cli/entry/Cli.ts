@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
@@ -8,11 +9,16 @@ import { DispatchActionCommand } from '../../../core/application/dispatch/Dispat
 import type { DispatchActionCommandHandler } from '../../../core/application/dispatch/DispatchActionCommandHandler.js';
 import type { CliOptions } from '../../../core/domain/CliOptions.js';
 import type { MapFileConfig } from '../../../core/domain/MapFileConfig.js';
+import { OperationMode } from '../../../core/domain/OperationMode.js';
+import type { ILogger } from '../../../core/domain/ports/ILogger.js';
 import { PackageVersionReader } from '../../../core/infrastructure/package/PackageVersionReader.js';
 import { readMapFileConfig } from '../../../core/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../../core/types.js';
 import { executeWithSsoRecovery } from '../recovery/SsoLoginRecovery.js';
 import { Startup } from '../Startup.js';
+
+const DEFAULT_MAP_FILE = 'envilder.json';
+const DEFAULT_ENV_FILE = '.env';
 
 let serviceProvider: Container;
 
@@ -43,16 +49,16 @@ export async function main() {
   ${pc.yellow('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')}
 
   ${pc.green('>')} ${pc.bold('Generate a .env file')}  ${pc.dim('(pull secrets from the cloud)')}
-    ${pc.cyan('envilder --map=envilder.json --envfile=.env')}
+    ${pc.cyan('envilder')}  ${pc.dim('# uses envilder.json → .env by default')}
 
   ${pc.magenta('>')} ${pc.bold('Sync .env back to cloud')}  ${pc.dim('(push secrets up)')}
-    ${pc.cyan('envilder --push --map=envilder.json --envfile=.env')}
+    ${pc.cyan('envilder --push')}  ${pc.dim('# uses envilder.json + .env by default')}
 
   ${pc.red('>')} ${pc.bold('Push a single secret')}
     ${pc.cyan('envilder --push --key=API_KEY --value=s3cret --secret-path=/my/path')}
 
   ${pc.blue('>')} ${pc.bold('Use Azure Key Vault')}
-    ${pc.cyan('envilder --provider=azure --map=envilder.json --envfile=.env')}
+    ${pc.cyan('envilder --provider=azure --vault-url=https://my-vault.vault.azure.net')}
 `;
 
   program
@@ -61,11 +67,11 @@ export async function main() {
     .version(version)
     .option(
       '--map <path>',
-      'Path to the JSON file with environment variable mapping (required for most commands)',
+      `Path to the JSON file with environment variable mapping (default: ${DEFAULT_MAP_FILE})`,
     )
     .option(
       '--envfile <path>',
-      'Path to the .env file to be generated or imported (required for most commands)',
+      `Path to the .env file to be generated or imported (default: ${DEFAULT_ENV_FILE})`,
     )
     .option('--profile <name>', 'AWS CLI profile to use (optional)')
     .option(
@@ -112,8 +118,21 @@ export async function main() {
         vaultUrl,
         ...options
       }: CliOptions & { provider?: string; vaultUrl?: string }) => {
-        const fileConfig = options.map
-          ? await readMapFileConfig(options.map)
+        const mode = DispatchActionCommand.determineOperationMode(options);
+        const isPushSingle = mode === OperationMode.PUSH_SINGLE;
+        const resolvedMap = resolveMapFile(options.map, {
+          required: !isPushSingle,
+        });
+        const resolvedEnvfile = resolveEnvfile(options.envfile);
+
+        const resolvedOptions: CliOptions = {
+          ...options,
+          map: resolvedMap,
+          envfile: resolvedEnvfile,
+        };
+
+        const fileConfig = resolvedMap
+          ? await readMapFileConfig(resolvedMap)
           : {};
 
         const config: MapFileConfig = {
@@ -137,11 +156,60 @@ export async function main() {
           .configureInfrastructure(config, infraOptions)
           .create();
 
-        await executeWithSsoRecovery(() => executeCommand(options));
+        if (isPushSingle) {
+          const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
+          const providerName = config.provider ?? 'aws';
+          const vaultInfo = config.vaultUrl ? `, vault=${config.vaultUrl}` : '';
+          const source = resolvedMap
+            ? `configuration from ${resolvedMap}`
+            : 'configuration';
+          logger.info(`Using ${source}: provider=${providerName}${vaultInfo}`);
+        }
+
+        await executeWithSsoRecovery(() => executeCommand(resolvedOptions));
       },
     );
 
   await program.parseAsync(process.argv);
+}
+
+function resolveMapFile(
+  mapOption: string | undefined,
+  options: { required: boolean } = { required: true },
+): string | undefined {
+  if (mapOption !== undefined) {
+    const trimmed = mapOption.trim();
+    if (trimmed.length === 0) {
+      throw new Error('Invalid --map value: path must not be empty.');
+    }
+    return trimmed;
+  }
+
+  const defaultPath = join(process.cwd(), DEFAULT_MAP_FILE);
+  if (existsSync(defaultPath)) {
+    return DEFAULT_MAP_FILE;
+  }
+
+  if (!options.required) {
+    return undefined;
+  }
+
+  throw new Error(
+    `No map file found. Provide --map or create ${DEFAULT_MAP_FILE} in the current directory.`,
+  );
+}
+
+function resolveEnvfile(envfileOption: string | undefined): string {
+  if (envfileOption === undefined) {
+    return DEFAULT_ENV_FILE;
+  }
+
+  const trimmed = envfileOption.trim();
+  if (trimmed.length === 0) {
+    throw new Error('Invalid --envfile value: path must not be empty.');
+  }
+
+  return trimmed;
 }
 
 function readPackageVersion(): Promise<string> {

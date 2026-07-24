@@ -38,7 +38,13 @@ If your `envilder.json` file contains:
 }
 ```
 
-Running this command:
+Running this command (uses `envilder.json` and `.env` by default):
+
+```bash
+envilder
+```
+
+With explicit paths:
 
 ```bash
 envilder --map=envilder.json --envfile=.env
@@ -63,8 +69,8 @@ SECRET_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
 
 | Option        | Description                                                        |
 | ------------- | ------------------------------------------------------------------ |
-| `--map`       | JSON mapping of env var to secret path                             |
-| `--envfile`   | Path to write `.env`                                               |
+| `--map`       | JSON mapping of env var to secret path (default: `envilder.json`) |
+| `--envfile`   | Path to write `.env` (default: `.env`)                             |
 | `--provider`  | Cloud provider: `aws` (default) or `azure` (overrides `$config`)   |
 | `--vault-url` | Azure Key Vault URL (overrides `$config.vaultUrl` in map file)     |
 | `--profile`   | AWS profile to use (overrides `$config.profile`)                   |
@@ -74,7 +80,13 @@ SECRET_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
 
 ### Pull Mode Examples
 
-**AWS SSM (default):**
+**AWS SSM (default, zero-config):**
+
+```bash
+envilder
+```
+
+With explicit paths:
 
 ```bash
 envilder --map=envilder.json --envfile=.env
