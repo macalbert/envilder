@@ -202,8 +202,8 @@ importers:
   tests/sdks/nodejs:
     devDependencies:
       '@aws-sdk/client-ssm':
-        specifier: ^3.1093.0
-        version: 3.1093.0
+        specifier: ^3.1092.0
+        version: 3.1092.0
       '@azure/identity':
         specifier: ^4.13.1
         version: 4.13.1
@@ -358,6 +358,10 @@ packages:
 
   '@aws-sdk/client-ssm@3.1085.0':
     resolution: {integrity: sha512-vFYFncOReqEtOj110hdTQK/4JzNEHdVR90Ob6FjdEeb8cNer+HShI64Nuw9J4gTUQAWJ0eErHZqqxQPTViplew==}
+    engines: {node: '>=20.0.0'}
+
+  '@aws-sdk/client-ssm@3.1092.0':
+    resolution: {integrity: sha512-3Mr8wLayhrDrqb99RK66AQQdkxh89JpkdW8L28NXh4sONMgnkXm+6oe/5f1zE+x8EUrJrXkKW08TOHeul9fcLw==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/client-ssm@3.1093.0':
@@ -1438,6 +1442,10 @@ packages:
 
   '@smithy/core@3.29.3':
     resolution: {integrity: sha512-L+Ys6ecjk5vwPMAKHBpPKlJ3DkqwNcnfEISXBZIsVvWG/XKXfsAP8mwIYlTeLcd2ElHdesPI8OuOmJSFAPhm6A==}
+    engines: {node: '>=18.0.0'}
+
+  '@smithy/core@3.29.4':
+    resolution: {integrity: sha512-G1GRglAabzEhqghJMBAd54FkRS7SAFGHEwbhcI9r+O+LIMuFsLyXkLZkCoFSgAglRu8s/URVXJB0hglq3ZipIg==}
     engines: {node: '>=18.0.0'}
 
   '@smithy/core@3.29.7':
@@ -3923,6 +3931,17 @@ snapshots:
       '@smithy/types': 4.16.1
       tslib: 2.8.1
 
+  '@aws-sdk/client-ssm@3.1092.0':
+    dependencies:
+      '@aws-sdk/core': 3.976.0
+      '@aws-sdk/credential-provider-node': 3.972.71
+      '@aws-sdk/types': 3.974.2
+      '@smithy/core': 3.29.4
+      '@smithy/fetch-http-handler': 5.6.6
+      '@smithy/node-http-handler': 4.9.6
+      '@smithy/types': 4.16.1
+      tslib: 2.8.1
+
   '@aws-sdk/client-ssm@3.1093.0':
     dependencies:
       '@aws-sdk/core': 3.976.0
@@ -5142,6 +5161,11 @@ snapshots:
   '@simple-libs/stream-utils@2.0.0': {}
 
   '@smithy/core@3.29.3':
+    dependencies:
+      '@smithy/types': 4.16.1
+      tslib: 2.8.1
+
+  '@smithy/core@3.29.4':
     dependencies:
       '@smithy/types': 4.16.1
       tslib: 2.8.1
