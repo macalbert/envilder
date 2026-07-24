@@ -51,6 +51,9 @@ jobs:
         uses: dependabot/fetch-metadata@v3
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
+          # The job remains gated on the Dependabot PR author above. Allow a
+          # maintainer to repair a conflicted Dependabot branch before merging.
+          skip-commit-verification: true
 
       - name: ✅ Enable auto-merge
         if: steps.meta.outputs.update-type != 'version-update:semver-major'
