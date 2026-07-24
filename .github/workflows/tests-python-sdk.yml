@@ -69,7 +69,7 @@ jobs:
         uses: astral-sh/setup-uv@v7
 
       - name: 🪙 Collect Coins (Configure AWS credentials)
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@v6.2.2
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
