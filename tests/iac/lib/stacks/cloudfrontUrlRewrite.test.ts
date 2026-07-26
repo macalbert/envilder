@@ -216,6 +216,36 @@ describe("CloudFront URL Rewrite Function", () => {
 		});
 	});
 
+	test("Should_SkipInvalidQueryEntries_When_QueryStringObjectContainsNullishValues", () => {
+		// Arrange
+		const event = {
+			request: {
+				uri: "/docs",
+				querystring: {
+					"search term": {
+						value: "hello world",
+					},
+					broken: null,
+					missing: undefined,
+				},
+			},
+		};
+		const expected = "/docs/?search%20term=hello%20world";
+
+		// Act
+		const actual = handlerFunc(event);
+
+		// Assert
+		expect(actual).toMatchObject({
+			statusCode: 301,
+			headers: {
+				location: {
+					value: expected,
+				},
+			},
+		});
+	});
+
 	test("Should_RedirectLegacySitemap_When_SitemapXmlIsRequested", () => {
 		// Arrange
 		const event = {

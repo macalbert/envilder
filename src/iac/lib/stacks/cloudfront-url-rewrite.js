@@ -53,18 +53,25 @@ function handler(event) {
 		for (var key in querystring) {
 			if (Object.prototype.hasOwnProperty.call(querystring, key)) {
 				var parameter = querystring[key];
-				var values = parameter.multiValue || [parameter];
+				if (parameter == null || typeof parameter !== "object") {
+					continue;
+				}
+				var values = Array.isArray(parameter.multiValue)
+					? parameter.multiValue
+					: [parameter];
 
 				for (var i = 0; i < values.length; i++) {
+					var entry = values[i];
+					if (entry == null || typeof entry !== "object") {
+						continue;
+					}
 					var hasValue = Object.prototype.hasOwnProperty.call(
-						values[i],
+						entry,
 						"value",
 					);
 					parts.push(
 						encodeURIComponent(key) +
-							(hasValue
-								? "=" + encodeURIComponent(values[i].value)
-								: ""),
+							(hasValue ? "=" + encodeURIComponent(entry.value) : ""),
 					);
 				}
 			}
