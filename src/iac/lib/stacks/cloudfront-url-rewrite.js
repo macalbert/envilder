@@ -56,8 +56,16 @@ function handler(event) {
 				var values = parameter.multiValue || [parameter];
 
 				for (var i = 0; i < values.length; i++) {
-					var value = values[i].value;
-					parts.push(key + (value ? "=" + value : ""));
+					var hasValue = Object.prototype.hasOwnProperty.call(
+						values[i],
+						"value",
+					);
+					parts.push(
+						encodeURIComponent(key) +
+							(hasValue
+								? "=" + encodeURIComponent(values[i].value)
+								: ""),
+					);
 				}
 			}
 		}

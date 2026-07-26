@@ -133,6 +133,45 @@ describe("CloudFront URL Rewrite Function", () => {
 		});
 	});
 
+	test(
+		"Should_PercentEncodeQueryObjectParameters_When_RedirectingUrl",
+		() => {
+			// Arrange
+			const event = {
+				request: {
+					uri: "/docs",
+					querystring: {
+						"category name": {
+							value: "green tea&herbs",
+						},
+						flag: {},
+						empty: {
+							value: "",
+						},
+						"a&b": {
+							value: "c=d#f",
+						},
+					},
+				},
+			};
+			const expected =
+				"/docs/?category%20name=green%20tea%26herbs&flag&empty=&a%26b=c%3Dd%23f";
+
+			// Act
+			const actual = handlerFunc(event);
+
+			// Assert
+			expect(actual).toMatchObject({
+				statusCode: 301,
+				headers: {
+					location: {
+						value: expected,
+					},
+				},
+			});
+		},
+	);
+
 	test("Should_RedirectToTrailingSlash_When_PathHasNoFileExtension", () => {
 		// Arrange
 		const event = {
