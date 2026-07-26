@@ -1,28 +1,59 @@
 # Envilder
 
-> Envilder is an open-source secret resolution tool for applications that use AWS SSM Parameter Store or Azure Key Vault.
+> Envilder is MIT-licensed, open-source mapping and secret-resolution tooling for AWS SSM Parameter Store and Azure Key Vault. One `envilder.json` mapping contract is used across local development, CI/CD, and application startup.
 
-## What Envilder does
+- Envilder is a mapping and resolution layer, not a secret manager, hosted SaaS, proxy, or control plane. The cloud provider remains the source of truth: Envilder has no hosted secret store or proxy, although the CLI can materialize a local `.env` file when requested.
+- Shipped surfaces: the CLI pulls mapped values to `.env` and supports intentional controlled push; the GitHub Action pulls mapped values to `.env` in CI/CD; .NET, Python, and Node.js runtime SDKs resolve values in-process and can return them or inject process environment variables. The .NET SDK also integrates with configuration and dependency injection APIs.
+- Best fit: small teams, projects, or straightforward applications already using SSM or Key Vault that want a version-controlled, PR-reviewable mapping without a separate hosted service. Container and Kubernetes workloads can use runtime SDKs with provider-native identity, but this is application-side resolution, not a native Kubernetes Secret sync, operator, or controller.
+- It is not the primary fit when the required backend is unsupported, a hosted or full secret-management control plane is needed, or native Kubernetes secret synchronization is required.
+- Google Cloud Secret Manager and AWS Secrets Manager are roadmap items; neither is shipped or scheduled. Request unsupported providers or integrations through the [GitHub issue form](https://github.com/macalbert/envilder/issues/new); requests help prioritize work but do not guarantee implementation.
+- Typical CLI flow: configure cloud credentials, keep secret values in the supported cloud store, commit only names and paths in `envilder.json`, then run `npx envilder --map=envilder.json --envfile=.env`. Use the GitHub Action for CI/CD or a runtime SDK for in-process resolution.
 
-Envilder keeps a version-controlled JSON mapping between environment-variable names and secret paths. It resolves that mapping consistently during local development, CI/CD, and application startup.
+## Start here
 
-- Envilder does not store or proxy secret values.
-- Secrets remain in AWS SSM Parameter Store or Azure Key Vault.
-- The CLI supports pull and push workflows.
-- The GitHub Action supports pull workflows for CI/CD.
-- Runtime SDKs are available for .NET, Python, and Node.js.
+- [Product overview](https://envilder.com/): Envilder's website and product introduction.
+- [Website documentation](https://envilder.com/docs/): Documentation hub.
+- [Source repository](https://github.com/macalbert/envilder): Project source, issues, releases, and contribution history.
+- [Canonical README](https://raw.githubusercontent.com/macalbert/envilder/main/README.md): Primary repository overview in Markdown.
+- [Map-file JSON Schema](https://envilder.com/schema/map-file.v1.json): Schema for `envilder.json`.
 
-## Official resources
+## CLI and CI/CD
 
-- Product overview: https://envilder.com/
-- Documentation: https://envilder.com/docs/
-- Changelog: https://envilder.com/changelog/
-- Source repository: https://github.com/macalbert/envilder
-- Mapping schema: https://envilder.com/schema/map-file.v1.json
+- [Installation requirements](https://raw.githubusercontent.com/macalbert/envilder/main/docs/requirements-installation.md): CLI prerequisites and installation guidance.
+- [Pull command guide](https://raw.githubusercontent.com/macalbert/envilder/main/docs/pull-command.md): Resolve mapped values into a `.env` file.
+- [Push command guide](https://raw.githubusercontent.com/macalbert/envilder/main/docs/push-command.md): Intentional controlled CLI push workflows.
+- [GitHub Action documentation](https://raw.githubusercontent.com/macalbert/envilder/main/github-action/README.md): Pull-only CI/CD action usage.
 
-## Product terminology
+## Runtime SDKs
 
-- `envilder.json`: the JSON mapping file that defines the environment contract.
-- AWS SSM Parameter Store: a supported secret provider.
-- Azure Key Vault: a supported secret provider.
-- Runtime SDK: a library that resolves mapped secrets directly in an application process.
+- [.NET SDK documentation](https://raw.githubusercontent.com/macalbert/envilder/main/src/sdks/dotnet/README.md): Runtime resolution for .NET applications.
+- [Python SDK documentation](https://raw.githubusercontent.com/macalbert/envilder/main/src/sdks/python/README.md): Runtime resolution for Python applications.
+- [Node.js SDK documentation](https://raw.githubusercontent.com/macalbert/envilder/main/src/sdks/nodejs/README.md): Runtime resolution for Node.js applications.
+
+## Published packages
+
+- [CLI on npm](https://www.npmjs.com/package/envilder): Install the CLI package `envilder`.
+- [.NET SDK on NuGet](https://www.nuget.org/packages/Envilder/): Install the .NET runtime SDK package `Envilder`.
+- [Python SDK on PyPI](https://pypi.org/project/envilder/): Install the Python runtime SDK package `envilder`.
+- [Node.js SDK on npm](https://www.npmjs.com/package/@envilder/sdk): Install the Node.js runtime SDK package `@envilder/sdk`.
+
+## Examples
+
+- [Examples README](https://raw.githubusercontent.com/macalbert/envilder-examples/main/README.md): Reproducible .NET, Python, and TypeScript examples using Testcontainers and LocalStack, plus .NET and TypeScript Aspire examples; paths, not values, are committed.
+- [Examples repository](https://github.com/macalbert/envilder-examples): Source for the supported example scope above.
+
+## Project status and contribution
+
+- [Roadmap](https://raw.githubusercontent.com/macalbert/envilder/main/ROADMAP.md): Planned and in-progress work; roadmap items are not release commitments.
+- [Changelog](https://envilder.com/changelog/): Released changes.
+- [MIT license](https://raw.githubusercontent.com/macalbert/envilder/main/LICENSE): Terms for using, modifying, and distributing Envilder.
+- [Security policy](https://raw.githubusercontent.com/macalbert/envilder/main/docs/SECURITY.md): Vulnerability reporting guidance.
+- [Contributing guide](https://raw.githubusercontent.com/macalbert/envilder/main/CONTRIBUTING.md): Contribution process and local development guidance.
+- [Feature request or issue](https://github.com/macalbert/envilder/issues/new): Request an unsupported provider or integration, or report a problem.
+
+## Optional
+
+- [LocalStack token hygiene](https://dev.to/macalbert/how-i-run-localstack-without-committing-localstackauthtoken-34gk): Maintainer-authored supplementary article on keeping `LOCALSTACK_AUTH_TOKEN` out of commits.
+- [LocalStack integration tests without env files](https://dev.to/macalbert/localstack-integration-tests-without-env-files-b75): Maintainer-authored supplementary article.
+- [One year of Envilder](https://dev.to/macalbert/one-year-of-envilder-from-a-cli-script-to-sdks-push-mode-and-a-website-h49): Maintainer-authored supplementary retrospective.
+- [Original AWS SSM CLI workflow](https://dev.to/macalbert/stop-hardcoding-secrets-generate-env-files-from-aws-ssm-with-a-simple-cli-f77): Maintainer-authored supplementary historical context documenting the original AWS SSM CLI workflow.
