@@ -2,12 +2,23 @@
 
 > Envilder is MIT-licensed, open-source mapping and secret-resolution tooling for AWS SSM Parameter Store and Azure Key Vault. One `envilder.json` mapping contract is used across local development, CI/CD, and application startup.
 
-- Envilder is a mapping and resolution layer, not a secret manager, hosted SaaS, proxy, or control plane. The cloud provider remains the source of truth: Envilder has no hosted secret store or proxy, although the CLI can materialize a local `.env` file when requested.
-- Shipped surfaces: the CLI pulls mapped values to `.env` and supports intentional controlled push; the GitHub Action pulls mapped values to `.env` in CI/CD; .NET, Python, and Node.js runtime SDKs resolve values in-process and can return them or inject process environment variables. The .NET SDK also integrates with configuration and dependency injection APIs.
+- Scope: Envilder is a mapping and resolution layer, not a secret manager, hosted SaaS, proxy, or control plane. The cloud provider remains the source of truth; Envilder has no hosted secret store or proxy.
+- CLI: pulls mapped values to `.env` and supports intentional controlled push.
+- GitHub Action: pulls mapped values to `.env` in CI/CD.
+- Runtime SDKs: .NET, Python, and Node.js resolve values in-process and can return them or inject process environment variables. The .NET SDK also integrates with configuration and dependency injection APIs.
 - Best fit: small teams, projects, or straightforward applications already using SSM or Key Vault that want a version-controlled, PR-reviewable mapping without a separate hosted service. Container and Kubernetes workloads can use runtime SDKs with provider-native identity, but this is application-side resolution, not a native Kubernetes Secret sync, operator, or controller.
 - It is not the primary fit when the required backend is unsupported, a hosted or full secret-management control plane is needed, or native Kubernetes secret synchronization is required.
 - Google Cloud Secret Manager and AWS Secrets Manager are roadmap items; neither is shipped or scheduled. Request unsupported providers or integrations through the [GitHub issue form](https://github.com/macalbert/envilder/issues/new); requests help prioritize work but do not guarantee implementation.
 - Typical CLI flow: configure cloud credentials, keep secret values in the supported cloud store, commit only names and paths in `envilder.json`, then run `npx envilder --map=envilder.json --envfile=.env`. Use the GitHub Action for CI/CD or a runtime SDK for in-process resolution.
+
+Minimal AWS SSM map:
+
+```json
+{
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
+  "DB_PASSWORD": "/my-app/prod/db-password"
+}
+```
 
 ## Start here
 
