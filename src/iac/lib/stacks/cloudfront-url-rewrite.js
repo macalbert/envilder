@@ -1,7 +1,3 @@
-// CloudFront Function for URL rewriting
-// Compatible with CloudFront Functions runtime (ES5.1)
-// Query strings are automatically preserved by CloudFront
-
 function handler(event) {
 	var req = event.request;
 	var uri = req.uri;
@@ -48,22 +44,71 @@ function handler(event) {
 		return false;
 	}
 
+	function getQueryString(querystring) {
+		if (typeof querystring === "string") {
+			return querystring ? "?" + querystring : "";
+		}
+
+		var parts = [];
+		for (var key in querystring) {
+			if (Object.prototype.hasOwnProperty.call(querystring, key)) {
+				var parameter = querystring[key];
+				if (parameter == null || typeof parameter !== "object") {
+					continue;
+				}
+				var values = Array.isArray(parameter.multiValue)
+					? parameter.multiValue
+					: [parameter];
+
+				for (var i = 0; i < values.length; i++) {
+					var entry = values[i];
+					if (entry == null || typeof entry !== "object") {
+						continue;
+					}
+					var hasValue = Object.prototype.hasOwnProperty.call(
+						entry,
+						"value",
+					);
+					parts.push(
+						encodeURIComponent(key) +
+							(hasValue ? "=" + encodeURIComponent(entry.value) : ""),
+					);
+				}
+			}
+		}
+
+		return parts.length ? "?" + parts.join("&") : "";
+	}
+
+	function redirect(path) {
+		return {
+			statusCode: 301,
+			statusDescription: "Moved Permanently",
+			headers: {
+				location: {
+					value: path + getQueryString(req.querystring),
+				},
+			},
+		};
+	}
+
+	if (uri === "/sitemap.xml") {
+		return redirect("/sitemap-index.xml");
+	}
+
 	// Exclude API routes
 	var lower = uri.toLowerCase();
 	if (hasPrefix(lower, "/api/")) {
 		return req; // no changes
 	}
 
-	// Remove trailing slash (except homepage)
-	if (uri !== "/" && endsWith(uri, "/")) {
-		uri = uri.substring(0, uri.length - 1);
-		lower = uri.toLowerCase(); // recompute after modifying uri
-	}
-
-	// Append /index.html if not homepage and no known extension
-	// Astro generates directory-based URLs: /docs → /docs/index.html
+	// Astro generates directory-based URLs with trailing slashes.
 	if (uri !== "/" && !hasKnownExt(lower)) {
-		uri += "/index.html";
+		if (!endsWith(uri, "/")) {
+			return redirect(uri + "/");
+		}
+
+		uri += "index.html";
 	}
 
 	req.uri = uri;

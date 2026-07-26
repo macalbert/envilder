@@ -1,0 +1,99 @@
+---
+import Footer from '../components/Footer.astro';
+import Navbar from '../components/Navbar.astro';
+import { defaultLang, languages, useTranslations } from '../i18n/utils';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const lang = defaultLang;
+const t = useTranslations(lang);
+const notFoundTranslations = Object.fromEntries(
+  Object.keys(languages).map((locale) => [
+    locale,
+    useTranslations(locale).notFound,
+  ]),
+);
+---
+
+<BaseLayout
+  title={t.notFound.title}
+  description={t.notFound.description}
+  lang={lang}
+  noindex
+>
+  <Navbar lang={lang} />
+  <main class="not-found-page" id="main-content">
+    <section class="section">
+      <div class="container">
+        <div class="not-found-content pixel-card" data-not-found-content>
+          <p class="not-found-code">404</p>
+          <h1 data-not-found-heading>{t.notFound.heading}</h1>
+          <p data-not-found-body>{t.notFound.body}</p>
+          <a class="btn btn-primary" data-not-found-home href="/">{t.notFound.home}</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer lang={lang} />
+</BaseLayout>
+
+<script define:vars={{ defaultLang, notFoundTranslations }}>
+  const requestedLocale = window.location.pathname.split('/')[1];
+  const locale = Object.hasOwn(notFoundTranslations, requestedLocale)
+    ? requestedLocale
+    : defaultLang;
+  const translation = notFoundTranslations[locale];
+  const homePath = locale === defaultLang ? '/' : `/${locale}/`;
+
+  document
+    .querySelector('[data-not-found-content]')
+    ?.setAttribute('lang', locale);
+  document.title = translation.title;
+  document
+    .querySelector('meta[name="description"]')
+    ?.setAttribute('content', translation.description);
+  const heading = document.querySelector('[data-not-found-heading]');
+  const body = document.querySelector('[data-not-found-body]');
+  const homeLink = document.querySelector('[data-not-found-home]');
+
+  if (heading) {
+    heading.textContent = translation.heading;
+  }
+
+  if (body) {
+    body.textContent = translation.body;
+  }
+
+  if (homeLink) {
+    homeLink.textContent = translation.home;
+    homeLink.setAttribute('href', homePath);
+  }
+</script>
+
+<style>
+  .not-found-page {
+    min-height: 70vh;
+    padding-top: calc(var(--nav-height) + var(--space-3xl));
+  }
+
+  .not-found-content {
+    max-width: 42rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .not-found-code {
+    margin-bottom: var(--space-md);
+    color: var(--color-primary);
+    font-family: var(--font-pixel);
+    font-size: clamp(2rem, 8vw, 4rem);
+  }
+
+  .not-found-content h1 {
+    margin-bottom: var(--space-md);
+  }
+
+  .not-found-content p:not(.not-found-code) {
+    margin-bottom: var(--space-xl);
+    color: var(--color-text-muted);
+  }
+</style>

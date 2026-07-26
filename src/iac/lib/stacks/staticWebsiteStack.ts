@@ -134,15 +134,15 @@ export class StaticWebsiteStack extends CustomStack {
 
 		const errorResponse403: ErrorResponse = {
 			httpStatus: 403,
-			responseHttpStatus: 200,
-			responsePagePath: "/index.html",
+			responseHttpStatus: 404,
+			responsePagePath: "/404.html",
 			ttl: Duration.seconds(10),
 		};
 
 		const errorResponse404: ErrorResponse = {
 			httpStatus: 404,
-			responseHttpStatus: 200,
-			responsePagePath: "/index.html",
+			responseHttpStatus: 404,
+			responsePagePath: "/404.html",
 			ttl: Duration.seconds(10),
 		};
 
