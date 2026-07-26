@@ -2,6 +2,25 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 describe("CloudFront URL Rewrite Function", () => {
+	interface CloudFrontRequest {
+		uri: string;
+		querystring: unknown;
+	}
+
+	interface CloudFrontRedirectResponse {
+		statusCode: number;
+		statusDescription: string;
+		headers: {
+			location: {
+				value: string;
+			};
+		};
+	}
+
+	type CloudFrontHandlerResult =
+		| CloudFrontRequest
+		| CloudFrontRedirectResponse;
+
 	const handlerPath = join(
 		__dirname,
 		"../../../../src/iac/lib/stacks/cloudfront-url-rewrite.js",
@@ -11,9 +30,9 @@ describe("CloudFront URL Rewrite Function", () => {
 	const handlerFunc = new Function(
 		"event",
 		`${handlerCode}; return handler(event);`,
-	) as (event: { request: { uri: string; querystring: unknown } }) => {
-		uri: string;
-	};
+	) as (event: {
+		request: CloudFrontRequest;
+	}) => CloudFrontHandlerResult;
 
 	interface TestCase {
 		input: string;
@@ -52,10 +71,12 @@ describe("CloudFront URL Rewrite Function", () => {
 		};
 
 		// Act
-		const result = handlerFunc(event);
+		const actual = handlerFunc(event);
 
 		// Assert
-		expect(result.uri).toBe(expectedUri);
+		expect(actual).toMatchObject({
+			uri: expectedUri,
+		});
 	});
 
 	test.each(
