@@ -1,11 +1,17 @@
 ---
 import Footer from '../components/Footer.astro';
 import Navbar from '../components/Navbar.astro';
-import { useTranslations } from '../i18n/utils';
+import { defaultLang, languages, useTranslations } from '../i18n/utils';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-const lang = 'en';
+const lang = defaultLang;
 const t = useTranslations(lang);
+const notFoundTranslations = Object.fromEntries(
+  Object.keys(languages).map((locale) => [
+    locale,
+    useTranslations(locale).notFound,
+  ]),
+);
 ---
 
 <BaseLayout
@@ -20,15 +26,37 @@ const t = useTranslations(lang);
       <div class="container">
         <div class="not-found-content pixel-card">
           <p class="not-found-code">404</p>
-          <h1>{t.notFound.heading}</h1>
-          <p>{t.notFound.body}</p>
-          <a class="btn btn-primary" href="/">{t.notFound.home}</a>
+          <h1 data-not-found-heading>{t.notFound.heading}</h1>
+          <p data-not-found-body>{t.notFound.body}</p>
+          <a class="btn btn-primary" data-not-found-home href="/">{t.notFound.home}</a>
         </div>
       </div>
     </section>
   </main>
   <Footer lang={lang} />
 </BaseLayout>
+
+<script define:vars={{ defaultLang, notFoundTranslations }}>
+  const requestedLocale = window.location.pathname.split('/')[1];
+  const locale = Object.hasOwn(notFoundTranslations, requestedLocale)
+    ? requestedLocale
+    : defaultLang;
+  const translation = notFoundTranslations[locale];
+  const homePath = locale === defaultLang ? '/' : `/${locale}/`;
+
+  document.documentElement.lang = locale;
+  document.title = translation.title;
+  document
+    .querySelector('meta[name="description"]')
+    ?.setAttribute('content', translation.description);
+  document.querySelector('[data-not-found-heading]').textContent =
+    translation.heading;
+  document.querySelector('[data-not-found-body]').textContent =
+    translation.body;
+  const homeLink = document.querySelector('[data-not-found-home]');
+  homeLink.textContent = translation.home;
+  homeLink.setAttribute('href', homePath);
+</script>
 
 <style>
   .not-found-page {
