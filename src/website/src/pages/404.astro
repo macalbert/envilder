@@ -51,13 +51,22 @@ const notFoundTranslations = Object.fromEntries(
   document
     .querySelector('meta[name="description"]')
     ?.setAttribute('content', translation.description);
-  document.querySelector('[data-not-found-heading]').textContent =
-    translation.heading;
-  document.querySelector('[data-not-found-body]').textContent =
-    translation.body;
+  const heading = document.querySelector('[data-not-found-heading]');
+  const body = document.querySelector('[data-not-found-body]');
   const homeLink = document.querySelector('[data-not-found-home]');
-  homeLink.textContent = translation.home;
-  homeLink.setAttribute('href', homePath);
+
+  if (heading) {
+    heading.textContent = translation.heading;
+  }
+
+  if (body) {
+    body.textContent = translation.body;
+  }
+
+  if (homeLink) {
+    homeLink.textContent = translation.home;
+    homeLink.setAttribute('href', homePath);
+  }
 </script>
 
 <style>
