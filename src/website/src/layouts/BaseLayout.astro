@@ -1,4 +1,6 @@
 ---
+import { defaultLang, languages } from '../i18n/utils';
+
 export interface Props {
   title?: string;
   description?: string;
@@ -23,12 +25,24 @@ const skipText = skipLabel[lang] ?? skipLabel.en;
 const siteUrl = Astro.site ?? 'https://envilder.com';
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
 const siteRootUrl = new URL('/', siteUrl).href;
-const pathWithoutLocale =
-  Astro.url.pathname.replace(/^\/(?:ca|es)(?=\/|$)/, '') || '/';
-const alternateLanguages = ['en', 'ca', 'es'].map((language) => ({
+const alternateLanguages = Object.keys(languages);
+const localizedLanguages = alternateLanguages.filter(
+  (language) => language !== defaultLang,
+);
+const localizedLanguagePattern = localizedLanguages.join('|');
+const pathWithoutLocale = localizedLanguagePattern
+  ? Astro.url.pathname.replace(
+      new RegExp(`^/(?:${localizedLanguagePattern})(?=/|$)`),
+      '',
+    ) || '/'
+  : Astro.url.pathname;
+const defaultLanguageUrl = new URL(pathWithoutLocale, siteUrl).href;
+const alternateLanguageUrls = alternateLanguages.map((language) => ({
   language,
   href: new URL(
-    language === 'en' ? pathWithoutLocale : `/${language}${pathWithoutLocale}`,
+    language === defaultLang
+      ? pathWithoutLocale
+      : `/${language}${pathWithoutLocale}`,
     siteUrl,
   ).href,
 }));
@@ -97,14 +111,14 @@ const structuredData = JSON.stringify({
     {noindex && <meta name="robots" content="noindex,follow" />}
     <link rel="canonical" href={canonicalUrl} />
     {!noindex &&
-      alternateLanguages.map((alternate) => (
+      alternateLanguageUrls.map((alternate) => (
         <link
           rel="alternate"
           hreflang={alternate.language}
           href={alternate.href}
         />
       ))}
-    {!noindex && <link rel="alternate" hreflang="x-default" href={alternateLanguages[0].href} />}
+    {!noindex && <link rel="alternate" hreflang="x-default" href={defaultLanguageUrl} />}
     <script type="application/ld+json" set:html={structuredData}></script>
 
     <!-- OG -->
