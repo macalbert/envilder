@@ -44,7 +44,7 @@ jobs:
       - name: ⚠️ Warn when metadata cannot be verified
         if: steps.meta.outcome == 'failure'
         run: |
-          echo "::warning title=Metadata verification failed::Dependabot commit verification failed. Review the pull request manually."
+          echo "::warning title=Dependabot metadata unavailable::Failed to fetch or verify Dependabot metadata. Check the workflow logs and review the pull request manually."
 
       - name: ℹ️ Require manual merge
         run: |
