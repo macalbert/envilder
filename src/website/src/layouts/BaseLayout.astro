@@ -1,14 +1,18 @@
 ---
+import { defaultLang, languages } from '../i18n/utils';
+
 export interface Props {
   title?: string;
   description?: string;
   lang?: string;
+  noindex?: boolean;
 }
 
 const {
   title = 'Envilder: centralize your secrets. One command.',
   description = 'A CLI tool and GitHub Action that securely centralizes environment variables from AWS SSM Parameter Store or Azure Key Vault as a single source of truth.',
   lang = 'en',
+  noindex = false,
 } = Astro.props;
 
 const skipLabel: Record<string, string> = {
@@ -18,7 +22,82 @@ const skipLabel: Record<string, string> = {
 };
 const skipText = skipLabel[lang] ?? skipLabel.en;
 
-const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
+const siteUrl = Astro.site ?? 'https://envilder.com';
+const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
+const siteRootUrl = new URL('/', siteUrl).href;
+const alternateLanguages = Object.keys(languages);
+const localizedLanguages = alternateLanguages.filter(
+  (language) => language !== defaultLang,
+);
+const localizedLanguagePattern = localizedLanguages.join('|');
+const pathWithoutLocale = localizedLanguagePattern
+  ? Astro.url.pathname.replace(
+      new RegExp(`^/(?:${localizedLanguagePattern})(?=/|$)`),
+      '',
+    ) || '/'
+  : Astro.url.pathname;
+const defaultLanguageUrl = new URL(pathWithoutLocale, siteUrl).href;
+const alternateLanguageUrls = alternateLanguages.map((language) => ({
+  language,
+  href: new URL(
+    language === defaultLang
+      ? pathWithoutLocale
+      : `/${language}${pathWithoutLocale}`,
+    siteUrl,
+  ).href,
+}));
+const isHomePage = pathWithoutLocale === '/';
+const structuredData = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${siteRootUrl}#organization`,
+      name: 'Envilder',
+      url: siteRootUrl,
+      sameAs: ['https://github.com/macalbert/envilder'],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${siteRootUrl}#website`,
+      name: 'Envilder',
+      url: siteRootUrl,
+      publisher: {
+        '@id': `${siteRootUrl}#organization`,
+      },
+    },
+    ...(!noindex
+      ? [
+          {
+            '@type': 'WebPage',
+            '@id': `${canonicalUrl}#webpage`,
+            url: canonicalUrl,
+            name: title,
+            description,
+            inLanguage: lang,
+            isPartOf: {
+              '@id': `${siteRootUrl}#website`,
+            },
+          },
+        ]
+      : []),
+    ...(isHomePage && !noindex
+      ? [
+          {
+            '@type': 'SoftwareApplication',
+            '@id': `${siteRootUrl}#software`,
+            name: 'Envilder',
+            description,
+            applicationCategory: 'DeveloperApplication',
+            operatingSystem: 'Windows, macOS, Linux',
+            isAccessibleForFree: true,
+            codeRepository: 'https://github.com/macalbert/envilder',
+            license: 'https://github.com/macalbert/envilder/blob/main/LICENSE',
+          },
+        ]
+      : []),
+  ],
+});
 ---
 
 <!doctype html>
@@ -29,6 +108,18 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
     <meta name="description" content={description} />
     <meta name="author" content="Marçal Albert Castellví" />
     <meta name="generator" content={Astro.generator} />
+    {noindex && <meta name="robots" content="noindex,follow" />}
+    <link rel="canonical" href={canonicalUrl} />
+    {!noindex &&
+      alternateLanguageUrls.map((alternate) => (
+        <link
+          rel="alternate"
+          hreflang={alternate.language}
+          href={alternate.href}
+        />
+      ))}
+    {!noindex && <link rel="alternate" hreflang="x-default" href={defaultLanguageUrl} />}
+    <script type="application/ld+json" set:html={structuredData}></script>
 
     <!-- OG -->
     <meta property="og:type" content="website" />
