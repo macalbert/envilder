@@ -24,7 +24,7 @@ const notFoundTranslations = Object.fromEntries(
   <main class="not-found-page" id="main-content">
     <section class="section">
       <div class="container">
-        <div class="not-found-content pixel-card">
+        <div class="not-found-content pixel-card" data-not-found-content>
           <p class="not-found-code">404</p>
           <h1 data-not-found-heading>{t.notFound.heading}</h1>
           <p data-not-found-body>{t.notFound.body}</p>
@@ -44,7 +44,9 @@ const notFoundTranslations = Object.fromEntries(
   const translation = notFoundTranslations[locale];
   const homePath = locale === defaultLang ? '/' : `/${locale}/`;
 
-  document.documentElement.lang = locale;
+  document
+    .querySelector('[data-not-found-content]')
+    ?.setAttribute('lang', locale);
   document.title = translation.title;
   document
     .querySelector('meta[name="description"]')
