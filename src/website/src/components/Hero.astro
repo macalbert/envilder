@@ -34,6 +34,8 @@ const jsonLines: Line[] = [
   { kind: 'output', segments: [{ text: '}', cls: 'output' }] },
 ];
 
+const cliRule = '━'.repeat(60);
+
 const scenes: Scene[] = [
   {
     id: 'setup',
@@ -98,12 +100,33 @@ const scenes: Scene[] = [
           { text: '=/openai/prod/api-key', cls: 'command' },
         ],
       },
+      { kind: 'blank' },
       {
         kind: 'output',
         delay: 450,
+        segments: [{ text: '📤 PUSHING SECRET', cls: 'highlight' }],
+      },
+      {
+        kind: 'output',
+        segments: [{ text: cliRule, cls: 'highlight' }],
+      },
+      {
+        kind: 'output',
         segments: [
+          { text: '  → ', cls: 'output' },
+          { text: 'OPENAI_API_KEY', cls: 'command' },
+          { text: ' → *****************key', cls: 'output' },
+        ],
+      },
+      { kind: 'blank' },
+      {
+        kind: 'output',
+        segments: [
+          { text: '⭐ SECRET PUSHED', cls: 'highlight' },
+          { text: '  —  ', cls: 'output' },
+          { text: 'OPENAI_API_KEY', cls: 'command' },
           {
-            text: 'Pushed OPENAI_API_KEY=************************lu3 to secret store at path *****************key',
+            text: '=************************lu3 → *****************key',
             cls: 'output',
           },
         ],
@@ -151,16 +174,29 @@ const scenes: Scene[] = [
       {
         kind: 'output',
         delay: 550,
+        segments: [{ text: '🪙  RESOLVING SECRETS', cls: 'highlight' }],
+      },
+      {
+        kind: 'output',
+        segments: [{ text: cliRule, cls: 'highlight' }],
+      },
+      {
+        kind: 'output',
         segments: [
-          { text: 'OPENAI_API_KEY', cls: 'command' },
-          { text: '=************************lu3', cls: 'output' },
+          { text: '  ✓ ', cls: 'flag' },
+          { text: 'OPENAI_API_KEY'.padEnd(20), cls: 'command' },
+          { text: '→ ************************lu3', cls: 'output' },
         ],
       },
+      { kind: 'blank' },
       {
         kind: 'output',
         delay: 220,
         segments: [
-          { text: "Environment File generated at '.env'", cls: 'highlight' },
+          { text: '⭐ LEVEL CLEARED', cls: 'highlight' },
+          { text: '  —  1/1 secrets loaded · ', cls: 'output' },
+          { text: '.env', cls: 'command' },
+          { text: ' written', cls: 'output' },
         ],
       },
     ],
@@ -568,7 +604,8 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
 
   .hero-term-screen {
     display: block;
-    min-height: 21em;
+    height: 21em;
+    overflow: hidden;
   }
 
   .hero-term-screen :global(.line) {
@@ -703,6 +740,7 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
     let current = 0;
     let paused = false;
     let holdTimer: ReturnType<typeof setTimeout> | undefined;
+    let scrollFrame: number | undefined;
 
     const sleep = (ms: number) =>
       new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -733,10 +771,19 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       });
     }
 
+    function keepLatestLineVisible(): void {
+      if (scrollFrame !== undefined) return;
+      scrollFrame = window.requestAnimationFrame(() => {
+        screen!.scrollTop = screen!.scrollHeight;
+        scrollFrame = undefined;
+      });
+    }
+
     function makeLineEl(): HTMLElement {
       const el = document.createElement('span');
       el.className = 'line';
       screen!.appendChild(el);
+      keepLatestLineVisible();
       return el;
     }
 
@@ -758,6 +805,7 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       const prompt = makeLineEl();
       prompt.innerHTML =
         '<span class="prompt">❯</span><span class="cursor"></span>';
+      keepLatestLineVisible();
     }
 
     function scheduleNext(index: number) {
@@ -807,12 +855,14 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       const span = appendSeg(el, seg, cursor);
       if (seg.instant) {
         span.textContent = seg.text;
+        keepLatestLineVisible();
         return true;
       }
       for (const ch of seg.text) {
         await waitWhilePaused();
         if (!alive(id)) return false;
         span.textContent += ch;
+        keepLatestLineVisible();
         await sleep(typeDelay());
       }
       return true;
@@ -908,6 +958,7 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       if (!alive(id)) return;
 
       screen!.innerHTML = '';
+      screen!.scrollTop = 0;
       const cursor = document.createElement('span');
       cursor.className = 'cursor';
 
