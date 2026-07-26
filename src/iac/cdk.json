@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts bin/main.ts",
+  "app": "pnpm exec tsx bin/main.ts",
   "profile": "mac",
   "watch": {
     "include": ["**"],

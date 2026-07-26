@@ -105,7 +105,7 @@ the commit is blocked.
 - Lock files **must** be committed: never `.gitignore` them
 - Dependabot (or Renovate) configured for automatic dependency updates
 - Review advisories on every dependency update PR
-- `@vercel/ncc` bundles GHA: verify bundle is up-to-date (`pnpm verify:gha`)
+- esbuild bundles GHA: verify the bundle is up to date (`pnpm verify:gha`)
 - Pin GitHub Actions to full commit SHA (not `@v4` tags) in production workflows
 
 ### CDK

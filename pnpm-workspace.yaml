@@ -17,8 +17,8 @@ allowBuilds:
 
 catalog:
   '@biomejs/biome': ~2.5.2
-  typescript: ^6.0.3
-  ts-node: ^10.9.2
+  typescript: ^7.0.2
+  tsx: ^4.23.0
   '@types/node': ^26.1.0
   vitest: ^4.1.9
   '@vitest/coverage-v8': ^4.1.9
