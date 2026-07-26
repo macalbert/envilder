@@ -4,6 +4,7 @@ import { main } from '../../../../../src/envilder/apps/cli/entry/Cli';
 import { Startup } from '../../../../../src/envilder/apps/cli/Startup';
 import { DispatchActionCommand } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommand';
 import { DispatchActionCommandHandler } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
+import { InvalidArgumentError } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import { OperationMode } from '../../../../../src/envilder/core/domain/OperationMode';
 
 vi.mock(
@@ -208,7 +209,7 @@ describe('Cli', () => {
     );
   });
 
-  it('Should_ThrowError_When_MapOptionIsOmittedAndEnvilderJsonDoesNotExist', async () => {
+  it('Should_ThrowInvalidArgumentError_When_MapOptionIsOmittedAndEnvilderJsonDoesNotExist', async () => {
     // Arrange
     const { existsSync } = await import('node:fs');
     vi.mocked(existsSync).mockReturnValue(false);
@@ -219,9 +220,7 @@ describe('Cli', () => {
     const action = () => main();
 
     // Assert
-    await expect(action).rejects.toThrow(
-      'No map file found. Provide --map or create envilder.json in the current directory.',
-    );
+    await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
   });
 
   it('Should_UseDefaultEnvfile_When_EnvfileOptionIsOmitted', async () => {
@@ -242,7 +241,7 @@ describe('Cli', () => {
     );
   });
 
-  it('Should_ThrowError_When_MapOptionIsEmptyString', async () => {
+  it('Should_ThrowInvalidArgumentError_When_MapOptionIsEmptyString', async () => {
     // Arrange
     process.argv = ['node', 'cli.js', '--map', '   ', '--envfile', '.env'];
 
@@ -250,9 +249,7 @@ describe('Cli', () => {
     const action = () => main();
 
     // Assert
-    await expect(action).rejects.toThrow(
-      'Invalid --map value: path must not be empty.',
-    );
+    await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
   });
 
   it('Should_ThrowError_When_EnvfileOptionIsEmptyString', async () => {

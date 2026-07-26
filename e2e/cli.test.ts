@@ -220,6 +220,7 @@ describe('Envilder (E2E)', () => {
     onTestFinished(() => rm(zeroConfigDir, { recursive: true, force: true }));
     const defaultMapPath = join(zeroConfigDir, 'envilder.json');
     const defaultEnvPath = join(zeroConfigDir, '.env');
+    const expected = 'zero-config-value-for-TOKEN_SECRET';
 
     const ssmParams = readMappings(mapFilePath);
     await writeFile(
@@ -227,9 +228,8 @@ describe('Envilder (E2E)', () => {
       JSON.stringify({ TOKEN_SECRET: `${ssmPrefix}/Token` }, null, 2),
     );
 
-    for (const [key, ssmPath] of Object.entries(ssmParams)) {
-      const testValue = `zero-config-value-for-${key}`;
-      await SetParameterSsm(ssmPath, testValue);
+    for (const ssmPath of Object.values(ssmParams)) {
+      await SetParameterSsm(ssmPath, expected);
     }
 
     // Act
@@ -238,6 +238,9 @@ describe('Envilder (E2E)', () => {
     // Assert
     expect(actual.code).toBe(0);
     expect(existsSync(defaultEnvPath)).toBe(true);
+    expect(readFileSync(defaultEnvPath, 'utf8')).toContain(
+      `TOKEN_SECRET=${expected}`,
+    );
   });
 
   it('Should_PushEnvFileToSSM_When_PushFlagIsUsed', async () => {

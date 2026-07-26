@@ -8,6 +8,7 @@ import pc from 'picocolors';
 import { DispatchActionCommand } from '../../../core/application/dispatch/DispatchActionCommand.js';
 import type { DispatchActionCommandHandler } from '../../../core/application/dispatch/DispatchActionCommandHandler.js';
 import type { CliOptions } from '../../../core/domain/CliOptions.js';
+import { InvalidArgumentError } from '../../../core/domain/errors/DomainErrors.js';
 import type { MapFileConfig } from '../../../core/domain/MapFileConfig.js';
 import { OperationMode } from '../../../core/domain/OperationMode.js';
 import type { ILogger } from '../../../core/domain/ports/ILogger.js';
@@ -82,18 +83,18 @@ export async function main() {
       '--vault-url <url>',
       'Azure Key Vault URL (overrides $config.vaultUrl in map file)',
     )
-    .option('--push', 'Push local .env file back to cloud provider')
+    .option('--push', 'Push a map-file-backed .env file to the cloud provider')
     .option(
       '--key <name>',
-      'Single environment variable name to push (only with --push)',
+      'Secret name; with --value and --secret-path, performs a single-secret push (no --push required)',
     )
     .option(
       '--value <value>',
-      'Value of the single environment variable to push (only with --push)',
+      'Secret value; with --key and --secret-path, performs a single-secret push (no --push required)',
     )
     .option(
       '--secret-path <path>',
-      'Secret path in your cloud provider for the single variable (only with --push)',
+      'Cloud secret path; with --key and --value, performs a single-secret push (no --push required)',
     )
     .option(
       '--ssm-path <path>',
@@ -180,7 +181,9 @@ function resolveMapFile(
   if (mapOption !== undefined) {
     const trimmed = mapOption.trim();
     if (trimmed.length === 0) {
-      throw new Error('Invalid --map value: path must not be empty.');
+      throw new InvalidArgumentError(
+        'Invalid --map value: path must not be empty.',
+      );
     }
     return trimmed;
   }
@@ -194,7 +197,7 @@ function resolveMapFile(
     return undefined;
   }
 
-  throw new Error(
+  throw new InvalidArgumentError(
     `No map file found. Provide --map or create ${DEFAULT_MAP_FILE} in the current directory.`,
   );
 }
