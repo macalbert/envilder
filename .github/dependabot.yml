@@ -6,7 +6,10 @@
 version: 2
 updates:
 - package-ecosystem: npm
-  directory: "/"
+  directories:
+  - "/"
+  - "/src/sdks/nodejs"
+  - "/tests/sdks/nodejs"
   pull-request-branch-name:
     separator: "/"
   schedule:
@@ -14,30 +17,14 @@ updates:
     day: monday
     time: "10:00"
     timezone: Europe/Madrid
-  open-pull-requests-limit: 5
+  open-pull-requests-limit: 1
   cooldown:
     default-days: 7
     semver-major-days: 14
   groups:
-    aws-sdk:
+    node-minor-patch:
       patterns:
-      - "@aws-sdk/*"
-      update-types:
-      - minor
-      - patch
-    azure-sdk:
-      patterns:
-      - "@azure/*"
-      update-types:
-      - minor
-      - patch
-    dev-minor-patch:
-      dependency-type: development
-      update-types:
-      - minor
-      - patch
-    prod-minor-patch:
-      dependency-type: production
+      - "*"
       update-types:
       - minor
       - patch
@@ -220,50 +207,6 @@ updates:
       - patch
   labels:
   - "pip"
-  - "dependencies"
-  assignees:
-  - macalbert
-
-- package-ecosystem: npm
-  directories:
-  - "/src/sdks/nodejs"
-  - "/tests/sdks/nodejs"
-  pull-request-branch-name:
-    separator: "/"
-  schedule:
-    interval: weekly
-    day: monday
-    time: "10:00"
-    timezone: Europe/Madrid
-  open-pull-requests-limit: 5
-  cooldown:
-    default-days: 7
-    semver-major-days: 14
-  groups:
-    aws-sdk:
-      patterns:
-      - "@aws-sdk/*"
-      update-types:
-      - minor
-      - patch
-    azure-sdk:
-      patterns:
-      - "@azure/*"
-      update-types:
-      - minor
-      - patch
-    dev-minor-patch:
-      dependency-type: development
-      update-types:
-      - minor
-      - patch
-    prod-minor-patch:
-      dependency-type: production
-      update-types:
-      - minor
-      - patch
-  labels:
-  - "npm"
   - "dependencies"
   assignees:
   - macalbert
