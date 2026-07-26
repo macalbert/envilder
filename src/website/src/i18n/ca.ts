@@ -3,9 +3,16 @@ import type { Translations } from './types';
 export const ca: Translations = {
   homeMeta: {
     title:
-      'Envilder: estandarditza com les teves aplicacions consumeixen secrets a cada entorn i runtime.',
+      'Gestió de secrets open source per a AWS SSM i Azure Key Vault | Envilder',
     description:
-      "Defineix el contracte d'entorn una vegada i resol-lo de forma consistent en desenvolupament local, CI/CD i runtime. Amb AWS SSM Parameter Store i Azure Key Vault.",
+      "Envilder és una CLI, GitHub Action i SDK de runtime open source per carregar secrets des d'AWS SSM Parameter Store i Azure Key Vault.",
+  },
+  notFound: {
+    title: 'Pàgina no trobada | Envilder',
+    description: "La pàgina d'Envilder sol·licitada no existeix.",
+    heading: 'No hem trobat aquesta pàgina',
+    body: "L'adreça pot ser incorrecta o la pàgina pot haver-se mogut.",
+    home: 'Torna a l’inici',
   },
   nav: {
     features: 'Funcionalitats',
@@ -451,7 +458,9 @@ export const ca: Translations = {
     builtWith: 'Fet amb Astro. Codi obert a GitHub.',
   },
   changelogPage: {
-    title: 'Changelog Envilder | Versions i actualitzacions',
+    title: 'Canvis d’Envilder: versions de la CLI, GitHub Action i SDKs',
+    description:
+      "Historial de versions de la CLI, GitHub Action i SDKs de runtime .NET, Python i Node.js d'Envilder.",
 
     backToHome: "← Tornar a l'inici",
     fullChangelog: 'Historial de ',
@@ -468,7 +477,9 @@ export const ca: Translations = {
     categorySdkNodejs: 'Node.js',
   },
   docs: {
-    title: 'Docs Envilder | CLI, GitHub Action i AWS SSM',
+    title: 'Docs Envilder: secrets amb AWS SSM i Azure Key Vault',
+    description:
+      "Aprèn a resoldre variables d'entorn des d'AWS SSM Parameter Store i Azure Key Vault amb la CLI, GitHub Action i SDKs de runtime d'Envilder.",
 
     backToHome: "← Tornar a l'inici",
     pageTitle: 'Documentació',

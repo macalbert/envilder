@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { App, Stack } from "aws-cdk-lib";
-import { Template } from "aws-cdk-lib/assertions";
+import { Match, Template } from "aws-cdk-lib/assertions";
 import { AppEnvironment } from "../../../../src/iac/lib/core/types";
 import type { DomainConfig } from "../../../../src/iac/lib/stacks/customStack";
 import {
@@ -42,6 +42,37 @@ describe("Static website Stack", () => {
 		normalizeStaticWebsiteTemplate(template);
 
 		expect(template).toMatchSnapshot("staticWebsiteStackTest");
+	});
+
+	test("Should_ReturnNotFoundPage_When_OriginReturnsMissingObject", () => {
+		// Arrange
+		const stack = new Stack(new App(), "staticWebsiteStackTest", {
+			env: env,
+		});
+		const props = createStaticWebsiteStackProps();
+		const sut = new StaticWebsiteStack(stack, props);
+		const template = Template.fromStack(sut);
+
+		// Act
+		const actual = template;
+
+		// Assert
+		actual.hasResourceProperties("AWS::CloudFront::Distribution", {
+			DistributionConfig: Match.objectLike({
+				CustomErrorResponses: Match.arrayWith([
+					Match.objectLike({
+						ErrorCode: 403,
+						ResponseCode: 404,
+						ResponsePagePath: "/404.html",
+					}),
+					Match.objectLike({
+						ErrorCode: 404,
+						ResponseCode: 404,
+						ResponsePagePath: "/404.html",
+					}),
+				]),
+			}),
+		});
 	});
 
 	// biome-ignore lint/suspicious/noExplicitAny: CDK template is untyped

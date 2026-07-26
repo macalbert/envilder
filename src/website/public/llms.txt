@@ -1,0 +1,28 @@
+# Envilder
+
+> Envilder is an open-source secret resolution tool for applications that use AWS SSM Parameter Store or Azure Key Vault.
+
+## What Envilder does
+
+Envilder keeps a version-controlled JSON mapping between environment-variable names and secret paths. It resolves that mapping consistently during local development, CI/CD, and application startup.
+
+- Envilder does not store or proxy secret values.
+- Secrets remain in AWS SSM Parameter Store or Azure Key Vault.
+- The CLI supports pull and push workflows.
+- The GitHub Action supports pull workflows for CI/CD.
+- Runtime SDKs are available for .NET, Python, and Node.js.
+
+## Official resources
+
+- Product overview: https://envilder.com/
+- Documentation: https://envilder.com/docs/
+- Changelog: https://envilder.com/changelog/
+- Source repository: https://github.com/macalbert/envilder
+- Mapping schema: https://envilder.com/schema/map-file.v1.json
+
+## Product terminology
+
+- `envilder.json`: the JSON mapping file that defines the environment contract.
+- AWS SSM Parameter Store: a supported secret provider.
+- Azure Key Vault: a supported secret provider.
+- Runtime SDK: a library that resolves mapped secrets directly in an application process.

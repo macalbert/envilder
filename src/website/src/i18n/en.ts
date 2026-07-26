@@ -3,9 +3,16 @@ import type { Translations } from './types';
 export const en: Translations = {
   homeMeta: {
     title:
-      'Envilder: standardize how your applications consume secrets across every environment and runtime.',
+      'Open-source secret management for AWS SSM and Azure Key Vault | Envilder',
     description:
-      'Define your environment contract once and resolve it consistently across local development, CI/CD, and runtime. Using AWS SSM Parameter Store and Azure Key Vault.',
+      'Envilder is an open-source CLI, GitHub Action, and runtime SDK for loading secrets from AWS SSM Parameter Store and Azure Key Vault.',
+  },
+  notFound: {
+    title: 'Page not found | Envilder',
+    description: 'The requested Envilder page does not exist.',
+    heading: 'This page was not found',
+    body: 'The address may be incorrect, or the page may have moved.',
+    home: 'Return home',
   },
   nav: {
     features: 'Features',
@@ -450,7 +457,9 @@ export const en: Translations = {
     builtWith: 'Built with Astro. Open source on GitHub.',
   },
   changelogPage: {
-    title: 'Envilder Changelog | Releases & Updates',
+    title: 'Envilder changelog: CLI, GitHub Action, and SDK releases',
+    description:
+      'Release history for the Envilder CLI, GitHub Action, and .NET, Python, and Node.js runtime SDKs.',
 
     backToHome: '← Back to home',
     fullChangelog: 'Full ',
@@ -467,7 +476,9 @@ export const en: Translations = {
     categorySdkNodejs: 'Node.js',
   },
   docs: {
-    title: 'Envilder Docs | CLI, GitHub Action & AWS SSM',
+    title: 'Envilder docs: AWS SSM and Azure Key Vault secrets',
+    description:
+      'Learn how to resolve environment variables from AWS SSM Parameter Store and Azure Key Vault with the Envilder CLI, GitHub Action, and runtime SDKs.',
 
     backToHome: '← Back to home',
     pageTitle: 'Documentation',

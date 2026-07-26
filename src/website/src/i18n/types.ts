@@ -253,6 +253,7 @@ export interface FooterTranslations {
 
 export interface ChangelogPageTranslations {
   title: string;
+  description: string;
   backToHome: string;
   fullChangelog: string;
   changelogAccent: string;
@@ -270,6 +271,7 @@ export interface ChangelogPageTranslations {
 
 export interface DocsTranslations {
   title: string;
+  description: string;
   backToHome: string;
   pageTitle: string;
   intro: string;
@@ -533,6 +535,14 @@ export interface HomeMetaTranslations {
   description: string;
 }
 
+export interface NotFoundTranslations {
+  title: string;
+  description: string;
+  heading: string;
+  body: string;
+  home: string;
+}
+
 export interface SponsorsTranslations {
   title: string;
   localstackAlt: string;
@@ -542,6 +552,7 @@ export interface SponsorsTranslations {
 
 export interface Translations {
   homeMeta: HomeMetaTranslations;
+  notFound: NotFoundTranslations;
   nav: NavLinks;
   theme: ThemeTranslations;
   hero: HeroTranslations;

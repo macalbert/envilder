@@ -11,7 +11,7 @@ describe("CloudFront URL Rewrite Function", () => {
 	const handlerFunc = new Function(
 		"event",
 		`${handlerCode}; return handler(event);`,
-	) as (event: { request: { uri: string; querystring: string } }) => {
+	) as (event: { request: { uri: string; querystring: unknown } }) => {
 		uri: string;
 	};
 
@@ -27,21 +27,15 @@ describe("CloudFront URL Rewrite Function", () => {
 
 	const testCases: TestCase[] = [
 		{ input: "/", expectedUri: "/" },
-		{ input: "/dashboard", expectedUri: "/dashboard/index.html" },
 		{ input: "/contact/", expectedUri: "/contact/index.html" },
 		{ input: "/app.js", expectedUri: "/app.js" },
 		{ input: "/api/users", expectedUri: "/api/users" },
-		{ input: "/folder/page", expectedUri: "/folder/page/index.html" },
 	];
 
 	const testCasesWithQueryString: TestCaseWithQueryString[] = [
 		{
 			input: "/contact?utm_source=x",
-			expectedVisible: "/contact/index.html?utm_source=x",
-		},
-		{
-			input: "/styles/main.css?ver=123",
-			expectedVisible: "/styles/main.css?ver=123",
+			expectedVisible: "/contact/?utm_source=x",
 		},
 	];
 
@@ -66,7 +60,7 @@ describe("CloudFront URL Rewrite Function", () => {
 
 	test.each(
 		testCasesWithQueryString,
-	)("Should_PreserveQueryStrings_When_UrlHasParameters_$input", ({
+	)("Should_PreserveQueryStrings_When_RedirectingUrl_$input", ({
 		input,
 		expectedVisible,
 	}) => {
@@ -80,12 +74,108 @@ describe("CloudFront URL Rewrite Function", () => {
 		};
 
 		// Act
-		const result = handlerFunc(event);
+		const actual = handlerFunc(event);
 
 		// Assert
-		const actualVisible = querystring
-			? `${result.uri}?${querystring}`
-			: result.uri;
-		expect(actualVisible).toBe(expectedVisible);
+		expect(actual).toMatchObject({
+			statusCode: 301,
+			headers: {
+				location: {
+					value: expectedVisible,
+				},
+			},
+		});
+	});
+
+	test("Should_KeepStaticUrl_When_StaticFileHasQueryString", () => {
+		// Arrange
+		const event = {
+			request: {
+				uri: "/styles/main.css",
+				querystring: "ver=123",
+			},
+		};
+
+		// Act
+		const actual = handlerFunc(event);
+
+		// Assert
+		expect(actual).toMatchObject({
+			uri: "/styles/main.css",
+			querystring: "ver=123",
+		});
+	});
+
+	test("Should_PreserveCloudFrontQueryObject_When_RedirectingUrl", () => {
+		// Arrange
+		const event = {
+			request: {
+				uri: "/docs",
+				querystring: {
+					utm_source: {
+						value: "search",
+					},
+				},
+			},
+		};
+
+		// Act
+		const actual = handlerFunc(event);
+
+		// Assert
+		expect(actual).toMatchObject({
+			statusCode: 301,
+			headers: {
+				location: {
+					value: "/docs/?utm_source=search",
+				},
+			},
+		});
+	});
+
+	test("Should_RedirectToTrailingSlash_When_PathHasNoFileExtension", () => {
+		// Arrange
+		const event = {
+			request: {
+				uri: "/docs",
+				querystring: "",
+			},
+		};
+
+		// Act
+		const actual = handlerFunc(event);
+
+		// Assert
+		expect(actual).toMatchObject({
+			statusCode: 301,
+			headers: {
+				location: {
+					value: "/docs/",
+				},
+			},
+		});
+	});
+
+	test("Should_RedirectLegacySitemap_When_SitemapXmlIsRequested", () => {
+		// Arrange
+		const event = {
+			request: {
+				uri: "/sitemap.xml",
+				querystring: "",
+			},
+		};
+
+		// Act
+		const actual = handlerFunc(event);
+
+		// Assert
+		expect(actual).toMatchObject({
+			statusCode: 301,
+			headers: {
+				location: {
+					value: "/sitemap-index.xml",
+				},
+			},
+		});
 	});
 });

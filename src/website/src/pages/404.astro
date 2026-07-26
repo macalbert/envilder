@@ -1,0 +1,60 @@
+---
+import Footer from '../components/Footer.astro';
+import Navbar from '../components/Navbar.astro';
+import { useTranslations } from '../i18n/utils';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const lang = 'en';
+const t = useTranslations(lang);
+---
+
+<BaseLayout
+  title={t.notFound.title}
+  description={t.notFound.description}
+  lang={lang}
+  noindex
+>
+  <Navbar lang={lang} />
+  <main class="not-found-page" id="main-content">
+    <section class="section">
+      <div class="container">
+        <div class="not-found-content pixel-card">
+          <p class="not-found-code">404</p>
+          <h1>{t.notFound.heading}</h1>
+          <p>{t.notFound.body}</p>
+          <a class="btn btn-primary" href="/">{t.notFound.home}</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer lang={lang} />
+</BaseLayout>
+
+<style>
+  .not-found-page {
+    min-height: 70vh;
+    padding-top: calc(var(--nav-height) + var(--space-3xl));
+  }
+
+  .not-found-content {
+    max-width: 42rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .not-found-code {
+    margin-bottom: var(--space-md);
+    color: var(--color-primary);
+    font-family: var(--font-pixel);
+    font-size: clamp(2rem, 8vw, 4rem);
+  }
+
+  .not-found-content h1 {
+    margin-bottom: var(--space-md);
+  }
+
+  .not-found-content p:not(.not-found-code) {
+    margin-bottom: var(--space-xl);
+    color: var(--color-text-muted);
+  }
+</style>
