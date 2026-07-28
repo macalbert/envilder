@@ -12,7 +12,7 @@ const navLinks = [
   { label: t.nav.features, href: localizedPath(lang, '/#features') },
   { label: t.nav.howItWorks, href: localizedPath(lang, '/#how-it-works') },
   { label: t.nav.providers, href: localizedPath(lang, '/#providers') },
-  { label: t.nav.changelog, href: localizedPath(lang, '/changelog') },
+  { label: t.nav.changelog, href: localizedPath(lang, '/changelog/') },
 ];
 
 const docsDropdown = [
@@ -40,13 +40,13 @@ const docsDropdown = [
           </li>
         ))}
         <li class="nav-dropdown">
-          <a href={localizedPath(lang, '/docs')} class="nav-link nav-dropdown-btn" role="button" aria-expanded="false">
+          <a href={localizedPath(lang, '/docs/')} class="nav-link nav-dropdown-btn" role="button" aria-expanded="false">
             {t.nav.docs} <span class="dropdown-chevron">›</span>
           </a>
           <ul class="nav-dropdown-menu">
             {docsDropdown.map((item) => (
               <li>
-                <a href={`${localizedPath(lang, '/docs')}#${item.hash}`} class="nav-dropdown-link">{item.label}</a>
+                <a href={`${localizedPath(lang, '/docs/')}#${item.hash}`} class="nav-dropdown-link">{item.label}</a>
               </li>
             ))}
           </ul>

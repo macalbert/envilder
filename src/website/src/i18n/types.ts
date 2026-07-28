@@ -28,6 +28,7 @@ export interface HeroTranslations {
   title2: string;
   titleAccent: string;
   description: string;
+  positioning: string;
   descAws: string;
   descAzure: string;
   descOr: string;
@@ -120,6 +121,7 @@ export interface DemoTranslations {
   titleAccent: string;
   subtitle: string;
   cliDemo: string;
+  transcript: string;
   ghaWorkflow: string;
   comingSoon: string;
 }
@@ -258,6 +260,7 @@ export interface ChangelogPageTranslations {
   fullChangelog: string;
   changelogAccent: string;
   intro: string;
+  releaseNotesLanguage: string;
   githubReleases: string;
   versions: string;
   backToTop: string;
@@ -533,6 +536,7 @@ export interface DocsTranslations {
 export interface HomeMetaTranslations {
   title: string;
   description: string;
+  ogImageAlt: string;
 }
 
 export interface NotFoundTranslations {

@@ -2,10 +2,11 @@ import type { Translations } from './types';
 
 export const es: Translations = {
   homeMeta: {
-    title:
-      'Gestión de secretos open source para AWS SSM y Azure Key Vault | Envilder',
+    title: 'Carga secretos de AWS SSM y Azure Key Vault | Envilder',
     description:
       'Envilder es una CLI, GitHub Action y SDK de runtime open source para cargar secretos desde AWS SSM Parameter Store y Azure Key Vault.',
+    ogImageAlt:
+      'Envilder - resolución de secretos open source para AWS SSM y Azure Key Vault',
   },
   notFound: {
     title: 'Página no encontrada | Envilder',
@@ -43,6 +44,8 @@ export const es: Translations = {
     titleAccent: 'secretos.',
     description:
       'Deja de reinventar la carga de secretos en cada proyecto. Define un contrato de entorno y resuélvelo en todas partes.',
+    positioning:
+      'Resolución de secretos open source para AWS SSM y Azure Key Vault, para desarrollo local, CI/CD y el runtime de la aplicación.',
     descAws: 'AWS SSM',
     descAzure: 'Azure Key Vault',
     descOr: '·',
@@ -222,6 +225,8 @@ export const es: Translations = {
     subtitle:
       'Mira cómo Envilder simplifica la gestión de secretos en menos de 2 minutos.',
     cliDemo: 'Demo CLI: Obtener Secretos',
+    transcript:
+      'Comandos de la demo: envilder pull --map envilder.json --envfile .env. Envilder resuelve los secretos mapeados de tu proveedor en la nube configurado y escribe las variables resultantes en .env.',
     ghaWorkflow: 'Workflow de GitHub Action',
     comingSoon: 'Próximamente',
   },
@@ -466,6 +471,7 @@ export const es: Translations = {
     fullChangelog: 'Historial de ',
     changelogAccent: 'cambios',
     intro: 'Historial completo de versiones. Ver también',
+    releaseNotesLanguage: 'Las notas de versión se publican en inglés.',
     githubReleases: 'Versiones en GitHub',
     versions: 'Versiones',
     backToTop: 'Volver arriba',
@@ -482,7 +488,7 @@ export const es: Translations = {
       'Aprende a resolver variables de entorno desde AWS SSM Parameter Store y Azure Key Vault con la CLI, GitHub Action y SDKs de runtime de Envilder.',
 
     backToHome: '← Volver al inicio',
-    pageTitle: 'Documentación',
+    pageTitle: 'Documentación de Envilder para AWS SSM y Azure Key Vault',
     intro: 'Todo lo que necesitas para empezar con Envilder.',
     sidebarGettingStarted: 'Primeros pasos',
     sidebarRequirements: 'Requisitos',

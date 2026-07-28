@@ -44,7 +44,7 @@ const products = [
 
 const parsed = products.map((p) => ({
   ...p,
-  html: changelogToHtml(p.raw),
+  html: changelogToHtml(p.raw, `${p.id}-`),
   versions: extractVersions(p.raw),
 }));
 
@@ -203,6 +203,7 @@ const parsedById = Object.fromEntries(parsed.map((p) => [p.id, p]));
               {t.changelogPage.githubReleases}
             </a>.
           </p>
+          <p class="changelog-language-notice">{t.changelogPage.releaseNotesLanguage}</p>
         </div>
 
         {parsed.map((p, i) => (
@@ -493,6 +494,12 @@ const parsedById = Object.fromEntries(parsed.map((p) => [p.id, p]));
   .changelog-intro {
     font-size: 1rem;
     color: var(--color-text-muted);
+  }
+
+  .changelog-language-notice {
+    color: var(--color-text-dim);
+    font-size: 0.85rem;
+    margin-top: var(--space-sm);
   }
 
   .changelog-intro a {

@@ -1,5 +1,9 @@
 ---
-import { languages, localizedPath, useTranslations } from '../i18n/utils';
+import {
+  localizedLanguages,
+  localizedPath,
+  useTranslations,
+} from '../i18n/utils';
 import ThemeSwitcher from './ThemeSwitcher.astro';
 
 interface Props {
@@ -11,20 +15,7 @@ const t = useTranslations(lang);
 const version = `v${__APP_VERSION__}`;
 const currentYear = new Date().getFullYear();
 const currentPath = Astro.url.pathname;
-const nonDefaultLocales = Object.keys(languages).filter(
-  (code) => code !== 'en',
-);
-const localePrefixRegex =
-  nonDefaultLocales.length > 0
-    ? new RegExp(`^/(${nonDefaultLocales.join('|')})(?=/|$)`)
-    : null;
-const stripLocalePrefix = (path: string): string => {
-  if (!localePrefixRegex) {
-    return path || '/';
-  }
-  const strippedPath = path.replace(localePrefixRegex, '');
-  return strippedPath || '/';
-};
+const supportedLanguages = localizedLanguages(currentPath);
 
 const links = {
   project: [
@@ -33,7 +24,7 @@ const links = {
       href: 'https://github.com/macalbert/envilder',
     },
     { label: t.footer.linkNpm, href: 'https://www.npmjs.com/package/envilder' },
-    { label: t.footer.linkChangelog, href: localizedPath(lang, '/changelog') },
+    { label: t.footer.linkChangelog, href: localizedPath(lang, '/changelog/') },
     {
       label: t.footer.linkRoadmap,
       href: 'https://github.com/macalbert/envilder/blob/main/ROADMAP.md',
@@ -46,15 +37,15 @@ const links = {
     },
     {
       label: t.footer.linkPullCommand,
-      href: localizedPath(lang, '/docs#pull-command'),
+      href: localizedPath(lang, '/docs/#pull-command'),
     },
     {
       label: t.footer.linkPushCommand,
-      href: localizedPath(lang, '/docs#push-command'),
+      href: localizedPath(lang, '/docs/#push-command'),
     },
     {
       label: t.footer.linkGithubAction,
-      href: localizedPath(lang, '/docs#gha-setup'),
+      href: localizedPath(lang, '/docs/#gha-setup'),
     },
   ],
   community: [
@@ -128,16 +119,18 @@ const links = {
       <div class="footer-pixel-border"></div>
       <div class="footer-bottom-row">
         <div class="footer-preferences">
-          <div class="lang-switcher">
-            {Object.entries(languages).map(([code, _label]) => (
+          {supportedLanguages.length > 1 && (
+            <div class="lang-switcher">
+              {supportedLanguages.map((code) => (
               <a
-                href={code === 'en' ? stripLocalePrefix(currentPath) : `/${code}${stripLocalePrefix(currentPath)}`}
+                href={localizedPath(code, currentPath)}
                 class:list={['lang-link', { active: code === lang }]}
               >
                 {code.toUpperCase()}
               </a>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
           <ThemeSwitcher lang={lang} />
         </div>
         <p class="footer-copy">

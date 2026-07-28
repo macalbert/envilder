@@ -426,6 +426,7 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       <p class="hero-description">
         {t.hero.description}
       </p>
+      <p class="hero-positioning">{t.hero.positioning}</p>
 
       <div class="hero-tech-line">
         <strong>{t.hero.descAws}</strong> {t.hero.descOr} <strong>{t.hero.descAzure}</strong>{t.hero.descSuffix}
@@ -561,6 +562,13 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
 
   .hero-description strong {
     color: var(--color-secondary);
+  }
+
+  .hero-positioning {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    max-width: 560px;
   }
 
   .hero-tech-line {

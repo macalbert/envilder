@@ -49,6 +49,7 @@ describe("Static website Stack", () => {
 		const stack = new Stack(new App(), "staticWebsiteStackTest", {
 			env: env,
 		});
+
 		const props = createStaticWebsiteStackProps();
 		const sut = new StaticWebsiteStack(stack, props);
 		const template = Template.fromStack(sut);
@@ -61,16 +62,80 @@ describe("Static website Stack", () => {
 			DistributionConfig: Match.objectLike({
 				CustomErrorResponses: Match.arrayWith([
 					Match.objectLike({
+						ErrorCachingMinTTL: 300,
 						ErrorCode: 403,
 						ResponseCode: 404,
 						ResponsePagePath: "/404.html",
 					}),
 					Match.objectLike({
+						ErrorCachingMinTTL: 300,
 						ErrorCode: 404,
 						ResponseCode: 404,
 						ResponsePagePath: "/404.html",
 					}),
 				]),
+			}),
+		});
+	});
+
+	test("Should_ApplyCacheAndSecurityHeaders_When_WebsiteIsCreated", () => {
+		// Arrange
+		const stack = new Stack(new App(), "staticWebsiteStackTest", {
+			env: env,
+		});
+		const props = createStaticWebsiteStackProps();
+		const sut = new StaticWebsiteStack(stack, props);
+
+		// Act
+		const actual = Template.fromStack(sut);
+
+		// Assert
+		actual.hasResourceProperties("AWS::CloudFront::Distribution", {
+			DistributionConfig: Match.objectLike({
+				HttpVersion: "http2and3",
+				CacheBehaviors: Match.arrayWith([
+					Match.objectLike({
+						PathPattern: "_assets/*",
+					}),
+				]),
+			}),
+		});
+		actual.hasResourceProperties("AWS::CloudFront::ResponseHeadersPolicy", {
+			ResponseHeadersPolicyConfig: Match.objectLike({
+				CustomHeadersConfig: Match.objectLike({
+					Items: Match.arrayWith([
+						Match.objectLike({
+							Header: "Cache-Control",
+							Value: "public, max-age=0, s-maxage=300, must-revalidate",
+						}),
+					]),
+				}),
+				SecurityHeadersConfig: Match.objectLike({
+					ContentTypeOptions: Match.objectLike({
+						Override: true,
+					}),
+					FrameOptions: Match.objectLike({
+						FrameOption: "DENY",
+					}),
+					ReferrerPolicy: Match.objectLike({
+						ReferrerPolicy: "strict-origin-when-cross-origin",
+					}),
+					StrictTransportSecurity: Match.objectLike({
+						AccessControlMaxAgeSec: 31536000,
+					}),
+				}),
+			}),
+		});
+		actual.hasResourceProperties("AWS::CloudFront::ResponseHeadersPolicy", {
+			ResponseHeadersPolicyConfig: Match.objectLike({
+				CustomHeadersConfig: Match.objectLike({
+					Items: Match.arrayWith([
+						Match.objectLike({
+							Header: "Cache-Control",
+							Value: "public, max-age=31536000, immutable",
+						}),
+					]),
+				}),
 			}),
 		});
 	});
