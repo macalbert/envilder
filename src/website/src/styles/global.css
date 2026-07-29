@@ -357,6 +357,10 @@ pre code,
 .pixel-card {
   --pixel-step: 14px;
   --pixel-frame: 6px;
+
+  /* explicit stacking context: don't rely on clip-path implicitly creating
+     one for the ::before z-index: -1 surface layer to paint correctly */
+  isolation: isolate;
   position: relative;
   background: var(--color-border-light);
   padding: var(--space-xl);
