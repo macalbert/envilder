@@ -83,7 +83,7 @@ const t = useTranslations(lang);
         <CodeBlock
           lang="python"
           filename="app.py"
-          code={`from envilder import Envilder\n\nEnvilder.load("envilder.json")\n\n${t.getStarted.sdkComment3}\napi_key = os.environ["API_KEY"]`}
+          code={`import os\n\nfrom envilder import Envilder\n\nEnvilder.load("envilder.json")\n\n${t.getStarted.sdkComment3}\napi_key = os.environ["API_KEY"]`}
         />
         <a
           href="https://github.com/macalbert/envilder/tree/main/examples/sdk"
