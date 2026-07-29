@@ -83,19 +83,19 @@ export const ca: Translations = {
       'Cada equip, cada etapa, cada runtime gestiona els secrets de forma diferent. Sense estàndard. Sense consistència. Sense confiança.',
     problems: [
       {
-        icon: '💀',
+        icon: 'skull',
         title: 'Fragmentada entre eines',
         description:
           "L'entorn local utilitza fitxers .env. CI/CD llegeix d'integracions amb vaults. Producció té el seu propi mètode. Mateixa app, diferents fluxos de configuració a tot arreu.",
       },
       {
-        icon: '📨',
+        icon: 'lock',
         title: 'Secrets compartits per canals insegurs',
         description:
           'Claus API enviades per Slack, fitxers .env als repositoris, pàgines wiki amb credencials en text pla. Un incident de seguretat esperant a passar.',
       },
       {
-        icon: '🐌',
+        icon: 'snail',
         title: 'El desfasament de configuració és inevitable',
         description:
           'Sense una font única de veritat sobre quins secrets necessita una app. Dev, staging i producció es desincronitzen. Els desplegaments fallen. Ningú sap quina config és la correcta.',
@@ -152,25 +152,25 @@ export const ca: Translations = {
       'Envilder és una capa de resolució sobre el teu gestor de secrets existent. Els secrets es queden al teu núvol. El mapeig JSON és només el contracte que manté cada entorn consistent.',
     highlights: [
       {
-        icon: '🧱',
+        icon: 'brick',
         title: 'Zero infraestructura',
         description:
           'Sense servidors, sense proxies, sense SaaS intermediari. Construït sobre AWS SSM i Azure Key Vault, serveis que ja utilitzes i pagues.',
       },
       {
-        icon: '📋',
+        icon: 'clipboard',
         title: 'Un fitxer, tots els secrets',
         description:
           'Un sol contracte JSON defineix cada secret per a cada entorn. Versionat a Git, revisable en PRs, comparable. El teu equip revisa canvis de secrets al mateix PR que el codi.',
       },
       {
-        icon: '🔄',
+        icon: 'refresh',
         title: 'Rotació de secrets segura',
         description:
           'Rota valors a AWS SSM o Azure Key Vault. Cada consumidor (local, CI/CD i runtime) resol el nou valor automàticament. Sense reescriure .env, sense canvis als pipelines.',
       },
       {
-        icon: '☁️',
+        icon: 'cloud',
         title: 'Multi-Cloud, sense lock-in',
         description:
           "AWS SSM, Azure Key Vault, GCP Secret Manager (pròximament). Canvia de proveïdor sense modificar el codi de l'app. El teu núvol, les teves regles.",
@@ -179,37 +179,37 @@ export const ca: Translations = {
     extrasTitle: 'També inclou',
     extras: [
       {
-        icon: '⚙️',
+        icon: 'gear',
         title: 'GitHub Action',
         description:
           'Obté secrets en workflows CI/CD. Mateix mapeig, zero intervenció manual.',
       },
       {
-        icon: '🔄',
+        icon: 'refresh',
         title: 'Sincronització bidireccional',
         description:
           'Obté a .env o puja valors .env al teu proveïdor al núvol via CLI.',
       },
       {
-        icon: '🔌',
+        icon: 'plug',
         title: 'Els secrets no toquen disc',
         description:
           "SDKs de runtime carreguen secrets directament a memòria a l'inici de l'app. Sense fitxers .env escrits a disc.",
       },
       {
-        icon: '🔒',
+        icon: 'lock',
         title: 'IAM i RBAC natiu',
         description:
           "Polítiques IAM d'AWS o RBAC d'Azure. Sense capa d'auth extra.",
       },
       {
-        icon: '📊',
+        icon: 'chart',
         title: 'Traçabilitat completa',
         description:
           'Cada accés registrat a CloudTrail o Azure Monitor automàticament.',
       },
       {
-        icon: '👤',
+        icon: 'person',
         title: 'Suport de perfils AWS',
         description:
           'Canvia entre perfils AWS CLI per a configuracions multi-compte.',
@@ -421,19 +421,13 @@ export const ca: Translations = {
     quickStart: 'Inici ràpid',
     step1:
       "Crea un envilder.json que mapegi variables d'entorn a rutes de secrets",
-    step2: 'Executa envilder --map=envilder.json --envfile=.env',
+    step2: 'Executa npx envilder --map=envilder.json --envfile=.env',
     step3: 'El teu fitxer .env està llest ✔',
     terminalTitle: 'Inici ràpid',
-    commentInstall: '# Instal·lar globalment',
     commentCreate: '# Crear fitxer de mapeig',
-    commentPull: '# Obtenir secrets',
     commentPush: '# Pujar un secret',
-    doneMessage: ' Fet! Fitxer .env generat.',
-    pushSuccess: ' Secret pujat correctament.',
-    sdkTerminalTitle: 'Runtime SDK (Python)',
-    sdkComment1: "# Instal·lar l'SDK",
-    sdkComment2: "# Carregar secrets a l'inici",
     sdkComment3: '# Els secrets ja són a os.environ',
+    sdkExampleLink: 'Veure més exemples a GitHub',
   },
   footer: {
     tagline:

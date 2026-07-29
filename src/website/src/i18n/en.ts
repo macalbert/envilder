@@ -83,19 +83,19 @@ export const en: Translations = {
       'Every team, every stage, every runtime handles secrets differently. No standard. No consistency. No confidence.',
     problems: [
       {
-        icon: '💀',
+        icon: 'skull',
         title: 'Fragmented across tools',
         description:
           'Local dev uses .env files. CI/CD reads from vault integrations. Production has its own method. Same app, different configuration workflows everywhere.',
       },
       {
-        icon: '📨',
+        icon: 'lock',
         title: 'Secrets shared through unsafe channels',
         description:
           'API keys sent over Slack, .env files committed to repos, wiki pages with plain-text credentials. A security incident waiting to happen.',
       },
       {
-        icon: '🐌',
+        icon: 'snail',
         title: 'Configuration drift is inevitable',
         description:
           'No single source of truth for what secrets an app needs. Dev, staging, and production desync. Deployments fail. Nobody knows which config is correct.',
@@ -152,25 +152,25 @@ export const en: Translations = {
       'Envilder is a resolution layer over your existing secret manager. Secrets stay in your cloud. The JSON mapping is just the contract that keeps every environment consistent.',
     highlights: [
       {
-        icon: '🧱',
+        icon: 'brick',
         title: 'Zero Infrastructure',
         description:
           'No servers, no proxies, no SaaS middleman. Built on AWS SSM and Azure Key Vault, services you already use and pay for.',
       },
       {
-        icon: '📋',
+        icon: 'clipboard',
         title: 'One File, All Secrets',
         description:
           'A single JSON contract defines every secret for every environment. Git-versioned, PR-reviewable, diff-able. Your team reviews secret changes in the same PR as the code.',
       },
       {
-        icon: '🔄',
+        icon: 'refresh',
         title: 'Safe Secret Rotation',
         description:
           'Rotate values in AWS SSM or Azure Key Vault. Every consumer (local, CI/CD, and runtime) resolves the new value automatically. No .env rewrites, no pipeline changes.',
       },
       {
-        icon: '☁️',
+        icon: 'cloud',
         title: 'Multi-Cloud, No Lock-in',
         description:
           'AWS SSM, Azure Key Vault, GCP Secret Manager (coming soon). Switch providers without changing your app code. Your cloud, your rules.',
@@ -179,37 +179,37 @@ export const en: Translations = {
     extrasTitle: 'Also included',
     extras: [
       {
-        icon: '⚙️',
+        icon: 'gear',
         title: 'GitHub Action',
         description:
           'Pull secrets in CI/CD workflows. Same mapping, zero manual intervention.',
       },
       {
-        icon: '🔄',
+        icon: 'refresh',
         title: 'Bidirectional Sync',
         description:
           'Pull to .env or push .env values back to your cloud provider via CLI.',
       },
       {
-        icon: '🔌',
+        icon: 'plug',
         title: 'Secrets Never Touch Disk',
         description:
           'Runtime SDKs load secrets directly into memory at app startup. No .env files written to disk.',
       },
       {
-        icon: '🔒',
+        icon: 'lock',
         title: 'Native IAM & RBAC',
         description:
           'AWS IAM policies or Azure RBAC. No extra auth layer needed.',
       },
       {
-        icon: '📊',
+        icon: 'chart',
         title: 'Full Audit Trail',
         description:
           'Every access logged in CloudTrail or Azure Monitor automatically.',
       },
       {
-        icon: '👤',
+        icon: 'person',
         title: 'AWS Profile Support',
         description:
           'Switch between AWS CLI profiles for multi-account setups.',
@@ -420,19 +420,13 @@ export const en: Translations = {
     install: 'Install',
     quickStart: 'Quick start',
     step1: 'Create an envilder.json mapping env vars to secret paths',
-    step2: 'Run envilder --map=envilder.json --envfile=.env',
+    step2: 'Run npx envilder --map=envilder.json --envfile=.env',
     step3: 'Your .env file is ready ✔',
     terminalTitle: 'Quick start',
-    commentInstall: '# Install globally',
     commentCreate: '# Create mapping file',
-    commentPull: '# Pull secrets',
     commentPush: '# Push a secret',
-    doneMessage: ' Done! .env file generated.',
-    pushSuccess: ' Secret pushed successfully.',
-    sdkTerminalTitle: 'Runtime SDK (Python)',
-    sdkComment1: '# Install the SDK',
-    sdkComment2: '# Load secrets at startup',
     sdkComment3: '# Secrets are now in os.environ',
+    sdkExampleLink: 'View more examples on GitHub',
   },
   footer: {
     tagline:

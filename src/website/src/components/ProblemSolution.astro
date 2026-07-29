@@ -1,5 +1,6 @@
 ---
 import { useTranslations } from '../i18n/utils';
+import PixelSprite from './PixelSprite.astro';
 
 interface Props {
   lang?: string;
@@ -21,8 +22,10 @@ const t = useTranslations(lang);
     <div class="grid-3 problems-grid">
       {t.problemSolution.problems.map((p) => (
         <div class="pixel-card problem-card">
-          <span class="pixel-icon">{p.icon}</span>
-          <h3>{p.title}</h3>
+          <div class="problem-card-header">
+            <PixelSprite name={p.icon} />
+            <h3>{p.title}</h3>
+          </div>
           <p>{p.description}</p>
         </div>
       ))}
@@ -32,25 +35,29 @@ const t = useTranslations(lang);
 
 <style>
   .problem-card {
-    border-color: var(--color-error);
-  }
-
-  .problem-card::before {
-    border-color: var(--color-error);
+    background: var(--color-primary-dim);
   }
 
   .problem-card:hover {
-    border-color: var(--color-error);
-    box-shadow: 4px 4px 0 rgba(160, 80, 80, 0.35);
-  }
-
-  .problem-card:hover::before {
-    border-color: var(--color-error);
+    background: var(--color-primary-dim);
+    filter: drop-shadow(4px 4px 0 rgba(76, 175, 80, 0.6));
   }
 
   .pixel-card h3 {
-    margin-bottom: var(--space-sm);
+    margin-bottom: 0;
     color: var(--color-text);
+  }
+
+  .problem-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-sm);
+  }
+
+  .problem-card-header :global(.pixel-sprite) {
+    margin-bottom: 0;
+    flex-shrink: 0;
   }
 
   .pixel-card p {

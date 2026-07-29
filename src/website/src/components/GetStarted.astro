@@ -1,5 +1,6 @@
 ---
 import { useTranslations } from '../i18n/utils';
+import CodeBlock from './CodeBlock.astro';
 import TerminalMockup from './TerminalMockup.astro';
 
 interface Props {
@@ -35,16 +36,16 @@ const t = useTranslations(lang);
           <h3>{t.getStarted.install}</h3>
           <div class="install-options">
             <div class="install-option">
-              <span class="install-label">pnpm</span>
-              <code class="install-code">pnpm add -g envilder</code>
+              <span class="install-label">npx</span>
+              <code class="install-code">npx envilder --map=envilder.json --envfile=.env</code>
             </div>
             <div class="install-option">
               <span class="install-label">npm</span>
               <code class="install-code">npm install -g envilder</code>
             </div>
             <div class="install-option">
-              <span class="install-label">npx</span>
-              <code class="install-code">npx envilder --help</code>
+              <span class="install-label">pnpm</span>
+              <code class="install-code">pnpm add -g envilder</code>
             </div>
           </div>
         </div>
@@ -62,14 +63,6 @@ const t = useTranslations(lang);
       <div class="getstarted-terminal">
         <TerminalMockup title={t.getStarted.terminalTitle}>
           <span class="line">
-            <span class="comment">{t.getStarted.commentInstall}</span>
-          </span>
-          <span class="line">
-            <span class="prompt">$</span>
-            <span class="command"> npm install -g envilder</span>
-          </span>
-          <span class="line">&nbsp;</span>
-          <span class="line">
             <span class="comment">{t.getStarted.commentCreate}</span>
           </span>
           <span class="line">
@@ -80,62 +73,51 @@ const t = useTranslations(lang);
           </span>
           <span class="line">&nbsp;</span>
           <span class="line">
-            <span class="comment">{t.getStarted.commentPull}</span>
-          </span>
-          <span class="line">
-            <span class="prompt">$</span><span class="command"> envilder</span><span class="flag"> --map</span><span class="command">=envilder.json</span><span class="flag"> --envfile</span><span class="command">=.env</span>
-          </span>
-          <span class="line">&nbsp;</span>
-          <span class="line">
-            <span class="highlight">✔</span>
-            <span class="output">{t.getStarted.doneMessage}</span>
-          </span>
-          <span class="line">&nbsp;</span>
-          <span class="line">
             <span class="comment">{t.getStarted.commentPush}</span>
           </span>
           <span class="line">
-            <span class="prompt">$</span><span class="command"> envilder</span><span class="flag"> --push</span><span class="flag"> --key</span><span class="command">=API_KEY</span><span class="flag"> --value</span><span class="command">=sk_live_abc123</span><span class="flag"> --secret-path</span><span class="command">=/app/api-key</span>
-          </span>
-          <span class="line">&nbsp;</span>
-          <span class="line">
-            <span class="highlight">✔</span>
-            <span class="output">{t.getStarted.pushSuccess}</span>
+            <span class="prompt">$</span><span class="command"> npx envilder</span><span class="flag"> --push</span><span class="flag"> --key</span><span class="command">=API_KEY</span><span class="flag"> --value</span><span class="command">=sk_live_abc123</span><span class="flag"> --secret-path</span><span class="command">=/app/api-key</span>
           </span>
         </TerminalMockup>
 
-        <TerminalMockup title={t.getStarted.sdkTerminalTitle}>
-          <span class="line">
-            <span class="comment">{t.getStarted.sdkComment1}</span>
-          </span>
-          <span class="line">
-            <span class="prompt">$</span><span class="command"> pip install envilder</span>
-          </span>
-          <span class="line">&nbsp;</span>
-          <span class="line">
-            <span class="comment">{t.getStarted.sdkComment2}</span>
-          </span>
-          <span class="line">
-            <span class="command"> from envilder import Envilder</span>
-          </span>
-          <span class="line">&nbsp;</span>
-          <span class="line">
-            <span class="command"> Envilder.load("envilder.json")</span>
-          </span>
-          <span class="line">&nbsp;</span>
-          <span class="line">
-            <span class="comment">{t.getStarted.sdkComment3}</span>
-          </span>
-          <span class="line">
-            <span class="command"> db_pass = os.environ["DB_PASSWORD"]</span>
-          </span>
-        </TerminalMockup>
+        <CodeBlock
+          lang="python"
+          filename="app.py"
+          code={`import os\n\nfrom envilder import Envilder\n\nEnvilder.load("envilder.json")\n\n${t.getStarted.sdkComment3}\napi_key = os.environ["API_KEY"]`}
+        />
+        <a
+          href="https://github.com/macalbert/envilder/tree/main/examples/sdk"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="sdk-example-link"
+        >
+          {t.getStarted.sdkExampleLink} →
+        </a>
       </div>
     </div>
   </div>
 </section>
 
 <style>
+  .getstarted-terminal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .sdk-example-link {
+    align-self: flex-start;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: opacity var(--transition-fast);
+  }
+
+  .sdk-example-link:hover {
+    opacity: 0.7;
+  }
+
   .getstarted-grid {
     display: grid;
     grid-template-columns: 1fr;
