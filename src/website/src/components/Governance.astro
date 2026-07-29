@@ -57,19 +57,11 @@ const t = useTranslations(lang);
   }
 
   .governance-card {
-    border-color: var(--color-accent);
-  }
-
-  .governance-card::before {
-    border-color: var(--color-accent);
+    background: var(--color-accent);
   }
 
   .governance-card:hover {
-    border-color: var(--color-accent);
-    box-shadow: 4px 4px 0 rgba(138, 154, 108, 0.4);
-  }
-
-  .governance-card:hover::before {
-    border-color: var(--color-accent);
+    background: var(--color-accent);
+    filter: drop-shadow(4px 4px 0 rgba(138, 154, 108, 0.6));
   }
 </style>

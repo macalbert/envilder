@@ -57,8 +57,21 @@ export interface TrustTranslations {
   label: string;
 }
 
+export type PixelSpriteName =
+  | 'skull'
+  | 'lock'
+  | 'snail'
+  | 'brick'
+  | 'clipboard'
+  | 'refresh'
+  | 'cloud'
+  | 'gear'
+  | 'plug'
+  | 'chart'
+  | 'person';
+
 export interface ProblemItem {
-  icon: string;
+  icon: PixelSpriteName;
   title: string;
   description: string;
 }
@@ -95,14 +108,14 @@ export interface HowItWorksTranslations {
 }
 
 export interface FeatureItem {
-  icon: string;
+  icon: PixelSpriteName;
   title: string;
   description: string;
   badge?: string;
 }
 
 export interface FeatureExtraItem {
-  icon: string;
+  icon: PixelSpriteName;
   title: string;
   description: string;
 }
@@ -219,16 +232,10 @@ export interface GetStartedTranslations {
   step2: string;
   step3: string;
   terminalTitle: string;
-  commentInstall: string;
   commentCreate: string;
-  commentPull: string;
   commentPush: string;
-  doneMessage: string;
-  pushSuccess: string;
-  sdkTerminalTitle: string;
-  sdkComment1: string;
-  sdkComment2: string;
   sdkComment3: string;
+  sdkExampleLink: string;
 }
 
 export interface FooterTranslations {
