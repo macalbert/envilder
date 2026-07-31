@@ -163,6 +163,8 @@ body {
   font-size: 1rem;
   overflow-x: hidden;
   cursor: default;
+  /* hide the native insertion caret Chromium/Firefox show when clicking selectable text */
+  caret-color: transparent;
 }
 
 /* ── Theme transition ─────────────────────────────────── */
