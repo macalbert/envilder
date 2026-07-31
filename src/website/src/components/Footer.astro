@@ -108,6 +108,15 @@ const links = {
         <h4>{t.footer.documentation}</h4>
         <ul>
           {links.docs.map((l) => (
+            <li><a href={l.href}>{l.label}</a></li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="footer-links-group">
+        <h4>{t.footer.community}</h4>
+        <ul>
+          {links.community.map((l) => (
             <li>
               <a
                 href={l.href}
@@ -117,15 +126,6 @@ const links = {
                 {l.label}
               </a>
             </li>
-          ))}
-        </ul>
-      </div>
-
-      <div class="footer-links-group">
-        <h4>{t.footer.community}</h4>
-        <ul>
-          {links.community.map((l) => (
-            <li><a href={l.href}>{l.label}</a></li>
           ))}
         </ul>
       </div>
