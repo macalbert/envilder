@@ -29,9 +29,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/macalbert/envilder"
+Homepage = "https://envilder.com"
 Repository = "https://github.com/macalbert/envilder"
-Documentation = "https://github.com/macalbert/envilder/tree/main/src/sdks/python"
+Documentation = "https://envilder.com/docs/sdks/python/"
 Issues = "https://github.com/macalbert/envilder/issues"
 
 [project.optional-dependencies]
@@ -70,4 +70,3 @@ strict = true
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
-
