@@ -1,0 +1,21 @@
+---
+import DocsPage from '../../components/DocsPage.astro';
+import { docsRouteManifest, getDocsArticleRoute } from '../../i18n/docs-routes';
+
+export function getStaticPaths() {
+  return docsRouteManifest
+    .filter((route) => route.key !== 'hub')
+    .map((route) => ({
+      params: { slug: route.path.replace(/^\/docs\/|\/$/g, '') },
+      props: { routeKey: route.key },
+    }));
+}
+
+const route = getDocsArticleRoute(Astro.params.slug ?? '');
+
+if (!route) {
+  throw new Error(`Unknown documentation route: ${Astro.params.slug}`);
+}
+---
+
+<DocsPage lang="en" routeKey={route.key} />

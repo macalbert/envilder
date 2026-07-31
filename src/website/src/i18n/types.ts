@@ -280,12 +280,47 @@ export interface ChangelogPageTranslations {
   categorySdkNodejs: string;
 }
 
+export interface DocsPageTranslations {
+  title: string;
+  description: string;
+  heading: string;
+  intro: string;
+  breadcrumb: string;
+  navLabel: string;
+  cardTitle: string;
+  cardSummary: string;
+}
+
 export interface DocsTranslations {
   title: string;
   description: string;
   backToHome: string;
   pageTitle: string;
   intro: string;
+  pages: Record<
+    | 'hub'
+    | 'getting-started'
+    | 'aws-ssm'
+    | 'azure-key-vault'
+    | 'map-file'
+    | 'cli-pull'
+    | 'cli-push'
+    | 'github-action'
+    | 'sdk-dotnet'
+    | 'sdk-python'
+    | 'sdk-nodejs',
+    DocsPageTranslations
+  >;
+  breadcrumbLabel: string;
+  breadcrumbHome: string;
+  breadcrumbDocs: string;
+  navigationLabel: string;
+  mobileNavigation: string;
+  navGettingStarted: string;
+  navProviders: string;
+  hubCardsLabel: string;
+  openPage: string;
+  pagerLabel: string;
   // Sidebar
   sidebarGettingStarted: string;
   sidebarRequirements: string;

@@ -1,0 +1,28 @@
+---
+import type { DocsRouteKey } from '../i18n/docs-routes';
+import { useTranslations } from '../i18n/utils';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BackToTop from './BackToTop.astro';
+import DocsArticle from './DocsArticle.astro';
+import DocsHub from './DocsHub.astro';
+import Navbar from './Navbar.astro';
+
+interface Props {
+  lang: string;
+  routeKey: DocsRouteKey;
+}
+
+const { lang, routeKey } = Astro.props;
+const t = useTranslations(lang);
+const page = t.docs.pages[routeKey];
+---
+
+<BaseLayout title={page.title} description={page.description} lang={lang}>
+  <Navbar lang={lang} />
+  {routeKey === 'hub' ? (
+    <DocsHub lang={lang} />
+  ) : (
+    <DocsArticle lang={lang} routeKey={routeKey} />
+  )}
+  <BackToTop label={t.changelogPage.backToTop} />
+</BaseLayout>

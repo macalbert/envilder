@@ -483,6 +483,154 @@ export const en: Translations = {
     backToHome: '← Back to home',
     pageTitle: 'Envilder documentation for AWS SSM and Azure Key Vault',
     intro: 'Everything you need to get started with Envilder.',
+    pages: {
+      hub: {
+        title: 'Envilder documentation',
+        description:
+          'Guides for using Envilder with AWS SSM Parameter Store, Azure Key Vault, the CLI, GitHub Action, and runtime SDKs.',
+        heading: 'Envilder documentation',
+        intro:
+          'Choose a guide to configure Envilder, resolve secrets, or load them at runtime.',
+        breadcrumb: 'Documentation',
+        navLabel: 'Documentation',
+        cardTitle: 'Envilder documentation',
+        cardSummary:
+          'Find setup, provider, CLI, GitHub Action, and SDK guides.',
+      },
+      'getting-started': {
+        title: 'Get started with Envilder',
+        description:
+          'Install Envilder and learn the prerequisites for resolving secrets from your cloud provider.',
+        heading: 'Get started',
+        intro:
+          'Install Envilder, configure a provider, and resolve secrets from a versioned map file.',
+        breadcrumb: 'Get started',
+        navLabel: 'Get started',
+        cardTitle: 'Get started with Envilder',
+        cardSummary:
+          'Install the CLI, review prerequisites, and understand the mapping model.',
+      },
+      'aws-ssm': {
+        title: 'Use Envilder with AWS SSM Parameter Store',
+        description:
+          'Configure AWS credentials and IAM permissions for Envilder with AWS SSM Parameter Store.',
+        heading: 'AWS SSM',
+        intro:
+          'Configure credentials, IAM permissions, and a test parameter for AWS SSM Parameter Store.',
+        breadcrumb: 'AWS SSM',
+        navLabel: 'AWS SSM',
+        cardTitle: 'AWS SSM setup',
+        cardSummary:
+          'Configure AWS credentials and the permissions Envilder needs.',
+      },
+      'azure-key-vault': {
+        title: 'Use Envilder with Azure Key Vault',
+        description:
+          'Configure Azure authentication and Key Vault access for Envilder.',
+        heading: 'Azure Key Vault',
+        intro:
+          'Configure Azure authentication, vault access, and a test secret for Azure Key Vault.',
+        breadcrumb: 'Azure Key Vault',
+        navLabel: 'Azure Key Vault',
+        cardTitle: 'Azure Key Vault setup',
+        cardSummary:
+          'Configure Azure authentication and Key Vault permissions.',
+      },
+      'map-file': {
+        title: 'Envilder map file reference',
+        description:
+          'Define Envilder mappings and provider configuration in envilder.json.',
+        heading: 'Map file',
+        intro:
+          'Define environment variable mappings and provider settings in envilder.json.',
+        breadcrumb: 'Map file',
+        navLabel: 'Map file',
+        cardTitle: 'Map file reference',
+        cardSummary:
+          'Map variables to secret paths and configure the selected provider.',
+      },
+      'cli-pull': {
+        title: 'Pull secrets with the Envilder CLI',
+        description:
+          'Download cloud secrets and generate a local .env file with Envilder.',
+        heading: 'CLI pull',
+        intro:
+          'Download secrets from your provider and write them to a local .env file.',
+        breadcrumb: 'CLI pull',
+        navLabel: 'CLI pull',
+        cardTitle: 'CLI pull command',
+        cardSummary:
+          'Generate a .env file from secrets defined in your map file.',
+      },
+      'cli-push': {
+        title: 'Push secrets with the Envilder CLI',
+        description:
+          'Upload local environment variables or a single secret with Envilder push mode.',
+        heading: 'CLI push',
+        intro:
+          'Upload environment variables from a .env file or push one secret directly.',
+        breadcrumb: 'CLI push',
+        navLabel: 'CLI push',
+        cardTitle: 'CLI push command',
+        cardSummary:
+          'Upload a mapped .env file or one secret to your provider.',
+      },
+      'github-action': {
+        title: 'Use the Envilder GitHub Action',
+        description:
+          'Pull AWS SSM or Azure Key Vault secrets into .env files in GitHub Actions workflows.',
+        heading: 'GitHub Action',
+        intro: 'Pull secrets into .env files during a GitHub Actions workflow.',
+        breadcrumb: 'GitHub Action',
+        navLabel: 'GitHub Action',
+        cardTitle: 'GitHub Action guide',
+        cardSummary:
+          'Configure the action for AWS, Azure, and multiple environments.',
+      },
+      'sdk-dotnet': {
+        title: 'Envilder .NET SDK',
+        description:
+          'Load secrets from Envilder map files in .NET applications.',
+        heading: '.NET SDK',
+        intro: 'Load secrets directly into a .NET application at startup.',
+        breadcrumb: '.NET SDK',
+        navLabel: '.NET SDK',
+        cardTitle: '.NET SDK guide',
+        cardSummary: 'Install and use the .NET runtime SDK.',
+      },
+      'sdk-python': {
+        title: 'Envilder Python SDK',
+        description:
+          'Load secrets from Envilder map files in Python applications.',
+        heading: 'Python SDK',
+        intro: 'Load secrets directly into a Python application at startup.',
+        breadcrumb: 'Python SDK',
+        navLabel: 'Python SDK',
+        cardTitle: 'Python SDK guide',
+        cardSummary: 'Install and use the Python runtime SDK.',
+      },
+      'sdk-nodejs': {
+        title: 'Envilder Node.js SDK',
+        description:
+          'Load secrets from Envilder map files in Node.js applications.',
+        heading: 'Node.js SDK',
+        intro: 'Load secrets directly into a Node.js application at startup.',
+        breadcrumb: 'Node.js SDK',
+        navLabel: 'Node.js SDK',
+        cardTitle: 'Node.js SDK guide',
+        cardSummary: 'Install and use the Node.js runtime SDK.',
+      },
+    },
+    breadcrumbLabel: 'Breadcrumb',
+    breadcrumbHome: 'Home',
+    breadcrumbDocs: 'Documentation',
+    navigationLabel: 'Documentation navigation',
+    mobileNavigation: 'Choose a documentation page',
+    navGettingStarted: 'Getting started',
+    navProviders: 'Providers',
+    hubCardsLabel: 'Documentation guides',
+    openPage: 'Open guide',
+    pagerLabel: 'Documentation pages',
     sidebarGettingStarted: 'Getting started',
     sidebarRequirements: 'Requirements',
     sidebarInstallation: 'Installation',

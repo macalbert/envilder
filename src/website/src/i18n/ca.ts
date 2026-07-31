@@ -487,6 +487,156 @@ export const ca: Translations = {
     backToHome: "← Tornar a l'inici",
     pageTitle: 'Documentació d’Envilder per a AWS SSM i Azure Key Vault',
     intro: 'Tot el que necessites per començar amb Envilder.',
+    pages: {
+      hub: {
+        title: "Documentació d'Envilder",
+        description:
+          "Guies per utilitzar Envilder amb AWS SSM Parameter Store, Azure Key Vault, la CLI, GitHub Action i SDKs de temps d'execució.",
+        heading: "Documentació d'Envilder",
+        intro:
+          "Tria una guia per configurar Envilder, resoldre secrets o carregar-los en temps d'execució.",
+        breadcrumb: 'Documentació',
+        navLabel: 'Documentació',
+        cardTitle: "Documentació d'Envilder",
+        cardSummary:
+          'Troba guies de configuració, proveïdors, CLI, GitHub Action i SDKs.',
+      },
+      'getting-started': {
+        title: 'Comença amb Envilder',
+        description:
+          'Instal·la Envilder i coneix els requisits per resoldre secrets des del teu proveïdor al núvol.',
+        heading: 'Comença',
+        intro:
+          "Instal·la Envilder, configura un proveïdor i resol secrets des d'un fitxer de mapatge versionat.",
+        breadcrumb: 'Comença',
+        navLabel: 'Comença',
+        cardTitle: 'Comença amb Envilder',
+        cardSummary:
+          'Instal·la la CLI, revisa els requisits i entén el model de mapatge.',
+      },
+      'aws-ssm': {
+        title: 'Utilitza Envilder amb AWS SSM Parameter Store',
+        description:
+          'Configura les credencials AWS i els permisos IAM per a Envilder amb AWS SSM Parameter Store.',
+        heading: 'AWS SSM',
+        intro:
+          'Configura credencials, permisos IAM i un paràmetre de prova per a AWS SSM Parameter Store.',
+        breadcrumb: 'AWS SSM',
+        navLabel: 'AWS SSM',
+        cardTitle: "Configuració d'AWS SSM",
+        cardSummary:
+          'Configura les credencials AWS i els permisos que necessita Envilder.',
+      },
+      'azure-key-vault': {
+        title: 'Utilitza Envilder amb Azure Key Vault',
+        description:
+          "Configura l'autenticació Azure i l'accés a Key Vault per a Envilder.",
+        heading: 'Azure Key Vault',
+        intro:
+          "Configura l'autenticació Azure, l'accés al vault i un secret de prova per a Azure Key Vault.",
+        breadcrumb: 'Azure Key Vault',
+        navLabel: 'Azure Key Vault',
+        cardTitle: "Configuració d'Azure Key Vault",
+        cardSummary:
+          "Configura l'autenticació Azure i els permisos de Key Vault.",
+      },
+      'map-file': {
+        title: "Referència del fitxer de mapatge d'Envilder",
+        description:
+          "Defineix mapatges d'Envilder i la configuració del proveïdor a envilder.json.",
+        heading: 'Fitxer de mapatge',
+        intro:
+          "Defineix els mapatges de variables d'entorn i la configuració del proveïdor a envilder.json.",
+        breadcrumb: 'Fitxer de mapatge',
+        navLabel: 'Fitxer de mapatge',
+        cardTitle: 'Referència del fitxer de mapatge',
+        cardSummary:
+          'Mapeja variables a rutes de secrets i configura el proveïdor seleccionat.',
+      },
+      'cli-pull': {
+        title: "Descarrega secrets amb la CLI d'Envilder",
+        description:
+          'Descarrega secrets al núvol i genera un fitxer .env local amb Envilder.',
+        heading: 'CLI pull',
+        intro:
+          'Descarrega secrets del proveïdor i escriu-los a un fitxer .env local.',
+        breadcrumb: 'CLI pull',
+        navLabel: 'CLI pull',
+        cardTitle: 'Comanda CLI pull',
+        cardSummary:
+          'Genera un fitxer .env a partir dels secrets definits al fitxer de mapatge.',
+      },
+      'cli-push': {
+        title: "Puja secrets amb la CLI d'Envilder",
+        description:
+          "Puja variables d'entorn locals o un sol secret amb el mode push d'Envilder.",
+        heading: 'CLI push',
+        intro:
+          "Puja variables d'entorn des d'un fitxer .env o envia un sol secret directament.",
+        breadcrumb: 'CLI push',
+        navLabel: 'CLI push',
+        cardTitle: 'Comanda CLI push',
+        cardSummary: 'Puja un fitxer .env mapat o un secret al proveïdor.',
+      },
+      'github-action': {
+        title: "Utilitza la GitHub Action d'Envilder",
+        description:
+          "Descarrega secrets d'AWS SSM o Azure Key Vault a fitxers .env en fluxos de GitHub Actions.",
+        heading: 'GitHub Action',
+        intro:
+          'Descarrega secrets a fitxers .env durant un flux de GitHub Actions.',
+        breadcrumb: 'GitHub Action',
+        navLabel: 'GitHub Action',
+        cardTitle: 'Guia de GitHub Action',
+        cardSummary: "Configura l'acció per a AWS, Azure i diversos entorns.",
+      },
+      'sdk-dotnet': {
+        title: "SDK .NET d'Envilder",
+        description:
+          "Carrega secrets de fitxers de mapatge d'Envilder en aplicacions .NET.",
+        heading: 'SDK .NET',
+        intro:
+          'Carrega secrets directament en una aplicació .NET en iniciar-se.',
+        breadcrumb: 'SDK .NET',
+        navLabel: 'SDK .NET',
+        cardTitle: "Guia de l'SDK .NET",
+        cardSummary: "Instal·la i utilitza l'SDK de temps d'execució .NET.",
+      },
+      'sdk-python': {
+        title: "SDK Python d'Envilder",
+        description:
+          "Carrega secrets de fitxers de mapatge d'Envilder en aplicacions Python.",
+        heading: 'SDK Python',
+        intro:
+          'Carrega secrets directament en una aplicació Python en iniciar-se.',
+        breadcrumb: 'SDK Python',
+        navLabel: 'SDK Python',
+        cardTitle: "Guia de l'SDK Python",
+        cardSummary: "Instal·la i utilitza l'SDK de temps d'execució Python.",
+      },
+      'sdk-nodejs': {
+        title: "SDK Node.js d'Envilder",
+        description:
+          "Carrega secrets de fitxers de mapatge d'Envilder en aplicacions Node.js.",
+        heading: 'SDK Node.js',
+        intro:
+          'Carrega secrets directament en una aplicació Node.js en iniciar-se.',
+        breadcrumb: 'SDK Node.js',
+        navLabel: 'SDK Node.js',
+        cardTitle: "Guia de l'SDK Node.js",
+        cardSummary: "Instal·la i utilitza l'SDK de temps d'execució Node.js.",
+      },
+    },
+    breadcrumbLabel: "Fil d'Ariadna",
+    breadcrumbHome: 'Inici',
+    breadcrumbDocs: 'Documentació',
+    navigationLabel: 'Navegació de documentació',
+    mobileNavigation: 'Tria una pàgina de documentació',
+    navGettingStarted: 'Comença',
+    navProviders: 'Proveïdors',
+    hubCardsLabel: 'Guies de documentació',
+    openPage: 'Obre la guia',
+    pagerLabel: 'Pàgines de documentació',
     sidebarGettingStarted: 'Primers passos',
     sidebarRequirements: 'Requisits',
     sidebarInstallation: 'Instal·lació',
