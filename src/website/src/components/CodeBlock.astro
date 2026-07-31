@@ -19,11 +19,21 @@ export interface Props {
   contentId?: string;
 }
 
+function createContentId(code: string, filename?: string): string {
+  let hash = 5381;
+
+  for (const character of code) {
+    hash = (hash * 33) ^ character.charCodeAt(0);
+  }
+
+  return `${filename ?? 'snippet'}-${(hash >>> 0).toString(36)}`;
+}
+
 const {
   lang = 'json',
   filename,
   code,
-  contentId = 'code-example',
+  contentId = createContentId(code, filename),
 } = Astro.props;
 const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
 ---
