@@ -27,6 +27,19 @@ function getTags(html: string, tagName: string): string[] {
   return html.match(new RegExp(`<${tagName}\\b[^>]*>`, 'g')) ?? [];
 }
 
+function isValidJsonLd(jsonLd: string | undefined): boolean {
+  if (!jsonLd) {
+    return false;
+  }
+
+  try {
+    JSON.parse(jsonLd);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function getExpectedAlternateUrls(path: string): string[] {
   const localizedPath = path.replace(/^\/(?:ca|es)(?=\/|$)/, '') || '/';
   const route = localizedPath.endsWith('/')
@@ -86,7 +99,7 @@ function getSeoIssues(file: string, path: string, lang: string): string[] {
     ...(htmlLang === lang ? [] : [`${file}: invalid html lang`]),
     ...(duplicateIds.length === 0 ? [] : [`${file}: duplicate ids`]),
     ...(brokenFragments.length === 0 ? [] : [`${file}: broken fragments`]),
-    ...(jsonLd && JSON.parse(jsonLd) ? [] : [`${file}: invalid JSON-LD`]),
+    ...(isValidJsonLd(jsonLd) ? [] : [`${file}: invalid JSON-LD`]),
     ...(ogImage === `${siteUrl}/og-image.png`
       ? []
       : [`${file}: missing Open Graph image`]),
@@ -126,6 +139,17 @@ function getSitemapUrls(): string[] {
 }
 
 describe('Static website SEO', () => {
+  it('Should_ReturnFalse_When_JsonLdIsInvalid', () => {
+    // Arrange
+    const expected = false;
+
+    // Act
+    const actual = isValidJsonLd('{');
+
+    // Assert
+    expect(actual).toBe(expected);
+  });
+
   it('Should_ExposeValidSeoMarkup_When_IndexablePagesAreBuilt', () => {
     // Arrange
     const expected: string[] = [];
