@@ -179,7 +179,7 @@ const override = await Envilder.fromMapFile('envilder.json')
               <p class="sdk-panel-desc">{sdk.desc}</p>
               {sdk.status === 'available' && (
                 <div class="sdk-panel-links">
-                  <a href={`${localizedPath(lang, '/docs')}#${sdk.docsHash}`} class="sdk-docs-link">
+                  <a href={`${localizedPath(lang, '/docs/')}#${sdk.docsHash}`} class="sdk-docs-link">
                     {t.sdks.docsLink} →
                   </a>
                   <a href={sdk.pkg} target="_blank" rel="noopener noreferrer" class="sdk-pkg-link">

@@ -283,6 +283,76 @@ exports[`Static website Stack > Should_CreateWebsite_When_StackIsCalled > static
       },
       "Type": "AWS::IAM::Role",
     },
+    "assetresponseheaderspolicyAF0CDE79": {
+      "Properties": {
+        "ResponseHeadersPolicyConfig": {
+          "CustomHeadersConfig": {
+            "Items": [
+              {
+                "Header": "Cache-Control",
+                "Override": true,
+                "Value": "public, max-age=31536000, immutable",
+              },
+            ],
+          },
+          "Name": "testwebappassetresponseheaderspolicyF8AA640B",
+          "SecurityHeadersConfig": {
+            "ContentTypeOptions": {
+              "Override": true,
+            },
+            "FrameOptions": {
+              "FrameOption": "DENY",
+              "Override": true,
+            },
+            "ReferrerPolicy": {
+              "Override": true,
+              "ReferrerPolicy": "strict-origin-when-cross-origin",
+            },
+            "StrictTransportSecurity": {
+              "AccessControlMaxAgeSec": 31536000,
+              "IncludeSubdomains": true,
+              "Override": true,
+            },
+          },
+        },
+      },
+      "Type": "AWS::CloudFront::ResponseHeadersPolicy",
+    },
+    "defaultresponseheaderspolicy7EAB93BC": {
+      "Properties": {
+        "ResponseHeadersPolicyConfig": {
+          "CustomHeadersConfig": {
+            "Items": [
+              {
+                "Header": "Cache-Control",
+                "Override": true,
+                "Value": "public, max-age=0, s-maxage=300, must-revalidate",
+              },
+            ],
+          },
+          "Name": "testwebappdefaultresponseheaderspolicyADDC3939",
+          "SecurityHeadersConfig": {
+            "ContentTypeOptions": {
+              "Override": true,
+            },
+            "FrameOptions": {
+              "FrameOption": "DENY",
+              "Override": true,
+            },
+            "ReferrerPolicy": {
+              "Override": true,
+              "ReferrerPolicy": "strict-origin-when-cross-origin",
+            },
+            "StrictTransportSecurity": {
+              "AccessControlMaxAgeSec": 31536000,
+              "IncludeSubdomains": true,
+              "Override": true,
+            },
+          },
+        },
+      },
+      "Type": "AWS::CloudFront::ResponseHeadersPolicy",
+    },
     "deploystaticwebsiteAwsCliLayer31B11195": {
       "Properties": {
         "Content": {
@@ -326,15 +396,27 @@ exports[`Static website Stack > Should_CreateWebsite_When_StackIsCalled > static
           "Aliases": [
             "test.domain.com",
           ],
+          "CacheBehaviors": [
+            {
+              "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+              "Compress": true,
+              "PathPattern": "_assets/*",
+              "ResponseHeadersPolicyId": {
+                "Ref": "assetresponseheaderspolicyAF0CDE79",
+              },
+              "TargetOriginId": "staticWebsiteStackTestmacalberttestwebsitewebsitetestdevelopmentstackdistributionOrigin1D40FE77F",
+              "ViewerProtocolPolicy": "redirect-to-https",
+            },
+          ],
           "CustomErrorResponses": [
             {
-              "ErrorCachingMinTTL": 10,
+              "ErrorCachingMinTTL": 300,
               "ErrorCode": 403,
               "ResponseCode": 404,
               "ResponsePagePath": "/404.html",
             },
             {
-              "ErrorCachingMinTTL": 10,
+              "ErrorCachingMinTTL": 300,
               "ErrorCode": 404,
               "ResponseCode": 404,
               "ResponsePagePath": "/404.html",
@@ -354,12 +436,15 @@ exports[`Static website Stack > Should_CreateWebsite_When_StackIsCalled > static
                 },
               },
             ],
+            "ResponseHeadersPolicyId": {
+              "Ref": "defaultresponseheaderspolicy7EAB93BC",
+            },
             "TargetOriginId": "staticWebsiteStackTestmacalberttestwebsitewebsitetestdevelopmentstackdistributionOrigin1D40FE77F",
             "ViewerProtocolPolicy": "redirect-to-https",
           },
           "DefaultRootObject": "index.html",
           "Enabled": true,
-          "HttpVersion": "http2",
+          "HttpVersion": "http2and3",
           "IPV6Enabled": true,
           "Logging": {
             "Bucket": {

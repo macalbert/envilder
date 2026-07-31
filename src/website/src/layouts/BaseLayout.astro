@@ -1,5 +1,11 @@
 ---
-import { defaultLang, languages } from '../i18n/utils';
+import {
+  defaultLang,
+  localizedLanguages,
+  localizedPath,
+  stripLocalePrefix,
+  useTranslations,
+} from '../i18n/utils';
 
 export interface Props {
   title?: string;
@@ -21,32 +27,29 @@ const skipLabel: Record<string, string> = {
   ca: 'Saltar al contingut principal',
 };
 const skipText = skipLabel[lang] ?? skipLabel.en;
+const t = useTranslations(lang);
+const openGraphLocale: Record<string, string> = {
+  en: 'en_US',
+  ca: 'ca_ES',
+  es: 'es_ES',
+};
+const ogLocale = openGraphLocale[lang] ?? openGraphLocale.en;
 
 const siteUrl = Astro.site ?? 'https://envilder.com';
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
 const siteRootUrl = new URL('/', siteUrl).href;
-const alternateLanguages = Object.keys(languages);
-const localizedLanguages = alternateLanguages.filter(
-  (language) => language !== defaultLang,
-);
-const localizedLanguagePattern = localizedLanguages.join('|');
-const pathWithoutLocale = localizedLanguagePattern
-  ? Astro.url.pathname.replace(
-      new RegExp(`^/(?:${localizedLanguagePattern})(?=/|$)`),
-      '',
-    ) || '/'
-  : Astro.url.pathname;
-const defaultLanguageUrl = new URL(pathWithoutLocale, siteUrl).href;
-const alternateLanguageUrls = alternateLanguages.map((language) => ({
+const pathWithoutLocale = stripLocalePrefix(Astro.url.pathname);
+const availableLanguages = localizedLanguages(pathWithoutLocale);
+const defaultLanguageUrl = new URL(
+  localizedPath(defaultLang, pathWithoutLocale),
+  siteUrl,
+).href;
+const alternateLanguageUrls = availableLanguages.map((language) => ({
   language,
-  href: new URL(
-    language === defaultLang
-      ? pathWithoutLocale
-      : `/${language}${pathWithoutLocale}`,
-    siteUrl,
-  ).href,
+  href: new URL(localizedPath(language, pathWithoutLocale), siteUrl).href,
 }));
 const isHomePage = pathWithoutLocale === '/';
+const ogImageUrl = new URL('/og-image.png', siteUrl).href;
 const structuredData = JSON.stringify({
   '@context': 'https://schema.org',
   '@graph': [
@@ -93,6 +96,7 @@ const structuredData = JSON.stringify({
             isAccessibleForFree: true,
             codeRepository: 'https://github.com/macalbert/envilder',
             license: 'https://github.com/macalbert/envilder/blob/main/LICENSE',
+            screenshot: ogImageUrl,
           },
         ]
       : []),
@@ -127,11 +131,17 @@ const structuredData = JSON.stringify({
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:site_name" content="Envilder" />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={t.homeMeta.ogImageAlt} />
+    <meta property="og:locale" content={ogLocale} />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
 
     <title>{title}</title>
 

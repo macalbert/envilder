@@ -2,10 +2,11 @@ import type { Translations } from './types';
 
 export const en: Translations = {
   homeMeta: {
-    title:
-      'Open-source secret management for AWS SSM and Azure Key Vault | Envilder',
+    title: 'Load AWS SSM & Azure Key Vault secrets into .env | Envilder',
     description:
       'Envilder is an open-source CLI, GitHub Action, and runtime SDK for loading secrets from AWS SSM Parameter Store and Azure Key Vault.',
+    ogImageAlt:
+      'Envilder - open-source secret resolution for AWS SSM and Azure Key Vault',
   },
   notFound: {
     title: 'Page not found | Envilder',
@@ -43,6 +44,8 @@ export const en: Translations = {
     titleAccent: 'secrets.',
     description:
       'Stop reinventing secret loading in every project. Define one environment contract and resolve it everywhere.',
+    positioning:
+      'Open-source secret resolution for AWS SSM and Azure Key Vault, across local development, CI/CD and application runtime.',
     descAws: 'AWS SSM',
     descAzure: 'Azure Key Vault',
     descOr: '·',
@@ -222,6 +225,8 @@ export const en: Translations = {
     subtitle:
       'Watch how Envilder simplifies secret management in under 2 minutes.',
     cliDemo: 'CLI Demo: Pull Secrets',
+    transcript:
+      'Demo commands: envilder pull --map envilder.json --envfile .env. Envilder resolves mapped secrets from your configured cloud provider and writes the resulting variables to .env.',
     ghaWorkflow: 'GitHub Action Workflow',
     comingSoon: 'Coming soon',
   },
@@ -459,6 +464,7 @@ export const en: Translations = {
     fullChangelog: 'Full ',
     changelogAccent: 'Changelog',
     intro: 'Complete release history. See also',
+    releaseNotesLanguage: 'Release notes are published in English.',
     githubReleases: 'GitHub Releases',
     versions: 'Versions',
     backToTop: 'Back to top',
@@ -475,7 +481,7 @@ export const en: Translations = {
       'Learn how to resolve environment variables from AWS SSM Parameter Store and Azure Key Vault with the Envilder CLI, GitHub Action, and runtime SDKs.',
 
     backToHome: '← Back to home',
-    pageTitle: 'Documentation',
+    pageTitle: 'Envilder documentation for AWS SSM and Azure Key Vault',
     intro: 'Everything you need to get started with Envilder.',
     sidebarGettingStarted: 'Getting started',
     sidebarRequirements: 'Requirements',
