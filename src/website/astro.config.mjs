@@ -55,7 +55,16 @@ const changelogSdkNodejs = readChangelog('../../docs/changelogs/sdk-nodejs.md');
 export default defineConfig({
   site: 'https://envilder.com',
   output: 'static',
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      filter: (page) =>
+        ![
+          'https://envilder.com/ca/changelog/',
+          'https://envilder.com/es/changelog/',
+        ].includes(page),
+    }),
+  ],
+  trailingSlash: 'always',
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'ca', 'es'],

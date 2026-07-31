@@ -10,7 +10,11 @@ import {
 	FunctionCode,
 	FunctionEventType,
 	Function as LambdaFunction,
+	HeadersFrameOption,
+	HeadersReferrerPolicy,
+	HttpVersion,
 	OriginAccessIdentity,
+	ResponseHeadersPolicy,
 	ViewerProtocolPolicy,
 } from "aws-cdk-lib/aws-cloudfront";
 import { S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
@@ -136,25 +140,81 @@ export class StaticWebsiteStack extends CustomStack {
 			httpStatus: 403,
 			responseHttpStatus: 404,
 			responsePagePath: "/404.html",
-			ttl: Duration.seconds(10),
+			ttl: Duration.minutes(5),
 		};
 
 		const errorResponse404: ErrorResponse = {
 			httpStatus: 404,
 			responseHttpStatus: 404,
 			responsePagePath: "/404.html",
-			ttl: Duration.seconds(10),
+			ttl: Duration.minutes(5),
 		};
 
 		errorResponses.push(errorResponse403, errorResponse404);
 
+		const securityHeadersBehavior = {
+			contentTypeOptions: {
+				override: true,
+			},
+			frameOptions: {
+				frameOption: HeadersFrameOption.DENY,
+				override: true,
+			},
+			referrerPolicy: {
+				referrerPolicy: HeadersReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN,
+				override: true,
+			},
+			strictTransportSecurity: {
+				accessControlMaxAge: Duration.days(365),
+				includeSubdomains: true,
+				override: true,
+			},
+		};
+		const defaultResponseHeadersPolicy = new ResponseHeadersPolicy(
+			this,
+			"default-response-headers-policy",
+			{
+				securityHeadersBehavior,
+				customHeadersBehavior: {
+					customHeaders: [
+						{
+							header: "Cache-Control",
+							value: "public, max-age=0, s-maxage=300, must-revalidate",
+							override: true,
+						},
+					],
+				},
+			},
+		);
+		const assetResponseHeadersPolicy = new ResponseHeadersPolicy(
+			this,
+			"asset-response-headers-policy",
+			{
+				securityHeadersBehavior,
+				customHeadersBehavior: {
+					customHeaders: [
+						{
+							header: "Cache-Control",
+							value: "public, max-age=31536000, immutable",
+							override: true,
+						},
+					],
+				},
+			},
+		);
+		const staticWebsiteOrigin = S3BucketOrigin.withOriginAccessIdentity(
+			bucketWebsite,
+			{
+				originAccessIdentity: originAccessIdentity,
+			},
+		);
+
 		const distribution = new Distribution(this, "distribution", {
 			domainNames: allDomainNames,
 			defaultBehavior: {
-				origin: S3BucketOrigin.withOriginAccessIdentity(bucketWebsite, {
-					originAccessIdentity: originAccessIdentity,
-				}),
+				origin: staticWebsiteOrigin,
 				viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+				responseHeadersPolicy: defaultResponseHeadersPolicy,
 				functionAssociations: [
 					{
 						eventType: FunctionEventType.VIEWER_REQUEST,
@@ -170,12 +230,20 @@ export class StaticWebsiteStack extends CustomStack {
 					},
 				],
 			},
+			additionalBehaviors: {
+				"_assets/*": {
+					origin: staticWebsiteOrigin,
+					viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+					responseHeadersPolicy: assetResponseHeadersPolicy,
+				},
+			},
 			defaultRootObject: "index.html",
 			certificate: primaryCertificate,
 			errorResponses: errorResponses,
 			enableLogging: true,
 			logBucket: loggingBucket,
 			logFilePrefix: "cloudfront-logs/",
+			httpVersion: HttpVersion.HTTP2_AND_3,
 		});
 
 		new BucketDeployment(this, "deploy-static-website", {
