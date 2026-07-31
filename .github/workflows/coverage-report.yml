@@ -131,6 +131,7 @@ jobs:
 
       - name: 🏎️ Run tests with coverage
         run: |
+          set -o pipefail
           mkdir -p output
           dotnet-coverage collect \
             "dotnet test src/sdks/dotnet/Envilder.sln --configuration Release --logger:console;verbosity=detailed" \
@@ -199,6 +200,7 @@ jobs:
 
       - name: 🏎️ Run tests with coverage
         run: |
+          set -o pipefail
           mkdir -p output
           cd tests/sdks/python && python -m pytest -v \
             --cov=envilder \
