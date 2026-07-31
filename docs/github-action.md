@@ -354,7 +354,7 @@ For maintainers releasing new versions:
 2. **Commit the action bundle referenced by `action.yml`:**
 
    ```bash
-   git add github-action/dist/index.js
+   git add action.yml github-action/dist/index.js
    git commit -m "chore: build GitHub Action release"
    ```
 
