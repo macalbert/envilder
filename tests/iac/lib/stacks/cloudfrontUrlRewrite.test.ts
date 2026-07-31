@@ -127,6 +127,23 @@ describe("CloudFront URL Rewrite Function", () => {
 		});
 	});
 
+	test("Should_KeepStaticUrl_When_WebpAssetIsRequested", () => {
+		// Arrange
+		const expected = {
+			uri: "/Envilder-demo-poster.webp",
+			querystring: "version=1",
+		};
+		const event = {
+			request: { ...expected },
+		};
+
+		// Act
+		const actual = handlerFunc(event);
+
+		// Assert
+		expect(actual).toEqual(expected);
+	});
+
 	test("Should_PreserveCloudFrontQueryObject_When_RedirectingUrl", () => {
 		// Arrange
 		const event = {

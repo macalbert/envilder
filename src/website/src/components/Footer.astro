@@ -37,15 +37,15 @@ const links = {
     },
     {
       label: t.footer.linkPullCommand,
-      href: localizedPath(lang, '/docs/#pull-command'),
+      href: localizedPath(lang, '/docs/cli/pull/'),
     },
     {
       label: t.footer.linkPushCommand,
-      href: localizedPath(lang, '/docs/#push-command'),
+      href: localizedPath(lang, '/docs/cli/push/'),
     },
     {
       label: t.footer.linkGithubAction,
-      href: localizedPath(lang, '/docs/#gha-setup'),
+      href: localizedPath(lang, '/docs/github-action/'),
     },
   ],
   community: [
@@ -91,7 +91,15 @@ const links = {
         <h4>{t.footer.project}</h4>
         <ul>
           {links.project.map((l) => (
-            <li><a href={l.href}>{l.label}</a></li>
+            <li>
+              <a
+                href={l.href}
+                data-analytics-event={l.href.includes('github.com') ? 'click_github' : undefined}
+                data-analytics-placement="footer-project"
+              >
+                {l.label}
+              </a>
+            </li>
           ))}
         </ul>
       </div>
@@ -109,7 +117,15 @@ const links = {
         <h4>{t.footer.community}</h4>
         <ul>
           {links.community.map((l) => (
-            <li><a href={l.href}>{l.label}</a></li>
+            <li>
+              <a
+                href={l.href}
+                data-analytics-event={l.href.includes('github.com') ? 'click_github' : undefined}
+                data-analytics-placement="footer-community"
+              >
+                {l.label}
+              </a>
+            </li>
           ))}
         </ul>
       </div>
@@ -298,23 +314,3 @@ const links = {
     color: var(--color-btn-text);
   }
 </style>
-
-<script>
-  function initFooterTracking() {
-    document
-      .querySelectorAll<HTMLAnchorElement>('.footer a[href*="github.com"]')
-      .forEach((link) => {
-        link.addEventListener('click', () => {
-          if (typeof window.gtag === 'function') {
-            window.gtag('event', 'click_github', {
-              event_category: 'outbound',
-              event_label: link.href,
-            });
-          }
-        });
-      });
-  }
-
-  initFooterTracking();
-  document.addEventListener('astro:after-swap', initFooterTracking);
-</script>

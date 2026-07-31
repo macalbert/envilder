@@ -1,5 +1,15 @@
 export const localizedRoutes = {
   '/': ['en', 'ca', 'es'],
   '/docs/': ['en', 'ca', 'es'],
+  '/docs/getting-started/': ['en', 'ca', 'es'],
+  '/docs/providers/aws-ssm/': ['en', 'ca', 'es'],
+  '/docs/providers/azure-key-vault/': ['en', 'ca', 'es'],
+  '/docs/map-file/': ['en', 'ca', 'es'],
+  '/docs/cli/pull/': ['en', 'ca', 'es'],
+  '/docs/cli/push/': ['en', 'ca', 'es'],
+  '/docs/github-action/': ['en', 'ca', 'es'],
+  '/docs/sdks/dotnet/': ['en', 'ca', 'es'],
+  '/docs/sdks/python/': ['en', 'ca', 'es'],
+  '/docs/sdks/nodejs/': ['en', 'ca', 'es'],
   '/changelog/': ['en'],
 } as const satisfies Record<string, readonly string[]>;

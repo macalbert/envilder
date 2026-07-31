@@ -1,19 +1,35 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { docsRouteManifest } from '../../src/website/src/i18n/docs-routes';
 import { localizedLanguages } from '../../src/website/src/i18n/utils';
 
 const siteUrl = 'https://envilder.com';
 const distDirectory = resolve(__dirname, '../../src/website/dist');
+const localizedDocsPages = docsRouteManifest.flatMap((route) =>
+  ['en', 'ca', 'es'].map((lang) => {
+    const routeDirectory =
+      route.path === '/docs/'
+        ? 'docs'
+        : `docs/${route.path.replace(/^\/docs\/|\/$/g, '')}`;
+    const localeDirectory =
+      lang === 'en' ? routeDirectory : `${lang}/${routeDirectory}`;
+    const path = lang === 'en' ? route.path : `/${lang}${route.path}`;
+
+    return {
+      file: `${localeDirectory}/index.html`,
+      path,
+      lang,
+    };
+  }),
+);
 const indexablePages = [
   { file: 'index.html', path: '/', lang: 'en' },
   { file: 'ca/index.html', path: '/ca/', lang: 'ca' },
   { file: 'es/index.html', path: '/es/', lang: 'es' },
-  { file: 'docs/index.html', path: '/docs/', lang: 'en' },
-  { file: 'ca/docs/index.html', path: '/ca/docs/', lang: 'ca' },
-  { file: 'es/docs/index.html', path: '/es/docs/', lang: 'es' },
+  ...localizedDocsPages,
   { file: 'changelog/index.html', path: '/changelog/', lang: 'en' },
-] as const;
+];
 
 function readDistFile(file: string): string {
   return readFileSync(resolve(distDirectory, file), 'utf-8');
@@ -25,6 +41,16 @@ function getAttribute(tag: string, attribute: string): string | undefined {
 
 function getTags(html: string, tagName: string): string[] {
   return html.match(new RegExp(`<${tagName}\\b[^>]*>`, 'g')) ?? [];
+}
+
+function findDuplicateValues(values: string[]): string[] {
+  const counts = new Map<string, number>();
+
+  for (const value of values) {
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+
+  return [...counts].flatMap(([value, count]) => (count > 1 ? [value] : []));
 }
 
 function isValidJsonLd(jsonLd: string | undefined): boolean {
@@ -56,12 +82,13 @@ function getExpectedAlternateUrls(path: string): string[] {
 function getSeoIssues(file: string, path: string, lang: string): string[] {
   const html = readDistFile(file);
   const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
-  const duplicateIds = ids.filter((id, index) => ids.indexOf(id) !== index);
+  const idSet = new Set(ids);
+  const duplicateIds = findDuplicateValues(ids);
   const fragmentTargets = [...html.matchAll(/<a\b[^>]*href="#([^"]+)"/g)].map(
     (match) => match[1],
   );
   const brokenFragments = fragmentTargets.filter(
-    (target) => !ids.includes(target),
+    (target) => !idSet.has(target),
   );
   const title = html.match(/<title>(.*?)<\/title>/s)?.[1];
   const description = getTags(html, 'meta')
@@ -172,7 +199,7 @@ describe('Static website SEO', () => {
 
     // Assert
     expect(actual).toEqual(expected);
-  });
+  }, 15_000);
 
   it('Should_ExposeManifestBackedHreflangClusters_When_IndexablePagesAreBuilt', () => {
     // Arrange
@@ -214,6 +241,29 @@ describe('Static website SEO', () => {
         'Sitemap: https://envilder.com/sitemap-index.xml',
       ),
     };
+
+    // Assert
+    expect(actual).toEqual(expected);
+  });
+
+  it('Should_ExcludeUnavailableClaims_When_IndexablePagesAreBuilt', () => {
+    // Arrange
+    const expected: string[] = [];
+    const forbiddenClaims = [
+      'envilder pull',
+      '--provider=gcp',
+      'ready to use from GitHub Marketplace',
+      'sk_live_',
+    ];
+    const html = indexablePages
+      .map((page) => readDistFile(page.file))
+      .join('\n')
+      .toLowerCase();
+
+    // Act
+    const actual = forbiddenClaims.filter((claim) =>
+      html.includes(claim.toLowerCase()),
+    );
 
     // Assert
     expect(actual).toEqual(expected);
@@ -262,6 +312,40 @@ describe('Static website SEO', () => {
       hasAutoplay: videoTag.includes('autoplay'),
       hasPoster: videoTag.includes('poster="/Envilder-demo-poster.webp"'),
       hasPreloadNone: videoTag.includes('preload="none"'),
+    };
+
+    // Assert
+    expect(actual).toEqual(expected);
+  });
+
+  it('Should_TrackConversionsWithoutSendingCode_When_IndexablePagesAreBuilt', () => {
+    // Arrange
+    const expected = {
+      hasGetStartedEvent: true,
+      hasGitHubEvent: true,
+      hasPackageEvent: true,
+      hasRuntimeEvent: true,
+      hasCopyCodeEvent: true,
+      hasCopyInstallEvent: true,
+      sendsCodeAsAnalyticsLabel: false,
+    };
+    const html = indexablePages
+      .map((page) => readDistFile(page.file))
+      .join('\n');
+
+    // Act
+    const actual = {
+      hasGetStartedEvent: html.includes(
+        'data-analytics-event="click_get_started"',
+      ),
+      hasGitHubEvent: html.includes('data-analytics-event="click_github"'),
+      hasPackageEvent: html.includes('data-analytics-event="click_package"'),
+      hasRuntimeEvent: html.includes('data-analytics-event="select_runtime"'),
+      hasCopyCodeEvent: html.includes('data-analytics-event="copy_code"'),
+      hasCopyInstallEvent: html.includes(
+        'data-analytics-event="copy_install_command"',
+      ),
+      sendsCodeAsAnalyticsLabel: html.includes('event_label'),
     };
 
     // Assert
