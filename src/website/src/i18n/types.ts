@@ -152,6 +152,7 @@ export interface ProvidersTranslations {
   gcpTitle: string;
   gcpBadge: string;
   gcpFeatures: string[];
+  gcpRoadmapLink: string;
   configPriorityTitle: string;
   priorityHigh: string;
   priorityMid: string;
@@ -223,7 +224,7 @@ export interface GetStartedTranslations {
   prereqNode: string;
   prereqAws: string;
   prereqAzure: string;
-  prereqIam: string;
+  prereqProviderChoice: string;
   prereqAwsNote: string;
   prereqAzureNote: string;
   install: string;

@@ -170,13 +170,13 @@ export const en: Translations = {
         icon: 'refresh',
         title: 'Safe Secret Rotation',
         description:
-          'Rotate values in AWS SSM or Azure Key Vault. Every consumer (local, CI/CD, and runtime) resolves the new value automatically. No .env rewrites, no pipeline changes.',
+          'Rotate values in AWS SSM or Azure Key Vault without changing envilder.json. Existing generated .env files update only when you rerun Envilder; runtime consumers must restart or resolve again.',
       },
       {
         icon: 'cloud',
-        title: 'Multi-Cloud, No Lock-in',
+        title: 'Your Secret Store, One Map Contract',
         description:
-          'AWS SSM, Azure Key Vault, GCP Secret Manager (coming soon). Switch providers without changing your app code. Your cloud, your rules.',
+          'Keep secrets in the AWS SSM or Azure Key Vault setup you already use. Envilder preserves the envilder.json mapping contract across tools; provider credentials and secret migration stay provider-specific.',
       },
     ],
     extrasTitle: 'Also included',
@@ -207,9 +207,9 @@ export const en: Translations = {
       },
       {
         icon: 'chart',
-        title: 'Full Audit Trail',
+        title: 'Provider-Native Access Logs',
         description:
-          'Every access logged in CloudTrail or Azure Monitor automatically.',
+          'CloudTrail or Azure Monitor can record provider access when configured. Envilder does not create an audit trail itself.',
       },
       {
         icon: 'person',
@@ -226,7 +226,7 @@ export const en: Translations = {
       'Watch how Envilder simplifies secret management in under 2 minutes.',
     cliDemo: 'CLI Demo: Pull Secrets',
     transcript:
-      'Demo commands: envilder pull --map envilder.json --envfile .env. Envilder resolves mapped secrets from your configured cloud provider and writes the resulting variables to .env.',
+      'Demo command: envilder --map=envilder.json --envfile=.env. Envilder resolves mapped secrets from your configured cloud provider and writes the resulting variables to .env.',
     ghaWorkflow: 'GitHub Action Workflow',
     comingSoon: 'Coming soon',
   },
@@ -234,14 +234,14 @@ export const en: Translations = {
     title: 'Your cloud. ',
     titleAccent: 'Your choice.',
     subtitle:
-      'Envilder works with AWS SSM Parameter Store, Azure Key Vault, and GCP Secret Manager (coming soon). Configure inline or via CLI flags.',
+      'Envilder works today with AWS SSM Parameter Store and Azure Key Vault. GCP Secret Manager is planned and not available yet. Configure shipped providers in envilder.json or with CLI flags.',
     awsTitle: 'AWS SSM Parameter Store',
     awsDefault: 'Default provider',
     awsFeatures: [
       'Supports GetParameter with WithDecryption',
       'AWS Profile support for multi-account',
       'IAM policy-based access control',
-      'CloudTrail audit logging',
+      'CloudTrail access logging when configured',
     ],
     azureTitle: 'Azure Key Vault',
     azureBadge: 'New in v0.8',
@@ -249,16 +249,15 @@ export const en: Translations = {
       'Auto-normalizes secret names (slashes → hyphens)',
       'DefaultAzureCredential authentication',
       'Azure RBAC access control',
-      'Azure Monitor audit logging',
+      'Azure Monitor access logging when configured',
     ],
     gcpTitle: 'GCP Secret Manager',
-    gcpBadge: 'Coming soon',
+    gcpBadge: 'Planned',
     gcpFeatures: [
-      'Google Cloud Secret Manager integration',
-      'Application Default Credentials (ADC)',
-      'IAM-based access control',
-      'Cloud Audit Logs',
+      'Planned GCP Secret Manager integration',
+      'Not available in the CLI, GitHub Action, or runtime SDKs',
     ],
+    gcpRoadmapLink: 'View roadmap',
     configPriorityTitle: 'Configuration priority',
     priorityHigh: 'CLI flags / GHA inputs',
     priorityMid: '$config in map file',
@@ -386,13 +385,13 @@ export const en: Translations = {
         label: '⚡',
         title: 'Exec mode (--exec)',
         description:
-          'Inject secrets into child process without writing to disk',
+          'Planned mode; not available yet. It would inject secrets into a child process without writing to disk',
       },
       {
         status: 'planned',
         label: '☁️',
         title: 'GCP Secret Manager',
-        description: 'Third cloud provider. Completes the multi-cloud trident',
+        description: 'Planned third cloud provider; not available yet',
       },
       {
         status: 'planned',
@@ -416,12 +415,13 @@ export const en: Translations = {
     subtitle: 'Up and running in under a minute.',
     prerequisites: 'Prerequisites',
     prereqNode: 'Node.js v22.12+',
-
-    prereqAws: 'AWS CLI configured',
-    prereqAzure: 'Azure CLI configured',
-    prereqIam: 'IAM permissions:',
-    prereqAwsNote: 'for AWS SSM',
-    prereqAzureNote: 'for Azure Key Vault',
+    prereqProviderChoice: 'Choose one cloud provider:',
+    prereqAws: 'AWS SSM',
+    prereqAzure: 'Azure Key Vault',
+    prereqAwsNote:
+      'AWS credentials with ssm:GetParameter; add ssm:PutParameter for --push',
+    prereqAzureNote:
+      'Azure credentials with secret Get access; add Set access for --push',
     install: 'Install',
     quickStart: 'Quick start',
     step1: 'Create an envilder.json mapping env vars to secret paths',
@@ -669,7 +669,7 @@ export const en: Translations = {
     pushSingleOptProfile: 'AWS CLI profile (AWS only)',
     ghaSetupTitle: 'GitHub Action setup',
     ghaSetupDesc:
-      'The Envilder GitHub Action pulls secrets from AWS SSM or Azure Key Vault into .env files during your CI/CD workflow. No build step needed. The action is pre-built and ready to use from GitHub Marketplace.',
+      'The prebuilt Envilder GitHub Action pulls secrets from AWS SSM or Azure Key Vault into .env files during your CI/CD workflow. Use the published macalbert/envilder/github-action@v0 tag; no consumer build step is required.',
     ghaPrerequisites: 'Prerequisites',
     ghaPrereqAws:
       'AWS: Configure credentials with aws-actions/configure-aws-credentials',

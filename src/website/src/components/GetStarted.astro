@@ -26,9 +26,9 @@ const t = useTranslations(lang);
           <h3>{t.getStarted.prerequisites}</h3>
           <ul>
             <li><strong>{t.getStarted.prereqNode}</strong></li>
-            <li>{t.getStarted.prereqAws} <em>({t.getStarted.prereqAwsNote})</em></li>
-            <li>{t.getStarted.prereqAzure} <em>({t.getStarted.prereqAzureNote})</em></li>
-            <li>{t.getStarted.prereqIam} <code>ssm:GetParameter</code> / <code>ssm:PutParameter</code></li>
+            <li><strong>{t.getStarted.prereqProviderChoice}</strong></li>
+            <li><strong>{t.getStarted.prereqAws}</strong><em>: {t.getStarted.prereqAwsNote}</em></li>
+            <li><strong>{t.getStarted.prereqAzure}</strong><em>: {t.getStarted.prereqAzureNote}</em></li>
           </ul>
         </div>
 
@@ -76,7 +76,7 @@ const t = useTranslations(lang);
             <span class="comment">{t.getStarted.commentPush}</span>
           </span>
           <span class="line">
-            <span class="prompt">$</span><span class="command"> npx envilder</span><span class="flag"> --push</span><span class="flag"> --key</span><span class="command">=API_KEY</span><span class="flag"> --value</span><span class="command">=sk_live_abc123</span><span class="flag"> --secret-path</span><span class="command">=/app/api-key</span>
+            <span class="prompt">$</span><span class="command"> npx envilder</span><span class="flag"> --push</span><span class="flag"> --key</span><span class="command">=API_KEY</span><span class="flag"> --value</span><span class="command">=example-not-a-real-secret</span><span class="flag"> --secret-path</span><span class="command">=/app/api-key</span>
           </span>
         </TerminalMockup>
 

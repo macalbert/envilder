@@ -170,13 +170,13 @@ export const ca: Translations = {
         icon: 'refresh',
         title: 'Rotació de secrets segura',
         description:
-          'Rota valors a AWS SSM o Azure Key Vault. Cada consumidor (local, CI/CD i runtime) resol el nou valor automàticament. Sense reescriure .env, sense canvis als pipelines.',
+          "Rota valors a AWS SSM o Azure Key Vault sense canviar envilder.json. Els fitxers .env generats només s'actualitzen quan tornes a executar Envilder; els consumidors de runtime s'han de reiniciar o tornar a resoldre els secrets.",
       },
       {
         icon: 'cloud',
-        title: 'Multi-Cloud, sense lock-in',
+        title: 'El teu magatzem de secrets, un contracte de mapeig',
         description:
-          "AWS SSM, Azure Key Vault, GCP Secret Manager (pròximament). Canvia de proveïdor sense modificar el codi de l'app. El teu núvol, les teves regles.",
+          "Conserva els secrets a la configuració d'AWS SSM o Azure Key Vault que ja utilitzes. Envilder preserva el contracte de mapeig envilder.json entre eines; les credencials i la migració de secrets continuen sent específiques de cada proveïdor.",
       },
     ],
     extrasTitle: 'També inclou',
@@ -207,9 +207,9 @@ export const ca: Translations = {
       },
       {
         icon: 'chart',
-        title: 'Traçabilitat completa',
+        title: "Registres d'accés natius del proveïdor",
         description:
-          'Cada accés registrat a CloudTrail o Azure Monitor automàticament.',
+          "CloudTrail o Azure Monitor poden registrar l'accés al proveïdor quan estan configurats. Envilder no crea cap registre d'auditoria per si mateix.",
       },
       {
         icon: 'person',
@@ -226,7 +226,7 @@ export const ca: Translations = {
       'Mira com Envilder simplifica la gestió de secrets en menys de 2 minuts.',
     cliDemo: 'Demo CLI: Obtenir Secrets',
     transcript:
-      'Comandes de la demo: envilder pull --map envilder.json --envfile .env. Envilder resol els secrets mapejats del proveïdor al núvol configurat i escriu les variables resultants a .env.',
+      'Comanda de la demo: envilder --map=envilder.json --envfile=.env. Envilder resol els secrets mapejats del proveïdor al núvol configurat i escriu les variables resultants a .env.',
     ghaWorkflow: 'Workflow de GitHub Action',
     comingSoon: 'Properament',
   },
@@ -234,14 +234,14 @@ export const ca: Translations = {
     title: 'El teu núvol. ',
     titleAccent: 'La teva elecció.',
     subtitle:
-      'Envilder funciona amb AWS SSM Parameter Store, Azure Key Vault i GCP Secret Manager (pròximament). Configura en línia o amb flags CLI.',
+      'Envilder funciona actualment amb AWS SSM Parameter Store i Azure Key Vault. GCP Secret Manager està planificat i encara no està disponible. Configura els proveïdors disponibles a envilder.json o amb flags CLI.',
     awsTitle: 'AWS SSM Parameter Store',
     awsDefault: 'Proveïdor per defecte',
     awsFeatures: [
       'Suport de GetParameter amb WithDecryption',
       'Suport de perfil AWS per a multi-compte',
       "Control d'accés basat en polítiques IAM",
-      "Registre d'auditoria CloudTrail",
+      "Registre d'accés de CloudTrail quan està configurat",
     ],
     azureTitle: 'Azure Key Vault',
     azureBadge: 'Nou a v0.8',
@@ -249,16 +249,15 @@ export const ca: Translations = {
       'Auto-normalitza noms de secrets (barres → guions)',
       'Autenticació DefaultAzureCredential',
       "Control d'accés Azure RBAC",
-      "Registre d'auditoria Azure Monitor",
+      "Registre d'accés d'Azure Monitor quan està configurat",
     ],
     gcpTitle: 'GCP Secret Manager',
-    gcpBadge: 'Pròximament',
+    gcpBadge: 'Planificat',
     gcpFeatures: [
-      'Integració amb Google Cloud Secret Manager',
-      'Application Default Credentials (ADC)',
-      "Control d'accés basat en IAM",
-      'Cloud Audit Logs',
+      'Integració planificada amb GCP Secret Manager',
+      'No disponible a la CLI, la GitHub Action ni els SDKs de runtime',
     ],
+    gcpRoadmapLink: 'Veure el roadmap',
     configPriorityTitle: 'Prioritat de configuració',
     priorityHigh: 'Flags CLI / Inputs GHA',
     priorityMid: '$config al fitxer de mapeig',
@@ -388,13 +387,15 @@ export const ca: Translations = {
         status: 'planned',
         label: '☁️',
         title: 'GCP Secret Manager',
-        description: 'Tercer proveïdor cloud. Completa el trident multi-núvol',
+        description:
+          'Tercer proveïdor cloud planificat; encara no està disponible',
       },
       {
         status: 'planned',
         label: '⚡',
         title: 'Mode exec (--exec)',
-        description: 'Injecta secrets en un procés fill sense escriure a disc',
+        description:
+          'Mode planificat; encara no està disponible. Injectaria secrets en un procés fill sense escriure a disc',
       },
       {
         status: 'planned',
@@ -417,11 +418,13 @@ export const ca: Translations = {
     subtitle: "En funcionament en menys d'un minut.",
     prerequisites: 'Prerequisits',
     prereqNode: 'Node.js v22.12+',
-    prereqAws: 'AWS CLI configurat',
-    prereqAzure: 'Azure CLI configurat',
-    prereqIam: 'Permisos IAM:',
-    prereqAwsNote: 'per AWS SSM',
-    prereqAzureNote: 'per Azure Key Vault',
+    prereqProviderChoice: 'Tria un proveïdor al núvol:',
+    prereqAws: 'AWS SSM',
+    prereqAzure: 'Azure Key Vault',
+    prereqAwsNote:
+      'credencials AWS amb ssm:GetParameter; afegeix ssm:PutParameter per a --push',
+    prereqAzureNote:
+      'credencials Azure amb accés Get a secrets; afegeix accés Set per a --push',
     install: 'Instal·lar',
     quickStart: 'Inici ràpid',
     step1:
@@ -679,7 +682,7 @@ export const ca: Translations = {
     pushSingleOptProfile: 'Perfil AWS CLI (només AWS)',
     ghaSetupTitle: 'Configuració de GitHub Action',
     ghaSetupDesc:
-      "La GitHub Action d'Envilder obté secrets d'AWS SSM o Azure Key Vault en fitxers .env durant el teu workflow CI/CD. No cal compilar. L'action està pre-construïda i llesta per utilitzar des de GitHub Marketplace.",
+      "La GitHub Action preconstruïda d'Envilder obté secrets d'AWS SSM o Azure Key Vault en fitxers .env durant el teu workflow CI/CD. Utilitza l'etiqueta publicada macalbert/envilder/github-action@v0; el projecte consumidor no necessita cap pas de compilació.",
     ghaPrerequisites: 'Prerequisits',
     ghaPrereqAws:
       'AWS: Configura credencials amb aws-actions/configure-aws-credentials',

@@ -219,6 +219,26 @@ describe('Static website SEO', () => {
     expect(actual).toEqual(expected);
   });
 
+  it('Should_ExcludeUnavailableClaims_When_IndexablePagesAreBuilt', () => {
+    // Arrange
+    const expected: string[] = [];
+    const forbiddenClaims = [
+      'envilder pull',
+      '--provider=gcp',
+      'ready to use from GitHub Marketplace',
+      'sk_live_',
+    ];
+    const html = indexablePages
+      .map((page) => readDistFile(page.file))
+      .join('\n');
+
+    // Act
+    const actual = forbiddenClaims.filter((claim) => html.includes(claim));
+
+    // Assert
+    expect(actual).toEqual(expected);
+  });
+
   it('Should_NoindexLocalizedChangelogs_When_StaticSiteIsBuilt', () => {
     // Arrange
     const expected = {
