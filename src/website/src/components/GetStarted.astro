@@ -37,15 +37,39 @@ const t = useTranslations(lang);
           <div class="install-options">
             <div class="install-option">
               <span class="install-label">npx</span>
-              <code class="install-code">npx envilder --map=envilder.json --envfile=.env</code>
+              <button
+                class="install-code"
+                data-copy-command="npx envilder --map=envilder.json --envfile=.env"
+                data-analytics-event="copy_install_command"
+                data-analytics-package-manager="npx"
+                type="button"
+              >
+                npx envilder --map=envilder.json --envfile=.env
+              </button>
             </div>
             <div class="install-option">
               <span class="install-label">npm</span>
-              <code class="install-code">npm install -g envilder</code>
+              <button
+                class="install-code"
+                data-copy-command="npm install -g envilder"
+                data-analytics-event="copy_install_command"
+                data-analytics-package-manager="npm"
+                type="button"
+              >
+                npm install -g envilder
+              </button>
             </div>
             <div class="install-option">
               <span class="install-label">pnpm</span>
-              <code class="install-code">pnpm add -g envilder</code>
+              <button
+                class="install-code"
+                data-copy-command="pnpm add -g envilder"
+                data-analytics-event="copy_install_command"
+                data-analytics-package-manager="pnpm"
+                type="button"
+              >
+                pnpm add -g envilder
+              </button>
             </div>
           </div>
         </div>
@@ -83,6 +107,7 @@ const t = useTranslations(lang);
         <CodeBlock
           lang="python"
           filename="app.py"
+          contentId="get-started-python-sdk"
           code={`import os\n\nfrom envilder import Envilder\n\nEnvilder.load("envilder.json")\n\n${t.getStarted.sdkComment3}\napi_key = os.environ["API_KEY"]`}
         />
         <a
@@ -90,6 +115,8 @@ const t = useTranslations(lang);
           target="_blank"
           rel="noopener noreferrer"
           class="sdk-example-link"
+          data-analytics-event="click_github"
+          data-analytics-placement="get-started-sdk-example"
         >
           {t.getStarted.sdkExampleLink} →
         </a>
@@ -218,6 +245,10 @@ const t = useTranslations(lang);
     font-size: 0.82rem;
     background: transparent;
     border: none;
+    color: var(--color-text);
+    cursor: pointer;
+    padding: 0;
+    text-align: left;
     padding: 0;
     color: var(--color-text);
   }

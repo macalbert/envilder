@@ -28,14 +28,19 @@ const t = useTranslations(lang);
           </div>
         </div>
 
-        <CodeBlock lang="json" filename="envilder.json" code={`{
+        <CodeBlock
+          lang="json"
+          filename="envilder.json"
+          contentId="aws-map-file"
+          code={`{
   "$config": {
     "provider": "aws",
     "profile": "prod-account"
   },
   "DB_PASSWORD": "/my-app/prod/db-password",
   "API_KEY": "/my-app/prod/api-key"
-}`} />
+}`}
+        />
 
         <div class="provider-cmd">
           <code>
@@ -58,14 +63,19 @@ const t = useTranslations(lang);
           </div>
         </div>
 
-        <CodeBlock lang="json" filename="envilder.json" code={`{
+        <CodeBlock
+          lang="json"
+          filename="envilder.json"
+          contentId="azure-map-file"
+          code={`{
   "$config": {
     "provider": "azure",
     "vaultUrl": "https://my-vault.vault.azure.net"
   },
   "DB_PASSWORD": "my-app-prod-db-password",
   "API_KEY": "my-app-prod-api-key"
-}`} />
+}`}
+        />
 
         <div class="provider-cmd">
           <code>

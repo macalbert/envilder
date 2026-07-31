@@ -314,4 +314,38 @@ describe('Static website SEO', () => {
     // Assert
     expect(actual).toEqual(expected);
   });
+
+  it('Should_TrackConversionsWithoutSendingCode_When_IndexablePagesAreBuilt', () => {
+    // Arrange
+    const expected = {
+      hasGetStartedEvent: true,
+      hasGitHubEvent: true,
+      hasPackageEvent: true,
+      hasRuntimeEvent: true,
+      hasCopyCodeEvent: true,
+      hasCopyInstallEvent: true,
+      sendsCodeAsAnalyticsLabel: false,
+    };
+    const html = indexablePages
+      .map((page) => readDistFile(page.file))
+      .join('\n');
+
+    // Act
+    const actual = {
+      hasGetStartedEvent: html.includes(
+        'data-analytics-event="click_get_started"',
+      ),
+      hasGitHubEvent: html.includes('data-analytics-event="click_github"'),
+      hasPackageEvent: html.includes('data-analytics-event="click_package"'),
+      hasRuntimeEvent: html.includes('data-analytics-event="select_runtime"'),
+      hasCopyCodeEvent: html.includes('data-analytics-event="copy_code"'),
+      hasCopyInstallEvent: html.includes(
+        'data-analytics-event="copy_install_command"',
+      ),
+      sendsCodeAsAnalyticsLabel: html.includes('event_label'),
+    };
+
+    // Assert
+    expect(actual).toEqual(expected);
+  });
 });

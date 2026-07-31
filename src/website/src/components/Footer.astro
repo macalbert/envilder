@@ -91,7 +91,15 @@ const links = {
         <h4>{t.footer.project}</h4>
         <ul>
           {links.project.map((l) => (
-            <li><a href={l.href}>{l.label}</a></li>
+            <li>
+              <a
+                href={l.href}
+                data-analytics-event={l.href.includes('github.com') ? 'click_github' : undefined}
+                data-analytics-placement="footer-project"
+              >
+                {l.label}
+              </a>
+            </li>
           ))}
         </ul>
       </div>
@@ -100,7 +108,15 @@ const links = {
         <h4>{t.footer.documentation}</h4>
         <ul>
           {links.docs.map((l) => (
-            <li><a href={l.href}>{l.label}</a></li>
+            <li>
+              <a
+                href={l.href}
+                data-analytics-event={l.href.includes('github.com') ? 'click_github' : undefined}
+                data-analytics-placement="footer-community"
+              >
+                {l.label}
+              </a>
+            </li>
           ))}
         </ul>
       </div>
@@ -298,23 +314,3 @@ const links = {
     color: var(--color-btn-text);
   }
 </style>
-
-<script>
-  function initFooterTracking() {
-    document
-      .querySelectorAll<HTMLAnchorElement>('.footer a[href*="github.com"]')
-      .forEach((link) => {
-        link.addEventListener('click', () => {
-          if (typeof window.gtag === 'function') {
-            window.gtag('event', 'click_github', {
-              event_category: 'outbound',
-              event_label: link.href,
-            });
-          }
-        });
-      });
-  }
-
-  initFooterTracking();
-  document.addEventListener('astro:after-swap', initFooterTracking);
-</script>
