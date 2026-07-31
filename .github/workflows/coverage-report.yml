@@ -54,6 +54,9 @@ jobs:
       - name: 📦 Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: 🏗️ Build website
+        run: pnpm --filter @envilder/website build
+
       - name: 🏎️ Run tests with coverage
         run: |
           mkdir -p output
