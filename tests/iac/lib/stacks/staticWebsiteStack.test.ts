@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { App, Stack } from "aws-cdk-lib";
-import { Match, Template } from "aws-cdk-lib/assertions";
+import { Capture, Match, Template } from "aws-cdk-lib/assertions";
 import { AppEnvironment } from "../../../../src/iac/lib/core/types";
 import type { DomainConfig } from "../../../../src/iac/lib/stacks/customStack";
 import {
@@ -85,6 +85,8 @@ describe("Static website Stack", () => {
 		});
 		const props = createStaticWebsiteStackProps();
 		const sut = new StaticWebsiteStack(stack, props);
+		const defaultResponseHeadersPolicyId = new Capture();
+		const assetResponseHeadersPolicyId = new Capture();
 
 		// Act
 		const actual = Template.fromStack(sut);
@@ -93,50 +95,72 @@ describe("Static website Stack", () => {
 		actual.hasResourceProperties("AWS::CloudFront::Distribution", {
 			DistributionConfig: Match.objectLike({
 				HttpVersion: "http2and3",
+				DefaultCacheBehavior: Match.objectLike({
+					ResponseHeadersPolicyId: {
+						Ref: defaultResponseHeadersPolicyId,
+					},
+				}),
 				CacheBehaviors: Match.arrayWith([
 					Match.objectLike({
 						PathPattern: "_assets/*",
+						ResponseHeadersPolicyId: {
+							Ref: assetResponseHeadersPolicyId,
+						},
 					}),
 				]),
 			}),
 		});
-		actual.hasResourceProperties("AWS::CloudFront::ResponseHeadersPolicy", {
-			ResponseHeadersPolicyConfig: Match.objectLike({
-				CustomHeadersConfig: Match.objectLike({
-					Items: Match.arrayWith([
-						Match.objectLike({
-							Header: "Cache-Control",
-							Value: "public, max-age=0, s-maxage=300, must-revalidate",
-						}),
-					]),
-				}),
-				SecurityHeadersConfig: Match.objectLike({
-					ContentTypeOptions: Match.objectLike({
-						Override: true,
-					}),
-					FrameOptions: Match.objectLike({
-						FrameOption: "DENY",
-					}),
-					ReferrerPolicy: Match.objectLike({
-						ReferrerPolicy: "strict-origin-when-cross-origin",
-					}),
-					StrictTransportSecurity: Match.objectLike({
-						AccessControlMaxAgeSec: 31536000,
-					}),
-				}),
-			}),
+		expect(
+			actual.findResources("AWS::CloudFront::ResponseHeadersPolicy")[
+				defaultResponseHeadersPolicyId.asString()
+			],
+		).toMatchObject({
+			Type: "AWS::CloudFront::ResponseHeadersPolicy",
+			Properties: {
+				ResponseHeadersPolicyConfig: {
+					CustomHeadersConfig: {
+						Items: [
+							{
+								Header: "Cache-Control",
+								Value: "public, max-age=0, s-maxage=300, must-revalidate",
+							},
+						],
+					},
+					SecurityHeadersConfig: {
+						ContentTypeOptions: {
+							Override: true,
+						},
+						FrameOptions: {
+							FrameOption: "DENY",
+						},
+						ReferrerPolicy: {
+							ReferrerPolicy: "strict-origin-when-cross-origin",
+						},
+						StrictTransportSecurity: {
+							AccessControlMaxAgeSec: 31536000,
+						},
+					},
+				},
+			},
 		});
-		actual.hasResourceProperties("AWS::CloudFront::ResponseHeadersPolicy", {
-			ResponseHeadersPolicyConfig: Match.objectLike({
-				CustomHeadersConfig: Match.objectLike({
-					Items: Match.arrayWith([
-						Match.objectLike({
-							Header: "Cache-Control",
-							Value: "public, max-age=31536000, immutable",
-						}),
-					]),
-				}),
-			}),
+		expect(
+			actual.findResources("AWS::CloudFront::ResponseHeadersPolicy")[
+				assetResponseHeadersPolicyId.asString()
+			],
+		).toMatchObject({
+			Type: "AWS::CloudFront::ResponseHeadersPolicy",
+			Properties: {
+				ResponseHeadersPolicyConfig: {
+					CustomHeadersConfig: {
+						Items: [
+							{
+								Header: "Cache-Control",
+								Value: "public, max-age=31536000, immutable",
+							},
+						],
+					},
+				},
+			},
 		});
 	});
 
