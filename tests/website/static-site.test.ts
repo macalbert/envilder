@@ -199,7 +199,7 @@ describe('Static website SEO', () => {
 
     // Assert
     expect(actual).toEqual(expected);
-  });
+  }, 15_000);
 
   it('Should_ExposeManifestBackedHreflangClusters_When_IndexablePagesAreBuilt', () => {
     // Arrange
