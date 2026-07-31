@@ -19,6 +19,7 @@ function handler(event) {
 		".js",
 		".css",
 		".png",
+		".webp",
 		".jpg",
 		".jpeg",
 		".gif",

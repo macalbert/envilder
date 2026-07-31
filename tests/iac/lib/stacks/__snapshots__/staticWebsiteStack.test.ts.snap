@@ -934,6 +934,7 @@ exports[`Static website Stack > Should_CreateWebsite_When_StackIsCalled > static
 		".js",
 		".css",
 		".png",
+		".webp",
 		".jpg",
 		".jpeg",
 		".gif",
