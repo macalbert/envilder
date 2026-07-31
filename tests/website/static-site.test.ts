@@ -2,7 +2,6 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { docsRouteManifest } from '../../src/website/src/i18n/docs-routes';
-import { localizedRoutes } from '../../src/website/src/i18n/localized-routes';
 import { localizedLanguages } from '../../src/website/src/i18n/utils';
 
 const siteUrl = 'https://envilder.com';
@@ -258,10 +257,13 @@ describe('Static website SEO', () => {
     ];
     const html = indexablePages
       .map((page) => readDistFile(page.file))
-      .join('\n');
+      .join('\n')
+      .toLowerCase();
 
     // Act
-    const actual = forbiddenClaims.filter((claim) => html.includes(claim));
+    const actual = forbiddenClaims.filter((claim) =>
+      html.includes(claim.toLowerCase()),
+    );
 
     // Assert
     expect(actual).toEqual(expected);
