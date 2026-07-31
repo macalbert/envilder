@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { docsRouteManifest } from '../../src/website/src/i18n/docs-routes';
 import { localizedRoutes } from '../../src/website/src/i18n/localized-routes';
+import { localizedLanguages } from '../../src/website/src/i18n/utils';
 
 const siteUrl = 'https://envilder.com';
 const distDirectory = resolve(__dirname, '../../src/website/dist');
@@ -71,7 +72,7 @@ function getExpectedAlternateUrls(path: string): string[] {
   const route = localizedPath.endsWith('/')
     ? localizedPath
     : `${localizedPath}/`;
-  const languages = localizedRoutes[route];
+  const languages = localizedLanguages(route);
   const languageUrls = languages.map((language) =>
     language === 'en' ? `${siteUrl}${route}` : `${siteUrl}/${language}${route}`,
   );

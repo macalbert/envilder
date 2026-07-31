@@ -54,8 +54,12 @@ jobs:
       - name: 📦 Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: 🏗️ Build website
+        run: pnpm --filter @envilder/website build
+
       - name: 🏎️ Run tests with coverage
         run: |
+          set -o pipefail
           mkdir -p output
           pnpm vitest run --reporter=verbose \
             --exclude='tests/sdks/**' \
@@ -127,6 +131,7 @@ jobs:
 
       - name: 🏎️ Run tests with coverage
         run: |
+          set -o pipefail
           mkdir -p output
           dotnet-coverage collect \
             "dotnet test src/sdks/dotnet/Envilder.sln --configuration Release --logger:console;verbosity=detailed" \
@@ -195,6 +200,7 @@ jobs:
 
       - name: 🏎️ Run tests with coverage
         run: |
+          set -o pipefail
           mkdir -p output
           cd tests/sdks/python && python -m pytest -v \
             --cov=envilder \
@@ -262,6 +268,7 @@ jobs:
 
       - name: 🏎️ Run tests with coverage
         run: |
+          set -o pipefail
           mkdir -p output
           cd tests/sdks/nodejs && pnpm vitest run --reporter=verbose --coverage 2>&1 | tee ../../../output/test-output.txt
         env:
@@ -316,6 +323,7 @@ jobs:
 
       - name: 🏎️ Run tests with coverage
         run: |
+          set -o pipefail
           mkdir -p output
           pnpm vitest run --reporter=verbose --coverage --coverage.reporter=lcov --coverage.reporter=text --coverage.reportsDirectory=coverage-iac --coverage.include='src/iac/**/*.ts' tests/iac/ 2>&1 | tee output/test-output.txt
 

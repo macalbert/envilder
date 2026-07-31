@@ -56,7 +56,9 @@ export function stripLocalePrefix(path: string) {
 export function localizedLanguages(path: string): readonly Lang[] {
   const { pathname } = splitPath(path);
   const normalizedPath = normalizePath(stripLocalePrefix(pathname));
-  const routeLanguages = localizedRoutes[normalizedPath];
+  const routeLanguages = Object.hasOwn(localizedRoutes, normalizedPath)
+    ? localizedRoutes[normalizedPath as keyof typeof localizedRoutes]
+    : undefined;
 
   return (routeLanguages ?? [defaultLang]) as readonly Lang[];
 }
