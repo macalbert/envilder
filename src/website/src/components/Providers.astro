@@ -28,14 +28,19 @@ const t = useTranslations(lang);
           </div>
         </div>
 
-        <CodeBlock lang="json" filename="envilder.json" code={`{
+        <CodeBlock
+          lang="json"
+          filename="envilder.json"
+          contentId="aws-map-file"
+          code={`{
   "$config": {
     "provider": "aws",
     "profile": "prod-account"
   },
   "DB_PASSWORD": "/my-app/prod/db-password",
   "API_KEY": "/my-app/prod/api-key"
-}`} />
+}`}
+        />
 
         <div class="provider-cmd">
           <code>
@@ -58,14 +63,19 @@ const t = useTranslations(lang);
           </div>
         </div>
 
-        <CodeBlock lang="json" filename="envilder.json" code={`{
+        <CodeBlock
+          lang="json"
+          filename="envilder.json"
+          contentId="azure-map-file"
+          code={`{
   "$config": {
     "provider": "azure",
     "vaultUrl": "https://my-vault.vault.azure.net"
   },
   "DB_PASSWORD": "my-app-prod-db-password",
   "API_KEY": "my-app-prod-api-key"
-}`} />
+}`}
+        />
 
         <div class="provider-cmd">
           <code>
@@ -89,26 +99,22 @@ const t = useTranslations(lang);
           </div>
         </div>
 
-        <CodeBlock lang="json" filename="envilder.json" code={`{
-  "$config": {
-    "provider": "gcp",
-    "projectId": "my-project-id"
-  },
-  "DB_PASSWORD": "my-app-prod-db-password",
-  "API_KEY": "my-app-prod-api-key"
-}`} />
-
-        <div class="provider-cmd">
-          <code>
-            <span class="prompt">$</span> envilder --provider=gcp --map=envilder.json --envfile=.env
-          </code>
-        </div>
-
-        <ul class="provider-features">
+        <ul class="provider-features provider-planned-features">
           {t.providers.gcpFeatures.map((f) => (
-            <li>✔ {f}</li>
+            <li>→ {f}</li>
           ))}
         </ul>
+
+        <a
+          class="provider-roadmap-link"
+          href="https://github.com/macalbert/envilder/blob/main/ROADMAP.md"
+          target="_blank"
+          rel="noopener noreferrer"
+          data-analytics-event="click_github"
+          data-analytics-placement="providers-gcp-roadmap"
+        >
+          {t.providers.gcpRoadmapLink} →
+        </a>
       </div>
     </div>
 
@@ -211,6 +217,20 @@ const t = useTranslations(lang);
 
   .provider-features code {
     font-size: 0.78rem;
+  }
+
+  .provider-roadmap-link {
+    align-self: flex-start;
+    margin-top: auto;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: opacity var(--transition-fast);
+  }
+
+  .provider-roadmap-link:hover {
+    opacity: 0.7;
   }
 
 </style>

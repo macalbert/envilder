@@ -144,6 +144,8 @@ const override = await Envilder.fromMapFile('envilder.json')
             aria-disabled={sdk.status === 'planned' ? 'true' : undefined}
             tabindex={i === 0 && sdk.status === 'available' ? 0 : -1}
             data-sdk-tab={sdk.id}
+            data-analytics-event="select_runtime"
+            data-analytics-runtime={sdk.id}
             type="button"
             disabled={sdk.status === 'planned'}
           >
@@ -182,7 +184,15 @@ const override = await Envilder.fromMapFile('envilder.json')
                   <a href={`${localizedPath(lang, '/docs/')}#${sdk.docsHash}`} class="sdk-docs-link">
                     {t.sdks.docsLink} →
                   </a>
-                  <a href={sdk.pkg} target="_blank" rel="noopener noreferrer" class="sdk-pkg-link">
+                  <a
+                    href={sdk.pkg}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="sdk-pkg-link"
+                    data-analytics-event="click_package"
+                    data-analytics-registry={sdk.id === 'nodejs' ? 'npm' : sdk.id === 'python' ? 'pypi' : 'nuget'}
+                    data-analytics-runtime={sdk.id}
+                  >
                     📦 {t.sdks.packageLink}
                   </a>
                 </div>
@@ -193,11 +203,20 @@ const override = await Envilder.fromMapFile('envilder.json')
               <div class="sdk-panel-content">
                 <div class="sdk-panel-install">
                   <h4>{t.sdks.install}</h4>
-                  <CodeBlock lang="bash" code={sdk.install} />
+                  <CodeBlock
+                    lang="bash"
+                    code={sdk.install}
+                    contentId={`${sdk.id}-install`}
+                  />
                 </div>
                 <div class="sdk-panel-code">
                   <h4>{t.sdks.quickStart}</h4>
-                  <CodeBlock lang={sdk.codeLang} filename={sdk.codeFile} code={sdk.code} />
+                  <CodeBlock
+                    lang={sdk.codeLang}
+                    filename={sdk.codeFile}
+                    code={sdk.code}
+                    contentId={`${sdk.id}-quick-start`}
+                  />
                 </div>
               </div>
             ) : (

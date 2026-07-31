@@ -170,13 +170,13 @@ export const es: Translations = {
         icon: 'refresh',
         title: 'Rotación de secretos segura',
         description:
-          'Rota valores en AWS SSM o Azure Key Vault. Cada consumidor (local, CI/CD y runtime) resuelve el nuevo valor automáticamente. Sin reescribir .env, sin cambios en los pipelines.',
+          'Rota valores en AWS SSM o Azure Key Vault sin cambiar envilder.json. Los archivos .env generados solo se actualizan al volver a ejecutar Envilder; los consumidores de runtime deben reiniciarse o volver a resolver los secretos.',
       },
       {
         icon: 'cloud',
-        title: 'Multi-Cloud, sin lock-in',
+        title: 'Tu almacén de secretos, un contrato de mapeo',
         description:
-          'AWS SSM, Azure Key Vault, GCP Secret Manager (próximamente). Cambia de proveedor sin modificar el código de tu app. Tu nube, tus reglas.',
+          'Mantén los secretos en la configuración de AWS SSM o Azure Key Vault que ya utilizas. Envilder preserva el contrato de mapeo envilder.json entre herramientas; las credenciales y la migración de secretos siguen siendo específicas de cada proveedor.',
       },
     ],
     extrasTitle: 'También incluye',
@@ -207,9 +207,9 @@ export const es: Translations = {
       },
       {
         icon: 'chart',
-        title: 'Trazabilidad completa',
+        title: 'Registros de acceso nativos del proveedor',
         description:
-          'Cada acceso registrado en CloudTrail o Azure Monitor automáticamente.',
+          'CloudTrail o Azure Monitor pueden registrar el acceso al proveedor cuando están configurados. Envilder no crea un registro de auditoría por sí mismo.',
       },
       {
         icon: 'person',
@@ -226,7 +226,7 @@ export const es: Translations = {
       'Mira cómo Envilder simplifica la gestión de secretos en menos de 2 minutos.',
     cliDemo: 'Demo CLI: Obtener Secretos',
     transcript:
-      'Comandos de la demo: envilder pull --map envilder.json --envfile .env. Envilder resuelve los secretos mapeados de tu proveedor en la nube configurado y escribe las variables resultantes en .env.',
+      'Comando de la demo: envilder --map=envilder.json --envfile=.env. Envilder resuelve los secretos mapeados de tu proveedor en la nube configurado y escribe las variables resultantes en .env.',
     ghaWorkflow: 'Workflow de GitHub Action',
     comingSoon: 'Próximamente',
   },
@@ -234,14 +234,14 @@ export const es: Translations = {
     title: 'Tu nube. ',
     titleAccent: 'Tu elección.',
     subtitle:
-      'Envilder funciona con AWS SSM Parameter Store, Azure Key Vault y GCP Secret Manager (próximamente). Configura en línea o con flags CLI.',
+      'Envilder funciona actualmente con AWS SSM Parameter Store y Azure Key Vault. GCP Secret Manager está planificado y aún no está disponible. Configura los proveedores disponibles en envilder.json o con flags CLI.',
     awsTitle: 'AWS SSM Parameter Store',
     awsDefault: 'Proveedor por defecto',
     awsFeatures: [
       'Soporte de GetParameter con WithDecryption',
       'Soporte de perfil AWS para multi-cuenta',
       'Control de acceso basado en políticas IAM',
-      'Registro de auditoría CloudTrail',
+      'Registro de acceso de CloudTrail cuando está configurado',
     ],
     azureTitle: 'Azure Key Vault',
     azureBadge: 'Nuevo en v0.8',
@@ -249,16 +249,15 @@ export const es: Translations = {
       'Auto-normaliza nombres de secretos (barras → guiones)',
       'Autenticación DefaultAzureCredential',
       'Control de acceso Azure RBAC',
-      'Registro de auditoría Azure Monitor',
+      'Registro de acceso de Azure Monitor cuando está configurado',
     ],
     gcpTitle: 'GCP Secret Manager',
-    gcpBadge: 'Próximamente',
+    gcpBadge: 'Planificado',
     gcpFeatures: [
-      'Integración con Google Cloud Secret Manager',
-      'Application Default Credentials (ADC)',
-      'Control de acceso basado en IAM',
-      'Cloud Audit Logs',
+      'Integración planificada con GCP Secret Manager',
+      'No disponible en la CLI, la GitHub Action ni los SDKs de runtime',
     ],
+    gcpRoadmapLink: 'Ver roadmap',
     configPriorityTitle: 'Prioridad de configuración',
     priorityHigh: 'Flags CLI / Inputs GHA',
     priorityMid: '$config en archivo de mapeo',
@@ -388,13 +387,15 @@ export const es: Translations = {
         status: 'planned',
         label: '☁️',
         title: 'GCP Secret Manager',
-        description: 'Tercer proveedor cloud. Completa el tridente multi-nube',
+        description:
+          'Tercer proveedor cloud planificado; aún no está disponible',
       },
       {
         status: 'planned',
         label: '⚡',
         title: 'Modo exec (--exec)',
-        description: 'Inyecta secretos en un proceso hijo sin escribir a disco',
+        description:
+          'Modo planificado; aún no está disponible. Inyectaría secretos en un proceso hijo sin escribir a disco',
       },
       {
         status: 'planned',
@@ -417,11 +418,13 @@ export const es: Translations = {
     subtitle: 'En funcionamiento en menos de un minuto.',
     prerequisites: 'Prerrequisitos',
     prereqNode: 'Node.js v22.12+',
-    prereqAws: 'AWS CLI configurado',
-    prereqAzure: 'Azure CLI configurado',
-    prereqIam: 'Permisos IAM:',
-    prereqAwsNote: 'para AWS SSM',
-    prereqAzureNote: 'para Azure Key Vault',
+    prereqProviderChoice: 'Elige un proveedor en la nube:',
+    prereqAws: 'AWS SSM',
+    prereqAzure: 'Azure Key Vault',
+    prereqAwsNote:
+      'credenciales AWS con ssm:GetParameter; añade ssm:PutParameter para --push',
+    prereqAzureNote:
+      'credenciales Azure con acceso Get a secretos; añade acceso Set para --push',
     install: 'Instalar',
     quickStart: 'Inicio rápido',
     step1:
@@ -484,6 +487,156 @@ export const es: Translations = {
     backToHome: '← Volver al inicio',
     pageTitle: 'Documentación de Envilder para AWS SSM y Azure Key Vault',
     intro: 'Todo lo que necesitas para empezar con Envilder.',
+    pages: {
+      hub: {
+        title: 'Documentación de Envilder',
+        description:
+          'Guías para usar Envilder con AWS SSM Parameter Store, Azure Key Vault, la CLI, GitHub Action y SDKs de tiempo de ejecución.',
+        heading: 'Documentación de Envilder',
+        intro:
+          'Elige una guía para configurar Envilder, resolver secretos o cargarlos en tiempo de ejecución.',
+        breadcrumb: 'Documentación',
+        navLabel: 'Documentación',
+        cardTitle: 'Documentación de Envilder',
+        cardSummary:
+          'Encuentra guías de configuración, proveedores, CLI, GitHub Action y SDKs.',
+      },
+      'getting-started': {
+        title: 'Primeros pasos con Envilder',
+        description:
+          'Instala Envilder y conoce los requisitos para resolver secretos desde tu proveedor en la nube.',
+        heading: 'Primeros pasos',
+        intro:
+          'Instala Envilder, configura un proveedor y resuelve secretos desde un archivo de mapeo versionado.',
+        breadcrumb: 'Primeros pasos',
+        navLabel: 'Primeros pasos',
+        cardTitle: 'Primeros pasos con Envilder',
+        cardSummary:
+          'Instala la CLI, revisa los requisitos y entiende el modelo de mapeo.',
+      },
+      'aws-ssm': {
+        title: 'Usa Envilder con AWS SSM Parameter Store',
+        description:
+          'Configura las credenciales de AWS y los permisos IAM para Envilder con AWS SSM Parameter Store.',
+        heading: 'AWS SSM',
+        intro:
+          'Configura credenciales, permisos IAM y un parámetro de prueba para AWS SSM Parameter Store.',
+        breadcrumb: 'AWS SSM',
+        navLabel: 'AWS SSM',
+        cardTitle: 'Configuración de AWS SSM',
+        cardSummary:
+          'Configura las credenciales de AWS y los permisos que necesita Envilder.',
+      },
+      'azure-key-vault': {
+        title: 'Usa Envilder con Azure Key Vault',
+        description:
+          'Configura la autenticación de Azure y el acceso a Key Vault para Envilder.',
+        heading: 'Azure Key Vault',
+        intro:
+          'Configura la autenticación de Azure, el acceso al vault y un secreto de prueba para Azure Key Vault.',
+        breadcrumb: 'Azure Key Vault',
+        navLabel: 'Azure Key Vault',
+        cardTitle: 'Configuración de Azure Key Vault',
+        cardSummary:
+          'Configura la autenticación de Azure y los permisos de Key Vault.',
+      },
+      'map-file': {
+        title: 'Referencia del archivo de mapeo de Envilder',
+        description:
+          'Define mapeos de Envilder y la configuración del proveedor en envilder.json.',
+        heading: 'Archivo de mapeo',
+        intro:
+          'Define los mapeos de variables de entorno y la configuración del proveedor en envilder.json.',
+        breadcrumb: 'Archivo de mapeo',
+        navLabel: 'Archivo de mapeo',
+        cardTitle: 'Referencia del archivo de mapeo',
+        cardSummary:
+          'Asigna variables a rutas de secretos y configura el proveedor seleccionado.',
+      },
+      'cli-pull': {
+        title: 'Descarga secretos con la CLI de Envilder',
+        description:
+          'Descarga secretos en la nube y genera un archivo .env local con Envilder.',
+        heading: 'CLI pull',
+        intro:
+          'Descarga secretos del proveedor y escríbelos en un archivo .env local.',
+        breadcrumb: 'CLI pull',
+        navLabel: 'CLI pull',
+        cardTitle: 'Comando CLI pull',
+        cardSummary:
+          'Genera un archivo .env con los secretos definidos en el archivo de mapeo.',
+      },
+      'cli-push': {
+        title: 'Sube secretos con la CLI de Envilder',
+        description:
+          'Sube variables de entorno locales o un secreto con el modo push de Envilder.',
+        heading: 'CLI push',
+        intro:
+          'Sube variables de entorno desde un archivo .env o envía un secreto directamente.',
+        breadcrumb: 'CLI push',
+        navLabel: 'CLI push',
+        cardTitle: 'Comando CLI push',
+        cardSummary: 'Sube un archivo .env mapeado o un secreto al proveedor.',
+      },
+      'github-action': {
+        title: 'Usa la GitHub Action de Envilder',
+        description:
+          'Descarga secretos de AWS SSM o Azure Key Vault a archivos .env en flujos de GitHub Actions.',
+        heading: 'GitHub Action',
+        intro:
+          'Descarga secretos a archivos .env durante un flujo de GitHub Actions.',
+        breadcrumb: 'GitHub Action',
+        navLabel: 'GitHub Action',
+        cardTitle: 'Guía de GitHub Action',
+        cardSummary: 'Configura la acción para AWS, Azure y varios entornos.',
+      },
+      'sdk-dotnet': {
+        title: 'SDK .NET de Envilder',
+        description:
+          'Carga secretos de archivos de mapeo de Envilder en aplicaciones .NET.',
+        heading: 'SDK .NET',
+        intro:
+          'Carga secretos directamente en una aplicación .NET al iniciarse.',
+        breadcrumb: 'SDK .NET',
+        navLabel: 'SDK .NET',
+        cardTitle: 'Guía del SDK .NET',
+        cardSummary: 'Instala y usa el SDK de tiempo de ejecución .NET.',
+      },
+      'sdk-python': {
+        title: 'SDK Python de Envilder',
+        description:
+          'Carga secretos de archivos de mapeo de Envilder en aplicaciones Python.',
+        heading: 'SDK Python',
+        intro:
+          'Carga secretos directamente en una aplicación Python al iniciarse.',
+        breadcrumb: 'SDK Python',
+        navLabel: 'SDK Python',
+        cardTitle: 'Guía del SDK Python',
+        cardSummary: 'Instala y usa el SDK de tiempo de ejecución Python.',
+      },
+      'sdk-nodejs': {
+        title: 'SDK Node.js de Envilder',
+        description:
+          'Carga secretos de archivos de mapeo de Envilder en aplicaciones Node.js.',
+        heading: 'SDK Node.js',
+        intro:
+          'Carga secretos directamente en una aplicación Node.js al iniciarse.',
+        breadcrumb: 'SDK Node.js',
+        navLabel: 'SDK Node.js',
+        cardTitle: 'Guía del SDK Node.js',
+        cardSummary: 'Instala y usa el SDK de tiempo de ejecución Node.js.',
+      },
+    },
+    breadcrumbLabel: 'Migas de pan',
+    breadcrumbHome: 'Inicio',
+    breadcrumbDocs: 'Documentación',
+    navigationLabel: 'Navegación de documentación',
+    mobileNavigation: 'Elige una página de documentación',
+    navGettingStarted: 'Primeros pasos',
+    navProviders: 'Proveedores',
+    hubCardsLabel: 'Guías de documentación',
+    openPage: 'Abrir guía',
+    pagerLabel: 'Páginas de documentación',
     sidebarGettingStarted: 'Primeros pasos',
     sidebarRequirements: 'Requisitos',
     sidebarInstallation: 'Instalación',
@@ -679,7 +832,7 @@ export const es: Translations = {
     pushSingleOptProfile: 'Perfil AWS CLI (solo AWS)',
     ghaSetupTitle: 'Configuración de GitHub Action',
     ghaSetupDesc:
-      'La GitHub Action de Envilder obtiene secretos de AWS SSM o Azure Key Vault en archivos .env durante tu workflow CI/CD. No hace falta compilar. La action está pre-construida y lista para usar desde GitHub Marketplace.',
+      'La GitHub Action precompilada de Envilder obtiene secretos de AWS SSM o Azure Key Vault en archivos .env durante tu workflow CI/CD. Usa la etiqueta publicada macalbert/envilder/github-action@v0; el proyecto consumidor no necesita ningún paso de compilación.',
     ghaPrerequisites: 'Prerrequisitos',
     ghaPrereqAws:
       'AWS: Configura credenciales con aws-actions/configure-aws-credentials',

@@ -202,6 +202,8 @@ ${t.howItWorks.terminalWritten}`} />
                   aria-disabled={sdk.status === 'planned' ? 'true' : undefined}
                   tabindex={i === 0 ? 0 : -1}
                   data-hiw-sdk-tab={sdk.id}
+                  data-analytics-event="select_runtime"
+                  data-analytics-runtime={sdk.id}
                   type="button"
                   disabled={sdk.status === 'planned'}
                 >
@@ -229,16 +231,33 @@ ${t.howItWorks.terminalWritten}`} />
                     <a href={`${localizedPath(lang, '/docs/')}#${sdk.docsHash}`} class="sdk-link">
                       {t.sdks.docsLink} →
                     </a>
-                    <a href={sdk.pkg} target="_blank" rel="noopener noreferrer" class="sdk-link">
+                    <a
+                      href={sdk.pkg}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="sdk-link"
+                      data-analytics-event="click_package"
+                      data-analytics-registry={sdk.id === 'nodejs' ? 'npm' : sdk.id === 'python' ? 'pypi' : 'nuget'}
+                      data-analytics-runtime={sdk.id}
+                    >
                       📦 {t.sdks.packageLink}
                     </a>
                   </div>
 
                   <div class="sdk-panel-install">
-                    <CodeBlock lang="bash" code={sdk.install} />
+                    <CodeBlock
+                      lang="bash"
+                      code={sdk.install}
+                      contentId={`${sdk.id}-install`}
+                    />
                   </div>
 
-                  <CodeBlock lang={sdk.lang} filename={sdk.filename} code={sdk.code} />
+                  <CodeBlock
+                    lang={sdk.lang}
+                    filename={sdk.filename}
+                    code={sdk.code}
+                    contentId={`${sdk.id}-quick-start`}
+                  />
                 </div>
               ))}
             </div>

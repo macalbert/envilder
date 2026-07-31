@@ -95,7 +95,7 @@ const scenes: Scene[] = [
           { text: ' --key', cls: 'flag' },
           { text: '=OPENAI_API_KEY', cls: 'command' },
           { text: ' --value', cls: 'flag' },
-          { text: '=sk-proj-1ts4f4k3s3cr3tv4lu3', cls: 'command' },
+          { text: '=example-not-a-real-secret', cls: 'command' },
           { text: ' --secret-path', cls: 'flag' },
           { text: '=/openai/prod/api-key', cls: 'command' },
         ],
@@ -123,10 +123,10 @@ const scenes: Scene[] = [
         kind: 'output',
         segments: [
           { text: '⭐ SECRET PUSHED', cls: 'highlight' },
-          { text: '  —  ', cls: 'output' },
+          { text: '  -  ', cls: 'output' },
           { text: 'OPENAI_API_KEY', cls: 'command' },
           {
-            text: '=************************lu3 → *****************key',
+            text: '=*******************secret → *****************key',
             cls: 'output',
           },
         ],
@@ -185,7 +185,7 @@ const scenes: Scene[] = [
         segments: [
           { text: '  ✓ ', cls: 'flag' },
           { text: 'OPENAI_API_KEY'.padEnd(20), cls: 'command' },
-          { text: '→ ************************lu3', cls: 'output' },
+          { text: '→ *******************secret', cls: 'output' },
         ],
       },
       { kind: 'blank' },
@@ -194,7 +194,7 @@ const scenes: Scene[] = [
         delay: 220,
         segments: [
           { text: '⭐ LEVEL CLEARED', cls: 'highlight' },
-          { text: '  —  1/1 secrets loaded · ', cls: 'output' },
+          { text: '  -  1/1 secrets loaded · ', cls: 'output' },
           { text: '.env', cls: 'command' },
           { text: ' written', cls: 'output' },
         ],
@@ -259,7 +259,7 @@ const scenes: Scene[] = [
         delay: 550,
         segments: [
           {
-            text: "Map(1) { 'OPENAI_API_KEY' => 'sk-proj-1ts4f4k3s3cr3tv4lu3' }",
+            text: "Map(1) { 'OPENAI_API_KEY' => 'example-not-a-real-secret' }",
             cls: 'output',
           },
         ],
@@ -322,7 +322,7 @@ const scenes: Scene[] = [
         delay: 550,
         segments: [
           {
-            text: "{'OPENAI_API_KEY': 'sk-proj-1ts4f4k3s3cr3tv4lu3'}",
+            text: "{'OPENAI_API_KEY': 'example-not-a-real-secret'}",
             cls: 'output',
           },
         ],
@@ -400,7 +400,7 @@ const scenes: Scene[] = [
         delay: 550,
         segments: [
           {
-            text: 'OPENAI_API_KEY = sk-proj-1ts4f4k3s3cr3tv4lu3',
+            text: 'OPENAI_API_KEY = example-not-a-real-secret',
             cls: 'output',
           },
         ],
@@ -433,7 +433,11 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       </div>
 
       <div class="hero-actions">
-        <a href="#get-started" class="btn btn-primary">
+        <a
+          href="#get-started"
+          class="btn btn-primary"
+          data-analytics-event="click_get_started"
+        >
           {t.hero.getStarted}
         </a>
         <a
@@ -441,6 +445,8 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
           class="btn btn-outline"
           target="_blank"
           rel="noopener noreferrer"
+          data-analytics-event="click_github"
+          data-analytics-placement="hero"
         >
           {t.hero.viewOnGithub}
         </a>

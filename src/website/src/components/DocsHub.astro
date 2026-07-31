@@ -1,0 +1,87 @@
+---
+import { docsRouteManifest } from '../i18n/docs-routes';
+import { localizedPath, useTranslations } from '../i18n/utils';
+import DocsShell from './DocsShell.astro';
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const articleRoutes = docsRouteManifest.filter((route) => route.key !== 'hub');
+const legacyHashes = Object.fromEntries(
+  docsRouteManifest.flatMap((route) =>
+    route.legacyHashes.map((hash) => [hash, route.path]),
+  ),
+);
+---
+
+<DocsShell lang={lang} routeKey="hub">
+  <section class="docs-hub" aria-label={t.docs.hubCardsLabel}>
+    {articleRoutes.map((route) => {
+      const page = t.docs.pages[route.key];
+      return (
+        <a class="docs-card pixel-card" href={localizedPath(lang, route.path)}>
+          <h2>{page.cardTitle}</h2>
+          <p>{page.cardSummary}</p>
+          <span>{t.docs.openPage}</span>
+        </a>
+      );
+    })}
+  </section>
+</DocsShell>
+
+<script define:vars={{ legacyHashes }}>
+  const hash = window.location.hash.slice(1).toLowerCase();
+  const targetPath =
+    legacyHashes[hash] ?? (hash.startsWith('gha-') ? '/docs/github-action/' : null);
+
+  if (targetPath) {
+    const locale = window.location.pathname.match(/^\/(ca|es)(?=\/|$)/)?.[1];
+    const destination = `${locale ? `/${locale}` : ''}${targetPath}${
+      window.location.search
+    }#${hash}`;
+    window.location.replace(destination);
+  }
+</script>
+
+<style>
+  .docs-hub {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+
+  .docs-card {
+    display: block;
+    padding: var(--space-xl);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .docs-card:hover {
+    border-color: var(--color-primary);
+  }
+
+  .docs-card h2 {
+    font-size: 0.7rem;
+    margin-bottom: var(--space-md);
+  }
+
+  .docs-card p {
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-lg);
+  }
+
+  .docs-card span {
+    font-family: var(--font-mono);
+    color: var(--color-primary);
+  }
+
+  @media (min-width: 640px) {
+    .docs-hub {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

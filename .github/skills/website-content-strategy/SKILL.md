@@ -27,12 +27,12 @@ environment variables from AWS SSM Parameter Store or Azure Key Vault.
 
 ### Three core problems solved
 
-1. **Security**: Secrets never live in `.env` files, git repos, or CI logs;
-   fetched from cloud vault at runtime
+1. **Security**: Secret values stay out of the versioned map and source control.
+   Runtime SDKs resolve in-process; CLI and GHA `.env` outputs must be protected
 2. **Consistency**: One `envilder.json` = single source of truth for all
    environments (dev, staging, production)
-3. **Developer Experience**: One command replaces manual secret copying,
-   reducing onboarding from hours to seconds
+3. **Developer Experience**: One command replaces manual secret copying with a
+   repeatable onboarding step
 
 ## Audience: Developers (Technical Depth)
 
@@ -41,7 +41,7 @@ Developers want to know **how it works** and **how to use it quickly**.
 ### Content guidelines
 
 - Show real CLI commands and `envilder.json` examples
-- Explain `--exec` mode, push mode, and GitHub Action inputs
+- Explain pull mode, push mode, and GitHub Action inputs; mark `--exec` as planned
 - Use terminal mockups (`TerminalMockup.astro`) for live demos
 - Keep language direct and concise: no marketing fluff
 - Include code blocks with copy buttons
@@ -50,8 +50,8 @@ Developers want to know **how it works** and **how to use it quickly**.
 ### Key selling points
 
 - One command replaces manual secret management
-- Works with existing `.env` workflows: zero migration cost
-- Supports `--exec` mode to inject secrets without writing files
+- Works with existing `.env` workflows through generated files
+- Planned, not shipped: `--exec` mode to inject secrets without writing files
 - Type-safe configuration via `envilder.json`
 - Works locally, in CI, and in production
 
@@ -63,15 +63,16 @@ Leaders want to know **business impact** and **risk reduction**.
 
 - Lead with business outcomes: compliance, reduced risk, faster onboarding
 - Use comparison tables (before/after, with/without Envilder)
-- Highlight multi-cloud flexibility and vendor independence
-- Quantify impact: "onboard in 1 command instead of 12 manual steps"
+- Highlight the shared map-file contract across the user's existing AWS or Azure vault
+- Explain outcomes without inventing step-count or time-saved metrics
 - Include trust signals: open-source, MIT license, hexagonal architecture
 - Use clear section headers they can scan quickly
 
 ### Key selling points
 
 - Zero secrets in source control (compliance-ready)
-- Multi-cloud support (AWS SSM + Azure Key Vault) without vendor lock-in
+- AWS SSM + Azure Key Vault support with one map-file contract; credentials
+  and secret migration remain provider-specific
 - GitHub Action integration for CI/CD pipelines with no code changes
 - Open-source with MIT license: no licensing costs
 - Hexagonal architecture: easy to extend with new providers
@@ -86,9 +87,9 @@ Use before/after format to show improvement:
 ```markdown
 | Without Envilder | With Envilder |
 |------------------|---------------|
-| Copy secrets manually from AWS console | `npx envilder --map=map.json` |
-| 12 steps to onboard a new developer | 1 command |
-| Secrets scattered in .env files | Single source of truth in SSM |
+| Copy secrets manually from a provider console | `npx envilder --map=envilder.json --envfile=.env` |
+| Ad hoc onboarding checklist | One documented resolution command |
+| Secret paths duplicated across tools | Paths versioned in `envilder.json`; values stay in the provider vault |
 ```
 
 ### Terminal mockups
