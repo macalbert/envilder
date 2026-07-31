@@ -75,6 +75,14 @@ function getSeoIssues(file: string, path: string, lang: string): string[] {
   )?.[1];
   const h1Count = (html.match(/<h1\b/g) ?? []).length;
   const htmlLang = html.match(/<html lang="([^"]+)">/)?.[1];
+  const ogLocale = getTags(html, 'meta')
+    .find((tag) => getAttribute(tag, 'property') === 'og:locale')
+    ?.match(/content="([^"]+)"/)?.[1];
+  const expectedOgLocale: Record<string, string> = {
+    en: 'en_US',
+    ca: 'ca_ES',
+    es: 'es_ES',
+  };
   const ogImage = getTags(html, 'meta')
     .find((tag) => getAttribute(tag, 'property') === 'og:image')
     ?.match(/content="([^"]+)"/)?.[1];
@@ -97,6 +105,9 @@ function getSeoIssues(file: string, path: string, lang: string): string[] {
       ? []
       : [`${file}: invalid canonical`]),
     ...(htmlLang === lang ? [] : [`${file}: invalid html lang`]),
+    ...(ogLocale === expectedOgLocale[lang]
+      ? []
+      : [`${file}: invalid Open Graph locale`]),
     ...(duplicateIds.length === 0 ? [] : [`${file}: duplicate ids`]),
     ...(brokenFragments.length === 0 ? [] : [`${file}: broken fragments`]),
     ...(isValidJsonLd(jsonLd) ? [] : [`${file}: invalid JSON-LD`]),
