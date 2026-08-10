@@ -91,9 +91,9 @@
   ],
   "type": "module",
   "dependencies": {
-    "@aws-sdk/client-ssm": "^3.1095.0",
-    "@aws-sdk/client-sts": "^3.1095.0",
-    "@aws-sdk/credential-providers": "^3.1095.0",
+    "@aws-sdk/client-ssm": "^3.1101.0",
+    "@aws-sdk/client-sts": "^3.1101.0",
+    "@aws-sdk/credential-providers": "^3.1101.0",
     "@azure/core-rest-pipeline": "^1.23.0",
     "@azure/identity": "^4.13.1",
     "@azure/keyvault-secrets": "^4.11.2",
