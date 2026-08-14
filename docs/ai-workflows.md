@@ -167,8 +167,9 @@ Use **Change Orchestrator**.
    requirement.
 
 For multi-item work, plan vertical slices and run each approved coherent item
-through Change Orchestrator. The calling workflow or user owns branch, commit,
-and pull-request lifecycle.
+through Change Orchestrator. The calling workflow or user owns the branch and
+overall pull-request lifecycle. When PR Resolver handles review feedback, it
+owns the specialized per-comment lifecycle described below.
 
 ### Scaffold a Feature
 
@@ -213,18 +214,20 @@ Orchestrator directly for one already-approved change.
 
 Use `/resolve-pr-comments` or **PR Resolver**.
 
-For each comment:
+For every comment, PR Resolver analyzes the feedback, presents the proposed
+action, and obtains explicit approval. It then follows one of two branches:
 
-1. analyze and present the proposed action;
-2. obtain explicit approval;
-3. delegate artifact changes through Change Orchestrator;
-4. create one commit for that comment;
-5. reply in the existing review thread;
-6. resolve the thread; and
-7. continue to the next comment.
+- For artifact-changing feedback, delegate the approved change through Change
+  Orchestrator, validate it, create exactly one separate commit, reply in the
+  existing review thread, and resolve the thread after confirming the reply.
+- For a question, disagreement, or approved skip, reply directly with repository
+  evidence and resolve the thread after confirming the reply. Do not create a
+  commit.
 
-Every comment receives a reply, including questions, disagreements, and
-approved skips.
+PR Resolver owns each artifact-changing comment's separate commit, every
+mandatory reply, and review-thread resolution. The calling user or workflow
+retains ownership of the branch and overall pull-request lifecycle. Push remains
+subject to explicit user approval.
 
 ## Oracle Effectiveness
 
