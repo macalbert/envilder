@@ -159,8 +159,11 @@ export async function main() {
 
         if (isPushSingle) {
           const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
-          const providerName = config.provider ?? 'aws';
-          const vaultInfo = config.vaultUrl ? `, vault=${config.vaultUrl}` : '';
+          const providerName = config.provider?.toLowerCase() || 'aws';
+          const vaultInfo =
+            providerName === 'azure' && config.vaultUrl
+              ? `, vault=${config.vaultUrl}`
+              : '';
           const source = resolvedMap
             ? `configuration from ${resolvedMap}`
             : 'configuration';

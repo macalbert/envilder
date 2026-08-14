@@ -6,6 +6,7 @@ import { DispatchActionCommand } from '../../../../../src/envilder/core/applicat
 import { DispatchActionCommandHandler } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
 import { InvalidArgumentError } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import { OperationMode } from '../../../../../src/envilder/core/domain/OperationMode';
+import { ConsoleLogger } from '../../../../../src/envilder/core/infrastructure/logger/ConsoleLogger';
 
 vi.mock(
   '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore',
@@ -326,6 +327,40 @@ describe('Cli', () => {
         vaultUrl: 'https://test.vault.azure.net',
       }),
       expect.any(Object),
+    );
+  });
+
+  it('Should_LogNormalizedAwsProviderWithoutVaultUrl_When_PushSingleUsesAwsConfig', async () => {
+    // Arrange
+    const { readMapFileConfig } = await import(
+      '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore'
+    );
+    vi.mocked(readMapFileConfig).mockResolvedValue({
+      provider: 'AWS',
+      vaultUrl: 'https://test.vault.azure.net',
+    });
+    const loggerSpy = vi
+      .spyOn(ConsoleLogger.prototype, 'info')
+      .mockImplementation(vi.fn());
+    process.argv = [
+      'node',
+      'cli.js',
+      '--map',
+      'map.json',
+      '--key',
+      'API_KEY',
+      '--value',
+      'secret',
+      '--secret-path',
+      '/my/path',
+    ];
+
+    // Act
+    await main();
+
+    // Assert
+    expect(loggerSpy).toHaveBeenCalledWith(
+      'Using configuration from map.json: provider=aws',
     );
   });
 });
