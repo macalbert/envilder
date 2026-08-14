@@ -60,7 +60,7 @@ The published `macalbert/envilder/github-action@v0` tag contains the prebuilt ac
   uses: macalbert/envilder/github-action@v0
   with:
     map-file: envilder.json
-    env-file: .env
+    env-file: ${{ runner.temp }}/envilder.env
 ```
 
 **Azure Key Vault:**
@@ -91,8 +91,10 @@ The published `macalbert/envilder/github-action@v0` tag contains the prebuilt ac
 | `provider` | ❌ No | `aws` | ☁️ `aws` or `azure`. Also settable via `$config.provider` in the map file. |
 | `vault-url` | ❌ No | - | 🔑 Azure Key Vault URL (overrides `$config.vaultUrl` in map file) |
 
-> **Note:** All paths (`map-file`, `env-file`) are relative to the repository root, not to any `working-directory`
-> setting in your job. If you use `working-directory`, adjust the paths accordingly.
+> **Note:** `map-file` paths are relative to the repository root, not to any
+> `working-directory` setting in your job. `env-file` can also be an absolute path.
+> When the consumer accepts an explicit path, prefer `${{ runner.temp }}/envilder.env`
+> to avoid storing the generated file in the repository workspace.
 >
 > **Azure:** When using `provider: azure`, provide the vault URL via the `vault-url` input
 > or set `$config.vaultUrl` in your map file. Authentication uses Azure Default Credentials.
@@ -373,6 +375,7 @@ SECRET_TOKEN=token_secret_value_here
 ### ✅ DO (Power-Ups!)
 
 - Use OIDC authentication instead of long-lived access keys
+- Prefer `${{ runner.temp }}/envilder.env` when the consuming tool accepts an explicit path
 - Scope IAM policies to specific parameter paths
 - Use separate parameter namespaces per environment (`/myapp/prod/*`, `/myapp/dev/*`)
 - Store sensitive SSM paths in GitHub Environment Secrets
@@ -384,6 +387,13 @@ SECRET_TOKEN=token_secret_value_here
 - Grant overly broad IAM permissions (`ssm:*` on `*`)
 - Use the same SSM parameters across environments
 - Store AWS credentials in repository secrets (use OIDC)
+
+### 🥷 Runner log masking
+
+The action registers each non-empty resolved value with GitHub Actions runner
+masking before writing the environment file. This redacts exact registered
+values from later workflow logs, but it is not a substitute for avoiding secret
+output: transformed, partial, or encoded values may not be masked.
 
 ## 🔧 Troubleshooting
 
