@@ -61,7 +61,7 @@ Envilder defines six agents:
 | Agent | Purpose | Artifact edits | Delegates to |
 | --- | --- | --- | --- |
 | **Change Orchestrator** | Coordinates one coherent approved change | No | Verifier, Implementer, Reviewer |
-| **Verifier** | Establishes independent contracts and runs final evidence | Contract only during establishment | None |
+| **Verifier** | Establishes independent contracts and runs final evidence | verification-contract artifacts only during contract establishment | None |
 | **Implementer** | Produces the coherent contracted solution | Solution artifacts | None |
 | **Reviewer** | Reviews one candidate or a complete change set | No | None |
 | **Content Designer** | Coordinates website and documentation outcomes | No | Change Orchestrator, Reviewer |
@@ -174,10 +174,10 @@ and pull-request lifecycle.
 
 Use `/scaffold-feature`.
 
-The prompt runs through Change Orchestrator. Verifier owns behavioral or
-contract artifacts before Implementer creates the solution structure. The
-Implementer completes required DI, routing, and entry-point wiring without
-generating placeholder tests.
+The prompt runs through Change Orchestrator. Verifier owns
+verification-contract artifacts, including behavioral tests, before
+Implementer creates the solution structure. The Implementer completes required
+DI, routing, and entry-point wiring without generating placeholder tests.
 
 ### Fix a Bug
 
