@@ -1,6 +1,6 @@
 ---
 name: core-testing
-description: "Apply Envilder testing conventions for Vitest unit tests and LocalStack e2e tests. Use when adding or updating tests for command handlers, domain entities, adapters, CLI, or GitHub Action flows."
+description: "Apply Envilder testing conventions when a verification contract selects Vitest unit tests, integration tests, or LocalStack e2e evidence for command handlers, domain entities, adapters, CLI, or GitHub Action flows."
 argument-hint: "feature or file under test"
 ---
 
@@ -8,14 +8,15 @@ argument-hint: "feature or file under test"
 
 ## Outcome
 
-Produce tests that match Envilder standards for naming, structure, and
-confidence level across unit, integration, and e2e coverage.
+Produce behavioral verification that matches Envilder standards and protects
+the risk identified by an approved `VerificationContract`.
 
 ## When To Use
 
-- Adding tests for new application handlers or domain behavior
+- Establishing, reusing, or updating tests for application or domain behavior
 - Updating tests after refactors in CLI, GHA, infrastructure, or ports
 - Reviewing whether test style is consistent before opening a PR
+- Diagnosing test infrastructure after consumer evidence proved insufficient
 
 ## Inputs
 
@@ -25,17 +26,21 @@ confidence level across unit, integration, and e2e coverage.
 
 ## Procedure
 
-1. Classify the test level and strategy.
-   - Use unit tests by default for domain/application logic.
+1. Read the approved intent, behavior, invariants, and verification strategy.
+   - Do not add a test when a compiler, schema, direct workflow, existing
+     baseline, or other oracle protects the requirement more directly.
+2. Classify the justified test level.
+   - Use unit tests for pure domain or application behavior with stable ports.
    - Use mocked port contracts (`vi.fn()`) for application handlers.
-   - Use e2e tests only when real AWS SSM behavior must be validated.
-2. Create test files in the matching test tree.
+   - Use integration or e2e tests when cloud, DI, CLI, GitHub Action, or
+     cross-layer wiring is the actual risk.
+3. Create or update only the verification artifacts required by the contract.
    - App and domain tests: `tests/` mirrored to `src/` structure.
    - E2E tests: `e2e/` using LocalStack/TestContainers.
-3. Name tests using the required pattern.
+4. Name tests using the required pattern.
    - `Should_<Expected>_When_<Condition>`
    - Example: `Should_ThrowError_When_SSMParameterIsNotFound`
-4. Write tests with explicit AAA sections.
+5. Write tests with explicit AAA sections.
    - Add comment markers in each test block:
      - `// Arrange`
      - `// Act`
@@ -43,24 +48,27 @@ confidence level across unit, integration, and e2e coverage.
    - **Each marker appears at most once per test.** If you need to
      test two actions or two assertions on different behaviors,
      write two separate tests.
-5. Mock at the port boundary for application tests.
+6. Mock at the port boundary for application tests.
    - Build test doubles by implementing domain port interfaces.
    - Prefer `vi.fn()` to control behavior and assertions.
-6. Validate primary success and failure paths.
+7. Validate primary success and failure paths required by the contract.
    - Success path (expected output/state change)
    - Domain error path (invalid input, missing parameter, etc.)
    - Empty/no-op behavior where relevant
-7. Keep assertions behavior-focused.
+8. Keep assertions behavior-focused.
    - Assert effects and interactions, not implementation details.
    - Verify calls to injected ports and logger where behavior requires it.
-8. Run verification commands before completion.
+9. For test-support changes, run a production-behavior consumer or direct
+   workflow first. Add a focused support test only for a documented diagnostic
+   precision gap.
+10. Run the targeted contract command and assigned broader gates.
    - `pnpm test`
    - `pnpm lint`
    - For CI parity when needed: `pnpm test:ci`
 
 ## Decision Points
 
-- If business rule is pure and deterministic: test at domain layer first.
+- If a business rule is pure and deterministic: use a domain unit test.
 - If orchestration calls multiple ports: test command handler with mocked
   dependencies.
 - If AWS integration semantics are the risk: add or update e2e with LocalStack.
@@ -68,6 +76,9 @@ confidence level across unit, integration, and e2e coverage.
    tests.
 - If only formatting/import changes occurred: update tests only when behavior
   changed or snapshots/assertions became stale.
+- If the intent is `PURE_REFACTOR`: establish a green baseline and keep
+  behavioral tests unchanged.
+- If the intent is `NON_BEHAVIORAL_CHANGE`: do not manufacture a test.
 
 ## Completion Criteria
 
@@ -75,6 +86,8 @@ confidence level across unit, integration, and e2e coverage.
 - AAA markers are present, clear, and appear at most once each per test
 - Positive and negative paths are both covered
 - No mandatory coverage percentage threshold is enforced by this skill
+- Verification rejects the incorrect or previous behavior for the expected
+  reason when a negative signal is practical
 - Tests run green locally with `pnpm test`
 - No type/lint regressions from test changes (`pnpm lint`)
 

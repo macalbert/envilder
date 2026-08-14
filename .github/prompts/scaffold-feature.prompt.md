@@ -1,17 +1,31 @@
 ---
 name: "Scaffold Feature"
-description: "Generate the skeleton files for a new Envilder feature following hexagonal architecture and command/handler pattern."
+description: "Implement an approved Envilder feature skeleton through the verification-first workflow."
 argument-hint: "feature name and brief description"
+agent: "Change Orchestrator"
 ---
 
-Scaffold the file structure for a new Envilder feature.
+Coordinate one coherent `NEW_BEHAVIOR` change that establishes independent
+behavioral verification before scaffolding the solution structure.
 
 ## Inputs
 
 - **Feature name**: e.g., "validate", "export-dotenv"
 - **Description**: what the feature does
+- **Observable outcome**: behavior available through a public entry point
+- **Scope**: approved layers, apps, SDKs, and documentation surfaces
+- **Constraints**: architecture, compatibility, security, and operations
 
-## Generated Files
+## Verification Ownership
+
+- `@Verifier` establishes the behavioral contract and owns all protected test or
+  validation artifacts.
+- `@Implementer` may inspect those artifacts but never creates, edits, renames,
+  regenerates, or weakens them.
+- Scaffolding is a solution-generation technique, not a source of expected
+  behavior.
+
+## Typical Solution Artifacts
 
 For a feature named `{name}`:
 
@@ -52,19 +66,7 @@ Add to `APPLICATION`:
 {Name}CommandHandler: Symbol.for('{Name}CommandHandler'),
 ```
 
-### 4. Test (`tests/envilder/core/application/{name}/{Name}CommandHandler.test.ts`)
-
-```typescript
-describe('{Name}CommandHandler', () => {
-  it('Should_{Expected}_When_{Condition}', async () => {
-    // Arrange
-    // Act
-    // Assert
-  });
-});
-```
-
-### 5. Dispatcher (`src/envilder/core/application/dispatch/DispatchActionCommandHandler.ts`)
+### 4. Dispatcher (`src/envilder/core/application/dispatch/DispatchActionCommandHandler.ts`)
 
 Add case to switch statement:
 
@@ -74,14 +76,23 @@ case OperationMode.{NAME}:
   break;
 ```
 
-## Post-Scaffold
+## Workflow
 
-After generating files, suggest:
-"Use `@TDD Coach` to implement the feature behavior via TDD."
+1. Approve the requirement, invariants, scope, and constraints.
+2. Establish the independent `VerificationContract`.
+3. Let `@Implementer` inspect similar features and create only approved solution
+   artifacts.
+4. Complete required DI, routing, and entry-point wiring; do not leave
+   non-executable placeholders.
+5. Run the frozen targeted verification and applicable broader gates.
+6. Run independent candidate review and fresh final verification.
 
 ## Constraints
 
 - Follow hexagonal architecture: no infrastructure imports in domain or application
 - Use InversifyJS decorators (`@injectable()`, `@inject()`)
 - One command + one handler per feature
-- Mirror `src/` structure under `tests/` for test files
+- Follow existing repository patterns before generic templates
+- Never generate placeholder tests or assertions
+- Never edit protected verification artifacts to make the scaffold pass
+- Do not add speculative abstractions or out-of-scope cleanup

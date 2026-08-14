@@ -65,6 +65,13 @@ See `code-quality-crap` skill for formula and thresholds.
 | **Medium** | Correctness risk with limited blast radius, test gaps |
 | **Low** | Maintainability concern worth addressing soon |
 
+### Anti-Inflation Rules
+
+- Not Critical unless the exact production failure is objectively demonstrable.
+- Not High unless a concrete input or state produces incorrect behavior.
+- Convention violations are Low unless they change runtime behavior.
+- Missing guards for values guaranteed by the type system are not defects.
+
 ## Synthesis Procedure
 
 1. Run all 5 perspectives (can be parallel)
@@ -74,6 +81,8 @@ See `code-quality-crap` skill for formula and thresholds.
 5. For each finding: severity, why it matters, file:line evidence, fix direction
 
 ## Output Format
+
+Use this standalone format when the caller does not define a workflow envelope:
 
 ```text
 ## Findings
@@ -90,6 +99,13 @@ See `code-quality-crap` skill for formula and thresholds.
 {1-2 sentence overview: AFTER findings, not before}
 ```
 
+When the caller requires the canonical `ReviewResult` envelope from
+`common-verification-first`, place these findings under `Prioritized findings`,
+preserve the same severity and anti-inflation rules, and map the remaining
+sections to the corresponding envelope fields. The envelope may add
+orchestration routing or contract assessment; it does not redefine review
+semantics.
+
 ## Verification
 
 After analysis, verify findings before reporting:
@@ -104,6 +120,7 @@ Only report **confirmed** findings. Downgrade unverified suspicions.
 
 ## Constraints
 
+- Only report findings for code introduced or modified in the requested diff
 - Do not report style-only nits unless they block quality gates
 - State assumptions explicitly
 - Never modify files during review: read-only analysis only

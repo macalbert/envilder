@@ -1,95 +1,99 @@
 ---
 name: code-refactoring
 description: >-
-  Code smell detection and safe incremental refactoring patterns. Use when
-  improving code structure, reducing technical debt, or cleaning up after
-  a TDD cycle. Covers SOLID principles, smell catalog, and the propose-apply
-  workflow.
+  Code-smell detection and safe incremental refactoring patterns. Use when
+  reviewing or implementing a PURE_REFACTOR contract, reducing technical debt,
+  or assessing structural findings. Covers SOLID principles and
+  behavior-preserving execution.
 ---
 
 # Code Refactoring
 
-Detect code smells and apply safe, incremental refactoring while preserving
-all existing behavior.
+Detect concrete code smells and improve structure while preserving all
+observable behavior. `common-verification-first` governs intent, protected
+artifacts, and evidence.
 
 ## When to Use
 
-- TDD Refactor phase (after Green)
-- Cleaning up technical debt
-- Improving code structure after review findings
-- Reducing complexity flagged by CRAP score
+- Implementing an approved `PURE_REFACTOR`.
+- Reviewing a candidate for justified structural findings.
+- Reducing technical debt within approved scope.
+- Reducing complexity flagged by CRAP evidence.
+
+## Preconditions
+
+- Establish an existing-suite baseline before solution edits.
+- Freeze and protect behavioral verification; do not rewrite it for the
+  refactor.
+- State architecture constraints and the behavior that must remain unchanged.
+- Only `@Implementer` applies workflow changes. `@Reviewer` remains read-only
+  and reports findings to the orchestrator.
 
 ## Smell Catalog
 
 | Smell | Indicator |
-|-------|-----------|
-| Long method | > 20 lines or doing multiple things |
-| Large class | Multiple responsibilities |
-| Duplicated logic | Same pattern in 2+ places |
-| Tight coupling | Direct dependency on concrete implementations |
-| Mixed abstraction levels | High/low-level operations in same method |
-| SRP violation | Class/method has multiple reasons to change |
-| Architecture boundary violation | Domain importing infrastructure |
-| Feature envy | Method uses another class's data more than its own |
+| --- | --- |
+| Long method | Excessive branches, mixed levels, or multiple responsibilities |
+| Large class | Multiple independent reasons to change |
+| Duplicated logic | The same decision or transformation exists in multiple places |
+| Tight coupling | High-level behavior depends directly on replaceable details |
+| Mixed abstraction | Policy and low-level mechanics are interleaved |
+| Architecture violation | A dependency crosses a prohibited layer boundary |
+| Feature envy | Behavior primarily manipulates another owner's data |
+| Shallow module | Interface complexity approaches implementation complexity |
+| Primitive obsession | Domain concepts lack meaningful types and invariants |
+| Speculative generality | Abstraction exists without a current requirement |
 
-## Workflow
+## Review Method
 
-### 1. Analyze
+1. Read target files, callers, verification contract, and architecture rules.
+2. Identify only concrete smells with maintenance or correctness risk.
+3. Apply the deletion test to shallow modules: retain an abstraction when
+   removing it concentrates complexity; inline it when removal merely shortens
+   the call path.
+4. Report location, evidence, proposed structural outcome, and risk.
+5. Accept `no changes required` when the candidate is already clear and
+   cohesive.
 
-- Read target file(s) and surrounding context
-- Identify smells from the catalog above
-- Check architecture boundary compliance
+## Implementation Method
 
-### 2. Propose
+For each approved structural change:
 
-Present opportunities before applying:
+1. Make one coherent transformation.
+2. Keep protected verification artifacts unchanged.
+3. Run the targeted existing verification.
+4. Run the stack formatter and static or build checks in the appropriate mode.
+5. Continue only while behavior and architecture constraints remain protected.
+6. Run the broader relevant suite before completion.
 
-```text
-## Refactoring Opportunities
+If a behavioral test must change, stop. The task may be a behavior change, the
+test may be coupled to private structure, or the contract may be defective.
+Route that decision to the orchestrator instead of silently reclassifying it.
 
-| # | Smell | Location | Proposed Change | Risk |
-|---|-------|----------|-----------------|------|
-| 1 | {smell} | {file:line} | {what to do} | Low/Med |
-```
+## Stack Checks
 
-Wait for confirmation before applying.
-
-### 3. Apply
-
-For each approved refactoring:
-
-1. Apply **one change at a time**
-2. Run `pnpm test` after each change
-3. Run `pnpm lint` to verify formatting
-4. Report result before proceeding to next
-
-### 4. Report
-
-```text
-## Refactoring Complete
-
-**Applied:** {N} of {M} proposed changes
-**Tests:** all passing ✓
-**Formatter:** ran ✓
-
-### Changes
-1. {file}: {what changed}
-```
+| Stack | Typical verification | Formatter |
+| --- | --- | --- |
+| TypeScript core, Node.js SDK, website | Targeted Vitest or build, type check | `pnpm format` |
+| .NET SDK | Targeted and broader `dotnet test`, build | `dotnet format` |
+| Python SDK | Targeted and broader pytest, mypy | `make format-sdk-python` |
 
 ## Constraints
 
-- **Never change observable behavior**: refactoring preserves outputs
-- Respect hexagonal architecture boundaries
-- Preserve existing DI wiring patterns (InversifyJS)
-- If a refactoring breaks a test, **revert it** and report
-- One change per step: never batch multiple refactorings without testing
+- Never change observable outputs, side effects, compatibility, or domain
+  invariants.
+- Respect Domain -> Application -> Infrastructure dependency rules.
+- Do not add tests merely to raise coverage or satisfy a refactoring ritual.
+- If important behavior truly lacks evidence, report a separate verification
+  need; do not expand the frozen refactor contract.
+- Do not force a modification after review; no findings is valid.
 
 ## SOLID Reference
 
-| Principle | Quick check |
-|-----------|-------------|
-| **S**ingle Responsibility | Does this class/method have one reason to change? |
-| **O**pen/Closed | Can I extend without modifying existing code? |
-| **L**iskov Substitution | Can subtypes replace base without breaking behavior? |
-| **I**nterface Segregation | Are interfaces focused (no unused methods)? |
-| **D**ependency Inversion | Do high-level modules depend on abstractions? |
+| Principle | Check |
+| --- | --- |
+| Single Responsibility | Does this unit have one reason to change? |
+| Open/Closed | Can required variation be added without unstable branching? |
+| Liskov Substitution | Can subtypes replace the abstraction without surprises? |
+| Interface Segregation | Do clients depend only on operations they need? |
+| Dependency Inversion | Does policy depend on abstractions rather than details? |
