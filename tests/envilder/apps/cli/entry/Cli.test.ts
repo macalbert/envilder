@@ -253,7 +253,7 @@ describe('Cli', () => {
     await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
   });
 
-  it('Should_ThrowError_When_EnvfileOptionIsEmptyString', async () => {
+  it('Should_ThrowInvalidArgumentError_When_EnvfileOptionIsEmptyString', async () => {
     // Arrange
     process.argv = ['node', 'cli.js', '--map', 'map.json', '--envfile', '   '];
 
@@ -261,9 +261,7 @@ describe('Cli', () => {
     const action = () => main();
 
     // Assert
-    await expect(action).rejects.toThrow(
-      'Invalid --envfile value: path must not be empty.',
-    );
+    await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
   });
 
   it('Should_NotRequireMapFile_When_PushSingleAndEnvilderJsonDoesNotExist', async () => {

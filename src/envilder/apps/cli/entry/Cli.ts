@@ -212,7 +212,9 @@ function resolveEnvfile(envfileOption: string | undefined): string {
 
   const trimmed = envfileOption.trim();
   if (trimmed.length === 0) {
-    throw new Error('Invalid --envfile value: path must not be empty.');
+    throw new InvalidArgumentError(
+      'Invalid --envfile value: path must not be empty.',
+    );
   }
 
   return trimmed;
