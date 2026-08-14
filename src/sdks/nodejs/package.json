@@ -52,8 +52,8 @@
     "node": ">=22.12.0"
   },
   "dependencies": {
-    "@aws-sdk/client-ssm": "^3.700.0",
-    "@aws-sdk/credential-providers": "^3.700.0",
+    "@aws-sdk/client-ssm": "^3.1101.0",
+    "@aws-sdk/credential-providers": "^3.1101.0",
     "@azure/identity": "^4.5.0",
     "@azure/keyvault-secrets": "^4.9.0"
   },
