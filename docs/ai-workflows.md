@@ -302,6 +302,9 @@ Agents must:
 3. Grant only the tools and delegations it needs.
 4. Reference skills instead of duplicating policy.
 5. Validate every delegated agent name exists.
+6. Synchronize the agent topology/inventory in `docs/ai-workflows.md` and
+   `.github/skills/README.md`, including whether the agent is user-invocable or
+   subagent-only.
 
 ## Maintenance Principles
 
