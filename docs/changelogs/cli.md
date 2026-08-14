@@ -5,6 +5,18 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [0.13.2] - 2026-08-14
+
+### Changed
+
+* **Preserve CLI behavior while adding GitHub Actions masking**: The CLI now
+  uses a no-op masker in the shared pull pipeline, so runner masking remains
+  limited to GitHub Actions and does not alter CLI output or generated
+  environment files
+  ([#477](https://github.com/macalbert/envilder/pull/477))
+
+---
+
 ## [0.13.0] - 2026-06-26
 
 ### Added

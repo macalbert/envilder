@@ -1,5 +1,22 @@
 ## [Unreleased]
 
+---
+
+## [0.13.2] - 2026-08-14
+
+### Security
+
+* **Mask resolved secrets in subsequent workflow logs**: Register every
+  non-empty resolved value with the GitHub Actions runner before writing it
+  to the environment file, so exact matches emitted by later steps are
+  redacted. CLI behavior remains unchanged
+  ([#476](https://github.com/macalbert/envilder/issues/476),
+  [#477](https://github.com/macalbert/envilder/pull/477))
+
+---
+
+## [0.13.1] - 2026-07-31
+
 ### Changed
 
 * **Bundle the GitHub Action with esbuild**: Replace the ncc bundler so the
