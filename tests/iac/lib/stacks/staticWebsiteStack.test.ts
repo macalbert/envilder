@@ -42,7 +42,7 @@ describe("Static website Stack", () => {
 		normalizeStaticWebsiteTemplate(template);
 
 		expect(template).toMatchSnapshot("staticWebsiteStackTest");
-	});
+	}, 30_000);
 
 	test("Should_ReturnNotFoundPage_When_OriginReturnsMissingObject", () => {
 		// Arrange

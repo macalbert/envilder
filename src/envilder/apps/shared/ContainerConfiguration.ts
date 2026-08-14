@@ -7,6 +7,7 @@ import { PushSingleCommandHandler } from '../../core/application/pushSingle/Push
 import { InvalidArgumentError } from '../../core/domain/errors/DomainErrors.js';
 import type { MapFileConfig } from '../../core/domain/MapFileConfig.js';
 import type { ILogger } from '../../core/domain/ports/ILogger.js';
+import type { ISecretMasker } from '../../core/domain/ports/ISecretMasker.js';
 import type { ISecretProvider } from '../../core/domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../core/domain/ports/IVariableStore.js';
 import { createAwsSecretProvider } from '../../core/infrastructure/aws/AwsSecretProviderFactory.js';
@@ -14,6 +15,7 @@ import {
   type AzureProviderOptions,
   createAzureSecretProvider,
 } from '../../core/infrastructure/azure/AzureSecretProviderFactory.js';
+import { NoOpSecretMasker } from '../../core/infrastructure/github/NoOpSecretMasker.js';
 import { ConsoleLogger } from '../../core/infrastructure/logger/ConsoleLogger.js';
 import { FileVariableStore } from '../../core/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../core/types.js';
@@ -46,6 +48,13 @@ export function configureInfrastructureServices(
     container
       .bind<IVariableStore>(TYPES.IVariableStore)
       .to(FileVariableStore)
+      .inSingletonScope();
+  }
+
+  if (!container.isBound(TYPES.ISecretMasker)) {
+    container
+      .bind<ISecretMasker>(TYPES.ISecretMasker)
+      .to(NoOpSecretMasker)
       .inSingletonScope();
   }
 

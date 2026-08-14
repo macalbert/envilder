@@ -8,6 +8,7 @@ import {
   SsoSessionExpiredError,
 } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import type { ILogger } from '../../../../../src/envilder/core/domain/ports/ILogger';
+import type { ISecretMasker } from '../../../../../src/envilder/core/domain/ports/ISecretMasker';
 import type { ISecretProvider } from '../../../../../src/envilder/core/domain/ports/ISecretProvider';
 import type { IVariableStore } from '../../../../../src/envilder/core/domain/ports/IVariableStore';
 
@@ -35,6 +36,7 @@ describe('PullSecretsToEnvCommandHandler', () => {
     saveEnvironment: Mock;
   };
   let mockLogger: ILogger & { info: Mock; warn: Mock; error: Mock };
+  let mockSecretMasker: ISecretMasker & { mask: Mock };
   let sut: PullSecretsToEnvCommandHandler;
 
   const mockMapPath = './tests/envilder.json';
@@ -65,11 +67,15 @@ describe('PullSecretsToEnvCommandHandler', () => {
       warn: vi.fn(),
       error: vi.fn(),
     };
+    mockSecretMasker = {
+      mask: vi.fn(),
+    };
 
     sut = new PullSecretsToEnvCommandHandler(
       mockSecretProvider,
       mockEnvFileManager,
       mockLogger,
+      mockSecretMasker,
     );
   });
 
@@ -306,6 +312,57 @@ describe('PullSecretsToEnvCommandHandler', () => {
       line.includes('PASSWORD'),
     );
     expect(resolvedLine).toContain('***********ord');
+  });
+
+  it('Should_RegisterCompleteSecretValuesBeforeSaving_When_ValuesAreResolved', async () => {
+    // Arrange
+    const paramMapContent = {
+      PASSWORD: '/path/to/ssm/password',
+    };
+    mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
+    mockEnvFileManager.getEnvironment.mockResolvedValue({});
+    const command = PullSecretsToEnvCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    expect(mockSecretMasker.mask).toHaveBeenCalledWith('mockedPassword');
+    expect(mockSecretMasker.mask.mock.invocationCallOrder[0]).toBeLessThan(
+      mockEnvFileManager.saveEnvironment.mock.invocationCallOrder[0],
+    );
+    const resolvedLine = loggedLines(mockLogger.info).find((line) =>
+      line.includes('PASSWORD'),
+    );
+    expect(resolvedLine).toContain('***********ord');
+    expect(resolvedLine).not.toContain('mockedPassword');
+  });
+
+  it('Should_NotRegisterSecretValues_When_ValueIsEmptyOrMissing', async () => {
+    // Arrange
+    const paramMapContent = {
+      EMPTY_PARAM: '/path/to/ssm/password_no_value',
+      MISSING_PARAM: '/path/to/ssm/missing',
+    };
+    mockEnvFileManager.getMapping.mockResolvedValue(paramMapContent);
+    mockEnvFileManager.getEnvironment.mockResolvedValue({});
+    vi.mocked(mockSecretProvider.getSecret).mockImplementation(
+      async (name: string) =>
+        name === '/path/to/ssm/password_no_value' ? '' : undefined,
+    );
+    const command = PullSecretsToEnvCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    expect(mockSecretMasker.mask).not.toHaveBeenCalled();
   });
 
   it('Should_PropagateExpiredCredentialsError_When_SecretFetchFails', async () => {

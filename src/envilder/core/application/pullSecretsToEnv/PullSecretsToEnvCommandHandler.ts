@@ -7,6 +7,7 @@ import {
   SsoSessionExpiredError,
 } from '../../domain/errors/DomainErrors.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
+import type { ISecretMasker } from '../../domain/ports/ISecretMasker.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
 import { describeError } from '../../infrastructure/describeError.js';
@@ -39,6 +40,8 @@ export class PullSecretsToEnvCommandHandler {
     @inject(TYPES.IVariableStore)
     private readonly variableStore: IVariableStore,
     @inject(TYPES.ILogger) private readonly logger: ILogger,
+    @inject(TYPES.ISecretMasker)
+    private readonly secretMasker: ISecretMasker,
   ) {}
 
   /**
@@ -148,6 +151,7 @@ export class PullSecretsToEnvCommandHandler {
         return { status: 'warning', envVar, path: secretName, reason: 'empty' };
       }
 
+      this.secretMasker.mask(value);
       existingEnvVariables[envVar] = value;
       const masked = new EnvironmentVariable(envVar, value, true).maskedValue;
 
