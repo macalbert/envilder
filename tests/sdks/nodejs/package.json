@@ -8,13 +8,13 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "@aws-sdk/client-ssm": "^3.1101.0",
+    "@aws-sdk/client-ssm": "^3.1106.0",
     "@azure/identity": "^4.13.1",
     "@azure/keyvault-secrets": "^4.11.2",
-    "@testcontainers/localstack": "^12.0.4",
+    "@testcontainers/localstack": "^12.1.0",
     "@types/node": "catalog:",
     "@vitest/coverage-v8": "catalog:",
-    "testcontainers": "^12.0.4",
+    "testcontainers": "^12.1.0",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }
