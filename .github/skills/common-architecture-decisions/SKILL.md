@@ -36,6 +36,7 @@ behind tooling choices and architectural patterns before proposing changes.
 | [ADR-0007](../../../docs/adr/0007-trunk-based-development.md) | Trunk-Based Development | All components | Single main branch, short-lived feature branches, squash merge, feature flags for incomplete work |
 | [ADR-0008](../../../docs/adr/0008-map-file-schema.md) | Map-File Schema Specification | All components | JSON Schema v1, `$` prefix reserved, `$config` strict fields, `file` provider for testing (planned), `EnvilderOptions.FromFile` (planned) |
 | [ADR-0009](../../../docs/adr/0009-sdk-dependency-compatibility-policy.md) | SDK Dependency Compatibility Policy | All SDKs | Minimum viable engine + dep versions in published SDKs; devDeps unconstrained; acceptance tests verify minimum |
+| [ADR-0013](../../../docs/adr/0013-verification-first-agent-workflow.md) | Verification-First Agent Workflow | AI workflow | Independent verification contracts, intent-specific oracles, isolated implementation, review, and final evaluation |
 
 ## Quick Reference: Test Doubles per Stack
 
