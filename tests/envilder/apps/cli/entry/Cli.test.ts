@@ -4,7 +4,9 @@ import { main } from '../../../../../src/envilder/apps/cli/entry/Cli';
 import { Startup } from '../../../../../src/envilder/apps/cli/Startup';
 import { DispatchActionCommand } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommand';
 import { DispatchActionCommandHandler } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
+import { InvalidArgumentError } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import { OperationMode } from '../../../../../src/envilder/core/domain/OperationMode';
+import { ConsoleLogger } from '../../../../../src/envilder/core/infrastructure/logger/ConsoleLogger';
 
 vi.mock(
   '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore',
@@ -18,6 +20,14 @@ vi.mock(
     };
   },
 );
+
+vi.mock('node:fs', async () => {
+  const actual = await vi.importActual('node:fs');
+  return {
+    ...(actual as object),
+    existsSync: vi.fn().mockReturnValue(true),
+  };
+});
 
 function patchWithMocks() {
   const mockCommandHandler = {
@@ -180,5 +190,175 @@ describe('Cli', () => {
     // Assert
     expect(infraSpy).toHaveBeenCalled();
     expect(infraSpy).toHaveBeenCalledWith(expect.any(Object), {});
+  });
+
+  it('Should_UseDefaultMapFile_When_MapOptionIsOmittedAndEnvilderJsonExists', async () => {
+    // Arrange
+    const { existsSync } = await import('node:fs');
+    vi.mocked(existsSync).mockReturnValue(true);
+
+    process.argv = ['node', 'cli.js', '--envfile', '.env'];
+
+    const fromCliOptionsSpy = vi.spyOn(DispatchActionCommand, 'fromCliOptions');
+
+    // Act
+    await main();
+
+    // Assert
+    expect(fromCliOptionsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ map: 'envilder.json' }),
+    );
+  });
+
+  it('Should_ThrowInvalidArgumentError_When_MapOptionIsOmittedAndEnvilderJsonDoesNotExist', async () => {
+    // Arrange
+    const { existsSync } = await import('node:fs');
+    vi.mocked(existsSync).mockReturnValue(false);
+
+    process.argv = ['node', 'cli.js'];
+
+    // Act
+    const action = () => main();
+
+    // Assert
+    await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
+  });
+
+  it('Should_UseDefaultEnvfile_When_EnvfileOptionIsOmitted', async () => {
+    // Arrange
+    const { existsSync } = await import('node:fs');
+    vi.mocked(existsSync).mockReturnValue(true);
+
+    process.argv = ['node', 'cli.js', '--map', 'map.json'];
+
+    const fromCliOptionsSpy = vi.spyOn(DispatchActionCommand, 'fromCliOptions');
+
+    // Act
+    await main();
+
+    // Assert
+    expect(fromCliOptionsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ envfile: '.env' }),
+    );
+  });
+
+  it('Should_ThrowInvalidArgumentError_When_MapOptionIsEmptyString', async () => {
+    // Arrange
+    process.argv = ['node', 'cli.js', '--map', '   ', '--envfile', '.env'];
+
+    // Act
+    const action = () => main();
+
+    // Assert
+    await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
+  });
+
+  it('Should_ThrowInvalidArgumentError_When_EnvfileOptionIsEmptyString', async () => {
+    // Arrange
+    process.argv = ['node', 'cli.js', '--map', 'map.json', '--envfile', '   '];
+
+    // Act
+    const action = () => main();
+
+    // Assert
+    await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
+  });
+
+  it('Should_NotRequireMapFile_When_PushSingleAndEnvilderJsonDoesNotExist', async () => {
+    // Arrange
+    const { existsSync } = await import('node:fs');
+    vi.mocked(existsSync).mockReturnValue(false);
+
+    process.argv = [
+      'node',
+      'cli.js',
+      '--push',
+      '--key',
+      'API_KEY',
+      '--value',
+      'secret',
+      '--secret-path',
+      '/my/path',
+    ];
+
+    // Act
+    await main();
+
+    // Assert
+    expect(mocks.mockCommandHandler.handleCommand).toHaveBeenCalledWith(
+      expect.objectContaining({ mode: OperationMode.PUSH_SINGLE }),
+    );
+  });
+
+  it('Should_ApplyDefaultMapConfig_When_PushSingleAndEnvilderJsonExists', async () => {
+    // Arrange
+    const { existsSync } = await import('node:fs');
+    vi.mocked(existsSync).mockReturnValue(true);
+    const { readMapFileConfig } = await import(
+      '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore'
+    );
+    vi.mocked(readMapFileConfig).mockResolvedValue({
+      provider: 'azure',
+      vaultUrl: 'https://test.vault.azure.net',
+    });
+    const infraSpy = vi.spyOn(Startup.prototype, 'configureInfrastructure');
+
+    process.argv = [
+      'node',
+      'cli.js',
+      '--push',
+      '--key',
+      'API_KEY',
+      '--value',
+      'secret',
+      '--secret-path',
+      '/my/path',
+    ];
+
+    // Act
+    await main();
+
+    // Assert
+    expect(infraSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        provider: 'azure',
+        vaultUrl: 'https://test.vault.azure.net',
+      }),
+      expect.any(Object),
+    );
+  });
+
+  it('Should_LogNormalizedAwsProviderWithoutVaultUrl_When_PushSingleUsesAwsConfig', async () => {
+    // Arrange
+    const { readMapFileConfig } = await import(
+      '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore'
+    );
+    vi.mocked(readMapFileConfig).mockResolvedValue({
+      provider: 'AWS',
+      vaultUrl: 'https://test.vault.azure.net',
+    });
+    const loggerSpy = vi
+      .spyOn(ConsoleLogger.prototype, 'info')
+      .mockImplementation(vi.fn());
+    process.argv = [
+      'node',
+      'cli.js',
+      '--map',
+      'map.json',
+      '--key',
+      'API_KEY',
+      '--value',
+      'secret',
+      '--secret-path',
+      '/my/path',
+    ];
+
+    // Act
+    await main();
+
+    // Assert
+    expect(loggerSpy).toHaveBeenCalledWith(
+      'Using configuration from map.json: provider=aws',
+    );
   });
 });

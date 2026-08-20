@@ -234,7 +234,9 @@ export interface GetStartedTranslations {
   step3: string;
   terminalTitle: string;
   commentCreate: string;
+  commentPull: string;
   commentPush: string;
+  doneMessage: string;
   sdkComment3: string;
   sdkExampleLink: string;
 }
