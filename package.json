@@ -1,7 +1,7 @@
 {
   "name": "envilder",
   "version": "0.13.2",
-  "packageManager": "pnpm@11.10.0+sha512.0b7f8b98060031904c017e3a41eb187a16d40eeb829b95c4f8cb03681761fc4ab53dd219115b9b447f4dce1a05a214764461e7d3703392a9f32f9511ce8c86c8",
+  "packageManager": "pnpm@11.22.0+sha512.1ff870c4c6133dfd88fb2afc46dd13d47f09c9794b438c6fdb47ca98caf3bc16381ee0be93a091b8e3824cf01f889f46d7d9e20910fb0be1ab0fb5baa80dd621",
   "description": "Open-source TypeScript CLI, GitHub Action, and runtime SDKs for loading secrets from AWS SSM Parameter Store and Azure Key Vault.",
   "homepage": "https://envilder.com",
   "author": {
