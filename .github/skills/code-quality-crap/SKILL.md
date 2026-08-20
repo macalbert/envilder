@@ -3,7 +3,7 @@ name: code-quality-crap
 description: >-
   CRAP score quality gate for code complexity and test coverage. Use when
   reviewing methods for complexity risk, deciding whether to split methods,
-  or determining minimum test coverage requirements.
+  or interpreting complexity and coverage risk without manufacturing tests.
 ---
 
 # Code Quality: CRAP Score
@@ -15,8 +15,8 @@ cyclomatic complexity and test coverage.
 
 - Reviewing new or changed methods for complexity risk
 - Deciding whether a method needs splitting
-- Determining minimum test coverage for a given complexity
-- During TDD Refactor phase to validate structural improvements
+- Interpreting coverage risk for a given complexity
+- During `PURE_REFACTOR` implementation or candidate review
 
 ## Formula
 
@@ -50,7 +50,7 @@ providing a safety margin:
 | Scenario | Action |
 |----------|--------|
 | CRAP >= 6 due to high complexity | Extract complex branches into smaller methods |
-| CRAP >= 6 due to low coverage | Add tests (new Red/Green cycle) |
+| CRAP >= 6 due to low coverage | First reduce complexity; if important behavior lacks evidence, route a separate verification contract rather than adding coverage-only tests |
 | Complexity 6+ regardless of coverage | Must split: CRAP floor equals complexity |
 
 ## Severity Classification

@@ -19,6 +19,7 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.biome": "explicit"
   },
+  "chat.subagents.allowInvocationsFromSubagents": true,
   "github.copilot.chat.commitMessageGeneration.instructions": [
     {
       "file": ".github/skills/workflow-smart-commit/SKILL.md"

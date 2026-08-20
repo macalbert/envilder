@@ -18,13 +18,13 @@ User ──→ Agent (persona + workflow) ──→ loads Skills (domain knowled
 - **Instructions** live in `.github/instructions/`: always-on rules scoped by
   file pattern (architecture boundaries, coding conventions, git).
 
-## Skills (24)
+## Skills (32)
 
 ### Category: Code Quality
 
 | Skill | Invocable | Purpose |
 |-------|-----------|---------|
-| `code-bug-investigation` | ✅ | Bug report → feedback loop → reproduction → TDD fix |
+| `code-bug-investigation` | ✅ | Bug report -> reproduction evidence -> verification-ready root cause |
 | `code-quality-crap` | ✅ | CRAP score formula, thresholds, when to split methods |
 | `code-refactoring` | ✅ | Smell catalog, safe incremental refactoring patterns |
 | `code-review-perspectives` | ✅ | 5 analysis perspectives: correctness, architecture, security, conventions, complexity |
@@ -37,6 +37,7 @@ User ──→ Agent (persona + workflow) ──→ loads Skills (domain knowled
 | `common-git` | Conventional commits, branching, PR workflow |
 | `common-security` | Secret handling, Secretlint, OIDC, input validation |
 | `common-testing-conventions` | AAA pattern, naming, assertions across all stacks |
+| `common-verification-first` | Intent classification, independent contracts, evidence, and role ownership |
 
 ### Category: Stack-Specific Testing
 
@@ -85,17 +86,16 @@ User ──→ Agent (persona + workflow) ──→ loads Skills (domain knowled
 | `to-issues` | ✅ | Break plan into vertical-slice GitHub issues |
 | `zoom-out` | `/zoom-out` only | Map modules/callers at higher abstraction level |
 
-## Agents (7)
+## Agents (6)
 
 | Agent | Role | Delegates to |
 |-------|------|-------------|
-| **TDD Coach** | Orchestrates Red-Green-Refactor. Plans, delegates, never writes code. | TDD Red, TDD Green, TDD Refactor |
-| **TDD Red** | Writes one failing test | n/a |
-| **TDD Green** | Writes minimum code to pass | n/a |
-| **TDD Refactor** | Improves structure, keeps tests green | n/a |
-| **Code Reviewer** | 5-perspective analysis + verification | TDD Coach, PR Resolver |
-| **Content Designer** | Website, docs, changelogs, translations, CSS | Code Reviewer |
-| **PR Resolver** | Processes PR review comments, commits fixes, replies on GitHub | TDD Coach |
+| **Change Orchestrator** | Coordinates one coherent verification-first change | Verifier, Implementer, Reviewer |
+| **Verifier** | Owns independent contracts and fresh final evidence | n/a |
+| **Implementer** | Edits solution artifacts against a frozen contract | n/a |
+| **Reviewer** | Read-only candidate and change-set evaluation | n/a |
+| **Content Designer** | Coordinates content outcomes without direct edits | Change Orchestrator, Reviewer |
+| **PR Resolver** | Resolves comments with one delegated change and commit each | Change Orchestrator, Reviewer |
 
 ## Key Properties
 
@@ -137,13 +137,17 @@ user-invocable: true
    silently when relevant via instruction file `applyTo` patterns.
 5. **`disable-model-invocation: true`** means the skill is only triggered by the
    user typing `/skill-name`: the model won't auto-load it.
+6. **Nested delegation** is enabled by
+   `chat.subagents.allowInvocationsFromSubagents` in `.vscode/settings.json`.
 
 ## Influences
 
 - [Matt Pocock's skills](https://github.com/mattpocock/skills): Patterns adopted:
   `grill-me`, `to-issues`, `zoom-out`, "build a feedback loop first" philosophy
-  in bug investigation, deep modules heuristic in TDD planning, and the
+  in bug investigation, deep modules heuristic in design planning, and the
   `CONTEXT.md` domain glossary convention.
 - [VS Code Copilot docs: Nested subagents](https://code.visualstudio.com/docs/copilot/agents/subagents#_nested-subagents):
-  Inspiration for the TDD Coach multi-agent architecture (coordinator +
-  specialized workers).
+  Basis for the coordinator and specialized worker topology.
+- [TDD in the Agent Loop](https://martinfowler.com/articles/exploring-gen-ai/tdd-in-the-agent-loop.html):
+  Directional evidence for separating executable verification from microscopic
+  implementation ritual.

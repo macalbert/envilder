@@ -70,6 +70,7 @@ Critical skills that are commonly missed:
 
 | Task | Skill to load |
 |------|---------------|
+| Planning or implementing any change | `common-verification-first` |
 | Creating/updating a PR | `workflow-pr-sync` |
 | Committing code | `workflow-smart-commit` |
 | Writing tests | `common-testing-conventions` + stack-specific (`core-testing`, `python-testing`, `dotnet-test-doubles`) |

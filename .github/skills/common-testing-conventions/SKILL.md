@@ -1,6 +1,6 @@
 ---
 name: common-testing-conventions
-description: Mandatory testing conventions including AAA pattern, test naming, and assertions across all stacks (.NET, TypeScript, Python). Use when writing unit tests, integration tests, E2E tests, or verifying mock interactions.
+description: Mandatory testing conventions including the narrow diagnostic exception for testing test-only code, AAA pattern, test naming, and assertions across all stacks (.NET, TypeScript, Python). Use when writing tests or changing test infrastructure.
 user-invocable: false
 ---
 
@@ -40,7 +40,25 @@ Exception: `// Arrange`, `// Act`, `// Assert` comments are REQUIRED in tests.
 
 ## Core Principles
 
-### 1. AAA Pattern (Mandatory)
+### 1. Test Production Behavior; Diagnose Test Support Only When Necessary
+
+Tests specify production behavior. Do not create tests whose subject is
+test-only code by default, including fixtures, mothers, builders, mocks, stubs,
+seeders, test containers, data loaders, or runner configuration. Shared,
+reusable, independently versioned, or public test-support code is still
+test-only code; those traits do not justify testing it directly.
+
+Start by validating test-infrastructure changes through the production-behavior
+tests that consume them or a direct reproduction of the affected workflow. A
+focused test of support code is allowed only when those paths cannot identify a
+failure with enough diagnostic precision. It must target the smallest stable
+contract needed to localize the fault and state why consumer or workflow
+evidence is insufficient.
+
+This is diagnostic instrumentation, not default behavioral verification. Never
+add it for coverage or to mirror implementation details.
+
+### 2. AAA Pattern (Mandatory)
 
 All tests **MUST** follow Arrange-Act-Assert with clear comments:
 
@@ -83,7 +101,7 @@ public async Task Should_CreateGroup_When_RequestIsValid()
 - Omit comment if section is empty
 - If a test needs branching, split it into separate test methods (one per scenario)
 
-### 2. Test Naming Convention
+### 3. Test Naming Convention
 
 ```txt
 Should_{ExpectedBehavior}_When_{Condition}
@@ -95,7 +113,7 @@ Should_{ExpectedBehavior}_When_{Condition}
 | `Should_ThrowNotFound_When_UserDoesNotExist` | `"should login"`  |
 | `Should_ReturnEmptyList_When_NoRecordsFound` | `Should_Work`     |
 
-### 3. Standard Variables
+### 4. Standard Variables
 
 | Purpose | Name |
 | ------- | ---- |
@@ -108,6 +126,20 @@ var expected = GroupMother.Create(id: groupId);
 var actual = await _sut.Handle(query, CancellationToken.None);
 actual.Id.Should().Be(expected.Id);
 ```
+
+### 5. Isolation During Concurrent Development
+
+Tests must run safely in parallel while a development environment is active on
+the same machine.
+
+- Use isolated ephemeral infrastructure where mutable state or external
+  resources are required.
+- Never share mutable state with development, another test, or another CI
+  worker.
+- Never rely on fixed ports, resource names, or execution order when isolation
+  is required.
+- If deterministic isolation is not practical, select a different verification
+  mechanism or report the limitation explicitly.
 
 ## Test Class Structure (C#)
 
