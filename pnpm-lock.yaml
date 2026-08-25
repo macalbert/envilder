@@ -77,7 +77,7 @@ importers:
     devDependencies:
       '@biomejs/biome':
         specifier: 'catalog:'
-        version: 2.5.8
+        version: 2.5.6
       '@commitlint/cli':
         specifier: ^21.2.0
         version: 21.2.2(@types/node@26.1.1)(conventional-commits-parser@7.1.2)(typescript@7.0.2)
@@ -175,7 +175,7 @@ importers:
         version: 3.7.3
       astro:
         specifier: ^7.1.6
-        version: 7.2.2(@azure/identity@4.13.1)(@azure/keyvault-secrets@4.11.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@26.2.0)(jiti@2.6.1)(tsx@4.23.12)(yaml@2.9.0)
+        version: 7.2.2(@azure/identity@4.13.1(supports-color@10.2.2))(@azure/keyvault-secrets@4.11.2(supports-color@10.2.2))(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@26.2.0)(jiti@2.6.1)(tsx@4.23.12)(yaml@2.9.0)
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.10
@@ -202,7 +202,7 @@ importers:
   tests/sdks/nodejs:
     devDependencies:
       '@aws-sdk/client-ssm':
-        specifier: ^3.1106.0
+        specifier: ^3.1111.0
         version: 3.1111.0
       '@azure/identity':
         specifier: ^4.13.1
@@ -212,7 +212,7 @@ importers:
         version: 4.11.2(supports-color@10.2.2)
       '@testcontainers/localstack':
         specifier: ^12.1.0
-        version: 12.1.0
+        version: 12.1.0(supports-color@10.2.2)
       '@types/node':
         specifier: 'catalog:'
         version: 26.1.1
@@ -221,7 +221,7 @@ importers:
         version: 4.1.10(vitest@4.1.10)
       testcontainers:
         specifier: ^12.1.0
-        version: 12.1.0
+        version: 12.1.0(supports-color@10.2.2)
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
@@ -544,19 +544,8 @@ packages:
     engines: {node: '>=14.21.3'}
     hasBin: true
 
-  '@biomejs/biome@2.5.8':
-    resolution: {integrity: sha512-aeAeeJB9fSDc7Gq+2GqpQxA0qBj6gj1k2R6L1cYqGePKP/baIq1WX8y6B+D+nRsO5ViQL22K/8IwbqERW0q1nw==}
-    engines: {node: '>=14.21.3'}
-    hasBin: true
-
   '@biomejs/cli-darwin-arm64@2.5.6':
     resolution: {integrity: sha512-zMOLZP4oMrjh6m1zcSj1ud2awUPgTuMVbmQhYYWL7J8HwCnbHHBvTm7VBTRuY7epT5bez76IpKYQ11ZAqHFlnw==}
-    engines: {node: '>=14.21.3'}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@biomejs/cli-darwin-arm64@2.5.8':
-    resolution: {integrity: sha512-mk1QON9PHllvvLN5gU3f4rMxeh4syK5p9OvKyWH6/W8ueh04uaC8TUXXByhGufWf/y5mQc03ZLM45zU+cmqMjA==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [darwin]
@@ -567,21 +556,8 @@ packages:
     cpu: [x64]
     os: [darwin]
 
-  '@biomejs/cli-darwin-x64@2.5.8':
-    resolution: {integrity: sha512-bsGwFMBNyHPyiLSsQcZJxdoRrg1V4JL+d7wEsvUBczlP9U9lwM+7mzQHxI4o1mhBsTmdOBbAb6fHU3Z3snN45w==}
-    engines: {node: '>=14.21.3'}
-    cpu: [x64]
-    os: [darwin]
-
   '@biomejs/cli-linux-arm64-musl@2.5.6':
     resolution: {integrity: sha512-eUa3jeeYvfMt19LBeh6E5PUZpxnTC4JqNWo+EDjTtQjAr2xLGnWaxACtVU1DQqmHYbvThlJzLX+ZsYgrqh2qVw==}
-    engines: {node: '>=14.21.3'}
-    cpu: [arm64]
-    os: [linux]
-    libc: [musl]
-
-  '@biomejs/cli-linux-arm64-musl@2.5.8':
-    resolution: {integrity: sha512-VcJNbstduTHx83NGAdhp78/JOcP45BZHXL7yNsfI1uGzdUgegAz2s+mSoT7wK6PBNzLoqG0zDOXaz/RQYVtSiw==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [linux]
@@ -594,22 +570,8 @@ packages:
     os: [linux]
     libc: [glibc]
 
-  '@biomejs/cli-linux-arm64@2.5.8':
-    resolution: {integrity: sha512-XmFiA0WPYFC+uiUDC8WRFzAIH9bo7vwQLav38Uoq4ETC+T/+uBi0TsYGJECkugY3r8USl3jc+Ae2/irAF6F2lQ==}
-    engines: {node: '>=14.21.3'}
-    cpu: [arm64]
-    os: [linux]
-    libc: [glibc]
-
   '@biomejs/cli-linux-x64-musl@2.5.6':
     resolution: {integrity: sha512-2Vp13QdKysH3HIWLaYLhUUwbK+jbZonJD1K+Lr0d0RO4wH7mkYd43vJixEDm8cUWrowoRz4UUHF1nm9Ae7ym8A==}
-    engines: {node: '>=14.21.3'}
-    cpu: [x64]
-    os: [linux]
-    libc: [musl]
-
-  '@biomejs/cli-linux-x64-musl@2.5.8':
-    resolution: {integrity: sha512-kKmiyokeISRGq2FLwvr+TzsgBusfxaZ0FZNLcOYOpCK/78tRrEjeEBLvq3xLZMpqbANgJdRPI7vZX8ZL37u9/w==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [linux]
@@ -622,33 +584,14 @@ packages:
     os: [linux]
     libc: [glibc]
 
-  '@biomejs/cli-linux-x64@2.5.8':
-    resolution: {integrity: sha512-S5wcm9OBDvLHodD4PUaN488hCpco9QD/9ZxuYJiw4euWtr/oQvLR72z2ixItH8Wd5BCm6FZaeb+YNvOoM1xHtQ==}
-    engines: {node: '>=14.21.3'}
-    cpu: [x64]
-    os: [linux]
-    libc: [glibc]
-
   '@biomejs/cli-win32-arm64@2.5.6':
     resolution: {integrity: sha512-tDGshcm6BdkZOCGnTDX0Y8/U4IfBSlnUU7T56nNDuPEfed+aHg+u8G36NB43fJVl0Os6+QURXIE1yuD7AaEofA==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [win32]
 
-  '@biomejs/cli-win32-arm64@2.5.8':
-    resolution: {integrity: sha512-nILH0mzm3Hi3iEdd7o7GpB8kBR/mSQwfQG/tyBqyNrY2GFtcgwfV9nV8xLmbtUpMNY/Oi0Ml1XgfR4flOdq+AA==}
-    engines: {node: '>=14.21.3'}
-    cpu: [arm64]
-    os: [win32]
-
   '@biomejs/cli-win32-x64@2.5.6':
     resolution: {integrity: sha512-WN05KwXnTO/2J45RQPvzZMXf7tZUIofHoR35xIPfCo7pQ2RFidxI8sfb5mGsaTxdMmEOzHzOPRCdA5/fCpc7xQ==}
-    engines: {node: '>=14.21.3'}
-    cpu: [x64]
-    os: [win32]
-
-  '@biomejs/cli-win32-x64@2.5.8':
-    resolution: {integrity: sha512-I2czzXTY61f3nFJxXoMDq80t7MivxDEnCjE+8sDKoFfcKMaoQdkqhIFQ3KyY0XLzeSpUBYeNAXgD+iOV/BU0VA==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [win32]
@@ -4315,63 +4258,28 @@ snapshots:
       '@biomejs/cli-win32-arm64': 2.5.6
       '@biomejs/cli-win32-x64': 2.5.6
 
-  '@biomejs/biome@2.5.8':
-    optionalDependencies:
-      '@biomejs/cli-darwin-arm64': 2.5.8
-      '@biomejs/cli-darwin-x64': 2.5.8
-      '@biomejs/cli-linux-arm64': 2.5.8
-      '@biomejs/cli-linux-arm64-musl': 2.5.8
-      '@biomejs/cli-linux-x64': 2.5.8
-      '@biomejs/cli-linux-x64-musl': 2.5.8
-      '@biomejs/cli-win32-arm64': 2.5.8
-      '@biomejs/cli-win32-x64': 2.5.8
-
   '@biomejs/cli-darwin-arm64@2.5.6':
-    optional: true
-
-  '@biomejs/cli-darwin-arm64@2.5.8':
     optional: true
 
   '@biomejs/cli-darwin-x64@2.5.6':
     optional: true
 
-  '@biomejs/cli-darwin-x64@2.5.8':
-    optional: true
-
   '@biomejs/cli-linux-arm64-musl@2.5.6':
-    optional: true
-
-  '@biomejs/cli-linux-arm64-musl@2.5.8':
     optional: true
 
   '@biomejs/cli-linux-arm64@2.5.6':
     optional: true
 
-  '@biomejs/cli-linux-arm64@2.5.8':
-    optional: true
-
   '@biomejs/cli-linux-x64-musl@2.5.6':
-    optional: true
-
-  '@biomejs/cli-linux-x64-musl@2.5.8':
     optional: true
 
   '@biomejs/cli-linux-x64@2.5.6':
     optional: true
 
-  '@biomejs/cli-linux-x64@2.5.8':
-    optional: true
-
   '@biomejs/cli-win32-arm64@2.5.6':
     optional: true
 
-  '@biomejs/cli-win32-arm64@2.5.8':
-    optional: true
-
   '@biomejs/cli-win32-x64@2.5.6':
-    optional: true
-
-  '@biomejs/cli-win32-x64@2.5.8':
     optional: true
 
   '@bruits/satteri-darwin-arm64@0.9.5':
@@ -5508,7 +5416,7 @@ snapshots:
 
   astral-regex@2.0.0: {}
 
-  astro@7.2.2(@azure/identity@4.13.1)(@azure/keyvault-secrets@4.11.2)(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)(@types/node@26.2.0)(jiti@2.6.1)(tsx@4.23.12)(yaml@2.9.0):
+  astro@7.2.2(@azure/identity@4.13.1(supports-color@10.2.2))(@azure/keyvault-secrets@4.11.2(supports-color@10.2.2))(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@26.2.0)(jiti@2.6.1)(tsx@4.23.12)(yaml@2.9.0):
     dependencies:
       '@astrojs/compiler-rs': 0.3.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)
       '@astrojs/internal-helpers': 0.10.2
@@ -5557,7 +5465,7 @@ snapshots:
       tinyglobby: 0.2.17
       ultrahtml: 1.7.0
       unifont: 0.7.5
-      unstorage: 1.17.5(@azure/identity@4.13.1)(@azure/keyvault-secrets@4.11.2)
+      unstorage: 1.17.5(@azure/identity@4.13.1(supports-color@10.2.2))(@azure/keyvault-secrets@4.11.2(supports-color@10.2.2))
       vite: 8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.6.1)(tsx@4.23.12)(yaml@2.9.0)
       vitefu: 1.1.3(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.6.1)(tsx@4.23.12)(yaml@2.9.0))
       xxhash-wasm: 1.1.0
@@ -7317,6 +7225,21 @@ snapshots:
       fsevents: 2.3.3
       jiti: 2.6.1
       tsx: 4.23.12
+      yaml: 2.9.0
+
+  vite@8.2.1(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.6.1)(tsx@4.23.5)(yaml@2.9.0):
+    dependencies:
+      lightningcss: 1.33.0
+      picomatch: 4.0.5
+      postcss: 8.5.25
+      rolldown: 1.2.1
+      tinyglobby: 0.2.17
+    optionalDependencies:
+      '@types/node': 26.1.1
+      esbuild: 0.28.2
+      fsevents: 2.3.3
+      jiti: 2.6.1
+      tsx: 4.23.5
       yaml: 2.9.0
 
   vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.6.1)(tsx@4.23.12)(yaml@2.9.0):
