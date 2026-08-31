@@ -31,7 +31,7 @@
     <PackageVersion Include="NSubstitute" Version="6.2.0" />
     <PackageVersion Include="Testcontainers" Version="4.14.0" />
     <PackageVersion Include="Testcontainers.LocalStack" Version="4.14.0" />
-    <PackageVersion Include="xunit.v3" Version="3.2.2" />
+    <PackageVersion Include="xunit.v3" Version="4.0.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
   </ItemGroup>
 </Project>
