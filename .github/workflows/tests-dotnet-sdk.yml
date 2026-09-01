@@ -95,9 +95,9 @@ jobs:
       - name: 🍄 Run tests
         id: run-tests
         run: |
-          dotnet test Envilder.sln --no-build --configuration Release \
-            --logger "trx;LogFileName=test-results.trx" \
-            --logger:"console;verbosity=detailed" --verbosity:detailed
+          dotnet test --solution Envilder.sln --no-build --configuration Release \
+            --results-directory "${{ github.workspace }}/TestResults" \
+            --report-trx --report-trx-filename test-results.trx
         continue-on-error: true
         env:
           TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
