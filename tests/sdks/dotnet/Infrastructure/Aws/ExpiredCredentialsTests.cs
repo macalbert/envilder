@@ -4,7 +4,7 @@ using Amazon.Runtime;
 using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
 using AwesomeAssertions;
-using global::Envilder.Infrastructure.Aws;
+using Envilder.Infrastructure.Aws;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
@@ -24,7 +24,7 @@ public class ExpiredCredentialsTests
 		var sut = new AwsSsmSecretProvider(ssmClient);
 
 		// Act
-		var act = () => sut.GetSecretAsync("/p");
+		var act = () => sut.GetSecretAsync("/p", TestContext.Current.CancellationToken);
 
 		// Assert
 		await act.Should().ThrowAsync<ExpiredCredentialsException>()
@@ -44,7 +44,7 @@ public class ExpiredCredentialsTests
 		var sut = new AwsSsmSecretProvider(ssmClient);
 
 		// Act
-		var act = () => sut.GetSecretAsync("/p");
+		var act = () => sut.GetSecretAsync("/p", TestContext.Current.CancellationToken);
 
 		// Assert
 		await act.Should().ThrowAsync<ExpiredCredentialsException>();
@@ -60,7 +60,7 @@ public class ExpiredCredentialsTests
 		var sut = new AwsSsmSecretProvider(ssmClient);
 
 		// Act
-		var actual = await sut.GetSecretAsync("/p");
+		var actual = await sut.GetSecretAsync("/p", TestContext.Current.CancellationToken);
 
 		// Assert
 		actual.Should().BeNull();
@@ -80,13 +80,13 @@ public class ExpiredCredentialsTests
 		var sut = new AwsSsmSecretProvider(ssmClient);
 
 		// Act
-		var act = () => sut.GetSecretAsync("/p");
+		var act = () => sut.GetSecretAsync("/p", TestContext.Current.CancellationToken);
 
 		// Assert
 		await act.Should().ThrowAsync<AmazonServiceException>();
 	}
 
-	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
+	[Fact]
 	public void Should_ThrowExpiredCredentialsException_When_GetSecretFailsWithExpiredToken()
 	{
 		// Arrange

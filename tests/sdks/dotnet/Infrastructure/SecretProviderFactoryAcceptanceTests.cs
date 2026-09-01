@@ -2,8 +2,8 @@ namespace Envilder.Tests.Infrastructure;
 
 using Amazon.SimpleSystemsManagement;
 using AwesomeAssertions;
-using global::Envilder.Infrastructure;
-using global::Envilder.Tests.Fixtures;
+using Envilder.Infrastructure;
+using Envilder.Tests.Fixtures;
 
 [Collection(nameof(ContainersCollection))]
 public class SecretProviderFactoryAcceptanceTests : IAsyncLifetime
@@ -44,7 +44,7 @@ public class SecretProviderFactoryAcceptanceTests : IAsyncLifetime
 			Value = "factory-no-profile-secret",
 			Type = ParameterType.SecureString,
 			Overwrite = true,
-		});
+		}, TestContext.Current.CancellationToken);
 
 		OverrideEnvironmentVariable("AWS_ENDPOINT_URL", _localStack.ServiceUrl);
 		OverrideEnvironmentVariable("AWS_SERVICE_URL", _localStack.ServiceUrl);
@@ -58,7 +58,7 @@ public class SecretProviderFactoryAcceptanceTests : IAsyncLifetime
 		var sut = SecretProviderFactory.Create(config);
 
 		// Act
-		var actual = await sut.GetSecretAsync("/Test/FactoryNoProfile");
+		var actual = await sut.GetSecretAsync("/Test/FactoryNoProfile", TestContext.Current.CancellationToken);
 
 		// Assert
 		actual.Should().Be("factory-no-profile-secret");
@@ -74,7 +74,7 @@ public class SecretProviderFactoryAcceptanceTests : IAsyncLifetime
 			Value = "factory-profile-secret",
 			Type = ParameterType.SecureString,
 			Overwrite = true,
-		});
+		}, TestContext.Current.CancellationToken);
 
 		_tempDirToDelete = Path.Combine(Path.GetTempPath(), $"envilder-test-{Guid.NewGuid()}");
 		Directory.CreateDirectory(_tempDirToDelete);
@@ -87,14 +87,14 @@ public class SecretProviderFactoryAcceptanceTests : IAsyncLifetime
             [profile localstack-test]
             region = us-east-1
             endpoint_url = {_localStack.ServiceUrl}
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		await File.WriteAllTextAsync(credentialsFilePath,
 			"""
             [localstack-test]
             aws_access_key_id = test
             aws_secret_access_key = test
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		OverrideEnvironmentVariable("AWS_CONFIG_FILE", configFilePath);
 		OverrideEnvironmentVariable("AWS_SHARED_CREDENTIALS_FILE", credentialsFilePath);
@@ -112,8 +112,8 @@ public class SecretProviderFactoryAcceptanceTests : IAsyncLifetime
 		};
 		var sut = SecretProviderFactory.Create(config);
 
-		// Act
-		var actual = await sut.GetSecretAsync("/Test/FactoryWithProfile");
+		// Act	
+		var actual = await sut.GetSecretAsync("/Test/FactoryWithProfile", TestContext.Current.CancellationToken);
 
 		// Assert
 		actual.Should().Be("factory-profile-secret");

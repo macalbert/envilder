@@ -4,7 +4,7 @@ using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
 using Amazon.SSOOIDC.Model;
 using AwesomeAssertions;
-using global::Envilder.Infrastructure.Aws;
+using Envilder.Infrastructure.Aws;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
@@ -20,7 +20,7 @@ public class SsoSessionExpiredProviderTests
 		var sut = new AwsSsmSecretProvider(ssmClient, "staging");
 
 		// Act
-		var act = () => sut.GetSecretAsync("/p");
+		var act = () => sut.GetSecretAsync("/p", TestContext.Current.CancellationToken);
 
 		// Assert
 		var assertion = await act.Should().ThrowAsync<SsoSessionExpiredException>();
@@ -28,7 +28,7 @@ public class SsoSessionExpiredProviderTests
 		assertion.Which.Message.Should().Contain("aws sso login --profile staging");
 	}
 
-	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
+	[Fact]
 	public void Should_ThrowSsoSessionExpiredException_When_GetSecretEncountersSsoFailure()
 	{
 		// Arrange
@@ -55,7 +55,7 @@ public class SsoSessionExpiredProviderTests
 		var sut = new AwsSsmSecretProvider(ssmClient);
 
 		// Act
-		var act = () => sut.GetSecretAsync("/p");
+		var act = () => sut.GetSecretAsync("/p", TestContext.Current.CancellationToken);
 
 		// Assert
 		var assertion = await act.Should().ThrowAsync<SsoSessionExpiredException>();

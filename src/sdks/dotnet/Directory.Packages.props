@@ -5,8 +5,8 @@
     <CentralPackageVersionOverrideEnabled>true</CentralPackageVersionOverrideEnabled>
   </PropertyGroup>
   <ItemGroup Label="AWS">
-    <PackageVersion Include="AWSSDK.SimpleSystemsManagement" Version="4.0.103.5" />
-    <PackageVersion Include="AWSSDK.SSOOIDC" Version="4.0.100.11" />
+    <PackageVersion Include="AWSSDK.SimpleSystemsManagement" Version="4.0.103.6" />
+    <PackageVersion Include="AWSSDK.SSOOIDC" Version="4.0.100.12" />
   </ItemGroup>
   <ItemGroup Label="Azure">
     <PackageVersion Include="Azure.Identity" Version="1.21.0" />

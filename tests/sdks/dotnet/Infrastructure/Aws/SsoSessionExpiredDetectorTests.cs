@@ -3,7 +3,7 @@ namespace Envilder.Tests.Infrastructure.Aws;
 using Amazon.Runtime;
 using Amazon.SSOOIDC.Model;
 using AwesomeAssertions;
-using global::Envilder.Infrastructure.Aws;
+using Envilder.Infrastructure.Aws;
 
 public class SsoSessionExpiredDetectorTests
 {
