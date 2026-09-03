@@ -429,7 +429,7 @@ export const ca: Translations = {
     quickStart: 'Inici ràpid',
     step1:
       "Crea un envilder.json que mapegi variables d'entorn a rutes de secrets",
-    step2: 'Executa npx envilder --map=envilder.json --envfile=.env',
+    step2: 'Executa npx envilder',
     step3: 'El teu fitxer .env està llest ✔',
     terminalTitle: 'Inici ràpid',
     commentCreate: '# Crear fitxer de mapeig',

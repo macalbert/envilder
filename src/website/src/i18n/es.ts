@@ -429,7 +429,7 @@ export const es: Translations = {
     quickStart: 'Inicio rápido',
     step1:
       'Crea un envilder.json que mapee variables de entorno a rutas de secretos',
-    step2: 'Ejecuta npx envilder --map=envilder.json --envfile=.env',
+    step2: 'Ejecuta npx envilder',
     step3: 'Tu archivo .env está listo ✔',
     terminalTitle: 'Inicio rápido',
     commentCreate: '# Crear archivo de mapeo',

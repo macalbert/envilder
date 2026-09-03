@@ -425,7 +425,7 @@ export const en: Translations = {
     install: 'Install',
     quickStart: 'Quick start',
     step1: 'Create an envilder.json mapping env vars to secret paths',
-    step2: 'Run npx envilder --map=envilder.json --envfile=.env',
+    step2: 'Run npx envilder',
     step3: 'Your .env file is ready ✔',
     terminalTitle: 'Quick start',
     commentCreate: '# Create mapping file',
