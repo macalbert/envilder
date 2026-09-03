@@ -151,7 +151,7 @@ graph LR
 **Example:**
 
 ```bash
-envilder --push --key=API_KEY --value=abc123 --secret-path=/myapp/api/key
+envilder --key=API_KEY --value=abc123 --secret-path=/myapp/api/key
 ```
 
 Will push:
@@ -221,11 +221,11 @@ envilder --push --provider=azure --vault-url=https://my-vault.vault.azure.net --
 **Single variable push:**
 
 ```bash
-envilder --push --key=API_KEY --value=secret123 --secret-path=/my/path
+envilder --key=API_KEY --value=secret123 --secret-path=/my/path
 ```
 
 With AWS profile:
 
 ```bash
-envilder --push --key=API_KEY --value=secret123 --secret-path=/my/path --profile=dev
+envilder --key=API_KEY --value=secret123 --secret-path=/my/path --profile=dev
 ```

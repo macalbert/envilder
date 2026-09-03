@@ -203,7 +203,7 @@ This means you can set a default provider in `$config` and override it per invoc
 
 ```bash
 # Uses $config from the map file
-envilder --map=envilder.json --envfile=.env
+envilder
 
 # Overrides provider and vault URL from the map file
 envilder --provider=azure --vault-url=https://other-vault.vault.azure.net --map=envilder.json --envfile=.env

@@ -117,7 +117,7 @@ Add `$config` to your map file:
 Then pull as usual:
 
 ```bash
-envilder --map=envilder.json --envfile=.env
+envilder
 ```
 
 **Azure Key Vault (via CLI flags):**
