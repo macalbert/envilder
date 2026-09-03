@@ -431,7 +431,7 @@ export const en: Translations = {
     commentCreate: '# Create mapping file',
     commentPull: '# Pull secrets',
     commentPush: '# Push a secret',
-    doneMessage: ' Done! .env file generated.',
+    doneMessage: 'Done! .env file generated.',
     sdkComment3: '# Secrets are now in os.environ',
     sdkExampleLink: 'View more examples on GitHub',
   },

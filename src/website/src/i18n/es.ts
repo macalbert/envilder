@@ -435,7 +435,7 @@ export const es: Translations = {
     commentCreate: '# Crear archivo de mapeo',
     commentPull: '# Obtener secretos',
     commentPush: '# Subir un secreto',
-    doneMessage: ' ¡Hecho! Archivo .env generado.',
+    doneMessage: '¡Hecho! Archivo .env generado.',
     sdkComment3: '# Los secretos ya están en os.environ',
     sdkExampleLink: 'Ver más ejemplos en GitHub',
   },

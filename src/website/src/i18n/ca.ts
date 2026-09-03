@@ -435,7 +435,7 @@ export const ca: Translations = {
     commentCreate: '# Crear fitxer de mapeig',
     commentPull: '# Obtenir secrets',
     commentPush: '# Pujar un secret',
-    doneMessage: ' Fet! Fitxer .env generat.',
+    doneMessage: 'Fet! Fitxer .env generat.',
     sdkComment3: '# Els secrets ja són a os.environ',
     sdkExampleLink: 'Veure més exemples a GitHub',
   },
