@@ -110,10 +110,10 @@ describe('Cli', () => {
     });
 
     // Act
-    const action = () => main();
+    const act = () => main();
 
     // Assert
-    await expect(action).rejects.toThrow('Missing required arguments');
+    await expect(act).rejects.toThrow('Missing required arguments');
   });
 
   it('Should_CreateExportToEnvCommand_When_OptionsAreProvided', () => {
@@ -255,10 +255,10 @@ describe('Cli', () => {
     process.argv = ['node', 'cli.js', '--map', '   ', '--envfile', '.env'];
 
     // Act
-    const action = () => main();
+    const act = () => main();
 
     // Assert
-    await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
+    await expect(act).rejects.toBeInstanceOf(InvalidArgumentError);
   });
 
   it('Should_ThrowInvalidArgumentError_When_EnvfileOptionIsEmptyString', async () => {
@@ -266,10 +266,10 @@ describe('Cli', () => {
     process.argv = ['node', 'cli.js', '--map', 'map.json', '--envfile', '   '];
 
     // Act
-    const action = () => main();
+    const act = () => main();
 
     // Assert
-    await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
+    await expect(act).rejects.toBeInstanceOf(InvalidArgumentError);
   });
 
   it('Should_NotRequireMapFile_When_PushSingleAndEnvilderJsonDoesNotExist', async () => {
