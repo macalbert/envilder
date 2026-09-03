@@ -162,7 +162,7 @@ export async function main() {
           const providerName = config.provider?.toLowerCase() || 'aws';
           const vaultInfo =
             providerName === 'azure' && config.vaultUrl
-              ? `, vault=${config.vaultUrl}`
+              ? `, vault=${new URL(config.vaultUrl).origin}`
               : '';
           const source = resolvedMap
             ? `configuration from ${resolvedMap}`

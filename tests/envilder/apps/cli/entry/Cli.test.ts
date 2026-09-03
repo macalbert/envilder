@@ -369,4 +369,48 @@ describe('Cli', () => {
       'Using configuration from map.json: provider=aws',
     );
   });
+  it('Should_LogOnlyVaultOrigin_When_PushSingleUsesAzureConfig', async () => {
+    // Arrange
+    const vaultUrl =
+      'https://user:placeholder-password@my-vault.vault.azure.net/non-secret-path?sig=placeholder-signature#fragment';
+    const { readMapFileConfig } = await import(
+      '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore'
+    );
+    vi.mocked(readMapFileConfig).mockResolvedValue({
+      provider: 'azure',
+      vaultUrl,
+    });
+    const loggerSpy = vi
+      .spyOn(ConsoleLogger.prototype, 'info')
+      .mockImplementation(vi.fn());
+    process.argv = [
+      'node',
+      'cli.js',
+      '--map',
+      'map.json',
+      '--key',
+      'API_KEY',
+      '--value',
+      'secret',
+      '--secret-path',
+      '/my/path',
+    ];
+
+    // Act
+    await main();
+
+    // Assert
+    const loggedMessages = loggerSpy.mock.calls
+      .map(([message]) => message)
+      .join('\n');
+    expect(loggedMessages).toContain(
+      'Using configuration from map.json: provider=azure, vault=https://my-vault.vault.azure.net',
+    );
+    expect(loggedMessages).not.toContain('user');
+    expect(loggedMessages).not.toContain('placeholder-password');
+    expect(loggedMessages).not.toContain('non-secret-path');
+    expect(loggedMessages).not.toContain('sig=');
+    expect(loggedMessages).not.toContain('placeholder-signature');
+    expect(loggedMessages).not.toContain('fragment');
+  });
 });
