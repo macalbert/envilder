@@ -56,7 +56,7 @@ export async function main() {
     ${pc.cyan('envilder --push')}  ${pc.dim('# uses envilder.json + .env by default')}
 
   ${pc.red('>')} ${pc.bold('Push a single secret')}
-    ${pc.cyan('envilder --push --key=API_KEY --value=s3cret --secret-path=/my/path')}
+    ${pc.cyan('envilder --key=API_KEY --value=s3cret --secret-path=/my/path')}
 
   ${pc.blue('>')} ${pc.bold('Use Azure Key Vault')}
     ${pc.cyan('envilder --provider=azure --vault-url=https://my-vault.vault.azure.net')}
