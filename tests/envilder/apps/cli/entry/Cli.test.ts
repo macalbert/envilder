@@ -46,8 +46,16 @@ describe('Cli', () => {
   const testProfile = 'test-profile';
   let mocks: ReturnType<typeof patchWithMocks>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mocks = patchWithMocks();
+    const { existsSync } = await import('node:fs');
+    vi.mocked(existsSync).mockReset();
+    vi.mocked(existsSync).mockReturnValue(true);
+    const { readMapFileConfig } = await import(
+      '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore'
+    );
+    vi.mocked(readMapFileConfig).mockReset();
+    vi.mocked(readMapFileConfig).mockResolvedValue({});
   });
 
   afterEach(() => {
