@@ -43,12 +43,15 @@ For each active review comment:
 4. Classify the action and, for artifact changes, classify intent and
    verification strategy using `common-verification-first`.
 5. Present:
-   - quoted reviewer comment and location;
+   - verbatim reviewer comment and location;
    - repository evidence and impact analysis;
    - exact proposed action;
    - intent and verification strategy;
-   - expected outcome, invariants, scope, and constraints; and
-   - targeted and broader validation.
+   - expected outcome, scope, and constraints; and
+   - targeted validation.
+   Include invariants only when repository evidence or the comment's risk
+   supports them. Include broader validation only when justified by integration
+   risk; never add either as filler.
 6. Wait for explicit user approval. Re-present material changes to the proposal.
 7. Execute only the approved action.
 8. For an artifact change:
@@ -68,6 +71,66 @@ For each active review comment:
 
 After all comments, run relevant aggregate validation and report any unresolved
 or blocked thread. Push only with user approval.
+
+## Required Comment Presentation
+
+Present one distinct comment at a time. Do not group comments, even when they
+affect the same file, unless they are genuine duplicates with the same root
+cause and approved action. For grouped duplicates, list every source comment's
+author, `path:line`, and thread ID before the shared analysis, then reply to and
+resolve every source thread individually.
+
+Investigate the current repository state before presenting the comment. Write
+the interactive presentation in the user's language; this does not change the
+requirement that GitHub replies are always in English. Keep the analysis
+proportional to the comment's complexity. For straightforward comments, be
+brief and do not invent impact, scope, alternatives, invariants, or validation
+requirements merely to fill the format.
+
+Use this structure and preserve its heading order. Translate every fixed
+template element into the user's language; the user's language always takes
+precedence for the interactive presentation. Adapt a heading only when it
+genuinely does not apply:
+
+```markdown
+## Review Comment {number} - `{path}:{line}`
+
+**Author:** `{author}`
+**Comment:** {verbatim review comment}
+
+### Problem and Location
+
+{Explain the current behavior and concrete mismatch using repository evidence.
+Include the smallest relevant source snippet when useful.}
+
+### Impact and Scope
+
+{State only concrete consequences, affected surfaces, constraints, and
+invariants supported by the evidence.}
+
+**Impact:** {low, medium, or high}, with a brief justification.
+
+### Proposed Action
+
+{State the exact action and expected observable outcome. Include alternatives
+only when the decision genuinely warrants them.}
+
+### Verification
+
+**Intent and strategy:** {classification and justified verification strategy}.
+**Targeted validation:** {the narrowest credible command or artifact check}.
+**Broader validation:** {only when justified by integration risk}.
+
+### Recommendation
+
+**{Apply, skip, reply, or discuss}:** {clear recommendation and rationale.}
+
+**Would you like me to apply it?**
+```
+
+For questions, disagreements, or approved skips, retain the same evidence and
+decision context while tailoring the proposed action and final question. Never
+act merely because the resolution appears obvious; wait for explicit approval.
 
 ## Classification and Routing
 
