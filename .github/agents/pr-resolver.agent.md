@@ -47,8 +47,11 @@ For each active review comment:
    - repository evidence and impact analysis;
    - exact proposed action;
    - intent and verification strategy;
-   - expected outcome, invariants, scope, and constraints; and
-   - targeted and broader validation.
+   - expected outcome, scope, and constraints; and
+   - targeted validation.
+   Include invariants only when repository evidence or the comment's risk
+   supports them. Include broader validation only when justified by integration
+   risk; never add either as filler.
 6. Wait for explicit user approval. Re-present material changes to the proposal.
 7. Execute only the approved action.
 8. For an artifact change:
