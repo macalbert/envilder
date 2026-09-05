@@ -112,7 +112,7 @@ public class SecretProviderFactoryAcceptanceTests : IAsyncLifetime
 		};
 		var sut = SecretProviderFactory.Create(config);
 
-		// Act	
+		// Act
 		var actual = await sut.GetSecretAsync("/Test/FactoryWithProfile", TestContext.Current.CancellationToken);
 
 		// Assert
