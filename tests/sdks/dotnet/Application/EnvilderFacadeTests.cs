@@ -14,11 +14,11 @@ public class EnvilderFacadeTests
 		act.Should().Throw<ArgumentException>();
 	}
 
-	[Fact]
+	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
 	public async Task Should_ThrowArgumentException_When_ResolveFileAsyncCalledWithEmptyPath()
 	{
 		// Act
-		var act = () => Env.ResolveFileAsync(string.Empty);
+		var act = () => Env.ResolveFileAsync(string.Empty, TestContext.Current.CancellationToken);
 
 		// Assert
 		await act.Should().ThrowAsync<ArgumentException>();
@@ -34,11 +34,11 @@ public class EnvilderFacadeTests
 		act.Should().Throw<FileNotFoundException>();
 	}
 
-	[Fact]
+	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
 	public async Task Should_ThrowFileNotFoundException_When_ResolveFileAsyncCalledWithNonExistentPath()
 	{
 		// Act
-		var act = () => Env.ResolveFileAsync("/nonexistent/map.json");
+		var act = () => Env.ResolveFileAsync("/nonexistent/map.json", TestContext.Current.CancellationToken);
 
 		// Assert
 		await act.Should().ThrowAsync<FileNotFoundException>();
@@ -54,11 +54,11 @@ public class EnvilderFacadeTests
 		act.Should().Throw<ArgumentException>();
 	}
 
-	[Fact]
+	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
 	public async Task Should_ThrowArgumentException_When_LoadAsyncCalledWithEmptyPath()
 	{
 		// Act
-		var act = () => Env.LoadAsync(string.Empty);
+		var act = () => Env.LoadAsync(string.Empty, TestContext.Current.CancellationToken);
 
 		// Assert
 		await act.Should().ThrowAsync<ArgumentException>();

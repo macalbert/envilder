@@ -56,7 +56,7 @@ public class EnvilderClientTests : IDisposable
 		var sut = new EnvilderClient(secretProvider);
 
 		// Act
-		var actual = await sut.ResolveSecretsAsync(mapFile);
+		var actual = await sut.ResolveSecretsAsync(mapFile, TestContext.Current.CancellationToken);
 
 		// Assert
 		actual.Should().HaveCount(2);
@@ -85,7 +85,7 @@ public class EnvilderClientTests : IDisposable
 		var sut = new EnvilderClient(secretProvider);
 
 		// Act
-		var actual = await sut.ResolveSecretsAsync(mapFile);
+		var actual = await sut.ResolveSecretsAsync(mapFile, TestContext.Current.CancellationToken);
 
 		// Assert
 		actual.Should().HaveCount(1);
