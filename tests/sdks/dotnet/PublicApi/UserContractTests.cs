@@ -12,11 +12,6 @@ using Envilder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-/// <summary>
-/// Guards the user contract: a single <c>using Envilder;</c> must be enough to
-/// reach the whole public surface of the SDK. These tests are compile-time
-/// proofs written exactly as a consumer would write them.
-/// </summary>
 public class UserContractTests
 {
 	[Fact]
