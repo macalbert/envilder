@@ -73,7 +73,7 @@ updates:
       - minor
       - patch
   labels:
-  - "nuget"
+  - "dotnet"
   - "dependencies"
   assignees:
   - macalbert
