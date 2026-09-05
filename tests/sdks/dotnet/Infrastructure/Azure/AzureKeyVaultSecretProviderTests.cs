@@ -24,7 +24,7 @@ public class AzureKeyVaultSecretProviderTests
 		var sut = new AzureKeyVaultSecretProvider(secretClient);
 
 		// Act
-		var actual = await sut.GetSecretAsync("test-secret");
+		var actual = await sut.GetSecretAsync("test-secret", TestContext.Current.CancellationToken);
 
 		// Assert
 		actual.Should().Be("azure-secret-value");
@@ -40,7 +40,7 @@ public class AzureKeyVaultSecretProviderTests
 		var sut = new AzureKeyVaultSecretProvider(secretClient);
 
 		// Act
-		var actual = await sut.GetSecretAsync("missing-secret");
+		var actual = await sut.GetSecretAsync("missing-secret", TestContext.Current.CancellationToken);
 
 		// Assert
 		actual.Should().BeNull();
@@ -56,7 +56,7 @@ public class AzureKeyVaultSecretProviderTests
 		var sut = new AzureKeyVaultSecretProvider(secretClient);
 
 		// Act
-		var act = () => sut.GetSecretAsync("forbidden-secret");
+		var act = () => sut.GetSecretAsync("forbidden-secret", TestContext.Current.CancellationToken);
 
 		// Assert
 		await act.Should().ThrowAsync<RequestFailedException>();

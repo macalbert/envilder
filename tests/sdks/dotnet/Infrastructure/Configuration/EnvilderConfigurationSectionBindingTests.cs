@@ -49,15 +49,6 @@ public class EnvilderConfigurationSectionBindingTests
 		actual.MaxPoolSize.Should().Be("100");
 	}
 
-	private IConfigurationRoot CreateConfiguration(ParsedMapFile mapFile)
-	{
-		var client = new EnvilderClient(_secretProvider);
-		var configuration = new ConfigurationBuilder()
-			.Add(new EnvilderConfigurationSource(client, mapFile))
-			.Build();
-		return configuration;
-	}
-
 	[Fact]
 	public void Should_BindOpenAiSection_When_KeysUseSlashHierarchy()
 	{
@@ -89,6 +80,15 @@ public class EnvilderConfigurationSectionBindingTests
 		// Assert
 		actual.ApiKey.Should().Be("sk-proj-abc123");
 		actual.Model.Should().Be("gpt-4o");
+	}
+
+	private IConfigurationRoot CreateConfiguration(ParsedMapFile mapFile)
+	{
+		var client = new EnvilderClient(_secretProvider);
+		var configuration = new ConfigurationBuilder()
+			.Add(new EnvilderConfigurationSource(client, mapFile))
+			.Build();
+		return configuration;
 	}
 
 	private class DatabaseConfig

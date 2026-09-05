@@ -18,7 +18,7 @@ public class AzureKeyVaultAcceptanceTests
 	public async Task Should_ResolveSecretFromKeyVault_When_SecretExistsInLowkeyVault()
 	{
 		// Arrange
-		await _lowkeyVault.SecretClient.SetSecretAsync("test-secret", "vault-secret-value");
+		await _lowkeyVault.SecretClient.SetSecretAsync("test-secret", "vault-secret-value", TestContext.Current.CancellationToken);
 
 		var provider = new AzureKeyVaultSecretProvider(_lowkeyVault.SecretClient);
 		var sut = new EnvilderClient(provider);
@@ -34,7 +34,7 @@ public class AzureKeyVaultAcceptanceTests
 			});
 
 		// Act
-		var actual = await sut.ResolveSecretsAsync(mapFile);
+		var actual = await sut.ResolveSecretsAsync(mapFile, TestContext.Current.CancellationToken);
 
 		// Assert
 		actual.Should().ContainKey("VAULT_SECRET");
@@ -59,7 +59,7 @@ public class AzureKeyVaultAcceptanceTests
 			});
 
 		// Act
-		var actual = await client.ResolveSecretsAsync(mapFile);
+		var actual = await client.ResolveSecretsAsync(mapFile, TestContext.Current.CancellationToken);
 
 		// Assert
 		actual.Should().BeEmpty();

@@ -134,7 +134,7 @@ jobs:
           set -o pipefail
           mkdir -p output
           dotnet-coverage collect \
-            "dotnet test src/sdks/dotnet/Envilder.sln --configuration Release --logger:console;verbosity=detailed" \
+            "dotnet test --solution src/sdks/dotnet/Envilder.sln --configuration Release --output Detailed" \
             --output output/dotnet.cobertura.xml \
             --output-format cobertura 2>&1 | tee output/test-output.txt
         env:
