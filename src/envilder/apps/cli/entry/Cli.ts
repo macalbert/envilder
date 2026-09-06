@@ -119,6 +119,20 @@ export async function main() {
         vaultUrl,
         ...options
       }: CliOptions & { provider?: string; vaultUrl?: string }) => {
+        const singleSecretOptions = [
+          options.key,
+          options.value,
+          options.secretPath,
+        ];
+        const hasPartialSingleSecretOptions =
+          singleSecretOptions.some((option) => option !== undefined) &&
+          singleSecretOptions.some((option) => option === undefined);
+        if (hasPartialSingleSecretOptions) {
+          throw new InvalidArgumentError(
+            'Single-secret push requires --key, --value, and --secret-path.',
+          );
+        }
+
         const mode = DispatchActionCommand.determineOperationMode(options);
         const isPushSingle = mode === OperationMode.PUSH_SINGLE;
         const resolvedMap = resolveMapFile(options.map, {

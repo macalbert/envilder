@@ -44,6 +44,37 @@ function patchWithMocks() {
 
 describe('Cli', () => {
   const testProfile = 'test-profile';
+  const incompleteSingleSecretOptions = [
+    { name: 'KeyOnly', options: ['--key', 'API_KEY'] },
+    { name: 'ValueOnly', options: ['--value', 'secret'] },
+    { name: 'SecretPathOnly', options: ['--secret-path', '/my/path'] },
+    {
+      name: 'KeyAndValue',
+      options: ['--key', 'API_KEY', '--value', 'secret'],
+    },
+    {
+      name: 'KeyAndSecretPath',
+      options: ['--key', 'API_KEY', '--secret-path', '/my/path'],
+    },
+    {
+      name: 'ValueAndSecretPath',
+      options: ['--value', 'secret', '--secret-path', '/my/path'],
+    },
+  ] as const;
+  const pushModes = [
+    { name: 'WithoutPush', options: [] },
+    { name: 'WithPush', options: ['--push'] },
+  ] as const;
+  const incompleteSingleSecretCases = incompleteSingleSecretOptions.flatMap(
+    ({ name, options }) =>
+      pushModes.map(
+        ({ name: pushMode, options: pushOptions }) =>
+          [
+            `${name}And${pushMode}SingleSecretOptionsAreIncomplete`,
+            [...pushOptions, ...options],
+          ] as const,
+      ),
+  );
   let mocks: ReturnType<typeof patchWithMocks>;
 
   beforeEach(async () => {
@@ -165,6 +196,26 @@ describe('Cli', () => {
     expect(pushCommand.value).toBe('secret123');
     expect(pushCommand.secretPath).toBe('/my/path');
   });
+
+  it.each(incompleteSingleSecretCases)(
+    'Should_ThrowInvalidArgumentError_When_%s',
+    async (_scenarioName, options) => {
+      // Arrange
+      const { existsSync } = await import('node:fs');
+      process.argv = ['node', 'cli.js', ...options, '--envfile', ' '];
+
+      // Act
+      const actual = await main().catch((error: unknown) => error);
+
+      // Assert
+      expect(actual).toBeInstanceOf(InvalidArgumentError);
+      expect(existsSync).not.toHaveBeenCalled();
+      expect(mocks.mockCommandHandler.handleCommand).not.toHaveBeenCalled();
+      expect(actual).not.toMatchObject({
+        message: expect.stringContaining('Invalid --envfile value'),
+      });
+    },
+  );
 
   it('Should_PassAllowedVaultHosts_When_EnvVarIsSet', async () => {
     // Arrange
