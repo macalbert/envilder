@@ -55,9 +55,16 @@ The root object contains exactly two categories of keys:
 | Any other key | string | Variable mapping: env var name → secret identifier |
 
 Variable names SHOULD match `^[a-zA-Z_][a-zA-Z0-9_]*$` (valid POSIX env var
-names). Parsers MUST NOT reject keys that don't match: this is a recommended
-convention, not a runtime constraint. Existing files with hyphens or dots in
-keys remain valid.
+names). Parsers MUST NOT reject keys that don't match on that basis alone:
+this is a recommended convention, not a runtime constraint. Existing files
+with hyphens or dots in keys remain valid.
+
+**Narrow safety exception:** parsers MUST reject a variable name that is empty
+or whitespace-only, or that contains `=`, a carriage return (`\r`), or a line
+feed (`\n`). Such names or characters would let a mapping key inject an
+additional `key=value` assignment or extra line when later written to a `.env`
+file. This is the only case where an otherwise-permissive parser rejects a key
+([#511](https://github.com/macalbert/envilder/issues/511)).
 
 At least one variable mapping is required for meaningful operation.
 

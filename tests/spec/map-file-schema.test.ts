@@ -41,6 +41,34 @@ describe('Map File Schema', () => {
     expect(actual).toBe(true);
   });
 
+  it.each(['', '   ', 'SAFE=prefix', 'SAFE\nINJECTED', 'SAFE\rINJECTED'])(
+    'Should_RejectMapFile_When_MappingNameIsEmptyWhitespaceOrContainsInvalidDelimiter',
+    (invalidName) => {
+      // Arrange
+      const mapFile = { [invalidName]: '/simple' };
+
+      // Act
+      const actual = validate(mapFile);
+
+      // Assert
+      expect(actual).toBe(false);
+    },
+  );
+
+  it('Should_AcceptMapFile_When_MappingNamesContainDotsOrHyphens', () => {
+    // Arrange
+    const mapFile = {
+      'APP.NAME': '/app/dotted',
+      'APP-NAME': '/app/hyphenated',
+    };
+
+    // Act
+    const actual = validate(mapFile);
+
+    // Assert
+    expect(actual).toBe(true);
+  });
+
   it('Should_AcceptMapFile_When_SchemaAndConfigKeysArePresent', () => {
     // Arrange
     const mapFile = {

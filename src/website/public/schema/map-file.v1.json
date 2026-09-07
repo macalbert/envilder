@@ -164,6 +164,10 @@
   },
   "additionalProperties": {
     "type": "string",
-    "description": "Variable mapping with non-standard naming. Keys SHOULD match ^[a-zA-Z_][a-zA-Z0-9_]*$ (valid POSIX env var names) but parsers accept any non-$-prefixed string key."
+    "description": "Variable mapping with non-standard naming. Keys SHOULD match ^[a-zA-Z_][a-zA-Z0-9_]*$ (valid POSIX env var names) but parsers accept any non-$-prefixed string key except empty or whitespace-only names and names containing '=', carriage return, or line feed."
+  },
+  "propertyNames": {
+    "pattern": "^(\\$.*|(?=.*\\S)[^=\\r\\n]+)$",
+    "description": "Non-$-prefixed keys (variable names) must contain at least one non-whitespace character and must not contain '=', carriage return, or newline characters, which could inject additional assignments or lines when written to a .env file."
   }
 }
