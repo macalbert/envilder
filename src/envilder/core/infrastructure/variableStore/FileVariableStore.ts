@@ -13,6 +13,24 @@ import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
 import { TYPES } from '../../types.js';
 
+type EnvDocument = {
+  lines: string[];
+  newline: '\n' | '\r\n';
+  hasTrailingNewline: boolean;
+};
+
+type QuotedAssignment = {
+  end: number;
+  quote: '"' | "'";
+  suffix: string;
+};
+
+type LineReplacement = {
+  line: string;
+  end: number;
+  updatedKey: string | null;
+};
+
 @injectable()
 export class FileVariableStore implements IVariableStore {
   private logger: ILogger;
@@ -119,68 +137,206 @@ export class FileVariableStore implements IVariableStore {
     existingContent: string | null,
     envVariables: Record<string, string>,
   ): string {
-    const pending = { ...envVariables };
-
     if (existingContent === null) {
-      return Object.entries(pending)
-        .map(([key, value]) => `${key}=${this.escapeEnvValue(value)}`)
-        .join('\n');
+      return this.formatAssignments(envVariables).join('\n');
     }
 
-    const newline = existingContent.includes('\r\n') ? '\r\n' : '\n';
-    const hasTrailingNewline = /\r?\n$/.test(existingContent);
-    const lines = existingContent === '' ? [] : existingContent.split(/\r?\n/);
+    const pending = { ...envVariables };
+    const document = this.parseEnvDocument(existingContent);
+    const { lines, updatedKeys } = this.replaceAssignments(
+      document.lines,
+      pending,
+    );
+    this.removeUpdatedVariables(pending, updatedKeys);
+    lines.push(...this.formatAssignments(pending));
+
+    return this.renderEnvDocument(lines, document);
+  }
+
+  private parseEnvDocument(content: string): EnvDocument {
+    const newline = content.includes('\r\n') ? '\r\n' : '\n';
+    const hasTrailingNewline = /\r?\n$/.test(content);
+    const lines = content === '' ? [] : content.split(/\r?\n/);
     if (hasTrailingNewline) {
       lines.pop();
     }
+    return { lines, newline, hasTrailingNewline };
+  }
 
-    const assignmentRegex = /^(\s*(?:export\s+)?)([\w.-]+)(\s*=\s*)(.*)$/;
+  private replaceAssignments(
+    lines: string[],
+    pending: Record<string, string>,
+  ): { lines: string[]; updatedKeys: Set<string> } {
+    const mergedLines: string[] = [];
     const updatedKeys = new Set<string>();
-    const mergedLines = lines.map((line) => {
-      const match = assignmentRegex.exec(line);
-      if (match === null) {
-        return line;
+    for (let index = 0; index < lines.length; index++) {
+      const replacement = this.replaceAssignment(lines, index, pending);
+      mergedLines.push(replacement.line);
+      index = replacement.end;
+      if (replacement.updatedKey !== null) {
+        updatedKeys.add(replacement.updatedKey);
       }
-      const [, prefix, key, separator, originalValue] = match;
-      if (!Object.hasOwn(pending, key)) {
-        return line;
-      }
-      updatedKeys.add(key);
-      const value = this.formatValue(pending[key], originalValue);
-      return `${prefix}${key}${separator}${value}`;
-    });
+    }
+    return { lines: mergedLines, updatedKeys };
+  }
+
+  private replaceAssignment(
+    lines: string[],
+    index: number,
+    pending: Record<string, string>,
+  ): LineReplacement {
+    const assignmentRegex = /^(\s*(?:export\s+)?)([\w.-]+)(\s*=\s*)(.*)$/;
+    const line = lines[index];
+    const match = assignmentRegex.exec(line);
+    if (match === null) {
+      return { line, end: index, updatedKey: null };
+    }
+    const [, prefix, key, separator, originalValue] = match;
+    if (!Object.hasOwn(pending, key)) {
+      return { line, end: index, updatedKey: null };
+    }
+
+    const quotedAssignment = this.findQuotedAssignment(
+      lines,
+      index,
+      originalValue,
+    );
+    const value = this.formatValue(
+      pending[key],
+      quotedAssignment?.quote,
+      quotedAssignment?.suffix,
+    );
+    return {
+      line: `${prefix}${key}${separator}${value}`,
+      end: quotedAssignment?.end ?? index,
+      updatedKey: key,
+    };
+  }
+
+  private removeUpdatedVariables(
+    pending: Record<string, string>,
+    updatedKeys: Set<string>,
+  ): void {
     for (const key of updatedKeys) {
       delete pending[key];
     }
-
-    const appended = Object.entries(pending).map(
-      ([key, value]) => `${key}=${this.escapeEnvValue(value)}`,
-    );
-    const allLines =
-      appended.length > 0 ? [...mergedLines, ...appended] : mergedLines;
-    const result = allLines.join(newline);
-    return hasTrailingNewline ? result + newline : result;
   }
 
-  private formatValue(newValue: string, originalValue: string): string {
-    const trimmed = originalValue.trim();
-    const quote = trimmed[0];
-    const isQuoted =
-      trimmed.length >= 2 &&
-      (quote === '"' || quote === "'") &&
-      trimmed[trimmed.length - 1] === quote;
-    // Only keep the original quotes when the new value can be wrapped safely.
-    // A value containing the same quote, a backslash, or a newline would
-    // produce a string dotenv cannot parse back, so fall back to the
-    // unquoted escaped form instead of corrupting the value.
-    const isSafeToWrap =
+  private formatAssignments(variables: Record<string, string>): string[] {
+    return Object.entries(variables).map(
+      ([key, value]) => `${key}=${this.escapeEnvValue(value)}`,
+    );
+  }
+
+  private renderEnvDocument(lines: string[], document: EnvDocument): string {
+    const result = lines.join(document.newline);
+    return document.hasTrailingNewline ? result + document.newline : result;
+  }
+
+  private findQuotedAssignment(
+    lines: string[],
+    assignmentStart: number,
+    originalValue: string,
+  ): QuotedAssignment | null {
+    const trimmedStart = originalValue.trimStart();
+    const quote = this.getOpeningQuote(trimmedStart);
+    if (quote === null) {
+      return null;
+    }
+
+    return this.findQuotedAssignmentEnd(
+      lines,
+      assignmentStart,
+      trimmedStart,
+      quote,
+    );
+  }
+
+  private getOpeningQuote(value: string): '"' | "'" | null {
+    const quote = value[0];
+    if (quote === '"' || quote === "'") {
+      return quote;
+    }
+    return null;
+  }
+
+  private findQuotedAssignmentEnd(
+    lines: string[],
+    assignmentStart: number,
+    trimmedStart: string,
+    quote: '"' | "'",
+  ): QuotedAssignment | null {
+    for (let index = assignmentStart; index < lines.length; index++) {
+      const valueLine =
+        index === assignmentStart ? trimmedStart.slice(1) : lines[index];
+      const candidate = this.getQuotedAssignmentCandidate(
+        valueLine,
+        index,
+        quote,
+      );
+      if (candidate !== undefined) {
+        return candidate;
+      }
+    }
+    return null;
+  }
+
+  private getQuotedAssignmentCandidate(
+    valueLine: string,
+    index: number,
+    quote: '"' | "'",
+  ): QuotedAssignment | null | undefined {
+    const closingQuoteIndex = this.findUnescapedQuote(valueLine, quote);
+    if (closingQuoteIndex < 0) {
+      return undefined;
+    }
+    const suffix = valueLine.slice(closingQuoteIndex + 1);
+    if (!/^\s*(?:#.*)?$/.test(suffix)) {
+      return null;
+    }
+    return { end: index, quote, suffix };
+  }
+
+  private findUnescapedQuote(value: string, quote: '"' | "'"): number {
+    for (let index = 0; index < value.length; index++) {
+      if (value[index] === quote && !this.isEscaped(value, index)) {
+        return index;
+      }
+    }
+    return -1;
+  }
+
+  private isEscaped(value: string, index: number): boolean {
+    let backslashCount = 0;
+    for (let cursor = index - 1; cursor >= 0; cursor--) {
+      if (value[cursor] !== '\\') {
+        break;
+      }
+      backslashCount++;
+    }
+    return backslashCount % 2 === 1;
+  }
+
+  private formatValue(
+    newValue: string,
+    quote?: '"' | "'",
+    suffix = '',
+  ): string {
+    if (quote === undefined) {
+      return `${this.escapeEnvValue(newValue)}${suffix}`;
+    }
+    if (!this.canPreserveQuote(newValue, quote)) {
+      return `${this.escapeEnvValue(newValue)}${suffix}`;
+    }
+    return `${quote}${newValue}${quote}${suffix}`;
+  }
+
+  private canPreserveQuote(newValue: string, quote: '"' | "'"): boolean {
+    return (
       !newValue.includes(quote) &&
       !newValue.includes('\\') &&
-      !/[\r\n]/.test(newValue);
-    if (isQuoted && isSafeToWrap) {
-      return `${quote}${newValue}${quote}`;
-    }
-    return this.escapeEnvValue(newValue);
+      !/[\r\n]/.test(newValue)
+    );
   }
 
   private escapeEnvValue(value: string): string {
