@@ -1,6 +1,7 @@
 import * as fs from 'node:fs/promises';
 import * as dotenv from 'dotenv';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { InvalidArgumentError } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import { ConsoleLogger } from '../../../../../src/envilder/core/infrastructure/logger/ConsoleLogger';
 import {
   FileVariableStore,
@@ -76,6 +77,29 @@ describe('FileVariableStore', () => {
   });
 
   describe('saveEnvFile', () => {
+    it.each(['', '   ', 'SAFE=prefix', 'SAFE\nINJECTED', 'SAFE\rINJECTED'])(
+      'Should_PreserveDestination_When_MappingContainsInvalidVariableNames',
+      async (invalidName) => {
+        // Arrange
+        const expected = 'EXISTING=value';
+        mockInMemoryFiles.set(mockEnvFilePath, expected);
+        const envVariables = { [invalidName]: 'fictional-value-123' };
+
+        // Act
+        const action = sut.saveEnvironment(mockEnvFilePath, envVariables);
+
+        // Assert
+        await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
+        await expect(action).rejects.toThrow(/environment variable name/i);
+        await expect(action).rejects.toMatchObject({
+          message: expect.not.stringMatching(/[\r\n]/),
+        });
+        expect(mockInMemoryFiles.get(mockEnvFilePath)).toBe(expected);
+        expect(fs.readFile).not.toHaveBeenCalled();
+        expect(fs.writeFile).not.toHaveBeenCalled();
+      },
+    );
+
     it('Should_EscapeBackslashes_When_WritingEnvFile', async () => {
       // Arrange
       const expected = 'value\\with\\backslashes';
@@ -480,6 +504,44 @@ describe('FileVariableStore', () => {
   });
 
   describe('getParsedMapping', () => {
+    it.each(['   ', 'SAFE=prefix', 'SAFE\nINJECTED', 'SAFE\rINJECTED'])(
+      'Should_RejectMappingKey_When_NameIsWhitespaceOnlyOrContainsInvalidDelimiter',
+      async (invalidName) => {
+        // Arrange
+        const mapData = { [invalidName]: '/simple' };
+        mockInMemoryFiles.set(mockMapPath, JSON.stringify(mapData));
+
+        // Act
+        const action = sut.getMapping(mockMapPath);
+
+        // Assert
+        await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
+        await expect(action).rejects.toThrow(/environment variable name/i);
+        await expect(action).rejects.toMatchObject({
+          message: expect.not.stringMatching(/[\r\n]/),
+        });
+        expect(fs.readFile).toHaveBeenCalledTimes(1);
+        expect(fs.readFile).toHaveBeenCalledWith(mockMapPath, 'utf-8');
+        expect(fs.writeFile).not.toHaveBeenCalled();
+      },
+    );
+
+    it('Should_RejectMappingKey_When_NameIsEmpty', async () => {
+      // Arrange
+      const mapData = { '': '/simple' };
+      mockInMemoryFiles.set(mockMapPath, JSON.stringify(mapData));
+
+      // Act
+      const action = sut.getMapping(mockMapPath);
+
+      // Assert
+      await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
+      await expect(action).rejects.toThrow(/environment variable name/i);
+      expect(fs.readFile).toHaveBeenCalledTimes(1);
+      expect(fs.readFile).toHaveBeenCalledWith(mockMapPath, 'utf-8');
+      expect(fs.writeFile).not.toHaveBeenCalled();
+    });
+
     it('Should_ReturnEmptyConfig_When_MapFileHasNoConfigSection', async () => {
       // Arrange
       const mapData = {

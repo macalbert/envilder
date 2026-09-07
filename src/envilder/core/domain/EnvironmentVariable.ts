@@ -1,3 +1,6 @@
+import { isValidEnvironmentVariableName } from './EnvironmentVariableName.js';
+import { InvalidArgumentError } from './errors/DomainErrors.js';
+
 /**
  * Represents an environment variable with validation and business rules.
  */
@@ -69,8 +72,12 @@ export class EnvironmentVariable {
    * Validates the environment variable
    */
   private validate(name: string, value: string): void {
-    if (!name || name.trim() === '') {
-      throw new Error('Environment variable name cannot be empty');
+    if (!isValidEnvironmentVariableName(name)) {
+      const message =
+        typeof name === 'string' && name.trim() === ''
+          ? 'Environment variable name cannot be empty'
+          : `Invalid environment variable name ${JSON.stringify(name)}: names must not contain "=", carriage return, or newline characters`;
+      throw new InvalidArgumentError(message);
     }
 
     if (value === undefined || value === null) {
