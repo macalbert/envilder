@@ -5,6 +5,7 @@ on:
     paths:
       - "src/envilder/apps/gha/**"
       - "github-action/**"
+      - "scripts/build-github-action.mjs"
       - ".github/workflows/verify-action-build.yml"
 
 jobs:

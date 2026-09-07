@@ -343,7 +343,7 @@ envilder --map=config/prod/envilder.json --envfile=.env.prod`} />
         <h3>{t.docs.mapOverrideTitle}</h3>
         <p>{t.docs.mapOverrideDesc}</p>
         <CodeBlock lang="bash" code={`# Uses $config from the map file as-is
-envilder --map=envilder.json --envfile=.env
+envilder
 
 # Overrides provider and vault URL, ignoring $config
 envilder --provider=azure \\
@@ -375,7 +375,7 @@ envilder --map=envilder.json --envfile=.env --profile=staging-account`} />
         <h2>{t.docs.pullTitle}</h2>
         <p>{t.docs.pullDesc}</p>
 
-        <CodeBlock lang="bash" code="envilder --map=envilder.json --envfile=.env" />
+        <CodeBlock lang="bash" code="envilder" />
 
         <h3>{t.docs.pullOptions}</h3>
         <table class="docs-table">
@@ -393,7 +393,7 @@ envilder --map=envilder.json --envfile=.env --profile=staging-account`} />
 
         <h3>{t.docs.pullExamples}</h3>
         <CodeBlock lang="bash" code={`# Default (AWS SSM)
-envilder --map=envilder.json --envfile=.env
+envilder
 
 # With AWS profile
 envilder --map=envilder.json --envfile=.env --profile=prod-account

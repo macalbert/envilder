@@ -39,12 +39,12 @@ const t = useTranslations(lang);
               <span class="install-label">npx</span>
               <button
                 class="install-code"
-                data-copy-command="npx envilder --map=envilder.json --envfile=.env"
+                data-copy-command="npx envilder"
                 data-analytics-event="copy_install_command"
                 data-analytics-package-manager="npx"
                 type="button"
               >
-                npx envilder --map=envilder.json --envfile=.env
+                npx envilder
               </button>
             </div>
             <div class="install-option">
@@ -94,6 +94,17 @@ const t = useTranslations(lang);
             <span class="command"> echo </span>
             <span class="output">{`'{"API_KEY": "/app/api-key"}' `}</span>
             <span class="command"> > envilder.json</span>
+          </span>
+          <span class="line">&nbsp;</span>
+          <span class="line">
+            <span class="comment">{t.getStarted.commentPull}</span>
+          </span>
+          <span class="line">
+            <span class="prompt">$</span><span class="command"> npx envilder</span>
+          </span>
+          <span class="line">&nbsp;</span>
+          <span class="line">
+            <span class="highlight">✔</span>{' '}<span class="output">{t.getStarted.doneMessage}</span>
           </span>
           <span class="line">&nbsp;</span>
           <span class="line">
