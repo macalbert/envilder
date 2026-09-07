@@ -1,9 +1,11 @@
 import * as fs from 'node:fs/promises';
 import * as dotenv from 'dotenv';
 import { inject, injectable } from 'inversify';
+import { isValidEnvironmentVariableName } from '../../domain/EnvironmentVariableName.js';
 import {
   DependencyMissingError,
   EnvironmentFileError,
+  InvalidArgumentError,
 } from '../../domain/errors/DomainErrors.js';
 import type {
   MapFileConfig,
@@ -36,11 +38,21 @@ export class FileVariableStore implements IVariableStore {
       $config && typeof $config === 'object' ? $config : {};
     const mappings: Record<string, string> = {};
     for (const [key, value] of Object.entries(rest)) {
-      if (!key.startsWith('$') && typeof value === 'string') {
-        mappings[key] = value;
+      if (key.startsWith('$') || typeof value !== 'string') {
+        continue;
       }
+      this.assertValidVariableName(key);
+      mappings[key] = value;
     }
     return { config, mappings };
+  }
+
+  private assertValidVariableName(name: string): void {
+    if (!isValidEnvironmentVariableName(name)) {
+      throw new InvalidArgumentError(
+        `Invalid environment variable name ${JSON.stringify(name)}: names must not be empty and must not contain "=", carriage return, or newline characters`,
+      );
+    }
   }
 
   private async readJsonFile(source: string): Promise<Record<string, unknown>> {
@@ -80,6 +92,10 @@ export class FileVariableStore implements IVariableStore {
     destination: string,
     envVariables: Record<string, string>,
   ): Promise<void> {
+    for (const key of Object.keys(envVariables)) {
+      this.assertValidVariableName(key);
+    }
+
     const existingContent = await this.readExistingEnvContent(destination);
     const envContent = this.buildEnvContent(existingContent, envVariables);
 

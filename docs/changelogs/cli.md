@@ -5,6 +5,18 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [Unreleased]
+
+### Fixed
+
+* **Reject map-file mapping keys that could inject extra `.env` lines**: The
+  CLI now rejects empty or whitespace-only variable names and names containing
+  `=`, carriage return, or newline characters when parsing a map file or
+  writing an environment file, instead of silently writing them through
+  ([#511](https://github.com/macalbert/envilder/issues/511))
+
+---
+
 ## [0.13.2] - 2026-08-14
 
 ### Changed
