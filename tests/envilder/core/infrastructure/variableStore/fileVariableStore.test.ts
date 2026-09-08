@@ -1,6 +1,7 @@
 import * as fs from 'node:fs/promises';
 import * as dotenv from 'dotenv';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { EnvironmentFileError } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import { ConsoleLogger } from '../../../../../src/envilder/core/infrastructure/logger/ConsoleLogger';
 import {
   FileVariableStore,
@@ -149,6 +150,244 @@ describe('FileVariableStore', () => {
       expect(actual).toBe(`ESCAPED_VAR=${escapeForEnvFile(input)}`);
       const parsed = dotenv.parse(actual as string);
       expect(parsed.ESCAPED_VAR).toBe(input);
+    });
+
+    it('Should_RoundTripDotenvRepresentableValues_When_CreatingFreshEnvFile', async () => {
+      // Arrange
+      const expected: Record<string, string> = {
+        HASH_VAR: 'alpha#beta',
+        PADDED_VAR: '  padded value  ',
+        QUOTE_VAR: `she said "hi" and 'bye'`,
+        BACKSLASH_VAR: 'back\\slash\\value',
+        LF_VAR: 'line1\nline2',
+        CRLF_VAR: 'line1\r\nline2',
+        LITERAL_N_VAR: 'value\\nwith\\nliteral',
+        LITERAL_R_VAR: 'value\\rwith\\rliteral',
+        BACKTICK_REQUIRED_VAR: ` she said "hi" and 'bye' `,
+        BACKTICK_LITERAL_VAR: 'uses ` and #tag',
+      };
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, expected);
+
+      // Assert
+      const savedText = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      const actual = dotenv.parse(savedText);
+      expect(actual).toEqual(expected);
+    });
+
+    it('Should_RoundTripDotenvRepresentableValues_When_UpdatingExistingEnvFile', async () => {
+      // Arrange
+      const expected: Record<string, string> = {
+        HASH_VAR: 'alpha#beta',
+        PADDED_VAR: '  padded value  ',
+        QUOTE_VAR: `she said "hi" and 'bye'`,
+        BACKSLASH_VAR: 'back\\slash\\value',
+        LF_VAR: 'line1\nline2',
+        CRLF_VAR: 'line1\r\nline2',
+        LITERAL_N_VAR: 'value\\nwith\\nliteral',
+        LITERAL_R_VAR: 'value\\rwith\\rliteral',
+        BACKTICK_REQUIRED_VAR: ` she said "hi" and 'bye' `,
+        BACKTICK_LITERAL_VAR: 'uses ` and #tag',
+      };
+      const existing = Object.keys(expected)
+        .map((key) => `${key}=old-value`)
+        .join('\n');
+      mockInMemoryFiles.set(mockEnvFilePath, existing);
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, expected);
+
+      // Assert
+      const savedText = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      const actual = dotenv.parse(savedText);
+      expect(actual).toEqual(expected);
+    });
+
+    it('Should_RoundTripValueWithNewlineQuoteAndLiteralBackslashN_When_CreatingFreshEnvFile', async () => {
+      // Arrange
+      const expected = 'He said "hi"\nAnd wrote \\n literally';
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { MIXED_VAR: expected });
+
+      // Assert
+      const savedText = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      const actual = dotenv.parse(savedText);
+      expect(actual.MIXED_VAR).toBe(expected);
+    });
+
+    it('Should_RoundTripPaddedValueEndingInBackslash_When_CreatingFreshEnvFile', async () => {
+      // Arrange
+      const expected = '  padded value\\';
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, {
+        PADDED_BACKSLASH_VAR: expected,
+      });
+
+      // Assert
+      const savedText = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      const actual = dotenv.parse(savedText);
+      expect(actual.PADDED_BACKSLASH_VAR).toBe(expected);
+    });
+
+    it('Should_RoundTripValueContainingBackslashDelimiterLookalike_When_UpdatingSingleQuotedAssignment', async () => {
+      // Arrange
+      mockInMemoryFiles.set(mockEnvFilePath, "SECRET='old'\n");
+      const expected = "data \\' with escaped-looking delimiter";
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { SECRET: expected });
+
+      // Assert
+      const savedText = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      const actual = dotenv.parse(savedText);
+      expect(actual.SECRET).toBe(expected);
+    });
+
+    it('Should_ReplaceEntireMultilineAssignmentSpan_When_UpdatingExistingQuotedValue', async () => {
+      // Arrange
+      const existing = 'MULTI_VAR="prefix\nSNEAKY=leaked"\nOTHER=other-value\n';
+      mockInMemoryFiles.set(mockEnvFilePath, existing);
+      const expected = { MULTI_VAR: 'updated-value', OTHER: 'other-value' };
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, {
+        MULTI_VAR: 'updated-value',
+      });
+
+      // Assert
+      const savedText = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      const actual = dotenv.parse(savedText);
+      expect(actual).toEqual(expected);
+    });
+
+    it('Should_ThrowBeforeWritingWithoutLeakingSecret_When_ValueIsGenuinelyUnrepresentable', async () => {
+      // Arrange
+      const existing = 'OTHER=old-value\n';
+      mockInMemoryFiles.set(mockEnvFilePath, existing);
+      const secret = 'has \' single and " double and ` backtick\nacross lines';
+      const action = () =>
+        sut.saveEnvironment(mockEnvFilePath, {
+          OTHER: 'new-value',
+          UNREPRESENTABLE: secret,
+        });
+
+      // Act
+      const actual = await action().then(
+        () => null,
+        (error: unknown) => error,
+      );
+
+      // Assert
+      expect(actual).toBeInstanceOf(EnvironmentFileError);
+      expect((actual as Error).message).not.toContain(secret);
+      expect(vi.mocked(fs.writeFile)).not.toHaveBeenCalled();
+      expect(mockInMemoryFiles.get(mockEnvFilePath)).toBe(existing);
+    });
+
+    it('Should_RemoveOldSecretWithoutDuplicatingKey_When_UpdatingBomPrefixedAssignment', async () => {
+      // Arrange
+      const existing = '\uFEFFSECRET=old-secret\n';
+      mockInMemoryFiles.set(mockEnvFilePath, existing);
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { SECRET: 'new-secret' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      const parsed = dotenv.parse(actual);
+      expect(parsed.SECRET).toBe('new-secret');
+      expect(actual).not.toContain('old-secret');
+      expect((actual.match(/SECRET=/g) ?? []).length).toBe(1);
+    });
+
+    it('Should_PreserveInlineCommentAndExactSecret_When_UpdateForcesQuoting', async () => {
+      // Arrange
+      const existing = 'API_KEY=old-key # keep this note\n';
+      mockInMemoryFiles.set(mockEnvFilePath, existing);
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { API_KEY: 'sec#ret' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(dotenv.parse(actual).API_KEY).toBe('sec#ret');
+      expect(actual).toContain('# keep this note');
+    });
+
+    it('Should_ThrowBeforeWritingWithoutLeakingSecret_When_UpdateWouldChangeAnUnmanagedKey', async () => {
+      // Arrange
+      const originalSecret = 'super-secret-value';
+      const leakedText = 'leaked-value';
+      const existing = `DB_PASSWORD=${originalSecret}\nMANAGED_KEY=\n"orphan\nDB_PASSWORD=${leakedText}"\n`;
+      mockInMemoryFiles.set(mockEnvFilePath, existing);
+      const action = () =>
+        sut.saveEnvironment(mockEnvFilePath, { MANAGED_KEY: 'updated-value' });
+
+      // Act
+      const actual = await action().then(
+        () => null,
+        (error: unknown) => error,
+      );
+
+      // Assert
+      expect(actual).toBeInstanceOf(EnvironmentFileError);
+      expect((actual as Error).message).not.toContain(originalSecret);
+      expect((actual as Error).message).not.toContain(leakedText);
+      expect(vi.mocked(fs.writeFile)).not.toHaveBeenCalled();
+      expect(mockInMemoryFiles.get(mockEnvFilePath)).toBe(existing);
+    });
+
+    it('Should_ThrowBeforeWritingWithoutLeakingSecret_When_ManagedKeyValueIsAlteredByGrammarInteraction', async () => {
+      // Arrange
+      const originalSecret = 'real-secret';
+      const leakedText = 'leaked';
+      const existing = `SECRET=${originalSecret}\nMANAGED=\n"orphan\nSECRET: ${leakedText}"\n`;
+      mockInMemoryFiles.set(mockEnvFilePath, existing);
+      const action = () =>
+        sut.saveEnvironment(mockEnvFilePath, {
+          SECRET: originalSecret,
+          MANAGED: 'updated-value',
+        });
+
+      // Act
+      const actual = await action().then(
+        () => null,
+        (error: unknown) => error,
+      );
+
+      // Assert
+      expect(actual).toBeInstanceOf(EnvironmentFileError);
+      expect((actual as Error).message).not.toContain(originalSecret);
+      expect((actual as Error).message).not.toContain(leakedText);
+      expect(vi.mocked(fs.writeFile)).not.toHaveBeenCalled();
+      expect(mockInMemoryFiles.get(mockEnvFilePath)).toBe(existing);
+    });
+
+    it('Should_ThrowBeforeWritingWithoutLeakingSecret_When_UpdateIntroducesAnUnexpectedThirdKey', async () => {
+      // Arrange
+      const leakedText = 'leaked';
+      const existing = `MANAGED=\n"orphan\nHIDDEN=${leakedText}"\nOTHER=1\n`;
+      mockInMemoryFiles.set(mockEnvFilePath, existing);
+      const action = () =>
+        sut.saveEnvironment(mockEnvFilePath, {
+          MANAGED: 'updated-value',
+          OTHER: '1',
+        });
+
+      // Act
+      const actual = await action().then(
+        () => null,
+        (error: unknown) => error,
+      );
+
+      // Assert
+      expect(actual).toBeInstanceOf(EnvironmentFileError);
+      expect((actual as Error).message).not.toContain(leakedText);
+      expect(vi.mocked(fs.writeFile)).not.toHaveBeenCalled();
+      expect(mockInMemoryFiles.get(mockEnvFilePath)).toBe(existing);
     });
 
     it('Should_ThrowError_When_FailsToWriteEnvFile', async () => {
