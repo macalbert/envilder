@@ -3,9 +3,9 @@ name: PR Resolver
 description: >
   Processes pull-request review comments interactively. After approval,
   delegates artifact changes through the verification-first Change
-  Orchestrator, commits each fix separately, replies to every comment, and
-  resolves each thread before continuing.
-tools: [vscode, read, search, execute, agent, web, github.vscode-pull-request-github, todo]
+  Orchestrator and commits each fix separately. Publishes replies and resolves
+  threads only after aggregate validation succeeds.
+tools: [read, search, execute, agent]
 agents: ['Change Orchestrator', 'Reviewer']
 argument-hint: "Pull-request comments or supplied review feedback to address"
 user-invocable: true
@@ -20,6 +20,15 @@ Follow
 [review-response.instructions.md](../instructions/review-response.instructions.md).
 Always write GitHub replies in English.
 
+## Capability Preflight
+
+Before querying or mutating GitHub, confirm that the host provides command
+execution, can invoke `Change Orchestrator`, and supports its nested worker
+delegations with declared tool boundaries. Confirm that authenticated GitHub
+CLI operations can reply inside review threads and resolve them. If any
+capability is unavailable or cannot be established, make no mutation and
+return `ResolvedComments` as `BLOCKED`. Never collapse the delegated roles.
+
 ## Non-Negotiable Boundaries
 
 - Obtain explicit user approval before applying, replying, skipping, or
@@ -29,7 +38,7 @@ Always write GitHub replies in English.
 - Delegate every artifact change through `@Change Orchestrator`.
 - Never edit code, tests, documentation, configuration, or metadata directly.
 - Preserve one commit per artifact-changing comment.
-- Reply to and resolve the current thread before moving to the next comment.
+- Publish no reply and resolve no thread before aggregate validation succeeds.
 - Use `@Reviewer` in `change-set-review` mode for read-only impact analysis.
 
 ## Workflow
@@ -38,11 +47,15 @@ For each active review comment:
 
 1. Load the comment and thread state from GitHub or user-provided text.
 2. Check the tracker and existing replies to prevent duplicate processing.
-3. Map the comment to the affected file, line, requirement, and current
+3. Require a clean index before processing the comment. If staged changes
+   already exist, preserve them unchanged and block because an isolated commit
+   cannot be proven. Snapshot the current tracked worktree diff plus all
+   untracked paths and content hashes.
+4. Map the comment to the affected file, line, requirement, and current
    behavior.
-4. Classify the action and, for artifact changes, classify intent and
+5. Classify the action and, for artifact changes, classify intent and
    verification strategy using `common-verification-first`.
-5. Present:
+6. Present:
    - verbatim reviewer comment and location;
    - repository evidence and impact analysis;
    - exact proposed action;
@@ -52,25 +65,37 @@ For each active review comment:
    Include invariants only when repository evidence or the comment's risk
    supports them. Include broader validation only when justified by integration
    risk; never add either as filler.
-6. Wait for explicit user approval. Re-present material changes to the proposal.
-7. Execute only the approved action.
-8. For an artifact change:
+7. Wait for explicit user approval. Re-present material changes to the proposal.
+8. Execute only the approved action.
+9. For an artifact change:
    - delegate one coherent approved change to `@Change Orchestrator`;
    - accept only a successful `ChangeResult`;
    - run or confirm comment-specific validation;
-   - stage only that comment's paths;
+   - compare the candidate against the pre-comment worktree and index snapshot;
+   - block if the candidate touches a file that was untracked before the
+     comment, because its prior content cannot be attributed to the fix;
+   - derive the exact candidate patch introduced for the comment, present that
+     patch to the user, and obtain explicit approval before staging;
+   - freeze the approved patch; any subsequent candidate change requires fresh
+     review, verification, and user approval;
+   - stage only the exact approved hunks from that frozen patch;
+   - verify that the complete staged diff exactly equals the approved patch
+     before committing;
+   - if approved hunks overlap pre-existing or unrelated changes and cannot be
+     separated safely, restore the clean index without changing the worktree
+     and block the comment;
    - create one conventional commit with the required co-author trailer;
    - capture the commit hash and URL;
-   - post or confirm the mandatory addressed reply; and
-   - resolve the thread.
-9. For a question, disagreement, or approved skip:
-   - answer with repository evidence;
-   - post or confirm the reply; and
-   - resolve the thread.
-10. Update the tracker and continue to the next comment.
+   - prepare the mandatory reply without publishing it; and
+   - leave the thread open.
+10. For a question, disagreement, or approved skip, prepare the approved reply
+    with repository evidence without publishing it, and leave the thread open.
+11. Update the tracker and continue to the next comment.
 
-After all comments, run relevant aggregate validation and report any unresolved
-or blocked thread. Push only with user approval.
+After all comments, run relevant aggregate validation. Only when it succeeds,
+publish each prepared reply in its existing thread and resolve that thread.
+If aggregate validation fails or is unavailable, publish nothing, leave all
+threads open, and report the failure. Push only with user approval.
 
 ## Required Comment Presentation
 
@@ -209,7 +234,7 @@ Skipping - {approved reason}.
 
 ## Duplicate Prevention
 
-Before any reply:
+After aggregate validation passes and before any reply:
 
 1. Fetch replies for the parent comment.
 2. If a member reply already records the outcome, do not post another.

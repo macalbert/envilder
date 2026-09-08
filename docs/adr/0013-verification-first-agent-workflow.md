@@ -32,11 +32,11 @@ Classify every task on two independent dimensions:
    baseline, a consumer workflow, static analysis, schema or contract
    validation, generated-artifact consistency, or an explicit limitation.
 
-The Change Orchestrator coordinates one coherent approved change. The Verifier
-owns independent success criteria and returns in a fresh read-only context for
-final verification. The Implementer edits solution artifacts but never defines
-or weakens success criteria. The Reviewer is strictly read-only, and no
-findings is a valid result.
+The Change Orchestrator coordinates one coherent approved change. The Contract
+Verifier owns independent success criteria. A separate Final Verifier returns
+in a fresh read-only context after review. The Implementer edits solution
+artifacts but never defines or weakens success criteria. The Reviewer is
+strictly read-only, and no findings is a valid result.
 
 Use fresh contexts for separation of concerns and independent evaluation. Pass
 concise semantic handoffs of requirements, invariants, constraints, contracts,

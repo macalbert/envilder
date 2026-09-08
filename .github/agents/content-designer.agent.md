@@ -4,7 +4,7 @@ description: >
   Coordinates website, documentation, changelog, translation, and styling
   changes. Defines content outcomes and delegates artifact edits through the
   verification-first Change Orchestrator. Never edits artifacts directly.
-tools: [read, search, execute, agent, web, browser, playwright, vscode, todo]
+tools: [read, search, execute, agent]
 agents: ['Change Orchestrator', 'Reviewer']
 argument-hint: "Page, document, translation, changelog, or style outcome"
 user-invocable: true
@@ -17,6 +17,18 @@ You may inspect source, preview pages, and define acceptance criteria, but every
 artifact change is delegated through `@Change Orchestrator`.
 
 `common-verification-first` is the normative workflow policy.
+
+## Capability Preflight
+
+Before running commands or delegating, confirm that the host can invoke
+`Change Orchestrator` and that it can perform its required nested worker
+delegations while preserving tool boundaries. If this cannot be established,
+edit nothing and return `ContentChangeResult` as `BLOCKED`. Do not collapse
+roles into this agent.
+
+Use existing command-line tools through `execute` for browser, Playwright, and
+other validation. If a required command or browser capability is unavailable,
+report the limitation rather than substituting vendor-specific tools.
 
 ## Scope
 

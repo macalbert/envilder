@@ -56,19 +56,27 @@ It distinguishes:
 
 ## Verification-First Agent Topology
 
-Envilder defines six agents:
+Envilder defines seven agents:
 
 | Agent | Purpose | Artifact edits | Delegates to |
 | --- | --- | --- | --- |
-| **Change Orchestrator** | Coordinates one coherent approved change | No | Verifier, Implementer, Reviewer |
-| **Verifier** | Establishes independent contracts and runs final evidence | verification-contract artifacts only during contract establishment | None |
+| **Change Orchestrator** | Coordinates one coherent approved change | No | Contract Verifier, Implementer, Reviewer, Final Verifier |
+| **Contract Verifier** | Establishes independent contracts | verification-contract artifacts only | None |
 | **Implementer** | Produces the coherent contracted solution | Solution artifacts | None |
 | **Reviewer** | Reviews one candidate or a complete change set | No | None |
+| **Final Verifier** | Runs fresh final evidence | No | None |
 | **Content Designer** | Coordinates website and documentation outcomes | No | Change Orchestrator, Reviewer |
 | **PR Resolver** | Processes review feedback one comment at a time | No | Change Orchestrator, Reviewer |
 
-`Verifier` and `Implementer` are subagent-only. The other agents are
-user-invocable.
+`Contract Verifier`, `Implementer`, and `Final Verifier` are subagent-only. The
+other agents are user-invocable.
+
+Agent profiles intentionally omit `model`, allowing each host to select an
+available model, and use only portable tool aliases. Portability does not imply
+that every host supports the required orchestration topology. Each coordinator
+must preflight custom-agent invocation, nested delegation, and worker tool
+boundaries. It stops as `BLOCKED` instead of collapsing independent roles when
+those capabilities are unavailable or cannot be established.
 
 ### Nested Delegation
 
@@ -88,7 +96,7 @@ enables this topology:
 Approved requirement and invariants
                 |
                 v
-         fresh Verifier
+    fresh Contract Verifier
                 |
                 v
       independent contract
@@ -103,7 +111,7 @@ Approved requirement and invariants
     fresh read-only Reviewer
                 |
                 v
-      fresh final Verifier
+      fresh Final Verifier
                 |
                 v
  Change Orchestrator judgment
@@ -159,10 +167,10 @@ ritual.
 Use **Change Orchestrator**.
 
 1. Supply one approved semantic specification.
-2. Let Verifier establish independent evidence.
+2. Let Contract Verifier establish independent evidence.
 3. Let Implementer produce the solution.
 4. Review the candidate independently.
-5. Run fresh final verification.
+5. Let Final Verifier run fresh read-only verification.
 6. Accept only when evidence and engineering judgment satisfy the original
    requirement.
 
@@ -175,7 +183,7 @@ owns the specialized per-comment lifecycle described below.
 
 Use `/scaffold-feature`.
 
-The prompt runs through Change Orchestrator. Verifier owns
+The prompt runs through Change Orchestrator. Contract Verifier owns
 verification-contract artifacts, including behavioral tests, before
 Implementer creates the solution structure. The Implementer completes required
 DI, routing, and entry-point wiring without generating placeholder tests.
@@ -218,16 +226,18 @@ For every comment, PR Resolver analyzes the feedback, presents the proposed
 action, and obtains explicit approval. It then follows one of two branches:
 
 - For artifact-changing feedback, delegate the approved change through Change
-  Orchestrator, validate it, create exactly one separate commit, reply in the
-  existing review thread, and resolve the thread after confirming the reply.
-- For a question, disagreement, or approved skip, reply directly with repository
-  evidence and resolve the thread after confirming the reply. Do not create a
-  commit.
+  Orchestrator, validate it, create exactly one separate commit, and prepare
+  the thread reply.
+- For a question, disagreement, or approved skip, prepare a reply with
+  repository evidence. Do not create a commit.
 
 PR Resolver owns each artifact-changing comment's separate commit, every
-mandatory reply, and review-thread resolution. The calling user or workflow
-retains ownership of the branch and overall pull-request lifecycle. Push remains
-subject to explicit user approval.
+mandatory reply, and review-thread resolution. It requires a clean index for
+each isolated commit and verifies that the staged diff exactly matches the
+approved patch. After all comments, it runs aggregate validation; only a
+successful result permits publishing replies and resolving threads. The calling
+user or workflow retains ownership of the branch and overall pull-request
+lifecycle. Push remains subject to explicit user approval.
 
 ## Oracle Effectiveness
 
@@ -255,10 +265,11 @@ Reviewer modes:
 Reviewer is always read-only and never delegates fixes. No findings is a valid
 result.
 
-Verifier modes:
-
-- `establish-contract` may edit verification-contract artifacts.
-- `final-verification` runs in a new read-only context after review.
+Contract Verifier may edit verification-contract artifacts while establishing
+the independent contract. Final Verifier is a separate agent with read-only
+tools and runs in a fresh context after review. It reassesses static evidence
+and recorded gate results, and returns `BLOCKED` rather than acquiring a
+general-purpose execution tool when fresh command execution is required.
 
 If candidate artifacts change after review or final verification, the affected
 evaluation must run again against the new candidate.

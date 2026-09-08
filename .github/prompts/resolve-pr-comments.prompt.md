@@ -19,9 +19,11 @@ Resolve pull request comments end-to-end.
 3. Present the proposed action, intent, verification strategy, scope, and
    validation for explicit approval.
 4. Delegate each approved artifact change through `@Change Orchestrator`.
-5. Commit each artifact-changing comment separately, reply in its existing
-   thread, and resolve it before continuing.
-6. Use artifact-appropriate targeted and broader verification rather than
+5. Commit each artifact-changing comment separately and prepare its reply
+   without publishing or resolving the thread.
+6. Run aggregate validation after all comments. Only after it succeeds, publish
+   each prepared reply in its existing thread and resolve the thread.
+7. Use artifact-appropriate targeted and broader verification rather than
    defaulting mechanically to `pnpm test`.
 
 ## Required Output

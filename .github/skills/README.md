@@ -86,14 +86,15 @@ User ──→ Agent (persona + workflow) ──→ loads Skills (domain knowled
 | `to-issues` | ✅ | Break plan into vertical-slice GitHub issues |
 | `zoom-out` | `/zoom-out` only | Map modules/callers at higher abstraction level |
 
-## Agents (6)
+## Agents (7)
 
 | Agent | Role | Delegates to |
 |-------|------|-------------|
-| **Change Orchestrator** | Coordinates one coherent verification-first change | Verifier, Implementer, Reviewer |
-| **Verifier** | Owns independent contracts and fresh final evidence | n/a |
+| **Change Orchestrator** | Coordinates one coherent verification-first change | Contract Verifier, Implementer, Reviewer, Final Verifier |
+| **Contract Verifier** | Owns independent verification contracts | n/a |
 | **Implementer** | Edits solution artifacts against a frozen contract | n/a |
 | **Reviewer** | Read-only candidate and change-set evaluation | n/a |
+| **Final Verifier** | Runs fresh final evidence with enforced read-only tools | n/a |
 | **Content Designer** | Coordinates content outcomes without direct edits | Change Orchestrator, Reviewer |
 | **PR Resolver** | Resolves comments with one delegated change and commit each | Change Orchestrator, Reviewer |
 
@@ -139,6 +140,10 @@ user-invocable: true
    user typing `/skill-name`: the model won't auto-load it.
 6. **Nested delegation** is enabled by
    `chat.subagents.allowInvocationsFromSubagents` in `.vscode/settings.json`.
+7. **Portable defaults**: Agents omit `model` intentionally so the host selects
+   an available model, and use only the common `read`, `search`, `edit`,
+   `execute`, and `agent` aliases. Coordinators stop as `BLOCKED` when the host
+   cannot preserve nested delegation and tool boundaries.
 
 ## Influences
 

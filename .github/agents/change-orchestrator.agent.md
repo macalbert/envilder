@@ -5,7 +5,7 @@ description: >
   implementation, risk-adaptive read-only review, and fresh final
   verification.
 tools: [read, search, agent]
-agents: ['Verifier', 'Implementer', 'Reviewer']
+agents: ['Contract Verifier', 'Implementer', 'Reviewer', 'Final Verifier']
 argument-hint: "Approved requirement, invariants, scope, and constraints for one coherent change"
 user-invocable: true
 ---
@@ -22,10 +22,25 @@ implementation steps.
 
 - Own classification, orchestration, routing, and final acceptance.
 - Never execute repository commands and never edit artifacts.
-- Delegate verification-contract artifacts only to a fresh `@Verifier`.
+- Delegate verification-contract artifacts only to a fresh
+  `@Contract Verifier`.
 - Delegate solution artifacts only to a fresh `@Implementer`.
-- Delegate independent evaluation only to a fresh read-only `@Reviewer`.
+- Delegate candidate review only to a fresh read-only `@Reviewer`.
+- Delegate final verification only to a fresh read-only `@Final Verifier`.
 - Handle one coherent change. Calling workflows own multi-item lifecycle work.
+
+## Capability Preflight
+
+Before repository discovery or delegation, confirm that the current host can:
+
+- invoke each custom agent listed in `agents`;
+- preserve each worker's declared tool boundary; and
+- when this agent was itself invoked as a subagent, support the additional
+  nested delegation level required to invoke its workers.
+
+If any capability is unavailable or cannot be established, do not approximate
+the roles in one context. Edit nothing and return a `ChangeResult` with final
+judgment `BLOCKED`, naming the unsupported capability.
 
 ## Approved Specification
 
@@ -84,7 +99,7 @@ hypotheses, or obsolete result histories.
 
 ### 1. Establish the Independent Contract
 
-Delegate a fresh `@Verifier` in `establish-contract` mode.
+Delegate a fresh `@Contract Verifier`.
 
 Accept the returned `VerificationContract` only when:
 
@@ -98,8 +113,8 @@ Accept the returned `VerificationContract` only when:
 - targeted and broader gates are sufficient; and
 - assumptions, limitations, and risks are explicit.
 
-A defective contract returns to a fresh Verifier. A correction that changes
-approved semantics requires human approval.
+A defective contract returns to a fresh Contract Verifier. A correction that
+changes approved semantics requires human approval.
 
 ### 2. Implement the Contract
 
@@ -115,8 +130,8 @@ The Implementer may iterate freely, but must:
 - return a concise `ImplementationResult`.
 
 An implementation defect returns to a fresh Implementer. A contract defect
-returns to a fresh Verifier. Never ask the Implementer to reinterpret or weaken
-success criteria.
+returns to a fresh Contract Verifier. Never ask the Implementer to reinterpret
+or weaken success criteria.
 
 ### 3. Review the Candidate
 
@@ -139,7 +154,8 @@ exact candidate diff and path set.
 Route findings only to their owner:
 
 - implementation defect -> fresh Implementer, then review again;
-- verification-contract defect -> fresh Verifier, then downstream stages again;
+- verification-contract defect -> fresh Contract Verifier, then downstream
+  stages again;
 - semantic intent, invariant, scope, requirement, or product change -> human
   approval;
 - out-of-scope improvement -> report without expanding the change.
@@ -147,14 +163,16 @@ Route findings only to their owner:
 ### 4. Run Fresh Final Verification
 
 After review converges or a valid omission exists, delegate a new fresh
-`@Verifier` in `final-verification` mode with the exact reviewed candidate.
+`@Final Verifier` with the exact reviewed candidate.
 
-Require the final Verifier to:
+Require the Final Verifier to:
 
 - remain read-only;
 - reassess evidence against original intent and invariants;
 - validate the review result or omission;
-- run targeted and required broader gates; and
+- inspect targeted and broader gate results against the exact candidate;
+- return `BLOCKED` when completion requires fresh command execution that the
+  read-only profile cannot perform; and
 - return a concise `FinalVerificationResult`.
 
 If any candidate artifact changes after review or final verification, invalidate
