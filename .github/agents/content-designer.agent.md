@@ -33,6 +33,14 @@ preserving each worker's tool boundary. If this cannot be established,
 edit nothing and return `ContentChangeResult` as `BLOCKED`. Do not collapse
 roles into this agent.
 
+When taking the direct `@Reviewer` `change-set-review` path, independently
+confirm before invoking it that the current host can invoke `Reviewer`
+directly and preserve Reviewer's declared read-only tool boundary. A successful
+`Change Orchestrator` preflight does not establish either condition. Defer this
+check until that direct path is needed; if it is unavailable or cannot be
+proven, do not proceed or collapse roles, and return `ContentChangeResult` as
+`BLOCKED`.
+
 Use existing command-line tools through `execute` for validation, including
 browser-based checks via tools such as Playwright. If a required command or
 browser capability is unavailable, report the limitation rather than

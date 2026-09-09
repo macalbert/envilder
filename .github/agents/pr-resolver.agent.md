@@ -36,6 +36,14 @@ CLI operations can reply inside review threads and resolve them. If any
 capability is unavailable or cannot be established, make no mutation and
 return `ResolvedComments` as `BLOCKED`. Never collapse the delegated roles.
 
+When taking the direct `@Reviewer` `change-set-review` path, independently
+confirm before invoking it that the current host can invoke `Reviewer`
+directly and preserve Reviewer's declared read-only tool boundary. A successful
+`Change Orchestrator` preflight does not establish either condition. Defer this
+check until that direct path is needed; if it is unavailable or cannot be
+proven, do not proceed or collapse roles, and return `ResolvedComments` as
+`BLOCKED`.
+
 ## Non-Negotiable Boundaries
 
 - Obtain explicit user approval for the comment action or disposition before
