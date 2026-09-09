@@ -38,8 +38,12 @@ return `ResolvedComments` as `BLOCKED`. Never collapse the delegated roles.
 
 ## Non-Negotiable Boundaries
 
-- Obtain explicit user approval before applying, replying, skipping, or
-  resolving.
+- Obtain explicit user approval for the comment action or disposition before
+  executing it, including answering a question, disagreeing, or skipping.
+- That decision intrinsically includes its normal factual outcome reply, even
+  if approval does not mention the reply. Never request separate reply
+  authorization or review/approval of wording, either upfront or after
+  validation.
 - Present the exact proposed action, impact, scope, and validation before
   approval.
 - Delegate every artifact change through `@Change Orchestrator`.
@@ -95,12 +99,16 @@ For each active review comment:
    - capture the commit hash and URL;
    - prepare the mandatory reply without publishing it; and
    - leave the thread open.
-10. For a question, disagreement, or approved skip, prepare the approved reply
-    with repository evidence without publishing it, and leave the thread open.
+10. For a question, disagreement, or skip, prepare a reply explaining the
+    approved disposition and why, with repository evidence, without publishing
+    it; leave the thread open.
 11. Update the tracker and continue to the next comment.
 
-After all comments, run relevant aggregate validation. Only when it succeeds,
-publish each prepared reply in its existing thread and resolve that thread.
+After all comments, run relevant aggregate validation. Only when it succeeds
+and the approved actions are complete, publish each prepared reply in its
+existing thread and resolve that thread using the Duplicate Prevention and
+Thread Resolution safeguards below. Do not insert a separate reply or resolution
+approval checkpoint.
 If aggregate validation fails or is unavailable, publish nothing, leave all
 threads open, and report the failure. Push only with user approval.
 
@@ -217,26 +225,37 @@ Call out anything not resolved at completion.
 
 ## Mandatory Reply Templates
 
+Follow the shared response conventions for every disposition. Use only actual
+available commit, file, and validation evidence; adapt the outcome line when no
+commit is available and never claim an incomplete action is fixed.
+
 ### Addressed
 
 ```markdown
 Fixed in [{hash}]({commit-url}).
 
-{What changed and which verification passed.}
+{What actually changed and why, including relevant technical reasoning,
+tradeoffs, or protected behavior.}
+
+{Actual verification results and file references when available.}
 ```
 
 ### Skipped or Disagreed
 
 ```markdown
-Skipping - {approved reason}.
+{Skipped or disagreed} - {decided disposition}.
 
-{Repository evidence or scope rationale.}
+{Why, supported by repository evidence or scope rationale, including relevant
+technical reasoning, tradeoffs, or protected behavior.}
 ```
 
 ### Question
 
 ```markdown
-{Direct answer with file and line references.}
+{Direct answer with available file and line references.}
+
+{Why this is the answer, including relevant technical reasoning, tradeoffs, or
+protected behavior.}
 ```
 
 ## Duplicate Prevention
@@ -268,8 +287,7 @@ option. Remove the temporary file after confirming the remote state.
 
 ## Constraints
 
-- Never apply, commit, reply, skip, dismiss, resolve, or push without required
-  approval.
+- Never apply, commit, skip, dismiss, or push without required approval.
 - Never delegate a raw comment as an underspecified requirement.
 - Never combine separate comments in one commit unless they are confirmed
   duplicates of the same inseparable change.
