@@ -181,6 +181,40 @@ accepting the action. A prepared but held reply is not published success.
 Direct no-artifact dispositions in step 10 do not acquire an artifact final
 verification requirement.
 
+Candidate Reviewer approval is mandatory for every candidate that can authorize
+publication, including a candidate used only for no-artifact dispositions. Do
+not use Change Orchestrator's trivial/mechanical `NON_BEHAVIORAL_CHANGE` review
+omission at this publication boundary. Require a `candidate-review`
+`ReviewResult` with literal `Verdict: APPROVE`.
+
+Immediately after that approval, the Reviewer—not PR Resolver, Change
+Orchestrator, or Final Verifier—must collect and return a candidate-evidence
+record for the exact current-worktree candidate. The immediately post-`APPROVE`
+record identifies the baseline/current `HEAD`, a 64-hex SHA-256 computed over
+the raw bytes emitted by exactly `git diff --binary HEAD`, and the exact
+changed-path set emitted by `git diff --name-only HEAD`. The Reviewer must then
+run and record successful results for `git diff --check HEAD` and
+`pnpm format:check`. Immediately after those static checks, the Reviewer must
+recapture `HEAD`, the raw-byte SHA-256, and the changed-path set.
+All before/after values must match. Any `HEAD`, hash, or path-set drift
+invalidates the approval and its evidence, elevates the worktree to a fresh
+candidate, and requires a fresh candidate-review approval followed by this
+entire protocol. Failed, unavailable, or ambiguous Reviewer-owned static
+evidence is non-qualifying and blocks publication; no other role may recreate,
+substitute, or attribute it.
+
+Delegate a fresh Final Verifier only with the exact reviewed candidate and this
+Reviewer-owned record. The Final Verifier remains read/search-only and must not
+execute commands or collect replacement evidence. It validates the source
+policy and reconciles and attributes the Reviewer-owned baseline/current `HEAD`
+identity, raw-byte binary-diff SHA-256, changed-path set, and static results to
+the exact reviewed candidate. It may return literal `Final result: PASS` only
+when the Reviewer approved that exact candidate, the before/after
+identity/hash/path-set captures are unchanged, every required static result
+passed, the record is attributable to that candidate, and the source policy
+meets the current contract. Otherwise it returns `FAIL` or `BLOCKED`; a prior
+`PASS` does not survive drift.
+
 After all comments and completion of the approved actions, enforce this
 committed-candidate guard at the aggregate/publication boundary:
 
@@ -192,33 +226,70 @@ committed-candidate guard at the aggregate/publication boundary:
 3. After validation, confirm that HEAD is unchanged from the recorded candidate
    and that the index and worktree remain clean by the same criteria.
 
-For a batch containing any artifact changes, successful aggregate validation and
-all committed-candidate checks must precede this remote-availability gate:
+For every batch, including one consisting entirely of no-artifact dispositions,
+successful aggregate validation, all committed-candidate checks, mandatory
+candidate Reviewer approval, and its unchanged Reviewer-owned candidate-evidence
+record must precede this remote-availability gate:
 
-1. Identify the actual PR remote repository and head branch, and inspect its
-   current history for the validated candidate and every corrective commit in
-   the batch.
+1. Derive and record the actual PR remote repository, head branch, and current
+   immutable remote head commit through authoritative PR inspection to identify
+   the remote-availability target. This preliminary inspection does not
+   authorize publication. Failed, missing, stale, or ambiguous inspection blocks;
+   a local remote-tracking ref, push result, commit URL, or other remote or
+   branch is not authoritative evidence.
 2. If needed commits are not present, the recorded action approval authorizes
    the necessary non-force push to that PR head remote/branch, unless explicitly
    limited. Do not include unrelated commits or user work. If the responsible
    calling workflow owns the push, wait for its confirmed handoff instead.
    Already-present commits require neither a redundant push nor permission.
-3. Before publishing any batch reply or resolving any thread, confirm from
-   current authoritative remote history that the validated candidate and all
-   corrective commits are reachable from the actual PR head branch. A remote
-   head that has advanced and contains them all qualifies; exact HEAD equality
-   is not required. A public commit URL, presence only in another repository or
+3. Qualify the actual remote head by exactly one of these evidence paths:
+   - **Exact committed candidate:** it exactly equals the fully validated
+     candidate for which all affected reviews (including mandatory candidate
+     Reviewer approval and its unchanged Reviewer-owned evidence), qualifying
+     literal final `PASS`, aggregate validation, and clean committed-candidate
+     checks passed.
+   - **Advanced fresh candidate:** it differs from the committed candidate,
+     contains every corrective commit in the batch, and is treated as a fresh
+     candidate. Record fresh successful reruns specifically for that exact
+     advanced remote-head commit of all affected reviews (including a new
+     candidate Reviewer approval and unchanged Reviewer-owned evidence),
+     qualifying literal final `PASS`, aggregate validation, and clean
+     committed-candidate checks before it qualifies.
+4. Corrective-commit reachability is necessary but insufficient: it cannot
+   qualify an advanced head without the documented exact-head reruns. Tree or
+   text similarity, a public commit URL, presence only in another repository or
    the base or an unrelated branch, a stale local remote-tracking ref, push
-   success alone, or an unconfirmed caller handoff is not sufficient. Confirm
-   this containment after any push or handoff.
+   success alone, or an unconfirmed caller handoff cannot substitute for either
+   path. Confirm this evidence after any push or handoff. Missing, unavailable,
+   contradictory, or ambiguous identity, reachability, or check evidence
+   blocks publication and resolution.
+5. After all applicable checks, including the applicable qualification in step
+   3, immediately before **each** individual reply and again immediately before
+   its thread resolution, repeat authoritative PR inspection. Record and prove
+   that the actual PR remote repository, head branch, and immutable current SHA
+   exactly equal the fully validated candidate's repository/branch/SHA tuple.
+   This final inspection is required for every publication operation, including
+   no-artifact replies and resolutions; neither the absence of a push nor an
+   earlier inspection or stale evidence can authorize one. If the identity or
+   SHA differs, treat the actual head as a fresh candidate: first establish its
+   unambiguous PR repository/branch identity, then rerun all affected reviews
+   including mandatory candidate Reviewer approval and its evidence protocol,
+   qualifying literal final `PASS`, aggregate validation, and clean
+   committed-candidate checks specifically for that exact SHA, re-establish
+   reachability, and repeat this final inspection. If the final inspection is
+   unavailable or ambiguous, or changes again, fail closed: publish or resolve
+   nothing until the prescribed fresh-candidate route finishes for the
+   then-current exact head.
 
-Do not rebase, merge, or rewrite history to bypass gate failures. If remote
-preparation changes the local candidate, stop and follow the existing review,
-revalidation, and exact-patch approval guards.
+Never reset, rebase, merge, or rewrite history to force remote equality or
+bypass gate failures. If remote preparation changes the local candidate, stop
+and follow the existing review, revalidation, and exact-patch approval guards.
 
 A batch consisting entirely of no-artifact outcomes (questions, clarifications,
-disagreements, or skips) is exempt only from the push/remote-commit gate; existing
-action approvals, aggregate validation, and committed-candidate guards remain.
+disagreements, or skips) requires no artifact commit or push, but is not exempt
+from the remote-availability gate, exact remote-tuple equality, candidate
+Reviewer approval/evidence protocol, aggregate validation, or
+committed-candidate guards.
 
 Only completion of all approved actions, including qualifying final `PASS` for
 each artifact change, together with successful aggregate validation, every
@@ -232,7 +303,8 @@ untracked-file check fails, is unavailable, or cannot establish the required
 condition, hold all prepared replies and leave all threads open. Do the same for
 an explicit limit preventing a needed push, missing scope or permissions, a failed
 push, an incomplete or unconfirmed caller handoff, unavailable remote inspection,
-or unconfirmed remote containment.
+unconfirmed remote containment, or missing/ambiguous exact-head qualification
+evidence.
 Report the blocker without claiming success. In a mixed batch, this holds every
 outcome, including questions and skips. Preserve all user work: never
 automatically stash, discard/reset, stage or incorporate unrelated changes, or

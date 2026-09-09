@@ -43,26 +43,68 @@ Resolve pull request comments end-to-end.
    record candidate HEAD and establish a clean index and worktree (no staged or
    unstaged tracked changes or nonignored untracked files) before aggregate
    validation. Afterward, confirm unchanged HEAD and the same clean state.
-   For any artifact-changing batch, then apply PR Resolver's remote-availability
-   gate: the recorded action approval authorizes a needed non-force push unless
-   explicitly limited; exclude unrelated commits/user work, or wait for the
-   responsible calling workflow's confirmed push handoff. Before publishing any
-   reply or resolving any thread, confirm from current authoritative history that
-   the actual PR remote repository's head branch contains the validated candidate
-   and every corrective commit in the batch. An advanced descendant containing
-   all qualifies; a commit URL, push success, stale tracking ref, wrong
-   repository/branch, or unconfirmed handoff does not. Already-present commits
-   need neither redundant push nor permission. Entirely no-artifact batches need
-   no artifact final verification and are exempt from this push/remote gate, not
-   existing approvals or aggregate guards. Require explicit final `PASS` for each
-   artifact action. Only when all applicable gates pass may replies be published
-   and threads resolved using PR Resolver's publication safeguards. An explicit
-   limit preventing a needed push, missing scope/permissions, failed push/tool
-   gates, or any failed, unavailable, or unconfirmed gate holds all replies
-   (including mixed-batch questions/skips) and leaves all threads open; report
-   the blocker and preserve user work. Do not bypass failures by rebasing,
-   merging, or rewriting history; local candidate changes require the existing
-   stop/review/revalidation guards.
+   For every batch, apply PR Resolver's remote-availability gate: the recorded
+   action approval authorizes a needed non-force push unless explicitly
+   limited; exclude unrelated commits/user work, or wait for the responsible
+   calling workflow's confirmed push handoff. Immediately before
+   qualifying remote availability, derive and record the actual PR remote
+   repository, head branch, and immutable remote head through authoritative PR
+   inspection; this preliminary inspection does not authorize publication, and
+   missing, stale, or ambiguous inspection blocks. The actual remote head
+   qualifies only if it exactly equals the committed
+   fully validated candidate for which all affected reviews, qualifying final
+   `PASS`, aggregate validation, and clean committed-candidate checks passed,
+   or if it advanced, contains every corrective commit, and has documented fresh
+   successful reruns of all affected reviews, qualifying final `PASS`,
+   aggregate validation, and clean committed-candidate checks specifically for
+   that exact advanced remote head.
+   Reachability alone is necessary but insufficient. A commit URL, push success,
+   stale tracking ref, tree or text similarity, another remote, the base or an
+   unrelated branch, or unconfirmed handoff does not qualify; missing or ambiguous identity,
+   reachability, or rerun evidence blocks. Already-present commits need neither
+   redundant push nor permission. After all applicable checks, immediately
+   before **every** reply and again immediately before **every** thread
+   resolution, repeat authoritative PR inspection and prove the actual PR
+   remote repository, head branch, and immutable current SHA exactly equal the
+   fully validated candidate's repository/branch/SHA tuple. No earlier inspection,
+   stale evidence, or absence of a push authorizes publication. If the identity
+   or SHA differs, treat the actual head as a fresh candidate: establish its
+   unambiguous PR repository/branch identity, rerun all affected reviews, qualifying final
+   `PASS`, aggregate validation, and clean committed-candidate checks
+   specifically for that exact SHA, re-establish reachability, then repeat the
+   final inspection. If inspection is unavailable or ambiguous, or changes
+   again, fail closed and publish or resolve nothing until that prescribed route
+   finishes for the then-current exact head. Entirely no-artifact batches need
+   no artifact final verification, but are not exempt from the remote gate,
+   exact remote-tuple equality, mandatory candidate Reviewer approval, aggregate
+   validation, or committed-candidate guards; lack of a push does not bypass
+   any of them. Require a `candidate-review` Reviewer `Verdict: APPROVE` for
+   every candidate that can authorize publication; do not use a
+   `NON_BEHAVIORAL_CHANGE` review omission at this boundary. Immediately after
+   `APPROVE`, Reviewer alone records the exact current-worktree candidate's
+   baseline/current `HEAD`, a 64-hex SHA-256 computed over the raw bytes emitted by
+   exactly `git diff --binary HEAD`, and the changed-path set emitted by
+   `git diff --name-only HEAD`; runs and records `git diff --check HEAD` and
+   `pnpm format:check`; then recaptures `HEAD`, raw-byte SHA-256, and path set.
+   Any `HEAD`, hash, or path-set drift invalidates the approval and evidence,
+   elevates the worktree to a fresh candidate, and requires a fresh
+   candidate-review approval and complete evidence protocol. Failed, missing,
+   or ambiguous Reviewer-owned static evidence blocks. A fresh read/search-only Final Verifier executes no
+   commands: it validates source policy and reconciles/attributes that
+   Reviewer-owned evidence to the exact reviewed candidate. It may return
+   literal final `PASS` only if the approved candidate identity, hash, and scope
+   remained unchanged, all required static evidence passed, and source meets
+   the current contract. For an advanced remote SHA, repeat affected review
+   (including this protocol), literal final `PASS`, aggregate validation, and
+   clean candidate checks specifically for that SHA before reinspection.
+   Only when all applicable gates pass may replies be published and threads
+   resolved using PR Resolver's publication safeguards. An explicit limit
+   preventing a needed push, missing scope/permissions, failed push/tool gates,
+   or any failed, unavailable, or unconfirmed gate holds all replies (including
+   mixed-batch questions/skips) and leaves all threads open; report the blocker
+   and preserve user work. Never reset, rebase, merge, or rewrite history to
+   force equality or bypass failures; local candidate changes require the
+   existing stop/review/revalidation guards.
 7. Use artifact-appropriate targeted and broader verification rather than
    defaulting mechanically to `pnpm test`.
 

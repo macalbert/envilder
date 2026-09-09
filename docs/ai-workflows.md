@@ -321,27 +321,93 @@ follows the [PR Resolver committed-candidate guard](../.github/agents/pr-resolve
 record candidate HEAD and establish a clean index and worktree (no staged or
 unstaged tracked changes or nonignored untracked files) before aggregate
 validation, then confirm unchanged HEAD and the same clean state afterward.
-For any artifact-changing batch, successful validation and these checks must be
-followed by PR Resolver's remote-availability gate. Recorded action approval
-authorizes a needed non-force push unless explicitly limited. Never include
-unrelated commits/user work; if the responsible calling workflow owns the push,
-wait for its confirmed handoff instead.
-Before publishing any batch reply or resolving any thread, confirm from current
-authoritative history that the actual PR remote repository's head branch contains
-the validated candidate and every corrective commit in the batch. An advanced
-descendant containing all qualifies; a commit URL, push success, stale tracking
-ref, wrong repository/branch, or unconfirmed handoff does not. Already-present
-commits need no push or push approval. Entirely no-artifact batches are exempt
-only from the push/remote gate, not existing approvals or aggregate guards.
+Every batch must pass PR Resolver's remote-availability gate after successful
+aggregate validation and these checks. Recorded action approval authorizes a
+needed non-force push unless explicitly limited. Never include unrelated
+commits/user work; if the responsible calling workflow owns the push, wait for
+its confirmed handoff instead.
+Every candidate that can authorize a publication requires a `candidate-review`
+Reviewer `Verdict: APPROVE`, including a candidate used for an entirely
+no-artifact batch; the trivial/mechanical `NON_BEHAVIORAL_CHANGE` review
+omission does not apply at this boundary. Immediately after approval, Reviewer
+alone must collect the immediately post-`APPROVE` record for the exact
+current-worktree candidate: baseline/current `HEAD`, a 64-hex SHA-256 computed
+over the raw bytes emitted by exactly `git diff --binary HEAD`, and the exact
+changed-path set emitted by `git diff --name-only HEAD`. Reviewer then runs and
+records `git diff --check HEAD` and `pnpm format:check`, and immediately
+recaptures `HEAD`, raw-byte SHA-256, and changed-path set. The before/after
+values must match; any `HEAD`, hash, or path-set drift invalidates the approval
+and evidence, elevates the worktree to a fresh candidate, and requires a fresh
+candidate-review approval and the complete evidence protocol. Failed,
+unavailable, or ambiguous Reviewer-owned static evidence blocks publication and
+cannot be substituted by another role.
+
+A fresh Final Verifier remains read/search-only and executes no commands. It
+validates source policy and reconciles and attributes the Reviewer-owned base
+and current `HEAD` identity, raw-byte binary-diff SHA-256, changed-path set,
+and static results to the exact reviewed candidate. It may return literal final
+`PASS` only if Reviewer approved that exact candidate, its identity/hash/scope
+remained unchanged across the evidence captures, all required static evidence
+passed, and the source policy meets the current contract. Otherwise it returns
+`FAIL` or `BLOCKED`; neither an earlier `PASS` nor evidence owned or recreated
+by another role survives drift.
+
+For every batch, mandatory candidate Reviewer approval and its unchanged
+Reviewer-owned evidence, successful aggregate validation, and clean
+committed-candidate checks precede remote-availability qualification. A
+no-artifact batch requires no artifact commit or push, but lack of a push does
+not bypass this gate or exact remote-tuple equality.
+To begin remote-availability qualification, derive and record the actual PR
+remote repository, head branch, and immutable remote head through authoritative
+PR inspection. This preliminary inspection does not authorize publication.
+Missing, stale, or ambiguous inspection blocks; a local remote-tracking ref,
+push result, commit URL, or another remote or branch is not authoritative
+evidence. The actual remote head qualifies only by one of two paths:
+
+1. It exactly equals the fully validated candidate for which all affected
+   reviews—including mandatory candidate Reviewer approval and its unchanged
+   Reviewer-owned evidence—qualifying literal final `PASS`, aggregate
+   validation, and clean committed-candidate checks passed.
+2. It advanced, contains every corrective commit in the batch, and is treated as
+   a fresh candidate: documented fresh successful reruns of all affected
+   reviews—including a new candidate Reviewer approval and complete unchanged
+   Reviewer-owned evidence—qualifying literal final `PASS`, aggregate
+   validation, and clean committed-candidate checks must each identify that
+   exact advanced remote-head commit.
+
+Corrective-commit reachability is necessary but insufficient. Tree or text
+similarity, a public commit URL, presence only in the base or an unrelated
+branch or repository, a stale local remote-tracking ref, push success alone, or
+an unconfirmed handoff cannot qualify either path. Missing, unavailable,
+contradictory, or ambiguous identity, reachability, or exact-head rerun evidence
+blocks publication and resolution. Already-present commits need no push or push
+approval. An entirely no-artifact batch requires no artifact commit or push, but
+is not exempt from the push/remote gate, exact remote-tuple equality, mandatory
+candidate review/evidence, or aggregate guards.
+After all applicable checks, immediately before **every** individual reply and
+again immediately before **every** individual thread resolution, repeat
+authoritative PR inspection. Record and prove that the actual PR remote
+repository, head branch, and immutable current SHA exactly equal the fully
+validated candidate's repository/branch/SHA tuple; no earlier inspection, stale
+evidence, or absence of a push can authorize publication. If the identity or
+SHA differs, treat the actual head as a fresh candidate: establish its
+unambiguous PR repository/branch identity, rerun all affected reviews including
+mandatory candidate Reviewer approval and the complete evidence protocol,
+qualifying literal final `PASS`, aggregate validation, and clean
+committed-candidate checks specifically for that exact SHA, re-establish
+reachability, then repeat this final inspection. If inspection is unavailable or
+ambiguous, or changes again, fail closed and publish or resolve nothing until
+that prescribed route finishes for the then-current exact head.
 Only when all applicable gates pass may replies be published and threads resolved
 under the existing publication safeguards, without another reply or resolution
 approval checkpoint. An explicit limit preventing a needed push, failed push, or
 any failed, unavailable, or unconfirmed gate holds all replies (including
 mixed-batch questions and skips) and leaves all threads open; report the blocker
 and preserve user work.
-Do not bypass failures by rebasing, merging, or rewriting history; local candidate
-changes require the existing stop/review/revalidation guards. The calling user or
-workflow retains ownership of the branch and overall pull-request lifecycle.
+Never reset, rebase, merge, or rewrite history to force equality or bypass
+failures; local candidate changes require the existing stop/review/revalidation
+guards. The calling user or workflow retains ownership of the branch and overall
+pull-request lifecycle.
 
 ## Oracle Effectiveness
 
