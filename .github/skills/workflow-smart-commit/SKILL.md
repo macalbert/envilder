@@ -26,8 +26,15 @@ Analyze staged changes and create a conventional commit message.
    generated conventional message without repeated wording permission.
 6. Run `git commit -m "<message>"` after message approval, or under that narrow
    PR Resolver exception once all its pre-commit gates pass, including final
-   `PASS` and exact staged-patch equality. Honor recorded limits and retain
-   conventional format, required trailers, commitlint, hooks, and host gates.
+   `PASS` and exact staged-patch equality. For that exception, PR Resolver must
+   first have prepared every applicable mutating commit hook through its
+   enabled repository-supported staged-hook path, then re-reviewed, freshly
+   verified, and obtained exact-patch approval for the resulting candidate.
+   Final `PASS` and staged equality alone are never sufficient: use ordinary
+   enabled hooks for the commit and require PR Resolver's post-commit
+   parent/diff/scope integrity guard before treating it as successful. Honor
+   recorded limits and retain conventional format, required trailers,
+   commitlint, hooks, and host gates.
    Standalone Smart Commit and every unrelated workflow still require message
    approval. This exception never authorizes unseen hunks or bypasses PR
    Resolver's reassessment/reapproval guards for material or candidate changes.
@@ -69,3 +76,7 @@ See [reference.md](./reference.md) for the full scope table.
 - Never commit unstaged changes
 - Never use `--no-verify`
 - If nothing is staged, tell the user to stage changes first
+- Never infer that a generic formatter or command exercised Lefthook
+  `stage_fixed` behavior; only PR Resolver's repository-supported preparation
+  protocol can authorize its lifecycle exception. `--no-stage-fixed` is
+  prohibited.

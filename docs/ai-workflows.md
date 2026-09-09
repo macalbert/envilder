@@ -311,8 +311,46 @@ preserve state, without automatically reverting, resetting, stashing,
 discarding, absorbing changed history into the fix, or restoring old HEAD to
 hide a change. Resume only after legitimate reassessment and applicable approval
 under existing review/verification guards. These are point-in-time checks, not a
-runtime lock. PR Resolver retains authority to stage the exact approved frozen
-patch and commit it separately, verifying staged equality before committing.
+runtime lock.
+
+Before final candidate review, fresh final literal `PASS`, frozen exact-patch
+content approval, official staging, or staged equality, PR Resolver compares
+the preliminary candidate with the recorded initial HEAD and blocks
+out-of-scope/unattributable content. It determines every configured mutating
+commit hook applicable to that candidate. Every applicable content-mutating hook
+must run before review through the enabled repository-supported installed-hook
+preparation path that actually exercises configured Lefthook staged-hook
+behavior, including `stage_fixed`; a generic formatter, arbitrary command,
+disabled-hook switch (including `--no-stage-fixed`), or claim that it exercised
+Lefthook is not a substitute.
+
+A disposable preparation staging operation is allowed only from strict clean
+admission, only for the preliminary candidate, and only when it is not
+official/final staging and a clean index can be deterministically restored
+without changing the worktree. Before restoration, prove that both staged index
+and worktree equal the resulting candidate and that no untracked or
+out-of-candidate content exists; after it, prove that the index equals HEAD and
+the worktree still equals that candidate. Do not use snapshots, exclusions, or
+temporary worktrees to evade admission. If the enabled preparation route or
+Lefthook behavior cannot be safely and deterministically executed, fails, is
+ambiguous, or cannot prove restoration/equality, block and preserve user state;
+do not destroy, stage, or incorporate user content. Require a
+project-supported preparation path rather than inventing a generic surrogate.
+
+Re-derive the candidate after preparation. A content or scope change is a new
+candidate. Re-determine and prepare every newly applicable mutating hook until
+the candidate and applicable-hook set are unchanged, or block. Immediately
+after final preparation/restoration, reconfirm the original HEAD, clean index,
+no tracked unstaged or nonignored untracked content outside the candidate, and
+that the restored worktree still exactly equals the final candidate; any drift
+or ambiguity blocks rather than racing ahead. The resulting candidate requires
+comment-specific validation, then a new candidate review and fresh final
+literal `PASS` through Change Orchestrator, and explicit frozen exact-patch
+approval. A pre-preparation review or `PASS` is not sufficient. PR Resolver
+then stages only the exact frozen approved patch and proves staged equality. It
+creates the ordinary commit with normal hooks enabled and runs no other
+user-content mutating hook after approval. Final `PASS` plus staged equality
+alone is insufficient.
 After a parent-owned commit reports success, it immediately records the
 resulting HEAD commit hash and, before retaining it as a fixed commit or
 capturing/publishing its URL, proves that the recorded initial per-comment HEAD
@@ -342,13 +380,19 @@ Reviewer `Verdict: APPROVE`, including a candidate used for an entirely
 no-artifact batch; the trivial/mechanical `NON_BEHAVIORAL_CHANGE` review
 omission does not apply at this boundary. Immediately after approval, Reviewer
 alone must collect the immediately post-`APPROVE` record for the exact
-current-worktree candidate: baseline/current `HEAD`, a 64-hex SHA-256 computed
-over the raw bytes emitted by exactly `git diff --binary HEAD`, and the exact
-changed-path set emitted by `git diff --name-only HEAD`. Reviewer then runs and
-records `git diff --check HEAD` and `pnpm format:check`, and immediately
-recaptures `HEAD`, raw-byte SHA-256, and changed-path set. The before/after
-values must match; any `HEAD`, hash, or path-set drift invalidates the approval
-and evidence, elevates the worktree to a fresh candidate, and requires a fresh
+current-worktree candidate. Before any static gates, Reviewer must physically
+run and record `git status --porcelain=v1`. The record includes baseline/current
+`HEAD`, a 64-hex SHA-256 computed over the raw bytes emitted by exactly
+`git diff --binary HEAD`, the exact changed-path set emitted by
+`git diff --name-only HEAD`, and that initial porcelain-status capture.
+Reviewer then runs and records `git diff --check HEAD`, `pnpm lefthook
+validate`, and `pnpm format:check`, in that order. Immediately after those
+static checks, it physically recaptures and records `git status --porcelain=v1`,
+`HEAD`, the changed-path set, the raw-byte SHA-256, and the output of a final
+`git diff --check HEAD` (capture B). Both `git diff --check HEAD` results must
+be clean. The before/after identity dimensions must match; any `HEAD`, hash,
+path-set, or porcelain-status drift invalidates the approval and evidence,
+elevates the worktree to a fresh candidate, and requires a fresh
 candidate-review approval and the complete evidence protocol. Failed,
 unavailable, or ambiguous Reviewer-owned static evidence blocks publication and
 cannot be substituted by another role.
@@ -356,9 +400,11 @@ cannot be substituted by another role.
 A fresh Final Verifier remains read/search-only and executes no commands. It
 validates source policy and reconciles and attributes the Reviewer-owned base
 and current `HEAD` identity, raw-byte binary-diff SHA-256, changed-path set,
-and static results to the exact reviewed candidate. It may return literal final
-`PASS` only if Reviewer approved that exact candidate, its identity/hash/scope
-remained unchanged across the evidence captures, all required static evidence
+initial/final porcelain-status captures, both recorded `git diff --check HEAD`
+outputs, and the other static results to the exact reviewed candidate. It may
+return literal final `PASS` only if Reviewer approved that exact candidate, its
+identity/hash/scope/porcelain-status remained unchanged across the evidence
+captures, both diff checks are clean, every other required static result
 passed, and the source policy meets the current contract. Otherwise it returns
 `FAIL` or `BLOCKED`; neither an earlier `PASS` nor evidence owned or recreated
 by another role survives drift.

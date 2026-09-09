@@ -120,14 +120,50 @@ For each active review comment:
    - on receiving the delegated result, before deriving any candidate patch,
      successfully confirm that HEAD equals the initial per-comment HEAD and
      that the index remains clean;
-   - accept only a successful `ChangeResult` whose `FinalVerificationResult`
-     explicitly reports `Final result: PASS` for the exact current reviewed
-     candidate and whose other acceptance conditions remain satisfied;
-   - run or confirm comment-specific validation;
-   - compare the candidate with the recorded initial HEAD and block if any
-     change cannot be attributed to the approved action or exceeds its scope;
-   - derive the exact candidate patch introduced for the comment, present that
-     patch to the user, and obtain explicit approval before staging;
+   - compare the preliminary candidate with the recorded initial HEAD and
+     block if any change cannot be attributed to the approved action or exceeds
+     its scope. Before its final candidate review, fresh final literal `PASS`,
+     frozen exact-patch content approval, official staging, or staged-equality
+     check, determine every configured mutating commit hook applicable to that
+     preliminary candidate;
+   - where an applicable hook can mutate content, execute every such hook before review
+     through the repository-supported, enabled installed-hook preparation path
+     that actually exercises the configured Lefthook staged-hook behavior,
+     including `stage_fixed`. Never substitute a generic formatter, claim that
+     an arbitrary command exercises Lefthook, use a disabled-hook switch
+     (including `--no-stage-fixed`), or run another user-content mutating hook
+     after approval;
+   - a disposable preparation staging operation is permitted only after the
+     strict clean admission and only when it can stage exclusively the
+     preliminary candidate, is explicitly not official/final staging, and can
+     deterministically restore a clean index without changing the worktree.
+     Before restoration, prove that both the staged index and worktree equal
+     the resulting candidate and that no untracked path or out-of-candidate
+     content was created; after it, prove that the index equals HEAD and the
+     worktree still equals that candidate. Do not use snapshots, exclusions,
+     or temporary worktrees to evade admission. If the installed-hook
+     preparation path, its enabled Lefthook behavior, its result, or that
+     restoration/equality proof is unavailable, ambiguous, unsafe, or fails,
+     block while preserving all user state; do not clean up by destroying user
+     work or staging/incorporating it. When this guarantee cannot be made,
+     require a project-supported preparation path rather than inventing a
+     generic one;
+   - re-derive the candidate after preparation. Any content or scope change is
+     a new candidate. Re-determine and prepare every newly applicable mutating
+     hook until the candidate and its applicable-hook set are unchanged, or
+     block. Immediately after the final preparation/restoration, reconfirm the
+     original HEAD, clean index, absence of tracked unstaged and nonignored
+     untracked changes outside that candidate, and that the restored worktree
+     still exactly equals the final candidate; any drift or ambiguity blocks
+     rather than racing ahead. Then run or confirm its comment-specific
+     validation, route that candidate through Change Orchestrator for a new
+     candidate review and a fresh `FinalVerificationResult` with literal
+     `Final result: PASS` for that exact reviewed candidate. Accept only a
+     successful `ChangeResult` with that qualifying result and all other
+     acceptance conditions satisfied; a pre-preparation review or `PASS` is
+     not sufficient;
+   - derive the exact resulting candidate patch, present it to the user, and
+     obtain explicit approval before staging;
    - freeze the approved patch; any subsequent candidate change requires fresh
      review, verification, and user approval;
    - immediately before approved staging, after any approval wait, successfully
@@ -140,7 +176,9 @@ For each active review comment:
      comment;
    - generate the conventional message and create one commit with the required
      co-author trailer under `workflow-smart-commit`'s PR Resolver exception,
-     without another message-approval checkpoint; retain commitlint and hooks;
+     without another message-approval checkpoint. Use an ordinary commit with
+     normal hooks enabled; final `PASS` plus pre-commit staged equality is not
+     sufficient and no other user-content mutating hook may run after approval;
    - immediately after the parent-owned `git commit` reports success, record
      the resulting HEAD commit hash and run the committed-patch integrity guard
      before capturing or publishing a fixed commit URL:
@@ -200,14 +238,19 @@ omission at this publication boundary. Require a `candidate-review`
 
 Immediately after that approval, the Reviewer—not PR Resolver, Change
 Orchestrator, or Final Verifier—must collect and return a candidate-evidence
-record for the exact current-worktree candidate. The immediately post-`APPROVE`
-record identifies the baseline/current `HEAD`, a 64-hex SHA-256 computed over
-the raw bytes emitted by exactly `git diff --binary HEAD`, and the exact
-changed-path set emitted by `git diff --name-only HEAD`. The Reviewer must then
-run and record successful results for `git diff --check HEAD` and
-`pnpm format:check`. Immediately after those static checks, the Reviewer must
-recapture `HEAD`, the raw-byte SHA-256, and the changed-path set.
-All before/after values must match. Any `HEAD`, hash, or path-set drift
+record for the exact current-worktree candidate. Before any static gates, the
+Reviewer must physically run and record `git status --porcelain=v1`. The
+immediately post-`APPROVE` record identifies the baseline/current `HEAD`, a
+64-hex SHA-256 computed over the raw bytes emitted by exactly
+`git diff --binary HEAD`, the exact changed-path set emitted by
+`git diff --name-only HEAD`, and that initial porcelain-status capture. The
+Reviewer must then run and record successful results for `git diff --check HEAD`,
+`pnpm lefthook validate`, and `pnpm format:check`, in that order. Immediately
+after those static checks, the Reviewer must physically recapture and record
+`git status --porcelain=v1`, `HEAD`, the changed-path set, the raw-byte
+SHA-256, and the output of a final `git diff --check HEAD` (capture B). Both
+`git diff --check HEAD` results must be clean. All before/after identity
+dimensions must match. Any `HEAD`, hash, path-set, or porcelain-status drift
 invalidates the approval and its evidence, elevates the worktree to a fresh
 candidate, and requires a fresh candidate-review approval followed by this
 entire protocol. Failed, unavailable, or ambiguous Reviewer-owned static
@@ -218,10 +261,12 @@ Delegate a fresh Final Verifier only with the exact reviewed candidate and this
 Reviewer-owned record. The Final Verifier remains read/search-only and must not
 execute commands or collect replacement evidence. It validates the source
 policy and reconciles and attributes the Reviewer-owned baseline/current `HEAD`
-identity, raw-byte binary-diff SHA-256, changed-path set, and static results to
-the exact reviewed candidate. It may return literal `Final result: PASS` only
-when the Reviewer approved that exact candidate, the before/after
-identity/hash/path-set captures are unchanged, every required static result
+identity, raw-byte binary-diff SHA-256, changed-path set, initial/final
+porcelain-status captures, and both recorded `git diff --check HEAD` outputs
+with the other static results to the exact reviewed candidate. It may return
+literal `Final result: PASS` only when the Reviewer approved that exact
+candidate, the before/after identity/hash/path-set/porcelain-status captures
+are unchanged, both diff checks are clean, every other required static result
 passed, the record is attributable to that candidate, and the source policy
 meets the current contract. Otherwise it returns `FAIL` or `BLOCKED`; a prior
 `PASS` does not survive drift.
