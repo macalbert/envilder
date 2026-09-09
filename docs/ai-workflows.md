@@ -249,10 +249,18 @@ action, and obtains explicit approval. It then follows one of two branches:
 PR Resolver owns each artifact-changing comment's separate commit, every
 mandatory reply, and review-thread resolution. It requires a clean index for
 each isolated commit and verifies that the staged diff exactly matches the
-approved patch. After all comments, it runs aggregate validation; only a
-successful result permits publishing replies and resolving threads. The calling
-user or workflow retains ownership of the branch and overall pull-request
-lifecycle. Push remains subject to explicit user approval.
+approved patch. After all comments and completion of the approved actions, it
+follows the [PR Resolver committed-candidate guard](../.github/agents/pr-resolver.agent.md#workflow):
+record candidate HEAD and establish a clean index and worktree (no staged or
+unstaged tracked changes or nonignored untracked files) before aggregate
+validation, then confirm unchanged HEAD and the same clean state afterward.
+Only successful validation with every guard check established permits publishing
+replies and resolving threads under the existing publication safeguards. If
+validation or any guard check fails, is unavailable, or cannot establish the
+required condition, publish nothing, leave threads open, report the reason, and
+preserve user work. The calling user or workflow retains ownership of the branch
+and overall pull-request lifecycle. Push remains subject to explicit user
+approval.
 
 ## Oracle Effectiveness
 

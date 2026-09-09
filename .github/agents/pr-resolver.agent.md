@@ -104,13 +104,27 @@ For each active review comment:
     it; leave the thread open.
 11. Update the tracker and continue to the next comment.
 
-After all comments, run relevant aggregate validation. Only when it succeeds
-and the approved actions are complete, publish each prepared reply in its
-existing thread and resolve that thread using the Duplicate Prevention and
-Thread Resolution safeguards below. Do not insert a separate reply or resolution
-approval checkpoint.
-If aggregate validation fails or is unavailable, publish nothing, leave all
-threads open, and report the failure. Push only with user approval.
+After all comments and completion of the approved actions, enforce this
+committed-candidate guard at the aggregate/publication boundary:
+
+1. Record the candidate HEAD and establish that the index and worktree are
+   clean: no staged changes relative to HEAD, no unstaged tracked changes, and
+   no nonignored untracked files, including files inside untracked directories.
+   Git-ignored untracked files are exempt.
+2. Only after establishing that pre-state, run relevant aggregate validation.
+3. After validation, confirm that HEAD is unchanged from the recorded candidate
+   and that the index and worktree remain clean by the same criteria.
+
+Only successful aggregate validation with every guard check established permits
+publishing each prepared reply in its existing thread and resolving that thread
+using the Duplicate Prevention and Thread Resolution safeguards below. Do not
+insert a separate reply or resolution approval checkpoint.
+If aggregate validation or any required HEAD, index, tracked-worktree, or
+untracked-file check fails, is unavailable, or cannot establish the required
+condition, publish nothing, resolve no threads, leave all threads open, and
+report the reason. Preserve all user work: never automatically stash,
+discard/reset, stage or incorporate unrelated changes, or create temporary-worktree
+infrastructure to make checks pass. Push only with user approval.
 
 ## Required Comment Presentation
 

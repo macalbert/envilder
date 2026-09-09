@@ -26,11 +26,16 @@ Resolve pull request comments end-to-end.
    and why, following
    [review-response.instructions.md](../instructions/review-response.instructions.md),
    without publishing or resolving the thread.
-6. Run aggregate validation after all comments. Only after the decided actions
-   are complete and it succeeds, publish each prepared reply in its existing
-   thread and resolve the thread using PR Resolver's publication safeguards.
-   If validation fails or is unavailable, publish nothing, leave threads open,
-   and report the failure.
+6. After all comments and completion of the decided actions, follow
+   [PR Resolver's committed-candidate guard](../agents/pr-resolver.agent.md#workflow):
+   record candidate HEAD and establish a clean index and worktree (no staged or
+   unstaged tracked changes or nonignored untracked files) before aggregate
+   validation. Afterward, confirm unchanged HEAD and the same clean state.
+   Only successful validation with every guard check established permits
+   publishing each prepared reply in its existing thread and resolving the
+   thread using PR Resolver's publication safeguards. If validation or any guard
+   check fails, is unavailable, or cannot establish the required condition,
+   publish nothing, leave threads open, report the reason, and preserve user work.
 7. Use artifact-appropriate targeted and broader verification rather than
    defaulting mechanically to `pnpm test`.
 
