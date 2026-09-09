@@ -33,9 +33,10 @@ preserving each worker's tool boundary. If this cannot be established,
 edit nothing and return `ContentChangeResult` as `BLOCKED`. Do not collapse
 roles into this agent.
 
-Use existing command-line tools through `execute` for browser, Playwright, and
-other validation. If a required command or browser capability is unavailable,
-report the limitation rather than substituting vendor-specific tools.
+Use existing command-line tools through `execute` for validation, including
+browser-based checks via tools such as Playwright. If a required command or
+browser capability is unavailable, report the limitation rather than
+substituting vendor-specific tools.
 
 ## Scope
 
