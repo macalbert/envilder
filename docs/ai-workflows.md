@@ -75,9 +75,9 @@ Agent profiles intentionally omit `model`, allowing each host to select an
 available model, and use common tool aliases as portability defaults. Alias
 mappings and support are host-dependent, not universal. Each coordinator must
 preflight custom-agent invocation, nested delegation, required tool propagation,
-and worker tool boundaries. It stops as `BLOCKED` instead of collapsing
-independent roles when those capabilities are unavailable or cannot be
-established.
+and worker tool boundaries. The coordinator returns a `BLOCKED` result instead
+of collapsing independent roles when those capabilities are unavailable or
+cannot be established.
 
 ### Nested Delegation
 
