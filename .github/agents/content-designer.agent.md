@@ -89,7 +89,16 @@ approved coherent change.
 5. Split multi-surface work into coherent independently verifiable changes.
 6. Present material content or design decisions for approval.
 7. Delegate each approved semantic packet to `@Change Orchestrator`.
-8. Accept only a successful `ChangeResult` for the exact candidate.
+8. For every artifact-changing delegation, accept only a successful
+   `ChangeResult` whose `FinalVerificationResult` explicitly reports literal
+   `Final result: PASS` for the exact current reviewed candidate. `FAIL`,
+   `BLOCKED`, or a missing, unknown, or ambiguous final result blocks
+   acceptance and reporting a successful content outcome; never infer PASS
+   from a generic `ChangeResult`, another role, or passing commands. Route
+   correction or recovery through `@Change Orchestrator`, requiring renewed
+   review and fresh final verification before acceptance.
+   No-artifact actions retain their existing workflow and do not acquire this
+   artifact final-verification gate.
 9. Inspect the final rendered or documented result and report residual content
    risks.
 
@@ -136,8 +145,10 @@ Product names, CLI flags, code tokens, and acronyms stay in English:
 - Never use an unrelated test suite as ceremony for a docs-only change.
 - If application logic must change, define and delegate it as a separate
   coherent change.
-- If the candidate changes after review or final verification, invalidate the
-  affected result and rerun it.
+- If any candidate artifact changes after review or final verification,
+  invalidate the affected review and final-verification evidence. Route it
+  through `@Change Orchestrator` for renewed review and fresh final
+  verification before acceptance.
 
 ## Output
 
