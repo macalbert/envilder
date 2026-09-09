@@ -17,13 +17,25 @@ Resolve pull request comments end-to-end.
 1. Gather comments from the active/open PR when available.
 2. Process one comment at a time and prevent duplicate replies.
 3. Present the proposed action or disposition, intent, verification strategy,
-   scope, and validation for explicit approval. That decision intrinsically
-   includes the normal factual outcome reply even if not mentioned; never ask
-   for separate reply authorization or wording review before or after validation.
+   scope, and validation for explicit approval. Before asking, disclose that
+   approval bundles implementation, staging of the separately approved exact
+   patch, a separate conventional commit, any necessary non-force push to the
+   actual PR head remote/branch, a factual English reply explaining action and
+   reason, then confirmed resolution after the reply is confirmed. Record the
+   authorization and explicit limits in the action/handoff. No action approval
+   means no execution; do not ask again solely for commit/push/reply/resolve or
+   generated wording. Honor local-only/no-push limits without pressure to remove
+   them. Questions/disagreements/skips authorize reply/resolution only, not
+   manufactured artifacts, commits, or pushes.
 4. Delegate each approved artifact change through `@Change Orchestrator`.
-5. Commit each artifact-changing comment separately. Prepare each comment's
-   English factual reply explaining the action, answer, or decided disposition
-   and why, following
+5. Obtain explicit content approval of the exact resulting patch before staging;
+   action approval never covers unseen future hunks. Material changes require
+   reassessment/reapproval; candidate changes invalidate affected review/final
+   results. Follow PR Resolver's frozen-patch and staged-equality guards. Commit
+   each artifact-changing comment separately using `workflow-smart-commit`'s
+   scoped PR Resolver message exception, retaining commitlint and hooks.
+   Prepare each comment's English factual reply explaining the action, answer,
+   or decided disposition and why, following
    [review-response.instructions.md](../instructions/review-response.instructions.md),
    without publishing or resolving the thread.
 6. After all comments and completion of the decided actions, follow
@@ -32,21 +44,25 @@ Resolve pull request comments end-to-end.
    unstaged tracked changes or nonignored untracked files) before aggregate
    validation. Afterward, confirm unchanged HEAD and the same clean state.
    For any artifact-changing batch, then apply PR Resolver's remote-availability
-   gate: push only if needed and explicitly user-approved, or wait for the
-   responsible calling workflow to push. Before publishing any reply or resolving
-   any thread, confirm from current authoritative history that the actual PR
-   remote repository's head branch contains the validated candidate and every
-   corrective commit in the batch. An advanced descendant containing all qualifies;
-   a commit URL, push success, stale tracking ref, wrong repository/branch, or
-   unconfirmed handoff does not. Already-present commits need no push or push
-   approval. Entirely no-artifact batches are exempt only from this push/remote
-   gate, not existing approvals or aggregate guards. Only when all applicable
-   gates pass may replies be published and threads resolved using PR Resolver's
-   publication safeguards. Missing needed push approval, failed push, or any
-   failed, unavailable, or unconfirmed gate holds all replies (including mixed-batch
-   questions/skips) and leaves all threads open; report the blocker and preserve
-   user work. Do not bypass failures by rebasing, merging, or rewriting history;
-   local candidate changes require the existing stop/review/revalidation guards.
+   gate: the recorded action approval authorizes a needed non-force push unless
+   explicitly limited; exclude unrelated commits/user work, or wait for the
+   responsible calling workflow's confirmed push handoff. Before publishing any
+   reply or resolving any thread, confirm from current authoritative history that
+   the actual PR remote repository's head branch contains the validated candidate
+   and every corrective commit in the batch. An advanced descendant containing
+   all qualifies; a commit URL, push success, stale tracking ref, wrong
+   repository/branch, or unconfirmed handoff does not. Already-present commits
+   need neither redundant push nor permission. Entirely no-artifact batches need
+   no artifact final verification and are exempt from this push/remote gate, not
+   existing approvals or aggregate guards. Require explicit final `PASS` for each
+   artifact action. Only when all applicable gates pass may replies be published
+   and threads resolved using PR Resolver's publication safeguards. An explicit
+   limit preventing a needed push, missing scope/permissions, failed push/tool
+   gates, or any failed, unavailable, or unconfirmed gate holds all replies
+   (including mixed-batch questions/skips) and leaves all threads open; report
+   the blocker and preserve user work. Do not bypass failures by rebasing,
+   merging, or rewriting history; local candidate changes require the existing
+   stop/review/revalidation guards.
 7. Use artifact-appropriate targeted and broader verification rather than
    defaulting mechanically to `pnpm test`.
 

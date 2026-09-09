@@ -40,12 +40,23 @@ return `ResolvedComments` as `BLOCKED`. Never collapse the delegated roles.
 
 - Obtain explicit user approval for the comment action or disposition before
   executing it, including answering a question, disagreeing, or skipping.
-- That decision intrinsically includes its normal factual outcome reply, even
-  if approval does not mention the reply. Never request separate reply
-  authorization or review/approval of wording, either upfront or after
-  validation.
-- Present the exact proposed action, impact, scope, and validation before
-  approval.
+- Before requesting that approval, disclose the bundled lifecycle and scope:
+  implement the fix, stage the separately approved exact patch, create its
+  separate conventional commit, make any necessary non-force push to the actual
+  PR head remote/branch, publish the factual English outcome reply explaining
+  action and reason, then confirm thread resolution after the reply is confirmed.
+  Questions, disagreements, and skips authorize reply/resolution, not
+  manufactured artifacts, commits, or pushes.
+- Record this authorization and explicit limits in the action packet and
+  handoffs. Do not execute without action approval or request repeated permission
+  solely for commit/push/reply/resolve or their generated wording. Exact-patch
+  content approval before staging remains mandatory; action approval cannot
+  authorize unseen future hunks.
+- Honor explicit limits such as local-only or no push. If a limit prevents a
+  required gate, hold the batch and report it; do not override the limit or
+  pressure the user to remove it. Clarifying missing scope or authority is allowed.
+- Present the exact proposed action, impact, scope, validation, and lifecycle
+  before approval.
 - Delegate every artifact change through `@Change Orchestrator`.
 - Never edit code, tests, documentation, configuration, or metadata directly.
 - Preserve one commit per artifact-changing comment.
@@ -61,10 +72,12 @@ For each active review comment:
 
 1. Load the comment and thread state from GitHub or user-provided text.
 2. Check the tracker and existing replies to prevent duplicate processing.
-3. Require a clean index before processing the comment. If staged changes
-   already exist, preserve them unchanged and block because an isolated commit
-   cannot be proven. Snapshot the current tracked worktree diff plus all
-   untracked paths and content hashes.
+3. Record the initial per-comment HEAD commit and confirmed clean-index result
+   before processing the comment. If staged changes already exist,
+   preserve them unchanged and block because an isolated commit cannot be
+   proven. Snapshot the current tracked worktree diff plus all untracked paths
+   and content hashes. Isolatable pre-existing unstaged user changes are allowed;
+   preserve them and exclude them from the fix.
 4. Map the comment to the affected file, line, requirement, and current
    behavior.
 5. Classify the action and, for artifact changes, classify intent and
@@ -74,7 +87,8 @@ For each active review comment:
    - repository evidence and impact analysis;
    - exact proposed action;
    - intent and verification strategy;
-   - expected outcome, scope, and constraints; and
+   - expected outcome, scope, constraints, bundled lifecycle, and explicit
+     limits; and
    - targeted validation.
    Include invariants only when repository evidence or the comment's risk
    supports them. Include broader validation only when justified by integration
@@ -82,7 +96,12 @@ For each active review comment:
 7. Wait for explicit user approval. Re-present material changes to the proposal.
 8. Execute only the approved action.
 9. For an artifact change:
-   - delegate one coherent approved change to `@Change Orchestrator`;
+   - delegate one coherent approved change to `@Change Orchestrator` with the
+     packet's delegated Git lifecycle restriction below, retained through every
+     stage and retry;
+   - on receiving the delegated result, before deriving any candidate patch,
+     successfully confirm that HEAD equals the initial per-comment HEAD and
+     that the index remains clean;
    - accept only a successful `ChangeResult` whose `FinalVerificationResult`
      explicitly reports `Final result: PASS` for the exact current reviewed
      candidate and whose other acceptance conditions remain satisfied;
@@ -94,20 +113,32 @@ For each active review comment:
      patch to the user, and obtain explicit approval before staging;
    - freeze the approved patch; any subsequent candidate change requires fresh
      review, verification, and user approval;
+   - immediately before approved staging, after any approval wait, successfully
+     reconfirm the same initial per-comment HEAD and a clean index;
    - stage only the exact approved hunks from that frozen patch;
    - verify that the complete staged diff exactly equals the approved patch
      before committing;
    - if approved hunks overlap pre-existing or unrelated changes and cannot be
      separated safely, restore the clean index without changing the worktree
      and block the comment;
-   - create one conventional commit with the required co-author trailer;
+   - generate the conventional message and create one commit with the required
+     co-author trailer under `workflow-smart-commit`'s PR Resolver exception,
+     without another message-approval checkpoint; retain commitlint and hooks;
    - capture the commit hash and URL;
    - prepare the mandatory reply without publishing it; and
    - leave the thread open.
 10. For a question, disagreement, or skip, prepare a reply explaining the
     approved disposition and why, with repository evidence, without publishing
-    it; leave the thread open.
+    it; leave the thread open. Do not manufacture artifacts, commits, or pushes.
 11. Update the tracker and continue to the next comment.
+
+If an initial or subsequent per-comment HEAD/index inspection fails, is
+unavailable or ambiguous, shows unexpected HEAD, or cannot confirm a clean
+index, block and report the reason even with nominal success or final `PASS`.
+For these gate failures, preserve state: never automatically revert, reset,
+stash, discard, incorporate changed history into the fix, or restore the old
+HEAD to conceal a change. Resume only after legitimate reassessment and
+applicable approval under the existing review and verification guards.
 
 Do not complete an artifact action on a nominally successful `ChangeResult`
 without that qualifying final `PASS`. `FAIL`, `BLOCKED`, and missing, unknown,
@@ -136,9 +167,11 @@ all committed-candidate checks must precede this remote-availability gate:
 1. Identify the actual PR remote repository and head branch, and inspect its
    current history for the validated candidate and every corrective commit in
    the batch.
-2. If needed commits are not present, push only with explicit user approval, or
-   wait for the responsible calling workflow to push. Already-present commits
-   require neither a redundant push nor push approval.
+2. If needed commits are not present, the recorded action approval authorizes
+   the necessary non-force push to that PR head remote/branch, unless explicitly
+   limited. Do not include unrelated commits or user work. If the responsible
+   calling workflow owns the push, wait for its confirmed handoff instead.
+   Already-present commits require neither a redundant push nor permission.
 3. Before publishing any batch reply or resolving any thread, confirm from
    current authoritative remote history that the validated candidate and all
    corrective commits are reachable from the actual PR head branch. A remote
@@ -166,8 +199,9 @@ If any approved action is incomplete or lacks its required final `PASS`, or
 aggregate validation or any required HEAD, index, tracked-worktree, or
 untracked-file check fails, is unavailable, or cannot establish the required
 condition, hold all prepared replies and leave all threads open. Do the same for
-missing needed push approval, a failed push, an incomplete or unconfirmed caller
-handoff, unavailable remote inspection, or unconfirmed remote containment.
+an explicit limit preventing a needed push, missing scope or permissions, a failed
+push, an incomplete or unconfirmed caller handoff, unavailable remote inspection,
+or unconfirmed remote containment.
 Report the blocker without claiming success. In a mixed batch, this holds every
 outcome, including questions and skips. Preserve all user work: never
 automatically stash, discard/reset, stage or incorporate unrelated changes, or
@@ -216,6 +250,11 @@ invariants supported by the evidence.}
 {State the exact action and expected observable outcome. Include alternatives
 only when the decision genuinely warrants them.}
 
+**Lifecycle and limits:** {Disclose the applicable bundled lifecycle above and
+its scope/limits before approval. For artifact changes, distinguish later exact
+patch content approval from the commit/push/reply/resolution authorization
+included in this decision.}
+
 ### Verification
 
 **Intent and strategy:** {classification and justified verification strategy}.
@@ -258,12 +297,18 @@ ApprovedCommentAction
 
 Source comment, author, thread, file, and line:
 Exact approved action:
+Disclosed lifecycle and scope:
+Recorded lifecycle authorization and explicit limits:
 Impact analysis:
 Intent and verification strategy:
 Expected observable outcome:
 Invariants:
 In-scope and out-of-scope boundaries:
 Architecture, compatibility, security, and operational constraints:
+Delegated Git lifecycle restriction: No worker staging, commits, branch/ref
+changes, or other Git lifecycle mutations, directly or via helpers/hooks/scripts.
+Nonmutating Git and role-authorized in-scope edits/preparation remain allowed.
+PR Resolver alone owns approved per-comment staging and commits.
 Assumptions and explicit limitations:
 Repository context and prior evidence:
 Targeted and broader validation:
@@ -350,6 +395,9 @@ option. Remove the temporary file after confirming the remote state.
 ## Constraints
 
 - Never apply, commit, skip, dismiss, or push without required approval.
+- Stop and report missing scope/permissions or failed host tool gates; lifecycle
+  authorization never bypasses host approvals or permits unrelated changes,
+  branches, commits, or user work.
 - Never delegate a raw comment as an underspecified requirement.
 - Never combine separate comments in one commit unless they are confirmed
   duplicates of the same inseparable change.

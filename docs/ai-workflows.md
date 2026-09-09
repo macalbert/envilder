@@ -240,7 +240,17 @@ Orchestrator directly for one already-approved change.
 Use `/resolve-pr-comments` or **PR Resolver**.
 
 For every comment, PR Resolver analyzes the feedback, presents the proposed
-action, and obtains explicit approval. It then follows one of two branches:
+action, and obtains explicit approval before execution. Before requesting it,
+disclose the applicable bundled lifecycle and scope: implementation, staging of
+the separately approved exact patch, a separate conventional commit, necessary
+non-force push to the actual PR head remote/branch, factual English outcome reply
+explaining action and reason, then confirmed resolution after the reply is
+confirmed. Record authorization and explicit limits in the action and handoff.
+Do not ask again solely for commit/push/reply/resolve or generated wording.
+Honor local-only/no-push limits; hold and report any gate they prevent without
+overriding them or pressuring the user. Missing scope/permissions or failed host
+tool gates require stopping and reporting, not bypassing safeguards; clarifying
+questions remain allowed. It then follows one of two branches:
 
 - For artifact-changing feedback, delegate the approved change through Change
   Orchestrator, require a successful `ChangeResult` with explicit final `PASS`
@@ -248,7 +258,18 @@ action, and obtains explicit approval. It then follows one of two branches:
   satisfied, validate it, create exactly one separate commit, and prepare the
   thread reply.
 - For a question, disagreement, or approved skip, prepare a reply with
-  repository evidence. Do not create a commit.
+  repository evidence, then resolve only after publication gates and confirmed
+  reply. Do not manufacture artifacts, commits, or pushes.
+
+Action approval does not approve unseen future hunks: obtain separate explicit
+content approval of the exact resulting patch before staging. Material semantic
+changes require reassessment/reapproval; candidate changes invalidate affected
+review/final results and require the frozen-patch guards below. With recorded
+action approval and separately approved exact patch, PR Resolver generates the
+conventional message and commits without repeated wording approval under
+[`workflow-smart-commit`](../.github/skills/workflow-smart-commit/SKILL.md)'s narrow
+exception. Standalone Smart Commit and unrelated workflows still require message
+approval; conventional format, commitlint, hooks, and host gates remain.
 
 An artifact action is not complete without qualifying final `PASS`, even if
 `ChangeResult` nominally claims success. `FAIL`, `BLOCKED`, or a missing/unknown
@@ -258,16 +279,40 @@ Prepared but held replies are not published success. Direct no-artifact
 dispositions do not require artifact final verification.
 
 PR Resolver owns each artifact-changing comment's separate commit, every
-mandatory reply, and review-thread resolution. It requires a clean index for
-each isolated commit and verifies that the staged diff exactly matches the
-approved patch. After all comments and completion of the approved actions, it
+mandatory reply, and review-thread resolution. At comment admission it records
+the initial per-comment HEAD alongside the clean-index, tracked-worktree diff,
+and untracked path/content-hash snapshots. Isolatable pre-existing unstaged user
+work is allowed, preserved, and excluded from the fix.
+
+The delegated packet bans worker staging, commits, branch/ref changes, and other
+Git lifecycle mutations, including through helpers, hooks, or scripts. Change
+Orchestrator retains this restriction through every stage and retry, including
+contract repair, implementation correction, review, and final verification;
+Implementer observes it during execution and preparation. Nonmutating Git and
+role-authorized in-scope edits/formatters remain allowed.
+
+On receiving the delegated result, before deriving the candidate patch, and
+again immediately before approved staging after any approval wait, PR Resolver
+must successfully confirm the original per-comment HEAD and a clean index.
+Unexpected HEAD or staging, or failed, unavailable, or ambiguous HEAD/index
+inspection, blocks even nominal success or final `PASS`: report the reason and
+preserve state, without automatically reverting, resetting, stashing,
+discarding, absorbing changed history into the fix, or restoring old HEAD to
+hide a change. Resume only after legitimate reassessment and applicable approval
+under existing review/verification guards. These are point-in-time checks, not a
+runtime lock. PR Resolver retains authority to stage the exact approved frozen
+patch and commit it separately, verifying staged equality before committing.
+
+After all comments and completion of the approved actions, it
 follows the [PR Resolver committed-candidate guard](../.github/agents/pr-resolver.agent.md#workflow):
 record candidate HEAD and establish a clean index and worktree (no staged or
 unstaged tracked changes or nonignored untracked files) before aggregate
 validation, then confirm unchanged HEAD and the same clean state afterward.
 For any artifact-changing batch, successful validation and these checks must be
-followed by PR Resolver's remote-availability gate. Push only if needed and
-explicitly user-approved, or wait for the responsible calling workflow to push.
+followed by PR Resolver's remote-availability gate. Recorded action approval
+authorizes a needed non-force push unless explicitly limited. Never include
+unrelated commits/user work; if the responsible calling workflow owns the push,
+wait for its confirmed handoff instead.
 Before publishing any batch reply or resolving any thread, confirm from current
 authoritative history that the actual PR remote repository's head branch contains
 the validated candidate and every corrective commit in the batch. An advanced
@@ -277,9 +322,10 @@ commits need no push or push approval. Entirely no-artifact batches are exempt
 only from the push/remote gate, not existing approvals or aggregate guards.
 Only when all applicable gates pass may replies be published and threads resolved
 under the existing publication safeguards, without another reply or resolution
-approval checkpoint. Missing needed push approval, failed push, or any failed,
-unavailable, or unconfirmed gate holds all replies (including mixed-batch questions
-and skips) and leaves all threads open; report the blocker and preserve user work.
+approval checkpoint. An explicit limit preventing a needed push, failed push, or
+any failed, unavailable, or unconfirmed gate holds all replies (including
+mixed-batch questions and skips) and leaves all threads open; report the blocker
+and preserve user work.
 Do not bypass failures by rebasing, merging, or rewriting history; local candidate
 changes require the existing stop/review/revalidation guards. The calling user or
 workflow retains ownership of the branch and overall pull-request lifecycle.

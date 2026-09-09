@@ -20,8 +20,17 @@ Analyze staged changes and create a conventional commit message.
 2. Run `git diff --cached` to read the full diff.
 3. Analyze the changes: identify the dominant change type and scope.
 4. Generate a conventional commit message following the [format](#commit-message-format), [rules](#rules), and [scope heuristics](./reference.md).
-5. Present the commit message for user approval.
-6. Run `git commit -m "<message>"` after approval.
+5. Present the commit message for user approval, except only when PR Resolver
+   has recorded approval of the disclosed comment action/lifecycle and separate
+   explicit content approval of the exact resulting patch. In that case, use the
+   generated conventional message without repeated wording permission.
+6. Run `git commit -m "<message>"` after message approval, or under that narrow
+   PR Resolver exception once all its pre-commit gates pass, including final
+   `PASS` and exact staged-patch equality. Honor recorded limits and retain
+   conventional format, required trailers, commitlint, hooks, and host gates.
+   Standalone Smart Commit and every unrelated workflow still require message
+   approval. This exception never authorizes unseen hunks or bypasses PR
+   Resolver's reassessment/reapproval guards for material or candidate changes.
 
 ## Commit Message Format
 

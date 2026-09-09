@@ -62,6 +62,13 @@ edit tool, bypass host approval gates, or report unrun checks as passing.
 
 ## Workflow
 
+Observe the caller's delegated Git lifecycle restriction on every attempt,
+including corrections: never stage, commit, change branches/refs, or perform
+other Git lifecycle mutations, directly or via helpers, hooks, or scripts.
+Nonmutating Git and role-authorized in-scope solution edits and preparation
+(including formatters and generators) remain allowed; `execute` does not grant
+the calling workflow's staging or commit authority.
+
 1. Read the approved specification and complete current contract before
    editing.
 2. Confirm the contract is executable, non-contradictory, and compatible with

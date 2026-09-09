@@ -99,6 +99,14 @@ current stage inputs it needs:
   `FinalVerificationResult`; and
 - the finding or failure that caused a retry.
 
+Retain the caller's delegated Git lifecycle restriction in every worker packet
+at every stage and retry, including contract repair, implementation correction,
+review, and final verification. During delegated contract, solution, and review
+execution, workers must not stage, commit, change branches/refs, or perform other
+Git lifecycle mutations, directly or through helpers, hooks, or scripts.
+Nonmutating Git and role-authorized in-scope edits/preparation remain allowed.
+The calling workflow retains its approved Git lifecycle authority.
+
 Do not propagate transcripts, raw command logs, private reasoning, temporary
 hypotheses, or obsolete result histories.
 
