@@ -140,6 +140,31 @@ The Contract Verifier may edit only verification-contract artifacts while
 establishing a contract. The Implementer may edit only solution artifacts. The
 Reviewer and Final Verifier edit nothing.
 
+## Capability Exposure and Inheritance
+
+On filtering hosts, a descendant's effective tools are limited by its own
+profile and every ancestor's exposed tools. Change Orchestrator, Content
+Designer, and PR Resolver therefore each declare the explicit inheritance
+envelope `[read, search, edit, execute, agent]`. Every ancestor must expose all
+required descendant tools, including `agent` for nested delegation.
+
+Exposure does not grant semantic authority: coordinators never edit artifacts,
+and Change Orchestrator never executes repository commands. Contract Verifier
+owns verification-contract edits; Implementer owns solution edits. Host
+approval gates remain in force; never use wildcard tool grants or bypass
+approvals to repair propagation.
+
+Workers retain their own limits: Contract Verifier and Implementer use
+`[read, search, edit, execute]`, Reviewer uses `[read, search, execute]`, and
+Final Verifier uses `[read, search]`. None delegates. A broader ancestor
+envelope must not expand a worker's effective boundary.
+
+These common aliases are portability defaults, not universal host tool names
+or support guarantees. Preflight actual tool exposure, nested delegation, and
+worker boundaries; return `BLOCKED` with the missing capability when required
+support cannot be established. Implementer diagnoses missing read/edit/execute
+and may use execute-based search when no dedicated search tool is exposed.
+
 ## Semantic Handoffs
 
 Fresh contexts provide separation of responsibilities and independent

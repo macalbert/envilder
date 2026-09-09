@@ -4,7 +4,7 @@ description: >
   Coordinates one coherent approved change through independent verification,
   implementation, risk-adaptive read-only review, and fresh final
   verification.
-tools: [read, search, agent]
+tools: [read, search, edit, execute, agent]
 agents: ['Contract Verifier', 'Implementer', 'Reviewer', 'Final Verifier']
 argument-hint: "Approved requirement, invariants, scope, and constraints for one coherent change"
 user-invocable: true
@@ -31,9 +31,16 @@ implementation steps.
 
 ## Capability Preflight
 
+The explicit tool list is an inheritance envelope: filtering hosts may expose
+to descendants only tools available to every ancestor. `edit` and `execute`
+are exposed for workers, not permission for this coordinator to edit artifacts
+or execute repository commands. Artifact ownership and host approval gates
+remain unchanged.
+
 Before repository discovery or delegation, confirm that the current host can:
 
 - invoke each custom agent listed in `agents`;
+- propagate required tools through every ancestor to each worker;
 - preserve each worker's declared tool boundary; and
 - when this agent was itself invoked as a subagent, support the additional
   nested delegation level required to invoke its workers.

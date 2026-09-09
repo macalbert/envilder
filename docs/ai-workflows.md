@@ -72,11 +72,12 @@ Envilder defines seven agents:
 other agents are user-invocable.
 
 Agent profiles intentionally omit `model`, allowing each host to select an
-available model, and use only portable tool aliases. Portability does not imply
-that every host supports the required orchestration topology. Each coordinator
-must preflight custom-agent invocation, nested delegation, and worker tool
-boundaries. It stops as `BLOCKED` instead of collapsing independent roles when
-those capabilities are unavailable or cannot be established.
+available model, and use common tool aliases as portability defaults. Alias
+mappings and support are host-dependent, not universal. Each coordinator must
+preflight custom-agent invocation, nested delegation, required tool propagation,
+and worker tool boundaries. It stops as `BLOCKED` instead of collapsing
+independent roles when those capabilities are unavailable or cannot be
+established.
 
 ### Nested Delegation
 
@@ -89,6 +90,20 @@ enables this topology:
   "chat.subagents.allowInvocationsFromSubagents": true
 }
 ```
+
+On hosts that filter descendant tools through ancestor exposure, all three
+coordinators declare `[read, search, edit, execute, agent]`. This inheritance
+envelope is necessary along the entire nested path; it does not authorize
+coordinators to edit artifacts or Change Orchestrator to execute repository
+commands. Host approval gates remain in force.
+
+Worker limits stay unchanged: Contract Verifier and Implementer have
+`[read, search, edit, execute]`, Reviewer has `[read, search, execute]`, and
+Final Verifier has `[read, search]`, with no worker delegation. Implementer
+preflights actual read/edit/execute access, reports missing capabilities
+concretely, and can search through execute when no dedicated search tool is
+exposed. See the
+[normative inheritance policy](../.github/skills/common-verification-first/SKILL.md#capability-exposure-and-inheritance).
 
 ### One Coherent Change
 
@@ -310,7 +325,8 @@ Agents must:
 
 1. Place it under `.github/agents/{name}.agent.md`.
 2. Give it one clear ownership boundary.
-3. Grant only the tools and delegations it needs.
+3. Grant only the tools and delegations it needs, including required descendant
+   tools in every coordinator ancestor's inheritance envelope.
 4. Reference skills instead of duplicating policy.
 5. Validate every delegated agent name exists.
 6. Synchronize the agent topology/inventory in `docs/ai-workflows.md` and

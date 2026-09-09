@@ -142,8 +142,16 @@ user-invocable: true
    `chat.subagents.allowInvocationsFromSubagents` in `.vscode/settings.json`.
 7. **Portable defaults**: Agents omit `model` intentionally so the host selects
    an available model, and use only the common `read`, `search`, `edit`,
-   `execute`, and `agent` aliases. Coordinators stop as `BLOCKED` when the host
-   cannot preserve nested delegation and tool boundaries.
+   `execute`, and `agent` aliases. Alias mappings and support vary by host;
+   preflight actual capabilities. Coordinators stop as `BLOCKED` when the host
+   cannot propagate required tools or preserve nested delegation and worker
+   tool boundaries.
+8. **Inheritance envelopes**: Change Orchestrator, Content Designer, and PR
+   Resolver expose `[read, search, edit, execute, agent]` so filtering hosts can
+   pass required tools through every ancestor. Exposure never authorizes
+   coordinator artifact edits or Change Orchestrator repository commands.
+   Worker tool lists and host approval gates remain unchanged. See
+   [the normative policy](common-verification-first/SKILL.md#capability-exposure-and-inheritance).
 
 ## Influences
 

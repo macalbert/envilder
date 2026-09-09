@@ -38,6 +38,14 @@ in a fresh read-only context after review. The Implementer edits solution
 artifacts but never defines or weakens success criteria. The Reviewer is
 strictly read-only, and no findings is a valid result.
 
+Preserve nested delegation through Change Orchestrator. Filtering hosts require
+every coordinator ancestor (Change Orchestrator, Content Designer, PR Resolver)
+to expose `[read, search, edit, execute, agent]` for descendant inheritance.
+This is capability exposure, not authority for coordinator artifact edits or
+Change Orchestrator repository commands. Worker tool limits and host approval
+gates remain unchanged. Common aliases are portability defaults, not universal
+host guarantees; preflight effective capabilities and worker boundaries.
+
 Use fresh contexts for separation of concerns and independent evaluation. Pass
 concise semantic handoffs of requirements, invariants, constraints, contracts,
 evidence, and results rather than transcripts or problem-solving trajectories.

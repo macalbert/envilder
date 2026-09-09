@@ -4,7 +4,7 @@ description: >
   Coordinates website, documentation, changelog, translation, and styling
   changes. Defines content outcomes and delegates artifact edits through the
   verification-first Change Orchestrator. Never edits artifacts directly.
-tools: [read, search, execute, agent]
+tools: [read, search, edit, execute, agent]
 agents: ['Change Orchestrator', 'Reviewer']
 argument-hint: "Page, document, translation, changelog, or style outcome"
 user-invocable: true
@@ -20,9 +20,16 @@ artifact change is delegated through `@Change Orchestrator`.
 
 ## Capability Preflight
 
+The explicit tool list is an inheritance envelope for filtering hosts: nested
+workers need their tools exposed by every ancestor. Exposing `edit` does not
+authorize direct artifact edits, nor does `execute` authorize Change
+Orchestrator to run repository commands. Ownership and host approval gates
+remain unchanged.
+
 Before running commands or delegating, confirm that the host can invoke
 `Change Orchestrator` and that it can perform its required nested worker
-delegations while preserving tool boundaries. If this cannot be established,
+delegations with required tools propagated through every ancestor while
+preserving each worker's tool boundary. If this cannot be established,
 edit nothing and return `ContentChangeResult` as `BLOCKED`. Do not collapse
 roles into this agent.
 

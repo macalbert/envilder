@@ -5,7 +5,7 @@ description: >
   delegates artifact changes through the verification-first Change
   Orchestrator and commits each fix separately. Publishes replies and resolves
   threads only after aggregate validation succeeds.
-tools: [read, search, execute, agent]
+tools: [read, search, edit, execute, agent]
 agents: ['Change Orchestrator', 'Reviewer']
 argument-hint: "Pull-request comments or supplied review feedback to address"
 user-invocable: true
@@ -22,9 +22,16 @@ Always write GitHub replies in English.
 
 ## Capability Preflight
 
+The explicit tool list is an inheritance envelope for filtering hosts: nested
+workers need their tools exposed by every ancestor. Exposing `edit` does not
+authorize direct artifact edits, nor does `execute` authorize Change
+Orchestrator to run repository commands. Ownership and host approval gates
+remain unchanged.
+
 Before querying or mutating GitHub, confirm that the host provides command
 execution, can invoke `Change Orchestrator`, and supports its nested worker
-delegations with declared tool boundaries. Confirm that authenticated GitHub
+delegations with required tools propagated through every ancestor and each
+worker's declared tool boundary preserved. Confirm that authenticated GitHub
 CLI operations can reply inside review threads and resolve them. If any
 capability is unavailable or cannot be established, make no mutation and
 return `ResolvedComments` as `BLOCKED`. Never collapse the delegated roles.

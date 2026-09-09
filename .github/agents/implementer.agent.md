@@ -35,6 +35,31 @@ Solution artifacts can include production code, configuration, documentation,
 behavior-preserving refactors, migrations, fixtures, builders, seeders, mocks,
 containers, data loaders, and runner setup.
 
+## Capability Preflight
+
+Before editing, confirm effective tools in this invocation, not just the
+declared frontmatter. The common aliases are portability defaults; hosts may
+map them differently or not support them.
+
+- `read`: can inspect repository files and verification-contract artifacts.
+- `edit`: can create and modify in-scope solution files via edit tools.
+- `execute`: can run required repository commands and validation.
+
+If the host has no native deletion primitive, the same worker may use `execute`
+for a needed deletion only on explicitly approved, exact in-scope file paths,
+with separate approval for the deletion and subject to normal host approvals.
+
+Use a dedicated search tool when exposed; otherwise use `execute` for
+repository search (for example, `rg` or `git grep`). A missing dedicated search
+tool alone is not a blocker when command-based search is available.
+
+If read, edit, or execute is missing or denied, stop and return
+`ImplementationResult` with contract status `BLOCKED`. Name the missing
+capability, the affected file operation or command, and the observed tool
+absence or denial. Ask the caller to check ancestor tool filtering and host
+capability or approval support. Do not substitute shell writes for a missing
+edit tool, bypass host approval gates, or report unrun checks as passing.
+
 ## Workflow
 
 1. Read the approved specification and complete current contract before
