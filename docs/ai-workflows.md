@@ -279,10 +279,21 @@ Prepared but held replies are not published success. Direct no-artifact
 dispositions do not require artifact final verification.
 
 PR Resolver owns each artifact-changing comment's separate commit, every
-mandatory reply, and review-thread resolution. At comment admission it records
-the initial per-comment HEAD alongside the clean-index, tracked-worktree diff,
-and untracked path/content-hash snapshots. Isolatable pre-existing unstaged user
-work is allowed, preserved, and excluded from the fix.
+mandatory reply, and review-thread resolution. At admission for an
+artifact-changing comment, before any artifact or Git lifecycle mutation, it
+records the initial per-comment HEAD and independently requires a clean index,
+with staged changes retained as their existing separate blocker. It also
+requires no tracked unstaged changes and no nonignored untracked paths,
+including files inside untracked directories; Git-ignored untracked paths are
+exempt. A failed, unavailable, or ambiguous check blocks the artifact action and
+explains that an isolated per-comment commit and later clean
+committed-candidate aggregate validation cannot both be proven from that
+admission state. User work remains untouched. Snapshots or exclusions cannot
+make the dirty state admissible, and the workflow neither recommends nor
+automatically performs a stash, reset, discard, cleanup, staging,
+incorporation, or temporary-worktree isolation of user work to pass admission.
+Questions, disagreements, and approved skips continue through their existing
+no-artifact branch without being redefined by this artifact admission rule.
 
 The delegated packet bans worker staging, commits, branch/ref changes, and other
 Git lifecycle mutations, including through helpers, hooks, or scripts. Change

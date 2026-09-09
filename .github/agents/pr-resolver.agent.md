@@ -80,16 +80,26 @@ For each active review comment:
 
 1. Load the comment and thread state from GitHub or user-provided text.
 2. Check the tracker and existing replies to prevent duplicate processing.
-3. Record the initial per-comment HEAD commit and confirmed clean-index result
-   before processing the comment. If staged changes already exist,
-   preserve them unchanged and block because an isolated commit cannot be
-   proven. Snapshot the current tracked worktree diff plus all untracked paths
-   and content hashes. Isolatable pre-existing unstaged user changes are allowed;
-   preserve them and exclude them from the fix.
-4. Map the comment to the affected file, line, requirement, and current
+3. Map the comment to the affected file, line, requirement, and current
    behavior.
-5. Classify the action and, for artifact changes, classify intent and
+4. Classify the action and, for artifact changes, classify intent and
    verification strategy using `common-verification-first`.
+5. Before presenting or executing an artifact-changing action, record the
+   initial per-comment HEAD and admit the action only after all of these
+   independent checks succeed:
+   - confirm the index is clean. Staged changes remain the existing separate
+     blocker;
+   - confirm there are no tracked unstaged changes; and
+   - confirm there are no nonignored untracked paths, including files inside
+     untracked directories. Git-ignored untracked paths are exempt.
+   If a check fails, is unavailable, or is ambiguous, block before any artifact
+   or Git lifecycle mutation and leave all user work untouched. Explain that an
+   isolated per-comment commit and later clean committed-candidate aggregate
+   validation cannot both be proven from this admission state. Do not use
+   snapshots or exclusions to make the dirty state admissible. Neither
+   recommend nor automatically perform a stash, reset, discard, cleanup,
+   staging, incorporation, or temporary-worktree isolation of user work to pass
+   admission.
 6. Present:
    - verbatim reviewer comment and location;
    - repository evidence and impact analysis;
@@ -114,9 +124,8 @@ For each active review comment:
      explicitly reports `Final result: PASS` for the exact current reviewed
      candidate and whose other acceptance conditions remain satisfied;
    - run or confirm comment-specific validation;
-   - compare the candidate against the pre-comment worktree and index snapshot;
-   - block if the candidate touches a file that was untracked before the
-     comment, because its prior content cannot be attributed to the fix;
+   - compare the candidate with the recorded initial HEAD and block if any
+     change cannot be attributed to the approved action or exceeds its scope;
    - derive the exact candidate patch introduced for the comment, present that
      patch to the user, and obtain explicit approval before staging;
    - freeze the approved patch; any subsequent candidate change requires fresh
@@ -126,9 +135,9 @@ For each active review comment:
    - stage only the exact approved hunks from that frozen patch;
    - verify that the complete staged diff exactly equals the approved patch
      before committing;
-   - if approved hunks overlap pre-existing or unrelated changes and cannot be
-     separated safely, restore the clean index without changing the worktree
-     and block the comment;
+   - if approved hunks overlap unrelated changes and cannot be separated safely,
+     restore the clean index without changing the worktree and block the
+     comment;
    - generate the conventional message and create one commit with the required
      co-author trailer under `workflow-smart-commit`'s PR Resolver exception,
      without another message-approval checkpoint; retain commitlint and hooks;
@@ -163,13 +172,15 @@ For each active review comment:
     it; leave the thread open. Do not manufacture artifacts, commits, or pushes.
 11. Update the tracker and continue to the next comment.
 
-If an initial or subsequent per-comment HEAD/index inspection fails, is
-unavailable or ambiguous, shows unexpected HEAD, or cannot confirm a clean
-index, block and report the reason even with nominal success or final `PASS`.
-For these gate failures, preserve state: never automatically revert, reset,
-stash, discard, incorporate changed history into the fix, or restore the old
-HEAD to conceal a change. Resume only after legitimate reassessment and
-applicable approval under the existing review and verification guards.
+If the initial admission HEAD/index/worktree inspection or a subsequent
+per-comment HEAD/index inspection fails, is unavailable or ambiguous, shows
+unexpected HEAD, or cannot establish its required clean state, block and report
+the reason even with nominal success or final `PASS`. For these gate failures,
+leave user work untouched: neither recommend nor automatically perform a
+revert, reset, stash, discard, cleanup, staging, incorporation, or
+temporary-worktree isolation, and do not restore the old HEAD to conceal a
+change. A later invocation must repeat admission from its then-current state and
+follow the existing review and verification guards.
 
 Do not complete an artifact action on a nominally successful `ChangeResult`
 without that qualifying final `PASS`. `FAIL`, `BLOCKED`, and missing, unknown,
@@ -306,9 +317,10 @@ push, an incomplete or unconfirmed caller handoff, unavailable remote inspection
 unconfirmed remote containment, or missing/ambiguous exact-head qualification
 evidence.
 Report the blocker without claiming success. In a mixed batch, this holds every
-outcome, including questions and skips. Preserve all user work: never
-automatically stash, discard/reset, stage or incorporate unrelated changes, or
-create temporary-worktree infrastructure to make checks pass.
+outcome, including questions and skips. Preserve all user work: neither
+recommend nor automatically perform a stash, discard/reset, cleanup, staging,
+or incorporation of unrelated changes, and never create temporary-worktree
+infrastructure to make checks pass.
 
 ## Required Comment Presentation
 
