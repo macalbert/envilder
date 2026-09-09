@@ -254,13 +254,24 @@ follows the [PR Resolver committed-candidate guard](../.github/agents/pr-resolve
 record candidate HEAD and establish a clean index and worktree (no staged or
 unstaged tracked changes or nonignored untracked files) before aggregate
 validation, then confirm unchanged HEAD and the same clean state afterward.
-Only successful validation with every guard check established permits publishing
-replies and resolving threads under the existing publication safeguards. If
-validation or any guard check fails, is unavailable, or cannot establish the
-required condition, publish nothing, leave threads open, report the reason, and
-preserve user work. The calling user or workflow retains ownership of the branch
-and overall pull-request lifecycle. Push remains subject to explicit user
-approval.
+For any artifact-changing batch, successful validation and these checks must be
+followed by PR Resolver's remote-availability gate. Push only if needed and
+explicitly user-approved, or wait for the responsible calling workflow to push.
+Before publishing any batch reply or resolving any thread, confirm from current
+authoritative history that the actual PR remote repository's head branch contains
+the validated candidate and every corrective commit in the batch. An advanced
+descendant containing all qualifies; a commit URL, push success, stale tracking
+ref, wrong repository/branch, or unconfirmed handoff does not. Already-present
+commits need no push or push approval. Entirely no-artifact batches are exempt
+only from the push/remote gate, not existing approvals or aggregate guards.
+Only when all applicable gates pass may replies be published and threads resolved
+under the existing publication safeguards, without another reply or resolution
+approval checkpoint. Missing needed push approval, failed push, or any failed,
+unavailable, or unconfirmed gate holds all replies (including mixed-batch questions
+and skips) and leaves all threads open; report the blocker and preserve user work.
+Do not bypass failures by rebasing, merging, or rewriting history; local candidate
+changes require the existing stop/review/revalidation guards. The calling user or
+workflow retains ownership of the branch and overall pull-request lifecycle.
 
 ## Oracle Effectiveness
 

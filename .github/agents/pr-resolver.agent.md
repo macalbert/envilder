@@ -49,7 +49,8 @@ return `ResolvedComments` as `BLOCKED`. Never collapse the delegated roles.
 - Delegate every artifact change through `@Change Orchestrator`.
 - Never edit code, tests, documentation, configuration, or metadata directly.
 - Preserve one commit per artifact-changing comment.
-- Publish no reply and resolve no thread before aggregate validation succeeds.
+- Publish no reply and resolve no thread before aggregate validation succeeds
+  and the remote-availability gate below is satisfied when applicable.
 - Use `@Reviewer` in `change-set-review` mode for read-only impact analysis.
 
 ## Workflow
@@ -115,16 +116,46 @@ committed-candidate guard at the aggregate/publication boundary:
 3. After validation, confirm that HEAD is unchanged from the recorded candidate
    and that the index and worktree remain clean by the same criteria.
 
-Only successful aggregate validation with every guard check established permits
+For a batch containing any artifact changes, successful aggregate validation and
+all committed-candidate checks must precede this remote-availability gate:
+
+1. Identify the actual PR remote repository and head branch, and inspect its
+   current history for the validated candidate and every corrective commit in
+   the batch.
+2. If needed commits are not present, push only with explicit user approval, or
+   wait for the responsible calling workflow to push. Already-present commits
+   require neither a redundant push nor push approval.
+3. Before publishing any batch reply or resolving any thread, confirm from
+   current authoritative remote history that the validated candidate and all
+   corrective commits are reachable from the actual PR head branch. A remote
+   head that has advanced and contains them all qualifies; exact HEAD equality
+   is not required. A public commit URL, presence only in another repository or
+   the base or an unrelated branch, a stale local remote-tracking ref, push
+   success alone, or an unconfirmed caller handoff is not sufficient. Confirm
+   this containment after any push or handoff.
+
+Do not rebase, merge, or rewrite history to bypass gate failures. If remote
+preparation changes the local candidate, stop and follow the existing review,
+revalidation, and exact-patch approval guards.
+
+A batch consisting entirely of no-artifact outcomes (questions, clarifications,
+disagreements, or skips) is exempt only from the push/remote-commit gate; existing
+action approvals, aggregate validation, and committed-candidate guards remain.
+
+Only successful aggregate validation with every committed-candidate check and
+the applicable remote-availability gate established permits
 publishing each prepared reply in its existing thread and resolving that thread
 using the Duplicate Prevention and Thread Resolution safeguards below. Do not
 insert a separate reply or resolution approval checkpoint.
 If aggregate validation or any required HEAD, index, tracked-worktree, or
 untracked-file check fails, is unavailable, or cannot establish the required
-condition, publish nothing, resolve no threads, leave all threads open, and
-report the reason. Preserve all user work: never automatically stash,
-discard/reset, stage or incorporate unrelated changes, or create temporary-worktree
-infrastructure to make checks pass. Push only with user approval.
+condition, hold all prepared replies and leave all threads open. Do the same for
+missing needed push approval, a failed push, an incomplete or unconfirmed caller
+handoff, unavailable remote inspection, or unconfirmed remote containment.
+Report the blocker without claiming success. In a mixed batch, this holds every
+outcome, including questions and skips. Preserve all user work: never
+automatically stash, discard/reset, stage or incorporate unrelated changes, or
+create temporary-worktree infrastructure to make checks pass.
 
 ## Required Comment Presentation
 
@@ -274,7 +305,8 @@ protected behavior.}
 
 ## Duplicate Prevention
 
-After aggregate validation passes and before any reply:
+After aggregate validation and the applicable remote-availability gate pass,
+and before any reply:
 
 1. Fetch replies for the parent comment.
 2. If a member reply already records the outcome, do not post another.

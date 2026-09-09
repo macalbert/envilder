@@ -31,11 +31,22 @@ Resolve pull request comments end-to-end.
    record candidate HEAD and establish a clean index and worktree (no staged or
    unstaged tracked changes or nonignored untracked files) before aggregate
    validation. Afterward, confirm unchanged HEAD and the same clean state.
-   Only successful validation with every guard check established permits
-   publishing each prepared reply in its existing thread and resolving the
-   thread using PR Resolver's publication safeguards. If validation or any guard
-   check fails, is unavailable, or cannot establish the required condition,
-   publish nothing, leave threads open, report the reason, and preserve user work.
+   For any artifact-changing batch, then apply PR Resolver's remote-availability
+   gate: push only if needed and explicitly user-approved, or wait for the
+   responsible calling workflow to push. Before publishing any reply or resolving
+   any thread, confirm from current authoritative history that the actual PR
+   remote repository's head branch contains the validated candidate and every
+   corrective commit in the batch. An advanced descendant containing all qualifies;
+   a commit URL, push success, stale tracking ref, wrong repository/branch, or
+   unconfirmed handoff does not. Already-present commits need no push or push
+   approval. Entirely no-artifact batches are exempt only from this push/remote
+   gate, not existing approvals or aggregate guards. Only when all applicable
+   gates pass may replies be published and threads resolved using PR Resolver's
+   publication safeguards. Missing needed push approval, failed push, or any
+   failed, unavailable, or unconfirmed gate holds all replies (including mixed-batch
+   questions/skips) and leaves all threads open; report the blocker and preserve
+   user work. Do not bypass failures by rebasing, merging, or rewriting history;
+   local candidate changes require the existing stop/review/revalidation guards.
 7. Use artifact-appropriate targeted and broader verification rather than
    defaulting mechanically to `pnpm test`.
 
