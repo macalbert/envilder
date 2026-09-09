@@ -201,11 +201,40 @@ semantic results, not full working trajectories.
 7. Route findings to their owner and repeat only the affected downstream
    stages.
 8. Delegate a new fresh Final Verifier.
-9. Let the Change Orchestrator judge whether evidence, review, and engineering
-   judgment satisfy the original requirement.
+9. Only an explicit `Final result: PASS` in `FinalVerificationResult` for the
+   exact current reviewed candidate permits Change Orchestrator completion
+   judgment. `PASS` is necessary, not sufficient: all existing acceptance
+   conditions still apply.
 
-If any candidate artifact changes after review or final verification, rerun the
-necessary review and final verification against the new candidate.
+If any candidate artifact changes after review or final verification, invalidate
+the affected results and rerun the necessary review and final verification
+against the new candidate.
+
+### Final Result Gate and Recovery
+
+- `FAIL` prevents acceptance. Route implementation defects to a fresh
+  Implementer and contract defects to a fresh Contract Verifier, then repeat
+  affected downstream stages. Changes to approved semantics, invariants, scope,
+  or requirements require human approval.
+- `BLOCKED` propagates a reason-bearing `ChangeResult` with final judgment
+  `BLOCKED`; callers must not claim successful completion, publish PR replies,
+  or resolve threads. Unavailable required evidence alone is not an instruction
+  to edit the solution.
+- An approved limitation cannot replace final `PASS` or waive `FAIL` or
+  `BLOCKED`. A legitimately approved limitation strategy can still receive
+  `PASS` when the approved contract is actually satisfied and assessable.
+- A genuinely resolved blocker, including independently owned contract repair,
+  requires reassessment of the corrected contract/candidate, appropriate review,
+  and fresh final verification. Only a fresh explicit `PASS` reopens judgment.
+- Missing, unknown, or ambiguous final results cannot pass the gate. Neither
+  another role's success nor passing commands establish final `PASS`.
+
+Callers must require this qualifying final `PASS` for each artifact-changing
+action, even if its `ChangeResult` nominally claims success. All approved actions
+must succeed before batch publication; prepared but held replies are not
+published success. Aggregate validation and remote availability are additional
+gates, not substitutes for final `PASS`. Direct no-artifact answers and approved
+skips retain their existing workflow and applicable exemptions.
 
 ### Review Omission
 

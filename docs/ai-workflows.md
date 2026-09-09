@@ -128,6 +128,7 @@ Approved requirement and invariants
                 v
       fresh Final Verifier
                 |
+        explicit PASS only
                 v
  Change Orchestrator judgment
 ```
@@ -186,8 +187,9 @@ Use **Change Orchestrator**.
 3. Let Implementer produce the solution.
 4. Review the candidate independently.
 5. Let Final Verifier run fresh read-only verification.
-6. Accept only when evidence and engineering judgment satisfy the original
-   requirement.
+6. Enter completion judgment only with explicit final `PASS` for the exact
+   current reviewed candidate. Accept only when all other evidence, review,
+   gates, and engineering conditions also satisfy the original requirement.
 
 For multi-item work, plan vertical slices and run each approved coherent item
 through Change Orchestrator. The calling workflow or user owns the branch and
@@ -241,10 +243,19 @@ For every comment, PR Resolver analyzes the feedback, presents the proposed
 action, and obtains explicit approval. It then follows one of two branches:
 
 - For artifact-changing feedback, delegate the approved change through Change
-  Orchestrator, validate it, create exactly one separate commit, and prepare
-  the thread reply.
+  Orchestrator, require a successful `ChangeResult` with explicit final `PASS`
+  for the exact current reviewed candidate and all other acceptance conditions
+  satisfied, validate it, create exactly one separate commit, and prepare the
+  thread reply.
 - For a question, disagreement, or approved skip, prepare a reply with
   repository evidence. Do not create a commit.
+
+An artifact action is not complete without qualifying final `PASS`, even if
+`ChangeResult` nominally claims success. `FAIL`, `BLOCKED`, or a missing/unknown
+final result holds all batch replies and leaves all threads open; report the
+reason for `BLOCKED`. Aggregate or remote success cannot replace final `PASS`.
+Prepared but held replies are not published success. Direct no-artifact
+dispositions do not require artifact final verification.
 
 PR Resolver owns each artifact-changing comment's separate commit, every
 mandatory reply, and review-thread resolution. It requires a clean index for
@@ -305,8 +316,24 @@ tools and runs in a fresh context after review. It reassesses static evidence
 and recorded gate results, and returns `BLOCKED` rather than acquiring a
 general-purpose execution tool when fresh command execution is required.
 
-If candidate artifacts change after review or final verification, the affected
-evaluation must run again against the new candidate.
+Only explicit `FinalVerificationResult` `PASS` opens completion judgment; it is
+necessary, not sufficient. `FAIL` routes to the existing owner: a fresh
+Implementer for implementation defects, a fresh Contract Verifier for contract
+defects, followed by affected downstream stages. Changes to approved semantics,
+invariants, scope, or requirements need human approval. `BLOCKED` propagates a
+reason-bearing blocked `ChangeResult`, with no success, PR replies, or thread
+resolution; missing execution evidence alone does not call for solution edits.
+Missing, unknown, or ambiguous results and other roles' or commands' successes
+cannot establish final `PASS`.
+
+Approved limitations cannot substitute for `PASS` or waive `FAIL` or `BLOCKED`.
+A valid approved limitation strategy may receive `PASS` when its contract is
+actually satisfied and assessable. Genuinely resolved blockers, including
+independent contract repair, require appropriate contract/candidate reassessment,
+review, and fresh final verification before judgment can reopen on fresh `PASS`.
+Candidate changes invalidate affected review/final results and require necessary
+review and fresh final verification; PR Resolver's frozen-patch reapproval still
+applies.
 
 ## Repository Gates
 

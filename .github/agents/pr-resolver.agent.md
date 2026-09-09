@@ -49,8 +49,10 @@ return `ResolvedComments` as `BLOCKED`. Never collapse the delegated roles.
 - Delegate every artifact change through `@Change Orchestrator`.
 - Never edit code, tests, documentation, configuration, or metadata directly.
 - Preserve one commit per artifact-changing comment.
-- Publish no reply and resolve no thread before aggregate validation succeeds
-  and the remote-availability gate below is satisfied when applicable.
+- Publish no reply and resolve no thread before all approved actions succeed,
+  including qualifying final `PASS` for every artifact change, aggregate
+  validation succeeds, and the remote-availability gate below is satisfied when
+  applicable.
 - Use `@Reviewer` in `change-set-review` mode for read-only impact analysis.
 
 ## Workflow
@@ -81,7 +83,9 @@ For each active review comment:
 8. Execute only the approved action.
 9. For an artifact change:
    - delegate one coherent approved change to `@Change Orchestrator`;
-   - accept only a successful `ChangeResult`;
+   - accept only a successful `ChangeResult` whose `FinalVerificationResult`
+     explicitly reports `Final result: PASS` for the exact current reviewed
+     candidate and whose other acceptance conditions remain satisfied;
    - run or confirm comment-specific validation;
    - compare the candidate against the pre-comment worktree and index snapshot;
    - block if the candidate touches a file that was untracked before the
@@ -104,6 +108,16 @@ For each active review comment:
     approved disposition and why, with repository evidence, without publishing
     it; leave the thread open.
 11. Update the tracker and continue to the next comment.
+
+Do not complete an artifact action on a nominally successful `ChangeResult`
+without that qualifying final `PASS`. `FAIL`, `BLOCKED`, and missing, unknown,
+or ambiguous final results prevent completion; approved limitations cannot waive
+them. Propagate `BLOCKED` with its reason, hold all batch replies, and leave all
+threads open. Route correction or blocker recovery through Change Orchestrator
+and require appropriate review/reassessment and fresh final verification before
+accepting the action. A prepared but held reply is not published success.
+Direct no-artifact dispositions in step 10 do not acquire an artifact final
+verification requirement.
 
 After all comments and completion of the approved actions, enforce this
 committed-candidate guard at the aggregate/publication boundary:
@@ -142,12 +156,14 @@ A batch consisting entirely of no-artifact outcomes (questions, clarifications,
 disagreements, or skips) is exempt only from the push/remote-commit gate; existing
 action approvals, aggregate validation, and committed-candidate guards remain.
 
-Only successful aggregate validation with every committed-candidate check and
-the applicable remote-availability gate established permits
+Only completion of all approved actions, including qualifying final `PASS` for
+each artifact change, together with successful aggregate validation, every
+committed-candidate check, and the applicable remote-availability gate permits
 publishing each prepared reply in its existing thread and resolving that thread
 using the Duplicate Prevention and Thread Resolution safeguards below. Do not
 insert a separate reply or resolution approval checkpoint.
-If aggregate validation or any required HEAD, index, tracked-worktree, or
+If any approved action is incomplete or lacks its required final `PASS`, or
+aggregate validation or any required HEAD, index, tracked-worktree, or
 untracked-file check fails, is unavailable, or cannot establish the required
 condition, hold all prepared replies and leave all threads open. Do the same for
 missing needed push approval, a failed push, an incomplete or unconfirmed caller
@@ -305,8 +321,8 @@ protected behavior.}
 
 ## Duplicate Prevention
 
-After aggregate validation and the applicable remote-availability gate pass,
-and before any reply:
+After all action-completion, aggregate validation, and applicable
+remote-availability gates pass, and before any reply:
 
 1. Fetch replies for the parent comment.
 2. If a member reply already records the outcome, do not post another.

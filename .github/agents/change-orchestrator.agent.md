@@ -182,6 +182,26 @@ Require the Final Verifier to:
   read-only profile cannot perform; and
 - return a concise `FinalVerificationResult`.
 
+Route the final result before completion judgment:
+
+- Only an explicit `Final result: PASS` for the exact current reviewed candidate
+  permits step 5; it does not itself establish acceptance.
+- On `FAIL`, route implementation defects to a fresh Implementer and contract
+  defects to a fresh Contract Verifier, then repeat affected downstream stages.
+  Changes to approved semantics, invariants, scope, or requirements need human
+  approval.
+- On `BLOCKED`, return a `ChangeResult` with final judgment `BLOCKED` and the
+  reason; callers must not publish PR replies or resolve threads. Unavailable
+  required evidence does not by itself call for solution edits.
+- Missing, unknown, or ambiguous results do not open the gate. Never infer
+  `PASS` from another role's result or a successful command.
+
+An approved limitation cannot substitute for `PASS` or waive `FAIL` or `BLOCKED`.
+A legitimate limitation strategy may still earn `PASS` when its approved
+contract is satisfied. After a blocker is genuinely resolved, including through
+independent contract repair, perform appropriate review/reassessment and fresh
+final verification before returning to the gate.
+
 If any candidate artifact changes after review or final verification, invalidate
 the affected results and rerun review and final verification.
 
@@ -196,7 +216,8 @@ Accept only when:
 - targeted and broader gates pass or an approved limitation explains their
   absence;
 - review is present or the strict omission is justified;
-- final verification assessed the exact current candidate; and
+- `FinalVerificationResult` explicitly reports `PASS` for the exact current
+  reviewed candidate; and
 - limitations and residual risks are explicit and acceptable.
 
 ## Completion Output
