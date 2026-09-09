@@ -132,7 +132,30 @@ For each active review comment:
    - generate the conventional message and create one commit with the required
      co-author trailer under `workflow-smart-commit`'s PR Resolver exception,
      without another message-approval checkpoint; retain commitlint and hooks;
-   - capture the commit hash and URL;
+   - immediately after the parent-owned `git commit` reports success, record
+     the resulting HEAD commit hash and run the committed-patch integrity guard
+     before capturing or publishing a fixed commit URL:
+     - prove that the recorded initial per-comment HEAD is the resulting
+       commit's sole expected parent; an unexpected, combined, missing, or
+       otherwise unprovable parent blocks the comment;
+     - compare the resulting commit diff from that recorded initial HEAD to
+       the resulting HEAD exactly with the frozen, user-approved patch, and
+       compare the post-commit scope and result with the accepted pre-commit
+       candidate;
+     - fail closed if either comparison is unavailable, ambiguous, or unequal,
+       or if hooks or the commit process altered the approved candidate. The
+       pre-commit staged-equality check alone is insufficient evidence that
+       the actual commit contains only approved hunks;
+     - on any such failure, block publication, push, reply, and resolution;
+       retain all records and state; and do not claim success. Never
+       automatically amend, revert, reset, stash, discard, or otherwise
+       rewrite or clean up the candidate. A corrected candidate requires fresh
+       review, final verification, and exact-patch user approval before it can
+       be staged again.
+     Hooks that leave the approved candidate unchanged follow the normal
+     successful commit path.
+   - only after that guard passes, retain it as the fixed commit hash and
+     capture its URL;
    - prepare the mandatory reply without publishing it; and
    - leave the thread open.
 10. For a question, disagreement, or skip, prepare a reply explaining the

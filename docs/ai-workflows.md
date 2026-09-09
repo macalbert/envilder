@@ -302,6 +302,19 @@ hide a change. Resume only after legitimate reassessment and applicable approval
 under existing review/verification guards. These are point-in-time checks, not a
 runtime lock. PR Resolver retains authority to stage the exact approved frozen
 patch and commit it separately, verifying staged equality before committing.
+After a parent-owned commit reports success, it immediately records the
+resulting HEAD commit hash and, before retaining it as a fixed commit or
+capturing/publishing its URL, proves that the recorded initial per-comment HEAD
+is its sole expected parent. It then compares that commit's exact diff and
+post-commit scope/result with the frozen user-approved patch and accepted
+pre-commit candidate. A combined or unexpected parent, unavailable or ambiguous
+comparison, mismatch, or hook mutation blocks publication, push, reply, and
+resolution; records and state remain intact, no success is claimed, and any
+correction needs fresh review, final verification, and exact-patch approval.
+Pre-commit staged equality alone is insufficient. This guard never amends,
+reverts, resets, stashes, discards, or otherwise rewrites/cleans up state.
+Hooks that do not alter the approved candidate continue on the normal
+successful path.
 
 After all comments and completion of the approved actions, it
 follows the [PR Resolver committed-candidate guard](../.github/agents/pr-resolver.agent.md#workflow):
