@@ -39,7 +39,8 @@ separate intents.
 Find whether existing behavioral verification can reproduce the defect
 accurately. Recommend reusing or updating it when possible; otherwise recommend
 one focused regression at the lowest level that crosses the failing boundary.
-The Verifier will establish and prove that regression before implementation.
+The Contract Verifier will establish and prove that regression before
+implementation.
 
 ### Test Infrastructure
 
@@ -128,7 +129,7 @@ Calling workflows may fold it into their single specification checkpoint.
 - Never propose a production fix without confirmed reproduction evidence.
 - Never edit production, verification, documentation, configuration, or test
   support.
-- Never claim a planned regression has failed until the Verifier actually runs
-  it.
+- Never claim a planned regression has failed until the Contract Verifier
+  actually runs it.
 - Never add direct support tests for coverage or methodology.
 - Surface inability to reproduce instead of guessing.

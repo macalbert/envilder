@@ -18,8 +18,8 @@ behavioral verification before scaffolding the solution structure.
 
 ## Verification Ownership
 
-- `@Verifier` establishes the behavioral contract and owns all protected test or
-  validation artifacts.
+- `@Contract Verifier` establishes the behavioral contract and owns all
+  protected test or validation artifacts.
 - `@Implementer` may inspect those artifacts but never creates, edits, renames,
   regenerates, or weakens them.
 - Scaffolding is a solution-generation technique, not a source of expected
