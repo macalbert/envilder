@@ -302,16 +302,28 @@ contract repair, implementation correction, review, and final verification;
 Implementer observes it during execution and preparation. Nonmutating Git and
 role-authorized in-scope edits/formatters remain allowed.
 
-On receiving the delegated result, before deriving the candidate patch, and
-again immediately before approved staging after any approval wait, PR Resolver
-must successfully confirm the original per-comment HEAD and a clean index.
-Unexpected HEAD or staging, or failed, unavailable, or ambiguous HEAD/index
-inspection, blocks even nominal success or final `PASS`: report the reason and
-preserve state, without automatically reverting, resetting, stashing,
-discarding, absorbing changed history into the fix, or restoring old HEAD to
-hide a change. Resume only after legitimate reassessment and applicable approval
-under existing review/verification guards. These are point-in-time checks, not a
-runtime lock.
+On receiving the delegated result, before deriving the candidate patch, PR
+Resolver must successfully confirm the original per-comment HEAD and a clean
+index. Immediately before official approved staging, after any approval wait,
+it must perform the complete current-candidate integrity gate against that recorded
+per-comment initial HEAD and frozen approved patch: HEAD must still equal the
+initial HEAD;
+the complete current raw binary diff from that HEAD must have byte-for-byte
+exact equality with the frozen patch; and the changed-path set, approved scope,
+and accepted candidate result must match the frozen record. Patch applicability,
+a permissive diff, matching paths or hunks, text equivalence, or a partial
+comparison cannot stand in for raw-binary exact equality. The index exactly
+equals HEAD (no staged content), the only tracked worktree changes must be the
+exact unstaged candidate, and no nonignored untracked path, tracked addition,
+or other unexpected file may exist. Any integrity-gate failure—including any
+mismatch, unavailable or ambiguous comparison, changed HEAD, staged content,
+or tracked/untracked addition—blocks staging even with nominal success or final
+`PASS`, while preserving all work. Any such failure requires fresh review,
+fresh final verification, and exact-patch approval before another staging
+attempt. Never stage, infer, or adopt altered hunks; never stash or reset; and
+never automatically revert, discard, absorb changed history into the fix, or
+restore old HEAD to hide a change. These are point-in-time checks, not a runtime
+lock.
 
 Before final candidate review, fresh final literal `PASS`, frozen exact-patch
 content approval, official staging, or staged equality, PR Resolver compares

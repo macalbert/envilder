@@ -166,8 +166,23 @@ For each active review comment:
      obtain explicit approval before staging;
    - freeze the approved patch; any subsequent candidate change requires fresh
      review, verification, and user approval;
-   - immediately before approved staging, after any approval wait, successfully
-     reconfirm the same initial per-comment HEAD and a clean index;
+   - immediately before official approved staging, after any approval wait,
+     perform a complete current-candidate integrity gate against the recorded
+     per-comment initial HEAD and frozen approved patch: confirm HEAD is still
+     that initial HEAD; produce the complete current raw binary diff from that
+     HEAD and require byte-for-byte exact equality with the frozen patch; and
+     confirm the changed-path set, approved scope, and accepted candidate result
+     still match the frozen record. Patch applicability, a permissive diff,
+     matching paths or hunks, text equivalence, or a partial comparison is not
+     raw-binary exact equality. Confirm the index exactly equals HEAD (no staged
+     content), the only tracked worktree changes are the exact unstaged
+     candidate, and no nonignored untracked path, tracked addition, or other
+     unexpected file exists. Any integrity-gate failure—including any mismatch,
+     unavailable or ambiguous comparison, changed HEAD, staged content, or
+     tracked/untracked addition—blocks staging while preserving all work. Any
+     such failure requires fresh review, fresh final verification, and
+     exact-patch approval before another staging attempt. Never stage, infer, or
+     adopt altered hunks, and never stash or reset;
    - stage only the exact approved hunks from that frozen patch;
    - verify that the complete staged diff exactly equals the approved patch
      before committing;
