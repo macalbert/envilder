@@ -431,7 +431,34 @@ remote repository, head branch, and immutable remote head through authoritative
 PR inspection. This preliminary inspection does not authorize publication.
 Missing, stale, or ambiguous inspection blocks; a local remote-tracking ref,
 push result, commit URL, or another remote or branch is not authoritative
-evidence. The actual remote head qualifies only by one of two paths:
+evidence. Maintain an immutable batch record of the exact ordered commit
+identities approved as that batch's corrective commits from the per-comment
+completion records, not from a later observed range. Before **every**
+parent-owned normal (non-force) push, immediately repeat authoritative PR
+inspection of that same repository and head branch and freeze the actual current
+remote-head SHA for pre-push range admission. Establish that this exact remote
+head is an ancestor of the exact local validated candidate, enumerate the
+complete ordered outgoing range using `git rev-list --reverse --topo-order
+<remote-head>..<candidate>`, and require exact ordered identity equality with
+the immutable batch corrective-commit record. Do not push unless all these
+checks pass. An unavailable, unknown, stale, changed, or ambiguous remote head;
+a non-fast-forward or otherwise incorrect relationship; incomplete range; an
+extra, unrelated, or unrecorded outgoing commit; a missing approved corrective
+commit; or any ordered identity/range mismatch blocks push, publication, replies,
+and resolution while preserving all state. Local tracking refs, prior inspection
+output, commit URLs, another remote or branch, or push output cannot establish
+this admission. This pre-push range-admission gate is separate from remote
+qualified-candidate validation and cannot be replaced by containment or later
+fresh-candidate evidence. If the actual remote head already exactly equals the
+qualified candidate, do not push and do not compare an empty outgoing range with
+a nonempty corrective-commit record; use the separate qualification path below.
+If the remote has advanced, do not push from a stale range; use the existing
+advanced fresh-candidate path. Only after admission does recorded action
+approval authorize a needed non-force push unless explicitly limited, and the
+push must exclude unrelated commits and user work or await the responsible
+calling workflow's confirmed handoff. Separately, after any admitted push or
+handoff, or when no push is needed, the actual remote head qualifies only by one
+of two paths:
 
 1. It exactly equals the fully validated candidate for which all affected
    reviews—including mandatory candidate Reviewer approval and its unchanged
@@ -444,13 +471,14 @@ evidence. The actual remote head qualifies only by one of two paths:
    validation, and clean committed-candidate checks must each identify that
    exact advanced remote-head commit.
 
-Corrective-commit reachability is necessary but insufficient. Tree or text
-similarity, a public commit URL, presence only in the base or an unrelated
-branch or repository, a stale local remote-tracking ref, push success alone, or
-an unconfirmed handoff cannot qualify either path. Missing, unavailable,
-contradictory, or ambiguous identity, reachability, or exact-head rerun evidence
-blocks publication and resolution. Already-present commits need no push or push
-approval. An entirely no-artifact batch requires no artifact commit or push, but
+Corrective-commit reachability is necessary but insufficient: it cannot qualify
+an advanced head without its exact-head reruns and cannot replace pre-push
+ordered-range admission. Tree or text similarity, a public commit URL, presence
+only in the base or an unrelated branch or repository, a stale local
+remote-tracking ref, push success alone, or an unconfirmed handoff cannot
+qualify either path. Missing, unavailable, contradictory, or ambiguous identity,
+reachability, range, or exact-head rerun evidence blocks publication and
+resolution. An entirely no-artifact batch requires no artifact commit or push, but
 is not exempt from the push/remote gate, exact remote-tuple equality, mandatory
 candidate review/evidence, or aggregate guards.
 After all applicable checks, immediately before **every** individual reply and

@@ -43,26 +43,43 @@ Resolve pull request comments end-to-end.
    record candidate HEAD and establish a clean index and worktree (no staged or
    unstaged tracked changes or nonignored untracked files) before aggregate
    validation. Afterward, confirm unchanged HEAD and the same clean state.
-   For every batch, apply PR Resolver's remote-availability gate: the recorded
-   action approval authorizes a needed non-force push unless explicitly
-   limited; exclude unrelated commits/user work, or wait for the responsible
-   calling workflow's confirmed push handoff. Immediately before
-   qualifying remote availability, derive and record the actual PR remote
-   repository, head branch, and immutable remote head through authoritative PR
-   inspection; this preliminary inspection does not authorize publication, and
-   missing, stale, or ambiguous inspection blocks. The actual remote head
-   qualifies only if it exactly equals the committed
+   For every batch, apply PR Resolver's remote-availability gate. Maintain the
+   immutable exact ordered record of its approved corrective commit identities
+   from the per-comment completion records. Before **every** parent-owned normal
+   non-force push, immediately authoritatively inspect and freeze the actual PR
+   remote repository, head branch, and current remote-head SHA; local tracking
+   refs, earlier inspection, URLs, other remotes/branches, and push output are
+   nonauthoritative. Establish that the frozen remote head is an ancestor of
+   the exact local validated candidate, enumerate the complete ordered outgoing
+   range with `git rev-list --reverse --topo-order <remote-head>..<candidate>`,
+   and require exact ordered identity equality with the immutable batch record.
+   Missing, unknown, stale, changed, or ambiguous remote inspection; a
+   non-fast-forward or incorrect relationship; incomplete range; extra, unrelated, or unrecorded
+   outgoing commits; missing approved corrective commits; or any order/range
+   mismatch blocks push, publication, replies, and resolution while preserving
+   state. This pre-push range admission is separate from remote
+   qualified-candidate validation and cannot be satisfied by reachability or
+   fresh-candidate evidence. If the actual remote head already equals the
+   qualified candidate, make no push and do not compare an empty outgoing range
+   with a nonempty correction list; use the separate qualification path. If it
+   advanced, do not push from a stale range; use the existing advanced
+   fresh-candidate path. Only after admission does recorded action approval
+   authorize a needed non-force push unless explicitly limited; exclude
+   unrelated commits/user work, or wait for the responsible calling workflow's
+   confirmed push handoff. Separately after any admitted push or handoff, or
+   when no push is needed, the actual remote head qualifies only if it exactly
+   equals the committed
    fully validated candidate for which all affected reviews, qualifying final
    `PASS`, aggregate validation, and clean committed-candidate checks passed,
    or if it advanced, contains every corrective commit, and has documented fresh
    successful reruns of all affected reviews, qualifying final `PASS`,
    aggregate validation, and clean committed-candidate checks specifically for
    that exact advanced remote head.
-   Reachability alone is necessary but insufficient. A commit URL, push success,
-   stale tracking ref, tree or text similarity, another remote, the base or an
-   unrelated branch, or unconfirmed handoff does not qualify; missing or ambiguous identity,
-   reachability, or rerun evidence blocks. Already-present commits need neither
-   redundant push nor permission. After all applicable checks, immediately
+   Reachability alone is necessary but insufficient and cannot replace pre-push
+   ordered-range admission. A commit URL, push success, stale tracking ref, tree
+   or text similarity, another remote, the base or an unrelated branch, or
+   unconfirmed handoff does not qualify; missing or ambiguous identity,
+   reachability, range, or rerun evidence blocks. After all applicable checks, immediately
    before **every** reply and again immediately before **every** thread
    resolution, repeat authoritative PR inspection and prove the actual PR
    remote repository, head branch, and immutable current SHA exactly equal the

@@ -308,12 +308,37 @@ record must precede this remote-availability gate:
    authorize publication. Failed, missing, stale, or ambiguous inspection blocks;
    a local remote-tracking ref, push result, commit URL, or other remote or
    branch is not authoritative evidence.
-2. If needed commits are not present, the recorded action approval authorizes
-   the necessary non-force push to that PR head remote/branch, unless explicitly
+2. Maintain an immutable batch record of the exact ordered commit identities
+   approved as that batch's corrective commits; record it from the approved
+   per-comment completion records, not from a later observed range. Before
+   **every** parent-owned normal (non-force) push, immediately repeat
+   authoritative PR inspection of that same repository and head branch and
+   freeze its actual current remote-head SHA for this pre-push range admission.
+   Establish that this exact remote head is an ancestor of the exact local
+   validated candidate, then enumerate the complete ordered outgoing range
+   from that head to that candidate using
+   `git rev-list --reverse --topo-order <remote-head>..<candidate>`. The
+   resulting ordered commit identities must equal the immutable ordered batch
+   corrective-commit record exactly. Do not push unless all these checks pass.
+   A non-fast-forward or otherwise incorrect relationship, an unavailable,
+   unknown, stale, changed, or ambiguous remote head, an incomplete range, an extra,
+   unrelated, or unrecorded outgoing commit, a missing approved corrective
+   commit, or any ordered identity/range mismatch blocks the push, publication,
+   replies, and thread resolution while preserving all state. Local tracking
+   refs, prior inspection output, commit URLs, another remote or branch, or
+   push output are nonauthoritative and cannot establish this admission.
+   This is a range-admission gate, not remote qualified-candidate validation:
+   it cannot be replaced by containment or later fresh-candidate evidence.
+   If the actual remote head already exactly equals the qualified candidate, do
+   not push and do not compare an empty outgoing range with a nonempty
+   corrective-commit record; use the separate qualification path below. If the
+   remote has advanced, do not push from the stale range; use the existing
+   advanced fresh-candidate path. The recorded action approval authorizes a
+   needed non-force push only after this admission and unless explicitly
    limited. Do not include unrelated commits or user work. If the responsible
    calling workflow owns the push, wait for its confirmed handoff instead.
-   Already-present commits require neither a redundant push nor permission.
-3. Qualify the actual remote head by exactly one of these evidence paths:
+3. Separately, after any admitted push or handoff, or when no push is needed,
+   qualify the actual remote head by exactly one of these evidence paths:
    - **Exact committed candidate:** it exactly equals the fully validated
      candidate for which all affected reviews (including mandatory candidate
      Reviewer approval and its unchanged Reviewer-owned evidence), qualifying
@@ -327,13 +352,14 @@ record must precede this remote-availability gate:
      qualifying literal final `PASS`, aggregate validation, and clean
      committed-candidate checks before it qualifies.
 4. Corrective-commit reachability is necessary but insufficient: it cannot
-   qualify an advanced head without the documented exact-head reruns. Tree or
-   text similarity, a public commit URL, presence only in another repository or
-   the base or an unrelated branch, a stale local remote-tracking ref, push
-   success alone, or an unconfirmed caller handoff cannot substitute for either
-   path. Confirm this evidence after any push or handoff. Missing, unavailable,
-   contradictory, or ambiguous identity, reachability, or check evidence
-   blocks publication and resolution.
+   qualify an advanced head without the documented exact-head reruns, and it
+   cannot replace pre-push ordered-range admission. Tree or text similarity, a
+   public commit URL, presence only in another repository or the base or an
+   unrelated branch, a stale local remote-tracking ref, push success alone, or
+   an unconfirmed caller handoff cannot substitute for either path. Confirm this
+   evidence after any push or handoff. Missing, unavailable, contradictory, or
+   ambiguous identity, reachability, range, or check evidence blocks
+   publication and resolution.
 5. After all applicable checks, including the applicable qualification in step
    3, immediately before **each** individual reply and again immediately before
    its thread resolution, repeat authoritative PR inspection. Record and prove
