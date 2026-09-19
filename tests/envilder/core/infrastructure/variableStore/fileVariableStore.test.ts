@@ -11,6 +11,14 @@ import {
   readMapFileConfig,
 } from '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore';
 
+const LINE_SEPARATOR = String.fromCharCode(0x2028);
+const PARAGRAPH_SEPARATOR = String.fromCharCode(0x2029);
+// Every terminator that would split the rendered message across lines, so an
+// error about an untrusted name cannot itself be forged into extra output.
+const ANY_LINE_TERMINATOR = new RegExp(
+  `[\\r\\n${LINE_SEPARATOR}${PARAGRAPH_SEPARATOR}]`,
+);
+
 vi.mock('node:fs/promises', async () => {
   const actual = await vi.importActual('node:fs/promises');
   return {
@@ -170,7 +178,15 @@ describe('FileVariableStore', () => {
   });
 
   describe('saveEnvFile', () => {
-    it.each(['', '   ', 'SAFE=prefix', 'SAFE\nINJECTED', 'SAFE\rINJECTED'])(
+    it.each([
+      '',
+      '   ',
+      'SAFE=prefix',
+      'SAFE\nINJECTED',
+      'SAFE\rINJECTED',
+      `SAFE${LINE_SEPARATOR}INJECTED`,
+      `SAFE${PARAGRAPH_SEPARATOR}INJECTED`,
+    ])(
       'Should_PreserveDestination_When_MappingContainsInvalidVariableNames',
       async (invalidName) => {
         // Arrange
@@ -185,11 +201,54 @@ describe('FileVariableStore', () => {
         await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
         await expect(action).rejects.toThrow(/environment variable name/i);
         await expect(action).rejects.toMatchObject({
-          message: expect.not.stringMatching(/[\r\n]/),
+          message: expect.not.stringMatching(ANY_LINE_TERMINATOR),
         });
         expect(mockInMemoryFiles.get(mockEnvFilePath)).toBe(expected);
         expect(fs.readFile).not.toHaveBeenCalled();
         expect(fs.writeFile).not.toHaveBeenCalled();
+      },
+    );
+
+    // The invariant behind the name rule: a name that survives validation must
+    // read back as itself and nothing else. Asserting on the written file
+    // through dotenv, rather than on a list of characters, is what catches a
+    // terminator the rule forgot -- which is how U+2028 slipped past `[=\r\n]`.
+    it('Should_ReadBackExactlyTheWrittenNames_When_NamesAreAccepted', async () => {
+      // Arrange
+      const envVariables = {
+        PLAIN_NAME: 'fictional-value-1',
+        'APP.NAME': 'fictional-value-2',
+        'APP-NAME': 'fictional-value-3',
+      };
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, envVariables);
+
+      // Assert
+      const written = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(Object.keys(dotenv.parse(written)).sort()).toEqual(
+        Object.keys(envVariables).sort(),
+      );
+    });
+
+    // Characterization test recording *why* U+2028/U+2029 are rejected: they
+    // are not newlines to the writer, so the file holds a single line, but
+    // dotenv's line regex is multiline and JavaScript counts them as line
+    // terminators. If dotenv ever stops splitting on them this test fails and
+    // the rule can be revisited -- until then the name must be rejected
+    // upstream, which the sibling tests assert.
+    it.each([LINE_SEPARATOR, PARAGRAPH_SEPARATOR])(
+      'Should_ReadAnExtraAssignment_When_EnvFileKeyEmbedsLineSeparator',
+      (separator) => {
+        // Arrange
+        const singleLine = `SAFE${separator}INJECTED=fictional-value-123`;
+
+        // Act
+        const actual = dotenv.parse(singleLine);
+
+        // Assert
+        expect(singleLine.split(/\r?\n/)).toHaveLength(1);
+        expect(actual).toEqual({ INJECTED: 'fictional-value-123' });
       },
     );
 
@@ -1296,7 +1355,14 @@ describe('FileVariableStore', () => {
   });
 
   describe('getParsedMapping', () => {
-    it.each(['   ', 'SAFE=prefix', 'SAFE\nINJECTED', 'SAFE\rINJECTED'])(
+    it.each([
+      '   ',
+      'SAFE=prefix',
+      'SAFE\nINJECTED',
+      'SAFE\rINJECTED',
+      `SAFE${LINE_SEPARATOR}INJECTED`,
+      `SAFE${PARAGRAPH_SEPARATOR}INJECTED`,
+    ])(
       'Should_RejectMappingKey_When_NameIsWhitespaceOnlyOrContainsInvalidDelimiter',
       async (invalidName) => {
         // Arrange
@@ -1310,7 +1376,7 @@ describe('FileVariableStore', () => {
         await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
         await expect(action).rejects.toThrow(/environment variable name/i);
         await expect(action).rejects.toMatchObject({
-          message: expect.not.stringMatching(/[\r\n]/),
+          message: expect.not.stringMatching(ANY_LINE_TERMINATOR),
         });
         expect(fs.readFile).toHaveBeenCalledTimes(1);
         expect(fs.readFile).toHaveBeenCalledWith(mockMapPath, 'utf-8');
@@ -1332,6 +1398,22 @@ describe('FileVariableStore', () => {
       expect(fs.readFile).toHaveBeenCalledTimes(1);
       expect(fs.readFile).toHaveBeenCalledWith(mockMapPath, 'utf-8');
       expect(fs.writeFile).not.toHaveBeenCalled();
+    });
+
+    it('Should_KeepMappingAsData_When_KeyShadowsObjectPrototype', async () => {
+      // Arrange: written as raw JSON because an object literal would treat
+      // `__proto__` as a prototype assignment rather than an own property.
+      const mapJson = '{"__proto__":"/proto/secret","SAFE":"/safe/secret"}';
+      mockInMemoryFiles.set(mockMapPath, mapJson);
+
+      // Act
+      const actual = await sut.getMapping(mockMapPath);
+
+      // Assert
+      expect(Object.keys(actual).sort()).toEqual(['SAFE', '__proto__']);
+      expect(Object.getOwnPropertyDescriptor(actual, '__proto__')?.value).toBe(
+        '/proto/secret',
+      );
     });
 
     it('Should_ReturnEmptyConfig_When_MapFileHasNoConfigSection', async () => {

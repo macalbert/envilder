@@ -5,15 +5,37 @@ import Ajv2020 from 'ajv/dist/2020';
 import addFormats from 'ajv-formats';
 import { beforeAll, describe, expect, it } from 'vitest';
 
+const LINE_SEPARATOR = String.fromCharCode(0x2028);
+const PARAGRAPH_SEPARATOR = String.fromCharCode(0x2029);
+
+const SPEC_SCHEMA = resolve(__dirname, '../../spec/map-file.v1.json');
+const PUBLISHED_SCHEMA = resolve(
+  __dirname,
+  '../../src/website/public/schema/map-file.v1.json',
+);
+
 describe('Map File Schema', () => {
   let validate: ValidateFunction;
 
   beforeAll(() => {
-    const schemaPath = resolve(__dirname, '../../spec/map-file.v1.json');
-    const schema = JSON.parse(readFileSync(schemaPath, 'utf-8'));
+    const schema = JSON.parse(readFileSync(SPEC_SCHEMA, 'utf-8'));
     const ajv = new Ajv2020({ strict: false });
     addFormats(ajv);
     validate = ajv.compile(schema);
+  });
+
+  // Every other test here compiles the spec copy, but IDEs fetch the copy the
+  // website publishes. Without this guard the published contract can drift
+  // from the one under test, and nothing would fail.
+  it('Should_MatchSpecCopy_When_ComparingPublishedSchema', () => {
+    // Arrange
+    const expected = readFileSync(SPEC_SCHEMA, 'utf-8');
+
+    // Act
+    const actual = readFileSync(PUBLISHED_SCHEMA, 'utf-8');
+
+    // Assert
+    expect(actual).toBe(expected);
   });
 
   it('Should_AcceptMapFile_When_Empty', () => {
@@ -41,7 +63,15 @@ describe('Map File Schema', () => {
     expect(actual).toBe(true);
   });
 
-  it.each(['', '   ', 'SAFE=prefix', 'SAFE\nINJECTED', 'SAFE\rINJECTED'])(
+  it.each([
+    '',
+    '   ',
+    'SAFE=prefix',
+    'SAFE\nINJECTED',
+    'SAFE\rINJECTED',
+    `SAFE${LINE_SEPARATOR}INJECTED`,
+    `SAFE${PARAGRAPH_SEPARATOR}INJECTED`,
+  ])(
     'Should_RejectMapFile_When_MappingNameIsEmptyWhitespaceOrContainsInvalidDelimiter',
     (invalidName) => {
       // Arrange

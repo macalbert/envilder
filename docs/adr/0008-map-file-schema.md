@@ -60,11 +60,18 @@ this is a recommended convention, not a runtime constraint. Existing files
 with hyphens or dots in keys remain valid.
 
 **Narrow safety exception:** parsers MUST reject a variable name that is empty
-or whitespace-only, or that contains `=`, a carriage return (`\r`), or a line
-feed (`\n`). Such names or characters would let a mapping key inject an
-additional `key=value` assignment or extra line when later written to a `.env`
-file. This is the only case where an otherwise-permissive parser rejects a key
-([#511](https://github.com/macalbert/envilder/issues/511)).
+or whitespace-only, or that contains any of `=`, a carriage return (`\r`), a
+line feed (`\n`), or the Unicode line separators `U+2028` / `U+2029`. Such
+names would let a mapping key inject an additional `key=value` assignment or
+extra line when later written to a `.env` file: `=` opens a second assignment
+on the same line, `\r` and `\n` open a second line, and `U+2028`/`U+2029` are
+line terminators for JavaScript regular expressions, so a `.env` parser reads
+the text following them as a fresh assignment even though the writer emitted a
+single line. This is the only case where an otherwise-permissive parser
+rejects a key ([#511](https://github.com/macalbert/envilder/issues/511)).
+
+The rule applies to variable mappings. `$`-prefixed keys stay reserved and
+ignored under the rule above, so they are never written to a `.env` file.
 
 At least one variable mapping is required for meaningful operation.
 

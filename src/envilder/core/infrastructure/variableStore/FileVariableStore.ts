@@ -1,7 +1,10 @@
 import * as fs from 'node:fs/promises';
 import * as dotenv from 'dotenv';
 import { inject, injectable } from 'inversify';
-import { isValidEnvironmentVariableName } from '../../domain/EnvironmentVariableName.js';
+import {
+  invalidEnvironmentVariableNameMessage,
+  isValidEnvironmentVariableName,
+} from '../../domain/EnvironmentVariableName.js';
 import {
   DependencyMissingError,
   EnvironmentFileError,
@@ -80,7 +83,10 @@ export class FileVariableStore implements IVariableStore {
     const { $config, ...rest } = raw;
     const config: MapFileConfig =
       $config && typeof $config === 'object' ? $config : {};
-    const mappings: Record<string, string> = {};
+    // Null-prototype: map-file keys are untrusted, and a plain object literal
+    // would route `__proto__` through the Object.prototype setter, silently
+    // dropping that mapping instead of storing it as data.
+    const mappings: Record<string, string> = Object.create(null);
     for (const [key, value] of Object.entries(rest)) {
       if (key.startsWith('$') || typeof value !== 'string') {
         continue;
@@ -94,7 +100,7 @@ export class FileVariableStore implements IVariableStore {
   private assertValidVariableName(name: string): void {
     if (!isValidEnvironmentVariableName(name)) {
       throw new InvalidArgumentError(
-        `Invalid environment variable name ${JSON.stringify(name)}: names must not be empty and must not contain "=", carriage return, or newline characters`,
+        invalidEnvironmentVariableNameMessage(name),
       );
     }
   }

@@ -4,8 +4,10 @@
 
 * **Reject map-file mapping keys that could inject extra `.env` lines**: The
   GitHub Action now rejects empty or whitespace-only variable names and names
-  containing `=`, carriage return, or newline characters when parsing a map
-  file or writing an environment file, instead of silently writing them through
+  containing `=`, carriage return, newline, or the `U+2028`/`U+2029` line
+  separators when parsing a map file or writing an environment file, instead of
+  silently writing them through. A name embedding one of these characters could
+  smuggle an extra `key=value` assignment into the generated environment file
   ([#511](https://github.com/macalbert/envilder/issues/511))
 
 ---
