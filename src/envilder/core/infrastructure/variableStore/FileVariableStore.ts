@@ -27,12 +27,15 @@ type EnvQuote = (typeof ENV_QUOTES)[number];
  * BOM, a non-breaking space, an ideographic space, ...) minus the line breaks,
  * so structural spacing can never swallow the newline that separates two
  * assignments.
+ *
+ * The padding between the value and an optional comment is a group of its own
+ * and the unquoted run is lazy, so a closing delimiter followed by blanks still
+ * ends the value. Folding that padding into the quoted alternatives would make
+ * them fail and hand the line to the unquoted run, which stops at the first
+ * line break and would leave the tail of a multiline secret behind.
  */
 const ASSIGNMENT_PATTERN =
-  /^([^\S\r\n]*(?:export[^\S\r\n]+)?)([\w.-]+)([^\S\r\n]*=[^\S\r\n]*)('(?:\\'|[^'])*'|"(?:\\"|[^"])*"|`(?:\\`|[^`])*`|[^#\r\n]*)((?:[^\S\r\n]*#.*)?)$/gm;
-
-/** Trailing horizontal whitespace of an already captured value. */
-const TRAILING_SPACE_PATTERN = /[^\S\r\n]*$/;
+  /^([^\S\r\n]*(?:export[^\S\r\n]+)?)([\w.-]+)([^\S\r\n]*=[^\S\r\n]*)('(?:\\'|[^'])*'|"(?:\\"|[^"])*"|`(?:\\`|[^`])*`|[^#\r\n]*?)([^\S\r\n]*)((?:#.*)?)$/gm;
 
 /** The line break that closes a file, kept verbatim instead of normalized. */
 const TRAILING_NEWLINE_PATTERN = /(?:\r\n|[\r\n])$/;
@@ -172,6 +175,7 @@ export class FileVariableStore implements IVariableStore {
         key: string,
         separator: string,
         rawValue: string,
+        padding: string,
         comment: string,
       ) => {
         if (!Object.hasOwn(envVariables, key)) {
@@ -183,11 +187,7 @@ export class FileVariableStore implements IVariableStore {
           envVariables[key],
           rawValue,
         );
-        const spacing =
-          comment === ''
-            ? ''
-            : (TRAILING_SPACE_PATTERN.exec(rawValue)?.[0] ?? '');
-        return `${prefix}${key}${separator}${value}${spacing}${comment}`;
+        return `${prefix}${key}${separator}${value}${padding}${comment}`;
       },
     );
 

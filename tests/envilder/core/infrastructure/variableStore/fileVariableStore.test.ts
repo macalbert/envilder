@@ -263,6 +263,226 @@ describe('FileVariableStore', () => {
       expect(actual).toEqual(expected);
     });
 
+    describe.each([
+      { quoteStyle: 'double', quote: '"' },
+      { quoteStyle: 'single', quote: "'" },
+      { quoteStyle: 'backtick', quote: '`' },
+    ])('$quoteStyle-quoted multiline assignments', ({ quote }) => {
+      describe.each([
+        { newlineStyle: 'LF', newline: '\n' },
+        { newlineStyle: 'CRLF', newline: '\r\n' },
+      ])('$newlineStyle files', ({ newline }) => {
+        describe.each([
+          { trailingNewlineState: 'without trailing newline', suffix: '' },
+          { trailingNewlineState: 'with trailing newline', suffix: newline },
+        ])('$trailingNewlineState', ({ suffix }) => {
+          it('Should_ReplaceEntireAssignment_When_ExistingSecretSpansMultipleLines', async () => {
+            // Arrange
+            const staleFragment = 'old-continuation';
+            const existing = [
+              '# Preserved header',
+              'BEFORE=keep-before',
+              '',
+              `TOKEN=${quote}old-first`,
+              `${staleFragment}${quote}`,
+              '# Preserved footer',
+              'AFTER=keep-after',
+              '',
+              'LAST=keep-last',
+            ].join(newline);
+            const expected = [
+              '# Preserved header',
+              'BEFORE=keep-before',
+              '',
+              `TOKEN=${quote}new-value${quote}`,
+              '# Preserved footer',
+              'AFTER=keep-after',
+              '',
+              'LAST=keep-last',
+            ].join(newline);
+            mockInMemoryFiles.set(mockEnvFilePath, existing + suffix);
+
+            // Act
+            await sut.saveEnvironment(mockEnvFilePath, { TOKEN: 'new-value' });
+
+            // Assert
+            const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+            expect(actual).not.toContain(staleFragment);
+            expect(actual).toBe(expected + suffix);
+          });
+
+          it('Should_ReplaceEntireAssignment_When_ClosingDelimiterIsFollowedByBlanks', async () => {
+            // Arrange
+            const staleFragment = 'old-continuation';
+            const existing = [
+              `TOKEN=${quote}old-first`,
+              `${staleFragment}${quote}   `,
+              'KEEP=keep-me',
+            ].join(newline);
+            const expected = [
+              `TOKEN=${quote}new-value${quote}   `,
+              'KEEP=keep-me',
+            ].join(newline);
+            mockInMemoryFiles.set(mockEnvFilePath, existing + suffix);
+
+            // Act
+            await sut.saveEnvironment(mockEnvFilePath, { TOKEN: 'new-value' });
+
+            // Assert
+            const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+            expect(actual).not.toContain(staleFragment);
+            expect(dotenv.parse(actual)).toEqual({
+              TOKEN: 'new-value',
+              KEEP: 'keep-me',
+            });
+            expect(actual).toBe(expected + suffix);
+          });
+        });
+      });
+
+      it('Should_PreserveInlineComment_When_ReplacingMultilineAssignment', async () => {
+        // Arrange
+        mockInMemoryFiles.set(
+          mockEnvFilePath,
+          [
+            `TOKEN=${quote}old-first`,
+            `stale-tail${quote} # keep`,
+            'AFTER=ok',
+          ].join('\n'),
+        );
+        const expected = [
+          `TOKEN=${quote}new-value${quote} # keep`,
+          'AFTER=ok',
+        ].join('\n');
+
+        // Act
+        await sut.saveEnvironment(mockEnvFilePath, { TOKEN: 'new-value' });
+
+        // Assert
+        const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+        expect(actual).not.toContain('stale-tail');
+        expect(actual).toBe(expected);
+      });
+
+      it('Should_IgnoreEscapedDelimiter_When_ReplacingMultilineAssignment', async () => {
+        // Arrange
+        mockInMemoryFiles.set(
+          mockEnvFilePath,
+          [
+            `TOKEN=${quote}old \\${quote} alias`,
+            `another \\${quote} alias`,
+            `stale-tail${quote}`,
+            'AFTER=ok',
+          ].join('\n'),
+        );
+        const expected = [`TOKEN=${quote}new-value${quote}`, 'AFTER=ok'].join(
+          '\n',
+        );
+
+        // Act
+        await sut.saveEnvironment(mockEnvFilePath, { TOKEN: 'new-value' });
+
+        // Assert
+        const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+        expect(actual).not.toContain('stale-tail');
+        expect(actual).toBe(expected);
+      });
+
+      it('Should_PreserveFollowingContent_When_MultilineAssignmentIsUnclosed', async () => {
+        // Arrange
+        mockInMemoryFiles.set(
+          mockEnvFilePath,
+          [
+            `TOKEN=${quote}unterminated`,
+            '# Must remain unrelated',
+            'AFTER=keep-after',
+          ].join('\n'),
+        );
+
+        // Act
+        await sut.saveEnvironment(mockEnvFilePath, { TOKEN: 'new-value' });
+
+        // Assert
+        const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+        expect(actual).toBe(
+          [
+            'TOKEN=new-value',
+            '# Must remain unrelated',
+            'AFTER=keep-after',
+          ].join('\n'),
+        );
+      });
+    });
+
+    it('Should_ReplaceEntireAssignment_When_ClosingQuoteFollowsEvenBackslashes', async () => {
+      // Arrange
+      mockInMemoryFiles.set(
+        mockEnvFilePath,
+        ['TOKEN="old-first', 'stale-tail\\\\" # keep', 'AFTER=ok'].join('\n'),
+      );
+      const expected = ['TOKEN="new-value" # keep', 'AFTER=ok'].join('\n');
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { TOKEN: 'new-value' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).not.toContain('stale-tail');
+      expect(actual).toBe(expected);
+    });
+
+    it('Should_PreserveUnrelatedQuotedLines_When_ClosingQuoteHasInvalidSuffix', async () => {
+      // Arrange
+      const existing = [
+        "TOKEN='old-first",
+        "stale-tail'junk",
+        "# Unrelated note'",
+        'AFTER=ok',
+      ].join('\n');
+      mockInMemoryFiles.set(mockEnvFilePath, existing);
+      const expected = [
+        'TOKEN=new-value',
+        "stale-tail'junk",
+        "# Unrelated note'",
+        'AFTER=ok',
+      ].join('\n');
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { TOKEN: 'new-value' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).toBe(expected);
+    });
+
+    it('Should_ReplaceEntireAssignment_When_MultilineAssignmentIsExported', async () => {
+      // Arrange
+      mockInMemoryFiles.set(
+        mockEnvFilePath,
+        ['export TOKEN="old-first', 'stale-tail"', 'AFTER=ok'].join('\n'),
+      );
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { TOKEN: 'new-value' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).not.toContain('stale-tail');
+      expect(actual).toBe(['export TOKEN="new-value"', 'AFTER=ok'].join('\n'));
+    });
+
+    it('Should_KeepTrailingBlanks_When_UpdatingSingleLineQuotedAssignment', async () => {
+      // Arrange
+      mockInMemoryFiles.set(mockEnvFilePath, 'DB_HOST="old-host"   \nKEEP=ok');
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { DB_HOST: 'new-host' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).toBe('DB_HOST="new-host"   \nKEEP=ok');
+    });
+
     it('Should_ThrowBeforeWritingWithoutLeakingSecret_When_ValueIsGenuinelyUnrepresentable', async () => {
       // Arrange
       const existing = 'OTHER=old-value\n';
