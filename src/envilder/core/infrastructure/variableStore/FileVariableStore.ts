@@ -407,11 +407,6 @@ export class FileVariableStore implements IVariableStore {
     );
   }
 
-  /**
-   * The values the file already held for keys this run is not writing. Read
-   * through `dotenv.parse` so duplicate keys collapse the same way a consumer
-   * would see them.
-   */
   /** Keys the file no longer reads back as the value they are meant to hold. */
   private keysThatLostTheirValue(
     parsed: Record<string, string>,
@@ -433,6 +428,11 @@ export class FileVariableStore implements IVariableStore {
     );
   }
 
+  /**
+   * The values the file already held for keys this run is not writing. Read
+   * through `dotenv.parse` so duplicate keys collapse the same way a consumer
+   * would see them.
+   */
   private collectUnmanagedValues(
     existingContent: string | null,
     envVariables: Record<string, string>,
