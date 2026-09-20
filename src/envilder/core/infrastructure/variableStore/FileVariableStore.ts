@@ -157,8 +157,14 @@ export class FileVariableStore implements IVariableStore {
     envVariables: Record<string, string>,
   ): string {
     const entries = Object.entries(envVariables);
-    if (existingContent === null) {
-      return this.renderAssignments(entries).join('\n');
+    // A file we create ends with a line break, as a POSIX text file should:
+    // without one, git reports "\ No newline at end of file" and any editor
+    // configured to add one rewrites the file behind us. A file that already
+    // exists keeps the ending it has, empty one included — that shape belongs
+    // to whoever wrote it, and normalizing it is not ours to do.
+    if (existingContent === null || existingContent === '') {
+      const created = this.renderAssignments(entries).join('\n');
+      return created === '' ? created : `${created}\n`;
     }
 
     // The body keeps its own line breaks: rewriting them would also rewrite the
@@ -209,9 +215,7 @@ export class FileVariableStore implements IVariableStore {
     const appended = this.renderAssignments(
       entries.filter(([key]) => !updatedKeys.has(key)),
     );
-    const content = (
-      existingContent === '' ? appended : [merged, ...appended]
-    ).join(newline);
+    const content = [merged, ...appended].join(newline);
     return trailingNewline === '' ? content : content + trailingNewline;
   }
 

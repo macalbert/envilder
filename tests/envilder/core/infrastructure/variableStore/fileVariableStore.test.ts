@@ -177,7 +177,7 @@ describe('FileVariableStore', () => {
 
       // Assert
       const actual = mockInMemoryFiles.get(mockEnvFilePath);
-      expect(actual).toBe(`BACKSLASH_VAR=${escapeForEnvFile(expected)}`);
+      expect(actual).toBe(`BACKSLASH_VAR=${escapeForEnvFile(expected)}\n`);
       const parsed = dotenv.parse(actual as string);
       expect(parsed.BACKSLASH_VAR).toBe(expected);
     });
@@ -192,7 +192,7 @@ describe('FileVariableStore', () => {
 
       // Assert
       const actual = mockInMemoryFiles.get(mockEnvFilePath);
-      expect(actual).toBe(`NEWLINE_VAR=${escapeForEnvFile(expected)}`);
+      expect(actual).toBe(`NEWLINE_VAR=${escapeForEnvFile(expected)}\n`);
       const parsed = dotenv.parse(actual as string);
       expect(parsed.NEWLINE_VAR).toBe(expected);
     });
@@ -207,7 +207,7 @@ describe('FileVariableStore', () => {
 
       // Assert
       const actual = mockInMemoryFiles.get(mockEnvFilePath);
-      expect(actual).toBe(`QUOTE_VAR=${escapeForEnvFile(expected)}`);
+      expect(actual).toBe(`QUOTE_VAR=${escapeForEnvFile(expected)}\n`);
       const parsed = dotenv.parse(actual as string);
       expect(parsed.QUOTE_VAR).toBe(expected);
     });
@@ -222,7 +222,7 @@ describe('FileVariableStore', () => {
 
       // Assert
       const actual = mockInMemoryFiles.get(mockEnvFilePath);
-      expect(actual).toBe(`COMBINED_VAR=${escapeForEnvFile(expected)}`);
+      expect(actual).toBe(`COMBINED_VAR=${escapeForEnvFile(expected)}\n`);
       const parsed = dotenv.parse(actual as string);
       expect(parsed.COMBINED_VAR).toBe(expected);
     });
@@ -237,9 +237,43 @@ describe('FileVariableStore', () => {
 
       // Assert
       const actual = mockInMemoryFiles.get(mockEnvFilePath);
-      expect(actual).toBe(`ESCAPED_VAR=${escapeForEnvFile(input)}`);
+      expect(actual).toBe(`ESCAPED_VAR=${escapeForEnvFile(input)}\n`);
       const parsed = dotenv.parse(actual as string);
       expect(parsed.ESCAPED_VAR).toBe(input);
+    });
+
+    it('Should_EndWithALineBreak_When_CreatingAFreshEnvFile', async () => {
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { FIRST: 'a', SECOND: 'b' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).toBe('FIRST=a\nSECOND=b\n');
+    });
+
+    it('Should_EndWithALineBreak_When_FillingAnEmptyEnvFile', async () => {
+      // Arrange
+      mockInMemoryFiles.set(mockEnvFilePath, '');
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { FIRST: 'a' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).toBe('FIRST=a\n');
+    });
+
+    it('Should_LeaveTheEndingAlone_When_UpdatingAFileThatHasNoFinalLineBreak', async () => {
+      // Arrange: the convention applies to files we create. One that already
+      // exists keeps the shape its author gave it, missing ending included.
+      mockInMemoryFiles.set(mockEnvFilePath, 'KEEP=ok\nTOKEN=old');
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { TOKEN: 'new' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).toBe('KEEP=ok\nTOKEN=new');
     });
 
     it('Should_RoundTripDotenvRepresentableValues_When_CreatingFreshEnvFile', async () => {
@@ -975,7 +1009,7 @@ describe('FileVariableStore', () => {
 
       // Assert
       const actual = mockInMemoryFiles.get(mockEnvFilePath);
-      expect(actual).toBe('NEW_VAR=new-value');
+      expect(actual).toBe('NEW_VAR=new-value\n');
     });
 
     it('Should_ThrowError_When_ReadingExistingEnvFileFailsWithNonEnoent', async () => {
