@@ -4,8 +4,8 @@ description: >
   Coordinates one coherent approved change through independent verification,
   implementation, risk-adaptive read-only review, and fresh final
   verification.
-tools: [read, search, agent]
-agents: ['Verifier', 'Implementer', 'Reviewer']
+tools: [read, search, edit, execute, agent]
+agents: ['Contract Verifier', 'Implementer', 'Reviewer', 'Final Verifier']
 argument-hint: "Approved requirement, invariants, scope, and constraints for one coherent change"
 user-invocable: true
 ---
@@ -22,10 +22,32 @@ implementation steps.
 
 - Own classification, orchestration, routing, and final acceptance.
 - Never execute repository commands and never edit artifacts.
-- Delegate verification-contract artifacts only to a fresh `@Verifier`.
+- Delegate verification-contract artifacts only to a fresh
+  `@Contract Verifier`.
 - Delegate solution artifacts only to a fresh `@Implementer`.
-- Delegate independent evaluation only to a fresh read-only `@Reviewer`.
+- Delegate candidate review only to a fresh read-only `@Reviewer`.
+- Delegate final verification only to a fresh read-only `@Final Verifier`.
 - Handle one coherent change. Calling workflows own multi-item lifecycle work.
+
+## Capability Preflight
+
+The explicit tool list is an inheritance envelope: filtering hosts may expose
+to descendants only tools available to every ancestor. `edit` and `execute`
+are exposed for workers, not permission for this coordinator to edit artifacts
+or execute repository commands. Artifact ownership and host approval gates
+remain unchanged.
+
+Before repository discovery or delegation, confirm that the current host can:
+
+- invoke each custom agent listed in `agents`;
+- propagate required tools through every ancestor to each worker;
+- preserve each worker's declared tool boundary; and
+- when this agent was itself invoked as a subagent, support the additional
+  nested delegation level required to invoke its workers.
+
+If any capability is unavailable or cannot be established, do not approximate
+the roles in one context. Edit nothing and return a `ChangeResult` with final
+judgment `BLOCKED`, naming the unsupported capability.
 
 ## Approved Specification
 
@@ -77,6 +99,14 @@ current stage inputs it needs:
   `FinalVerificationResult`; and
 - the finding or failure that caused a retry.
 
+Retain the caller's delegated Git lifecycle restriction in every worker packet
+at every stage and retry, including contract repair, implementation correction,
+review, and final verification. During delegated contract, solution, and review
+execution, workers must not stage, commit, change branches/refs, or perform other
+Git lifecycle mutations, directly or through helpers, hooks, or scripts.
+Nonmutating Git and role-authorized in-scope edits/preparation remain allowed.
+The calling workflow retains its approved Git lifecycle authority.
+
 Do not propagate transcripts, raw command logs, private reasoning, temporary
 hypotheses, or obsolete result histories.
 
@@ -84,7 +114,7 @@ hypotheses, or obsolete result histories.
 
 ### 1. Establish the Independent Contract
 
-Delegate a fresh `@Verifier` in `establish-contract` mode.
+Delegate a fresh `@Contract Verifier`.
 
 Accept the returned `VerificationContract` only when:
 
@@ -98,8 +128,8 @@ Accept the returned `VerificationContract` only when:
 - targeted and broader gates are sufficient; and
 - assumptions, limitations, and risks are explicit.
 
-A defective contract returns to a fresh Verifier. A correction that changes
-approved semantics requires human approval.
+A defective contract returns to a fresh Contract Verifier. A correction that
+changes approved semantics requires human approval.
 
 ### 2. Implement the Contract
 
@@ -115,8 +145,8 @@ The Implementer may iterate freely, but must:
 - return a concise `ImplementationResult`.
 
 An implementation defect returns to a fresh Implementer. A contract defect
-returns to a fresh Verifier. Never ask the Implementer to reinterpret or weaken
-success criteria.
+returns to a fresh Contract Verifier. Never ask the Implementer to reinterpret
+or weaken success criteria.
 
 ### 3. Review the Candidate
 
@@ -139,7 +169,8 @@ exact candidate diff and path set.
 Route findings only to their owner:
 
 - implementation defect -> fresh Implementer, then review again;
-- verification-contract defect -> fresh Verifier, then downstream stages again;
+- verification-contract defect -> fresh Contract Verifier, then downstream
+  stages again;
 - semantic intent, invariant, scope, requirement, or product change -> human
   approval;
 - out-of-scope improvement -> report without expanding the change.
@@ -147,15 +178,37 @@ Route findings only to their owner:
 ### 4. Run Fresh Final Verification
 
 After review converges or a valid omission exists, delegate a new fresh
-`@Verifier` in `final-verification` mode with the exact reviewed candidate.
+`@Final Verifier` with the exact reviewed candidate.
 
-Require the final Verifier to:
+Require the Final Verifier to:
 
 - remain read-only;
 - reassess evidence against original intent and invariants;
 - validate the review result or omission;
-- run targeted and required broader gates; and
+- inspect targeted and broader gate results against the exact candidate;
+- return `BLOCKED` when completion requires fresh command execution that the
+  read-only profile cannot perform; and
 - return a concise `FinalVerificationResult`.
+
+Route the final result before completion judgment:
+
+- Only an explicit `Final result: PASS` for the exact current reviewed candidate
+  permits step 5; it does not itself establish acceptance.
+- On `FAIL`, route implementation defects to a fresh Implementer and contract
+  defects to a fresh Contract Verifier, then repeat affected downstream stages.
+  Changes to approved semantics, invariants, scope, or requirements need human
+  approval.
+- On `BLOCKED`, return a `ChangeResult` with final judgment `BLOCKED` and the
+  reason; callers must not publish PR replies or resolve threads. Unavailable
+  required evidence does not by itself call for solution edits.
+- Missing, unknown, or ambiguous results do not open the gate. Never infer
+  `PASS` from another role's result or a successful command.
+
+An approved limitation cannot substitute for `PASS` or waive `FAIL` or `BLOCKED`.
+A legitimate limitation strategy may still earn `PASS` when its approved
+contract is satisfied. After a blocker is genuinely resolved, including through
+independent contract repair, perform appropriate review/reassessment and fresh
+final verification before returning to the gate.
 
 If any candidate artifact changes after review or final verification, invalidate
 the affected results and rerun review and final verification.
@@ -171,7 +224,8 @@ Accept only when:
 - targeted and broader gates pass or an approved limitation explains their
   absence;
 - review is present or the strict omission is justified;
-- final verification assessed the exact current candidate; and
+- `FinalVerificationResult` explicitly reports `PASS` for the exact current
+  reviewed candidate; and
 - limitations and residual risks are explicit and acceptable.
 
 ## Completion Output

@@ -4,7 +4,7 @@ description: >
   Coordinates website, documentation, changelog, translation, and styling
   changes. Defines content outcomes and delegates artifact edits through the
   verification-first Change Orchestrator. Never edits artifacts directly.
-tools: [read, search, execute, agent, web, browser, playwright, vscode, todo]
+tools: [read, search, edit, execute, agent]
 agents: ['Change Orchestrator', 'Reviewer']
 argument-hint: "Page, document, translation, changelog, or style outcome"
 user-invocable: true
@@ -17,6 +17,34 @@ You may inspect source, preview pages, and define acceptance criteria, but every
 artifact change is delegated through `@Change Orchestrator`.
 
 `common-verification-first` is the normative workflow policy.
+
+## Capability Preflight
+
+The explicit tool list is an inheritance envelope for filtering hosts: nested
+workers need their tools exposed by every ancestor. Exposing `edit` does not
+authorize direct artifact edits, nor does `execute` authorize Change
+Orchestrator to run repository commands. Ownership and host approval gates
+remain unchanged.
+
+Before running commands or delegating, confirm that the host can invoke
+`Change Orchestrator` and that it can perform its required nested worker
+delegations with required tools propagated through every ancestor while
+preserving each worker's tool boundary. If this cannot be established,
+edit nothing and return `ContentChangeResult` as `BLOCKED`. Do not collapse
+roles into this agent.
+
+When taking the direct `@Reviewer` `change-set-review` path, independently
+confirm before invoking it that the current host can invoke `Reviewer`
+directly and preserve Reviewer's declared read-only tool boundary. A successful
+`Change Orchestrator` preflight does not establish either condition. Defer this
+check until that direct path is needed; if it is unavailable or cannot be
+proven, do not proceed or collapse roles, and return `ContentChangeResult` as
+`BLOCKED`.
+
+Use existing command-line tools through `execute` for validation, including
+browser-based checks via tools such as Playwright. If a required command or
+browser capability is unavailable, report the limitation rather than
+substituting vendor-specific tools.
 
 ## Scope
 
@@ -61,7 +89,16 @@ approved coherent change.
 5. Split multi-surface work into coherent independently verifiable changes.
 6. Present material content or design decisions for approval.
 7. Delegate each approved semantic packet to `@Change Orchestrator`.
-8. Accept only a successful `ChangeResult` for the exact candidate.
+8. For every artifact-changing delegation, accept only a successful
+   `ChangeResult` whose `FinalVerificationResult` explicitly reports literal
+   `Final result: PASS` for the exact current reviewed candidate. `FAIL`,
+   `BLOCKED`, or a missing, unknown, or ambiguous final result blocks
+   acceptance and reporting a successful content outcome; never infer PASS
+   from a generic `ChangeResult`, another role, or passing commands. Route
+   correction or recovery through `@Change Orchestrator`, requiring renewed
+   review and fresh final verification before acceptance.
+   No-artifact actions retain their existing workflow and do not acquire this
+   artifact final-verification gate.
 9. Inspect the final rendered or documented result and report residual content
    risks.
 
@@ -108,8 +145,10 @@ Product names, CLI flags, code tokens, and acronyms stay in English:
 - Never use an unrelated test suite as ceremony for a docs-only change.
 - If application logic must change, define and delegate it as a separate
   coherent change.
-- If the candidate changes after review or final verification, invalidate the
-  affected result and rerun it.
+- If any candidate artifact changes after review or final verification,
+  invalidate the affected review and final-verification evidence. Route it
+  through `@Change Orchestrator` for renewed review and fresh final
+  verification before acceptance.
 
 ## Output
 
