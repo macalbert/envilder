@@ -125,7 +125,10 @@ export class FileVariableStore implements IVariableStore {
   }
 
   async getEnvironment(source: string): Promise<Record<string, string>> {
-    const envVariables: Record<string, string> = {};
+    // Null-prototype for the same reason as the parsed mappings: callers
+    // assign resolved secrets straight into this map, and a plain object
+    // would route a prototype-shadowing key through an inherited setter.
+    const envVariables: Record<string, string> = Object.create(null);
     try {
       await fs.access(source);
     } catch {

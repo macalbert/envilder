@@ -1400,20 +1400,33 @@ describe('FileVariableStore', () => {
       expect(fs.writeFile).not.toHaveBeenCalled();
     });
 
-    it('Should_KeepMappingAsData_When_KeyShadowsObjectPrototype', async () => {
+    it('Should_RejectMappingKey_When_NameShadowsObjectPrototype', async () => {
       // Arrange: written as raw JSON because an object literal would treat
       // `__proto__` as a prototype assignment rather than an own property.
       const mapJson = '{"__proto__":"/proto/secret","SAFE":"/safe/secret"}';
       mockInMemoryFiles.set(mockMapPath, mapJson);
 
       // Act
-      const actual = await sut.getMapping(mockMapPath);
+      const action = sut.getMapping(mockMapPath);
 
       // Assert
-      expect(Object.keys(actual).sort()).toEqual(['SAFE', '__proto__']);
-      expect(Object.getOwnPropertyDescriptor(actual, '__proto__')?.value).toBe(
-        '/proto/secret',
-      );
+      await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
+      await expect(action).rejects.toThrow(/cannot read this name back/i);
+      expect(fs.writeFile).not.toHaveBeenCalled();
+    });
+
+    // Why the name is refused rather than preserved: no reader can get it
+    // back, so accepting it would resolve a secret and write a line that
+    // silently never loads.
+    it('Should_LoseTheAssignment_When_EnvFileKeyShadowsObjectPrototype', () => {
+      // Arrange
+      const line = '__proto__=fictional-value-123';
+
+      // Act
+      const actual = dotenv.parse(line);
+
+      // Assert
+      expect(Object.keys(actual)).toEqual([]);
     });
 
     it('Should_ReturnEmptyConfig_When_MapFileHasNoConfigSection', async () => {

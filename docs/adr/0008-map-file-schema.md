@@ -70,7 +70,18 @@ the text following them as a fresh assignment even though the writer emitted a
 single line. This is the only case where an otherwise-permissive parser
 rejects a key ([#511](https://github.com/macalbert/envilder/issues/511)).
 
-The rule applies to variable mappings. `$`-prefixed keys stay reserved and
+Parsers MUST also reject the single name `__proto__`. It contains no unsafe
+character, but every `.env` reader accumulates parsed pairs into a plain
+object, so assigning it routes through the `Object.prototype` accessor instead
+of creating an own property and the entry disappears — `dotenv.parse`
+included. Accepting it would mean resolving the secret and writing a line that
+no consumer can read back, while reporting success.
+
+Both rules share one invariant: **an accepted name must survive a `.env`
+round-trip as itself and nothing else.** A name that cannot is rejected at
+ingestion rather than written and silently lost.
+
+The rules apply to variable mappings. `$`-prefixed keys stay reserved and
 ignored under the rule above, so they are never written to a `.env` file.
 
 At least one variable mapping is required for meaningful operation.

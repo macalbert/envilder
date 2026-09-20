@@ -17,6 +17,11 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   an extra `key=value` assignment into the generated environment file
   ([#511](https://github.com/macalbert/envilder/issues/511))
 
+* **Reject the mapping key `__proto__`**: No `.env` parser can read this name
+  back, so the CLI previously resolved the secret and wrote a line that
+  silently never loaded. It is now rejected at map-file ingestion with an
+  explicit message ([#511](https://github.com/macalbert/envilder/issues/511))
+
 ---
 
 ## [0.13.2] - 2026-08-14

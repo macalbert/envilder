@@ -5,10 +5,12 @@
  * `.env` writing) shares a single source of truth instead of duplicating the
  * same regex and message.
  *
- * A name is unsafe when it is empty/whitespace-only, or when it contains a
- * character that would let the name inject an additional `key=value`
- * assignment or an extra line once written to a `.env` file or a mapping
- * JSON file (see issue #511):
+ * The rule enforces one invariant: a name that is accepted must survive a
+ * `.env` round-trip as itself and nothing else.
+ *
+ * Unsafe characters, which would inject an additional `key=value` assignment
+ * or an extra line once written to a `.env` file or a mapping JSON file (see
+ * issue #511):
  *
  * - `=` opens a second assignment on the same line.
  * - CR and LF open a second line.
@@ -21,11 +23,24 @@
  */
 const UNSAFE_NAME_CHARACTERS = /[=\r\n\u{2028}\u{2029}]/u;
 
+/**
+ * `__proto__` is the one name that breaks the round-trip without containing an
+ * unsafe character. Writing it is fine, but every reader builds a plain object
+ * and assigns into it, which routes the key through the `Object.prototype`
+ * accessor instead of creating an own property -- `dotenv.parse` included, so
+ * `dotenv.parse('__proto__=v')` returns `{}`. Accepting the name would mean
+ * resolving the secret and writing a line that neither envilder nor any
+ * dotenv-based consumer can read back, while reporting success. Rejecting it
+ * up front is the only behavior that matches what actually happens.
+ */
+const UNSUPPORTED_NAMES = new Set(['__proto__']);
+
 export function isValidEnvironmentVariableName(name: string): boolean {
   return (
     typeof name === 'string' &&
     name.trim() !== '' &&
-    !UNSAFE_NAME_CHARACTERS.test(name)
+    !UNSAFE_NAME_CHARACTERS.test(name) &&
+    !UNSUPPORTED_NAMES.has(name)
   );
 }
 
@@ -38,6 +53,14 @@ export function isValidEnvironmentVariableName(name: string): boolean {
 export function invalidEnvironmentVariableNameMessage(name: string): string {
   if (typeof name === 'string' && name.trim() === '') {
     return 'Environment variable name cannot be empty';
+  }
+
+  if (typeof name === 'string' && UNSUPPORTED_NAMES.has(name)) {
+    return (
+      `Unsupported environment variable name ${quoteName(name)}: ` +
+      'a .env parser cannot read this name back, so it would be written ' +
+      'but never resolved'
+    );
   }
 
   return (
