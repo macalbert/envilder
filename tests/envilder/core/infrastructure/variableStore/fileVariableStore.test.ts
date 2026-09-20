@@ -655,27 +655,28 @@ describe('FileVariableStore', () => {
       expect(actual).toContain('# keep this note');
     });
 
-    it('Should_ThrowBeforeWritingWithoutLeakingSecret_When_UpdateWouldChangeAnUnmanagedKey', async () => {
-      // Arrange
+    it('Should_RemoveTheWholeBlock_When_AnOrphanQuoteIsTheManagedValue', async () => {
+      // Arrange: dotenv reads everything up to the closing quote as
+      // MANAGED_KEY's value, so replacing that value removes the block, and the
+      // DB_PASSWORD line hidden inside it goes with it rather than surfacing.
       const originalSecret = 'super-secret-value';
-      const leakedText = 'leaked-value';
-      const existing = `DB_PASSWORD=${originalSecret}\nMANAGED_KEY=\n"orphan\nDB_PASSWORD=${leakedText}"\n`;
+      const hiddenText = 'leaked-value';
+      const existing = `DB_PASSWORD=${originalSecret}\nMANAGED_KEY=\n"orphan\nDB_PASSWORD=${hiddenText}"\n`;
       mockInMemoryFiles.set(mockEnvFilePath, existing);
-      const action = () =>
-        sut.saveEnvironment(mockEnvFilePath, { MANAGED_KEY: 'updated-value' });
 
       // Act
-      const actual = await action().then(
-        () => null,
-        (error: unknown) => error,
-      );
+      await sut.saveEnvironment(mockEnvFilePath, {
+        MANAGED_KEY: 'updated-value',
+      });
 
       // Assert
-      expect(actual).toBeInstanceOf(EnvironmentFileError);
-      expect((actual as Error).message).not.toContain(originalSecret);
-      expect((actual as Error).message).not.toContain(leakedText);
-      expect(vi.mocked(fs.writeFile)).not.toHaveBeenCalled();
-      expect(mockInMemoryFiles.get(mockEnvFilePath)).toBe(existing);
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).not.toContain(hiddenText);
+      expect(actual).not.toContain('orphan');
+      expect(dotenv.parse(actual)).toEqual({
+        DB_PASSWORD: originalSecret,
+        MANAGED_KEY: 'updated-value',
+      });
     });
 
     it('Should_RemoveStaleSecret_When_ColonDuplicateFollowsAnOrphanQuote', async () => {
@@ -720,52 +721,59 @@ describe('FileVariableStore', () => {
       expect((actual.match(/DB_PASSWORD/g) ?? []).length).toBe(1);
     });
 
-    it('Should_ThrowBeforeWritingWithoutLeakingSecret_When_ExistingAssignmentCannotBeLocated', async () => {
-      // Arrange: dotenv reads a colon assignment whose value sits on the next
-      // line, but the pattern only spans one line, so appending would hide the
-      // old secret behind a later duplicate instead of removing it.
+    it('Should_ReplaceInPlace_When_AColonValueStartsOnTheNextLine', async () => {
+      // Arrange
       const staleSecret = 'old-secret';
-      const newSecret = 'new-secret';
-      const existing = `SECRET:\n  ${staleSecret}\nKEEP=ok\n`;
-      mockInMemoryFiles.set(mockEnvFilePath, existing);
-      const action = () =>
-        sut.saveEnvironment(mockEnvFilePath, { SECRET: newSecret });
-
-      // Act
-      const actual = await action().then(
-        () => null,
-        (error: unknown) => error,
+      mockInMemoryFiles.set(
+        mockEnvFilePath,
+        `SECRET:\n  ${staleSecret}\nKEEP=ok\n`,
       );
 
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { SECRET: 'new-secret' });
+
       // Assert
-      expect(actual).toBeInstanceOf(EnvironmentFileError);
-      expect((actual as Error).message).not.toContain(staleSecret);
-      expect((actual as Error).message).not.toContain(newSecret);
-      expect(vi.mocked(fs.writeFile)).not.toHaveBeenCalled();
-      expect(mockInMemoryFiles.get(mockEnvFilePath)).toBe(existing);
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).not.toContain(staleSecret);
+      expect(actual).toBe('SECRET:\n  new-secret\nKEEP=ok\n');
     });
 
-    it('Should_ThrowBeforeWritingWithoutLeakingSecret_When_AnEarlierDuplicateCannotBeLocated', async () => {
-      // Arrange: rewriting the reachable duplicate is not enough. dotenv reads
-      // the later one, so every value check passes while the unreachable first
-      // assignment keeps the old secret on disk.
+    it('Should_ReplaceInPlace_When_AnEqualsValueStartsOnTheNextLine', async () => {
+      // Arrange
       const staleSecret = 'old-secret';
-      const existing = `SECRET:\n  ${staleSecret}\nSECRET=placeholder\nKEEP=ok\n`;
-      mockInMemoryFiles.set(mockEnvFilePath, existing);
-      const action = () =>
-        sut.saveEnvironment(mockEnvFilePath, { SECRET: 'new-secret' });
-
-      // Act
-      const actual = await action().then(
-        () => null,
-        (error: unknown) => error,
+      mockInMemoryFiles.set(
+        mockEnvFilePath,
+        `SECRET=\n"${staleSecret}"\nKEEP=ok\n`,
       );
 
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { SECRET: 'new-secret' });
+
       // Assert
-      expect(actual).toBeInstanceOf(EnvironmentFileError);
-      expect((actual as Error).message).not.toContain(staleSecret);
-      expect(vi.mocked(fs.writeFile)).not.toHaveBeenCalled();
-      expect(mockInMemoryFiles.get(mockEnvFilePath)).toBe(existing);
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).not.toContain(staleSecret);
+      expect(actual).toBe('SECRET="new-secret"\nKEEP=ok\n');
+    });
+
+    it('Should_ReplaceEveryOccurrence_When_DuplicatesUseDifferentForms', async () => {
+      // Arrange: rewriting only the duplicate dotenv happens to read would let
+      // every value check pass while the other one kept the old secret.
+      const staleSecret = 'old-secret';
+      mockInMemoryFiles.set(
+        mockEnvFilePath,
+        `SECRET:\n  ${staleSecret}\nSECRET=placeholder\nKEEP=ok\n`,
+      );
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { SECRET: 'new-secret' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).not.toContain(staleSecret);
+      expect(actual).not.toContain('placeholder');
+      expect(actual).toBe(
+        'SECRET:\n  new-secret\nSECRET=new-secret\nKEEP=ok\n',
+      );
     });
 
     it('Should_KeepTheFinalLineEnding_When_ACrlfOnlyAppearsInsideAValue', async () => {
@@ -789,28 +797,47 @@ describe('FileVariableStore', () => {
       });
     });
 
-    it('Should_ThrowBeforeWritingWithoutLeakingSecret_When_UpdateIntroducesAnUnexpectedThirdKey', async () => {
-      // Arrange
-      const leakedText = 'leaked';
-      const existing = `MANAGED=\n"orphan\nHIDDEN=${leakedText}"\nOTHER=1\n`;
-      mockInMemoryFiles.set(mockEnvFilePath, existing);
-      const action = () =>
-        sut.saveEnvironment(mockEnvFilePath, {
-          MANAGED: 'updated-value',
-          OTHER: '1',
-        });
-
-      // Act
-      const actual = await action().then(
-        () => null,
-        (error: unknown) => error,
+    it('Should_NotSurfaceAHiddenKey_When_ItIsPayloadOfTheManagedValue', async () => {
+      // Arrange: HIDDEN is not an assignment, it is text inside MANAGED's
+      // value. Replacing that value must take it away, never promote it to a
+      // key of its own.
+      const hiddenText = 'leaked';
+      mockInMemoryFiles.set(
+        mockEnvFilePath,
+        `MANAGED=\n"orphan\nHIDDEN=${hiddenText}"\nOTHER=1\n`,
       );
 
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, {
+        MANAGED: 'updated-value',
+        OTHER: '1',
+      });
+
       // Assert
-      expect(actual).toBeInstanceOf(EnvironmentFileError);
-      expect((actual as Error).message).not.toContain(leakedText);
-      expect(vi.mocked(fs.writeFile)).not.toHaveBeenCalled();
-      expect(mockInMemoryFiles.get(mockEnvFilePath)).toBe(existing);
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).not.toContain(hiddenText);
+      expect(actual).not.toContain('HIDDEN');
+      expect(dotenv.parse(actual)).toEqual({
+        MANAGED: 'updated-value',
+        OTHER: '1',
+      });
+    });
+
+    it('Should_UseTheStructuralLineEnding_When_AppendingToAFileWithoutAFinalNewline', async () => {
+      // Arrange: the file's structure is LF; its only CRLF is payload inside an
+      // unmanaged multiline secret, and there is no final newline to fall back
+      // on, so the separator has to come from a break between assignments.
+      mockInMemoryFiles.set(mockEnvFilePath, "KEEP='a\r\nb'\nTOKEN=old");
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, {
+        TOKEN: 'new',
+        ADDED: 'extra',
+      });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).toBe("KEEP='a\r\nb'\nTOKEN=new\nADDED=extra");
     });
 
     it('Should_ThrowError_When_FailsToWriteEnvFile', async () => {

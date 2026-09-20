@@ -18,29 +18,26 @@ const ENV_QUOTES = ["'", '"', '`'] as const;
 type EnvQuote = (typeof ENV_QUOTES)[number];
 
 /**
- * Mirrors the value grammar of `dotenv.parse`: quoted alternatives first (each
- * one able to span physical lines and to swallow an escaped delimiter), then an
- * unquoted run that stops at a comment. Matching the same span dotenv consumes
- * is what keeps a multiline assignment from being split into stray lines.
+ * dotenv's own `LINE` grammar, kept structurally identical to it and only
+ * split into capture groups:
  *
- * `[^\S\r\n]` is every character dotenv's `\s` accepts around a key (a UTF-8
- * BOM, a non-breaking space, an ideographic space, ...) minus the line breaks,
- * so structural spacing can never swallow the newline that separates two
- * assignments.
+ *     /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'
+ *       |\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg
  *
- * The padding between the value and an optional comment is a group of its own
- * and the unquoted run is lazy, so a closing delimiter followed by blanks still
- * ends the value. Folding that padding into the quoted alternatives would make
- * them fail and hand the line to the unquoted run, which stops at the first
- * line break and would leave the tail of a multiline secret behind.
+ * Approximating that grammar instead of copying it is what repeatedly left old
+ * secrets on disk: every form dotenv spans and we do not degrades into the
+ * single-line branch, which rewrites the first physical line of an assignment
+ * and abandons the rest of the previous value in the file. Cases that cost us a
+ * round each — a closing delimiter followed by blanks, a colon separator, a
+ * value that only starts on the next physical line — are all consequences of
+ * the same divergence, so the grammar is now shared rather than re-derived.
  *
- * The separator accepts the colon form too, because dotenv does. It demands a
- * blank after the colon and none before it, matching dotenv's `:\s+?`: `K: v`
- * is an assignment, `K:v` and `K : v` are not. The captured separator is
- * re-emitted verbatim, so an update keeps the style the file already used.
+ * Everything except the value is captured and re-emitted verbatim, so groups
+ * whose `\s` reaches across line breaks cannot lose structure: whatever they
+ * consume, they put back.
  */
 const ASSIGNMENT_PATTERN =
-  /^([^\S\r\n]*(?:export[^\S\r\n]+)?)([\w.-]+)([^\S\r\n]*=[^\S\r\n]*|:[^\S\r\n]+)('(?:\\'|[^'])*'|"(?:\\"|[^"])*"|`(?:\\`|[^`])*`|[^#\r\n]*?)([^\S\r\n]*)((?:#.*)?)$/gm;
+  /^(\s*(?:export\s+)?)([\w.-]+)(\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?(\s*)((?:#.*)?)$/gm;
 
 /** The line break that closes a file, kept verbatim instead of normalized. */
 const TRAILING_NEWLINE_PATTERN = /(?:\r\n|[\r\n])$/;
@@ -171,20 +168,11 @@ export class FileVariableStore implements IVariableStore {
     // line breaks a multiline value carries as payload.
     const trailingNewline =
       TRAILING_NEWLINE_PATTERN.exec(existingContent)?.[0] ?? '';
-    // The terminator that closes the file ends a physical line, so it is a
-    // structural break by construction. Scanning for any CRLF is the fallback
-    // and only a guess: the sole CRLF in an LF file can be payload inside a
-    // multiline secret.
-    const newline =
-      trailingNewline !== ''
-        ? trailingNewline
-        : existingContent.includes('\r\n')
-          ? '\r\n'
-          : '\n';
     const body = existingContent.slice(
       0,
       existingContent.length - trailingNewline.length,
     );
+    const newline = this.detectStructuralNewline(body, trailingNewline);
 
     const updatedKeys = new Set<string>();
     const merged = body.replace(
@@ -194,7 +182,7 @@ export class FileVariableStore implements IVariableStore {
         prefix: string,
         key: string,
         separator: string,
-        rawValue: string,
+        rawValue: string | undefined,
         padding: string,
         comment: string,
       ) => {
@@ -202,12 +190,19 @@ export class FileVariableStore implements IVariableStore {
           return assignment;
         }
         updatedKeys.add(key);
+        // dotenv's `=\s*?` is lazy, so the blanks after it belong to the value
+        // group. Put back the ones that stayed on the line, which is the
+        // spacing the file chose; a value that only began on a later physical
+        // line collapses onto the key's line instead, because that is how the
+        // old one leaves.
+        const leading = /^\s*/.exec(rawValue ?? '')?.[0] ?? '';
+        const spacing = /[\r\n]/.test(leading) ? '' : leading;
         const value = this.serializeAssignmentValue(
           key,
           envVariables[key],
-          rawValue,
+          rawValue ?? '',
         );
-        return `${prefix}${key}${separator}${value}${padding}${comment}`;
+        return `${prefix}${key}${separator}${spacing}${value}${padding}${comment}`;
       },
     );
 
@@ -217,6 +212,31 @@ export class FileVariableStore implements IVariableStore {
     );
     const content = [merged, ...appended].join(newline);
     return trailingNewline === '' ? content : content + trailingNewline;
+  }
+
+  /**
+   * The break that separates two assignments, which is the only kind that is
+   * structural. Blanking the claimed spans outright leaves exactly those: a
+   * break carried inside a value is part of a span and disappears with it,
+   * while a break between spans is in no span and survives. The terminator
+   * that closes the file is structural by the same argument and wins when the
+   * file has one; scanning the raw text for any CRLF is the last resort, and
+   * only a guess.
+   */
+  private detectStructuralNewline(
+    body: string,
+    trailingNewline: string,
+  ): string {
+    if (trailingNewline !== '') {
+      return trailingNewline;
+    }
+    const betweenSpans = body.replace(ASSIGNMENT_PATTERN, (assignment) =>
+      ' '.repeat(assignment.length),
+    );
+    return (
+      /\r\n|[\r\n]/.exec(betweenSpans)?.[0] ??
+      (body.includes('\r\n') ? '\r\n' : '\n')
+    );
   }
 
   /**
@@ -374,6 +394,27 @@ export class FileVariableStore implements IVariableStore {
    * through `dotenv.parse` so duplicate keys collapse the same way a consumer
    * would see them.
    */
+  /** Keys the file no longer reads back as the value they are meant to hold. */
+  private keysThatLostTheirValue(
+    parsed: Record<string, string>,
+    expected: Record<string, string>,
+  ): string[] {
+    return Object.keys(expected).filter((key) => parsed[key] !== expected[key]);
+  }
+
+  /**
+   * Keys the file gained. Nobody asked for them, so they can only come from our
+   * grammar and dotenv's disagreeing about where some value ended.
+   */
+  private keysThatAppeared(
+    parsed: Record<string, string>,
+    ...accounted: Array<Record<string, string>>
+  ): string[] {
+    return Object.keys(parsed).filter(
+      (key) => !accounted.some((group) => Object.hasOwn(group, key)),
+    );
+  }
+
   private collectUnmanagedValues(
     existingContent: string | null,
     envVariables: Record<string, string>,
@@ -402,25 +443,11 @@ export class FileVariableStore implements IVariableStore {
     unmanagedValues: Record<string, string>,
   ): void {
     const parsed = dotenv.parse(content);
-    const affectedKeys = new Set<string>();
-    for (const [key, value] of Object.entries(envVariables)) {
-      if (parsed[key] !== value) {
-        affectedKeys.add(key);
-      }
-    }
-    for (const [key, value] of Object.entries(unmanagedValues)) {
-      if (parsed[key] !== value) {
-        affectedKeys.add(key);
-      }
-    }
-    for (const key of Object.keys(parsed)) {
-      if (
-        !Object.hasOwn(envVariables, key) &&
-        !Object.hasOwn(unmanagedValues, key)
-      ) {
-        affectedKeys.add(key);
-      }
-    }
+    const affectedKeys = new Set([
+      ...this.keysThatLostTheirValue(parsed, envVariables),
+      ...this.keysThatLostTheirValue(parsed, unmanagedValues),
+      ...this.keysThatAppeared(parsed, envVariables, unmanagedValues),
+    ]);
     if (affectedKeys.size === 0) {
       return;
     }
