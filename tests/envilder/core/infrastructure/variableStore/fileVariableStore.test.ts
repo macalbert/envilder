@@ -186,6 +186,10 @@ describe('FileVariableStore', () => {
       'SAFE\rINJECTED',
       `SAFE${LINE_SEPARATOR}INJECTED`,
       `SAFE${PARAGRAPH_SEPARATOR}INJECTED`,
+      'LOST NAME',
+      'LOST\tNAME',
+      'LOST#NAME',
+      'CAFÉ_URL',
     ])(
       'Should_PreserveDestination_When_MappingContainsInvalidVariableNames',
       async (invalidName) => {
@@ -1362,6 +1366,10 @@ describe('FileVariableStore', () => {
       'SAFE\rINJECTED',
       `SAFE${LINE_SEPARATOR}INJECTED`,
       `SAFE${PARAGRAPH_SEPARATOR}INJECTED`,
+      'LOST NAME',
+      'LOST\tNAME',
+      'LOST#NAME',
+      'CAFÉ_URL',
     ])(
       'Should_RejectMappingKey_When_NameIsWhitespaceOnlyOrContainsInvalidDelimiter',
       async (invalidName) => {

@@ -72,6 +72,10 @@ describe('Map File Schema', () => {
     `SAFE${LINE_SEPARATOR}INJECTED`,
     `SAFE${PARAGRAPH_SEPARATOR}INJECTED`,
     '__proto__',
+    'LOST NAME',
+    'LOST\tNAME',
+    'LOST#NAME',
+    'CAFÉ_URL',
   ])(
     'Should_RejectMapFile_When_MappingNameIsEmptyWhitespaceOrContainsInvalidDelimiter',
     (invalidName) => {
