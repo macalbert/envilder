@@ -560,17 +560,58 @@ describe('FileVariableStore', () => {
       expect(mockInMemoryFiles.get(mockEnvFilePath)).toBe(existing);
     });
 
-    it('Should_ThrowBeforeWritingWithoutLeakingSecret_When_ManagedKeyValueIsAlteredByGrammarInteraction', async () => {
+    it('Should_RemoveStaleSecret_When_ColonDuplicateFollowsAnOrphanQuote', async () => {
       // Arrange
       const originalSecret = 'real-secret';
-      const leakedText = 'leaked';
-      const existing = `SECRET=${originalSecret}\nMANAGED=\n"orphan\nSECRET: ${leakedText}"\n`;
+      const staleText = 'leaked';
+      const existing = `SECRET=${originalSecret}\nMANAGED=\n"orphan\nSECRET: ${staleText}"\n`;
+      mockInMemoryFiles.set(mockEnvFilePath, existing);
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, {
+        SECRET: originalSecret,
+        MANAGED: 'updated-value',
+      });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).not.toContain(staleText);
+      expect(dotenv.parse(actual)).toEqual({
+        SECRET: originalSecret,
+        MANAGED: 'updated-value',
+      });
+    });
+
+    it('Should_ReplaceInPlaceKeepingSeparator_When_ExistingAssignmentUsesAColon', async () => {
+      // Arrange
+      const staleSecret = 'old-secret';
+      mockInMemoryFiles.set(
+        mockEnvFilePath,
+        `DB_PASSWORD: ${staleSecret}\nKEEP=ok\n`,
+      );
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, {
+        DB_PASSWORD: 'new-secret',
+      });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).not.toContain(staleSecret);
+      expect(actual).toBe('DB_PASSWORD: new-secret\nKEEP=ok\n');
+      expect((actual.match(/DB_PASSWORD/g) ?? []).length).toBe(1);
+    });
+
+    it('Should_ThrowBeforeWritingWithoutLeakingSecret_When_ExistingAssignmentCannotBeLocated', async () => {
+      // Arrange: dotenv reads a colon assignment whose value sits on the next
+      // line, but the pattern only spans one line, so appending would hide the
+      // old secret behind a later duplicate instead of removing it.
+      const staleSecret = 'old-secret';
+      const newSecret = 'new-secret';
+      const existing = `SECRET:\n  ${staleSecret}\nKEEP=ok\n`;
       mockInMemoryFiles.set(mockEnvFilePath, existing);
       const action = () =>
-        sut.saveEnvironment(mockEnvFilePath, {
-          SECRET: originalSecret,
-          MANAGED: 'updated-value',
-        });
+        sut.saveEnvironment(mockEnvFilePath, { SECRET: newSecret });
 
       // Act
       const actual = await action().then(
@@ -580,8 +621,8 @@ describe('FileVariableStore', () => {
 
       // Assert
       expect(actual).toBeInstanceOf(EnvironmentFileError);
-      expect((actual as Error).message).not.toContain(originalSecret);
-      expect((actual as Error).message).not.toContain(leakedText);
+      expect((actual as Error).message).not.toContain(staleSecret);
+      expect((actual as Error).message).not.toContain(newSecret);
       expect(vi.mocked(fs.writeFile)).not.toHaveBeenCalled();
       expect(mockInMemoryFiles.get(mockEnvFilePath)).toBe(existing);
     });

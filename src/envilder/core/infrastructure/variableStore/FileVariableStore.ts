@@ -33,9 +33,14 @@ type EnvQuote = (typeof ENV_QUOTES)[number];
  * ends the value. Folding that padding into the quoted alternatives would make
  * them fail and hand the line to the unquoted run, which stops at the first
  * line break and would leave the tail of a multiline secret behind.
+ *
+ * The separator accepts the colon form too, because dotenv does. It demands a
+ * blank after the colon and none before it, matching dotenv's `:\s+?`: `K: v`
+ * is an assignment, `K:v` and `K : v` are not. The captured separator is
+ * re-emitted verbatim, so an update keeps the style the file already used.
  */
 const ASSIGNMENT_PATTERN =
-  /^([^\S\r\n]*(?:export[^\S\r\n]+)?)([\w.-]+)([^\S\r\n]*=[^\S\r\n]*)('(?:\\'|[^'])*'|"(?:\\"|[^"])*"|`(?:\\`|[^`])*`|[^#\r\n]*?)([^\S\r\n]*)((?:#.*)?)$/gm;
+  /^([^\S\r\n]*(?:export[^\S\r\n]+)?)([\w.-]+)([^\S\r\n]*=[^\S\r\n]*|:[^\S\r\n]+)('(?:\\'|[^'])*'|"(?:\\"|[^"])*"|`(?:\\`|[^`])*`|[^#\r\n]*?)([^\S\r\n]*)((?:#.*)?)$/gm;
 
 /** The line break that closes a file, kept verbatim instead of normalized. */
 const TRAILING_NEWLINE_PATTERN = /(?:\r\n|[\r\n])$/;
@@ -191,13 +196,37 @@ export class FileVariableStore implements IVariableStore {
       },
     );
 
-    const appended = this.renderAssignments(
-      entries.filter(([key]) => !updatedKeys.has(key)),
-    );
+    const pending = entries.filter(([key]) => !updatedKeys.has(key));
+    this.assertNothingStaleIsLeftBehind(existingContent, pending);
+    const appended = this.renderAssignments(pending);
     const content = (
       existingContent === '' ? appended : [merged, ...appended]
     ).join(newline);
     return trailingNewline === '' ? content : content + newline;
+  }
+
+  /**
+   * A managed key that dotenv already reads from the file, but whose assignment
+   * this pass did not rewrite, means our grammar failed to locate a form dotenv
+   * accepts. Appending would satisfy a reader, because dotenv keeps the last of
+   * several duplicates, while the previous secret stayed on disk untouched and
+   * `assertValuesArePreserved` saw nothing wrong. Refuse the write instead.
+   */
+  private assertNothingStaleIsLeftBehind(
+    existingContent: string,
+    pending: Array<[string, string]>,
+  ): void {
+    const existing = dotenv.parse(existingContent);
+    const stale = pending
+      .filter(([key]) => Object.hasOwn(existing, key))
+      .map(([key]) => `"${key}"`);
+    if (stale.length === 0) {
+      return;
+    }
+    // Names only: the values at stake are the secrets this guard protects.
+    throw new EnvironmentFileError(
+      `Cannot locate the existing assignment for ${stale.join(', ')}; appending would leave the previous value in the file, so nothing was written`,
+    );
   }
 
   private renderAssignments(entries: Array<[string, string]>): string[] {
