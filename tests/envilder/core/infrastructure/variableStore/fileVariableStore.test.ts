@@ -865,6 +865,31 @@ describe('FileVariableStore', () => {
       expect(actual).toBe("KEEP='a\r\nb'\n# note\nTOKEN=x");
     });
 
+    it('Should_UseTheStructuralLineEnding_When_ABlankLinePrecedesTheOnlyAssignment', async () => {
+      // Arrange: the leading blank line is the only structural break, and the
+      // assignment's prefix reaches back over it.
+      mockInMemoryFiles.set(mockEnvFilePath, "\nKEEP='a\r\nb'");
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { NEW: 'x' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).toBe("\nKEEP='a\r\nb'\nNEW=x");
+    });
+
+    it('Should_AppendWithCrlf_When_ACrlfFileHasNoFinalNewline', async () => {
+      // Arrange
+      mockInMemoryFiles.set(mockEnvFilePath, 'A=1\r\nB=2');
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { NEW: 'x' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).toBe('A=1\r\nB=2\r\nNEW=x');
+    });
+
     it('Should_UseTheStructuralLineEnding_When_AppendingToAFileWithoutAFinalNewline', async () => {
       // Arrange: the file's structure is LF; its only CRLF is payload inside an
       // unmanaged multiline secret, and there is no final newline to fall back

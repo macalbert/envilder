@@ -234,9 +234,10 @@ export class FileVariableStore implements IVariableStore {
 
   /**
    * The break that separates two assignments, which is the only kind that is
-   * structural. Blanking the claimed spans outright leaves exactly those: a
-   * break carried inside a value is part of a span and disappears with it,
-   * while a break between spans is in no span and survives. The terminator
+   * structural. Blanking the claimed spans leaves exactly those: a break
+   * carried inside a value is part of a span and disappears with it, while a
+   * break that precedes a span is kept, because the prefix reaches back over
+   * blank lines and over the break that ended the line before. The terminator
    * that closes the file is structural by the same argument and wins when the
    * file has one; scanning the raw text for any CRLF is the last resort, and
    * only a guess.
@@ -248,8 +249,14 @@ export class FileVariableStore implements IVariableStore {
     if (trailingNewline !== '') {
       return trailingNewline;
     }
-    const betweenSpans = body.replace(ASSIGNMENT_PATTERN, (assignment) =>
-      ' '.repeat(assignment.length),
+    const betweenSpans = body.replace(
+      ASSIGNMENT_PATTERN,
+      (assignment: string, prefix: string) =>
+        // The breaks a span holds in its prefix are the ones that separate it
+        // from what came before, so they survive the blanking; everything else
+        // it holds, line breaks included, is payload and goes.
+        prefix.replace(/[^\r\n]/g, ' ') +
+        ' '.repeat(assignment.length - prefix.length),
     );
     return (
       /\r\n|[\r\n]/.exec(betweenSpans)?.[0] ??
