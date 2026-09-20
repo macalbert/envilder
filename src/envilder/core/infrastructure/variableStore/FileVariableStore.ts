@@ -18,8 +18,8 @@ const ENV_QUOTES = ["'", '"', '`'] as const;
 type EnvQuote = (typeof ENV_QUOTES)[number];
 
 /**
- * dotenv's own `LINE` grammar, kept structurally identical to it and only
- * split into capture groups:
+ * Follows dotenv's own `LINE` grammar rather than re-deriving it, split into
+ * capture groups, with the two deliberate narrowings noted at the end:
  *
  *     /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'
  *       |\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg
@@ -265,13 +265,19 @@ export class FileVariableStore implements IVariableStore {
   }
 
   /**
-   * Whatever the merge pass did not claim as an assignment, read the way dotenv
-   * reads it. A managed key still in there is an assignment our grammar could
-   * not locate — one of several duplicates, or a form we do not span, such as a
-   * colon whose value sits on the next line. Appending the new value would
-   * satisfy a reader, because dotenv keeps the last duplicate, while the
+   * That the pattern and dotenv agree on where an assignment ends is an
+   * invariant, so assert it rather than assume it. Whatever the merge pass did
+   * not claim is read the way dotenv reads it, and a managed key still in there
+   * is an assignment dotenv can see and we missed. Appending the new value
+   * would satisfy a reader, because dotenv keeps the last duplicate, while the
    * previous secret stayed on disk and `assertValuesArePreserved` saw nothing
-   * wrong. Refuse the write instead.
+   * wrong, so refuse the write instead.
+   *
+   * No supported syntax reaches this today: the grammar is shared with dotenv
+   * precisely so that none can, and every form that once did — duplicates, a
+   * colon separator, a value starting on the next physical line — is claimed
+   * and replaced. This is the net for the day the two drift apart, which
+   * declaring `dotenv` as `^17.4.2` leaves open.
    */
   private assertNoManagedAssignmentSurvives(
     merged: string,
