@@ -823,6 +823,23 @@ describe('FileVariableStore', () => {
       });
     });
 
+    it('Should_LeaveUntouchedAssignmentsByteForByte_When_EveryKeyIsHandedBack', async () => {
+      // Arrange: the CLI hands back every key it read, not just the mapped
+      // ones, so an assignment that already holds its value must not be
+      // reserialized out of the form the file gave it.
+      const existing =
+        '# note\nKEEP=\'a\r\nb\'\nMULTI="one\ntwo"\nLITERAL=first\\nsecond\nTOKEN=old\n';
+      mockInMemoryFiles.set(mockEnvFilePath, existing);
+      const handedBack = { ...dotenv.parse(existing), TOKEN: 'new' };
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, handedBack);
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).toBe(existing.replace('TOKEN=old', 'TOKEN=new'));
+    });
+
     it('Should_UseTheStructuralLineEnding_When_AppendingToAFileWithoutAFinalNewline', async () => {
       // Arrange: the file's structure is LF; its only CRLF is payload inside an
       // unmanaged multiline secret, and there is no final newline to fall back

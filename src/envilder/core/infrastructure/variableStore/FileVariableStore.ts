@@ -156,9 +156,10 @@ export class FileVariableStore implements IVariableStore {
     const entries = Object.entries(envVariables);
     // A file we create ends with a line break, as a POSIX text file should:
     // without one, git reports "\ No newline at end of file" and any editor
-    // configured to add one rewrites the file behind us. A file that already
-    // exists keeps the ending it has, empty one included — that shape belongs
-    // to whoever wrote it, and normalizing it is not ours to do.
+    // configured to add one rewrites the file behind us. An existing file that
+    // is empty counts as one we create, since there is no shape to preserve;
+    // one with content keeps the ending it has, missing ending included, because
+    // that shape belongs to whoever wrote it.
     if (existingContent === null || existingContent === '') {
       const created = this.renderAssignments(entries).join('\n');
       return created === '' ? created : `${created}\n`;
@@ -190,6 +191,15 @@ export class FileVariableStore implements IVariableStore {
           return assignment;
         }
         updatedKeys.add(key);
+        // An assignment that already says the right thing is left exactly as
+        // it is. The CLI hands us every key it read, not just the mapped ones,
+        // so rewriting on sight would reserialize untouched entries and churn
+        // bytes no reader can see: a CRLF carried inside a value, a span that
+        // spreads over two physical lines. Leaving them also makes a run with
+        // nothing to change produce a byte-identical file.
+        if (this.parsesBackTo(key, rawValue ?? '', envVariables[key])) {
+          return assignment;
+        }
         // dotenv's `=\s*?` is lazy, so the blanks after it belong to the value
         // group. Put back the ones that stayed on the line, which is the
         // spacing the file chose; a value that only began on a later physical
