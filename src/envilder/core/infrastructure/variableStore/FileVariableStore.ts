@@ -161,11 +161,20 @@ export class FileVariableStore implements IVariableStore {
       return this.renderAssignments(entries).join('\n');
     }
 
-    const newline = existingContent.includes('\r\n') ? '\r\n' : '\n';
     // The body keeps its own line breaks: rewriting them would also rewrite the
     // line breaks a multiline value carries as payload.
     const trailingNewline =
       TRAILING_NEWLINE_PATTERN.exec(existingContent)?.[0] ?? '';
+    // The terminator that closes the file ends a physical line, so it is a
+    // structural break by construction. Scanning for any CRLF is the fallback
+    // and only a guess: the sole CRLF in an LF file can be payload inside a
+    // multiline secret.
+    const newline =
+      trailingNewline !== ''
+        ? trailingNewline
+        : existingContent.includes('\r\n')
+          ? '\r\n'
+          : '\n';
     const body = existingContent.slice(
       0,
       existingContent.length - trailingNewline.length,
@@ -196,36 +205,43 @@ export class FileVariableStore implements IVariableStore {
       },
     );
 
-    const pending = entries.filter(([key]) => !updatedKeys.has(key));
-    this.assertNothingStaleIsLeftBehind(existingContent, pending);
-    const appended = this.renderAssignments(pending);
+    this.assertNoManagedAssignmentSurvives(merged, envVariables);
+    const appended = this.renderAssignments(
+      entries.filter(([key]) => !updatedKeys.has(key)),
+    );
     const content = (
       existingContent === '' ? appended : [merged, ...appended]
     ).join(newline);
-    return trailingNewline === '' ? content : content + newline;
+    return trailingNewline === '' ? content : content + trailingNewline;
   }
 
   /**
-   * A managed key that dotenv already reads from the file, but whose assignment
-   * this pass did not rewrite, means our grammar failed to locate a form dotenv
-   * accepts. Appending would satisfy a reader, because dotenv keeps the last of
-   * several duplicates, while the previous secret stayed on disk untouched and
-   * `assertValuesArePreserved` saw nothing wrong. Refuse the write instead.
+   * Whatever the merge pass did not claim as an assignment, read the way dotenv
+   * reads it. A managed key still in there is an assignment our grammar could
+   * not locate — one of several duplicates, or a form we do not span, such as a
+   * colon whose value sits on the next line. Appending the new value would
+   * satisfy a reader, because dotenv keeps the last duplicate, while the
+   * previous secret stayed on disk and `assertValuesArePreserved` saw nothing
+   * wrong. Refuse the write instead.
    */
-  private assertNothingStaleIsLeftBehind(
-    existingContent: string,
-    pending: Array<[string, string]>,
+  private assertNoManagedAssignmentSurvives(
+    merged: string,
+    envVariables: Record<string, string>,
   ): void {
-    const existing = dotenv.parse(existingContent);
-    const stale = pending
-      .filter(([key]) => Object.hasOwn(existing, key))
-      .map(([key]) => `"${key}"`);
+    // Blank the claimed spans in place: dropping them would join the text
+    // around them and invent assignments that were never there.
+    const remainder = merged.replace(ASSIGNMENT_PATTERN, (assignment) =>
+      assignment.replace(/[^\r\n]/g, ' '),
+    );
+    const stale = Object.keys(dotenv.parse(remainder))
+      .filter((key) => Object.hasOwn(envVariables, key))
+      .map((key) => `"${key}"`);
     if (stale.length === 0) {
       return;
     }
     // Names only: the values at stake are the secrets this guard protects.
     throw new EnvironmentFileError(
-      `Cannot locate the existing assignment for ${stale.join(', ')}; appending would leave the previous value in the file, so nothing was written`,
+      `Cannot locate every existing assignment for ${stale.join(', ')}; the previous value would stay in the file, so nothing was written`,
     );
   }
 

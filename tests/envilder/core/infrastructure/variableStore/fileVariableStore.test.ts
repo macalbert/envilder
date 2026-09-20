@@ -711,6 +711,50 @@ describe('FileVariableStore', () => {
       expect(mockInMemoryFiles.get(mockEnvFilePath)).toBe(existing);
     });
 
+    it('Should_ThrowBeforeWritingWithoutLeakingSecret_When_AnEarlierDuplicateCannotBeLocated', async () => {
+      // Arrange: rewriting the reachable duplicate is not enough. dotenv reads
+      // the later one, so every value check passes while the unreachable first
+      // assignment keeps the old secret on disk.
+      const staleSecret = 'old-secret';
+      const existing = `SECRET:\n  ${staleSecret}\nSECRET=placeholder\nKEEP=ok\n`;
+      mockInMemoryFiles.set(mockEnvFilePath, existing);
+      const action = () =>
+        sut.saveEnvironment(mockEnvFilePath, { SECRET: 'new-secret' });
+
+      // Act
+      const actual = await action().then(
+        () => null,
+        (error: unknown) => error,
+      );
+
+      // Assert
+      expect(actual).toBeInstanceOf(EnvironmentFileError);
+      expect((actual as Error).message).not.toContain(staleSecret);
+      expect(vi.mocked(fs.writeFile)).not.toHaveBeenCalled();
+      expect(mockInMemoryFiles.get(mockEnvFilePath)).toBe(existing);
+    });
+
+    it('Should_KeepTheFinalLineEnding_When_ACrlfOnlyAppearsInsideAValue', async () => {
+      // Arrange: the file is structurally LF; its only CRLF is payload inside
+      // an unmanaged multiline secret, so it must not dictate the terminator.
+      mockInMemoryFiles.set(mockEnvFilePath, "KEEP='a\r\nb'\nTOKEN=old\n");
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, {
+        TOKEN: 'new',
+        ADDED: 'extra',
+      });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).toBe("KEEP='a\r\nb'\nTOKEN=new\nADDED=extra\n");
+      expect(dotenv.parse(actual)).toEqual({
+        KEEP: 'a\nb',
+        TOKEN: 'new',
+        ADDED: 'extra',
+      });
+    });
+
     it('Should_ThrowBeforeWritingWithoutLeakingSecret_When_UpdateIntroducesAnUnexpectedThirdKey', async () => {
       // Arrange
       const leakedText = 'leaked';
