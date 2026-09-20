@@ -35,9 +35,17 @@ type EnvQuote = (typeof ENV_QUOTES)[number];
  * Everything except the value is captured and re-emitted verbatim, so groups
  * whose `\s` reaches across line breaks cannot lose structure: whatever they
  * consume, they put back.
+ *
+ * Two places stay deliberately narrower than dotenv, because dotenv only has to
+ * find where a value ends while we also have to put the surroundings back. The
+ * trailing padding is horizontal, so a comment on the next line stays outside
+ * the span and the break before it is still visible as structure; and the
+ * unquoted run is lazy, so the blanks before an inline comment land in the
+ * padding we re-emit instead of inside the value we replace. Neither narrows
+ * the value span itself, which is the part that has to agree with dotenv.
  */
 const ASSIGNMENT_PATTERN =
-  /^(\s*(?:export\s+)?)([\w.-]+)(\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?(\s*)((?:#.*)?)$/gm;
+  /^(\s*(?:export\s+)?)([\w.-]+)(\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]*?)([^\S\r\n]*)((?:#.*)?)$/gm;
 
 /** The line break that closes a file, kept verbatim instead of normalized. */
 const TRAILING_NEWLINE_PATTERN = /(?:\r\n|[\r\n])$/;

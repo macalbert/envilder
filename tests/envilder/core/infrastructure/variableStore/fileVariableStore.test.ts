@@ -840,6 +840,31 @@ describe('FileVariableStore', () => {
       expect(actual).toBe(existing.replace('TOKEN=old', 'TOKEN=new'));
     });
 
+    it('Should_KeepTheBlanksBeforeAnInlineComment_When_UpdatingAnUnquotedAssignment', async () => {
+      // Arrange
+      mockInMemoryFiles.set(mockEnvFilePath, 'KEY=old \t # note\nZ=1\n');
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { KEY: 'new' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).toBe('KEY=new \t # note\nZ=1\n');
+    });
+
+    it('Should_UseTheStructuralLineEnding_When_ACommentFollowsAMultilineValue', async () => {
+      // Arrange: the break before the comment is the only structural one, so
+      // the comment has to stay outside the value's span for it to be seen.
+      mockInMemoryFiles.set(mockEnvFilePath, "KEEP='a\r\nb'\n# note");
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { TOKEN: 'x' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).toBe("KEEP='a\r\nb'\n# note\nTOKEN=x");
+    });
+
     it('Should_UseTheStructuralLineEnding_When_AppendingToAFileWithoutAFinalNewline', async () => {
       // Arrange: the file's structure is LF; its only CRLF is payload inside an
       // unmanaged multiline secret, and there is no final newline to fall back
