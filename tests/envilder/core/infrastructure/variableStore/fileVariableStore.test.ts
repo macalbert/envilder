@@ -738,6 +738,40 @@ describe('FileVariableStore', () => {
       expect(actual).toBe('SECRET:\n  new-secret\nKEEP=ok\n');
     });
 
+    it('Should_ReplaceInPlace_When_AColonValueStartsOnTheNextLineOfACrlfFile', async () => {
+      // Arrange: `$` also matches between a CR and its LF, so the separator
+      // could end the assignment there and strand the value on the next line.
+      const staleSecret = 'old-secret';
+      mockInMemoryFiles.set(
+        mockEnvFilePath,
+        `SECRET:\r\n  ${staleSecret}\r\nKEEP=ok\r\n`,
+      );
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { SECRET: 'new-secret' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(actual).not.toContain(staleSecret);
+      expect(actual).toBe('SECRET:\r\n  new-secret\r\nKEEP=ok\r\n');
+    });
+
+    it('Should_LeaveTheNextLineAlone_When_AnEqualsAssignmentHasNoValue', async () => {
+      // Arrange: dotenv's unquoted branch cannot cross a line break, so it
+      // reads this as an empty value and the indented line is loose text, not
+      // the secret. Agreeing with the parser means leaving that text alone.
+      const existing = 'SECRET=\r\n  loose text\r\nKEEP=ok\r\n';
+      mockInMemoryFiles.set(mockEnvFilePath, existing);
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, { SECRET: 'new-secret' });
+
+      // Assert
+      const actual = mockInMemoryFiles.get(mockEnvFilePath) as string;
+      expect(dotenv.parse(existing).SECRET).toBe('');
+      expect(actual).toBe('SECRET=new-secret\r\n  loose text\r\nKEEP=ok\r\n');
+    });
+
     it('Should_ReplaceInPlace_When_AnEqualsValueStartsOnTheNextLine', async () => {
       // Arrange
       const staleSecret = 'old-secret';

@@ -36,6 +36,13 @@ type EnvQuote = (typeof ENV_QUOTES)[number];
  * whose `\s` reaches across line breaks cannot lose structure: whatever they
  * consume, they put back.
  *
+ * `(?<!\r)$` is the one place the raw text needs more than dotenv's grammar
+ * says. dotenv rewrites every CRLF to LF before it matches, so it never sees
+ * the position between a CR and its LF; we match the file as it is, where `$`
+ * does match there and would let a separator whose `\s` had just taken the CR
+ * end the assignment early, leaving the rest of the value behind a bare
+ * carriage return.
+ *
  * Two places stay deliberately narrower than dotenv, because dotenv only has to
  * find where a value ends while we also have to put the surroundings back. The
  * trailing padding is horizontal, so a comment on the next line stays outside
@@ -45,7 +52,7 @@ type EnvQuote = (typeof ENV_QUOTES)[number];
  * the value span itself, which is the part that has to agree with dotenv.
  */
 const ASSIGNMENT_PATTERN =
-  /^(\s*(?:export\s+)?)([\w.-]+)(\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]*?)([^\S\r\n]*)((?:#.*)?)$/gm;
+  /^(\s*(?:export\s+)?)([\w.-]+)(\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]*?)([^\S\r\n]*)((?:#.*)?)(?<!\r)$/gm;
 
 /** The line break that closes a file, kept verbatim instead of normalized. */
 const TRAILING_NEWLINE_PATTERN = /(?:\r\n|[\r\n])$/;
