@@ -1530,6 +1530,21 @@ describe('FileVariableStore', () => {
       expect(result.mappings).not.toHaveProperty('$schema');
     });
 
+    // The name rule runs before the non-string filter, so a key the published
+    // schema rejects is reported rather than quietly dropped just because its
+    // value is not a string. Excluding non-string values stays a silent skip.
+    it('Should_RejectMappingKey_When_NameIsInvalidAndValueIsNotAString', async () => {
+      // Arrange
+      const mapJson = '{"SAFE=prefix": 42, "DB_URL": "/app/db"}';
+      mockInMemoryFiles.set(mockMapPath, mapJson);
+
+      // Act
+      const action = sut.getParsedMapping(mockMapPath);
+
+      // Assert
+      await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
+    });
+
     it('Should_ExcludeNonStringValues_When_MapFileContainsNumericOrObjectValues', async () => {
       // Arrange
       const mapData = {

@@ -88,10 +88,17 @@ export class FileVariableStore implements IVariableStore {
     // dropping that mapping instead of storing it as data.
     const mappings: Record<string, string> = Object.create(null);
     for (const [key, value] of Object.entries(rest)) {
-      if (key.startsWith('$') || typeof value !== 'string') {
+      if (key.startsWith('$')) {
         continue;
       }
+      // Before the non-string filter, so the name rule covers every mapping
+      // key the file declares. Validating after would accept a name the
+      // published schema rejects whenever its value happened to be a number
+      // or an object. Non-string values are still skipped, not an error.
       this.assertValidVariableName(key);
+      if (typeof value !== 'string') {
+        continue;
+      }
       mappings[key] = value;
     }
     return { config, mappings };
