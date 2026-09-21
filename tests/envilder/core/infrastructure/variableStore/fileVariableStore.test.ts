@@ -189,6 +189,13 @@ describe('FileVariableStore', () => {
       'LOST NAME',
       'LOST\tNAME',
       'LOST#NAME',
+      // Trailing terminators: `$` is end-of-input in ECMAScript regexes only
+      // while the `m` flag is off; these pin that the rule never gains it.
+      'SAFE\n',
+      'SAFE\r',
+      'SAFE\r\n',
+      `SAFE${LINE_SEPARATOR}`,
+      `SAFE${PARAGRAPH_SEPARATOR}`,
       'CAFÉ_URL',
     ])(
       'Should_PreserveDestination_When_MappingContainsInvalidVariableNames',
@@ -1369,6 +1376,13 @@ describe('FileVariableStore', () => {
       'LOST NAME',
       'LOST\tNAME',
       'LOST#NAME',
+      // Trailing terminators: `$` is end-of-input in ECMAScript regexes only
+      // while the `m` flag is off; these pin that the rule never gains it.
+      'SAFE\n',
+      'SAFE\r',
+      'SAFE\r\n',
+      `SAFE${LINE_SEPARATOR}`,
+      `SAFE${PARAGRAPH_SEPARATOR}`,
       'CAFÉ_URL',
     ])(
       'Should_RejectMappingKey_When_NameIsWhitespaceOnlyOrContainsInvalidDelimiter',

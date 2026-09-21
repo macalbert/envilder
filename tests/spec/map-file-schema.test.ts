@@ -76,6 +76,13 @@ describe('Map File Schema', () => {
     'LOST\tNAME',
     'LOST#NAME',
     'CAFÉ_URL',
+    // Trailing terminators: `$` is end-of-input in ECMAScript regexes only
+    // while the `m` flag is off, so these pin that the pattern never gains it.
+    'SAFE\n',
+    'SAFE\r',
+    'SAFE\r\n',
+    `SAFE${LINE_SEPARATOR}`,
+    `SAFE${PARAGRAPH_SEPARATOR}`,
   ])(
     'Should_RejectMapFile_When_MappingNameIsEmptyWhitespaceOrContainsInvalidDelimiter',
     (invalidName) => {
