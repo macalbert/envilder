@@ -7,6 +7,31 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ## [Unreleased]
 
+### Added
+
+* **Zero-config defaults for `--map` and `--envfile`**: Running `envilder` with
+  no flags now resolves `envilder.json` from the current directory and writes
+  to `.env`. Both flags still override the defaults, and an empty `--map` value
+  is rejected rather than silently treated as absent
+  ([#314](https://github.com/macalbert/envilder/pull/314))
+
+### Changed
+
+* **Push-single resolves `$config` from the default map file**: A
+  single-variable push (`--key` + `--value` + `--secret-path`) now reads the
+  `$config` section (`provider`, `vaultUrl`, `profile`) of `envilder.json` when
+  one is present, so it targets the same provider as the rest of the project
+  instead of silently defaulting to AWS SSM. A missing `envilder.json` is not
+  an error for push-single, `--push` is no longer required, and CLI flags still
+  override `$config`. The resolved provider is logged before the push
+  ([#314](https://github.com/macalbert/envilder/pull/314))
+
+* **Reject empty single-secret options**: `--key`, `--value` and
+  `--secret-path` must now be non-empty whenever any of them is supplied.
+  Previously an explicitly empty value such as `--key ''` passed the
+  partial-option guard and fell through to a full `.env` push or pull
+  ([#314](https://github.com/macalbert/envilder/pull/314))
+
 ### Security
 
 * **Reject map-file mapping keys a `.env` file cannot represent**: Variable
