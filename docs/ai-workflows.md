@@ -56,19 +56,28 @@ It distinguishes:
 
 ## Verification-First Agent Topology
 
-Envilder defines six agents:
+Envilder defines seven agents:
 
 | Agent | Purpose | Artifact edits | Delegates to |
 | --- | --- | --- | --- |
-| **Change Orchestrator** | Coordinates one coherent approved change | No | Verifier, Implementer, Reviewer |
-| **Verifier** | Establishes independent contracts and runs final evidence | verification-contract artifacts only during contract establishment | None |
+| **Change Orchestrator** | Coordinates one coherent approved change | No | Contract Verifier, Implementer, Reviewer, Final Verifier |
+| **Contract Verifier** | Establishes independent contracts | verification-contract artifacts only | None |
 | **Implementer** | Produces the coherent contracted solution | Solution artifacts | None |
 | **Reviewer** | Reviews one candidate or a complete change set | No | None |
+| **Final Verifier** | Runs fresh final evidence | No | None |
 | **Content Designer** | Coordinates website and documentation outcomes | No | Change Orchestrator, Reviewer |
 | **PR Resolver** | Processes review feedback one comment at a time | No | Change Orchestrator, Reviewer |
 
-`Verifier` and `Implementer` are subagent-only. The other agents are
-user-invocable.
+`Contract Verifier`, `Implementer`, and `Final Verifier` are subagent-only. The
+other agents are user-invocable.
+
+Agent profiles intentionally omit `model`, allowing each host to select an
+available model, and use common tool aliases as portability defaults. Alias
+mappings and support are host-dependent, not universal. Each coordinator must
+preflight custom-agent invocation, nested delegation, required tool propagation,
+and worker tool boundaries. The coordinator returns a `BLOCKED` result instead
+of collapsing independent roles when those capabilities are unavailable or
+cannot be established.
 
 ### Nested Delegation
 
@@ -82,13 +91,27 @@ enables this topology:
 }
 ```
 
+On hosts that filter descendant tools through ancestor exposure, all three
+coordinators declare `[read, search, edit, execute, agent]`. This inheritance
+envelope is necessary along the entire nested path; it does not authorize
+coordinators to edit artifacts or Change Orchestrator to execute repository
+commands. Host approval gates remain in force.
+
+Worker limits stay unchanged: Contract Verifier and Implementer have
+`[read, search, edit, execute]`, Reviewer has `[read, search, execute]`, and
+Final Verifier has `[read, search]`, with no worker delegation. Implementer
+preflights actual read/edit/execute access, reports missing capabilities
+concretely, and can search through execute when no dedicated search tool is
+exposed. See the
+[normative inheritance policy](../.github/skills/common-verification-first/SKILL.md#capability-exposure-and-inheritance).
+
 ### One Coherent Change
 
 ```text
 Approved requirement and invariants
                 |
                 v
-         fresh Verifier
+    fresh Contract Verifier
                 |
                 v
       independent contract
@@ -103,8 +126,9 @@ Approved requirement and invariants
     fresh read-only Reviewer
                 |
                 v
-      fresh final Verifier
+      fresh Final Verifier
                 |
+        explicit PASS only
                 v
  Change Orchestrator judgment
 ```
@@ -159,12 +183,13 @@ ritual.
 Use **Change Orchestrator**.
 
 1. Supply one approved semantic specification.
-2. Let Verifier establish independent evidence.
+2. Let Contract Verifier establish independent evidence.
 3. Let Implementer produce the solution.
 4. Review the candidate independently.
-5. Run fresh final verification.
-6. Accept only when evidence and engineering judgment satisfy the original
-   requirement.
+5. Let Final Verifier run fresh read-only verification.
+6. Enter completion judgment only with explicit final `PASS` for the exact
+   current reviewed candidate. Accept only when all other evidence, review,
+   gates, and engineering conditions also satisfy the original requirement.
 
 For multi-item work, plan vertical slices and run each approved coherent item
 through Change Orchestrator. The calling workflow or user owns the branch and
@@ -175,7 +200,7 @@ owns the specialized per-comment lifecycle described below.
 
 Use `/scaffold-feature`.
 
-The prompt runs through Change Orchestrator. Verifier owns
+The prompt runs through Change Orchestrator. Contract Verifier owns
 verification-contract artifacts, including behavioral tests, before
 Implementer creates the solution structure. The Implementer completes required
 DI, routing, and entry-point wiring without generating placeholder tests.
@@ -255,13 +280,30 @@ Reviewer modes:
 Reviewer is always read-only and never delegates fixes. No findings is a valid
 result.
 
-Verifier modes:
+Contract Verifier may edit verification-contract artifacts while establishing
+the independent contract. Final Verifier is a separate agent with read-only
+tools and runs in a fresh context after review. It reassesses static evidence
+and recorded gate results, and returns `BLOCKED` rather than acquiring a
+general-purpose execution tool when fresh command execution is required.
 
-- `establish-contract` may edit verification-contract artifacts.
-- `final-verification` runs in a new read-only context after review.
+Only explicit `FinalVerificationResult` `PASS` opens completion judgment; it is
+necessary, not sufficient. `FAIL` routes to the existing owner: a fresh
+Implementer for implementation defects, a fresh Contract Verifier for contract
+defects, followed by affected downstream stages. Changes to approved semantics,
+invariants, scope, or requirements need human approval. `BLOCKED` propagates a
+reason-bearing blocked `ChangeResult`, with no success, PR replies, or thread
+resolution; missing execution evidence alone does not call for solution edits.
+Missing, unknown, or ambiguous results and other roles' or commands' successes
+cannot establish final `PASS`.
 
-If candidate artifacts change after review or final verification, the affected
-evaluation must run again against the new candidate.
+Approved limitations cannot substitute for `PASS` or waive `FAIL` or `BLOCKED`.
+A valid approved limitation strategy may receive `PASS` when its contract is
+actually satisfied and assessable. Genuinely resolved blockers, including
+independent contract repair, require appropriate contract/candidate reassessment,
+review, and fresh final verification before judgment can reopen on fresh `PASS`.
+Candidate changes invalidate affected review/final results and require necessary
+review and fresh final verification; PR Resolver's frozen-patch reapproval still
+applies.
 
 ## Repository Gates
 
@@ -299,7 +341,8 @@ Agents must:
 
 1. Place it under `.github/agents/{name}.agent.md`.
 2. Give it one clear ownership boundary.
-3. Grant only the tools and delegations it needs.
+3. Grant only the tools and delegations it needs, including required descendant
+   tools in every coordinator ancestor's inheritance envelope.
 4. Reference skills instead of duplicating policy.
 5. Validate every delegated agent name exists.
 6. Synchronize the agent topology/inventory in `docs/ai-workflows.md` and

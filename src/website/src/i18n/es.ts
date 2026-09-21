@@ -812,8 +812,9 @@ export const es: Translations = {
     pushOptions: 'Opciones',
     pushExamples: 'Ejemplos',
     pushOptPush: 'Activa el modo push (requerido)',
-    pushOptEnv: 'Ruta a tu archivo .env local',
-    pushOptMap: 'Ruta al JSON de mapeo de parámetros',
+    pushOptEnv: 'Ruta a tu archivo .env local (por defecto: .env)',
+    pushOptMap:
+      'Ruta al JSON de mapeo de parámetros (por defecto: envilder.json)',
     pushOptProvider: 'aws (por defecto) o azure',
     pushOptVault: 'URL de Azure Key Vault',
     pushOptProfile: 'Perfil AWS CLI (solo AWS)',
@@ -825,10 +826,13 @@ export const es: Translations = {
     pushSingleDesc:
       'Sube una variable de entorno individual directamente sin ningún archivo.',
     pushSingleOptions: 'Opciones',
-    pushSingleOptPush: 'Activa el modo push (requerido)',
+    pushSingleOptPush:
+      'Opcional: --key, --value y --secret-path ya activan el modo push',
     pushSingleOptKey: 'Nombre de la variable de entorno',
     pushSingleOptValue: 'Valor a almacenar',
     pushSingleOptPath: 'Ruta completa del secreto en tu proveedor en la nube',
+    pushSingleOptMap:
+      'Opcional: archivo de mapeo del que leer $config (por defecto: envilder.json si existe; nunca requerido para una subida individual)',
     pushSingleOptProvider: 'aws (por defecto) o azure',
     pushSingleOptVault: 'URL de Azure Key Vault',
     pushSingleOptProfile: 'Perfil AWS CLI (solo AWS)',

@@ -60,6 +60,18 @@ describe('Cli', () => {
       name: 'ValueAndSecretPath',
       options: ['--value', 'secret', '--secret-path', '/my/path'],
     },
+    {
+      name: 'EmptyKey',
+      options: ['--key', '', '--value', 'secret', '--secret-path', '/my/path'],
+    },
+    {
+      name: 'EmptyValue',
+      options: ['--key', 'API_KEY', '--value', '', '--secret-path', '/my/path'],
+    },
+    {
+      name: 'EmptySecretPath',
+      options: ['--key', 'API_KEY', '--value', 'secret', '--secret-path', ''],
+    },
   ] as const;
   const pushModes = [
     { name: 'WithoutPush', options: [] },

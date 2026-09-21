@@ -485,6 +485,7 @@ export interface DocsTranslations {
   pushSingleOptKey: string;
   pushSingleOptValue: string;
   pushSingleOptPath: string;
+  pushSingleOptMap: string;
   pushSingleOptProvider: string;
   pushSingleOptVault: string;
   pushSingleOptProfile: string;

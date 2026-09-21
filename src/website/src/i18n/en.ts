@@ -797,8 +797,8 @@ export const en: Translations = {
     pushOptions: 'Options',
     pushExamples: 'Examples',
     pushOptPush: 'Enable push mode (required)',
-    pushOptEnv: 'Path to your local .env file',
-    pushOptMap: 'Path to parameter mapping JSON',
+    pushOptEnv: 'Path to your local .env file (default: .env)',
+    pushOptMap: 'Path to parameter mapping JSON (default: envilder.json)',
     pushOptProvider: 'aws (default) or azure',
     pushOptVault: 'Azure Key Vault URL',
     pushOptProfile: 'AWS CLI profile (AWS only)',
@@ -810,10 +810,13 @@ export const en: Translations = {
     pushSingleDesc:
       'Push a single environment variable directly without any files.',
     pushSingleOptions: 'Options',
-    pushSingleOptPush: 'Enable push mode (required)',
+    pushSingleOptPush:
+      'Optional: --key, --value and --secret-path already activate push mode',
     pushSingleOptKey: 'Environment variable name',
     pushSingleOptValue: 'Value to store',
     pushSingleOptPath: 'Full secret path in your cloud provider',
+    pushSingleOptMap:
+      'Optional: map file to read $config from (default: envilder.json if present; never required for a single push)',
     pushSingleOptProvider: 'aws (default) or azure',
     pushSingleOptVault: 'Azure Key Vault URL',
     pushSingleOptProfile: 'AWS CLI profile (AWS only)',

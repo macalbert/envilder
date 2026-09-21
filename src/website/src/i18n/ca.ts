@@ -812,8 +812,9 @@ export const ca: Translations = {
     pushOptions: 'Opcions',
     pushExamples: 'Exemples',
     pushOptPush: 'Activa el mode push (requerit)',
-    pushOptEnv: 'Ruta al teu fitxer .env local',
-    pushOptMap: 'Ruta al JSON de mapeig de paràmetres',
+    pushOptEnv: 'Ruta al teu fitxer .env local (per defecte: .env)',
+    pushOptMap:
+      'Ruta al JSON de mapeig de paràmetres (per defecte: envilder.json)',
     pushOptProvider: 'aws (per defecte) o azure',
     pushOptVault: "URL d'Azure Key Vault",
     pushOptProfile: 'Perfil AWS CLI (només AWS)',
@@ -825,10 +826,13 @@ export const ca: Translations = {
     pushSingleDesc:
       "Puja una variable d'entorn individual directament sense cap fitxer.",
     pushSingleOptions: 'Opcions',
-    pushSingleOptPush: 'Activa el mode push (requerit)',
+    pushSingleOptPush:
+      'Opcional: --key, --value i --secret-path ja activen el mode push',
     pushSingleOptKey: "Nom de la variable d'entorn",
     pushSingleOptValue: 'Valor a emmagatzemar',
     pushSingleOptPath: 'Ruta completa del secret al teu proveïdor al núvol',
+    pushSingleOptMap:
+      'Opcional: fitxer de mapeig del qual llegir $config (per defecte: envilder.json si existeix; mai requerit per a una pujada individual)',
     pushSingleOptProvider: 'aws (per defecte) o azure',
     pushSingleOptVault: "URL d'Azure Key Vault",
     pushSingleOptProfile: 'Perfil AWS CLI (només AWS)',

@@ -86,7 +86,7 @@ export async function main() {
     .option('--push', 'Push a map-file-backed .env file to the cloud provider')
     .option(
       '--key <name>',
-      'Secret name; with --value and --secret-path, performs a single-secret push (no --push required)',
+      'Environment variable name; with --value and --secret-path, performs a single-secret push (no --push required)',
     )
     .option(
       '--value <value>',
@@ -126,10 +126,10 @@ export async function main() {
         ];
         const hasPartialSingleSecretOptions =
           singleSecretOptions.some((option) => option !== undefined) &&
-          singleSecretOptions.some((option) => option === undefined);
+          !singleSecretOptions.every((option) => Boolean(option));
         if (hasPartialSingleSecretOptions) {
           throw new InvalidArgumentError(
-            'Single-secret push requires --key, --value, and --secret-path.',
+            'Single-secret push requires non-empty --key, --value, and --secret-path.',
           );
         }
 
