@@ -2,8 +2,13 @@ import * as fs from 'node:fs/promises';
 import * as dotenv from 'dotenv';
 import { inject, injectable } from 'inversify';
 import {
+  invalidEnvironmentVariableNameMessage,
+  isValidEnvironmentVariableName,
+} from '../../domain/EnvironmentVariableName.js';
+import {
   DependencyMissingError,
   EnvironmentFileError,
+  InvalidArgumentError,
 } from '../../domain/errors/DomainErrors.js';
 import type {
   MapFileConfig,
@@ -78,13 +83,33 @@ export class FileVariableStore implements IVariableStore {
     const { $config, ...rest } = raw;
     const config: MapFileConfig =
       $config && typeof $config === 'object' ? $config : {};
-    const mappings: Record<string, string> = {};
+    // Null-prototype: map-file keys are untrusted, and a plain object literal
+    // would route `__proto__` through the Object.prototype setter, silently
+    // dropping that mapping instead of storing it as data.
+    const mappings: Record<string, string> = Object.create(null);
     for (const [key, value] of Object.entries(rest)) {
-      if (!key.startsWith('$') && typeof value === 'string') {
-        mappings[key] = value;
+      if (key.startsWith('$')) {
+        continue;
       }
+      // Before the non-string filter, so the name rule covers every mapping
+      // key the file declares. Validating after would accept a name the
+      // published schema rejects whenever its value happened to be a number
+      // or an object. Non-string values are still skipped, not an error.
+      this.assertValidVariableName(key);
+      if (typeof value !== 'string') {
+        continue;
+      }
+      mappings[key] = value;
     }
     return { config, mappings };
+  }
+
+  private assertValidVariableName(name: string): void {
+    if (!isValidEnvironmentVariableName(name)) {
+      throw new InvalidArgumentError(
+        invalidEnvironmentVariableNameMessage(name),
+      );
+    }
   }
 
   private async readJsonFile(source: string): Promise<Record<string, unknown>> {
@@ -107,7 +132,10 @@ export class FileVariableStore implements IVariableStore {
   }
 
   async getEnvironment(source: string): Promise<Record<string, string>> {
-    const envVariables: Record<string, string> = {};
+    // Null-prototype for the same reason as the parsed mappings: callers
+    // assign resolved secrets straight into this map, and a plain object
+    // would route a prototype-shadowing key through an inherited setter.
+    const envVariables: Record<string, string> = Object.create(null);
     try {
       await fs.access(source);
     } catch {
@@ -124,6 +152,10 @@ export class FileVariableStore implements IVariableStore {
     destination: string,
     envVariables: Record<string, string>,
   ): Promise<void> {
+    for (const key of Object.keys(envVariables)) {
+      this.assertValidVariableName(key);
+    }
+
     const existingContent = await this.readExistingEnvContent(destination);
     const unmanagedValues = this.collectUnmanagedValues(
       existingContent,

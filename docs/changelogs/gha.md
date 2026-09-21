@@ -1,5 +1,23 @@
 ## [Unreleased]
 
+### Security
+
+* **Reject map-file mapping keys a `.env` file cannot represent**: Variable
+  names must now match `^[A-Za-z0-9_.-]+$`, checked when parsing a map file
+  and again before writing an environment file. This is exactly the key
+  grammar `.env` parsers recognize, so an accepted name reads back as itself.
+  Previously a name containing `=`, a carriage return, a newline or the
+  `U+2028`/`U+2029` line separators could smuggle an extra `key=value`
+  assignment into the generated file, and a name containing a space, `#`, a
+  tab or a non-Latin letter was written and then silently lost while the run
+  reported success. Dotted and hyphenated names remain valid
+  ([#511](https://github.com/macalbert/envilder/issues/511))
+
+* **Reject the mapping key `__proto__`**: No `.env` parser can read this name
+  back, so the Action previously resolved the secret and wrote a line that
+  silently never loaded. It is now rejected at map-file ingestion with an
+  explicit message ([#511](https://github.com/macalbert/envilder/issues/511))
+
 ---
 
 ## [0.13.2] - 2026-08-14

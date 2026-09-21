@@ -55,9 +55,43 @@ The root object contains exactly two categories of keys:
 | Any other key | string | Variable mapping: env var name → secret identifier |
 
 Variable names SHOULD match `^[a-zA-Z_][a-zA-Z0-9_]*$` (valid POSIX env var
-names). Parsers MUST NOT reject keys that don't match: this is a recommended
-convention, not a runtime constraint. Existing files with hyphens or dots in
-keys remain valid.
+names). This remains a recommended convention: parsers MUST NOT reject a key
+merely for starting with a digit or for not being idiomatic POSIX. Existing
+files with hyphens or dots in keys remain valid.
+
+**Naming constraint:** parsers MUST reject a variable name that does not match
+`^[A-Za-z0-9_.-]+$`, and MUST additionally reject the single name
+`__proto__` ([#511](https://github.com/macalbert/envilder/issues/511)).
+
+The constraint exists to hold one invariant: **an accepted name must survive a
+`.env` round-trip as itself and nothing else.** `^[A-Za-z0-9_.-]+$` is exactly
+the key grammar `.env` parsers recognize, so it is stated as an allowlist. A
+blocklist cannot hold the invariant — every character outside the allowlist
+fails it, in one of two ways:
+
+| Outside the allowlist | Failure |
+| --------------------- | ------- |
+| `=`, `\r`, `\n`, `U+2028`, `U+2029` | Read back as a **different** assignment. `=` opens a second assignment on the same line; `\r`/`\n` open a second line; `U+2028`/`U+2029` are JavaScript line terminators, so a multiline parser starts a fresh assignment after them even though the writer emitted a single line. This is the injection in #511 |
+| space, tab, `#`, accented or non-Latin letters, NUL, vertical tab, … | Make the line unparseable, so the variable is written and then **silently lost** while the run reports success |
+| `__proto__` (inside the allowlist) | Every reader accumulates pairs into a plain object, so the key routes through the `Object.prototype` accessor instead of becoming an own property and the entry disappears — `dotenv.parse('__proto__=v')` returns `{}` |
+
+An empty or whitespace-only name is rejected by the allowlist as a
+consequence, not as a separate rule.
+
+The constraint applies to variable mappings. `$`-prefixed keys stay reserved
+and ignored under the rule above, so they are never written to a `.env` file.
+
+> **Implementation status:** enforced by the TypeScript CLI and GitHub Action
+> (`FileVariableStore`) and by the published JSON Schema. The runtime SDK
+> parsers do **not** enforce it yet:
+> `src/sdks/nodejs/src/application/map-file-parser.ts`,
+> `src/sdks/python/envilder/application/map_file_parser.py` and
+> `src/sdks/dotnet/Application/MapFileParser.cs` still only skip `$`-prefixed
+> keys and require string values. Until they are aligned, a map file rejected
+> by the CLI can still be parsed by an SDK. The threat differs by surface —
+> the CLI and Action write a `.env` file, whereas the SDKs resolve into
+> process environment — but the contract should be uniform, and closing this
+> gap is tracked as follow-up work.
 
 At least one variable mapping is required for meaningful operation.
 

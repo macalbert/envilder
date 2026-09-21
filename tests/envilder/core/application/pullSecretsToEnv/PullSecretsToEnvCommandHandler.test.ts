@@ -4,6 +4,7 @@ import { PullSecretsToEnvCommandHandler } from '../../../../../src/envilder/core
 import { EnvironmentVariable } from '../../../../../src/envilder/core/domain/EnvironmentVariable';
 import {
   ExpiredCredentialsError,
+  InvalidArgumentError,
   SecretsFetchError,
   SsoSessionExpiredError,
 } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
@@ -118,6 +119,26 @@ describe('PullSecretsToEnvCommandHandler', () => {
     );
     expect(summaryLine).toContain('2/2 secrets loaded');
     expect(summaryLine).toContain(mockEnvFilePath);
+  });
+
+  it('Should_NotReadOrWriteEnvironment_When_MapValidationRejects', async () => {
+    // Arrange
+    const command = PullSecretsToEnvCommand.create(
+      mockMapPath,
+      mockEnvFilePath,
+    );
+    mockEnvFileManager.getMapping.mockRejectedValueOnce(
+      new InvalidArgumentError('Invalid mapping key'),
+    );
+
+    // Act
+    const action = sut.handle(command);
+
+    // Assert
+    await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
+    expect(mockEnvFileManager.getEnvironment).not.toHaveBeenCalled();
+    expect(mockSecretProvider.getSecret).not.toHaveBeenCalled();
+    expect(mockEnvFileManager.saveEnvironment).not.toHaveBeenCalled();
   });
 
   it('Should_ThrowSecretsFetchError_When_SecretProviderThrows', async () => {

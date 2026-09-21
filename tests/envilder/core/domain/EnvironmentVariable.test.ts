@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { EnvironmentVariable } from '../../../../src/envilder/core/domain/EnvironmentVariable';
+import { InvalidArgumentError } from '../../../../src/envilder/core/domain/errors/DomainErrors';
 
 describe('EnvironmentVariable', () => {
   it('Should_CreateEnvironmentVariable_When_ValidInputsProvided', () => {
@@ -47,7 +48,7 @@ describe('EnvironmentVariable', () => {
     expect(longMasked).toBe('*************def');
   });
 
-  it('Should_ThrowError_When_NameIsEmpty', () => {
+  it('Should_ThrowInvalidArgumentError_When_NameIsEmptyOrWhitespaceOnly', () => {
     // Arrange
     const emptyName = '';
     const whitespaceOnlyName = '   ';
@@ -59,9 +60,11 @@ describe('EnvironmentVariable', () => {
       new EnvironmentVariable(whitespaceOnlyName, value);
 
     // Assert
+    expect(createWithEmptyName).toThrow(InvalidArgumentError);
     expect(createWithEmptyName).toThrow(
       'Environment variable name cannot be empty',
     );
+    expect(createWithWhitespaceName).toThrow(InvalidArgumentError);
     expect(createWithWhitespaceName).toThrow(
       'Environment variable name cannot be empty',
     );
