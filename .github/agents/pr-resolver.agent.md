@@ -5,7 +5,7 @@ description: >
   delegates artifact changes through the verification-first Change
   Orchestrator, commits each fix separately, replies to every comment, and
   resolves each thread before continuing.
-tools: [vscode, read, search, execute, agent, web, github.vscode-pull-request-github, todo]
+tools: [read, search, edit, execute, agent]
 agents: ['Change Orchestrator', 'Reviewer']
 argument-hint: "Pull-request comments or supplied review feedback to address"
 user-invocable: true
@@ -19,6 +19,26 @@ receives a reply, including questions, disagreements, and approved skips.
 Follow
 [review-response.instructions.md](../instructions/review-response.instructions.md).
 Always write GitHub replies in English.
+
+## Capability Preflight
+
+The explicit tool list is an inheritance envelope for filtering hosts: nested
+workers need their tools exposed by every ancestor. Exposing `edit` does not
+authorize direct artifact edits, nor does `execute` authorize Change
+Orchestrator to run repository commands. Ownership and host approval gates
+remain unchanged.
+
+Before querying or mutating GitHub, confirm that the host provides command
+execution, can invoke `Change Orchestrator`, and supports its nested worker
+delegations with required tools propagated through every ancestor and each
+worker's declared tool boundary preserved. If any capability is unavailable or
+cannot be established, make no mutation and return `ResolvedComments` as
+`BLOCKED`. Never collapse the delegated roles.
+
+When taking the direct `@Reviewer` `change-set-review` path, independently
+confirm before invoking it that the current host can invoke `Reviewer` directly
+and preserve Reviewer's declared read-only tool boundary. A successful
+`Change Orchestrator` preflight does not establish either condition.
 
 ## Non-Negotiable Boundaries
 
@@ -56,7 +76,11 @@ For each active review comment:
 7. Execute only the approved action.
 8. For an artifact change:
    - delegate one coherent approved change to `@Change Orchestrator`;
-   - accept only a successful `ChangeResult`;
+   - accept only a successful `ChangeResult` whose `FinalVerificationResult`
+     explicitly reports `Final result: PASS` for the exact current reviewed
+     candidate. `FAIL`, `BLOCKED`, or a missing, unknown, or ambiguous final
+     result blocks completion; route correction through `@Change Orchestrator`
+     and require fresh review and final verification before accepting;
    - run or confirm comment-specific validation;
    - stage only that comment's paths;
    - create one conventional commit with the required co-author trailer;

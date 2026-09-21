@@ -88,15 +88,22 @@ boundary. Add broader gates when a narrow oracle cannot expose integration risk.
   limitations.
 - Never edits artifacts or executes repository commands.
 - Routes implementation defects to the Implementer, contract defects to the
-  Verifier, and semantic changes to human approval.
+  Contract Verifier, and semantic changes to human approval.
 
-### Verifier
+### Contract Verifier
 
 - Is the sole editor of verification-contract artifacts.
-- In `establish-contract`, selects, reuses, updates, or creates the required
-  executable oracle before implementation.
-- In a new `final-verification` context, edits nothing and reassesses the final
-  candidate against the original approved intent.
+- Selects, reuses, updates, or creates the required executable oracle before
+  implementation.
+- Never derives expected behavior from the candidate implementation.
+
+### Final Verifier
+
+- Has read-only tools and cannot edit verification or solution artifacts.
+- Reassesses the exact reviewed candidate against the original approved intent
+  and independent contract in a fresh context.
+- Returns `BLOCKED` when required final evidence needs command execution that
+  the read-only profile cannot perform.
 - Never derives expected behavior from the candidate implementation.
 
 ### Implementer
@@ -129,9 +136,34 @@ Solution artifacts include production code, configuration, documentation,
 migrations, refactors, fixtures, builders, seeders, mocks, containers, data
 loaders, runner setup, and other test infrastructure.
 
-The Verifier may edit only verification-contract artifacts while establishing a
-contract. The Implementer may edit only solution artifacts. The Reviewer and
-final Verifier edit nothing.
+The Contract Verifier may edit only verification-contract artifacts while
+establishing a contract. The Implementer may edit only solution artifacts. The
+Reviewer and Final Verifier edit nothing.
+
+## Capability Exposure and Inheritance
+
+On filtering hosts, a descendant's effective tools are limited by its own
+profile and every ancestor's exposed tools. Change Orchestrator, Content
+Designer, and PR Resolver therefore each declare the explicit inheritance
+envelope `[read, search, edit, execute, agent]`. Every ancestor must expose all
+required descendant tools, including `agent` for nested delegation.
+
+Exposure does not grant semantic authority: coordinators never edit artifacts,
+and Change Orchestrator never executes repository commands. Contract Verifier
+owns verification-contract edits; Implementer owns solution edits. Host
+approval gates remain in force; never use wildcard tool grants or bypass
+approvals to repair propagation.
+
+Workers retain their own limits: Contract Verifier and Implementer use
+`[read, search, edit, execute]`, Reviewer uses `[read, search, execute]`, and
+Final Verifier uses `[read, search]`. None delegates. A broader ancestor
+envelope must not expand a worker's effective boundary.
+
+These common aliases are portability defaults, not universal host tool names
+or support guarantees. Preflight actual tool exposure, nested delegation, and
+worker boundaries; return `BLOCKED` with the missing capability when required
+support cannot be established. Implementer diagnoses missing read/edit/execute
+and may use execute-based search when no dedicated search tool is exposed.
 
 ## Semantic Handoffs
 
@@ -160,7 +192,7 @@ semantic results, not full working trajectories.
 1. Approve the requirement, observable outcome, invariants, scope, and
    constraints.
 2. Classify intent and choose the verification strategy independently.
-3. Delegate a fresh Verifier in `establish-contract` mode.
+3. Delegate a fresh Contract Verifier.
 4. Confirm the `VerificationContract` derives from approved semantics and uses
    the narrowest credible oracle.
 5. Delegate a fresh Implementer to produce the coherent solution.
@@ -168,12 +200,41 @@ semantic results, not full working trajectories.
    omission rule applies.
 7. Route findings to their owner and repeat only the affected downstream
    stages.
-8. Delegate a new fresh Verifier in `final-verification` mode.
-9. Let the Change Orchestrator judge whether evidence, review, and engineering
-   judgment satisfy the original requirement.
+8. Delegate a new fresh Final Verifier.
+9. Only an explicit `Final result: PASS` in `FinalVerificationResult` for the
+   exact current reviewed candidate permits Change Orchestrator completion
+   judgment. `PASS` is necessary, not sufficient: all existing acceptance
+   conditions still apply.
 
-If any candidate artifact changes after review or final verification, rerun the
-necessary review and final verification against the new candidate.
+If any candidate artifact changes after review or final verification, invalidate
+the affected results and rerun the necessary review and final verification
+against the new candidate.
+
+### Final Result Gate and Recovery
+
+- `FAIL` prevents acceptance. Route implementation defects to a fresh
+  Implementer and contract defects to a fresh Contract Verifier, then repeat
+  affected downstream stages. Changes to approved semantics, invariants, scope,
+  or requirements require human approval.
+- `BLOCKED` propagates a reason-bearing `ChangeResult` with final judgment
+  `BLOCKED`; callers must not claim successful completion, publish PR replies,
+  or resolve threads. Unavailable required evidence alone is not an instruction
+  to edit the solution.
+- An approved limitation cannot replace final `PASS` or waive `FAIL` or
+  `BLOCKED`. A legitimately approved limitation strategy can still receive
+  `PASS` when the approved contract is actually satisfied and assessable.
+- A genuinely resolved blocker, including independently owned contract repair,
+  requires reassessment of the corrected contract/candidate, appropriate review,
+  and fresh final verification. Only a fresh explicit `PASS` reopens judgment.
+- Missing, unknown, or ambiguous final results cannot pass the gate. Neither
+  another role's success nor passing commands establish final `PASS`.
+
+Callers must require this qualifying final `PASS` for each artifact-changing
+action, even if its `ChangeResult` nominally claims success. All approved actions
+must succeed before batch publication; prepared but held replies are not
+published success. Aggregate validation and remote availability are additional
+gates, not substitutes for final `PASS`. Direct no-artifact answers and approved
+skips retain their existing workflow and applicable exemptions.
 
 ### Review Omission
 
@@ -392,7 +453,7 @@ Limitations and residual risks:
   implementation.
 - Expected behavior is established independently of the candidate
   implementation.
-- Verification-contract artifacts remain Verifier-owned.
+- Verification-contract artifacts remain Contract Verifier-owned.
 - Bug fixes reproduce the defect whenever practical.
 - Pure refactors preserve behavior and behavioral verification.
 - Test infrastructure uses consumer or direct-workflow evidence first.
