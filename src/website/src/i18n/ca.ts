@@ -824,7 +824,7 @@ export const ca: Translations = {
     pushCommentAzureFlags: '# Azure via flags CLI',
     pushSingleTitle: 'Pujar variable individual',
     pushSingleDesc:
-      "Puja una variable d'entorn individual directament sense cap fitxer.",
+      "Puja una variable d'entorn individual directament al teu proveïdor al núvol sense fer servir cap fitxer .env.",
     pushSingleOptions: 'Opcions',
     pushSingleOptPush:
       'Opcional: --key, --value i --secret-path ja activen el mode push',

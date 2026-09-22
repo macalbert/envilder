@@ -808,7 +808,7 @@ export const en: Translations = {
     pushCommentAzureFlags: '# Azure via CLI flags',
     pushSingleTitle: 'Push single variable',
     pushSingleDesc:
-      'Push a single environment variable directly without any files.',
+      'Push a single environment variable directly to your cloud provider without using a .env file.',
     pushSingleOptions: 'Options',
     pushSingleOptPush:
       'Optional: --key, --value and --secret-path already activate push mode',

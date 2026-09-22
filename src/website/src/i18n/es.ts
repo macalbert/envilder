@@ -824,7 +824,7 @@ export const es: Translations = {
     pushCommentAzureFlags: '# Azure vía flags CLI',
     pushSingleTitle: 'Subir variable individual',
     pushSingleDesc:
-      'Sube una variable de entorno individual directamente sin ningún archivo.',
+      'Sube una variable de entorno individual directamente a tu proveedor en la nube sin usar ningún archivo .env.',
     pushSingleOptions: 'Opciones',
     pushSingleOptPush:
       'Opcional: --key, --value y --secret-path ya activan el modo push',
