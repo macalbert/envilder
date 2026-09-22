@@ -39,6 +39,9 @@ const ssmClient = new SSMClient({});
 // Lowkey Vault (Azure Key Vault test double)
 const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.61';
 const LOWKEY_VAULT_PORT = 8443;
+// The image is amd64-only; on arm64 hosts it runs emulated and several
+// suites start it concurrently, so Tomcat can take well over the 60s default.
+const LOWKEY_VAULT_STARTUP_TIMEOUT_MS = 180_000;
 
 describe('Envilder (E2E)', () => {
   // Unique ID per test run prevents race conditions between concurrent CI runs
@@ -331,6 +334,7 @@ describe('Envilder (E2E)', () => {
         .withEnvironment({
           LOWKEY_ARGS: '--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true',
         })
+        .withStartupTimeout(LOWKEY_VAULT_STARTUP_TIMEOUT_MS)
         .start();
 
       const host = lowkeyVaultContainer.getHost();
@@ -363,7 +367,7 @@ describe('Envilder (E2E)', () => {
           2,
         ),
       );
-    }, 120_000);
+    }, 240_000);
 
     afterAll(async () => {
       if (lowkeyVaultContainer) {

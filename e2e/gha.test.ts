@@ -45,6 +45,9 @@ let ssmClient: SSMClient;
 // Lowkey Vault (Azure Key Vault test double)
 const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.61';
 const LOWKEY_VAULT_PORT = 8443;
+// The image is amd64-only; on arm64 hosts it runs emulated and several
+// suites start it concurrently, so Tomcat can take well over the 60s default.
+const LOWKEY_VAULT_STARTUP_TIMEOUT_MS = 180_000;
 
 describe('GitHub Action (E2E)', () => {
   const envFilePath = join(rootDir, 'e2e', 'sample', 'gha-validation.env');
@@ -259,6 +262,7 @@ describe('GitHub Action (E2E)', () => {
         .withEnvironment({
           LOWKEY_ARGS: '--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true',
         })
+        .withStartupTimeout(LOWKEY_VAULT_STARTUP_TIMEOUT_MS)
         .start();
 
       const host = lowkeyVaultContainer.getHost();
@@ -291,7 +295,7 @@ describe('GitHub Action (E2E)', () => {
           2,
         ),
       );
-    }, 120_000);
+    }, 240_000);
 
     afterAll(async () => {
       if (lowkeyVaultContainer) {
