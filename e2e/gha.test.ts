@@ -45,6 +45,8 @@ let ssmClient: SSMClient;
 // Lowkey Vault (Azure Key Vault test double)
 const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.61';
 const LOWKEY_VAULT_PORT = 8443;
+const LOWKEY_VAULT_STARTUP_TIMEOUT_MS = 180_000;
+const LOWKEY_VAULT_TEST_TIMEOUT_MS = 30_000;
 
 describe('GitHub Action (E2E)', () => {
   const envFilePath = join(rootDir, 'e2e', 'sample', 'gha-validation.env');
@@ -229,7 +231,7 @@ describe('GitHub Action (E2E)', () => {
     }
   }, 30_000);
 
-  describe('Azure Key Vault', () => {
+  describe('Azure Key Vault', { timeout: LOWKEY_VAULT_TEST_TIMEOUT_MS }, () => {
     let lowkeyVaultContainer: StartedTestContainer;
     let azureVaultUrl: string;
     let lowkeyVaultHost: string;
@@ -259,6 +261,7 @@ describe('GitHub Action (E2E)', () => {
         .withEnvironment({
           LOWKEY_ARGS: '--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true',
         })
+        .withStartupTimeout(LOWKEY_VAULT_STARTUP_TIMEOUT_MS)
         .start();
 
       const host = lowkeyVaultContainer.getHost();
@@ -291,7 +294,7 @@ describe('GitHub Action (E2E)', () => {
           2,
         ),
       );
-    }, 120_000);
+    }, 240_000);
 
     afterAll(async () => {
       if (lowkeyVaultContainer) {

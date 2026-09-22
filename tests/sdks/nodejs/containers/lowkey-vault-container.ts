@@ -8,6 +8,7 @@ import { AzureKeyVaultSecretProvider } from '../../../../src/sdks/nodejs/src/inf
 const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.61';
 const HTTPS_PORT = 8443;
 const HTTP_PORT = 8080;
+const STARTUP_TIMEOUT_MS = 180_000;
 const MAX_RETRIES = 30;
 const RETRY_DELAY_MS = 1000;
 
@@ -33,6 +34,7 @@ export class LowkeyVaultTestContainer {
         .withEnvironment({
           LOWKEY_ARGS: `--server.port=${HTTPS_PORT} --LOWKEY_VAULT_RELAXED_PORTS=true`,
         })
+        .withStartupTimeout(STARTUP_TIMEOUT_MS)
         .start();
 
       const host = this.container.getHost();
