@@ -14,9 +14,6 @@ from testcontainers.core.container import DockerContainer
 _IMAGE = "nagyesta/lowkey-vault:7.1.61"
 _HTTPS_PORT = 8443
 _HTTP_PORT = 8080
-# The image is amd64-only; on arm64 hosts it runs emulated and other suites
-# may be starting their own copy, so it can take well over a minute to answer.
-# testcontainers-python does not wait for ports, so this budget is the whole wait.
 _STARTUP_TIMEOUT_SECONDS = 180.0
 
 
