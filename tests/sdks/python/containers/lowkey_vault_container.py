@@ -98,15 +98,22 @@ class LowkeyVaultContainer:
         self,
         timeout: float = _STARTUP_TIMEOUT_SECONDS,
         delay: float = 1.0,
+        request_timeout: float = 2.0,
     ) -> None:
         url = f"{self._vault_url}/ping"
         deadline = time.monotonic() + timeout
         last_error: Exception | None = None
         while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError(
+                    "LowkeyVault did not become ready"
+                    f" within {timeout:.0f}s"
+                ) from last_error
             try:
                 response = requests.get(
                     url,
-                    timeout=2,
+                    timeout=min(request_timeout, remaining),
                     verify=False,  # test-only: self-signed TLS
                 )
                 if response.status_code == 200:
@@ -114,10 +121,10 @@ class LowkeyVaultContainer:
             except requests.RequestException as e:
                 last_error = e
 
-            if time.monotonic() >= deadline:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
                 raise TimeoutError(
                     "LowkeyVault did not become ready"
                     f" within {timeout:.0f}s"
                 ) from last_error
-
-            time.sleep(delay)
+            time.sleep(min(delay, remaining))
