@@ -26,6 +26,7 @@ import {
   expect,
   it,
 } from 'vitest';
+import { prependGlobalBinDirToPath } from '../scripts/pnpm-global-bin-dir';
 import { Startup } from '../src/envilder/apps/cli/Startup';
 import { DispatchActionCommand } from '../src/envilder/core/application/dispatch/DispatchActionCommand';
 import type { DispatchActionCommandHandler } from '../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
@@ -59,6 +60,11 @@ describe('Envilder (E2E)', () => {
   const singleSsmPath = `${ssmPrefix}/SingleVariable`;
 
   beforeAll(async () => {
+    // pnpm 12 writes global shims to $PNPM_HOME/bin, which a PATH set up by an
+    // older `pnpm setup` lacks; without this, spawning `envilder` below fails
+    // and the global uninstall in cleanUpSystem() silently does nothing.
+    prependGlobalBinDirToPath(process.env);
+
     tempDir = await mkdtemp(join(tmpdir(), `envilder-e2e-${runId}-`));
     envFilePath = join(tempDir, 'cli-validation.env');
     mapFilePath = join(tempDir, `envilder-${runId}.json`);
