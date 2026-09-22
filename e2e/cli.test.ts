@@ -42,6 +42,9 @@ const LOWKEY_VAULT_PORT = 8443;
 // The image is amd64-only; on arm64 hosts it runs emulated and several
 // suites start it concurrently, so Tomcat can take well over the 60s default.
 const LOWKEY_VAULT_STARTUP_TIMEOUT_MS = 180_000;
+// The first requests against the freshly started (emulated) JVM are slow
+// enough to blow vitest's 5s default.
+const LOWKEY_VAULT_TEST_TIMEOUT_MS = 30_000;
 
 describe('Envilder (E2E)', () => {
   // Unique ID per test run prevents race conditions between concurrent CI runs
@@ -310,7 +313,7 @@ describe('Envilder (E2E)', () => {
     }
   });
 
-  describe('Azure Key Vault', () => {
+  describe('Azure Key Vault', { timeout: LOWKEY_VAULT_TEST_TIMEOUT_MS }, () => {
     let lowkeyVaultContainer: StartedTestContainer;
     let azureVaultUrl: string;
     let lowkeyVaultHost: string;
