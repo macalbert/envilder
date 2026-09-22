@@ -14,6 +14,7 @@ from testcontainers.core.container import DockerContainer
 _IMAGE = "nagyesta/lowkey-vault:7.1.61"
 _HTTPS_PORT = 8443
 _HTTP_PORT = 8080
+_STARTUP_TIMEOUT_SECONDS = 180.0
 
 
 class LowkeyVaultContainer:
@@ -95,29 +96,35 @@ class LowkeyVaultContainer:
 
     def _wait_until_ready(
         self,
-        max_retries: int = 30,
+        timeout: float = _STARTUP_TIMEOUT_SECONDS,
         delay: float = 1.0,
+        request_timeout: float = 2.0,
     ) -> None:
         url = f"{self._vault_url}/ping"
-        for attempt in range(max_retries):
+        deadline = time.monotonic() + timeout
+        last_error: Exception | None = None
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError(
+                    "LowkeyVault did not become ready"
+                    f" within {timeout:.0f}s"
+                ) from last_error
             try:
                 response = requests.get(
                     url,
-                    timeout=2,
+                    timeout=min(request_timeout, remaining),
                     verify=False,  # test-only: self-signed TLS
                 )
                 if response.status_code == 200:
                     return
             except requests.RequestException as e:
-                if attempt == max_retries - 1:
-                    raise TimeoutError(
-                        "LowkeyVault did not become ready"
-                        f" after {max_retries} attempts"
-                    ) from e
+                last_error = e
 
-            if attempt < max_retries - 1:
-                time.sleep(delay)
-
-        raise TimeoutError(
-            "LowkeyVault did not become ready" f" after {max_retries} attempts"
-        )
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError(
+                    "LowkeyVault did not become ready"
+                    f" within {timeout:.0f}s"
+                ) from last_error
+            time.sleep(min(delay, remaining))

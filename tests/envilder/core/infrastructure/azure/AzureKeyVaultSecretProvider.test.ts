@@ -20,6 +20,7 @@ import { AzureKeyVaultSecretProvider } from '../../../../../src/envilder/core/in
 // Constants for integration tests
 const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.32';
 const LOWKEY_VAULT_PORT = 8443;
+const LOWKEY_VAULT_STARTUP_TIMEOUT_MS = 180_000;
 const SECRET_NAME = 'test-secret';
 const SECRET_VALUE = 'super-secret-value';
 const NON_EXISTENT_SECRET = 'non-existent-secret';
@@ -324,6 +325,7 @@ describe('AzureKeyVaultSecretProvider (integration with Lowkey Vault)', () => {
       .withEnvironment({
         LOWKEY_ARGS: '--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true',
       })
+      .withStartupTimeout(LOWKEY_VAULT_STARTUP_TIMEOUT_MS)
       .start();
 
     const host = container.getHost();
@@ -342,7 +344,7 @@ describe('AzureKeyVaultSecretProvider (integration with Lowkey Vault)', () => {
 
     // Set up initial test secret
     await secretClient.setSecret(SECRET_NAME, SECRET_VALUE);
-  }, 120000);
+  }, 240_000);
 
   afterAll(async () => {
     if (container) {
