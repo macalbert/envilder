@@ -297,10 +297,10 @@ describe('Cli', () => {
     process.argv = ['node', 'cli.js'];
 
     // Act
-    const action = () => main();
+    const act = () => main();
 
     // Assert
-    await expect(action).rejects.toBeInstanceOf(InvalidArgumentError);
+    await expect(act).rejects.toBeInstanceOf(InvalidArgumentError);
   });
 
   it('Should_UseDefaultEnvfile_When_EnvfileOptionIsOmitted', async () => {
