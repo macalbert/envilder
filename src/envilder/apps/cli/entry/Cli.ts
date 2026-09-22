@@ -102,13 +102,15 @@ export async function main() {
     )
     .hook('preAction', (thisCommand) => {
       const opts = thisCommand.opts();
-      if (opts.ssmPath) {
+      // Alias on presence, not truthiness: an explicitly empty --ssm-path must
+      // reach the single-secret guard below instead of vanishing silently.
+      if (opts.ssmPath !== undefined) {
         console.warn(
           pc.yellow(
             '⚠️  --ssm-path is deprecated and will be removed in a future release. Use --secret-path instead.',
           ),
         );
-        if (!opts.secretPath) {
+        if (opts.secretPath === undefined) {
           thisCommand.setOptionValue('secretPath', opts.ssmPath);
         }
       }

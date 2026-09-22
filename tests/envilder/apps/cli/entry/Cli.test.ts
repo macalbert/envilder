@@ -72,6 +72,14 @@ describe('Cli', () => {
       name: 'EmptySecretPath',
       options: ['--key', 'API_KEY', '--value', 'secret', '--secret-path', ''],
     },
+    {
+      name: 'EmptySsmPathAlias',
+      options: ['--ssm-path', ''],
+    },
+    {
+      name: 'EmptySsmPathAliasWithKeyAndValue',
+      options: ['--key', 'API_KEY', '--value', 'secret', '--ssm-path', ''],
+    },
   ] as const;
   const pushModes = [
     { name: 'WithoutPush', options: [] },
