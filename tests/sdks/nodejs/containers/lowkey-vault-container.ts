@@ -8,8 +8,6 @@ import { AzureKeyVaultSecretProvider } from '../../../../src/sdks/nodejs/src/inf
 const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.61';
 const HTTPS_PORT = 8443;
 const HTTP_PORT = 8080;
-// The image is amd64-only; on arm64 hosts it runs emulated and other suites
-// may be starting their own copy, so Tomcat can take well over the 60s default.
 const STARTUP_TIMEOUT_MS = 180_000;
 const MAX_RETRIES = 30;
 const RETRY_DELAY_MS = 1000;

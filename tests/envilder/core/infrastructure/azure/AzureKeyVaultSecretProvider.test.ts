@@ -20,8 +20,6 @@ import { AzureKeyVaultSecretProvider } from '../../../../../src/envilder/core/in
 // Constants for integration tests
 const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.32';
 const LOWKEY_VAULT_PORT = 8443;
-// The image is amd64-only; on arm64 hosts it runs emulated and several
-// suites start it concurrently, so Tomcat can take well over the 60s default.
 const LOWKEY_VAULT_STARTUP_TIMEOUT_MS = 180_000;
 const SECRET_NAME = 'test-secret';
 const SECRET_VALUE = 'super-secret-value';
