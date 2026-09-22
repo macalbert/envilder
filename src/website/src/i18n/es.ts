@@ -818,7 +818,7 @@ export const es: Translations = {
     pushOptProvider: 'aws (por defecto) o azure',
     pushOptVault: 'URL de Azure Key Vault',
     pushOptProfile: 'Perfil AWS CLI (solo AWS)',
-    pushCommentAws: '# Subir a AWS SSM',
+    pushCommentAws: '# Subir a AWS SSM (por defecto envilder.json y .env)',
     pushCommentProfile: '# Con perfil AWS',
     pushCommentAzureConfig: '# Azure vía $config en archivo de mapeo',
     pushCommentAzureFlags: '# Azure vía flags CLI',

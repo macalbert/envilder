@@ -802,7 +802,7 @@ export const en: Translations = {
     pushOptProvider: 'aws (default) or azure',
     pushOptVault: 'Azure Key Vault URL',
     pushOptProfile: 'AWS CLI profile (AWS only)',
-    pushCommentAws: '# Push to AWS SSM',
+    pushCommentAws: '# Push to AWS SSM (defaults to envilder.json and .env)',
     pushCommentProfile: '# With AWS profile',
     pushCommentAzureConfig: '# Azure via $config in map file',
     pushCommentAzureFlags: '# Azure via CLI flags',

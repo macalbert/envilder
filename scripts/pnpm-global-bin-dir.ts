@@ -29,6 +29,8 @@ export function prependGlobalBinDirToPath(env: NodeJS.ProcessEnv): void {
   const globalBinDir = getGlobalBinDir();
   const pathEntries = (env.PATH ?? '').split(path.delimiter);
   if (globalBinDir && !pathEntries.includes(globalBinDir)) {
-    env.PATH = `${globalBinDir}${path.delimiter}${env.PATH ?? ''}`;
+    env.PATH = env.PATH
+      ? `${globalBinDir}${path.delimiter}${env.PATH}`
+      : globalBinDir;
   }
 }
