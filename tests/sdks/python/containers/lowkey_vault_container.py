@@ -14,6 +14,10 @@ from testcontainers.core.container import DockerContainer
 _IMAGE = "nagyesta/lowkey-vault:7.1.61"
 _HTTPS_PORT = 8443
 _HTTP_PORT = 8080
+# The image is amd64-only; on arm64 hosts it runs emulated and other suites
+# may be starting their own copy, so it can take well over a minute to answer.
+# testcontainers-python does not wait for ports, so this budget is the whole wait.
+_STARTUP_TIMEOUT_SECONDS = 180.0
 
 
 class LowkeyVaultContainer:
@@ -95,11 +99,13 @@ class LowkeyVaultContainer:
 
     def _wait_until_ready(
         self,
-        max_retries: int = 30,
+        timeout: float = _STARTUP_TIMEOUT_SECONDS,
         delay: float = 1.0,
     ) -> None:
         url = f"{self._vault_url}/ping"
-        for attempt in range(max_retries):
+        deadline = time.monotonic() + timeout
+        last_error: Exception | None = None
+        while True:
             try:
                 response = requests.get(
                     url,
@@ -109,15 +115,12 @@ class LowkeyVaultContainer:
                 if response.status_code == 200:
                     return
             except requests.RequestException as e:
-                if attempt == max_retries - 1:
-                    raise TimeoutError(
-                        "LowkeyVault did not become ready"
-                        f" after {max_retries} attempts"
-                    ) from e
+                last_error = e
 
-            if attempt < max_retries - 1:
-                time.sleep(delay)
+            if time.monotonic() >= deadline:
+                raise TimeoutError(
+                    "LowkeyVault did not become ready"
+                    f" within {timeout:.0f}s"
+                ) from last_error
 
-        raise TimeoutError(
-            "LowkeyVault did not become ready" f" after {max_retries} attempts"
-        )
+            time.sleep(delay)
