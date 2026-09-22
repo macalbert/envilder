@@ -8,7 +8,6 @@ await build({
   format: 'esm',
   target: 'node22',
   minify: true,
-  minifyIdentifiers: false,
   outfile: 'github-action/dist/index.js',
   banner: {
     js: "import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);",
