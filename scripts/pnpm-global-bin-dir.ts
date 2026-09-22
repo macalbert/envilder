@@ -24,13 +24,27 @@ export function getGlobalBinDir(): string {
   }
 }
 
-/** Prepends the global bin directory to `env.PATH` unless it is already there. */
+/**
+ * Prepends the global bin directory to the PATH entry of `env` unless it is
+ * already there.
+ *
+ * `process.env` resolves keys case-insensitively on Windows, but a spread
+ * clone of it is a plain object whose key is usually spelled `Path`. Writing
+ * `env.PATH` on such a clone would add a second entry instead of updating the
+ * existing one, so the existing key is looked up case-insensitively.
+ */
 export function prependGlobalBinDirToPath(env: NodeJS.ProcessEnv): void {
   const globalBinDir = getGlobalBinDir();
-  const pathEntries = (env.PATH ?? '').split(path.delimiter);
-  if (globalBinDir && !pathEntries.includes(globalBinDir)) {
-    env.PATH = env.PATH
-      ? `${globalBinDir}${path.delimiter}${env.PATH}`
+  if (!globalBinDir) {
+    return;
+  }
+  const pathKey =
+    Object.keys(env).find((key) => key.toUpperCase() === 'PATH') ?? 'PATH';
+  const currentPath = env[pathKey];
+  const pathEntries = (currentPath ?? '').split(path.delimiter);
+  if (!pathEntries.includes(globalBinDir)) {
+    env[pathKey] = currentPath
+      ? `${globalBinDir}${path.delimiter}${currentPath}`
       : globalBinDir;
   }
 }
