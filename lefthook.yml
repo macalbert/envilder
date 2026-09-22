@@ -2,9 +2,10 @@ pre-commit:
   commands:
     biome:
       glob: "**/*.{ts,tsx,js,jsx,json,jsonc,astro,mjs}"
+      exclude: "github-action/dist/index.js"
       run: >-
-        pnpx biome check --write --unsafe --no-errors-on-unmatched {staged_files} &&
-        pnpx biome format --write --no-errors-on-unmatched {staged_files}
+        pnpm exec biome check --write --unsafe --no-errors-on-unmatched {staged_files} &&
+        pnpm exec biome format --write --no-errors-on-unmatched {staged_files}
       stage_fixed: true
     dotnet-format:
       glob: "**/*.{cs,csproj}"

@@ -34,7 +34,7 @@ const azVaultPolicy = `az keyvault set-policy \
   --secret-permissions get set list`;
 
 const pushSingleCmd =
-  'envilder --push --key=API_KEY --value={SECRET} --secret-path=/myapp/api/key';
+  'envilder --key=API_KEY --value={SECRET} --secret-path=/myapp/api/key';
 
 const awsVerifyCmd = `# 1. Create a test parameter
 aws ssm put-parameter --name "/test/hello" --value "world" --type SecureString --overwrite
@@ -343,7 +343,7 @@ envilder --map=config/prod/envilder.json --envfile=.env.prod`} />
         <h3>{t.docs.mapOverrideTitle}</h3>
         <p>{t.docs.mapOverrideDesc}</p>
         <CodeBlock lang="bash" code={`# Uses $config from the map file as-is
-envilder --map=envilder.json --envfile=.env
+envilder
 
 # Overrides provider and vault URL, ignoring $config
 envilder --provider=azure \\
@@ -375,7 +375,7 @@ envilder --map=envilder.json --envfile=.env --profile=staging-account`} />
         <h2>{t.docs.pullTitle}</h2>
         <p>{t.docs.pullDesc}</p>
 
-        <CodeBlock lang="bash" code="envilder --map=envilder.json --envfile=.env" />
+        <CodeBlock lang="bash" code="envilder" />
 
         <h3>{t.docs.pullOptions}</h3>
         <table class="docs-table">
@@ -392,16 +392,16 @@ envilder --map=envilder.json --envfile=.env --profile=staging-account`} />
         </table>
 
         <h3>{t.docs.pullExamples}</h3>
-        <CodeBlock lang="bash" code={`# Default (AWS SSM)
-envilder --map=envilder.json --envfile=.env
+        <CodeBlock lang="bash" code={`${t.docs.pullCommentDefault}
+envilder
 
-# With AWS profile
+${t.docs.pullCommentProfile}
 envilder --map=envilder.json --envfile=.env --profile=prod-account
 
-# Azure via $config in map file
+${t.docs.pullCommentAzureConfig}
 envilder --map=envilder.azure.json --envfile=.env
 
-# Azure via CLI flags
+${t.docs.pullCommentAzureFlags}
 envilder --provider=azure \\
   --vault-url=https://my-vault.vault.azure.net \\
   --map=envilder.json --envfile=.env`} />
@@ -420,7 +420,7 @@ DB_PASSWORD=secret456`} />
         <h2>{t.docs.pushTitle}</h2>
         <p>{t.docs.pushDesc}</p>
 
-        <CodeBlock lang="bash" code="envilder --push --envfile=.env --map=envilder.json" />
+        <CodeBlock lang="bash" code="envilder --push" />
 
         <h3>{t.docs.pushOptions}</h3>
         <table class="docs-table">
@@ -438,16 +438,16 @@ DB_PASSWORD=secret456`} />
         </table>
 
         <h3>{t.docs.pushExamples}</h3>
-        <CodeBlock lang="bash" code={`# Push to AWS SSM
-envilder --push --envfile=.env --map=envilder.json
+        <CodeBlock lang="bash" code={`${t.docs.pushCommentAws}
+envilder --push
 
-# With AWS profile
+${t.docs.pushCommentProfile}
 envilder --push --envfile=.env.prod --map=envilder.json --profile=prod-account
 
-# Azure via $config in map file
+${t.docs.pushCommentAzureConfig}
 envilder --push --envfile=.env --map=envilder.azure.json
 
-# Azure via CLI flags
+${t.docs.pushCommentAzureFlags}
 envilder --push --provider=azure \\
   --vault-url=https://my-vault.vault.azure.net \\
   --envfile=.env --map=envilder.json`} />
@@ -469,6 +469,7 @@ envilder --push --provider=azure \\
             <tr><td><code>--key</code></td><td>{t.docs.pushSingleOptKey}</td></tr>
             <tr><td><code>--value</code></td><td>{t.docs.pushSingleOptValue}</td></tr>
             <tr><td><code>--secret-path</code></td><td>{t.docs.pushSingleOptPath}</td></tr>
+            <tr><td><code>--map</code></td><td>{t.docs.pushSingleOptMap}</td></tr>
             <tr><td><code>--provider</code></td><td>{t.docs.pushSingleOptProvider}</td></tr>
             <tr><td><code>--vault-url</code></td><td>{t.docs.pushSingleOptVault}</td></tr>
             <tr><td><code>--profile</code></td><td>{t.docs.pushSingleOptProfile}</td></tr>
