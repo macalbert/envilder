@@ -1,126 +1,360 @@
 # AI Workflows
 
-This document describes the AI-assisted development workflows configured for
-Envilder via VS Code Copilot agents, prompts, skills, and instructions.
+This document describes the AI-assisted engineering system configured for
+Envilder through Copilot agents, prompts, skills, instructions, and repository
+quality gates.
 
-## Architecture
+## Vision
 
-```text
-┌─────────────────────────────────────────────────────┐
-│  Hooks (lefthook)                                   │
-│  pre-commit → biome check --write on staged files   │
-├─────────────────────────────────────────────────────┤
-│  Prompts (.github/prompts/)                         │
-│  /scaffold-feature  /resolve-pr-comments  ...       │
-├─────────────────────────────────────────────────────┤
-│  Agents (.github/agents/)                           │
-│  @TDD Coach  @Code Reviewer  @Bug Hunter  ...       │
-├─────────────────────────────────────────────────────┤
-│  Skills (.github/skills/)                           │
-│  testing-conventions  smart-commit  pr-sync  ...    │
-├─────────────────────────────────────────────────────┤
-│  Instructions (.github/instructions/)               │
-│  architecture · coding · git · review-response      │
-└─────────────────────────────────────────────────────┘
-```
+Envilder uses verification-first orchestration without prescribing one
+implementation method. AI-generated changes must:
 
-## SDLC Cycle
+- satisfy explicit requirements and invariants;
+- use implementation-independent executable evidence;
+- preserve architecture, compatibility, security, and scope constraints;
+- receive independent evaluation; and
+- pass the same relevant quality gates as human-written changes.
 
-Agents and prompts form a guided development cycle. Solid arrows represent
-automatic delegation via the `agents:` frontmatter. Dashed arrows represent
-suggestions shown to the user (user invokes the next step manually).
+## Guardrail Layers
 
 ```text
-/scaffold-feature ···► @TDD Coach ···► smart-commit ···► pr-sync
-                          │                                    │
-                  @TDD Red / Green /          @Code Reviewer ◄┘
-                  @TDD Refactor                        │
-                                                  @PR Resolver
-                                                  ┌────┴─────┐
-                                             bug? │          │ code fix
-                                           @Bug Hunter   edit + commit
-                                                  │
-                                          @TDD Red / Green /
-                                          @TDD Refactor
-
-─── = suggestion (user invokes)
-──► = real delegation (automatic)
+CI and repository checks
+          |
+Pre-commit hooks
+          |
+Specialized agents
+          |
+Domain skills
+          |
+Path instructions
+          |
+Repository instructions
 ```
 
-## Agents
+| Layer | Role |
+| --- | --- |
+| Repository instructions | Architecture, commands, testing, and Git conventions |
+| Path instructions | Rules for TypeScript layers, tests, releases, and reviews |
+| Skills | Normative reusable engineering policy |
+| Agents | Specialized ownership and tool boundaries |
+| Pre-commit hooks | Local formatting and static feedback |
+| CI | Build, test, lint, bundle, and policy gates |
 
-| Agent | Purpose | Can Edit? | Subagents | Next Step |
-|-------|---------|-----------|-----------|-----------|
-| **@TDD Coach** | Orchestrates TDD | No (coordinator) | TDD Red, TDD Green, TDD Refactor | `smart-commit` → `pr-sync`|
-| **@TDD Red** | Writes one failing test | Yes | — | *(worker, not user-invocable)* |
-| **@TDD Green** | Writes minimal passing code | Yes | — | *(worker, not user-invocable)* |
-| **@TDD Refactor** | Improves structure, keeps tests green | Yes | — | *(worker, not user-invocable)* |
-| **@Code Reviewer** | Multi-perspective review | No (delegates via agents) | TDD Coach, Code Refactorer, Bug Hunter, PR Resolver, Document Maintainer, Website Designer, i18n Reviewer | `@PR Resolver` |
-| **@PR Resolver** | Resolves PR review comments | Yes | Bug Hunter, Code Reviewer, TDD Coach, Code Refactorer, Document Maintainer, Website Designer, i18n Reviewer | `smart-commit` |
-| **@Bug Hunter** | Reproduces and fixes bugs | No (coordinator) | TDD Red, TDD Green, TDD Refactor, TDD Coach, Code Reviewer, Code Refactorer | `smart-commit` |
-| **@Code Refactorer** | Code smell detection, SOLID improvements | Yes | — | `smart-commit` |
-| **@Document Maintainer** | Keeps docs in sync with code changes | Yes | — | — |
+Skills live under `.github/skills/`. They are the normative source for their
+topic and load when a task matches their description. See
+[the skills catalog](../.github/skills/README.md).
 
-## Prompts
+The core workflow policy is
+[`common-verification-first`](../.github/skills/common-verification-first/SKILL.md).
+It distinguishes:
 
-| Prompt | Purpose | When to Use |
-|--------|---------|-------------|
-| `/scaffold-feature` | Generate skeleton files for a new feature | Starting a new feature |
-| `/resolve-pr-comments` | Process PR review feedback end-to-end | After receiving review comments |
-| `/use-semantic-versioning` | Determine correct SemVer bump | Before releasing |
+- TDD as an optional implementation process;
+- test-first as an ordering technique;
+- automated tests as one form of evidence; and
+- verification-first as the requirement that success criteria remain
+  independent from solution generation.
 
-## Skills
+## Verification-First Agent Topology
 
-| Skill | Purpose | Loaded By |
-|-------|---------|-----------|
-| `testing-conventions` | Vitest naming, AAA structure, mock patterns | TDD Red, TDD Green, TDD Coach |
-| `smart-commit` | Generate conventional commit from staged changes | Any agent after code changes |
-| `pr-sync` | Create or update a PR with auto-generated description | PR Resolver, any agent after pushing |
-| `doc-sync` | Audit and sync docs across all surfaces | Document Maintainer, Code Reviewer |
+Envilder defines seven agents:
 
-## Instructions
+| Agent | Purpose | Artifact edits | Delegates to |
+| --- | --- | --- | --- |
+| **Change Orchestrator** | Coordinates one coherent approved change | No | Contract Verifier, Implementer, Reviewer, Final Verifier |
+| **Contract Verifier** | Establishes independent contracts | verification-contract artifacts only | None |
+| **Implementer** | Produces the coherent contracted solution | Solution artifacts | None |
+| **Reviewer** | Reviews one candidate or a complete change set | No | None |
+| **Final Verifier** | Runs fresh final evidence | No | None |
+| **Content Designer** | Coordinates website and documentation outcomes | No | Change Orchestrator, Reviewer |
+| **PR Resolver** | Processes review feedback one comment at a time | No | Change Orchestrator, Reviewer |
 
-| File | Scope | Purpose |
-|------|-------|---------|
-| `architecture-boundaries` | `src/**/*.ts` | Hexagonal architecture enforcement |
-| `coding-and-testing-conventions` | `src/**`, `tests/**`, `e2e/**` | Biome style, logging, secret masking, test patterns|
-| `git-conventions` | Git operations | Conventional commits, safe git workflow |
-| `review-response` | PR reviews | Evidence-based review responses |
+`Contract Verifier`, `Implementer`, and `Final Verifier` are subagent-only. The
+other agents are user-invocable.
 
-## Hooks
+Agent profiles intentionally omit `model`, allowing each host to select an
+available model, and use common tool aliases as portability defaults. Alias
+mappings and support are host-dependent, not universal. Each coordinator must
+preflight custom-agent invocation, nested delegation, required tool propagation,
+and worker tool boundaries. The coordinator returns a `BLOCKED` result instead
+of collapsing independent roles when those capabilities are unavailable or
+cannot be established.
 
-**Lefthook** runs automatically on git operations:
+### Nested Delegation
 
-- **pre-commit**: `biome check --write --unsafe` on staged `.ts`, `.js`, `.json`
-  files with auto-staging of fixes
+PR Resolver and Content Designer may delegate a coherent change to Change
+Orchestrator, which then delegates to its workers. The tracked VS Code setting
+enables this topology:
 
-## FAQ
+```json
+{
+  "chat.subagents.allowInvocationsFromSubagents": true
+}
+```
 
-### How do I add a new agent?
+On hosts that filter descendant tools through ancestor exposure, all three
+coordinators declare `[read, search, edit, execute, agent]`. This inheritance
+envelope is necessary along the entire nested path; it does not authorize
+coordinators to edit artifacts or Change Orchestrator to execute repository
+commands. Host approval gates remain in force.
 
-1. Create `.github/agents/{name}.agent.md` with YAML frontmatter
-2. Define `name`, `description`, `tools`, and optionally `agents` (for subagent delegation)
-3. Set `user-invocable: false` for worker subagents
-4. Add a `## Next Steps` section to guide the SDLC cycle
+Worker limits stay unchanged: Contract Verifier and Implementer have
+`[read, search, edit, execute]`, Reviewer has `[read, search, execute]`, and
+Final Verifier has `[read, search]`, with no worker delegation. Implementer
+preflights actual read/edit/execute access, reports missing capabilities
+concretely, and can search through execute when no dedicated search tool is
+exposed. See the
+[normative inheritance policy](../.github/skills/common-verification-first/SKILL.md#capability-exposure-and-inheritance).
 
-### How do agents chain together?
+### One Coherent Change
 
-Two mechanisms:
+```text
+Approved requirement and invariants
+                |
+                v
+    fresh Contract Verifier
+                |
+                v
+      independent contract
+                |
+                v
+        fresh Implementer
+                |
+                v
+       candidate solution
+                |
+                v
+    fresh read-only Reviewer
+                |
+                v
+      fresh Final Verifier
+                |
+        explicit PASS only
+                v
+ Change Orchestrator judgment
+```
 
-- **Automatic delegation**: The `agents:` frontmatter field lists subagents
-  that the coordinator can invoke directly (e.g., TDD Coach → TDD Red/Green/Refactor)
-- **Suggestions**: Each agent's `## Next Steps` section recommends the natural
-  next action (e.g., "Run `smart-commit`"). The user decides whether to follow.
+The Orchestrator controls intent, constraints, quality gates, and acceptance. It
+does not micromanage implementation steps.
 
-### Why not full automation?
+Workers exchange concise semantic results:
 
-TDD requires human validation at each Red/Green checkpoint. The hybrid approach
-(automatic delegation within a phase, suggestions between phases) preserves user
-control where it matters while automating mechanical steps.
+- approved requirement, invariants, scope, constraints, and limitations;
+- intent and selected verification strategy;
+- current verification contract;
+- exact current candidate diff and path set; and
+- latest relevant implementation, review, and verification results.
 
-### How do I extend with a new secret provider?
+They do not propagate full execution histories, failed attempts, private
+reasoning, or raw tool transcripts.
 
-No AI workflow changes needed. Implement `ISecretProvider` in
-`src/envilder/core/infrastructure/`, then update
-`configureInfrastructureServices()` in `ContainerConfiguration.ts`.
-The hexagonal architecture keeps the domain and application layers unchanged.
+## Change Classification
+
+Every coherent change has two independent dimensions.
+
+### Intent
+
+- `NEW_BEHAVIOR`
+- `BEHAVIOR_CHANGE`
+- `BUG_FIX`
+- `PURE_REFACTOR`
+- `NON_BEHAVIORAL_CHANGE`
+
+Infrastructure, configuration, migrations, generated artifacts, and test
+infrastructure are subjects, not additional intents.
+
+### Verification Strategy
+
+Examples include:
+
+- new, updated, or reused behavioral tests;
+- an existing-suite baseline;
+- consumer or direct-workflow evidence;
+- compiler, type, or static validation;
+- schema, policy, migration, generated-artifact, or contract validation; and
+- an explicit limitation when no meaningful automated oracle exists.
+
+The strategy must exercise the important risk rather than satisfy a methodology
+ritual.
+
+## Common Workflows
+
+### Implement One Approved Change
+
+Use **Change Orchestrator**.
+
+1. Supply one approved semantic specification.
+2. Let Contract Verifier establish independent evidence.
+3. Let Implementer produce the solution.
+4. Review the candidate independently.
+5. Let Final Verifier run fresh read-only verification.
+6. Enter completion judgment only with explicit final `PASS` for the exact
+   current reviewed candidate. Accept only when all other evidence, review,
+   gates, and engineering conditions also satisfy the original requirement.
+
+For multi-item work, plan vertical slices and run each approved coherent item
+through Change Orchestrator. The calling workflow or user owns the branch and
+overall pull-request lifecycle. When PR Resolver handles review feedback, it
+owns the specialized per-comment lifecycle described below.
+
+### Scaffold a Feature
+
+Use `/scaffold-feature`.
+
+The prompt runs through Change Orchestrator. Contract Verifier owns
+verification-contract artifacts, including behavioral tests, before
+Implementer creates the solution structure. The Implementer completes required
+DI, routing, and entry-point wiring without generating placeholder tests.
+
+### Fix a Bug
+
+1. Use `code-bug-investigation` to confirm the defect, trigger, root cause, and
+   affected scope without editing artifacts.
+2. Approve a `BUG_FIX` specification and focused regression or direct-workflow
+   strategy.
+3. Delegate through Change Orchestrator.
+4. Keep regression protection and run the broader relevant suite.
+
+### Refactor
+
+1. Classify the change as `PURE_REFACTOR`.
+2. Establish a green existing-suite baseline.
+3. Keep behavioral verification unchanged.
+4. Implement structural improvements.
+5. Review architecture, complexity, and behavior preservation.
+6. Run final verification against the original baseline and invariants.
+
+### Change Documentation, Website Content, or Styling
+
+Use **Content Designer** for multi-surface content coordination, or Change
+Orchestrator directly for one already-approved change.
+
+1. Choose intent based on meaning, not file extension.
+2. Select reference, parser, lint, build, i18n, browser, or responsive evidence
+   that protects the actual outcome.
+3. Do not manufacture tests.
+4. Omit candidate review only when the strict trivial and mechanical
+   `NON_BEHAVIORAL_CHANGE` rule is satisfied.
+
+### Resolve Pull-Request Feedback
+
+Use `/resolve-pr-comments` or **PR Resolver**.
+
+For every comment, PR Resolver analyzes the feedback, presents the proposed
+action, and obtains explicit approval. It then follows one of two branches:
+
+- For artifact-changing feedback, delegate the approved change through Change
+  Orchestrator, validate it, create exactly one separate commit, reply in the
+  existing review thread, and resolve the thread after confirming the reply.
+- For a question, disagreement, or approved skip, reply directly with repository
+  evidence and resolve the thread after confirming the reply. Do not create a
+  commit.
+
+PR Resolver owns each artifact-changing comment's separate commit, every
+mandatory reply, and review-thread resolution. The calling user or workflow
+retains ownership of the branch and overall pull-request lifecycle. Push remains
+subject to explicit user approval.
+
+## Oracle Effectiveness
+
+Physical test-first ordering is only a proxy for independent verification. The
+stronger question is whether the selected oracle can reject an incorrect or
+previous behavior.
+
+Useful signals include a focused failing regression, known counterexample,
+contract or schema mismatch, generated-artifact drift, or mutation rejected by
+the oracle. Compilation, setup, dependency, and environment failures are not
+behavioral evidence.
+
+Visible Red is not required as ceremony. A passing suite remains evidence, not
+proof.
+
+## Review and Final Verification
+
+Reviewer modes:
+
+- `candidate-review` assesses one coherent candidate against an approved
+  specification.
+- `change-set-review` assesses a staged, unstaged, branch, commit-range, or
+  pull-request diff and does not require a verification contract.
+
+Reviewer is always read-only and never delegates fixes. No findings is a valid
+result.
+
+Contract Verifier may edit verification-contract artifacts while establishing
+the independent contract. Final Verifier is a separate agent with read-only
+tools and runs in a fresh context after review. It reassesses static evidence
+and recorded gate results, and returns `BLOCKED` rather than acquiring a
+general-purpose execution tool when fresh command execution is required.
+
+Only explicit `FinalVerificationResult` `PASS` opens completion judgment; it is
+necessary, not sufficient. `FAIL` routes to the existing owner: a fresh
+Implementer for implementation defects, a fresh Contract Verifier for contract
+defects, followed by affected downstream stages. Changes to approved semantics,
+invariants, scope, or requirements need human approval. `BLOCKED` propagates a
+reason-bearing blocked `ChangeResult`, with no success, PR replies, or thread
+resolution; missing execution evidence alone does not call for solution edits.
+Missing, unknown, or ambiguous results and other roles' or commands' successes
+cannot establish final `PASS`.
+
+Approved limitations cannot substitute for `PASS` or waive `FAIL` or `BLOCKED`.
+A valid approved limitation strategy may receive `PASS` when its contract is
+actually satisfied and assessable. Genuinely resolved blockers, including
+independent contract repair, require appropriate contract/candidate reassessment,
+review, and fresh final verification before judgment can reopen on fresh `PASS`.
+Candidate changes invalidate affected review/final results and require necessary
+review and fresh final verification; PR Resolver's frozen-patch reapproval still
+applies.
+
+## Repository Gates
+
+Choose the smallest relevant command first, then run assigned broader gates:
+
+```text
+pnpm build
+pnpm test
+pnpm lint
+pnpm format:check
+pnpm verify:gha
+dotnet build src/sdks/dotnet/Envilder.sln
+dotnet test tests/sdks/dotnet/
+make check-sdk-python
+make test-sdk-python
+```
+
+Agents must:
+
+- run applicable repository-supported checks;
+- surface non-zero exits and unavailable evidence;
+- never bypass hooks or CI to claim success; and
+- use artifact-appropriate validation rather than unrelated tests.
+
+## Extending the System
+
+### Add a Skill
+
+1. Place it under `.github/skills/{name}/SKILL.md`.
+2. Give it one normative topic and clear discovery triggers.
+3. Reference existing skills rather than duplicating policy.
+4. Update the skills catalog.
+
+### Add an Agent
+
+1. Place it under `.github/agents/{name}.agent.md`.
+2. Give it one clear ownership boundary.
+3. Grant only the tools and delegations it needs, including required descendant
+   tools in every coordinator ancestor's inheritance envelope.
+4. Reference skills instead of duplicating policy.
+5. Validate every delegated agent name exists.
+6. Synchronize the agent topology/inventory in `docs/ai-workflows.md` and
+   `.github/skills/README.md`, including whether the agent is user-invocable or
+   subagent-only.
+
+## Maintenance Principles
+
+- Prefer semantic handoffs over full histories.
+- Keep artifact ownership strict.
+- Remove aliases after intentional hard renames.
+- Keep policy details in skills and general documentation concise.
+- Measure escaped regressions, review findings, verification effectiveness,
+  tool use, execution time, and unavailable evidence rather than ritual
+  compliance.

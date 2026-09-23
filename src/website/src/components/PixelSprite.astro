@@ -1,0 +1,139 @@
+---
+import type { PixelSpriteName } from '../i18n/types';
+
+// Hand-authored 8x8-ish pixel grids, true to the original Game Boy tile size.
+interface Props {
+  name: PixelSpriteName;
+  size?: number;
+}
+
+const { name, size = 34 } = Astro.props;
+
+const SPRITES: Record<PixelSpriteName, string[]> = {
+  skull: [
+    '..SSSS..',
+    '.SSSSSS.',
+    'SSSSSSSS',
+    'S..SS..S',
+    'SSSSSSSS',
+    '.SSSSSS.',
+    '.S.SS.S.',
+  ],
+  lock: [
+    '..SSSS..',
+    '.S....S.',
+    '.S....S.',
+    'SSSSSSSS',
+    'SSSSSSSS',
+    'SS.SS.SS',
+    'SSSSSSSS',
+    '.SSSSSS.',
+  ],
+  snail: [
+    '......SS..',
+    '.....SSSS.',
+    '....SSSSSS',
+    'S.S..SSSSS',
+    '.S...SSSSS',
+    '..SSSSSSSS',
+    '.SSSSSSSS.',
+  ],
+  brick: [
+    'SSS.SSS.',
+    'SSS.SSS.',
+    '........',
+    '.SSS.SSS',
+    '.SSS.SSS',
+    '........',
+    'SSS.SSS.',
+    'SSS.SSS.',
+  ],
+  clipboard: [
+    '..SSSS..',
+    'SSSSSSSS',
+    'S......S',
+    'S.SSSS.S',
+    'S......S',
+    'S.SSSS.S',
+    'S......S',
+    'SSSSSSSS',
+  ],
+  refresh: [
+    '..SSSSS.',
+    '.S....SS',
+    'S......S',
+    'S......S',
+    'S......S',
+    'S......S',
+    'SS....S.',
+    '.SSSSS..',
+  ],
+  cloud: [
+    '...SS...',
+    '..SSSSS.',
+    '.SSSSSSS',
+    'SSSSSSSS',
+    'SSSSSSSS',
+    '.SSSSSS.',
+  ],
+  gear: [
+    '..SSSS..',
+    'S.SSSS.S',
+    '.SSSSSS.',
+    'SS.SS.SS',
+    'SS.SS.SS',
+    '.SSSSSS.',
+    'S.SSSS.S',
+    '..SSSS..',
+  ],
+  plug: [
+    '.S...S..',
+    '.S...S..',
+    'SSSSSSSS',
+    'SSSSSSSS',
+    'SSSSSSSS',
+    '.SSSSSS.',
+    '...SS...',
+    '...SS...',
+  ],
+  chart: [
+    '......S.',
+    '......S.',
+    '....S.S.',
+    '....S.S.',
+    '..S.S.S.',
+    '..S.S.S.',
+    '..S.S.S.',
+    'SSSSSSSS',
+  ],
+  person: [
+    '..SSSS..',
+    '.SSSSSS.',
+    '.SSSSSS.',
+    '..SSSS..',
+    'SSSSSSSS',
+    'SSSSSSSS',
+    'SSSSSSSS',
+    'SSSSSSSS',
+  ],
+};
+
+const grid = SPRITES[name];
+const cols = grid[0].length;
+const rows = grid.length;
+const cells = grid.flatMap((row, y) =>
+  [...row].flatMap((cell, x) => (cell === 'S' ? [{ x, y }] : [])),
+);
+---
+
+<svg
+  class="pixel-sprite"
+  width={size}
+  height={(size / cols) * rows}
+  viewBox={`0 0 ${cols} ${rows}`}
+  fill="currentColor"
+  shape-rendering="crispEdges"
+  aria-hidden="true"
+>
+  {cells.map(({ x, y }) => <rect x={x} y={y} width="1" height="1" />)}
+</svg>

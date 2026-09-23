@@ -45,7 +45,7 @@ Run independently, then synthesize into a deduplicated prioritised report.
 
 - Biome style (single quotes, semicolons, 2-space indent, trailing commas)
 - Test naming: `Should_<Expected>_When_<Condition>`
-- AAA markers: `// Arrange`, `// Act`, `// Assert` — each at most once per test
+- AAA markers: `// Arrange`, `// Act`, `// Assert`: each at most once per test
 - InversifyJS decorator usage: `@injectable()`, `@inject(TYPES.X)`
 - Conventional commits in PR title
 
@@ -54,7 +54,7 @@ Run independently, then synthesize into a deduplicated prioritised report.
 See `code-quality-crap` skill for formula and thresholds.
 
 - Flag methods with cyclomatic complexity ≥ 4 lacking proportional coverage
-- Flag methods with complexity ≥ 6 — recommend extraction
+- Flag methods with complexity ≥ 6: recommend extraction
 
 ## Severity Model
 
@@ -64,6 +64,13 @@ See `code-quality-crap` skill for formula and thresholds.
 | **High** | Likely runtime failure, incorrect business behavior |
 | **Medium** | Correctness risk with limited blast radius, test gaps |
 | **Low** | Maintainability concern worth addressing soon |
+
+### Anti-Inflation Rules
+
+- Not Critical unless the exact production failure is objectively demonstrable.
+- Not High unless a concrete input or state produces incorrect behavior.
+- Convention violations are Low unless they change runtime behavior.
+- Missing guards for values guaranteed by the type system are not defects.
 
 ## Synthesis Procedure
 
@@ -75,10 +82,12 @@ See `code-quality-crap` skill for formula and thresholds.
 
 ## Output Format
 
+Use this standalone format when the caller does not define a workflow envelope:
+
 ```text
 ## Findings
 
-### [Critical/High/Medium/Low] — {title}
+### [Critical/High/Medium/Low]: {title}
 **File:** {path}:{line}
 **Why:** {explanation}
 **Fix:** {direction}
@@ -87,16 +96,23 @@ See `code-quality-crap` skill for formula and thresholds.
 - {assumptions or clarifications needed}
 
 ## Summary
-{1-2 sentence overview — AFTER findings, not before}
+{1-2 sentence overview: AFTER findings, not before}
 ```
+
+When the caller requires the canonical `ReviewResult` envelope from
+`common-verification-first`, place these findings under `Prioritized findings`,
+preserve the same severity and anti-inflation rules, and map the remaining
+sections to the corresponding envelope fields. The envelope may add
+orchestration routing or contract assessment; it does not redefine review
+semantics.
 
 ## Verification
 
 After analysis, verify findings before reporting:
 
-1. `pnpm test` — confirm test suite passes
-2. `biome check && tsc --noEmit` — lint compliance (no modifications)
-3. `pnpm format:check` — formatting (no modifications)
+1. `pnpm test`: confirm test suite passes
+2. `biome check && tsc --noEmit`: lint compliance (no modifications)
+3. `pnpm format:check`: formatting (no modifications)
 4. Browser checks for website/UI changes (Playwright)
 5. Stack-specific: `dotnet build`/`dotnet test`, `make check-sdk-python`
 
@@ -104,6 +120,7 @@ Only report **confirmed** findings. Downgrade unverified suspicions.
 
 ## Constraints
 
+- Only report findings for code introduced or modified in the requested diff
 - Do not report style-only nits unless they block quality gates
 - State assumptions explicitly
-- Never modify files during review — read-only analysis only
+- Never modify files during review: read-only analysis only

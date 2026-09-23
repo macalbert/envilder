@@ -126,7 +126,7 @@ az keyvault show --name <VAULT_NAME> --query properties.enableRbacAuthorization
 - `true` → **Azure RBAC** (recommended)
 - `false` / `null` → **Vault Access Policy** (classic)
 
-#### Option A — Azure RBAC (recommended)
+#### Option A: Azure RBAC (recommended)
 
 Assign the **Key Vault Secrets Officer** role to your identity:
 
@@ -148,7 +148,7 @@ az role assignment create \
   --scope /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>/providers/Microsoft.KeyVault/vaults/<VAULT_NAME>
 ```
 
-#### Option B — Vault Access Policy (classic)
+#### Option B: Vault Access Policy (classic)
 
 Grant secret permissions directly on the vault:
 

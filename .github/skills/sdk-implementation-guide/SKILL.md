@@ -59,14 +59,14 @@ Tests mirror the structure under `tests/sdks/{runtime}/`.
 
 ## 2. Mandatory API Surface
 
-### Tier 1 — Static Facade (one-liner)
+### Tier 1: Static Facade (one-liner)
 
 ```txt
 Envilder.load("map.json")              → injects into process env
 Envilder.resolveFile("map.json")       → returns resolved key-value pairs
 ```
 
-### Tier 2 — Fluent Builder
+### Tier 2: Fluent Builder
 
 ```txt
 Envilder.fromMapFile("map.json")
@@ -91,7 +91,7 @@ Envilder.load("production", {
 
 | Aspect | Decision |
 | ------ | -------- |
-| Missing secrets | Return null/None/nil (Option<T> in Rust) or omit from result collection — never throw |
+| Missing secrets | Return null/None/nil (Option<T> in Rust) or omit from result collection: never throw |
 | Validation | Opt-in `validateSecrets()` post-resolution |
 | Cross-provider validation | profile + Azure → error; vaultUrl + AWS → error |
 | Options override config | Runtime `EnvilderOptions` > `$config` from map file |

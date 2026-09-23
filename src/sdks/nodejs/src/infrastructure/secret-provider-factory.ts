@@ -63,7 +63,7 @@ export async function resolveRegionWithFallback(
 function createAwsProvider(profile: string | undefined): AwsSsmSecretProvider {
   const region = () => resolveRegionWithFallback(profile);
   const client = new SSMClient(profile ? { profile, region } : { region });
-  return new AwsSsmSecretProvider(client);
+  return new AwsSsmSecretProvider(client, profile);
 }
 
 function normalize(value: string | undefined): string | undefined {

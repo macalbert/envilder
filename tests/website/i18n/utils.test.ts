@@ -39,7 +39,7 @@ describe('localizedPath', () => {
     const result = localizedPath(lang, path);
 
     // Assert
-    expect(result).toBe('/docs');
+    expect(result).toBe('/docs/');
   });
 
   it('Should_PrefixWithLocale_When_LangIsNonDefault', () => {
@@ -51,6 +51,30 @@ describe('localizedPath', () => {
     const result = localizedPath(lang, path);
 
     // Assert
-    expect(result).toBe('/ca/docs');
+    expect(result).toBe('/ca/docs/');
+  });
+
+  it('Should_ReturnDefaultLanguageRoute_When_LocalizationIsUnsupported', () => {
+    // Arrange
+    const lang = 'ca';
+    const path = '/changelog/';
+
+    // Act
+    const actual = localizedPath(lang, path);
+
+    // Assert
+    expect(actual).toBe('/changelog/');
+  });
+
+  it('Should_PreserveFragment_When_PathIsLocalized', () => {
+    // Arrange
+    const lang = 'es';
+    const path = '/docs#installation';
+
+    // Act
+    const actual = localizedPath(lang, path);
+
+    // Assert
+    expect(actual).toBe('/es/docs/#installation');
   });
 });

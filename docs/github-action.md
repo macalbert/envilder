@@ -22,8 +22,8 @@ Before using this action, ensure you have:
 2. **Key Vault Access** - Your identity must have `Get` secret permission
 3. **Vault URL** - Set via `$config.vaultUrl` in your map file or `vault-url` action input
 
-> **Note:** If you're using the published action from GitHub Marketplace (`macalbert/envilder/github-action@v0.8.0`),
-> no build step is required. The action is pre-built and ready to use.
+> **Note:** Use the published `macalbert/envilder/github-action@v0` tag directly.
+> It includes the prebuilt action, so consumers do not need a build step.
 
 ### Required IAM Policy
 
@@ -80,7 +80,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: 🔐 Pull Secrets from AWS SSM
-        uses: macalbert/envilder/github-action@v0.8.0
+        uses: macalbert/envilder/github-action@v0
         with:
           map-file: config/envilder.json
           env-file: .env
@@ -136,7 +136,7 @@ jobs:
           aws-region: us-east-1
 
       - name: 🔐 Pull ${{ inputs.environment }} secrets
-        uses: macalbert/envilder/github-action@v0.8.0
+        uses: macalbert/envilder/github-action@v0
         with:
           map-file: config/${{ inputs.environment }}/envilder.json
           env-file: .env
@@ -268,10 +268,10 @@ steps:
       node-version: "22.x"
       cache: "pnpm"
 
-  - name: 📦 Install and Build Envilder
+  - name: 📦 Build the Envilder GitHub Action
     run: |
       pnpm install --frozen-lockfile
-      pnpm build
+      pnpm build:gha
 
   - uses: aws-actions/configure-aws-credentials@v5
     with:
@@ -285,8 +285,8 @@ steps:
       env-file: .env
 ```
 
-> **Note:** The `pnpm build` step is **only required for local development**.
-> Published releases on GitHub Marketplace include pre-built code.
+> **Note:** The `pnpm build:gha` step is **only required for local development**
+> after action source changes. Published tags include prebuilt code.
 
 ## Development Troubleshooting
 
@@ -298,7 +298,7 @@ This error only occurs when using a local reference (`uses: ./github-action`) du
 
 ```yaml
 - run: pnpm install --frozen-lockfile
-- run: pnpm build
+- run: pnpm build:gha
 - uses: ./github-action  # Local reference requires build
   with:
     map-file: envilder.json
@@ -318,7 +318,7 @@ Ensure you've configured AWS credentials before the action:
     role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
     aws-region: ${{ secrets.AWS_REGION }}
 
-- uses: macalbert/envilder/github-action@v0.8.0
+- uses: macalbert/envilder/github-action@v0
   with:
     map-file: envilder.json
     env-file: .env
@@ -340,7 +340,7 @@ Verify that:
 4. **Review Parameter Mappings** - Ensure `envilder.json` doesn't contain actual secrets
 5. **Enable CloudTrail** - Monitor SSM parameter access in AWS CloudTrail
 
-## Publishing to GitHub Marketplace
+## Publishing a tagged GitHub Action release
 
 For maintainers releasing new versions:
 
@@ -348,27 +348,34 @@ For maintainers releasing new versions:
 
    ```bash
    pnpm install --frozen-lockfile
-   pnpm build
+   pnpm build:gha
    ```
 
-2. **Commit the `lib/` directory:**
+2. **Commit the action bundle referenced by `action.yml`:**
 
    ```bash
-   git add lib/
-   git commit -m "chore: build for release v1.0.0"
+   git add action.yml github-action/dist/index.js
+   git commit -m "chore: build GitHub Action release"
    ```
 
-3. **Create and push tags:**
+3. **Verify the committed bundle is current:**
 
    ```bash
-   git tag -a v1.0.0 -m "Release v1.0.0"
-   git tag -fa v1 -m "Update v1 to v1.0.0"
-   git push origin v1.0.0
-   git push origin v1 --force
+   pnpm verify:gha
    ```
 
-The `lib/` directory **must be committed** for release tags so users can reference
-`macalbert/envilder/github-action@v1` without needing to build the action themselves.
+4. **Create the release tag and update the floating `v0` tag to the same commit:**
+
+   ```bash
+   release_tag=v0.x.y
+   git tag -a "$release_tag" -m "Release $release_tag"
+   git tag -fa v0 -m "Update v0 to $release_tag"
+   git push origin "$release_tag"
+   git push origin v0 --force
+   ```
+
+`github-action/dist/index.js` **must be committed** before tagging so users can reference
+`macalbert/envilder/github-action@v0` without building the action themselves.
 
 ## Examples
 

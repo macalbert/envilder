@@ -68,14 +68,14 @@ function joinMultiLineListItems(md: string): string {
 }
 
 /** Convert the cleaned markdown to HTML, adding `id` anchors on version headings. */
-export function changelogToHtml(md: string): string {
+export function changelogToHtml(md: string, idPrefix = ''): string {
   const cleaned = cleanChangelog(md);
   const joined = joinMultiLineListItems(cleaned);
   return (
     joined
       // Version headings → h2 with id anchor
       .replace(/^## \[?([\d.]+)\]?(.*)$/gm, (_match, ver, rest) => {
-        const id = `v${ver.replace(/\./g, '')}`;
+        const id = `${idPrefix}v${ver.replace(/\./g, '')}`;
         const dateMatch = rest.match(/(\d{4}-\d{2}-\d{2})/);
         const date = dateMatch?.[1];
         const deprecated = rest.includes('[DEPRECATED]');
@@ -105,7 +105,7 @@ export function changelogToHtml(md: string): string {
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
       // Generic ## headings (non-version, e.g. "## Features")
       .replace(/^## (.+)$/gm, '<h3>$1</h3>')
-      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/^# (.+)$/gm, '<h2 class="changelog-doc-title">$1</h2>')
       // Horizontal rules
       .replace(/^---$/gm, '<hr />')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')

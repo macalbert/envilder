@@ -1,0 +1,229 @@
+---
+import { type DocsRouteKey, docsRouteManifest } from '../i18n/docs-routes';
+import { localizedPath, useTranslations } from '../i18n/utils';
+import Footer from './Footer.astro';
+
+interface Props {
+  lang: string;
+  routeKey: DocsRouteKey;
+}
+
+const { lang, routeKey } = Astro.props;
+const t = useTranslations(lang);
+const page = t.docs.pages[routeKey];
+
+const navGroups = [
+  { key: 'gettingStarted', label: t.docs.navGettingStarted },
+  { key: 'providers', label: t.docs.navProviders },
+  { key: 'cli', label: t.docs.sidebarCli },
+  { key: 'githubAction', label: t.docs.sidebarGha },
+  { key: 'sdks', label: t.docs.sidebarSdks },
+] as const;
+
+const articleRoutes = docsRouteManifest.filter((route) => route.key !== 'hub');
+---
+
+<main class="docs-page" id="main-content">
+  <div class="docs-layout">
+    <div class="docs-mobile-select">
+      <label class="sr-only" for="docs-route-select">{t.docs.mobileNavigation}</label>
+      <select id="docs-route-select" onchange="window.location.assign(this.value)">
+        {articleRoutes.map((route) => (
+          <option
+            value={localizedPath(lang, route.path)}
+            selected={route.key === routeKey}
+          >
+            {t.docs.pages[route.key].navLabel}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    <aside class="docs-sidebar">
+      <nav class="docs-nav" aria-label={t.docs.navigationLabel}>
+        {navGroups.map((group) => {
+          const routes = articleRoutes.filter(
+            (route) => route.navGroup === group.key,
+          );
+
+          return routes.length > 0 ? (
+            <>
+              <p class="nav-section-title">{group.label}</p>
+              <ul>
+                {routes.map((route) => (
+                  <li>
+                    <a
+                      href={localizedPath(lang, route.path)}
+                      aria-current={route.key === routeKey ? 'page' : undefined}
+                    >
+                      {t.docs.pages[route.key].navLabel}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null;
+        })}
+      </nav>
+    </aside>
+
+    <div class="docs-content">
+      <nav class="breadcrumb" aria-label={t.docs.breadcrumbLabel}>
+        <a href={localizedPath(lang, '/')}>{t.docs.breadcrumbHome}</a>
+        <span aria-hidden="true">/</span>
+        <a href={localizedPath(lang, '/docs/')}>{t.docs.breadcrumbDocs}</a>
+        {routeKey !== 'hub' && (
+          <>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">{page.breadcrumb}</span>
+          </>
+        )}
+      </nav>
+      <header class="docs-header">
+        <h1><span class="accent">{page.heading}</span></h1>
+        <p class="docs-intro">{page.intro}</p>
+      </header>
+      <slot />
+    </div>
+  </div>
+</main>
+<Footer lang={lang} />
+
+<style>
+  .docs-page {
+    padding-top: calc(var(--nav-height) + var(--space-xl));
+    padding-bottom: var(--space-4xl);
+  }
+
+  .docs-layout {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: var(--space-2xl);
+  }
+
+  .docs-sidebar {
+    position: sticky;
+    top: calc(var(--nav-height) + var(--space-lg));
+    height: fit-content;
+    max-height: calc(100vh - var(--nav-height) - var(--space-xl));
+    overflow-y: auto;
+    padding-right: var(--space-md);
+    border-right: 1px solid var(--color-border);
+  }
+
+  .docs-nav ul {
+    list-style: none;
+    margin-bottom: var(--space-lg);
+  }
+
+  .nav-section-title {
+    font-family: var(--font-pixel);
+    font-size: 0.5rem;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: var(--space-sm);
+    margin-top: var(--space-lg);
+  }
+
+  .nav-section-title:first-child {
+    margin-top: 0;
+  }
+
+  .docs-nav a {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    padding: 3px 0 var(--space-sm);
+    border-left: 2px solid transparent;
+    padding-left: var(--space-sm);
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+  }
+
+  .docs-nav a:hover,
+  .docs-nav a[aria-current='page'] {
+    color: var(--color-primary);
+    border-left-color: var(--color-primary);
+  }
+
+  .docs-mobile-select {
+    display: none;
+  }
+
+  .docs-mobile-select select {
+    width: 100%;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    padding: var(--space-sm) var(--space-md);
+    cursor: pointer;
+  }
+
+  .docs-content {
+    min-width: 0;
+  }
+
+  .breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-lg);
+  }
+
+  .breadcrumb a {
+    color: var(--color-text-muted);
+  }
+
+  .breadcrumb a:hover {
+    color: var(--color-primary);
+  }
+
+  .docs-header {
+    margin-bottom: var(--space-3xl);
+  }
+
+  .accent {
+    color: var(--color-primary);
+  }
+
+  .docs-intro {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 768px) {
+    .docs-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .docs-sidebar {
+      display: none;
+    }
+
+    .docs-mobile-select {
+      display: block;
+      margin-bottom: var(--space-lg);
+    }
+  }
+</style>

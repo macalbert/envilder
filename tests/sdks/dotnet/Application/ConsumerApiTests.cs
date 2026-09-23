@@ -1,7 +1,6 @@
-namespace ConsumerApi.Tests;
+namespace Envilder.Tests.Application;
 
 using AwesomeAssertions;
-using Envilder;
 
 public class ConsumerApiTests
 {
@@ -92,21 +91,21 @@ public class ConsumerApiTests
 		act.Should().Throw<FileNotFoundException>();
 	}
 
-	[Fact]
+	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
 	public async Task Should_CompileAsyncVariants_When_UsingAsyncFacade()
 	{
 		// Act
-		var act = () => Env.ResolveFileAsync("nonexistent.json");
+		var act = () => Env.ResolveFileAsync("nonexistent.json", TestContext.Current.CancellationToken);
 
 		// Assert
 		await act.Should().ThrowAsync<FileNotFoundException>();
 	}
 
-	[Fact]
+	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
 	public async Task Should_CompileLoadAsync_When_UsingAsyncFacade()
 	{
 		// Act
-		var act = () => Env.LoadAsync("nonexistent.json");
+		var act = () => Env.LoadAsync("nonexistent.json", TestContext.Current.CancellationToken);
 
 		// Assert
 		await act.Should().ThrowAsync<FileNotFoundException>();

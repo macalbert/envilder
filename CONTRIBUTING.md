@@ -67,7 +67,7 @@ Non-JS SDKs use the **Makefile**:
 | SDK | Check | Format | Build | Test |
 |-----|-------|--------|-------|------|
 | .NET | `make check-sdk-dotnet` | `make format-sdk-dotnet` | `make build-sdk-dotnet` | `make test-sdk-dotnet` |
-| Python | `make check-sdk-python` | `make format-sdk-python` | — | `make test-sdk-python` |
+| Python | `make check-sdk-python` | `make format-sdk-python` | n/a | `make test-sdk-python` |
 | Node.js | `make check-sdk-nodejs` | `make format-sdk-nodejs` | `make build-sdk-nodejs` | `make test-sdk-nodejs` |
 | All | `make check-sdk` | `make format-sdk` | `make build-sdk` | `make test-sdk` |
 
@@ -79,7 +79,7 @@ Non-JS SDKs use the **Makefile**:
 pnpm build                    # Compile TypeScript
 pnpm test                     # Unit tests + coverage
 pnpm test:ci                  # Tests with JUnit reporter
-pnpm build:gha                # Bundle GHA with ncc
+pnpm build:gha                # Bundle GHA with esbuild
 pnpm verify:gha               # Verify GHA bundle is fresh
 pnpm local:install             # Build + pack + install globally
 pnpm local:test-run            # Run CLI against sample map

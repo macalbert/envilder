@@ -163,6 +163,8 @@ body {
   font-size: 1rem;
   overflow-x: hidden;
   cursor: default;
+  /* hide the native insertion caret Chromium/Firefox show when clicking selectable text */
+  caret-color: transparent;
 }
 
 /* ── Theme transition ─────────────────────────────────── */
@@ -343,36 +345,102 @@ pre code,
   box-shadow: none;
 }
 
-/* ── Cards (pixel-bordered) ───────────────────────────── */
+/* ── Cards (retro game window, stepped pixel corners) ── */
+/*
+ * Classic RPG dialog-box construction: the element's OWN background is
+ * the frame color, clipped into a stepped/staircase silhouette. ::before
+ * is inset by --pixel-frame (box shrinks, but reuses the SAME --pixel-step
+ * for its own clip-path) and painted in the surface color, leaving a
+ * uniform --pixel-frame-wide pixel border on all four corners. Reusing a
+ * reduced step there would pinch the border to zero width exactly at each
+ * notch's reflex vertex. ::after draws an inset groove line (the "bezel")
+ * that follows the same inner stepped silhouette.
+ */
 .pixel-card {
-  background: var(--color-surface);
-  border: 2px solid var(--color-border);
-  padding: var(--space-xl);
+  --pixel-step: 14px;
+  --pixel-frame: 6px;
+
+  /* explicit stacking context: don't rely on clip-path implicitly creating
+     one for the ::before z-index: -1 surface layer to paint correctly */
+  isolation: isolate;
   position: relative;
-  transition: all var(--transition-base);
+  background: var(--color-border-light);
+  padding: var(--space-xl);
+  clip-path: polygon(
+    0 var(--pixel-step),
+    var(--pixel-step) var(--pixel-step),
+    var(--pixel-step) 0,
+    calc(100% - var(--pixel-step)) 0,
+    calc(100% - var(--pixel-step)) var(--pixel-step),
+    100% var(--pixel-step),
+    100% calc(100% - var(--pixel-step)),
+    calc(100% - var(--pixel-step)) calc(100% - var(--pixel-step)),
+    calc(100% - var(--pixel-step)) 100%,
+    var(--pixel-step) 100%,
+    var(--pixel-step) calc(100% - var(--pixel-step)),
+    0 calc(100% - var(--pixel-step))
+  );
+  transition:
+    transform var(--transition-base),
+    filter var(--transition-base),
+    background var(--transition-base);
 }
 
 .pixel-card:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--pixel-shadow-primary);
-  transform: translate(-2px, -2px);
+  transform: translate(-3px, -3px);
+  filter: drop-shadow(4px 4px 0 var(--color-primary-dim));
+  background: var(--color-primary);
 }
 
-/* corner notch decoration */
+/* interior surface fill, inset by the frame thickness */
+/* negative z-index: must paint above the host's own frame background
+   but below the card's in-flow text content (h3/p), which paint in a
+   later paint-order step than negative-z-index positioned children */
 .pixel-card::before {
   content: "";
   position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 12px;
-  height: 12px;
-  background: var(--color-bg);
-  border-left: 2px solid var(--color-border);
-  border-bottom: 2px solid var(--color-border);
+  z-index: -1;
+  inset: var(--pixel-frame);
+  background: var(--color-surface);
+  clip-path: polygon(
+    0 var(--pixel-step),
+    var(--pixel-step) var(--pixel-step),
+    var(--pixel-step) 0,
+    calc(100% - var(--pixel-step)) 0,
+    calc(100% - var(--pixel-step)) var(--pixel-step),
+    100% var(--pixel-step),
+    100% calc(100% - var(--pixel-step)),
+    calc(100% - var(--pixel-step)) calc(100% - var(--pixel-step)),
+    calc(100% - var(--pixel-step)) 100%,
+    var(--pixel-step) 100%,
+    var(--pixel-step) calc(100% - var(--pixel-step)),
+    0 calc(100% - var(--pixel-step))
+  );
 }
 
-.pixel-card:hover::before {
-  border-color: var(--color-primary);
+/* inner bezel groove, follows the same stepped silhouette */
+.pixel-card::after {
+  content: "";
+  position: absolute;
+  inset: var(--pixel-frame);
+  clip-path: polygon(
+    0 var(--pixel-step),
+    var(--pixel-step) var(--pixel-step),
+    var(--pixel-step) 0,
+    calc(100% - var(--pixel-step)) 0,
+    calc(100% - var(--pixel-step)) var(--pixel-step),
+    100% var(--pixel-step),
+    100% calc(100% - var(--pixel-step)),
+    calc(100% - var(--pixel-step)) calc(100% - var(--pixel-step)),
+    calc(100% - var(--pixel-step)) 100%,
+    var(--pixel-step) 100%,
+    var(--pixel-step) calc(100% - var(--pixel-step)),
+    0 calc(100% - var(--pixel-step))
+  );
+  box-shadow:
+    inset 0 0 0 2px var(--color-bg),
+    inset 0 0 0 4px var(--color-border-light);
+  pointer-events: none;
 }
 
 /* ── Pixel icon (8-bit style emoji replacement) ───────── */
@@ -394,6 +462,14 @@ pre code,
   text-shadow:
     1px 0 0 rgba(107, 104, 96, 0.2),
     0 1px 0 rgba(107, 104, 96, 0.2);
+}
+
+/* ── Pixel sprite (hand-authored 8-bit icon, real pixel art) ─ */
+.pixel-sprite {
+  display: inline-block;
+  margin-bottom: var(--space-md);
+  color: var(--color-primary);
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.35));
 }
 
 /* ── Badge / Tag ──────────────────────────────────────── */
@@ -507,15 +583,6 @@ pre code,
 
   .section {
     padding: var(--space-3xl) 0;
-  }
-
-  .pixel-card::before {
-    display: none;
-  }
-
-  .pixel-card:hover {
-    transform: none;
-    box-shadow: var(--pixel-shadow-primary);
   }
 }
 

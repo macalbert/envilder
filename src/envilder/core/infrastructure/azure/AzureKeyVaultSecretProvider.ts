@@ -6,6 +6,7 @@ import {
   SecretOperationError,
 } from '../../domain/errors/DomainErrors.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
+import { describeError } from '../describeError.js';
 
 @injectable()
 export class AzureKeyVaultSecretProvider implements ISecretProvider {
@@ -30,10 +31,8 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
       ) {
         return undefined;
       }
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
       throw new SecretOperationError(
-        `Failed to get secret ${EnvironmentVariable.maskSecretPath(name)}: ${errorMessage}`,
+        `${EnvironmentVariable.maskSecretPath(name)}: ${describeError(error)}`,
       );
     }
   }

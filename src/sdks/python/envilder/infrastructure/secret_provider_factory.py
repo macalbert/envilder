@@ -67,13 +67,16 @@ def _create_azure_provider(
 def _create_aws_provider(
     profile: str | None,
 ) -> AwsSsmSecretProvider:
+    session = _create_aws_session(profile)
+    return AwsSsmSecretProvider(session.client("ssm"), profile)
+
+
+def _create_aws_session(profile: str | None) -> boto3.Session:
     if not profile:
-        session = boto3.Session()
-        return AwsSsmSecretProvider(session.client("ssm"))
+        return boto3.Session()
 
     try:
-        session = boto3.Session(profile_name=profile)
-        return AwsSsmSecretProvider(session.client("ssm"))
+        return boto3.Session(profile_name=profile)
     except Exception as e:
         raise ValueError(
             f"Failed to create AWS session with profile '{profile}': {e}"

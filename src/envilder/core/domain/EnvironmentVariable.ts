@@ -1,3 +1,9 @@
+import {
+  invalidEnvironmentVariableNameMessage,
+  isValidEnvironmentVariableName,
+} from './EnvironmentVariableName.js';
+import { InvalidArgumentError } from './errors/DomainErrors.js';
+
 /**
  * Represents an environment variable with validation and business rules.
  */
@@ -69,8 +75,10 @@ export class EnvironmentVariable {
    * Validates the environment variable
    */
   private validate(name: string, value: string): void {
-    if (!name || name.trim() === '') {
-      throw new Error('Environment variable name cannot be empty');
+    if (!isValidEnvironmentVariableName(name)) {
+      throw new InvalidArgumentError(
+        invalidEnvironmentVariableNameMessage(name),
+      );
     }
 
     if (value === undefined || value === null) {

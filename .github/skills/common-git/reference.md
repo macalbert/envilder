@@ -1,4 +1,4 @@
-# Git — Quick Reference
+# Git: Quick Reference
 
 ## Commit Types
 

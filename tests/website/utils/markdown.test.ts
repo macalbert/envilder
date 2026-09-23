@@ -64,16 +64,27 @@ describe('changelogToHtml', () => {
 - Second feature`;
 
     // Act
-    const result = changelogToHtml(md);
+    const result = changelogToHtml(md, 'cli-');
 
     // Assert
-    expect(result).toContain('<h2 id="v100">');
+    expect(result).toContain('<h2 id="cli-v100">');
     expect(result).toContain('<span class="version-tag">v1.0.0</span>');
     expect(result).toContain('<span class="release-date">2026-01-01</span>');
     expect(result).toContain('<h3>Added</h3>');
     expect(result).toContain('<li>First feature</li>');
     expect(result).toContain('<li>Second feature</li>');
     expect(result).toContain('<ul>');
+  });
+
+  it('Should_RenderChangelogTitleAsH2_When_ChangelogHasDocumentTitle', () => {
+    // Arrange
+    const md = '# Changelog';
+
+    // Act
+    const actual = changelogToHtml(md);
+
+    // Assert
+    expect(actual).toBe('<h2 class="changelog-doc-title">Changelog</h2>');
   });
 
   it('Should_ConvertIndentedCodeFences_When_CodeBlockIsInsideListContinuation', () => {

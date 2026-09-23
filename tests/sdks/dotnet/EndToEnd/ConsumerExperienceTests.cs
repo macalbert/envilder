@@ -2,8 +2,8 @@ namespace Envilder.Tests.EndToEnd;
 
 using Amazon.SimpleSystemsManagement;
 using AwesomeAssertions;
-using global::Envilder.Infrastructure;
-using global::Envilder.Tests.Fixtures;
+using Envilder.Infrastructure;
+using Envilder.Tests.Fixtures;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -39,9 +39,10 @@ public class ConsumerExperienceTests : IAsyncLifetime
 
 	public ValueTask InitializeAsync()
 	{
-		_originalEnvValues = FacadeEnvVars
-			.Select(v => (Name: v, Value: Environment.GetEnvironmentVariable(v)))
-			.ToArray();
+		_originalEnvValues =
+		[
+			.. FacadeEnvVars.Select(v => (Name: v, Value: Environment.GetEnvironmentVariable(v)))
+		];
 
 		Environment.SetEnvironmentVariable("AWS_ENDPOINT_URL", _localStack.ServiceUrl);
 		Environment.SetEnvironmentVariable("AWS_SERVICE_URL", _localStack.ServiceUrl);
@@ -70,16 +71,16 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		return ValueTask.CompletedTask;
 	}
 
-	[Fact]
+	[Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
 	public async Task Should_ExposeAwsSecretsViaIConfiguration_When_MapFileUsesDefaultAwsProvider()
 	{
 		// Arrange
 		var apikeyName = "/e2e/api-key";
 		var expectedApikey = "sk-test-12345";
-		await PutAwsParameterAsync(apikeyName, expectedApikey);
+		await PutAwsParameterAsync(apikeyName, expectedApikey, TestContext.Current.CancellationToken);
 		var connectionStringName = "/e2e/db-url";
 		var expectedConnectionString = "postgres://localhost:5432/mydb";
-		await PutAwsParameterAsync(connectionStringName, expectedConnectionString);
+		await PutAwsParameterAsync(connectionStringName, expectedConnectionString, TestContext.Current.CancellationToken);
 
 		var mapFilePath = await WriteTempMapFileAsync($$"""
             {
@@ -87,7 +88,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
                 "DB_URL": "{{connectionStringName}}",
                 "API_KEY": "{{apikeyName}}"
             }
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		// Act
 		var actual = new ConfigurationBuilder()
@@ -99,20 +100,20 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		actual["API_KEY"].Should().Be(expectedApikey);
 	}
 
-	[Fact]
+	[Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
 	public async Task Should_ExposeAwsSecretsViaIConfiguration_When_OptionsOverrideMapFileConfig()
 	{
 		// Arrange
 		var connectionStringName = "/e2e/db2-url";
 		var expectedConnectionString = "postgres://localhost:5432/mydb2";
-		await PutAwsParameterAsync(connectionStringName, expectedConnectionString);
+		await PutAwsParameterAsync(connectionStringName, expectedConnectionString, TestContext.Current.CancellationToken);
 
 		var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "aws", "profile": "nonexistent" },
                 "DB_URL": "{{connectionStringName}}"
             }
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		// Act
 		var config = new ConfigurationBuilder()
@@ -123,20 +124,20 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		config["DB_URL"].Should().Be(expectedConnectionString);
 	}
 
-	[Fact]
+	[Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
 	public async Task Should_ResolveSecretsViaHostBuilder_When_UsingConfigurationIntegration()
 	{
 		// Arrange
 		var name = "/e2e/db4-url";
 		var expectedValue = "postgres://localhost:5432/mydb4";
-		await PutAwsParameterAsync(name, expectedValue);
+		await PutAwsParameterAsync(name, expectedValue, TestContext.Current.CancellationToken);
 
 		var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "aws" },
                 "DB_URL": "{{name}}"
             }
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		var builder = Host.CreateApplicationBuilder();
 		builder.Configuration.AddEnvilder(mapFilePath);
@@ -189,13 +190,13 @@ public class ConsumerExperienceTests : IAsyncLifetime
 			.WithMessage("*Vault URL*");
 	}
 
-	[Fact]
+	[Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
 	public async Task Should_OmitMissingSecrets_When_SomeParametersDoNotExistInStore()
 	{
 		// Arrange
 		var name = "/e2e/db3-url";
 		var expectedValue = "postgres://localhost:5432/mydb3";
-		await PutAwsParameterAsync(name, expectedValue);
+		await PutAwsParameterAsync(name, expectedValue, TestContext.Current.CancellationToken);
 
 		var mapFilePath = await WriteTempMapFileAsync($$"""
             {
@@ -203,7 +204,7 @@ public class ConsumerExperienceTests : IAsyncLifetime
                 "DB_URL": "{{name}}",
                 "MISSING_KEY": "/e2e/does-not-exist"
             }
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		// Act
 		var config = new ConfigurationBuilder()
@@ -221,14 +222,14 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		// Arrange
 		var parameterName = "/e2e/facade-resolve";
 		var expectedValue = "facade-resolve-value";
-		await PutAwsParameterAsync(parameterName, expectedValue);
+		await PutAwsParameterAsync(parameterName, expectedValue, TestContext.Current.CancellationToken);
 
 		var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "aws" },
                 "FACADE_RESOLVE": "{{parameterName}}"
             }
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		// Act
 		var actual = Env.ResolveFile(mapFilePath);
@@ -243,14 +244,14 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		// Arrange
 		var parameterName = "/e2e/facade-load";
 		var expectedValue = "facade-load-value";
-		await PutAwsParameterAsync(parameterName, expectedValue);
+		await PutAwsParameterAsync(parameterName, expectedValue, TestContext.Current.CancellationToken);
 
 		var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "aws" },
                 "FACADE_LOAD": "{{parameterName}}"
             }
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		// Act
 		var actual = Env.Load(mapFilePath);
@@ -266,14 +267,14 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		// Arrange
 		var parameterName = "/e2e/facade-resolve-async";
 		var expectedValue = "facade-resolve-async-value";
-		await PutAwsParameterAsync(parameterName, expectedValue);
+		await PutAwsParameterAsync(parameterName, expectedValue, TestContext.Current.CancellationToken);
 
 		var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "aws" },
                 "FACADE_RESOLVE_ASYNC": "{{parameterName}}"
             }
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		// Act
 		var actual = await Env.ResolveFileAsync(mapFilePath);
@@ -288,14 +289,14 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		// Arrange
 		var parameterName = "/e2e/facade-load-async";
 		var expectedValue = "facade-load-async-value";
-		await PutAwsParameterAsync(parameterName, expectedValue);
+		await PutAwsParameterAsync(parameterName, expectedValue, TestContext.Current.CancellationToken);
 
 		var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "aws" },
                 "FACADE_LOAD_ASYNC": "{{parameterName}}"
             }
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		// Act
 		var actual = await Env.LoadAsync(mapFilePath);
@@ -311,14 +312,14 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		// Arrange
 		var parameterName = "/e2e/builder-resolve";
 		var expectedValue = "builder-resolve-value";
-		await PutAwsParameterAsync(parameterName, expectedValue);
+		await PutAwsParameterAsync(parameterName, expectedValue, TestContext.Current.CancellationToken);
 
 		var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "aws" },
                 "BUILDER_RESOLVE": "{{parameterName}}"
             }
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		// Act
 		var actual = Env.FromMapFile(mapFilePath).Resolve();
@@ -333,14 +334,14 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		// Arrange
 		var parameterName = "/e2e/builder-inject";
 		var expectedValue = "builder-inject-value";
-		await PutAwsParameterAsync(parameterName, expectedValue);
+		await PutAwsParameterAsync(parameterName, expectedValue, TestContext.Current.CancellationToken);
 
 		var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "aws" },
                 "BUILDER_INJECT": "{{parameterName}}"
             }
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		// Act
 		var actual = Env.FromMapFile(mapFilePath).Inject();
@@ -356,17 +357,17 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		// Arrange
 		var parameterName = "/e2e/builder-resolve-async";
 		var expectedValue = "builder-resolve-async-value";
-		await PutAwsParameterAsync(parameterName, expectedValue);
+		await PutAwsParameterAsync(parameterName, expectedValue, TestContext.Current.CancellationToken);
 
 		var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "aws" },
                 "BUILDER_RESOLVE_ASYNC": "{{parameterName}}"
             }
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		// Act
-		var actual = await Env.FromMapFile(mapFilePath).ResolveAsync();
+		var actual = await Env.FromMapFile(mapFilePath).ResolveAsync(TestContext.Current.CancellationToken);
 
 		// Assert
 		actual["BUILDER_RESOLVE_ASYNC"].Should().Be(expectedValue);
@@ -378,17 +379,17 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		// Arrange
 		var parameterName = "/e2e/builder-inject-async";
 		var expectedValue = "builder-inject-async-value";
-		await PutAwsParameterAsync(parameterName, expectedValue);
+		await PutAwsParameterAsync(parameterName, expectedValue, TestContext.Current.CancellationToken);
 
 		var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "aws" },
                 "BUILDER_INJECT_ASYNC": "{{parameterName}}"
             }
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		// Act
-		var actual = await Env.FromMapFile(mapFilePath).InjectAsync();
+		var actual = await Env.FromMapFile(mapFilePath).InjectAsync(TestContext.Current.CancellationToken);
 
 		// Assert
 		actual["BUILDER_INJECT_ASYNC"].Should().Be(expectedValue);
@@ -401,14 +402,14 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		// Arrange
 		var parameterName = "/e2e/env-route-resolve";
 		var expectedValue = "env-route-resolve-value";
-		await PutAwsParameterAsync(parameterName, expectedValue);
+		await PutAwsParameterAsync(parameterName, expectedValue, TestContext.Current.CancellationToken);
 
 		var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "aws" },
                 "ENV_ROUTE_RESOLVE": "{{parameterName}}"
             }
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		var envMapping = new Dictionary<string, string?>
 		{
@@ -429,14 +430,14 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		// Arrange
 		var parameterName = "/e2e/env-route-load";
 		var expectedValue = "env-route-load-value";
-		await PutAwsParameterAsync(parameterName, expectedValue);
+		await PutAwsParameterAsync(parameterName, expectedValue, TestContext.Current.CancellationToken);
 
 		var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "aws" },
                 "ENV_ROUTE_LOAD": "{{parameterName}}"
             }
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		var envMapping = new Dictionary<string, string?>
 		{
@@ -458,14 +459,14 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		// Arrange
 		var parameterName = "/e2e/validate-ok";
 		var expectedValue = "validate-ok-value";
-		await PutAwsParameterAsync(parameterName, expectedValue);
+		await PutAwsParameterAsync(parameterName, expectedValue, TestContext.Current.CancellationToken);
 
 		var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "aws" },
                 "VALIDATE_OK": "{{parameterName}}"
             }
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		// Act
 		var secrets = Env.ResolveFile(mapFilePath);
@@ -481,14 +482,14 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		// Arrange
 		var parameterName = "/e2e/di-resolve";
 		var expectedValue = "di-resolve-value";
-		await PutAwsParameterAsync(parameterName, expectedValue);
+		await PutAwsParameterAsync(parameterName, expectedValue, TestContext.Current.CancellationToken);
 
 		var mapFilePath = await WriteTempMapFileAsync($$"""
             {
                 "$config": { "provider": "aws" },
                 "DI_RESOLVE": "{{parameterName}}"
             }
-            """);
+            """, TestContext.Current.CancellationToken);
 
 		var services = new ServiceCollection();
 		services.AddEnvilder(mapFilePath);
@@ -504,16 +505,16 @@ public class ConsumerExperienceTests : IAsyncLifetime
 		actual["DI_RESOLVE"].Should().Be(expectedValue);
 	}
 
-	private async Task<string> WriteTempMapFileAsync(string json)
+	private async Task<string> WriteTempMapFileAsync(string json, CancellationToken cancellationToken = default)
 	{
 		var path = Path.Combine(Path.GetTempPath(), $"envilder-{Guid.NewGuid():N}.json");
-		await File.WriteAllTextAsync(path, json);
+		await File.WriteAllTextAsync(path, json, cancellationToken);
 		_tempFiles.Add(path);
 
 		return path;
 	}
 
-	private async Task PutAwsParameterAsync(string name, string value)
+	private async Task PutAwsParameterAsync(string name, string value, CancellationToken cancellationToken = default)
 	{
 		await _localStack.SsmClient.PutParameterAsync(new()
 		{
@@ -521,6 +522,6 @@ public class ConsumerExperienceTests : IAsyncLifetime
 			Value = value,
 			Type = ParameterType.SecureString,
 			Overwrite = true,
-		});
+		}, cancellationToken);
 	}
 }

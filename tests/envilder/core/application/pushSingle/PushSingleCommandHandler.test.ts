@@ -39,11 +39,53 @@ describe('PushSingleCommandHandler', () => {
       'test-value',
     );
     expect(mockLogger.info).toHaveBeenCalledWith(
-      "Starting push operation for key 'TEST_VAR' to path '**************est'",
+      expect.stringContaining('PUSHING SECRET'),
     );
     expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining('to secret store at path **************est'),
+      expect.stringContaining('TEST_VAR'),
     );
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('**************est'),
+    );
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('SECRET PUSHED'),
+    );
+  });
+
+  it('Should_LogRuleSeparator_When_PushingSingleVariable', async () => {
+    // Arrange
+    const sut = new PushSingleCommandHandler(mockSecretProvider, mockLogger);
+    const command = PushSingleCommand.create(
+      'TEST_VAR',
+      'test-value',
+      '/path/to/ssm/test',
+    );
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('\u2501'),
+    );
+  });
+
+  it('Should_WrapOutputWithBlankLines_When_PushingSingleVariable', async () => {
+    // Arrange
+    const sut = new PushSingleCommandHandler(mockSecretProvider, mockLogger);
+    const command = PushSingleCommand.create(
+      'TEST_VAR',
+      'test-value',
+      '/path/to/ssm/test',
+    );
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    const calls = vi.mocked(mockLogger.info).mock.calls.map(([msg]) => msg);
+    expect(calls[0].startsWith('\n')).toBe(true);
+    expect(calls[calls.length - 1].endsWith('\n')).toBe(true);
   });
 
   it('Should_ThrowError_When_PushingSingleVariableFails', async () => {

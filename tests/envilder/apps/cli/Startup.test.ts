@@ -4,7 +4,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { Startup } from '../../../../src/envilder/apps/cli/Startup.js';
 import type { DispatchActionCommandHandler } from '../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler.js';
 import type { ILogger } from '../../../../src/envilder/core/domain/ports/ILogger.js';
+import type { ISecretMasker } from '../../../../src/envilder/core/domain/ports/ISecretMasker.js';
 import type { ISecretProvider } from '../../../../src/envilder/core/domain/ports/ISecretProvider.js';
+import { NoOpSecretMasker } from '../../../../src/envilder/core/infrastructure/github/NoOpSecretMasker.js';
 import { TYPES } from '../../../../src/envilder/core/types.js';
 
 describe('Startup', () => {
@@ -96,6 +98,9 @@ describe('Startup', () => {
       expect(() =>
         container.get<ISecretProvider>(TYPES.ISecretProvider),
       ).not.toThrow();
+      expect(container.get<ISecretMasker>(TYPES.ISecretMasker)).toBeInstanceOf(
+        NoOpSecretMasker,
+      );
     });
 
     it('Should_ConfigureAwsSsmWithProfile_When_ProfileIsProvided', () => {

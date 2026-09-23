@@ -19,7 +19,7 @@ existing SDK. Prevents drift between code, website, changelogs, and CI.
 - Auditing that an SDK is fully wired into the website and build system
 - After a version bump to verify all integration points are updated
 
-## New SDK — Full Checklist
+## New SDK: Full Checklist
 
 When adding a brand-new SDK to the project, complete **every** item:
 
@@ -43,7 +43,7 @@ Every SDK must have a canonical version source read at build time:
 | Go         | Git tag / `go.mod` convention      | `vX.Y.Z` tag          |
 | Java       | `pom.xml` or `build.gradle`        | `<version>` / `version =` |
 
-### 3. Website — Version Badge Wiring
+### 3. Website: Version Badge Wiring
 
 The website reads SDK versions at **build time** via `astro.config.mjs`:
 
@@ -55,14 +55,14 @@ The website reads SDK versions at **build time** via `astro.config.mjs`:
 - [ ] Declare in `src/website/src/env.d.ts`: `declare const __SDK_{RUNTIME}_VERSION__: string;`
 - [ ] Use dynamic variable in `DocsContent.astro` badge (never hardcode versions)
 
-### 4. Website — Documentation Page Section
+### 4. Website: Documentation Page Section
 
 - [ ] Add SDK section in `src/website/src/components/DocsContent.astro`
       (install command, quick start code, badge, link to full docs)
 - [ ] Add i18n keys to `src/website/src/i18n/types.ts` for all new strings
 - [ ] Add translations to every locale file: `en.ts`, `ca.ts`, `es.ts`
 
-### 5. Website — Changelog Integration
+### 5. Website: Changelog Integration
 
 - [ ] Create `docs/changelogs/sdk-{runtime}.md` with initial release entry
 - [ ] Read changelog in `astro.config.mjs` via `readChangelog()` helper
@@ -73,11 +73,11 @@ The website reads SDK versions at **build time** via `astro.config.mjs`:
   - `src/website/src/pages/ca/changelog.astro`
   - `src/website/src/pages/es/changelog.astro`
 - [ ] Add sidebar nav block (button + version list) in the SDKs group for
-      **all 3** changelog pages — maintain correct `parsed[N]` indices
+      **all 3** changelog pages: maintain correct `parsed[N]` indices
 - [ ] Add i18n key `categorySdk{Runtime}` to `types.ts` and all locale files
 - [ ] Add to mobile product selector dropdown (automatic if in `products` array)
 
-### 6. Website — SDK Cards Component
+### 6. Website: SDK Cards Component
 
 - [ ] Add card in `src/website/src/components/Sdks.astro` with install
       command and package manager link
@@ -95,7 +95,7 @@ The website reads SDK versions at **build time** via `astro.config.mjs`:
 - [ ] Add to `docs/changelogs/` index if one exists
 - [ ] Run `doc-sync` skill to verify alignment
 
-## Existing SDK — Version Bump Checklist
+## Existing SDK: Version Bump Checklist
 
 When releasing a new version of an already-wired SDK:
 
@@ -132,5 +132,5 @@ node -e "const h=require('fs').readFileSync('dist/changelog/index.html','utf-8')
 | Hardcoded version in badge | Always use `__SDK_*_VERSION__` globals |
 | Missing changelog sidebar entry | Check all 3 locale pages, not just `en` |
 | Wrong `parsed[N]` index after adding SDK | Count products array entries carefully |
-| Forgot i18n key in one locale | Add to `types.ts` first — TypeScript errors catch missing keys |
+| Forgot i18n key in one locale | Add to `types.ts` first: TypeScript errors catch missing keys |
 | Version not updating after bump | Restart dev server (Vite caches `define` values) |

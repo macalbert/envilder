@@ -22,7 +22,11 @@ const t = useTranslations(lang);
     <div class="gha-grid">
       <div class="gha-block">
         <h3>{t.gha.awsSsm}</h3>
-        <CodeBlock lang="yaml" filename=".github/workflows/deploy.yml" code={`- name: 🪙 Configure AWS Credentials
+        <CodeBlock
+          lang="yaml"
+          filename=".github/workflows/deploy.yml"
+          contentId="github-action-aws"
+          code={`- name: 🪙 Configure AWS Credentials
   uses: aws-actions/configure-aws-credentials@v6
   with:
     role-to-assume: \${{ secrets.AWS_ROLE_TO_ASSUME }}
@@ -32,12 +36,17 @@ const t = useTranslations(lang);
   uses: macalbert/envilder/github-action@v0
   with:
     map-file: envilder.json
-    env-file: .env`} />
+    env-file: .env`}
+        />
       </div>
 
       <div class="gha-block">
         <h3>{t.gha.azureKeyVault}</h3>
-        <CodeBlock lang="yaml" filename=".github/workflows/deploy.yml" code={`- name: 🔑 Azure Login
+        <CodeBlock
+          lang="yaml"
+          filename=".github/workflows/deploy.yml"
+          contentId="github-action-azure"
+          code={`- name: 🔑 Azure Login
   uses: azure/login@v2
   with:
     client-id: \${{ secrets.AZURE_CLIENT_ID }}
@@ -50,7 +59,8 @@ const t = useTranslations(lang);
     map-file: envilder.json
     env-file: .env
     provider: azure
-    vault-url: \${{ secrets.AZURE_KEY_VAULT_URL }}`} />
+    vault-url: \${{ secrets.AZURE_KEY_VAULT_URL }}`}
+        />
       </div>
     </div>
 

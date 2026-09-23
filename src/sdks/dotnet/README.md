@@ -5,7 +5,7 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/macalbert/envilder/blob/main/LICENSE)
 
 Securely load environment variables from **AWS SSM Parameter Store** or **Azure Key Vault** directly into your .NET application.
-Zero vendor lock-in — secrets stay in your cloud.
+Zero vendor lock-in: secrets stay in your cloud.
 
 Part of the [Envilder](https://github.com/macalbert/envilder) project.
 
@@ -23,7 +23,7 @@ dotnet add package Envilder
 
 ## Quick Start
 
-### One-liner — resolve + inject
+### One-liner: resolve + inject
 
 ```csharp
 using Envilder;
@@ -57,7 +57,7 @@ var secrets = await Env.ResolveFileAsync("envilder.json");
 
 ### Fluent builder (with overrides)
 
-Override the map file's `$config` at runtime — useful for switching providers, profiles, or vault URLs per environment:
+Override the map file's `$config` at runtime: useful for switching providers, profiles, or vault URLs per environment:
 
 ```csharp
 using Envilder;

@@ -230,7 +230,7 @@ it("Should_CallHandleChange_When_MaxInputChanges", async () => {
 ```typescript
 // BAD - Two independent operations in Act
 it('Should_HaveIdenticalKeys_When_ComparedToEnglish', () => {
-    // Arrange — keys computed above
+    // Arrange: keys computed above
 
     // Act
     const missing = enKeys.filter((k) => !caKeys.includes(k));
@@ -243,7 +243,7 @@ it('Should_HaveIdenticalKeys_When_ComparedToEnglish', () => {
 
 // GOOD - Split into two tests (one action each)
 it('Should_HaveNoMissingKeys_When_CatalanComparedToEnglish', () => {
-    // Arrange — keys computed above
+    // Arrange: keys computed above
 
     // Act
     const missing = enKeys.filter((k) => !caKeys.includes(k));
@@ -253,7 +253,7 @@ it('Should_HaveNoMissingKeys_When_CatalanComparedToEnglish', () => {
 });
 
 it('Should_HaveNoExtraKeys_When_CatalanComparedToEnglish', () => {
-    // Arrange — keys computed above
+    // Arrange: keys computed above
 
     // Act
     const extra = caKeys.filter((k) => !enKeys.includes(k));
@@ -268,9 +268,9 @@ it('Should_HaveNoExtraKeys_When_CatalanComparedToEnglish', () => {
 ```typescript
 // BAD - No production code exercised, AAA markers are meaningless
 it('Should_HaveIdenticalKeys_When_ComparedToEnglish', () => {
-    // Arrange — enKeys and caKeys computed in describe scope
+    // Arrange: enKeys and caKeys computed in describe scope
 
-    // Act — comparison done in arrange   ← admits there is no Act
+    // Act: comparison done in arrange   ← admits there is no Act
 
     // Assert
     expect(missingInCa).toEqual([]);
@@ -367,5 +367,5 @@ it('Should_TransformData_When_InputIsValid', () => {
 7. ✓ Tests are independent and isolated
 8. ✓ No shared mutable state between tests
 9. ✓ **No `if`, `switch`, `try/catch`** inside Arrange, Act, or Assert blocks
-10. ✓ One scenario per test — if branching is needed, create separate tests
-11. ✓ **Each `// Arrange`, `// Act`, `// Assert` comment appears at most once per test** — no duplicate blocks
+10. ✓ One scenario per test: if branching is needed, create separate tests
+11. ✓ **Each `// Arrange`, `// Act`, `// Assert` comment appears at most once per test**: no duplicate blocks

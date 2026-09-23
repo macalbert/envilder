@@ -24,7 +24,7 @@ public class AwsSsmAcceptanceTests
 			Value = "real-secret-from-localstack",
 			Type = ParameterType.SecureString,
 			Overwrite = true,
-		});
+		}, TestContext.Current.CancellationToken);
 
 		var sut = new EnvilderClient(_localStack.CreateProvider());
 		var mapFile = new ParsedMapFile(
@@ -35,7 +35,7 @@ public class AwsSsmAcceptanceTests
 			});
 
 		// Act
-		var actual = await sut.ResolveSecretsAsync(mapFile);
+		var actual = await sut.ResolveSecretsAsync(mapFile, TestContext.Current.CancellationToken);
 
 		// Assert
 		actual.Should().ContainKey("MY_SECRET");
@@ -55,7 +55,7 @@ public class AwsSsmAcceptanceTests
 			});
 
 		// Act
-		var actual = await sut.ResolveSecretsAsync(mapFile);
+		var actual = await sut.ResolveSecretsAsync(mapFile, TestContext.Current.CancellationToken);
 
 		// Assert
 		actual.Should().BeEmpty();

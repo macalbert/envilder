@@ -10,9 +10,9 @@ A multi-language monorepo needs deterministic formatting and linting to
 eliminate style debates in reviews and ensure CI reproducibility. Each
 language has its own ecosystem of tools, but the principles are shared:
 
-- **Format on save** — no manual formatting ever
-- **Lint in CI** — check-only, fail the build on violations
-- **Credential detection** — prevent secrets from being committed
+- **Format on save**: no manual formatting ever
+- **Lint in CI**: check-only, fail the build on violations
+- **Credential detection**: prevent secrets from being committed
 
 ## Decision
 
@@ -26,9 +26,9 @@ language has its own ecosystem of tools, but the principles are shared:
 
 **Scripts:**
 
-- `pnpm format` — writes: `biome check --write --unsafe && biome format --write`
-- `pnpm format:check` — check-only (CI)
-- `pnpm lint` — check-only: `secretlint "**/*" && biome check && tsc --noEmit`
+- `pnpm format`: writes: `biome check --write --unsafe && biome format --write`
+- `pnpm format:check`: check-only (CI)
+- `pnpm lint`: check-only: `secretlint "**/*" && biome check && tsc --noEmit`
 
 **Biome rules** (from `biome.json`):
 
@@ -45,8 +45,8 @@ language has its own ecosystem of tools, but the principles are shared:
 
 **Scripts:**
 
-- `dotnet format src/sdks/dotnet/Envilder.sln` — writes
-- `dotnet format src/sdks/dotnet/Envilder.sln --verify-no-changes` — check-only (CI)
+- `dotnet format src/sdks/dotnet/Envilder.sln`: writes
+- `dotnet format src/sdks/dotnet/Envilder.sln --verify-no-changes`: check-only (CI)
 
 ### Python SDK
 
@@ -58,8 +58,8 @@ language has its own ecosystem of tools, but the principles are shared:
 
 **Scripts** (via Makefile with `uv run`):
 
-- `make format-sdk-python` — writes: `black . && isort .`
-- `make check-sdk-python` — check-only: `black --check && isort --check && mypy --strict`
+- `make format-sdk-python`: writes: `black . && isort .`
+- `make check-sdk-python`: check-only: `black --check && isort --check && mypy --strict`
 
 ### Pre-commit Hooks
 
@@ -72,8 +72,8 @@ Configured via `lefthook.yml`:
 
 ### Positive
 
-- Zero style discussions in PRs — tool decides, humans accept
-- CI catches violations before review — no manual formatting requests
+- Zero style discussions in PRs: tool decides, humans accept
+- CI catches violations before review: no manual formatting requests
 - Secretlint prevents accidental credential leaks across all file types
 - Single tool per language (Biome replaces ESLint+Prettier+import-sort)
 

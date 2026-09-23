@@ -5,6 +5,7 @@ on:
     paths:
       - "src/envilder/apps/gha/**"
       - "github-action/**"
+      - "scripts/build-github-action.mjs"
       - ".github/workflows/verify-action-build.yml"
 
 jobs:
@@ -20,7 +21,7 @@ jobs:
         uses: pnpm/action-setup@v6
 
       - name: 🍄 Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: "22.x"
           cache: "pnpm"

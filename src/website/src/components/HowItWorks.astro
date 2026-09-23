@@ -164,7 +164,7 @@ const override = await Envilder.fromMapFile('envilder.json')
           <p>
             {t.howItWorks.steps[1].description}
           </p>
-          <CodeBlock lang="bash" filename="terminal" code={`$ envilder --map=envilder.json --envfile=.env
+          <CodeBlock lang="bash" filename="terminal" code={`$ envilder
 
 ${t.howItWorks.terminalFetched1}
 ${t.howItWorks.terminalFetched2}
@@ -202,6 +202,8 @@ ${t.howItWorks.terminalWritten}`} />
                   aria-disabled={sdk.status === 'planned' ? 'true' : undefined}
                   tabindex={i === 0 ? 0 : -1}
                   data-hiw-sdk-tab={sdk.id}
+                  data-analytics-event="select_runtime"
+                  data-analytics-runtime={sdk.id}
                   type="button"
                   disabled={sdk.status === 'planned'}
                 >
@@ -226,19 +228,36 @@ ${t.howItWorks.terminalWritten}`} />
                 >
                   <div class="sdk-panel-header">
                     <span class="sdk-badge badge-primary">{t.sdks.available}</span>
-                    <a href={`${localizedPath(lang, '/docs')}#${sdk.docsHash}`} class="sdk-link">
+                    <a href={`${localizedPath(lang, '/docs/')}#${sdk.docsHash}`} class="sdk-link">
                       {t.sdks.docsLink} →
                     </a>
-                    <a href={sdk.pkg} target="_blank" rel="noopener noreferrer" class="sdk-link">
+                    <a
+                      href={sdk.pkg}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="sdk-link"
+                      data-analytics-event="click_package"
+                      data-analytics-registry={sdk.id === 'nodejs' ? 'npm' : sdk.id === 'python' ? 'pypi' : 'nuget'}
+                      data-analytics-runtime={sdk.id}
+                    >
                       📦 {t.sdks.packageLink}
                     </a>
                   </div>
 
                   <div class="sdk-panel-install">
-                    <CodeBlock lang="bash" code={sdk.install} />
+                    <CodeBlock
+                      lang="bash"
+                      code={sdk.install}
+                      contentId={`${sdk.id}-install`}
+                    />
                   </div>
 
-                  <CodeBlock lang={sdk.lang} filename={sdk.filename} code={sdk.code} />
+                  <CodeBlock
+                    lang={sdk.lang}
+                    filename={sdk.filename}
+                    code={sdk.code}
+                    contentId={`${sdk.id}-quick-start`}
+                  />
                 </div>
               ))}
             </div>
@@ -262,7 +281,7 @@ ${t.howItWorks.terminalWritten}`} />
           <p>
             {t.howItWorks.steps[3].description}
           </p>
-          <CodeBlock lang="bash" filename="terminal" code={`$ envilder --push --envfile=.env --map=envilder.json
+          <CodeBlock lang="bash" filename="terminal" code={`$ envilder --push
 
 ${t.howItWorks.pushTerminalPushed1}
 ${t.howItWorks.pushTerminalPushed2}

@@ -18,37 +18,84 @@ const t = useTranslations(lang);
       </p>
     </div>
 
-    <div class="demo-wrapper">
+    <figure class="demo-wrapper">
       <div class="demo-frame">
         <video
-          src="/Envilder-demo.mp4"
-          autoplay
+          data-src="/Envilder-demo.mp4"
           muted
           loop
           playsinline
           controls
-          preload="metadata"
+          poster="/Envilder-demo-poster.webp"
+          preload="none"
           aria-label={t.demo.cliDemo}
         />
       </div>
-    </div>
+      <figcaption>{t.demo.transcript}</figcaption>
+    </figure>
   </div>
 </section>
 
 <script>
-  const video = document.querySelector<HTMLVideoElement>(
-    '#demo .demo-frame video',
-  );
-  if (video && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    video.removeAttribute('autoplay');
-    video.pause();
+  function initializeDemoVideo() {
+    const video = document.querySelector<HTMLVideoElement>(
+      '#demo .demo-frame video',
+    );
+    if (!video || !video.dataset.src) {
+      return;
+    }
+
+    const reducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches;
+    const loadVideo = () => {
+      if (video.currentSrc) {
+        return;
+      }
+
+      video.src = video.dataset.src ?? '';
+      video.load();
+
+      if (!reducedMotion) {
+        video.addEventListener(
+          'loadeddata',
+          () => {
+            void video.play().catch((error) => {
+              console.warn('Envilder demo video could not play automatically.', error);
+            });
+          },
+          { once: true },
+        );
+      }
+    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          loadVideo();
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' },
+    );
+
+    observer.observe(video);
   }
+
+  initializeDemoVideo();
+  document.addEventListener('astro:after-swap', initializeDemoVideo);
 </script>
 
 <style>
   .demo-wrapper {
     max-width: 800px;
     margin: 0 auto;
+  }
+
+  .demo-wrapper figcaption {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    margin-top: var(--space-md);
   }
 
   .demo-frame {

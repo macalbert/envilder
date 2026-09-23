@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>🍄 Power up your GitHub workflows with cloud secrets! 🍄</b><br>
-  <span>Pull secrets from AWS SSM Parameter Store or Azure Key Vault into .env files automatically</span>
+  <span>Pull secrets from AWS SSM Parameter Store or Azure Key Vault into .env files during CI/CD runs</span>
 </p>
 
 <p align="center">
@@ -32,9 +32,9 @@ source of truth. This GitHub Action makes it easy to:
 - ✅ **Centralize secrets** - Store all your secrets in AWS SSM or Azure Key Vault
 - 🔒 **Secure by design** - Leverage AWS IAM or Azure RBAC for access control and encryption at rest
 - 🚀 **Automate workflows** - Pull secrets directly in your CI/CD pipelines
-- 📦 **Zero configuration** - Just provide a mapping file and you're ready to go
-- ☁️ **Multi-provider** - Switch between AWS and Azure with a single input
-- 🎯 **Type-safe** - Full TypeScript support with IntelliSense
+- 📦 **Prebuilt tagged action** - Reference `macalbert/envilder/github-action@v0`; no consumer build step
+- ☁️ **Supported providers** - Choose AWS or Azure and configure that provider's credentials and access
+- 🗺️ **Shared mapping contract** - Reuse the same `envilder.json` structure as the CLI and SDKs
 
 > 💡 **Learn more:** Visit [envilder.com](https://envilder.com) for complete documentation,
 > or check the [GitHub README](https://github.com/macalbert/envilder/blob/main/README.md)
@@ -45,6 +45,7 @@ source of truth. This GitHub Action makes it easy to:
 ## 🎮 Quick Start
 
 Pull secrets from AWS SSM Parameter Store or Azure Key Vault into `.env` files in your GitHub Actions workflows.
+The published `macalbert/envilder/github-action@v0` tag contains the prebuilt action.
 
 **AWS SSM (default):**
 
@@ -56,10 +57,10 @@ Pull secrets from AWS SSM Parameter Store or Azure Key Vault into `.env` files i
     aws-region: us-east-1
 
 - name: 🔐 Pull Secrets from AWS SSM
-  uses: macalbert/envilder/github-action@v0.8.0
+  uses: macalbert/envilder/github-action@v0
   with:
     map-file: envilder.json
-    env-file: .env
+    env-file: ${{ runner.temp }}/envilder.env
 ```
 
 **Azure Key Vault:**
@@ -73,7 +74,7 @@ Pull secrets from AWS SSM Parameter Store or Azure Key Vault into `.env` files i
     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
 - name: 🔐 Pull Secrets from Azure Key Vault
-  uses: macalbert/envilder/github-action@v0.8.0
+  uses: macalbert/envilder/github-action@v0
   with:
     map-file: envilder.json
     env-file: .env
@@ -90,8 +91,10 @@ Pull secrets from AWS SSM Parameter Store or Azure Key Vault into `.env` files i
 | `provider` | ❌ No | `aws` | ☁️ `aws` or `azure`. Also settable via `$config.provider` in the map file. |
 | `vault-url` | ❌ No | - | 🔑 Azure Key Vault URL (overrides `$config.vaultUrl` in map file) |
 
-> **Note:** All paths (`map-file`, `env-file`) are relative to the repository root, not to any `working-directory`
-> setting in your job. If you use `working-directory`, adjust the paths accordingly.
+> **Note:** `map-file` paths are relative to the repository root, not to any
+> `working-directory` setting in your job. `env-file` can also be an absolute path.
+> When the consumer accepts an explicit path, prefer `${{ runner.temp }}/envilder.env`
+> to avoid storing the generated file in the repository workspace.
 >
 > **Azure:** When using `provider: azure`, provide the vault URL via the `vault-url` input
 > or set `$config.vaultUrl` in your map file. Authentication uses Azure Default Credentials.
@@ -221,7 +224,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: 🔐 Pull Secrets from AWS SSM
-        uses: macalbert/envilder/github-action@v0.8.0
+        uses: macalbert/envilder/github-action@v0
         with:
           map-file: config/envilder.json
           env-file: .env
@@ -264,7 +267,7 @@ jobs:
           aws-region: us-east-1
       
       - name: 🔐 Pull Secrets
-        uses: macalbert/envilder/github-action@v0.8.0
+        uses: macalbert/envilder/github-action@v0
         with:
           map-file: app/config/envilder.json  # Path from repo root!
           env-file: app/.env                    # Path from repo root!
@@ -308,7 +311,7 @@ jobs:
           aws-region: us-east-1
 
       - name: 🔐 Pull ${{ inputs.environment }} secrets
-        uses: macalbert/envilder/github-action@v0.8.0
+        uses: macalbert/envilder/github-action@v0
         with:
           map-file: config/${{ inputs.environment }}/envilder.json
           env-file: .env.${{ inputs.environment }}
@@ -346,7 +349,7 @@ jobs:
           role-to-assume: ${{ secrets[format('AWS_ROLE_{0}', matrix.environment)] }}
           aws-region: us-east-1
       
-      - uses: macalbert/envilder/github-action@v0.8.0
+      - uses: macalbert/envilder/github-action@v0
         with:
           map-file: config/${{ matrix.environment }}/envilder.json
           env-file: .env
@@ -363,7 +366,7 @@ The action generates/updates the specified `.env` file with values from your clo
 
 ```bash
 DATABASE_URL=postgresql://user:pass@host:5432/db
-API_KEY=sk_live_abc123xyz789
+API_KEY=example-not-a-real-secret
 SECRET_TOKEN=token_secret_value_here
 ```
 
@@ -372,6 +375,7 @@ SECRET_TOKEN=token_secret_value_here
 ### ✅ DO (Power-Ups!)
 
 - Use OIDC authentication instead of long-lived access keys
+- Prefer `${{ runner.temp }}/envilder.env` when the consuming tool accepts an explicit path
 - Scope IAM policies to specific parameter paths
 - Use separate parameter namespaces per environment (`/myapp/prod/*`, `/myapp/dev/*`)
 - Store sensitive SSM paths in GitHub Environment Secrets
@@ -384,12 +388,19 @@ SECRET_TOKEN=token_secret_value_here
 - Use the same SSM parameters across environments
 - Store AWS credentials in repository secrets (use OIDC)
 
+### 🥷 Runner log masking
+
+The action registers each non-empty resolved value with GitHub Actions runner
+masking before writing the environment file. This redacts exact registered
+values from later workflow logs, but it is not a substitute for avoiding secret
+output: transformed, partial, or encoded values may not be masked.
+
 ## 🔧 Troubleshooting
 
-### Error: "Could not find lib directory"
+### Error: "Action bundle not found"
 
-The published action includes pre-built code. If you see this error, ensure you're using the
-marketplace version (`macalbert/envilder/github-action@v0.8.0`) not a local checkout.
+The published tag includes prebuilt code. If you see this error, ensure you're using
+`macalbert/envilder/github-action@v0` rather than a local checkout.
 
 ### Error: "Parameter not found"
 

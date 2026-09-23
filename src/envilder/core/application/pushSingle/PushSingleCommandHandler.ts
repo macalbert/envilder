@@ -1,4 +1,5 @@
 import { inject, injectable } from 'inversify';
+import pc from 'picocolors';
 import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
@@ -7,6 +8,8 @@ import type { PushSingleCommand } from './PushSingleCommand.js';
 
 @injectable()
 export class PushSingleCommandHandler {
+  private static readonly RULE = pc.magenta('\u2501'.repeat(60));
+
   constructor(
     @inject(TYPES.ISecretProvider)
     private readonly secretProvider: ISecretProvider,
@@ -20,8 +23,12 @@ export class PushSingleCommandHandler {
    */
   async handle(command: PushSingleCommand): Promise<void> {
     try {
+      const maskedPath = EnvironmentVariable.maskSecretPath(command.secretPath);
+
+      this.logger.info(`\n${pc.bold(pc.magenta('\u{1F4E4} PUSHING SECRET'))}`);
+      this.logger.info(PushSingleCommandHandler.RULE);
       this.logger.info(
-        `Starting push operation for key '${command.key}' to path '${EnvironmentVariable.maskSecretPath(command.secretPath)}'`,
+        `  ${pc.dim('\u2192 ')}${pc.bold(command.key)}${pc.dim(' \u2192 ')}${pc.dim(maskedPath)}`,
       );
 
       const envVariable = new EnvironmentVariable(
@@ -32,7 +39,11 @@ export class PushSingleCommandHandler {
 
       await this.secretProvider.setSecret(command.secretPath, command.value);
       this.logger.info(
-        `Pushed ${command.key}=${envVariable.maskedValue} to secret store at path ${EnvironmentVariable.maskSecretPath(command.secretPath)}`,
+        `\n${pc.bold(pc.green('\u2B50 SECRET PUSHED'))}${pc.dim(
+          '  \u2014  ',
+        )}${pc.bold(command.key)}${pc.dim('=')}${envVariable.maskedValue}${pc.dim(
+          ' \u2192 ',
+        )}${pc.dim(maskedPath)}\n`,
       );
     } catch (error) {
       const errorMessage =

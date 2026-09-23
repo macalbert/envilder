@@ -15,7 +15,7 @@ describe('Azure Key Vault Acceptance', () => {
     lowkeyVault = await new LowkeyVaultTestContainer().start();
     secretClient = lowkeyVault.createSecretClient();
     provider = lowkeyVault.createProvider();
-  }, 120_000);
+  }, 300_000);
 
   afterAll(async () => {
     await lowkeyVault.stop();

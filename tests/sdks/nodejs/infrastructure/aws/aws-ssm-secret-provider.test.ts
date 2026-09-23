@@ -1,5 +1,8 @@
+import type { SSMClient } from '@aws-sdk/client-ssm';
 import { describe, expect, it, vi } from 'vitest';
 import { AwsSsmSecretProvider } from '../../../../../src/sdks/nodejs/src/infrastructure/aws/aws-ssm-secret-provider.js';
+
+const asSsmClient = (send: unknown) => ({ send }) as unknown as SSMClient;
 
 describe('AwsSsmSecretProvider', () => {
   it('Should_ReturnValues_When_ParametersExist', async () => {
@@ -11,7 +14,7 @@ describe('AwsSsmSecretProvider', () => {
       ],
       InvalidParameters: [],
     });
-    const mockClient = { send: mockSend };
+    const mockClient = asSsmClient(mockSend);
     const sut = new AwsSsmSecretProvider(mockClient);
 
     // Act
@@ -29,7 +32,7 @@ describe('AwsSsmSecretProvider', () => {
       Parameters: [{ Name: '/app/db-url', Value: 'postgres://localhost' }],
       InvalidParameters: ['/app/missing'],
     });
-    const mockClient = { send: mockSend };
+    const mockClient = asSsmClient(mockSend);
     const sut = new AwsSsmSecretProvider(mockClient);
 
     // Act
@@ -43,7 +46,8 @@ describe('AwsSsmSecretProvider', () => {
 
   it('Should_ReturnEmptyMap_When_NamesIsEmpty', async () => {
     // Arrange
-    const mockClient = { send: vi.fn() };
+    const mockSend = vi.fn();
+    const mockClient = asSsmClient(mockSend);
     const sut = new AwsSsmSecretProvider(mockClient);
 
     // Act
@@ -51,7 +55,7 @@ describe('AwsSsmSecretProvider', () => {
 
     // Assert
     expect(actual.size).toBe(0);
-    expect(mockClient.send).not.toHaveBeenCalled();
+    expect(mockSend).not.toHaveBeenCalled();
   });
 
   it('Should_BatchRequests_When_MoreThanTenNames', async () => {
@@ -61,7 +65,7 @@ describe('AwsSsmSecretProvider', () => {
       Parameters: [],
       InvalidParameters: [],
     });
-    const mockClient = { send: mockSend };
+    const mockClient = asSsmClient(mockSend);
     const sut = new AwsSsmSecretProvider(mockClient);
 
     // Act
@@ -73,7 +77,7 @@ describe('AwsSsmSecretProvider', () => {
 
   it('Should_ThrowError_When_SsmClientIsNull', () => {
     // Act
-    const act = () => new AwsSsmSecretProvider(null);
+    const act = () => new AwsSsmSecretProvider(null as unknown as SSMClient);
 
     // Assert
     expect(act).toThrow('ssmClient cannot be null');
@@ -81,7 +85,7 @@ describe('AwsSsmSecretProvider', () => {
 
   it('Should_ThrowError_When_AnyNameIsEmpty', async () => {
     // Arrange
-    const mockClient = { send: vi.fn() };
+    const mockClient = asSsmClient(vi.fn());
     const sut = new AwsSsmSecretProvider(mockClient);
 
     // Act
@@ -98,7 +102,7 @@ describe('AwsSsmSecretProvider', () => {
     const error = new Error('AccessDenied');
     error.name = 'AccessDenied';
     const mockSend = vi.fn().mockRejectedValue(error);
-    const mockClient = { send: mockSend };
+    const mockClient = asSsmClient(mockSend);
     const sut = new AwsSsmSecretProvider(mockClient);
 
     // Act

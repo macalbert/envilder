@@ -1,10 +1,10 @@
-# Envilder .NET SDK — Examples
+# Envilder .NET SDK: Examples
 
 Minimal examples showing how to load secrets from AWS SSM Parameter Store using the .NET SDK.
 
 Uses .NET 10
-[file-based apps](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-10/sdk#file-based-apps-enhancements)
-— no `.csproj` needed.
+[file-based apps](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-10/sdk#file-based-apps-enhancements),
+no `.csproj` needed.
 
 ## Prerequisites
 

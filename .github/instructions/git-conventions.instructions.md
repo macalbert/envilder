@@ -24,17 +24,17 @@ Apply these rules whenever making or validating git changes.
 
 ## GitHub CLI (`gh`) in PowerShell
 
-- NEVER use inline `--body "..."` with multi-line content — PowerShell garbles encoding (hex escapes, collapsed newlines).
-- NEVER use PowerShell here-strings (`@"..."@`) piped directly to `gh` — variable interpolation mangles backticks and special characters.
+- NEVER use inline `--body "..."` with multi-line content: PowerShell garbles encoding (hex escapes, collapsed newlines).
+- NEVER use PowerShell here-strings (`@"..."@`) piped directly to `gh`: variable interpolation mangles backticks and special characters.
 - Always use `--body-file` with a temp file for issue/PR bodies.
-- Create the file via the editor (e.g., `create_file` tool) or `Set-Content` with `-Encoding utf8NoBOM` — never via `Out-File` with here-strings containing markdown backticks.
+- Create the file via the editor (e.g., `create_file` tool) or `Set-Content` with `-Encoding utf8NoBOM`: never via `Out-File` with here-strings containing markdown backticks.
 
 ### Why encoding breaks
 
 PowerShell treats backticks (`` ` ``) as escape characters. In a here-string or double-quoted string:
 
 - `` `n `` becomes a literal newline
-- `` `e `` becomes an ESC character (U+001B) — this corrupts words like `` `envilder `` into garbage
+- `` `e `` becomes an ESC character (U+001B): this corrupts words like `` `envilder `` into garbage
 - `` `t `` becomes a tab
 
 This means any markdown with inline code (`` `envilder.json` ``) WILL be corrupted if passed through PowerShell string interpolation.

@@ -1,5 +1,13 @@
 import { GetParametersCommand, type SSMClient } from '@aws-sdk/client-ssm';
+import {
+  ExpiredCredentialsError,
+  isExpiredCredentialsError,
+} from '../../domain/expired-credentials-error.js';
 import type { ISecretProvider } from '../../domain/ports/secret-provider.js';
+import {
+  isSsoSessionExpiredError,
+  SsoSessionExpiredError,
+} from '../../domain/sso-session-expired-error.js';
 
 const SSM_BATCH_SIZE = 10;
 
@@ -14,12 +22,14 @@ const SSM_BATCH_SIZE = 10;
  */
 export class AwsSsmSecretProvider implements ISecretProvider {
   private readonly ssmClient: SSMClient;
+  private readonly profile?: string;
 
-  constructor(ssmClient: SSMClient) {
+  constructor(ssmClient: SSMClient, profile?: string) {
     if (!ssmClient) {
       throw new Error('ssmClient cannot be null');
     }
     this.ssmClient = ssmClient;
+    this.profile = profile;
   }
 
   async getSecrets(names: string[]): Promise<Map<string, string>> {
@@ -36,17 +46,27 @@ export class AwsSsmSecretProvider implements ISecretProvider {
 
     for (let i = 0; i < names.length; i += SSM_BATCH_SIZE) {
       const batch = names.slice(i, i + SSM_BATCH_SIZE);
-      const response = await this.ssmClient.send(
-        new GetParametersCommand({
-          Names: batch,
-          WithDecryption: true,
-        }),
-      );
+      try {
+        const response = await this.ssmClient.send(
+          new GetParametersCommand({
+            Names: batch,
+            WithDecryption: true,
+          }),
+        );
 
-      for (const param of response.Parameters ?? []) {
-        if (param.Name && param.Value != null) {
-          result.set(param.Name, param.Value);
+        for (const param of response.Parameters ?? []) {
+          if (param.Name && param.Value != null) {
+            result.set(param.Name, param.Value);
+          }
         }
+      } catch (error) {
+        if (isSsoSessionExpiredError(error)) {
+          throw new SsoSessionExpiredError(this.profile, error);
+        }
+        if (isExpiredCredentialsError(error)) {
+          throw new ExpiredCredentialsError(error);
+        }
+        throw error;
       }
     }
 

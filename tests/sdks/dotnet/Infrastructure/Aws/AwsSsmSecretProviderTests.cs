@@ -3,7 +3,7 @@ namespace Envilder.Tests.Infrastructure.Aws;
 using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
 using AwesomeAssertions;
-using global::Envilder.Infrastructure.Aws;
+using Envilder.Infrastructure.Aws;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
@@ -15,7 +15,7 @@ public class AwsSsmSecretProviderTests
 		// Arrange
 		var ssmClient = Substitute.For<IAmazonSimpleSystemsManagement>();
 		ssmClient.GetParameterAsync(
-				Arg.Is<GetParameterRequest>(r => r.Name == "/Test/Token" && r.WithDecryption == true),
+				Arg.Is<GetParameterRequest>(r => r!.Name == "/Test/Token" && r.WithDecryption == true),
 				Arg.Any<CancellationToken>())
 			.Returns(new GetParameterResponse
 			{
@@ -24,7 +24,7 @@ public class AwsSsmSecretProviderTests
 		var sut = new AwsSsmSecretProvider(ssmClient);
 
 		// Act
-		var actual = await sut.GetSecretAsync("/Test/Token");
+		var actual = await sut.GetSecretAsync("/Test/Token", TestContext.Current.CancellationToken);
 
 		// Assert
 		actual.Should().Be("secret-value-123");
@@ -42,7 +42,7 @@ public class AwsSsmSecretProviderTests
 		var sut = new AwsSsmSecretProvider(ssmClient);
 
 		// Act
-		var actual = await sut.GetSecretAsync("/Test/NonExistent");
+		var actual = await sut.GetSecretAsync("/Test/NonExistent", TestContext.Current.CancellationToken);
 
 		// Assert
 		actual.Should().BeNull();
@@ -54,7 +54,7 @@ public class AwsSsmSecretProviderTests
 		// Arrange
 		var ssmClient = Substitute.For<IAmazonSimpleSystemsManagement>();
 		ssmClient.GetParameterAsync(
-				Arg.Is<GetParameterRequest>(r => r.Name == "/Test/SyncToken" && r.WithDecryption == true),
+				Arg.Is<GetParameterRequest>(r => r!.Name == "/Test/SyncToken" && r.WithDecryption == true),
 				Arg.Any<CancellationToken>())
 			.Returns(new GetParameterResponse
 			{

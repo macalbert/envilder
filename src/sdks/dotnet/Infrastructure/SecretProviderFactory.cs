@@ -89,14 +89,14 @@ internal static class SecretProviderFactory
 			if (chain.TryGetAWSCredentials(profile, out var credentials))
 			{
 				var region = ResolveProfileRegion(chain, profile!);
-				return new(new AmazonSimpleSystemsManagementClient(credentials, region));
+				return new(new AmazonSimpleSystemsManagementClient(credentials, region), profile);
 			}
 
 			throw new InvalidOperationException(
 				$"AWS profile '{profile}' was not found in the credential store.");
 		}
 
-		return new(new AmazonSimpleSystemsManagementClient());
+		return new(new AmazonSimpleSystemsManagementClient(), profile);
 	}
 
 	private static RegionEndpoint ResolveProfileRegion(CredentialProfileStoreChain chain, string profile)

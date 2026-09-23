@@ -25,7 +25,9 @@ import {
   describe,
   expect,
   it,
+  onTestFinished,
 } from 'vitest';
+import { prependGlobalBinDirToPath } from '../scripts/pnpm-global-bin-dir';
 import { Startup } from '../src/envilder/apps/cli/Startup';
 import { DispatchActionCommand } from '../src/envilder/core/application/dispatch/DispatchActionCommand';
 import type { DispatchActionCommandHandler } from '../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
@@ -39,6 +41,8 @@ const ssmClient = new SSMClient({});
 // Lowkey Vault (Azure Key Vault test double)
 const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.61';
 const LOWKEY_VAULT_PORT = 8443;
+const LOWKEY_VAULT_STARTUP_TIMEOUT_MS = 180_000;
+const LOWKEY_VAULT_TEST_TIMEOUT_MS = 30_000;
 
 describe('Envilder (E2E)', () => {
   // Unique ID per test run prevents race conditions between concurrent CI runs
@@ -53,6 +57,8 @@ describe('Envilder (E2E)', () => {
   const singleSsmPath = `${ssmPrefix}/SingleVariable`;
 
   beforeAll(async () => {
+    prependGlobalBinDirToPath(process.env);
+
     tempDir = await mkdtemp(join(tmpdir(), `envilder-e2e-${runId}-`));
     envFilePath = join(tempDir, 'cli-validation.env');
     mapFilePath = join(tempDir, `envilder-${runId}.json`);
@@ -78,7 +84,7 @@ describe('Envilder (E2E)', () => {
 
     await cleanUpSystem();
     execSync('pnpm build', { cwd: rootDir, stdio: 'inherit' });
-    execSync('node --loader ts-node/esm scripts/pack-and-install.ts', {
+    execSync('pnpm exec tsx scripts/pack-and-install.ts', {
       cwd: rootDir,
       stdio: 'inherit',
     });
@@ -87,6 +93,9 @@ describe('Envilder (E2E)', () => {
   beforeEach(async () => {
     await cleanUpSsm(mapFilePath, singleSsmPath);
     await cleanUpSsm(mapFileWithConfigPath);
+    if (existsSync(envFilePath)) {
+      await unlink(envFilePath);
+    }
   }, 60_000);
 
   afterEach(async () => {
@@ -139,10 +148,6 @@ describe('Envilder (E2E)', () => {
       await SetParameterSsm(ssmPath, testValue);
     }
 
-    if (existsSync(envFilePath)) {
-      await unlink(envFilePath);
-    }
-
     // Act
     const actual = await runCommand(envilder, params);
 
@@ -166,10 +171,6 @@ describe('Envilder (E2E)', () => {
     for (const [key, ssmPath] of Object.entries(ssmParams)) {
       const testValue = `test-value-for-${key}`;
       await SetParameterSsm(ssmPath, testValue);
-    }
-
-    if (existsSync(envFilePath)) {
-      await unlink(envFilePath);
     }
 
     // Act
@@ -198,16 +199,52 @@ describe('Envilder (E2E)', () => {
     expect(actual.output).toContain('error');
   });
 
-  it('Should_ShowErrorMessage_When_RequiredOptionsAreMissing', async () => {
+  it('Should_ShowErrorMessage_When_NoMapFlagAndEnvilderJsonAbsent', async () => {
     // Arrange
+    const emptyDir = await mkdtemp(
+      join(tmpdir(), `envilder-e2e-empty-${runId}-`),
+    );
+    onTestFinished(() => rm(emptyDir, { recursive: true, force: true }));
     const params: string[] = [];
 
     // Act
-    const actual = await runCommand(envilder, params);
+    const actual = await runCommand(envilder, params, { cwd: emptyDir });
 
     // Assert
+    expect(actual.code).not.toBe(0);
     expect(actual.output).toContain(
-      'Missing required arguments: --map and --envfile',
+      'No map file found. Provide --map or create envilder.json in the current directory.',
+    );
+  });
+
+  it('Should_GenerateEnvFile_When_NoArgumentsProvidedAndEnvilderJsonExists', async () => {
+    // Arrange
+    const zeroConfigDir = await mkdtemp(
+      join(tmpdir(), `envilder-e2e-zero-${runId}-`),
+    );
+    onTestFinished(() => rm(zeroConfigDir, { recursive: true, force: true }));
+    const defaultMapPath = join(zeroConfigDir, 'envilder.json');
+    const defaultEnvPath = join(zeroConfigDir, '.env');
+    const expected = 'zero-config-value-for-TOKEN_SECRET';
+
+    const ssmParams = readMappings(mapFilePath);
+    await writeFile(
+      defaultMapPath,
+      JSON.stringify({ TOKEN_SECRET: `${ssmPrefix}/Token` }, null, 2),
+    );
+
+    for (const ssmPath of Object.values(ssmParams)) {
+      await SetParameterSsm(ssmPath, expected);
+    }
+
+    // Act
+    const actual = await runCommand(envilder, [], { cwd: zeroConfigDir });
+
+    // Assert
+    expect(actual.code).toBe(0);
+    expect(existsSync(defaultEnvPath)).toBe(true);
+    expect(readFileSync(defaultEnvPath, 'utf8')).toContain(
+      `TOKEN_SECRET=${expected}`,
     );
   });
 
@@ -265,6 +302,10 @@ describe('Envilder (E2E)', () => {
     // Arrange
     const key = 'SINGLE_VARIABLE';
     const value = 'single-value-test';
+    const isolatedDir = await mkdtemp(
+      join(tmpdir(), `envilder-e2e-single-${runId}-`),
+    );
+    onTestFinished(() => rm(isolatedDir, { recursive: true, force: true }));
 
     const params = [
       '--key',
@@ -276,7 +317,7 @@ describe('Envilder (E2E)', () => {
     ];
 
     // Act
-    const actual = await runCommand(envilder, params);
+    const actual = await runCommand(envilder, params, { cwd: isolatedDir });
 
     // Assert
     expect(actual.code).toBe(0);
@@ -312,18 +353,20 @@ describe('Envilder (E2E)', () => {
     }
   });
 
-  describe('Azure Key Vault', () => {
+  describe('Azure Key Vault', { timeout: LOWKEY_VAULT_TEST_TIMEOUT_MS }, () => {
     let lowkeyVaultContainer: StartedTestContainer;
     let azureVaultUrl: string;
     let lowkeyVaultHost: string;
     let azureSecretClient: SecretClient;
     let azureMapFilePath: string;
     let azureEnvFilePath: string;
+    let noUrlMapPath: string;
     let originalTlsReject: string | undefined;
 
     beforeAll(async () => {
       azureMapFilePath = join(tempDir, 'envilder-azure.json');
       azureEnvFilePath = join(tempDir, 'azure-validation.env');
+      noUrlMapPath = join(tempDir, 'envilder-azure-no-url.json');
       originalTlsReject = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
       // Self-signed cert on a local test container — safe to skip validation
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -334,6 +377,7 @@ describe('Envilder (E2E)', () => {
         .withEnvironment({
           LOWKEY_ARGS: '--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true',
         })
+        .withStartupTimeout(LOWKEY_VAULT_STARTUP_TIMEOUT_MS)
         .start();
 
       const host = lowkeyVaultContainer.getHost();
@@ -366,7 +410,7 @@ describe('Envilder (E2E)', () => {
           2,
         ),
       );
-    }, 120_000);
+    }, 240_000);
 
     afterAll(async () => {
       if (lowkeyVaultContainer) {
@@ -384,11 +428,17 @@ describe('Envilder (E2E)', () => {
       if (azureEnvFilePath && existsSync(azureEnvFilePath)) {
         await unlink(azureEnvFilePath);
       }
+      if (noUrlMapPath && existsSync(noUrlMapPath)) {
+        await unlink(noUrlMapPath);
+      }
     }, 60_000);
 
     beforeEach(async () => {
       if (existsSync(azureEnvFilePath)) {
         await unlink(azureEnvFilePath);
+      }
+      if (existsSync(noUrlMapPath)) {
+        await unlink(noUrlMapPath);
       }
     });
 
@@ -423,7 +473,6 @@ describe('Envilder (E2E)', () => {
     it('Should_PullFromAzureKeyVault_When_VaultUrlProvidedViaConfig', async () => {
       // Arrange
       await azureSecretClient.setSecret('test-secret', 'config-override-value');
-      const noUrlMapPath = join(tempDir, 'envilder-azure-no-url.json');
       writeFileSync(
         noUrlMapPath,
         JSON.stringify(
@@ -458,10 +507,6 @@ describe('Envilder (E2E)', () => {
       expect(existsSync(azureEnvFilePath)).toBe(true);
       const envValue = GetSecretFromKey(azureEnvFilePath, 'VAULT_SECRET');
       expect(envValue).toBe('config-override-value');
-
-      if (existsSync(noUrlMapPath)) {
-        await unlink(noUrlMapPath);
-      }
     });
 
     it('Should_PushEnvFileToAzureKeyVault_When_PushFlagWithAzureProvider', async () => {
@@ -524,12 +569,13 @@ describe('Envilder (E2E)', () => {
 function runCommand(
   command: string,
   args: string[],
+  options: { cwd?: string } = {},
 ): Promise<{ code: number; output: string }> {
   console.log(
     `${pc.bold(pc.bgCyan(pc.black(' [CLI TEST] INPUT ')))} ${pc.cyan(`${command} ${args.join(' ')}`)}`,
   );
   return new Promise((resolve) => {
-    const proc = spawn(command, args, { shell: true });
+    const proc = spawn(command, args, { shell: true, cwd: options.cwd });
     let output = '';
     proc.stdout.on('data', (data) => {
       output += data.toString();
@@ -563,7 +609,6 @@ async function cleanUpSystem() {
     try {
       execSync('pnpm remove -g envilder', {
         stdio: 'pipe',
-        shell: true,
       });
     } catch {
       // Ignore errors if not installed

@@ -5,7 +5,7 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/macalbert/envilder/blob/main/LICENSE)
 
 Securely load environment variables from **AWS SSM Parameter Store** or **Azure Key Vault** directly into your Python application.
-Zero vendor lock-in — secrets stay in your cloud.
+Zero vendor lock-in: secrets stay in your cloud.
 
 Part of the [Envilder](https://github.com/macalbert/envilder) project.
 
@@ -48,7 +48,7 @@ print(secrets['DB_PASSWORD'])
 
 ### Fluent builder (with overrides)
 
-Override the map file's `$config` at runtime — useful for switching providers,
+Override the map file's `$config` at runtime: useful for switching providers,
 profiles, or vault URLs per environment:
 
 ```python
@@ -103,7 +103,7 @@ Behaviour:
 
 - If the environment maps to a file path, secrets are loaded from that file.
 - If the environment maps to `None` or is not in the mapping, an empty dict
-  is returned silently — no errors, no output.
+  is returned silently: no errors, no output.
 - The environment name is stripped of leading/trailing whitespace before lookup.
 - Empty or whitespace-only environment names raise `ValueError`.
 

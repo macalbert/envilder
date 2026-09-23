@@ -16,9 +16,25 @@ export interface Props {
   lang?: SupportedLang;
   filename?: string;
   code: string;
+  contentId?: string;
 }
 
-const { lang = 'json', filename, code } = Astro.props;
+function createContentId(code: string, filename?: string): string {
+  let hash = 5381;
+
+  for (const character of code) {
+    hash = (hash * 33) ^ character.charCodeAt(0);
+  }
+
+  return `${filename ?? 'snippet'}-${(hash >>> 0).toString(36)}`;
+}
+
+const {
+  lang = 'json',
+  filename,
+  code,
+  contentId = createContentId(code, filename),
+} = Astro.props;
 const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
 ---
 
@@ -32,7 +48,10 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
   <div class="codeblock-body" tabindex="0">
     <button
       class="copy-btn"
-      data-code={code}
+      data-copy-command={code}
+      data-analytics-event="copy_code"
+      data-analytics-content-id={contentId}
+      data-analytics-language={lang}
       aria-label="Copy code to clipboard"
       type="button"
     >
@@ -191,23 +210,7 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
     document.querySelectorAll<HTMLButtonElement>('.copy-btn').forEach((btn) => {
       if (btn.dataset.copyInit) return;
       btn.dataset.copyInit = 'true';
-      btn.addEventListener('click', async () => {
-        const code = btn.getAttribute('data-code');
-        if (!code) return;
-
-        try {
-          await navigator.clipboard.writeText(code);
-        } catch {
-          return;
-        }
-
-        if (typeof window.gtag === 'function') {
-          window.gtag('event', 'copy_code', {
-            event_category: 'engagement',
-            event_label: code.substring(0, 80),
-          });
-        }
-
+      btn.addEventListener('analytics:copied', () => {
         const copyIcon = btn.querySelector<SVGElement>('.copy-icon');
         const checkIcon = btn.querySelector<SVGElement>('.check-icon');
         if (copyIcon) copyIcon.style.display = 'none';

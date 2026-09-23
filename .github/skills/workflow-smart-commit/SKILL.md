@@ -18,7 +18,7 @@ Analyze staged changes and create a conventional commit message.
 
 1. Run `git diff --cached --stat` to see what's staged.
 2. Run `git diff --cached` to read the full diff.
-3. Analyze the changes — identify the dominant change type and scope.
+3. Analyze the changes: identify the dominant change type and scope.
 4. Generate a conventional commit message following the [format](#commit-message-format), [rules](#rules), and [scope heuristics](./reference.md).
 5. Present the commit message for user approval.
 6. Run `git commit -m "<message>"` after approval.
@@ -53,7 +53,7 @@ See [reference.md](./reference.md) for the full scope table.
 - Description: imperative mood, lowercase, no period, max 72 chars
 - Body: wrap at 72 chars, explain *why* not *what*
 - If changes span multiple scopes, use the most significant one
-- Breaking changes: add `!` after scope — `feat(cli)!: remove --legacy flag`
+- Breaking changes: add `!` after scope: `feat(cli)!: remove --legacy flag`
 
 ## Constraints
 

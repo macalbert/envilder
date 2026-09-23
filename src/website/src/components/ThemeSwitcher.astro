@@ -122,12 +122,6 @@ const t = useTranslations(lang);
         const theme = btn.dataset.themeValue;
         if (theme) {
           applyTheme(theme, true); // explicit user choice → persist
-          if (typeof window.gtag === 'function') {
-            window.gtag('event', 'switch_theme', {
-              event_category: 'engagement',
-              event_label: theme,
-            });
-          }
         }
       });
     });

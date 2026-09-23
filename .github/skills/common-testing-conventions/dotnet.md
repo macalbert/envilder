@@ -120,7 +120,7 @@ public class ApiServicesFactory : LocalStackWebBaseServicesFactory<IMinimalApiMa
 }
 ```
 
-## Test Cleanup — No `try/catch/finally` in Tests
+## Test Cleanup: No `try/catch/finally` in Tests
 
 **NEVER** use `try/catch`, `try/finally`, `if`, `switch`, or any control flow inside test methods.
 Use framework teardown mechanisms instead:
@@ -133,7 +133,7 @@ Use framework teardown mechanisms instead:
 | Environment variable restore | Save in `InitializeAsync`, restore in `DisposeAsync` |
 
 ```csharp
-// GOOD — cleanup via IAsyncLifetime
+// GOOD: cleanup via IAsyncLifetime
 public class MyTests : IAsyncLifetime
 {
     private (string Name, string? Value)[] _originalEnvValues = [];
@@ -167,7 +167,7 @@ public class MyTests : IAsyncLifetime
     }
 }
 
-// BAD — try/finally in test body
+// BAD: try/finally in test body
 [Fact]
 public void Should_UseEnvVar_When_Set()
 {

@@ -2,20 +2,27 @@ pre-commit:
   commands:
     biome:
       glob: "**/*.{ts,tsx,js,jsx,json,jsonc,astro,mjs}"
+      exclude: "github-action/dist/index.js"
       run: >-
-        pnpx biome check --write --unsafe --no-errors-on-unmatched {staged_files} &&
-        pnpx biome format --write --no-errors-on-unmatched {staged_files}
+        pnpm exec biome check --write --unsafe --no-errors-on-unmatched {staged_files} &&
+        pnpm exec biome format --write --no-errors-on-unmatched {staged_files}
       stage_fixed: true
     dotnet-format:
       glob: "**/*.{cs,csproj}"
       run: dotnet format src/sdks/dotnet/Envilder.sln --include {staged_files}
       stage_fixed: true
-    python-format-check:
-      glob: "**/*.py"
+    python-format-src:
+      glob: "src/sdks/python/**/*.py"
       run: >-
         uv run --project src/sdks/python black {staged_files} &&
         uv run --project src/sdks/python isort {staged_files} &&
         uv run --project src/sdks/python mypy src/sdks/python/envilder/
+      stage_fixed: true
+    python-format-tests:
+      glob: "tests/sdks/python/**/*.py"
+      run: >-
+        uv run --project src/sdks/python black {staged_files} &&
+        uv run --project src/sdks/python isort {staged_files}
       stage_fixed: true
 
 commit-msg:

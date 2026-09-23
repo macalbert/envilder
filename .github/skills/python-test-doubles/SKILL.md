@@ -11,7 +11,7 @@ This skill defines how to use test doubles in Python (unittest.mock + pytest).
 
 ## Test Doubles Types
 
-### 1. Mock — Mock / AsyncMock
+### 1. Mock: Mock / AsyncMock
 
 Use `Mock` and `AsyncMock` to create mock objects for protocol interfaces.
 
@@ -37,7 +37,7 @@ def async_provider() -> AsyncMock:
 
 **MANDATORY:** Always use `spec=InterfaceClass` to catch typos at test time.
 
-### 2. Stub — return_value / side_effect
+### 2. Stub: return_value / side_effect
 
 Use `return_value` or `side_effect` to configure stubs.
 
@@ -58,7 +58,7 @@ def resolve_secret(name: str) -> str | None:
 provider.get_secret.side_effect = resolve_secret
 ```
 
-### 3. Spy — wraps
+### 3. Spy: wraps
 
 Use `wraps` to observe calls on real objects without replacing behavior.
 
@@ -74,7 +74,7 @@ sut.resolve_secrets(map_file)
 spy_parser.parse.assert_called_once_with(map_file)
 ```
 
-### 4. Module Patch — patch / patch.object
+### 4. Module Patch: patch / patch.object
 
 Use `patch` to replace module-level objects or class methods.
 
@@ -100,7 +100,7 @@ def Should_CallSSM_When_AwsProviderUsed(mock_boto: Mock) -> None:
     mock_ssm.get_parameter.assert_called_once()
 ```
 
-### 5. Error Simulation — side_effect with Exception
+### 5. Error Simulation: side_effect with Exception
 
 Use `side_effect` with an exception to simulate failures.
 

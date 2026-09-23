@@ -1,9 +1,9 @@
-# Envilder Python SDK — Examples
+# Envilder Python SDK: Examples
 
 Minimal examples showing how to load secrets from AWS SSM Parameter Store using the Python SDK.
 
-Uses [PEP 723](https://peps.python.org/pep-0723/) inline script metadata
-— no setup required.
+Uses [PEP 723](https://peps.python.org/pep-0723/) inline script metadata,
+no setup required.
 
 ## Prerequisites
 

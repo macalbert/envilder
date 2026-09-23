@@ -1,8 +1,92 @@
+## [Unreleased]
+
+### Security
+
+* **Reject map-file mapping keys a `.env` file cannot represent**: Variable
+  names must now match `^[A-Za-z0-9_.-]+$`, checked when parsing a map file
+  and again before writing an environment file. This is exactly the key
+  grammar `.env` parsers recognize, so an accepted name reads back as itself.
+  Previously a name containing `=`, a carriage return, a newline or the
+  `U+2028`/`U+2029` line separators could smuggle an extra `key=value`
+  assignment into the generated file, and a name containing a space, `#`, a
+  tab or a non-Latin letter was written and then silently lost while the run
+  reported success. Dotted and hyphenated names remain valid
+  ([#511](https://github.com/macalbert/envilder/issues/511))
+
+* **Reject the mapping key `__proto__`**: No `.env` parser can read this name
+  back, so the Action previously resolved the secret and wrote a line that
+  silently never loaded. It is now rejected at map-file ingestion with an
+  explicit message ([#511](https://github.com/macalbert/envilder/issues/511))
+
+---
+
+## [0.13.2] - 2026-08-14
+
+### Security
+
+* **Mask resolved secrets in subsequent workflow logs**: Register every
+  non-empty resolved value with the GitHub Actions runner before writing it
+  to the environment file, so exact matches emitted by later steps are
+  redacted. CLI behavior remains unchanged
+  ([#476](https://github.com/macalbert/envilder/issues/476),
+  [#477](https://github.com/macalbert/envilder/pull/477))
+
+---
+
+## [0.13.1] - 2026-07-31
+
+### Changed
+
+* **Bundle the GitHub Action with esbuild**: Replace the ncc bundler so the
+  Action can build with TypeScript 7 while retaining a single minified
+  `dist/index.js` file, and configure Node.js 22 before executing the bundle.
+
+* **Run development scripts with tsx**: Replace ts-node, which is incompatible
+  with TypeScript 7, for local package installation and CDK execution.
+
+---
+
+## [0.13.0] - 2026-06-26
+
+### Added
+
+* **Colorized `AWS identity` banner**: The
+  `☁ AWS identity · account=… · region=… · profile=…` line is now colorized.
+  `account` and `region` render in red when they resolve to `unknown`,
+  signalling that authentication failed
+  ([#382](https://github.com/macalbert/envilder/issues/382))
+
+### Changed
+
+* **Print the `AWS identity` banner before resolving secrets**: The
+  banner is now printed before secrets are resolved, so it always
+  appears first. Previously it could surface mid-output because secrets
+  resolve in parallel
+  ([#382](https://github.com/macalbert/envilder/issues/382))
+
+### Fixed
+
+* **Clear error for expired or invalid AWS credentials**: Expired or
+  invalid AWS credentials (e.g. an expired session token) now produce a
+  clear, actionable `ExpiredCredentialsError` during the pull, telling
+  you to refresh credentials (e.g. run `aws sso login`), instead of
+  being masked as a misleading `ParameterNotFound`
+
+* **Expired SSO sessions surface as `SsoSessionExpiredError`**: When an
+  AWS SSO session can no longer be resolved, the action now fails with a
+  clear, actionable `SsoSessionExpiredError` that names the AWS profile
+  and the `aws sso login` command to run, instead of being lumped in
+  with a generic `ExpiredCredentialsError`. The action runs
+  non-interactively, so it presents the message only; it never prompts
+  or redirects
+
+---
+
 ## [0.12.1] - 2026-06-26
 
 ### Fixed
 
-* **Honor `$config.profile` for the AWS region, not just credentials** —
+* **Honor `$config.profile` for the AWS region, not just credentials**:
   When a map file set an AWS profile via `$config.profile`, the action
   applied it to credentials only; the AWS SDK fell back to the default
   profile's region and silently read SSM parameters from the wrong
@@ -14,9 +98,9 @@
 
 ### Added
 
-* **Log the effective AWS identity before resolving secrets** —
+* **Log the effective AWS identity before resolving secrets**:
   Before the first read, the action logs
-  `AWS identity → account=… region=… profile=…` so a misrouted account
+  `☁ AWS identity · account=… · region=… · profile=…` so a misrouted account
   or region is immediately visible. The account is read from the active
   credentials, falling back to an STS `GetCallerIdentity` call when not
   present, then `unknown`
@@ -28,7 +112,7 @@
 
 ### Changed
 
-* **Preserve existing `.env` formatting on pull** — When the target `.env`
+* **Preserve existing `.env` formatting on pull**: When the target `.env`
   file already exists, the action now updates values in place instead of
   rewriting the file from scratch. Full-line comments, blank lines, key
   ordering, `export` prefixes, and surrounding spacing are preserved; only
@@ -46,7 +130,7 @@
 
 ### Changed
 
-* **BREAKING: Require Node.js >= 22.12** — GitHub Actions workflows updated
+* **BREAKING: Require Node.js >= 22.12**: GitHub Actions workflows updated
   to use `node-version: "22.x"`. The bundled CLI now requires Node.js 22.12+
   ([#291](https://github.com/macalbert/envilder/pull/291))
 
@@ -60,7 +144,7 @@
 
 ### Fixed
 
-* **Reserved key filtering** — `$schema` and other `$`-prefixed keys no longer
+* **Reserved key filtering**: `$schema` and other `$`-prefixed keys no longer
   leak into environment variable mappings
   ([#218](https://github.com/macalbert/envilder/pull/218))
 
@@ -108,10 +192,10 @@
 
 ### Added
 
-* **Azure Key Vault support** — Use `provider: azure` input to pull secrets from Azure Key Vault
-* New input `vault-url` — Azure Key Vault URL, overrides `$config.vaultUrl` in the map file
-* New input `provider` — Select cloud provider (`aws` or `azure`, default: `aws`)
-* `$config` section support in map files — declare provider and connection details inline
+* **Azure Key Vault support**: Use `provider: azure` input to pull secrets from Azure Key Vault
+* New input `vault-url`: Azure Key Vault URL, overrides `$config.vaultUrl` in the map file
+* New input `provider`: Select cloud provider (`aws` or `azure`, default: `aws`)
+* `$config` section support in map files: declare provider and connection details inline
 
 ### Changed
 
@@ -133,7 +217,7 @@
 
 ### Added
 
-* **Initial GitHub Action release** — Use Envilder in CI/CD workflows natively
+* **Initial GitHub Action release**: Use Envilder in CI/CD workflows natively
 * Pull secrets from AWS SSM Parameter Store into `.env` files during workflow runs
 * End-to-end tests for GitHub Actions simulation
 

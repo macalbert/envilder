@@ -10,6 +10,7 @@ import {
   it,
   vi,
 } from 'vitest';
+import { EnvironmentVariable } from '../../../../../src/envilder/core/domain/EnvironmentVariable';
 import {
   InvalidArgumentError,
   SecretOperationError,
@@ -19,6 +20,7 @@ import { AzureKeyVaultSecretProvider } from '../../../../../src/envilder/core/in
 // Constants for integration tests
 const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.32';
 const LOWKEY_VAULT_PORT = 8443;
+const LOWKEY_VAULT_STARTUP_TIMEOUT_MS = 180_000;
 const SECRET_NAME = 'test-secret';
 const SECRET_VALUE = 'super-secret-value';
 const NON_EXISTENT_SECRET = 'non-existent-secret';
@@ -74,10 +76,13 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
       mockGetSecretFn.mockRejectedValueOnce(error);
 
       // Act
-      const action = sut.getSecret('test-secret');
+      const thrown = await sut
+        .getSecret('test-secret')
+        .catch((e: unknown) => e);
 
       // Assert
-      await expect(action).rejects.toThrow(SecretOperationError);
+      expect(thrown).toBeInstanceOf(SecretOperationError);
+      expect((thrown as Error).message).toBe('********ret: Network error');
     });
 
     it('Should_ThrowSecretOperationError_When_NonErrorObjectIsThrown', async () => {
@@ -89,6 +94,20 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
 
       // Assert
       await expect(action).rejects.toThrow(SecretOperationError);
+    });
+
+    it('Should_ReferenceOriginalName_When_NormalizedNameDiffersAndErrorOccurs', async () => {
+      // Arrange
+      const originalName = '/App/DB_Password';
+      mockGetSecretFn.mockRejectedValueOnce(new Error('Network error'));
+
+      // Act
+      const thrown = await sut.getSecret(originalName).catch((e: unknown) => e);
+
+      // Assert
+      expect((thrown as Error).message).toBe(
+        `${EnvironmentVariable.maskSecretPath(originalName)}: Network error`,
+      );
     });
 
     it('Should_NormalizeSecretName_When_NameContainsSlashes', async () => {
@@ -306,6 +325,7 @@ describe('AzureKeyVaultSecretProvider (integration with Lowkey Vault)', () => {
       .withEnvironment({
         LOWKEY_ARGS: '--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true',
       })
+      .withStartupTimeout(LOWKEY_VAULT_STARTUP_TIMEOUT_MS)
       .start();
 
     const host = container.getHost();
@@ -324,7 +344,7 @@ describe('AzureKeyVaultSecretProvider (integration with Lowkey Vault)', () => {
 
     // Set up initial test secret
     await secretClient.setSecret(SECRET_NAME, SECRET_VALUE);
-  }, 120000);
+  }, 240_000);
 
   afterAll(async () => {
     if (container) {

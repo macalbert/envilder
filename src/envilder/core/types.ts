@@ -1,6 +1,7 @@
 export const DOMAIN = {
   ILogger: Symbol.for('ILogger'),
   ISecretProvider: Symbol.for('ISecretProvider'),
+  ISecretMasker: Symbol.for('ISecretMasker'),
   IVariableStore: Symbol.for('IVariableStore'),
 };
 

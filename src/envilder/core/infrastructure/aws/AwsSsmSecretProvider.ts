@@ -5,10 +5,18 @@ import {
 } from '@aws-sdk/client-ssm';
 import { GetCallerIdentityCommand, type STS } from '@aws-sdk/client-sts';
 import { injectable } from 'inversify';
+import pc from 'picocolors';
 import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
-import { SecretOperationError } from '../../domain/errors/DomainErrors.js';
+import {
+  ExpiredCredentialsError,
+  SecretOperationError,
+  SsoSessionExpiredError,
+} from '../../domain/errors/DomainErrors.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
+import { describeError } from '../describeError.js';
+import { isExpiredCredentialsError } from './isExpiredCredentialsError.js';
+import { isSsoSessionExpiredError } from './isSsoSessionExpiredError.js';
 
 @injectable()
 export class AwsSsmSecretProvider implements ISecretProvider {
@@ -26,7 +34,7 @@ export class AwsSsmSecretProvider implements ISecretProvider {
   }
 
   async getSecret(name: string): Promise<string | undefined> {
-    await this.logIdentityOnce();
+    await this.logIdentity();
     try {
       const command = new GetParameterCommand({
         Name: name,
@@ -43,26 +51,42 @@ export class AwsSsmSecretProvider implements ISecretProvider {
       ) {
         return undefined;
       }
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      if (isSsoSessionExpiredError(error)) {
+        throw new SsoSessionExpiredError(this.profile, error);
+      }
+      if (isExpiredCredentialsError(error)) {
+        throw new ExpiredCredentialsError(error);
+      }
       throw new SecretOperationError(
-        `Failed to get secret ${EnvironmentVariable.maskSecretPath(name)}: ${errorMessage}`,
+        `${EnvironmentVariable.maskSecretPath(name)}: ${describeError(error)}`,
       );
     }
   }
 
   async setSecret(name: string, value: string): Promise<void> {
-    await this.logIdentityOnce();
+    await this.logIdentity();
     const command = new PutParameterCommand({
       Name: name,
       Value: value,
       Type: 'SecureString',
       Overwrite: true,
     });
-    await this.ssm.send(command);
+    try {
+      await this.ssm.send(command);
+    } catch (error) {
+      if (isSsoSessionExpiredError(error)) {
+        throw new SsoSessionExpiredError(this.profile, error);
+      }
+      if (isExpiredCredentialsError(error)) {
+        throw new ExpiredCredentialsError(error);
+      }
+      throw new SecretOperationError(
+        `${EnvironmentVariable.maskSecretPath(name)}: ${describeError(error)}`,
+      );
+    }
   }
 
-  private async logIdentityOnce(): Promise<void> {
+  async logIdentity(): Promise<void> {
     if (this.identityLogged) {
       return;
     }
@@ -72,8 +96,31 @@ export class AwsSsmSecretProvider implements ISecretProvider {
       this.resolveAccount(),
     ]);
     const profile = this.profile ?? 'default';
-    this.logger.info(
-      `AWS identity → account=${account} region=${region} profile=${profile}`,
+    this.logger.info(this.formatIdentityBanner(account, region, profile));
+  }
+
+  private formatIdentityBanner(
+    account: string,
+    region: string,
+    profile: string,
+  ): string {
+    const sep = pc.dim(' · ');
+    const accountValue =
+      account === 'unknown' ? pc.red(account) : pc.green(account);
+    const regionValue =
+      region === 'unknown' ? pc.red(region) : pc.yellow(region);
+    return (
+      '\n' +
+      pc.bold(pc.cyan('☁ AWS identity')) +
+      sep +
+      pc.dim('account=') +
+      accountValue +
+      sep +
+      pc.dim('region=') +
+      regionValue +
+      sep +
+      pc.dim('profile=') +
+      pc.magenta(profile)
     );
   }
 

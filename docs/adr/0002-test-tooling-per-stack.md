@@ -17,7 +17,7 @@ Key requirements:
 - **Test doubles** must follow the same taxonomy (Fake, Dummy, Stub, Spy, Mock)
 - **Container-based acceptance tests** share the same infrastructure
   (see [ADR-0001](./0001-sdk-acceptance-test-infrastructure.md))
-- **No test data generation library** in TypeScript or Python — inline
+- **No test data generation library** in TypeScript or Python: inline
   construction is sufficient given the small domain surface
 
 ## Decision
@@ -62,10 +62,10 @@ Key requirements:
 
 ### Positive
 
-- Each stack uses idiomatic, community-standard tools — no exotic choices.
+- Each stack uses idiomatic, community-standard tools: no exotic choices.
 - Vitest covers TypeScript core, Node.js SDK, and IaC from a single config
   (workspace-aware via `pnpm-workspace.yaml`).
-- Test double taxonomy (Fake/Dummy/Stub/Spy/Mock) is stack-independent — the
+- Test double taxonomy (Fake/Dummy/Stub/Spy/Mock) is stack-independent: the
   concept transfers, only the library differs.
 
 ### Negative

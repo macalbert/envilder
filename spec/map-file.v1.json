@@ -164,6 +164,10 @@
   },
   "additionalProperties": {
     "type": "string",
-    "description": "Variable mapping with non-standard naming. Keys SHOULD match ^[a-zA-Z_][a-zA-Z0-9_]*$ (valid POSIX env var names) but parsers accept any non-$-prefixed string key."
+    "description": "Variable mapping with non-standard naming. Keys SHOULD match ^[a-zA-Z_][a-zA-Z0-9_]*$ (valid POSIX env var names). Parsers additionally accept dotted and hyphenated names, but not names outside ^[A-Za-z0-9_.-]+$, which a .env file cannot represent."
+  },
+  "propertyNames": {
+    "pattern": "^(\\$.*|(?!__proto__$)[A-Za-z0-9_.-]+)$",
+    "description": "Non-$-prefixed keys (variable names) may only contain letters, digits, underscore, dot and hyphen. This is exactly the key grammar a .env parser recognizes, so an accepted name reads back as itself and nothing else. Names outside it are either written and then silently lost (a space, '#', a tab, a non-Latin letter) or read back as a different assignment ('=', carriage return, newline, U+2028, U+2029). The name '__proto__' is additionally rejected because every .env parser drops it."
   }
 }

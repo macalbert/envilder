@@ -28,6 +28,7 @@ export interface HeroTranslations {
   title2: string;
   titleAccent: string;
   description: string;
+  positioning: string;
   descAws: string;
   descAzure: string;
   descOr: string;
@@ -56,8 +57,21 @@ export interface TrustTranslations {
   label: string;
 }
 
+export type PixelSpriteName =
+  | 'skull'
+  | 'lock'
+  | 'snail'
+  | 'brick'
+  | 'clipboard'
+  | 'refresh'
+  | 'cloud'
+  | 'gear'
+  | 'plug'
+  | 'chart'
+  | 'person';
+
 export interface ProblemItem {
-  icon: string;
+  icon: PixelSpriteName;
   title: string;
   description: string;
 }
@@ -94,14 +108,14 @@ export interface HowItWorksTranslations {
 }
 
 export interface FeatureItem {
-  icon: string;
+  icon: PixelSpriteName;
   title: string;
   description: string;
   badge?: string;
 }
 
 export interface FeatureExtraItem {
-  icon: string;
+  icon: PixelSpriteName;
   title: string;
   description: string;
 }
@@ -120,6 +134,7 @@ export interface DemoTranslations {
   titleAccent: string;
   subtitle: string;
   cliDemo: string;
+  transcript: string;
   ghaWorkflow: string;
   comingSoon: string;
 }
@@ -137,6 +152,7 @@ export interface ProvidersTranslations {
   gcpTitle: string;
   gcpBadge: string;
   gcpFeatures: string[];
+  gcpRoadmapLink: string;
   configPriorityTitle: string;
   priorityHigh: string;
   priorityMid: string;
@@ -208,7 +224,7 @@ export interface GetStartedTranslations {
   prereqNode: string;
   prereqAws: string;
   prereqAzure: string;
-  prereqIam: string;
+  prereqProviderChoice: string;
   prereqAwsNote: string;
   prereqAzureNote: string;
   install: string;
@@ -217,16 +233,12 @@ export interface GetStartedTranslations {
   step2: string;
   step3: string;
   terminalTitle: string;
-  commentInstall: string;
   commentCreate: string;
   commentPull: string;
   commentPush: string;
   doneMessage: string;
-  pushSuccess: string;
-  sdkTerminalTitle: string;
-  sdkComment1: string;
-  sdkComment2: string;
   sdkComment3: string;
+  sdkExampleLink: string;
 }
 
 export interface FooterTranslations {
@@ -253,10 +265,12 @@ export interface FooterTranslations {
 
 export interface ChangelogPageTranslations {
   title: string;
+  description: string;
   backToHome: string;
   fullChangelog: string;
   changelogAccent: string;
   intro: string;
+  releaseNotesLanguage: string;
   githubReleases: string;
   versions: string;
   backToTop: string;
@@ -268,11 +282,47 @@ export interface ChangelogPageTranslations {
   categorySdkNodejs: string;
 }
 
+export interface DocsPageTranslations {
+  title: string;
+  description: string;
+  heading: string;
+  intro: string;
+  breadcrumb: string;
+  navLabel: string;
+  cardTitle: string;
+  cardSummary: string;
+}
+
 export interface DocsTranslations {
   title: string;
+  description: string;
   backToHome: string;
   pageTitle: string;
   intro: string;
+  pages: Record<
+    | 'hub'
+    | 'getting-started'
+    | 'aws-ssm'
+    | 'azure-key-vault'
+    | 'map-file'
+    | 'cli-pull'
+    | 'cli-push'
+    | 'github-action'
+    | 'sdk-dotnet'
+    | 'sdk-python'
+    | 'sdk-nodejs',
+    DocsPageTranslations
+  >;
+  breadcrumbLabel: string;
+  breadcrumbHome: string;
+  breadcrumbDocs: string;
+  navigationLabel: string;
+  mobileNavigation: string;
+  navGettingStarted: string;
+  navProviders: string;
+  hubCardsLabel: string;
+  openPage: string;
+  pagerLabel: string;
   // Sidebar
   sidebarGettingStarted: string;
   sidebarRequirements: string;
@@ -435,6 +485,7 @@ export interface DocsTranslations {
   pushSingleOptKey: string;
   pushSingleOptValue: string;
   pushSingleOptPath: string;
+  pushSingleOptMap: string;
   pushSingleOptProvider: string;
   pushSingleOptVault: string;
   pushSingleOptProfile: string;
@@ -531,6 +582,15 @@ export interface DocsTranslations {
 export interface HomeMetaTranslations {
   title: string;
   description: string;
+  ogImageAlt: string;
+}
+
+export interface NotFoundTranslations {
+  title: string;
+  description: string;
+  heading: string;
+  body: string;
+  home: string;
 }
 
 export interface SponsorsTranslations {
@@ -542,6 +602,7 @@ export interface SponsorsTranslations {
 
 export interface Translations {
   homeMeta: HomeMetaTranslations;
+  notFound: NotFoundTranslations;
   nav: NavLinks;
   theme: ThemeTranslations;
   hero: HeroTranslations;

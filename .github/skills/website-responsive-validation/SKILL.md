@@ -45,9 +45,9 @@ For **each** breakpoint:
 
 1. **Resize** the browser to the target viewport
 2. **Navigate** to the page being edited (or reload if already there)
-3. **Take a snapshot** — verify accessibility tree and element structure
-4. **Take a screenshot** — verify visual layout and styling
-5. **Toggle theme** — click the theme switcher and repeat snapshot + screenshot
+3. **Take a snapshot**: verify accessibility tree and element structure
+4. **Take a screenshot**: verify visual layout and styling
+5. **Toggle theme**: click the theme switcher and repeat snapshot + screenshot
    to verify both retro and light themes
 
 ## Playwright Tool Cheat Sheet

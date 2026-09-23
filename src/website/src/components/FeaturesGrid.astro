@@ -1,5 +1,6 @@
 ---
 import { useTranslations } from '../i18n/utils';
+import PixelSprite from './PixelSprite.astro';
 
 interface Props {
   lang?: string;
@@ -22,15 +23,18 @@ const t = useTranslations(lang);
     <div class="grid-2 highlights-grid">
       {t.features.highlights.map((f) => (
         <div class:list={['pixel-card', 'highlight-card', { 'feature-coming-soon': f.badge }]}>
-          <span class="pixel-icon">{f.icon}</span>
-          <div class="feature-title-row">
-            <h3>{f.title}</h3>
-            {f.badge && <span class="badge badge-small">{f.badge}</span>}
+          <div class="highlight-card-header">
+            <PixelSprite name={f.icon} />
+            <div class="feature-title-row">
+              <h3>{f.title}</h3>
+              {f.badge && <span class="badge badge-small">{f.badge}</span>}
+            </div>
           </div>
           <p>{f.description}</p>
         </div>
       ))}
     </div>
+
 
     <!-- Tier 2: Compact extras -->
     <div class="extras-section">
@@ -38,7 +42,7 @@ const t = useTranslations(lang);
       <div class="extras-grid">
         {t.features.extras.map((f) => (
           <div class="extra-item">
-            <span class="extra-icon">{f.icon}</span>
+            <PixelSprite name={f.icon} size={22} />
             <div class="extra-content">
               <strong>{f.title}</strong>
               <span class="extra-desc">{f.description}</span>
@@ -56,7 +60,7 @@ const t = useTranslations(lang);
   }
 
   .highlight-card h3 {
-    margin-bottom: var(--space-sm);
+    margin-bottom: 0;
     color: var(--color-text);
   }
 
@@ -65,8 +69,16 @@ const t = useTranslations(lang);
     line-height: 1.7;
   }
 
-  .highlight-card .pixel-icon {
-    font-size: 1.8rem;
+  .highlight-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-sm);
+  }
+
+  .highlight-card-header :global(.pixel-sprite) {
+    margin-bottom: 0;
+    flex-shrink: 0;
   }
 
   .feature-title-row {
@@ -77,8 +89,8 @@ const t = useTranslations(lang);
   }
 
   .feature-coming-soon {
-    border-style: dashed;
     opacity: 0.85;
+    filter: grayscale(0.4);
   }
 
   .badge-small {
@@ -95,7 +107,7 @@ const t = useTranslations(lang);
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--color-accent);
+    color: var(--color-primary);
     margin-bottom: var(--space-lg);
   }
 
@@ -124,10 +136,10 @@ const t = useTranslations(lang);
     padding: var(--space-sm) 0;
   }
 
-  .extra-icon {
-    font-size: 1.1rem;
-    flex-shrink: 0;
+  .extra-item :global(.pixel-sprite) {
+    margin-bottom: 0;
     margin-top: 2px;
+    flex-shrink: 0;
   }
 
   .extra-content {

@@ -10,7 +10,7 @@ Envilder provides runtime SDKs for .NET, Python, and Node.js (with Go and Java
 planned). Each SDK must:
 
 - Load secrets from AWS SSM or Azure Key Vault at application startup
-- Be lightweight — no framework dependencies forced on consumers
+- Be lightweight: no framework dependencies forced on consumers
 - Expose a simple public API while hiding provider wiring
 - Support custom providers for extensibility
 - Be idiomatic in each language
@@ -63,19 +63,19 @@ Three levels of API complexity for different consumer needs:
 
 ### 5. Cross-Stack Universal Behaviors
 
-- **Missing secrets silently omitted** — no exception from provider
-- **Opt-in validation** — separate `validateSecrets()` function throws on empty/missing
-- **Cross-provider validation** — profile + Azure → error; vaultUrl + AWS → error
-- **Options override config** — runtime `EnvilderOptions` > `$config` from map file
-- **Pull-only** — SDKs do not support push mode (CLI is the management tool)
-- **InjectIntoEnvironment as static** — sets env vars via `Environment.SetEnvironmentVariable` / `os.environ` / `process.env`
+- **Missing secrets silently omitted**: no exception from provider
+- **Opt-in validation**: separate `validateSecrets()` function throws on empty/missing
+- **Cross-provider validation**: profile + Azure → error; vaultUrl + AWS → error
+- **Options override config**: runtime `EnvilderOptions` > `$config` from map file
+- **Pull-only**: SDKs do not support push mode (CLI is the management tool)
+- **InjectIntoEnvironment as static**: sets env vars via `Environment.SetEnvironmentVariable` / `os.environ` / `process.env`
 
 ### 6. Framework Integrations (.NET-exclusive)
 
 .NET provides optional integration extensions for ASP.NET consumers:
 
-- `IConfigurationBuilder.AddEnvilder(mapFilePath)` — configuration pipeline
-- `IServiceCollection.AddEnvilder(mapFilePath)` — DI registration
+- `IConfigurationBuilder.AddEnvilder(mapFilePath)`: configuration pipeline
+- `IServiceCollection.AddEnvilder(mapFilePath)`: DI registration
 
 These are opt-in extensions, not required. The core SDK works without them.
 
@@ -83,7 +83,7 @@ These are opt-in extensions, not required. The core SDK works without them.
 
 ### Positive
 
-- Zero forced dependencies on consumers — no DI container, no framework lock-in
+- Zero forced dependencies on consumers: no DI container, no framework lock-in
 - Lightweight: `.NET` → 1 NuGet, `Python` → 1 PyPI, `Node.js` → 1 npm
 - Extensible: users can implement `ISecretProvider` for custom backends
 - Idiomatic per language (async model, naming conventions, visibility)

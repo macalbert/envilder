@@ -86,12 +86,6 @@ const { title = 'bash' } = Astro.props;
     font-weight: 700;
   }
 
-  .terminal-body :global(.prompt)::before {
-    content: "envilder ~ ";
-    color: var(--term-path);
-    font-weight: 400;
-  }
-
   .terminal-body :global(.command) {
     color: var(--term-text);
   }
