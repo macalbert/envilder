@@ -36,7 +36,7 @@ making it fast to load and ready to use without any build steps for users.
 **The Solution:**
 
 The workflow is started manually (`workflow_dispatch`) with a `version` input
-(`MAJOR.MINOR.PATCH`, without the `v` prefix; anything else fails fast).
+(`MAJOR.MINOR.PATCH`, without the `v` prefix or leading zeros; anything else fails fast).
 
 1. Uses esbuild to bundle compiled JavaScript + all dependencies → single minified `github-action/dist/index.js`
 2. Validates the `version` input and checks whether tag `v<version>` already exists
@@ -94,7 +94,10 @@ steps:
 
   - name: 🔎 Inspect the Existing Castle (Verify tagged bundle is fresh)
     if: steps.version-check.outputs.should_publish == 'false'
-    run: pnpm verify:gha
+    run: |
+      # verify:gha ignores untracked files, so make sure the tag really ships them
+      git ls-files --error-unmatch github-action/dist/index.js github-action/action.yml action.yml >/dev/null
+      pnpm verify:gha
 
   # ... new versions only: build, commit bundle, create version tag ...
 
