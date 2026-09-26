@@ -1,4 +1,13 @@
-## [Unreleased]
+## [0.14.0] - 2026-09-26
+
+### Fixed
+
+* **Preserve secret values when writing `.env` files**: Values with hashes,
+  leading or trailing whitespace, quotes, backslashes or line breaks now
+  round-trip exactly, and updating a multi-line value no longer leaves the
+  rest of the old secret in the file. Unchanged assignments are kept byte for
+  byte, and a write that would not read back correctly aborts, naming only
+  the affected keys ([#515](https://github.com/macalbert/envilder/pull/515))
 
 ### Security
 
@@ -17,6 +26,12 @@
   back, so the Action previously resolved the secret and wrote a line that
   silently never loaded. It is now rejected at map-file ingestion with an
   explicit message ([#511](https://github.com/macalbert/envilder/issues/511))
+
+### Documentation
+
+* **Point the README "Learn more" link at the Action docs**: It now lands on
+  `envilder.com/docs/github-action/` with UTM tags, so visits from the Action
+  README to envilder.com can be measured
 
 ---
 

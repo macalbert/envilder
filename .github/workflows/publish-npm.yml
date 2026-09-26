@@ -92,6 +92,14 @@ jobs:
         if: steps.version-check.outputs.version_changed == 'true'
         run: pnpm build
 
+      # The root README is shared by GitHub and npm; retag its website links so
+      # clicks from the npm page are attributed to npm, not GitHub.
+      - name: 🏷️ Tag README links for npm
+        if: steps.version-check.outputs.version_changed == 'true'
+        run: |
+          sed -i 's/utm_source=github&utm_medium=readme&utm_campaign=root/utm_source=npm\&utm_medium=readme\&utm_campaign=root/g' README.md
+          test "$(grep -c 'utm_source=npm&utm_medium=readme&utm_campaign=root' README.md)" -eq 2
+
       - name: 🚩 Publish to npm
         if: steps.version-check.outputs.version_changed == 'true'
         run: pnpm run release:publish

@@ -5,7 +5,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
-## [Unreleased]
+## [0.14.0] - 2026-09-26
 
 ### Added
 
@@ -32,6 +32,15 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   partial-option guard and fell through to a full `.env` push or pull
   ([#314](https://github.com/macalbert/envilder/pull/314))
 
+### Fixed
+
+* **Preserve secret values when writing `.env` files**: Values with hashes,
+  leading or trailing whitespace, quotes, backslashes or line breaks now
+  round-trip exactly, and updating a multi-line value no longer leaves the
+  rest of the old secret in the file. Unchanged assignments are kept byte for
+  byte, and a write that would not read back correctly aborts, naming only
+  the affected keys ([#515](https://github.com/macalbert/envilder/pull/515))
+
 ### Security
 
 * **Reject map-file mapping keys a `.env` file cannot represent**: Variable
@@ -49,6 +58,13 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   back, so the CLI previously resolved the secret and wrote a line that
   silently never loaded. It is now rejected at map-file ingestion with an
   explicit message ([#511](https://github.com/macalbert/envilder/issues/511))
+
+### Documentation
+
+* **Point README links at specific docs pages with UTM tags**: The header link
+  and "Full Documentation" link in the README now carry UTM tags and the
+  latter lands on `envilder.com/docs/getting-started/`, so visits from GitHub
+  and npm to envilder.com can be measured
 
 ---
 

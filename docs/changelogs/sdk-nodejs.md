@@ -1,3 +1,13 @@
+## [0.4.1] - 2026-09-26
+
+### Documentation
+
+* **Add a Links section to the npm README**: The `@envilder/sdk` page on npm
+  now links to the changelog and to `envilder.com/docs/sdks/nodejs/` with UTM
+  tags, so visits from npm to envilder.com can be measured
+
+---
+
 ## [0.4.0] - 2026-06-26
 
 ### Added

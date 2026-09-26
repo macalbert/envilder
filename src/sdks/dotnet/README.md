@@ -265,7 +265,7 @@ For Azure, add `vaultUrl`:
 ## Links
 
 - [Changelog](https://github.com/macalbert/envilder/blob/main/docs/changelogs/sdk-dotnet.md)
-- [Official Website](https://envilder.com)
+- [Official Website](https://envilder.com/docs/sdks/dotnet/?utm_source=nuget&utm_medium=readme)
 
 ## License
 
