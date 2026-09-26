@@ -43,14 +43,16 @@ The workflow is started manually (`workflow_dispatch`) with a `version` input
 3. **New version** (no tag yet):
    1. Builds bundle with `pnpm build:gha`, with minification configured in the
       esbuild script
-   2. Commits only `github-action/dist/index.js` to current branch
+   2. Commits the generated `github-action/dist/index.js` and root `action.yml`
+      to current branch
    3. Creates and pushes the version tag (e.g., `v0.7.0`)
    4. Moves the major tag (e.g., `v0`) to the new version
    5. Creates the GitHub release
 4. **Existing version** (tag already created, e.g. by `publish-npm.yml` when the
    CLI and the Action share a version):
-   1. Checks out the existing tag and runs `pnpm verify:gha` against it (fails
-      if the committed bundle is stale)
+   1. Checks out the existing tag, asserts that `github-action/dist/index.js`,
+      `github-action/action.yml` and `action.yml` are tracked in it, and runs
+      `pnpm verify:gha` against it (fails if any file is missing or stale)
    2. Moves the major tag (e.g., `v0`) to that tag; no commit, version tag or
       release is created
 
@@ -60,7 +62,8 @@ This approach ensures:
 - ✅ Single optimized minified bundle with all dependencies
 - ✅ Fast startup time (no node_modules resolution)
 - ✅ Re-running for an existing version is safe: it never re-creates the version tag, and only moves the major tag after the bundle is verified
-- ✅ Repository stays ultra-clean (only index.js tracked, no source maps or type definitions)
+  - ⚠️ The major tag always follows the dispatched version, so dispatching a version older than the one `v0` points to moves `v0` backwards. Always dispatch the latest published version.
+- ✅ Repository stays ultra-clean (only the minified bundle and the action manifests are tracked, no source maps or type definitions)
 
 **Key workflow steps:**
 
