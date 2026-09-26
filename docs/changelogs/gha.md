@@ -1,5 +1,14 @@
 ## [0.14.0] - 2026-09-26
 
+### Fixed
+
+* **Preserve secret values when writing `.env` files**: Values with hashes,
+  leading or trailing whitespace, quotes, backslashes or line breaks now
+  round-trip exactly, and updating a multi-line value no longer leaves the
+  rest of the old secret in the file. Unchanged assignments are kept byte for
+  byte, and a write that would not read back correctly aborts, naming only
+  the affected keys ([#515](https://github.com/macalbert/envilder/pull/515))
+
 ### Security
 
 * **Reject map-file mapping keys a `.env` file cannot represent**: Variable
