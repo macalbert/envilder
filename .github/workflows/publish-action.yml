@@ -21,6 +21,23 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: 🔍 Check if Already Published
+        id: version-check
+        run: |
+          if git rev-parse -q --verify "refs/tags/v${{ inputs.version }}" >/dev/null; then
+            echo "⚠️ Version v${{ inputs.version }} already exists! Re-verifying it and moving the major tag only."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "✅ Version v${{ inputs.version }} is new!"
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 🕹️ Warp to the Existing Level (Checkout version tag)
+        if: steps.version-check.outputs.should_publish == 'false'
+        run: |
+          echo "🕹️ Warping to existing level v${{ inputs.version }}"
+          git checkout --detach "v${{ inputs.version }}"
+
       - name: 📦 Install pnpm
         uses: pnpm/action-setup@v6
 
@@ -33,16 +50,11 @@ jobs:
       - name: 📦 Open the ? Block (Install packages)
         run: pnpm install --frozen-lockfile
 
-      - name: 🔍 Check if Already Published
-        id: version-check
+      - name: 🔎 Inspect the Existing Castle (Verify tagged bundle is fresh)
+        if: steps.version-check.outputs.should_publish == 'false'
         run: |
-          if git rev-parse "v${{ inputs.version }}" >/dev/null 2>&1; then
-            echo "⚠️ Version v${{ inputs.version }} already exists!"
-            echo "should_publish=false" >> $GITHUB_OUTPUT
-          else
-            echo "✅ Version v${{ inputs.version }} is new!"
-            echo "should_publish=true" >> $GITHUB_OUTPUT
-          fi
+          pnpm verify:gha
+          echo "✅ Bundle at v${{ inputs.version }} is up to date!"
 
       - name: 🏗️ Build the Castle
         if: steps.version-check.outputs.should_publish == 'true'
@@ -81,13 +93,16 @@ jobs:
           git push origin "v${{ inputs.version }}"
 
       - name: ⭐ Collect the Star (Update major tag)
-        if: steps.version-check.outputs.should_publish == 'true'
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
           MAJOR_VERSION=$(echo "v${{ inputs.version }}" | cut -d. -f1)
+          TARGET_COMMIT=$(git rev-parse "v${{ inputs.version }}^{commit}")
 
-          echo "⭐ Collecting star power! Updating $MAJOR_VERSION to v${{ inputs.version }}"
+          echo "⭐ Collecting star power! Updating $MAJOR_VERSION to v${{ inputs.version }} ($TARGET_COMMIT)"
 
-          git tag -fa "$MAJOR_VERSION" -m "⭐ Power-up $MAJOR_VERSION now at v${{ inputs.version }}"
+          git tag -fa "$MAJOR_VERSION" "$TARGET_COMMIT" -m "⭐ Power-up $MAJOR_VERSION now at v${{ inputs.version }}"
           git push origin "$MAJOR_VERSION" --force
           echo "🌟 Star collected! $MAJOR_VERSION is now super-charged!"
 
