@@ -14,6 +14,8 @@ jobs:
   publish-action:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    env:
+      VERSION: ${{ inputs.version }}
 
     steps:
       - name: 🧱 Enter the Pipe (Checkout)
@@ -21,22 +23,30 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: 🎯 Check the Level Number (Validate version input)
+        run: |
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ Oh no! '$VERSION' is not a valid level! Use MAJOR.MINOR.PATCH without the 'v' prefix (e.g., 1.0.0)."
+            exit 1
+          fi
+          echo "✅ Level $VERSION looks good!"
+
       - name: 🔍 Check if Already Published
         id: version-check
         run: |
-          if git rev-parse -q --verify "refs/tags/v${{ inputs.version }}" >/dev/null; then
-            echo "⚠️ Version v${{ inputs.version }} already exists! Re-verifying it and moving the major tag only."
+          if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
+            echo "⚠️ Version v$VERSION already exists! Re-verifying it and moving the major tag only."
             echo "should_publish=false" >> "$GITHUB_OUTPUT"
           else
-            echo "✅ Version v${{ inputs.version }} is new!"
+            echo "✅ Version v$VERSION is new!"
             echo "should_publish=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: 🕹️ Warp to the Existing Level (Checkout version tag)
         if: steps.version-check.outputs.should_publish == 'false'
         run: |
-          echo "🕹️ Warping to existing level v${{ inputs.version }}"
-          git checkout --detach "v${{ inputs.version }}"
+          echo "🕹️ Warping to existing level v$VERSION"
+          git checkout --detach "refs/tags/v$VERSION"
 
       - name: 📦 Install pnpm
         uses: pnpm/action-setup@v6
@@ -54,7 +64,7 @@ jobs:
         if: steps.version-check.outputs.should_publish == 'false'
         run: |
           pnpm verify:gha
-          echo "✅ Bundle at v${{ inputs.version }} is up to date!"
+          echo "✅ Bundle at v$VERSION is up to date!"
 
       - name: 🏗️ Build the Castle
         if: steps.version-check.outputs.should_publish == 'true'
@@ -71,6 +81,8 @@ jobs:
 
       - name: 📝 Commit Built Files
         if: steps.version-check.outputs.should_publish == 'true'
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -81,29 +93,29 @@ jobs:
           if git diff --staged --quiet; then
             echo "ℹ️ No changes to commit"
           else
-            git commit -m "build: update compiled files for v${{ inputs.version }}"
-            git push origin HEAD:${{ github.ref_name }}
+            git commit -m "build: update compiled files for v$VERSION"
+            git push origin "HEAD:$REF_NAME"
           fi
 
       - name: 🏁 Place the Flagpole (Create version tag)
         if: steps.version-check.outputs.should_publish == 'true'
         run: |
-          echo "🏁 Creating tag v${{ inputs.version }}!"
-          git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }}"
-          git push origin "v${{ inputs.version }}"
+          echo "🏁 Creating tag v$VERSION!"
+          git tag -a "v$VERSION" -m "Release v$VERSION"
+          git push origin "refs/tags/v$VERSION"
 
       - name: ⭐ Collect the Star (Update major tag)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          MAJOR_VERSION=$(echo "v${{ inputs.version }}" | cut -d. -f1)
-          TARGET_COMMIT=$(git rev-parse "v${{ inputs.version }}^{commit}")
+          MAJOR_VERSION=$(echo "v$VERSION" | cut -d. -f1)
+          TARGET_COMMIT=$(git rev-parse "refs/tags/v$VERSION^{commit}")
 
-          echo "⭐ Collecting star power! Updating $MAJOR_VERSION to v${{ inputs.version }} ($TARGET_COMMIT)"
+          echo "⭐ Collecting star power! Updating $MAJOR_VERSION to v$VERSION ($TARGET_COMMIT)"
 
-          git tag -fa "$MAJOR_VERSION" "$TARGET_COMMIT" -m "⭐ Power-up $MAJOR_VERSION now at v${{ inputs.version }}"
-          git push origin "$MAJOR_VERSION" --force
+          git tag -fa "$MAJOR_VERSION" "$TARGET_COMMIT" -m "⭐ Power-up $MAJOR_VERSION now at v$VERSION"
+          git push origin "refs/tags/$MAJOR_VERSION" --force
           echo "🌟 Star collected! $MAJOR_VERSION is now super-charged!"
 
       - name: 🏰 Unlock the Castle (Create Release)
