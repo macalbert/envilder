@@ -63,6 +63,12 @@ jobs:
       - name: 🔎 Inspect the Existing Castle (Verify tagged bundle is fresh)
         if: steps.version-check.outputs.should_publish == 'false'
         run: |
+          # verify:gha ignores untracked files, so make sure the tag really ships them
+          if ! git ls-files --error-unmatch github-action/dist/index.js github-action/action.yml action.yml >/dev/null; then
+            echo "❌ Oh no! v$VERSION is missing GitHub Action files!"
+            exit 1
+          fi
+
           pnpm verify:gha
           echo "✅ Bundle at v$VERSION is up to date!"
 
@@ -87,7 +93,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add -f github-action/dist/index.js
+          git add -f github-action/dist/index.js action.yml
 
           # Only commit if there are changes
           if git diff --staged --quiet; then
