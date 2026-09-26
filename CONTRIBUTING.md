@@ -185,7 +185,7 @@ ci(coverage): add Node.js SDK to coverage report
 | `publish-npm-sdk.yml` | Push to main (SDK paths) | Node.js SDK npm publish |
 | `publish-nuget.yml` | Tag `sdk-dotnet/v*` | .NET NuGet publish |
 | `publish-pypi.yml` | Tag `sdk-python/v*` | Python PyPI publish |
-| `publish-action.yml` | Push to main | GitHub Action release |
+| `publish-action.yml` | Manual dispatch (`version`) | GitHub Action release + major tag (`v0`) |
 | `publish-website.yml` | Push to main | Website deploy |
 
 ## Adding a New SDK
