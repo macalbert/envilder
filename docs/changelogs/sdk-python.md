@@ -1,3 +1,13 @@
+## [0.5.1] - 2026-09-26
+
+### Documentation
+
+* **Link the PyPI page to the Python SDK docs**: The README's "Official
+  Website" link now points to `envilder.com/docs/sdks/python/` with UTM tags,
+  so visits from PyPI to envilder.com can be measured
+
+---
+
 ## [0.5.0] - 2026-06-26
 
 ### Added

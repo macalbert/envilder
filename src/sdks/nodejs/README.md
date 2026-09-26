@@ -214,3 +214,8 @@ For Azure, add `vaultUrl`:
 ```
 
 See the [root README](https://github.com/macalbert/envilder#%EF%B8%8F-mapping-file-format) for the full map file reference.
+
+## Links
+
+- [Changelog](https://github.com/macalbert/envilder/blob/main/docs/changelogs/sdk-nodejs.md)
+- [Official Website](https://envilder.com/docs/sdks/nodejs/?utm_source=npm&utm_medium=readme&utm_campaign=sdk)

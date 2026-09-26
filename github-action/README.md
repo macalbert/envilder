@@ -36,7 +36,7 @@ source of truth. This GitHub Action makes it easy to:
 - ☁️ **Supported providers** - Choose AWS or Azure and configure that provider's credentials and access
 - 🗺️ **Shared mapping contract** - Reuse the same `envilder.json` structure as the CLI and SDKs
 
-> 💡 **Learn more:** Visit [envilder.com](https://envilder.com) for complete documentation,
+> 💡 **Learn more:** Visit [envilder.com](https://envilder.com/docs/github-action/?utm_source=github&utm_medium=readme&utm_campaign=action) for complete documentation,
 > or check the [GitHub README](https://github.com/macalbert/envilder/blob/main/README.md)
 > for CLI usage, advanced features, and more examples.
 

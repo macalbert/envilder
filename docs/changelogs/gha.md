@@ -18,6 +18,12 @@
   silently never loaded. It is now rejected at map-file ingestion with an
   explicit message ([#511](https://github.com/macalbert/envilder/issues/511))
 
+### Documentation
+
+* **Point the README "Learn more" link at the Action docs**: It now lands on
+  `envilder.com/docs/github-action/` with UTM tags, so visits from the Action
+  README to envilder.com can be measured
+
 ---
 
 ## [0.13.2] - 2026-08-14
