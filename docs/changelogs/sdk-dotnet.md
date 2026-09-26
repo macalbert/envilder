@@ -1,3 +1,13 @@
+## [0.5.1] - 2026-09-26
+
+### Documentation
+
+* **Link the NuGet page to the .NET SDK docs**: The README's "Official
+  Website" link now points to `envilder.com/docs/sdks/dotnet/` with UTM tags,
+  so visits from NuGet to envilder.com can be measured
+
+---
+
 ## [0.5.0] - 2026-06-26
 
 ### Added

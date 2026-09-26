@@ -217,7 +217,7 @@ For Azure, add `vaultUrl`:
 ## Links
 
 - [Changelog](https://github.com/macalbert/envilder/blob/main/docs/changelogs/sdk-python.md)
-- [Official Website](https://envilder.com)
+- [Official Website](https://envilder.com/docs/sdks/python/?utm_source=pypi&utm_medium=readme)
 
 ## License
 
