@@ -776,6 +776,71 @@ export const es: Translations = {
     mapAuthentication: 'Autenticación',
     mapAwsAuth: 'Credenciales AWS CLI',
     mapAzureAuth: 'Azure Default Credentials',
+    mapRulesTitle: 'Claves y valores: qué se acepta',
+    mapRulesIntro:
+      'Cada mapeo tiene la forma "CLAVE": "referencia del secreto". Estas reglas son las mismas en el CLI, la GitHub Action, el JSON Schema y todos los SDKs, así que un archivo de mapeo válido en un sitio es válido en todas partes.',
+    mapKeysTitle: 'Claves (nombres de variables de entorno)',
+    mapThRule: 'Regla',
+    mapThDetails: 'Detalles',
+    mapKeysAllowed: 'Caracteres permitidos',
+    mapKeysAllowedDesc: 'Letras, dígitos, guion bajo, punto y guion:',
+    mapKeysRecommended: 'Recomendado',
+    mapKeysRecommendedDesc:
+      'Un nombre POSIX, utilizable desde cualquier shell:',
+    mapKeysRejected: 'Rechazado',
+    mapKeysRejectedDesc:
+      'Un nombre vacío, cualquier otro carácter (espacio, tabulador, #, =, /, :, saltos de línea, U+2028/U+2029, letras acentuadas o no latinas) y el nombre',
+    mapKeysReserved: 'Reservado',
+    mapKeysReservedDesc:
+      'Las claves que empiezan por $ son metadatos, nunca variables:',
+    mapKeysNonString: 'Valores que no son texto',
+    mapKeysNonStringDesc:
+      'Un mapeo cuyo valor no es un string se ignora, pero su clave se valida igualmente.',
+    mapKeysWholeFile:
+      'Un archivo de mapeo con una clave inválida se rechaza entero, antes de obtener ningún secreto. El error cita la clave y nunca el valor.',
+    mapKeysWhyTitle: '¿Por qué exactamente este conjunto?',
+    mapKeysWhyDesc:
+      'Las claves se convierten en líneas de un archivo .env, y esta es la gramática de claves de dotenv, el parser que usa el propio Envilder. Cualquier otro carácter o bien abre una asignación distinta (=, saltos de línea, U+2028/U+2029) o bien genera una línea que los consumidores descartan en silencio: una clave como Database/Password la ignora dotenv y la rechazan Docker Compose y bash. El nombre __proto__ lo descarta cualquier lector JavaScript, dotenv incluido.',
+    mapKeysHierarchyTitle: 'Nombres jerárquicos:',
+    mapKeysHierarchyDesc:
+      'usa __ como separador (Database__Password). Funciona con todos los consumidores, y el SDK de .NET lo convierte en la sección de configuración Database:Password.',
+    mapValuesTitle: 'Valores (referencias de secretos)',
+    mapValuesDesc:
+      'Un valor es el identificador del secreto en el proveedor. Debe ser un string JSON.',
+    mapThProvider: 'Proveedor',
+    mapThIdentifier: 'Formato del identificador',
+    mapValuesAws:
+      'Nombre del parámetro, tal cual. Distingue mayúsculas; letras, dígitos, _ . - y / para jerarquías (como máximo 15 niveles); hasta 1011 caracteres incluyendo el prefijo del ARN; no puede empezar por aws ni ssm.',
+    mapValuesAzure:
+      'Nombre del secreto: 1-127 caracteres, letras, dígitos y guiones, empezando por una letra.',
+    mapValuesDocsLink: 'Documentación del proveedor',
+    mapContentsTitle: 'Contenido de los secretos (los valores resueltos)',
+    mapContentsIntro:
+      'Envilder nunca reescribe el valor de un secreto: lo que devuelve el proveedor es lo que recibe tu aplicación. Los límites dependen de dónde se guarda el valor:',
+    mapThStage: 'Etapa',
+    mapThLimit: 'Límite',
+    mapContentsProvider: 'Proveedor',
+    mapContentsProviderLimit:
+      'AWS SSM: 4 KB (estándar) u 8 KB (nivel avanzado). Azure Key Vault: 25 KB.',
+    mapContentsEnvFile: 'Archivo .env (CLI, GitHub Action)',
+    mapContentsEnvFileLimit:
+      'Cualquier valor que dotenv pueda representar. Consulta la excepción más abajo.',
+    mapContentsProcess: 'Entorno del proceso',
+    mapContentsProcessLimit:
+      'El sistema operativo no puede guardar NUL (U+0000) en una variable, y Windows limita cada variable a 32.767 caracteres.',
+    mapContentsResolveOnly:
+      'Las APIs de los SDKs que solo resuelven (resolve, ResolveFile, IConfiguration) mantienen los valores en memoria y solo están sujetas a los límites del proveedor.',
+    mapContentsWriterDesc:
+      'El CLI escribe cada valor de forma que dotenv lea exactamente el string original. Las comillas se eligen automáticamente y se comprueban analizando el resultado antes de escribir el archivo:',
+    mapContentsRoundTrip:
+      '#, espacios al principio y al final, comillas, barras invertidas, un \\n literal, saltos de línea LF/CRLF reales y Unicode se conservan todos. Si el archivo ya existe, cada asignación se sustituye en su sitio (una multilínea, entera), y se mantienen los comentarios, el orden y los finales de línea.',
+    mapContentsUnrepresentableTitle:
+      'El único valor que un .env no puede contener:',
+    mapContentsUnrepresentableDesc:
+      'un valor que contiene los tres tipos de comillas (\', " y `) junto con un salto de línea, espacios al principio o al final, o un #. El CLI se detiene con un error que indica la variable y deja el archivo .env intacto. Guarda ese valor codificado (por ejemplo en base64) o léelo con un SDK.',
+    mapContentsExpansionTitle: 'Expansión de variables:',
+    mapContentsExpansionDesc:
+      'Envilder escribe referencias como $HOME literalmente y dotenv no las expande, pero otros cargadores sí. Docker Compose, por ejemplo, expande un KEY=$HOME sin comillas al leer el archivo. Tenlo en cuenta cuando un secreto contenga $.',
     mapMultiEnvTitle: 'Múltiples entornos',
     mapMultiEnvDesc:
       'Un patrón común es tener un archivo de mapeo por entorno. La estructura es la misma, solo cambian las rutas de los secretos:',

@@ -1,5 +1,7 @@
 namespace Envilder;
 
+using Envilder.Domain;
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -42,6 +44,13 @@ public class MapFileParser
 				}
 
 				continue;
+			}
+
+			// Before the non-string filter, so the name rule covers every mapping
+			// key the file declares, matching the CLI and the published schema.
+			if (!EnvironmentVariableName.IsValid(property.Name))
+			{
+				throw new FormatException(EnvironmentVariableName.InvalidMessage(property.Name));
 			}
 
 			if (property.Value.ValueKind != JsonValueKind.String)

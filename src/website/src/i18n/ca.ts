@@ -776,6 +776,70 @@ export const ca: Translations = {
     mapAuthentication: 'Autenticació',
     mapAwsAuth: 'Credencials AWS CLI',
     mapAzureAuth: 'Azure Default Credentials',
+    mapRulesTitle: 'Claus i valors: què s’accepta',
+    mapRulesIntro:
+      'Cada mapeig té la forma "CLAU": "referència del secret". Aquestes regles són les mateixes al CLI, a la GitHub Action, al JSON Schema i a tots els SDKs, de manera que un fitxer de mapeig vàlid en un lloc és vàlid a tot arreu.',
+    mapKeysTitle: 'Claus (noms de variables d’entorn)',
+    mapThRule: 'Regla',
+    mapThDetails: 'Detalls',
+    mapKeysAllowed: 'Caràcters permesos',
+    mapKeysAllowedDesc: 'Lletres, dígits, guió baix, punt i guió:',
+    mapKeysRecommended: 'Recomanat',
+    mapKeysRecommendedDesc: 'Un nom POSIX, utilitzable des de qualsevol shell:',
+    mapKeysRejected: 'Rebutjat',
+    mapKeysRejectedDesc:
+      'Un nom buit, qualsevol altre caràcter (espai, tabulador, #, =, /, :, salts de línia, U+2028/U+2029, lletres accentuades o no llatines) i el nom',
+    mapKeysReserved: 'Reservat',
+    mapKeysReservedDesc:
+      'Les claus que comencen per $ són metadades, mai variables:',
+    mapKeysNonString: 'Valors que no són text',
+    mapKeysNonStringDesc:
+      'Un mapeig el valor del qual no és un string s’ignora, però la clau es valida igualment.',
+    mapKeysWholeFile:
+      'Un fitxer de mapeig amb una clau invàlida es rebutja sencer, abans d’obtenir cap secret. L’error cita la clau i mai el valor.',
+    mapKeysWhyTitle: 'Per què exactament aquest conjunt?',
+    mapKeysWhyDesc:
+      'Les claus es converteixen en línies d’un fitxer .env, i aquesta és la gramàtica de claus de dotenv, el parser que fa servir el mateix Envilder. Qualsevol altre caràcter o bé obre una assignació diferent (=, salts de línia, U+2028/U+2029) o bé genera una línia que els consumidors descarten en silenci: una clau com Database/Password la ignora dotenv i la rebutgen Docker Compose i bash. El nom __proto__ el descarta qualsevol lector JavaScript, dotenv inclòs.',
+    mapKeysHierarchyTitle: 'Noms jeràrquics:',
+    mapKeysHierarchyDesc:
+      'fes servir __ com a separador (Database__Password). Funciona amb tots els consumidors, i el SDK de .NET el converteix en la secció de configuració Database:Password.',
+    mapValuesTitle: 'Valors (referències de secrets)',
+    mapValuesDesc:
+      'Un valor és l’identificador del secret al proveïdor. Ha de ser un string JSON.',
+    mapThProvider: 'Proveïdor',
+    mapThIdentifier: 'Format de l’identificador',
+    mapValuesAws:
+      'Nom del paràmetre, tal qual. Distingeix majúscules; lletres, dígits, _ . - i / per a jerarquies (com a màxim 15 nivells); fins a 1011 caràcters incloent-hi el prefix de l’ARN; no pot començar per aws ni ssm.',
+    mapValuesAzure:
+      'Nom del secret: 1-127 caràcters, lletres, dígits i guions, començant per una lletra.',
+    mapValuesDocsLink: 'Documentació del proveïdor',
+    mapContentsTitle: 'Contingut dels secrets (els valors resolts)',
+    mapContentsIntro:
+      'Envilder no reescriu mai el valor d’un secret: el que retorna el proveïdor és el que rep la teva aplicació. Els límits depenen d’on es desa el valor:',
+    mapThStage: 'Etapa',
+    mapThLimit: 'Límit',
+    mapContentsProvider: 'Proveïdor',
+    mapContentsProviderLimit:
+      'AWS SSM: 4 KB (estàndard) o 8 KB (nivell avançat). Azure Key Vault: 25 KB.',
+    mapContentsEnvFile: 'Fitxer .env (CLI, GitHub Action)',
+    mapContentsEnvFileLimit:
+      'Qualsevol valor que dotenv pugui representar. Consulta l’excepció més avall.',
+    mapContentsProcess: 'Entorn del procés',
+    mapContentsProcessLimit:
+      'El sistema operatiu no pot desar NUL (U+0000) en una variable, i Windows limita cada variable a 32.767 caràcters.',
+    mapContentsResolveOnly:
+      'Les APIs dels SDKs que només resolen (resolve, ResolveFile, IConfiguration) mantenen els valors en memòria i només estan subjectes als límits del proveïdor.',
+    mapContentsWriterDesc:
+      'El CLI escriu cada valor de manera que dotenv en llegeixi exactament el string original. Les cometes s’escullen automàticament i es comproven analitzant el resultat abans d’escriure el fitxer:',
+    mapContentsRoundTrip:
+      '#, espais al principi i al final, cometes, barres inverses, un \\n literal, salts de línia LF/CRLF reals i Unicode es conserven tots. Si el fitxer ja existeix, cada assignació es substitueix al seu lloc (una multilínia, sencera), i es mantenen els comentaris, l’ordre i els finals de línia.',
+    mapContentsUnrepresentableTitle:
+      'L’únic valor que un .env no pot contenir:',
+    mapContentsUnrepresentableDesc:
+      'un valor que conté els tres tipus de cometes (\', " i `) juntament amb un salt de línia, espais al principi o al final, o un #. El CLI s’atura amb un error que indica la variable i deixa el fitxer .env intacte. Desa aquest valor codificat (per exemple en base64) o llegeix-lo amb un SDK.',
+    mapContentsExpansionTitle: 'Expansió de variables:',
+    mapContentsExpansionDesc:
+      'Envilder escriu referències com $HOME literalment i dotenv no les expandeix, però altres carregadors sí. Docker Compose, per exemple, expandeix un KEY=$HOME sense cometes quan llegeix el fitxer. Tingues-ho en compte quan un secret contingui $.',
     mapMultiEnvTitle: 'Múltiples entorns',
     mapMultiEnvDesc:
       "Un patró comú és tenir un fitxer de mapeig per entorn. L'estructura és la mateixa, només canvien les rutes dels secrets:",

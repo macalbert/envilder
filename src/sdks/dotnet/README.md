@@ -149,14 +149,20 @@ var config = new ConfigurationBuilder()
 var dbPassword = config["DB_PASSWORD"];
 ```
 
-Secrets with `/` in their paths are normalized to configuration sections:
+Variable names with `__` are normalized to configuration sections, the same
+convention .NET's environment-variables provider uses:
 
 ```json
 {
-  "Database/ConnectionString": "/app/prod/db-connection",
-  "Database/Password": "/app/prod/db-password"
+  "Database__ConnectionString": "/app/prod/db-connection",
+  "Database__Password": "/app/prod/db-password"
 }
 ```
+
+> Variable names may only contain letters, digits, `_`, `.` and `-`, so the
+> same map file works with the CLI, the GitHub Action and every SDK. Since
+> 1.0.0 a name such as `Database/ConnectionString` is rejected; rename it to
+> `Database__ConnectionString`.
 
 ```csharp
 var dbSettings = config.GetSection("Database");
@@ -261,6 +267,22 @@ For Azure, add `vaultUrl`:
   "API_KEY": "api-key"
 }
 ```
+
+### Keys and values
+
+Keys follow the same rule as the CLI and the GitHub Action, so one map file works everywhere:
+
+- **Keys** may only contain letters, digits, `_`, `.` and `-` (`^[A-Za-z0-9_.-]+$`); `__proto__`
+  is also rejected. `MapFileParser.Parse` throws `FormatException` for any other key, before any secret is fetched.
+  Use `__` for hierarchical names (`Database__Password`), not `/`.
+- **Values** are the secret identifiers in the provider (SSM parameter name or Key Vault secret
+  name) and must be JSON strings.
+- **Secret contents** are returned exactly as the provider stores them. `ResolveFile` / `Resolve` and `IConfiguration` keep them in
+  memory; `Load` / `Inject` write them to the process environment, where the operating system cannot
+  store `NUL` (`U+0000`) and Windows limits a variable to 32,767 characters.
+
+See [Keys and Values: What Is Accepted](https://github.com/macalbert/envilder#keys-and-values-what-is-accepted)
+for the full reference and the reasoning behind the rules.
 
 ## Links
 

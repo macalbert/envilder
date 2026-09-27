@@ -66,6 +66,12 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   latter lands on `envilder.com/docs/getting-started/`, so visits from GitHub
   and npm to envilder.com can be measured
 
+* **Document accepted map-file keys, values and limits**: The README and the website map-file page
+  now list the accepted key grammar and why it matches dotenv, the secret
+  reference format per provider, and the limits on secret contents
+  (provider sizes, the one value a `.env` file cannot hold, operating-system
+  limits and variable expansion by other loaders)
+
 ---
 
 ## [0.13.2] - 2026-08-14

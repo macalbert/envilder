@@ -1,6 +1,31 @@
+import json
+import re
+
 import pytest
 from envilder.application.map_file_parser import MapFileParser
 from envilder.domain.secret_provider_type import SecretProviderType
+
+_ANY_LINE_TERMINATOR = re.compile("[\r\n\u2028\u2029]")
+
+_INVALID_NAMES = [
+    "",
+    "   ",
+    "SAFE=prefix",
+    "SAFE\nINJECTED",
+    "SAFE\rINJECTED",
+    "SAFE\u2028INJECTED",
+    "SAFE\u2029INJECTED",
+    "LOST NAME",
+    "LOST\tNAME",
+    "LOST#NAME",
+    "SAFE\n",
+    "SAFE\r",
+    "SAFE\r\n",
+    "SAFE\u2028",
+    "SAFE\u2029",
+    "CAFÉ_URL",
+    "__proto__",
+]
 
 
 class TestMapFileParser:
@@ -196,3 +221,55 @@ class TestMapFileParser:
         # Assert
         with pytest.raises(ValueError, match="Unsupported provider"):
             action()
+
+    @pytest.mark.parametrize("invalid_name", _INVALID_NAMES)
+    def Should_RaiseValueError_When_MappingNameIsInvalid(
+        self,
+        invalid_name: str,
+    ) -> None:
+        # Arrange
+        json_content = json.dumps({invalid_name: "/app/secret"})
+        sut = MapFileParser()
+
+        # Act
+        action = lambda: sut.parse(json_content)
+
+        # Assert
+        with pytest.raises(
+            ValueError, match="(?i)environment variable name"
+        ) as error:
+            action()
+        assert _ANY_LINE_TERMINATOR.search(str(error.value)) is None
+
+    def Should_RaiseValueError_When_InvalidNameMapsToNonStringValue(
+        self,
+    ) -> None:
+        # Arrange
+        json_content = json.dumps({"SAFE=prefix": 42})
+        sut = MapFileParser()
+
+        # Act
+        action = lambda: sut.parse(json_content)
+
+        # Assert
+        with pytest.raises(ValueError, match="(?i)environment variable name"):
+            action()
+
+    def Should_AcceptMappings_When_NamesAreDottedHyphenatedOrStartWithDigit(
+        self,
+    ) -> None:
+        # Arrange
+        expected = {
+            "APP.NAME": "/app/name",
+            "APP-NAME": "/app/name-hyphen",
+            "1PASSWORD_TOKEN": "/app/token",
+            "__proto__x": "/app/proto-like",
+        }
+        json_content = json.dumps(expected)
+        sut = MapFileParser()
+
+        # Act
+        actual = sut.parse(json_content)
+
+        # Assert
+        assert actual.mappings == expected
