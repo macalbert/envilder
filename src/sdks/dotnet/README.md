@@ -44,6 +44,32 @@ var secrets = Env.ResolveFile("envilder.json");
 var dbPassword = secrets["DB_PASSWORD"];
 ```
 
+### Azure Key Vault
+
+Set the provider in the map file's `$config`; values are Key Vault secret names:
+
+```json
+{
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "DB_PASSWORD": "myapp-prod-db-password"
+}
+```
+
+The code is the same as for AWS. Credentials are resolved with `DefaultAzureCredential`
+(`az login`, managed identity, or environment variables):
+
+```csharp
+using Envilder;
+
+Env.Load("envilder.json");
+
+var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+```
+
 ### Async variants
 
 Every method has an async counterpart:
