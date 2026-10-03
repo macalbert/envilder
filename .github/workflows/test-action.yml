@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   test-action:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: ${{ !github.event.pull_request.draft }}
     timeout-minutes: 15
 
