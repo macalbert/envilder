@@ -1,0 +1,35 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "url": "https://context7.com/macalbert/envilder",
+  "public_key": "pk_4hBjJRoWeI9KtICh7CJff",
+  "projectTitle": "Envilder",
+  "description": "Resolves secrets from AWS SSM Parameter Store or Azure Key Vault using a Git-versioned envilder.json mapping, via CLI, GitHub Action, or runtime SDKs (.NET, Python, Node.js).",
+  "folders": ["docs", "github-action", "src/sdks", "examples"],
+  "excludeFolders": [
+    "docs/adr",
+    "docs/architecture",
+    "docs/changelogs",
+    "**/.venv",
+    "**/node_modules"
+  ],
+  "excludeFiles": [
+    "AGENTS.md",
+    "CONTEXT.md",
+    "CONTRIBUTING.md",
+    "ROADMAP.md",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "LICENSE.md",
+    "ai-workflows.md",
+    "conventional-commits.md"
+  ],
+  "rules": [
+    "envilder.json maps environment variable names to secret paths/names; never put secret values in it.",
+    "With no $config block, the provider is AWS SSM Parameter Store; Azure Key Vault requires $config.provider = \"azure\" (or the CLI/GitHub Action override).",
+    "Precedence: CLI flags / GitHub Action inputs > $config in the map file > defaults.",
+    "`npx envilder` with no flags uses envilder.json as the map and .env as the output file.",
+    "Runtime SDKs resolve secrets into process memory; no .env file is needed.",
+    "Never suggest committing generated .env files or secret values to Git.",
+    "SDK APIs differ per language; use only the API documented in each SDK README."
+  ]
+}
