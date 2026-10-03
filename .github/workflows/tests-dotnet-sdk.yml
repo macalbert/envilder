@@ -26,7 +26,7 @@ jobs:
   # blocks merging forever. A job-level `if:` skip reports "success"
   # instead, so the path check moves here and gates test-dotnet-sdk below.
   changes:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read
@@ -48,7 +48,7 @@ jobs:
 
   test-dotnet-sdk:
     needs: changes
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_dispatch' || (needs.changes.outputs.dotnet == 'true' && !github.event.pull_request.draft) }}
     timeout-minutes: 10
     env:
@@ -118,7 +118,7 @@ jobs:
 
   test-dotnet-sdk-report:
     permissions: write-all
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     needs: [test-dotnet-sdk]
 
     if: ${{ success() || failure() }}

@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   publish-action:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
       VERSION: ${{ inputs.version }}

@@ -28,7 +28,7 @@ jobs:
   # blocks merging forever. A job-level `if:` skip reports "success"
   # instead, so the path check moves here and gates powerup-test below.
   changes:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     outputs:
       core: ${{ steps.filter.outputs.core }}
     steps:
@@ -53,7 +53,7 @@ jobs:
 
   powerup-test:
     needs: changes
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_dispatch' || (needs.changes.outputs.core == 'true' && !github.event.pull_request.draft) }}
     timeout-minutes: 30
     env:

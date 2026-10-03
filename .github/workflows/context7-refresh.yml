@@ -16,7 +16,7 @@ on:
 
 jobs:
   refresh:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: 📚 Trigger Context7 Refresh
