@@ -27,7 +27,7 @@ jobs:
     permissions:
       security-events: write
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
 
     steps:
       - name: 🧱 Enter the Fortress (Checkout Repository)

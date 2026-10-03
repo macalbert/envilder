@@ -27,7 +27,7 @@ concurrency:
 jobs:
   label-by-stack:
     name: Label by stack (changed files)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     # Fork PRs get a read-only GITHUB_TOKEN on pull_request, so label mutations
     # fail. Skip them: labeling only runs for PRs from branches in this repo.
     if: github.event.pull_request.head.repo.full_name == github.repository
@@ -40,7 +40,7 @@ jobs:
 
   label-by-type:
     name: Label by commit type
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     if: github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - name: 🏷️ Reconcile Conventional Commit type labels
@@ -108,7 +108,7 @@ jobs:
 
   label-by-size:
     name: Label by PR size
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     if: github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - name: 🏷️ Compute size and apply label
@@ -139,7 +139,7 @@ jobs:
           fi
 
           # Normalize config to JSON once, then drive everything with jq.
-          # yq ships preinstalled on GitHub-hosted ubuntu-latest runners.
+          # yq ships preinstalled on GitHub-hosted Ubuntu runners.
           json="$(yq -o=json '.' <<< "$raw")"
 
           mapfile -t excludes < <(jq -r '.exclude[]?' <<< "$json")

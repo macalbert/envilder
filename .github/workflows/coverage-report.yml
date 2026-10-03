@@ -27,7 +27,7 @@ jobs:
   # ────────────────────────────────────────────────────────────────────────────
   test-cli:
     if: ${{ !github.event.pull_request.draft }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     env:
       LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
@@ -94,7 +94,7 @@ jobs:
   # ────────────────────────────────────────────────────────────────────────────
   test-dotnet:
     if: ${{ !github.event.pull_request.draft }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     env:
       LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
@@ -169,7 +169,7 @@ jobs:
   # ────────────────────────────────────────────────────────────────────────────
   test-python:
     if: ${{ !github.event.pull_request.draft }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     steps:
       - name: 🧲 Checkout
@@ -239,7 +239,7 @@ jobs:
   # ────────────────────────────────────────────────────────────────────────────
   test-nodejs-sdk:
     if: ${{ !github.event.pull_request.draft }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     env:
       LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
@@ -303,7 +303,7 @@ jobs:
   # ────────────────────────────────────────────────────────────────────────────
   test-iac:
     if: ${{ !github.event.pull_request.draft }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - name: 🧲 Checkout
@@ -356,7 +356,7 @@ jobs:
   publish-report:
     needs: [test-cli, test-dotnet, test-python, test-nodejs-sdk, test-iac]
     if: ${{ always() }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     environment:
       name: github-pages
