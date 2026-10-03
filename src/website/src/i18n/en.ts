@@ -762,6 +762,68 @@ export const en: Translations = {
     mapAuthentication: 'Authentication',
     mapAwsAuth: 'AWS CLI credentials',
     mapAzureAuth: 'Azure Default Credentials',
+    mapRulesTitle: 'Keys and values: what is accepted',
+    mapRulesIntro:
+      'Every mapping has the shape "KEY": "secret reference". These rules are the same in the CLI, the GitHub Action, the JSON Schema and every runtime SDK, so a mapping file that is valid in one place is valid everywhere.',
+    mapKeysTitle: 'Keys (environment variable names)',
+    mapThRule: 'Rule',
+    mapThDetails: 'Details',
+    mapKeysAllowed: 'Allowed characters',
+    mapKeysAllowedDesc: 'Letters, digits, underscore, dot and hyphen:',
+    mapKeysRecommended: 'Recommended',
+    mapKeysRecommendedDesc: 'A POSIX name, usable from any shell:',
+    mapKeysRejected: 'Rejected',
+    mapKeysRejectedDesc:
+      'An empty name, any other character (space, tab, #, =, /, :, line breaks, U+2028/U+2029, accented or non-Latin letters) and the name',
+    mapKeysReserved: 'Reserved',
+    mapKeysReservedDesc: 'Keys starting with $ are metadata, never variables:',
+    mapKeysNonString: 'Non-string values',
+    mapKeysNonStringDesc:
+      'A mapping whose value is not a string is skipped, but its key is still validated.',
+    mapKeysWholeFile:
+      'A mapping file with an invalid key is rejected as a whole, before any secret is fetched. The error quotes the key and never the value.',
+    mapKeysWhyTitle: 'Why this exact set?',
+    mapKeysWhyDesc:
+      'Keys become lines in a .env file, and this is the key grammar of dotenv, the parser Envilder itself uses. Any other character either opens a different assignment (=, line breaks, U+2028/U+2029) or produces a line that consumers silently drop: a key such as Database/Password is ignored by dotenv, rejected by Docker Compose and by bash. The name __proto__ is dropped by every JavaScript reader, dotenv included.',
+    mapKeysHierarchyTitle: 'Hierarchical names:',
+    mapKeysHierarchyDesc:
+      'use __ as the separator (Database__Password). It works with every consumer, and the .NET SDK maps it to the Database:Password configuration section.',
+    mapValuesTitle: 'Values (secret references)',
+    mapValuesDesc:
+      'A value is the identifier of the secret in the provider. It must be a JSON string.',
+    mapThProvider: 'Provider',
+    mapThIdentifier: 'Identifier format',
+    mapValuesAws:
+      'Parameter name, used as-is. Case-sensitive; letters, digits, _ . - plus / for hierarchies (at most 15 levels); up to 1011 characters including the ARN prefix; cannot start with aws or ssm.',
+    mapValuesAzure:
+      'Secret name: 1-127 characters, letters, digits and hyphens, starting with a letter.',
+    mapValuesDocsLink: 'Provider documentation',
+    mapContentsTitle: 'Secret contents (the resolved values)',
+    mapContentsIntro:
+      'Envilder never rewrites a secret value: what the provider returns is what your application gets. The limits come from where the value is stored:',
+    mapThStage: 'Stage',
+    mapThLimit: 'Limit',
+    mapContentsProvider: 'Provider',
+    mapContentsProviderLimit:
+      'AWS SSM: 4 KB (standard) or 8 KB (advanced tier). Azure Key Vault: 25 KB.',
+    mapContentsEnvFile: '.env file (CLI, GitHub Action)',
+    mapContentsEnvFileLimit:
+      'Every value dotenv can represent. See the exception below.',
+    mapContentsProcess: 'Process environment',
+    mapContentsProcessLimit:
+      'The operating system cannot store NUL (U+0000) in a variable, and Windows limits a variable to 32,767 characters.',
+    mapContentsResolveOnly:
+      "The SDKs' resolve-only APIs (resolve, ResolveFile, IConfiguration) keep values in memory and are subject to the provider limits only.",
+    mapContentsWriterDesc:
+      'The CLI writes each value so that dotenv reads back exactly the original string. The quoting is chosen automatically and checked by parsing the result before the file is written:',
+    mapContentsRoundTrip:
+      '#, leading and trailing whitespace, quotes, backslashes, a literal \\n, real LF/CRLF line breaks and Unicode all round-trip. When the file already exists, each assignment is replaced in place (a multiline one entirely), and comments, ordering and line endings are preserved.',
+    mapContentsUnrepresentableTitle: 'The one value a .env file cannot hold:',
+    mapContentsUnrepresentableDesc:
+      'a value containing all three quote characters (\', " and `) together with a line break, leading or trailing whitespace, or a #. The CLI stops with an error that names the variable and leaves the .env file unchanged. Store such a value encoded (for example base64) or read it with an SDK.',
+    mapContentsExpansionTitle: 'Variable expansion:',
+    mapContentsExpansionDesc:
+      'Envilder writes references such as $HOME literally and dotenv does not expand them, but other loaders do. Docker Compose, for instance, expands an unquoted KEY=$HOME when it reads the file. Keep this in mind when a secret contains $.',
     mapMultiEnvTitle: 'Multiple environments',
     mapMultiEnvDesc:
       'A common pattern is having one mapping file per environment. The structure is the same, only the secret paths change:',

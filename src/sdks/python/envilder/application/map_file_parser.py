@@ -2,6 +2,10 @@ from __future__ import annotations
 
 import json
 
+from envilder.domain.environment_variable_name import (
+    invalid_environment_variable_name_message,
+    is_valid_environment_variable_name,
+)
 from envilder.domain.map_file_config import MapFileConfig
 from envilder.domain.parsed_map_file import ParsedMapFile
 from envilder.domain.secret_provider_type import SecretProviderType
@@ -51,6 +55,13 @@ class MapFileParser:
                 if key == _CONFIG_KEY and isinstance(value, dict):
                     config = _deserialize_config(value)
                 continue
+
+            # Before the non-string filter, so the name rule covers every
+            # mapping key the file declares, matching the CLI and the schema.
+            if not is_valid_environment_variable_name(key):
+                raise ValueError(
+                    invalid_environment_variable_name_message(key)
+                )
 
             if isinstance(value, str):
                 mappings[key] = value
