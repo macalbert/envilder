@@ -43,6 +43,32 @@ const secrets = await Envilder.resolveFile('envilder.json');
 console.log(secrets.get('DB_PASSWORD')); // avoid logging secrets in production
 ```
 
+### Azure Key Vault
+
+Set the provider in the map file's `$config`; values are Key Vault secret names:
+
+```json
+{
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "DB_PASSWORD": "myapp-prod-db-password"
+}
+```
+
+The code is the same as for AWS. Credentials are resolved with `DefaultAzureCredential`
+(`az login`, managed identity, or environment variables):
+
+```typescript
+import { Envilder } from '@envilder/sdk';
+
+await Envilder.load('envilder.json');
+
+console.log('DB_PASSWORD loaded:', !!process.env.DB_PASSWORD);
+```
+
 ### Fluent builder (with overrides)
 
 Override the map file's `$config` at runtime: useful for switching providers,
