@@ -23,7 +23,20 @@ jobs:
         env:
           CONTEXT7_API_KEY: ${{ secrets.CONTEXT7_API_KEY }}
         run: |
-          curl -sS --fail-with-body -X POST https://context7.com/api/v1/refresh \
+          status=$(curl -sS -o response.json -w "%{http_code}" -X POST https://context7.com/api/v1/refresh \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${CONTEXT7_API_KEY}" \
-            -d '{"libraryName": "/macalbert/envilder"}'
+            -d '{"libraryName": "/macalbert/envilder"}')
+          cat response.json; echo
+
+          if [ "$status" -lt 300 ]; then
+            exit 0
+          fi
+
+          # Context7 rate-limits refreshes; a throttled refresh is not a failure
+          if grep -q '"too-early"' response.json; then
+            echo "::warning::Context7 refresh skipped: $(cat response.json)"
+            exit 0
+          fi
+
+          exit 1
