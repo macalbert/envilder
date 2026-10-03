@@ -350,6 +350,8 @@ prebuilt action, so consumers do not need an Envilder build step.
 - [📖 Full Documentation](https://envilder.com/docs/getting-started/?utm_source=github&utm_medium=readme&utm_campaign=root-docs): the complete guide at envilder.com
 - [Push Command Guide](docs/push-command.md)
 - [Pull Command Guide](docs/pull-command.md)
+- [🤖 Envilder on Context7](https://context7.com/macalbert/envilder): up-to-date docs for AI coding assistants
+  (Claude Code, Cursor, Copilot). Add `use context7` to your prompt, or reference the library ID `/macalbert/envilder`.
 
 ## 🛠️ How it works
 
