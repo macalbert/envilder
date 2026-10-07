@@ -242,6 +242,22 @@ For Azure, add `vaultUrl`:
 }
 ```
 
+### Keys and values
+
+Keys follow the same rule as the CLI and the GitHub Action, so one map file works everywhere:
+
+- **Keys** may only contain letters, digits, `_`, `.` and `-` (`^[A-Za-z0-9_.-]+$`); `__proto__`
+  is also rejected. `MapFileParser.parse` raises `ValueError` for any other key, before any secret is fetched.
+  Use `__` for hierarchical names (`Database__Password`), not `/`.
+- **Values** are the secret identifiers in the provider (SSM parameter name or Key Vault secret
+  name) and must be JSON strings.
+- **Secret contents** are returned exactly as the provider stores them. `resolve_file` / `resolve` keep them in
+  memory; `load` / `inject` write them to the process environment, where the operating system cannot
+  store `NUL` (`U+0000`) and Windows limits a variable to 32,767 characters.
+
+See [Keys and Values: What Is Accepted](https://github.com/macalbert/envilder#keys-and-values-what-is-accepted)
+for the full reference and the reasoning behind the rules.
+
 ## Links
 
 - [Changelog](https://github.com/macalbert/envilder/blob/main/docs/changelogs/sdk-python.md)

@@ -27,8 +27,15 @@ public class EnvilderConfigurationProvider : ConfigurationProvider
 		}
 	}
 
+	// `__` is the section separator a map file can express: `/` and `:` fall
+	// outside the ADR-0008 name grammar, so the CLI would write a `.env` line
+	// no reader loads. `__` survives that round-trip and is the same convention
+	// .NET's own environment-variables provider uses. `/` is still normalized
+	// for callers that build a ParsedMapFile in code.
 	private static string NormalizeKey(string key)
 	{
-		return key.Replace("/", ConfigurationPath.KeyDelimiter);
+		return key
+			.Replace("__", ConfigurationPath.KeyDelimiter)
+			.Replace("/", ConfigurationPath.KeyDelimiter);
 	}
 }

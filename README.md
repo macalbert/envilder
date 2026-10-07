@@ -210,6 +210,92 @@ envilder
 envilder --provider=azure --vault-url=https://other-vault.vault.azure.net --map=envilder.json --envfile=.env
 ```
 
+### Keys and Values: What Is Accepted
+
+Every mapping has the shape `"<KEY>": "<secret reference>"`. The rules below are the same in the
+CLI, the GitHub Action, the [JSON Schema](https://envilder.com/schema/map-file.v1.json) and every
+runtime SDK, so a map file that is valid in one place is valid everywhere
+([ADR-0008](docs/adr/0008-map-file-schema.md)).
+
+#### Keys (environment variable names)
+
+| Rule | Details |
+| --- | --- |
+| Allowed characters | Letters `A-Z` `a-z`, digits `0-9`, `_`, `.` and `-` (`^[A-Za-z0-9_.-]+$`) |
+| Recommended | `^[A-Za-z_][A-Za-z0-9_]*$`: a POSIX name, usable from any shell |
+| Rejected | An empty name, any other character (space, tab, `#`, `=`, `/`, `:`, line breaks, `U+2028`/`U+2029`, accented or non-Latin letters) and the name `__proto__` |
+| Reserved | Keys starting with `$` (`$schema`, `$config`) are metadata, never variables |
+| Non-string values | A mapping whose value is not a string is skipped, but its key is still validated |
+
+A map file with an invalid key is rejected as a whole, before any secret is fetched. The error
+quotes the key and never the value.
+
+**Why this exact set?** Keys become lines in a `.env` file, and `^[A-Za-z0-9_.-]+$` is the key
+grammar of [`dotenv`](https://github.com/motdotla/dotenv), the parser Envilder itself uses. Any
+other character either opens a different assignment (`=`, line breaks, `U+2028`/`U+2029`: the
+injection fixed in [#511](https://github.com/macalbert/envilder/issues/511)) or produces a line
+that consumers silently drop. For example, a key with `/`:
+
+| Consumer reading `Database/Password=secret` | Result |
+| --- | --- |
+| `dotenv` (Node.js) | Line ignored: the variable never loads |
+| Docker Compose `env_file` | Error: `unexpected character "/" in variable name` |
+| `set -a; source .env` (bash) | Error: the variable does not exist |
+| `python-dotenv` | Loaded |
+
+`__proto__` is inside the character set but is dropped by every JavaScript reader that builds a
+plain object, `dotenv` included.
+
+> **Hierarchical names:** use `__` as the separator (`Database__Password`). It survives every
+> consumer above, and the .NET SDK maps it to the `Database:Password` configuration section.
+
+#### Values (secret references)
+
+A value is the identifier of the secret in the provider. It must be a JSON string.
+
+| Provider | Identifier format |
+| --- | --- |
+| AWS SSM | Parameter name, used as-is. Case-sensitive; `a-zA-Z0-9_.-` plus `/` for hierarchies (at most 15 levels); up to 1011 characters including the ARN prefix; cannot start with `aws` or `ssm` ([AWS constraints](https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-a-parameter.html#sysman-parameter-name-constraints)) |
+| Azure Key Vault | Secret name: 1-127 characters, letters, digits and `-`, starting with a letter ([Azure naming](https://learn.microsoft.com/azure/key-vault/general/about-keys-secrets-certificates#objects-identifiers-and-versioning)) |
+
+#### Secret contents (the resolved values)
+
+Envilder never rewrites a secret value: what the provider returns is what your application gets.
+The limits come from where the value is stored:
+
+| Stage | Limit |
+| --- | --- |
+| Provider | AWS SSM: 4 KB (standard) or 8 KB (advanced tier). Azure Key Vault: 25 KB |
+| `.env` file (CLI, GitHub Action) | See below |
+| Process environment (SDK `load` / `inject`, or any tool that loads the `.env`) | The operating system cannot store `NUL` (`U+0000`) in a variable, and Windows limits a variable to 32,767 characters |
+
+The SDKs' resolve-only APIs (`resolve`, `ResolveFile`, `IConfiguration`) return values in memory
+and are subject to the provider limits only.
+
+**How the CLI writes `.env` values.** Each value is written so that `dotenv` reads back exactly
+the original string. The quoting is chosen automatically and checked by parsing the result before
+the file is written:
+
+| Value | Written as |
+| --- | --- |
+| `plain`, `she said "hi"` | `KEY=plain`, `KEY=she said "hi"` (no quotes needed) |
+| `alpha#beta` | `KEY='alpha#beta'` (unquoted, `#` would start a comment) |
+| `padded` with two leading and trailing spaces | `KEY='  padded  '` (unquoted, the spaces would be trimmed) |
+| `first` + line break + `second` | `KEY="first\nsecond"` (read back as a real line break) |
+
+`#`, leading and trailing whitespace, quotes, backslashes, a literal `\n`, real LF/CRLF line
+breaks and Unicode all round-trip. When the file already exists, each assignment is replaced in
+place (a multiline one entirely), and comments, ordering and line endings are preserved.
+
+One combination cannot be expressed by any `.env` quoting: a value containing all three quote
+characters (`'`, `"` and `` ` ``) together with a line break, leading or trailing whitespace, or
+a `#`. The CLI then stops with an error that names the variable, and the `.env` file is left
+unchanged. Store such a value encoded (for example base64) or read it with an SDK instead.
+
+> **Variable expansion:** Envilder writes `${...}` literally and `dotenv` does not expand it,
+> but other loaders do. Docker Compose, for instance, expands an unquoted `KEY=${HOME}` when it
+> reads the file. Keep this in mind when a secret contains `$`.
+
 ## 🧩 Runtime SDKs
 
 Beyond the CLI and GitHub Action, Envilder provides **runtime SDKs** that resolve secrets

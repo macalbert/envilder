@@ -1,9 +1,12 @@
 namespace Envilder.Tests.Application;
 
 using AwesomeAssertions;
+using System.Text.Json;
 
 public class MapFileParserTests
 {
+	private static readonly char[] LineTerminators = ['\r', '\n', '\u2028', '\u2029'];
+
 	private readonly MapFileParser _sut = new();
 
 	[Fact]
@@ -141,5 +144,71 @@ public class MapFileParserTests
 		actual.Mappings.Should().NotContainKey("$schema");
 		actual.Mappings["DB_URL"].Should().Be("/app/db");
 		actual.Config.Provider.Should().Be(SecretProviderType.Aws);
+	}
+
+	[Theory]
+	[InlineData("")]
+	[InlineData("   ")]
+	[InlineData("SAFE=prefix")]
+	[InlineData("SAFE\nINJECTED")]
+	[InlineData("SAFE\rINJECTED")]
+	[InlineData("SAFE\u2028INJECTED")]
+	[InlineData("SAFE\u2029INJECTED")]
+	[InlineData("LOST NAME")]
+	[InlineData("LOST\tNAME")]
+	[InlineData("LOST#NAME")]
+	[InlineData("SAFE\n")]
+	[InlineData("SAFE\r")]
+	[InlineData("SAFE\r\n")]
+	[InlineData("SAFE\u2028")]
+	[InlineData("SAFE\u2029")]
+	[InlineData("CAFÉ_URL")]
+	[InlineData("__proto__")]
+	public void Should_ThrowFormatException_When_MappingNameIsInvalid(string invalidName)
+	{
+		// Arrange
+		var json = JsonSerializer.Serialize(new Dictionary<string, string> { [invalidName] = "/app/secret" });
+
+		// Act
+		var act = () => _sut.Parse(json);
+
+		// Assert
+		act.Should().Throw<FormatException>()
+			.Where(e => e.Message.Contains("environment variable name", StringComparison.OrdinalIgnoreCase))
+			.Where(e => e.Message.IndexOfAny(LineTerminators) < 0);
+	}
+
+	[Fact]
+	public void Should_ThrowFormatException_When_InvalidNameMapsToNonStringValue()
+	{
+		// Arrange
+		var json = """{ "SAFE=prefix": 42 }""";
+
+		// Act
+		var act = () => _sut.Parse(json);
+
+		// Assert
+		act.Should().Throw<FormatException>()
+			.WithMessage("*environment variable name*");
+	}
+
+	[Fact]
+	public void Should_AcceptMappings_When_NamesAreDottedHyphenatedOrStartWithDigit()
+	{
+		// Arrange
+		var expected = new Dictionary<string, string>
+		{
+			["APP.NAME"] = "/app/name",
+			["APP-NAME"] = "/app/name-hyphen",
+			["1PASSWORD_TOKEN"] = "/app/token",
+			["__proto__x"] = "/app/proto-like",
+		};
+		var json = JsonSerializer.Serialize(expected);
+
+		// Act
+		var actual = _sut.Parse(json);
+
+		// Assert
+		actual.Mappings.Should().BeEquivalentTo(expected);
 	}
 }

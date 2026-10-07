@@ -313,6 +313,116 @@ SECRET_TOKEN={value from /myapp/prod/secret-token}`} />
           </tbody>
         </table>
 
+        <h3 id="keys-and-values">{t.docs.mapRulesTitle}</h3>
+        <p>{t.docs.mapRulesIntro}</p>
+
+        <h4>{t.docs.mapKeysTitle}</h4>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.mapThRule}</th><th>{t.docs.mapThDetails}</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>{t.docs.mapKeysAllowed}</strong></td>
+              <td>{t.docs.mapKeysAllowedDesc} <code>^[A-Za-z0-9_.-]+$</code></td>
+            </tr>
+            <tr>
+              <td><strong>{t.docs.mapKeysRecommended}</strong></td>
+              <td>{t.docs.mapKeysRecommendedDesc} <code>^[A-Za-z_][A-Za-z0-9_]*$</code></td>
+            </tr>
+            <tr>
+              <td><strong>{t.docs.mapKeysRejected}</strong></td>
+              <td>{t.docs.mapKeysRejectedDesc} <code>__proto__</code></td>
+            </tr>
+            <tr>
+              <td><strong>{t.docs.mapKeysReserved}</strong></td>
+              <td>{t.docs.mapKeysReservedDesc} <code>$schema</code>, <code>$config</code></td>
+            </tr>
+            <tr>
+              <td><strong>{t.docs.mapKeysNonString}</strong></td>
+              <td>{t.docs.mapKeysNonStringDesc}</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>{t.docs.mapKeysWholeFile}</p>
+
+        <div class="callout">
+          <span class="callout-icon">🔎</span>
+          <div>
+            <strong>{t.docs.mapKeysWhyTitle}</strong> {t.docs.mapKeysWhyDesc}
+          </div>
+        </div>
+
+        <div class="callout">
+          <span class="callout-icon">🧭</span>
+          <div>
+            <strong>{t.docs.mapKeysHierarchyTitle}</strong> {t.docs.mapKeysHierarchyDesc}
+          </div>
+        </div>
+
+        <h4>{t.docs.mapValuesTitle}</h4>
+        <p>{t.docs.mapValuesDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.mapThProvider}</th><th>{t.docs.mapThIdentifier}</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>{t.docs.mapThAwsSsm}</strong></td>
+              <td>{t.docs.mapValuesAws} <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-a-parameter.html#sysman-parameter-name-constraints" target="_blank" rel="noopener noreferrer">{t.docs.mapValuesDocsLink}</a></td>
+            </tr>
+            <tr>
+              <td><strong>{t.docs.mapThAzureKv}</strong></td>
+              <td>{t.docs.mapValuesAzure} <a href="https://learn.microsoft.com/azure/key-vault/general/about-keys-secrets-certificates#objects-identifiers-and-versioning" target="_blank" rel="noopener noreferrer">{t.docs.mapValuesDocsLink}</a></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>{t.docs.mapContentsTitle}</h4>
+        <p>{t.docs.mapContentsIntro}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.mapThStage}</th><th>{t.docs.mapThLimit}</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>{t.docs.mapContentsProvider}</strong></td>
+              <td>{t.docs.mapContentsProviderLimit}</td>
+            </tr>
+            <tr>
+              <td><strong>{t.docs.mapContentsEnvFile}</strong></td>
+              <td>{t.docs.mapContentsEnvFileLimit}</td>
+            </tr>
+            <tr>
+              <td><strong>{t.docs.mapContentsProcess}</strong></td>
+              <td>{t.docs.mapContentsProcessLimit}</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>{t.docs.mapContentsResolveOnly}</p>
+
+        <p>{t.docs.mapContentsWriterDesc}</p>
+        <CodeBlock lang="dotenv" filename=".env" code={`PLAIN=plain
+QUOTES=she said "hi"
+HASH='alpha#beta'
+PADDED='  padded  '
+MULTILINE="first\\nsecond"`} />
+        <p>{t.docs.mapContentsRoundTrip}</p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>
+            <strong>{t.docs.mapContentsUnrepresentableTitle}</strong> {t.docs.mapContentsUnrepresentableDesc}
+          </div>
+        </div>
+
+        <div class="callout">
+          <span class="callout-icon">💲</span>
+          <div>
+            <strong>{t.docs.mapContentsExpansionTitle}</strong> {t.docs.mapContentsExpansionDesc}
+          </div>
+        </div>
+
         <h3>{t.docs.mapMultiEnvTitle}</h3>
         <p>{t.docs.mapMultiEnvDesc}</p>
         <div class="multi-env-grid">
