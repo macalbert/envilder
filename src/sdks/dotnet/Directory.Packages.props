@@ -5,12 +5,12 @@
     <CentralPackageVersionOverrideEnabled>true</CentralPackageVersionOverrideEnabled>
   </PropertyGroup>
   <ItemGroup Label="AWS">
-    <PackageVersion Include="AWSSDK.SimpleSystemsManagement" Version="4.0.103.9" />
-    <PackageVersion Include="AWSSDK.SSOOIDC" Version="4.0.100.15" />
+    <PackageVersion Include="AWSSDK.SimpleSystemsManagement" Version="4.0.104.1" />
+    <PackageVersion Include="AWSSDK.SSOOIDC" Version="4.0.100.16" />
   </ItemGroup>
   <ItemGroup Label="Azure">
     <PackageVersion Include="Azure.Identity" Version="1.21.0" />
-    <PackageVersion Include="Azure.Security.KeyVault.Secrets" Version="4.11.1" />
+    <PackageVersion Include="Azure.Security.KeyVault.Secrets" Version="4.11.2" />
   </ItemGroup>
   <ItemGroup Label="Microsoft">
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.12" />
