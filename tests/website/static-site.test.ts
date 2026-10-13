@@ -253,6 +253,19 @@ describe('Static website SEO', () => {
     expect(actual).toEqual(expected);
   });
 
+  it('Should_KeepEnglishDocsIndexable_When_StaticSiteIsBuilt', () => {
+    // Arrange
+    const expected: string[] = [];
+
+    // Act
+    const actual = englishDocsPages
+      .filter((page) => readDistFile(page.file).includes('name="robots"'))
+      .map((page) => page.file);
+
+    // Assert
+    expect(actual).toEqual(expected);
+  });
+
   it('Should_KeepRobotsAndNotFoundMetadata_When_StaticSiteIsBuilt', () => {
     // Arrange
     const expected = {

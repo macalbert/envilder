@@ -501,9 +501,10 @@ export const en: Translations = {
           'Find setup, provider, CLI, GitHub Action, and SDK guides.',
       },
       'getting-started': {
-        title: 'Get started: from AWS SSM or Azure Key Vault to a .env file',
+        title:
+          'Get started with Envilder: install and prerequisites for AWS SSM and Azure Key Vault',
         description:
-          'Install Envilder, write a JSON map of variables to secret paths, and generate a .env from your cloud vault. Works with AWS SSM and Azure Key Vault.',
+          'Install the Envilder CLI, check the prerequisites for AWS SSM or Azure Key Vault, and learn how the JSON map links variables to secret paths.',
         heading: 'Get started',
         intro:
           'Install Envilder, configure a provider, and resolve secrets from a versioned map file.',
@@ -543,7 +544,7 @@ export const en: Translations = {
         title:
           'envilder.json reference: map environment variables to cloud secrets',
         description:
-          'Full reference for the Envilder mapping file: $config, providers, profiles, vault URL, multi-environment layouts and validation rules.',
+          'Full reference for the Envilder mapping file: $config, providers, profiles, vault URL, multi-environment layouts and config precedence.',
         heading: 'Map file',
         intro:
           'Define environment variable mappings and provider settings in envilder.json.',
