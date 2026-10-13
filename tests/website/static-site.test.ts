@@ -23,11 +23,17 @@ const localizedDocsPages = docsRouteManifest.flatMap((route) =>
     };
   }),
 );
+const englishDocsPages = localizedDocsPages.filter(
+  (page) => page.lang === 'en',
+);
+const translatedDocsPages = localizedDocsPages.filter(
+  (page) => page.lang !== 'en',
+);
 const indexablePages = [
   { file: 'index.html', path: '/', lang: 'en' },
   { file: 'ca/index.html', path: '/ca/', lang: 'ca' },
   { file: 'es/index.html', path: '/es/', lang: 'es' },
-  ...localizedDocsPages,
+  ...englishDocsPages,
   { file: 'changelog/index.html', path: '/changelog/', lang: 'en' },
 ];
 
@@ -71,7 +77,9 @@ function getExpectedAlternateUrls(path: string): string[] {
   const route = localizedPath.endsWith('/')
     ? localizedPath
     : `${localizedPath}/`;
-  const languages = localizedLanguages(route);
+  const languages = route.startsWith('/docs/')
+    ? ['en']
+    : localizedLanguages(route);
   const languageUrls = languages.map((language) =>
     language === 'en' ? `${siteUrl}${route}` : `${siteUrl}/${language}${route}`,
   );
@@ -223,6 +231,37 @@ describe('Static website SEO', () => {
 
     // Assert
     expect(actual).toEqual(expected.sort());
+  });
+
+  it('Should_NoindexTranslatedDocs_When_StaticSiteIsBuilt', () => {
+    // Arrange
+    const expected: string[] = [];
+
+    // Act
+    const actual = translatedDocsPages
+      .filter(
+        (page) =>
+          !readDistFile(page.file).includes(
+            '<meta name="robots" content="noindex,follow">',
+          ),
+      )
+      .map((page) => page.file);
+
+    // Assert
+    expect(actual).toEqual(expected);
+  });
+
+  it('Should_KeepEnglishDocsIndexable_When_StaticSiteIsBuilt', () => {
+    // Arrange
+    const expected: string[] = [];
+
+    // Act
+    const actual = englishDocsPages
+      .filter((page) => readDistFile(page.file).includes('name="robots"'))
+      .map((page) => page.file);
+
+    // Assert
+    expect(actual).toEqual(expected);
   });
 
   it('Should_KeepRobotsAndNotFoundMetadata_When_StaticSiteIsBuilt', () => {
