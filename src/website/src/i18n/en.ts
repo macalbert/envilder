@@ -528,9 +528,9 @@ export const en: Translations = {
           'Configure AWS credentials and the permissions Envilder needs.',
       },
       'azure-key-vault': {
-        title: 'Azure Key Vault provider: setup, RBAC and secret naming',
+        title: 'Azure Key Vault provider: credentials, RBAC and vault access',
         description:
-          'Configure Envilder for Azure Key Vault: DefaultAzureCredential, the minimum RBAC role and how slashes in secret names become hyphens.',
+          'Configure Envilder for Azure Key Vault: Azure default credentials, the vault URL, the minimum RBAC role or access policy, and how to verify access.',
         heading: 'Azure Key Vault',
         intro:
           'Configure Azure authentication, vault access, and a test secret for Azure Key Vault.',
