@@ -501,8 +501,7 @@ export const en: Translations = {
           'Find setup, provider, CLI, GitHub Action, and SDK guides.',
       },
       'getting-started': {
-        title:
-          'Get started: from AWS SSM or Azure Key Vault to a .env file in 5 minutes',
+        title: 'Get started: from AWS SSM or Azure Key Vault to a .env file',
         description:
           'Install Envilder, write a JSON map of variables to secret paths, and generate a .env from your cloud vault. Works with AWS SSM and Azure Key Vault.',
         heading: 'Get started',
@@ -530,7 +529,7 @@ export const en: Translations = {
       'azure-key-vault': {
         title: 'Azure Key Vault provider: setup, RBAC and secret naming',
         description:
-          'Configure Envilder for Azure Key Vault: DefaultAzureCredential, minimum RBAC role, how slashes become hyphens and common access errors.',
+          'Configure Envilder for Azure Key Vault: DefaultAzureCredential, the minimum RBAC role and how slashes in secret names become hyphens.',
         heading: 'Azure Key Vault',
         intro:
           'Configure Azure authentication, vault access, and a test secret for Azure Key Vault.',
@@ -557,7 +556,7 @@ export const en: Translations = {
       'cli-pull': {
         title: 'Pull mode: generate a .env from AWS SSM or Azure Key Vault',
         description:
-          'Reference for pull mode: flags, profiles, providers, output format and the errors you will see when a secret or permission is missing.',
+          'Reference for pull mode: generate a local .env from the secrets in your map file, with AWS profiles and AWS SSM or Azure Key Vault providers.',
         heading: 'CLI pull',
         intro:
           'Download secrets from your provider and write them to a local .env file.',
@@ -583,7 +582,7 @@ export const en: Translations = {
       'github-action': {
         title: 'Load AWS SSM and Azure Key Vault secrets in GitHub Actions',
         description:
-          'Pull secrets from AWS SSM Parameter Store or Azure Key Vault inside a GitHub Actions workflow with OIDC, without copying them into GitHub Secrets.',
+          'Pull secrets from AWS SSM Parameter Store or Azure Key Vault into a .env file inside a GitHub Actions workflow, using the same JSON mapping as the CLI.',
         heading: 'GitHub Action',
         intro: 'Pull secrets into .env files during a GitHub Actions workflow.',
         breadcrumb: 'GitHub Action',

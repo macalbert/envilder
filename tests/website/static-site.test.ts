@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { docsRouteManifest } from '../../src/website/src/i18n/docs-routes';
-import { indexedLanguages } from '../../src/website/src/i18n/utils';
+import { localizedLanguages } from '../../src/website/src/i18n/utils';
 
 const siteUrl = 'https://envilder.com';
 const distDirectory = resolve(__dirname, '../../src/website/dist');
@@ -77,7 +77,11 @@ function getExpectedAlternateUrls(path: string): string[] {
   const route = localizedPath.endsWith('/')
     ? localizedPath
     : `${localizedPath}/`;
-  const languages = indexedLanguages(route);
+  // Docs are indexed in English only; spelled out so a regression in the
+  // production helper cannot also change the expectation.
+  const languages = route.startsWith('/docs/')
+    ? ['en']
+    : localizedLanguages(route);
   const languageUrls = languages.map((language) =>
     language === 'en' ? `${siteUrl}${route}` : `${siteUrl}/${language}${route}`,
   );
