@@ -1,7 +1,7 @@
 ---
 import {
   defaultLang,
-  localizedLanguages,
+  indexedLanguages,
   localizedPath,
   stripLocalePrefix,
   useTranslations,
@@ -39,7 +39,7 @@ const siteUrl = Astro.site ?? 'https://envilder.com';
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
 const siteRootUrl = new URL('/', siteUrl).href;
 const pathWithoutLocale = stripLocalePrefix(Astro.url.pathname);
-const availableLanguages = localizedLanguages(pathWithoutLocale);
+const availableLanguages = indexedLanguages(pathWithoutLocale);
 const defaultLanguageUrl = new URL(
   localizedPath(defaultLang, pathWithoutLocale),
   siteUrl,
