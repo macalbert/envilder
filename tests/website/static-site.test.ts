@@ -77,8 +77,6 @@ function getExpectedAlternateUrls(path: string): string[] {
   const route = localizedPath.endsWith('/')
     ? localizedPath
     : `${localizedPath}/`;
-  // Docs are indexed in English only; spelled out so a regression in the
-  // production helper cannot also change the expectation.
   const languages = route.startsWith('/docs/')
     ? ['en']
     : localizedLanguages(route);
