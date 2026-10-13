@@ -570,7 +570,7 @@ export const en: Translations = {
       'cli-push': {
         title: 'Push mode: upload .env values to AWS SSM or Azure Key Vault',
         description:
-          'Reference for push mode (--push): create or rotate secrets in Parameter Store or Key Vault from a local .env, using the same JSON mapping.',
+          'Reference for push mode (--push): upload a local .env or a single variable to Parameter Store or Key Vault, using the same JSON mapping.',
         heading: 'CLI push',
         intro:
           'Upload environment variables from a .env file or push one secret directly.',
@@ -596,7 +596,7 @@ export const en: Translations = {
         title:
           'Load AWS SSM and Azure Key Vault secrets into .NET IConfiguration',
         description:
-          'Envilder .NET SDK: resolve secrets from AWS Parameter Store or Azure Key Vault at startup into IConfiguration, DI or environment variables.',
+          'Envilder .NET SDK: resolve secrets from AWS Parameter Store or Azure Key Vault at startup into IConfiguration, environment variables or a dictionary.',
         heading: '.NET SDK',
         intro: 'Load secrets directly into a .NET application at startup.',
         breadcrumb: '.NET SDK',
@@ -618,7 +618,7 @@ export const en: Translations = {
       'sdk-nodejs': {
         title: 'Load AWS SSM and Azure Key Vault secrets in Node.js at startup',
         description:
-          'Envilder Node.js SDK: resolve secrets from AWS SSM or Azure Key Vault into process.env from one JSON mapping. TypeScript ready.',
+          'Envilder Node.js SDK: resolve secrets from AWS SSM or Azure Key Vault into process.env or a Map from one JSON mapping.',
         heading: 'Node.js SDK',
         intro: 'Load secrets directly into a Node.js application at startup.',
         breadcrumb: 'Node.js SDK',
