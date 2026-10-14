@@ -64,7 +64,7 @@ Minimal AWS SSM map:
 
 ## Optional
 
-- [LocalStack token hygiene](https://dev.to/macalbert/how-i-run-localstack-without-committing-localstackauthtoken-34gk): Maintainer-authored supplementary article on keeping `LOCALSTACK_AUTH_TOKEN` out of commits.
-- [LocalStack integration tests without env files](https://dev.to/macalbert/localstack-integration-tests-without-env-files-b75): Maintainer-authored supplementary article.
+- [LocalStack auth token out of Git with Docker Compose](https://dev.to/macalbert/how-i-run-localstack-without-committing-localstackauthtoken-34gk): Maintainer-authored supplementary article on keeping `LOCALSTACK_AUTH_TOKEN` out of commits.
+- [LocalStack auth token in Testcontainers without a .env file](https://dev.to/macalbert/localstack-integration-tests-without-env-files-b75): Maintainer-authored supplementary article on resolving `LOCALSTACK_AUTH_TOKEN` in-process for Testcontainers and Aspire.
 - [One year of Envilder](https://dev.to/macalbert/one-year-of-envilder-from-a-cli-script-to-sdks-push-mode-and-a-website-h49): Maintainer-authored supplementary retrospective.
 - [Original AWS SSM CLI workflow](https://dev.to/macalbert/stop-hardcoding-secrets-generate-env-files-from-aws-ssm-with-a-simple-cli-f77): Maintainer-authored supplementary historical context documenting the original AWS SSM CLI workflow.
