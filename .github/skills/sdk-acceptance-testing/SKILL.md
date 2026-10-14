@@ -2,7 +2,7 @@
 name: sdk-acceptance-testing
 description: >-
   Acceptance testing patterns for Envilder SDKs using TestContainers
-  (LocalStack for AWS SSM, Lowkey Vault for Azure Key Vault). Use when
+  (LocalStack for AWS SSM, LocalStack for Azure for Azure Key Vault). Use when
   adding acceptance tests to any SDK, creating container wrappers, or
   updating CI workflows for SDK test infrastructure.
 ---
@@ -13,12 +13,13 @@ Patterns for acceptance testing Envilder SDKs against real cloud provider
 emulators. Applies to all SDKs (.NET, Python, Node.js, Go, Java).
 
 See [ADR-0001](../../../docs/adr/0001-sdk-acceptance-test-infrastructure.md)
-for the architectural decision behind these patterns.
+and [ADR-0014](../../../docs/adr/0014-localstack-azure-key-vault-emulator.md)
+for the architectural decisions behind these patterns.
 
 ## When to Use
 
 - Adding acceptance tests to a new or existing SDK
-- Creating container wrappers for LocalStack or Lowkey Vault
+- Creating container wrappers for LocalStack (AWS or Azure)
 - Updating CI workflows to support SDK acceptance tests
 - Adding a new SDK and need to replicate test infrastructure
 
@@ -30,7 +31,7 @@ Every SDK test directory follows this layout:
 tests/sdks/{lang}/
 ├── containers/                   ← Container wrapper modules
 │   ├── localstack-container.*
-│   └── lowkey-vault-container.*
+│   └── localstack-azure-container.*
 ├── acceptance/                   ← Acceptance test files
 │   ├── aws-ssm.acceptance.*
 │   └── azure-key-vault.acceptance.*
@@ -89,27 +90,45 @@ AWS provider to resolve the token.
 4. Expose connection URL for SSM client creation
 ```
 
-## Lowkey Vault Container Wrapper
+## LocalStack for Azure Container Wrapper
 
 ### Requirements
 
-- Image: `nagyesta/lowkey-vault:7.1.61` (pinned)
-- Ports: 8443 (HTTPS vault), 8080 (HTTP token endpoint)
-- Args: `--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true`
-- Set `IDENTITY_ENDPOINT` and `IDENTITY_HEADER` env vars for
-  `DefaultAzureCredential`
-- Self-signed TLS: disable certificate verification in test clients
+- Image: `localstack/localstack-azure:latest`
+- Resolve `LOCALSTACK_AUTH_TOKEN` exactly like the AWS wrapper (same token)
+- Host port must equal the container port: vault URIs embed the gateway
+  port. Pick a free port `P`, bind `P:P`, and set
+  `GATEWAY_LISTEN=0.0.0.0:P` and `LOCALSTACK_HOST=localhost.localstack.cloud:P`
+- Wait for the `Ready.` log line
+- Placeholder credentials the emulator accepts (not secrets): tenant and
+  subscription `00000000-0000-0000-0000-000000000000`, client `any-app`,
+  secret `dummy`, authority `https://azure.localhost.localstack.cloud:P`
+- TLS stays enabled: `*.localhost.localstack.cloud` resolves to `127.0.0.1`
+  and the emulator serves a trusted certificate
+- Never point `DefaultAzureCredential` at the emulator through
+  `AZURE_TENANT_ID`/`AZURE_CLIENT_ID`/`AZURE_CLIENT_SECRET`: MSAL validates
+  the authority against `login.microsoftonline.com`, which rejects it.
+  Use a local managed identity token endpoint instead (see lifecycle)
 - Restore original env vars on teardown
 
 ### Lifecycle
 
 ```txt
-1. Start container with Lowkey Vault args
-2. Wait for HTTPS port to be ready (health check /ping)
-3. Set IDENTITY_ENDPOINT = http://{host}:{http_port}/metadata/identity/oauth2/token
-4. Set IDENTITY_HEADER = "dummy"
-5. Create SecretClient with TLS verification disabled
-6. On teardown: restore original IDENTITY_ENDPOINT/IDENTITY_HEADER
+1. Start container on host port P = container port P
+2. Create ClientSecretCredential(placeholders, authority, instance discovery disabled)
+3. Create the vault through ARM (token scope https://management.azure.com/.default):
+   PUT .../resourceGroups/envilder-tests?api-version=2021-04-01
+   PUT .../providers/Microsoft.KeyVault/vaults/kv-{random}?api-version=2023-07-01
+4. Vault URL = response properties.vaultUri (trailing slash trimmed)
+5. Start a local HTTP token endpoint speaking the App Service managed
+   identity protocol; it returns tokens from the ClientSecretCredential
+6. Clear competing AZURE_* credential variables, then set
+   IDENTITY_ENDPOINT = http://127.0.0.1:{token_port}/msi/token
+   and IDENTITY_HEADER = {random value checked by the endpoint}
+7. Test clients use DefaultAzureCredential, like production code. The
+   emulator serves reads without a token, so test writes (seeding secrets)
+   are what exercise the token endpoint
+8. On teardown: stop the token endpoint and the container, restore env vars
 ```
 
 ## Acceptance Test Patterns
@@ -129,7 +148,7 @@ Every SDK should have at minimum these acceptance tests:
 
 **Azure Key Vault:**
 
-1. `Should_ResolveSecretFromKeyVault_When_SecretExistsInLowkeyVault`
+1. `Should_ResolveSecretFromKeyVault_When_SecretExistsInLocalStack`
 2. `Should_ReturnEmptyForMissingKeyVaultSecret_When_SecretDoesNotExist`
 
 ### Test Structure (AAA)
@@ -183,6 +202,7 @@ steps:
 ### Key Points
 
 - `LOCALSTACK_AUTH_TOKEN` at job level so container wrapper can read it
+  (both the AWS and the Azure emulator need it)
 - AWS OIDC credentials for resolving the token from SSM
 - Docker socket env vars for TestContainers compatibility on GitHub runners
 - Acceptance tests run in the same job as unit tests (no separate workflow)

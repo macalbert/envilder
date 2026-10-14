@@ -101,7 +101,7 @@ object passed to `configureInfrastructureServices()`. CLI flags override
 - `pnpm format`: Auto-format with Biome
 
 **E2E Tests**: Located in `e2e/`, use real AWS SSM via LocalStack and Azure Key Vault
-via Lowkey Vault (both via TestContainers). Run `pnpm build` + `pack-and-install.ts` before E2E.
+via LocalStack for Azure (both via TestContainers). Run `pnpm build` + `pack-and-install.ts` before E2E.
 
 ## Coding Conventions
 
@@ -264,7 +264,7 @@ but have **no code dependency** on the TypeScript core.
 - Cross-provider validation: profile + Azure → error, vaultUrl + AWS → error
 
 **Tests** (`tests/sdks/dotnet/`): xUnit + NSubstitute + AwesomeAssertions.
-Acceptance tests use TestContainers (LocalStack for AWS, Lowkey Vault for Azure).
+Acceptance tests use TestContainers (LocalStack for AWS, LocalStack for Azure).
 Naming: `Should_<Expected>_When_<Condition>`. AAA pattern with comment markers.
 
 **Build & test**:
@@ -309,7 +309,7 @@ Naming: `Should_<Expected>_When_<Condition>`. AAA pattern with comment markers.
 
 **Tests** (`tests/sdks/python/`): pytest with `Should_<Expected>_When_<Condition>` naming.
 Container wrappers follow Envilder pattern with explicit `start()`/`stop()` lifecycle.
-Acceptance tests use TestContainers (LocalStack for AWS, Lowkey Vault for Azure).
+Acceptance tests use TestContainers (LocalStack for AWS, LocalStack for Azure).
 AAA pattern with comment markers.
 
 **Build & test** (via Makefile, uses `uv run` with project-local `.venv`):

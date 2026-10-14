@@ -57,7 +57,7 @@ class TestConsumerExperience:
         assert actual["API_KEY"] == "sk-test-12345"
 
     def Should_ResolveAzureSecretsEndToEnd_When_MapFileUsesAzureProvider(
-        self, azure_secret_client, azure_provider, lowkey_vault_url
+        self, azure_secret_client, azure_provider, localstack_azure_vault_url
     ) -> None:
         # Arrange
         azure_secret_client.set_secret("e2e-vault-secret", "azure-e2e-value")
@@ -65,7 +65,7 @@ class TestConsumerExperience:
             {
                 "$config": {
                     "provider": "azure",
-                    "vaultUrl": lowkey_vault_url,
+                    "vaultUrl": localstack_azure_vault_url,
                 },
                 "VAULT_SECRET": "e2e-vault-secret",
             }

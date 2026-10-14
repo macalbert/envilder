@@ -89,7 +89,7 @@ All five SDKs are developed **in parallel**: same map-file contract, same confor
 - **One map-file spec**: formal JSON Schema at `spec/` is the source of truth for all SDKs
 - **Conformance tests**: language-agnostic fixtures that every SDK must pass
 - **Independent versioning**: each SDK has its own semver (`sdk-node@1.2.0`, `sdk-py@0.3.0`)
-- **Shared test infrastructure**: LocalStack (AWS) and Lowkey Vault (Azure) via Docker Compose serve all SDKs
+- **Shared test infrastructure**: LocalStack for AWS and Azure via Docker Compose serve all SDKs
 
 ---
 

@@ -39,7 +39,7 @@ multi-runtime SDK platform that manages secrets from AWS SSM and Azure Key Vault
 | Production (Azure) | Azure Key Vault | In code or checked-in files |
 | CI | GitHub Secrets → OIDC → SSM | As plaintext in workflow YAML |
 | Local dev | AWS profile → SSM (via `envilder.json`) | In `.env` files committed to Git |
-| Tests | TestContainers (LocalStack/Lowkey Vault) | Real credentials in test code |
+| Tests | TestContainers (LocalStack for AWS and Azure) | Real credentials in test code |
 
 ### Secretlint Enforcement
 
@@ -126,8 +126,8 @@ the commit is blocked.
 
 - Use `DefaultAzureCredential`: never hardcode `clientId`/`clientSecret`
 - Vault URL validation: must match `https://*.vault.azure.net`
-- TLS certificate validation: enabled in production, only disabled in tests
-  against Lowkey Vault (emulator)
+- TLS certificate validation: always enabled, including tests against the
+  LocalStack for Azure emulator (it serves a publicly trusted certificate)
 
 ### Cross-Provider
 
@@ -145,12 +145,13 @@ the commit is blocked.
 
 ## 7. Testing Security
 
-- Acceptance tests use emulators (LocalStack, Lowkey Vault): never real
+- Acceptance tests use emulators (LocalStack for AWS and Azure): never real
   cloud endpoints
 - `LOCALSTACK_AUTH_TOKEN` resolved via Envilder itself (dogfooding): stored
   in SSM, never in code
 - Test cleanup: containers destroyed after test run (TestContainers lifecycle)
-- TLS disabled only for Lowkey Vault container tests (self-signed cert)
+- Emulator Azure credentials (all-zero tenant, `any-app`/`dummy` service
+  principal) are placeholders the emulator accepts; they are not secrets
 
 ## Quick Security Checklist
 

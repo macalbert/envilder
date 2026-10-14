@@ -53,6 +53,62 @@ echo '{ "$config": { "provider": "azure", "vaultUrl": "https://{VAULT_NAME}.vaul
 
 # 3. Pull with Envilder
 envilder --map=test-map.json --envfile=.env`;
+
+const ghaAwsTrustPolicy = `{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": {
+      "Federated": "arn:aws:iam::123456789012:oidc-provider/token.actions.githubusercontent.com"
+    },
+    "Action": "sts:AssumeRoleWithWebIdentity",
+    "Condition": {
+      "StringEquals": {
+        "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+        "token.actions.githubusercontent.com:sub": "repo:my-org/my-repo:ref:refs/heads/main"
+      }
+    }
+  }]
+}`;
+
+const ghaAwsReadPolicy = `{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": "ssm:GetParameter",
+    "Resource": "arn:aws:ssm:eu-west-1:123456789012:parameter/myapp/prod/*"
+  }]
+}`;
+
+const ghaExpectedOutput = `🔑 Envilder GitHub Action - Starting secret pull...
+📋 Map file: envilder.json
+📄 Env file: .env
+
+☁ AWS identity · account=123456789012 · region=eu-west-1 · profile=default
+
+🪙  RESOLVING SECRETS
+${'━'.repeat(60)}
+  ✓ DB_PASSWORD         → *****************x9Q
+  ✓ STRIPE_KEY          → *****************************4Rt
+
+⭐ LEVEL CLEARED  —  2/2 secrets loaded · .env written
+
+✅ Secrets pulled successfully!`;
+
+const ghaAzureFederated = `az ad app create --display-name github-envilder
+az ad sp create --id {APP_ID}
+
+az ad app federated-credential create --id {APP_ID} --parameters '{
+  "name": "github-main",
+  "issuer": "https://token.actions.githubusercontent.com",
+  "subject": "repo:my-org/my-repo:ref:refs/heads/main",
+  "audiences": ["api://AzureADTokenExchange"]
+}'`;
+
+const ghaAzureRole = `az role assignment create \\
+  --role "Key Vault Secrets User" \\
+  --assignee {APP_ID} \\
+  --scope /subscriptions/{SUB}/resourceGroups/{RG}/providers/Microsoft.KeyVault/vaults/{VAULT}`;
 ---
 
 <DocsShell lang={lang} routeKey={routeKey}>
@@ -691,6 +747,8 @@ validateSecrets(secrets); // throws SecretValidationError if any value is empty`
 
         <h3>{t.docs.ghaPrerequisites}</h3>
         <ul class="docs-list">
+          <li>{t.docs.ghaPrereqCheckout}</li>
+          <li>{t.docs.ghaPrereqPermissions}</li>
           <li>{t.docs.ghaPrereqAws}</li>
           <li>{t.docs.ghaPrereqAzure}</li>
           <li>{t.docs.ghaPrereqMap}</li>
@@ -699,8 +757,25 @@ validateSecrets(secrets); // throws SecretValidationError if any value is empty`
         <p class="note">{t.docs.ghaPullOnly}</p>
       </section>
 
-      <section id="gha-basic" class="docs-section">
+      <section id="gha-aws" class="docs-section">
         <h2>{t.docs.ghaBasicTitle}</h2>
+
+        <h3>{t.docs.ghaAwsTrustTitle}</h3>
+        <p>{t.docs.ghaAwsTrustDesc}</p>
+        <CodeBlock lang="json" filename="trust-policy.json" code={ghaAwsTrustPolicy} />
+        <p class="note">{t.docs.ghaOidcSubjectNote}</p>
+
+        <h3>{t.docs.ghaAwsPolicyTitle}</h3>
+        <p>{t.docs.ghaAwsPolicyDesc}</p>
+        <CodeBlock lang="json" filename="envilder-read.json" code={ghaAwsReadPolicy} />
+        <p class="note">{t.docs.ghaAwsKmsNote}</p>
+
+        <h3>{t.docs.ghaWorkflowTitle}</h3>
+        <p>{t.docs.ghaAwsMapDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={`{
+  "DB_PASSWORD": "/myapp/prod/db-password",
+  "STRIPE_KEY": "/myapp/prod/stripe-key"
+}`} />
         <CodeBlock lang="yaml" filename=".github/workflows/deploy.yml" code={`name: Deploy Application
 
 on:
@@ -720,26 +795,46 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: \${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::123456789012:role/github-envilder
+          aws-region: eu-west-1
 
       - name: Pull Secrets from AWS SSM
         uses: macalbert/envilder/github-action@v0
         with:
-          map-file: config/envilder.json
+          map-file: envilder.json
           env-file: .env
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "22.x"
+      - run: npm ci
+      - run: npm run deploy`} />
 
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm deploy`} />
+        <h3>{t.docs.ghaOutputTitle}</h3>
+        <p>{t.docs.ghaOutputDesc}</p>
+        <CodeBlock lang="text" code={ghaExpectedOutput} />
+        <p class="note">{t.docs.ghaOutputMaskNote}</p>
       </section>
 
       <section id="gha-azure" class="docs-section">
         <h2>{t.docs.ghaAzureTitle}</h2>
+
+        <h3>{t.docs.ghaAzureFedTitle}</h3>
+        <p>{t.docs.ghaAzureFedDesc}</p>
+        <CodeBlock lang="bash" code={ghaAzureFederated} />
+
+        <h3>{t.docs.ghaAzureRoleTitle}</h3>
+        <p>{t.docs.ghaAzureRoleDesc}</p>
+        <CodeBlock lang="bash" code={ghaAzureRole} />
+        <p class="note">{t.docs.ghaAzurePolicyNote}</p>
+
+        <h3>{t.docs.ghaWorkflowTitle}</h3>
+        <p>{t.docs.ghaAzureMapDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={`{
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "DB_PASSWORD": "myapp-prod-db-password",
+  "STRIPE_KEY": "/myapp/prod/stripe_key"
+}`} />
         <CodeBlock lang="yaml" filename=".github/workflows/deploy-azure.yml" code={`name: Deploy with Azure Key Vault
 
 on:
@@ -759,28 +854,24 @@ jobs:
       - name: Azure Login
         uses: azure/login@v2
         with:
-          client-id: \${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: \${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: \${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: \${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: \${{ vars.AZURE_TENANT_ID }}
+          subscription-id: \${{ vars.AZURE_SUBSCRIPTION_ID }}
 
       - name: Pull Secrets from Azure Key Vault
         uses: macalbert/envilder/github-action@v0
         with:
-          map-file: config/envilder.json
+          map-file: envilder.json
           env-file: .env
-          provider: azure
-          vault-url: https://my-vault.vault.azure.net
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "22.x"
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm deploy`} />
+      - run: npm ci
+      - run: npm run deploy`} />
+        <p>{t.docs.ghaAzureInputsNote}</p>
       </section>
 
       <section id="gha-multi-env" class="docs-section">
         <h2>{t.docs.ghaMultiEnvTitle}</h2>
+        <p>{t.docs.ghaMultiEnvDesc}</p>
         <CodeBlock lang="yaml" filename=".github/workflows/deploy-env.yml" code={`name: Deploy to Environment
 
 on:
@@ -805,8 +896,8 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: \${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: us-east-1
+          role-to-assume: \${{ vars.AWS_ROLE_ARN }}
+          aws-region: eu-west-1
 
       - name: Pull \${{ inputs.environment }} secrets
         uses: macalbert/envilder/github-action@v0
@@ -814,12 +905,64 @@ jobs:
           map-file: config/\${{ inputs.environment }}/envilder.json
           env-file: .env
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "22.x"
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm deploy`} />
+      - run: npm ci
+      - run: npm run deploy`} />
+      </section>
+
+      <section id="gha-why" class="docs-section">
+        <h2>{t.docs.ghaWhyTitle}</h2>
+        <p>{t.docs.ghaWhyDesc}</p>
+        <ul class="docs-list">
+          <li><strong>{t.docs.ghaWhyRotationLabel}</strong> {t.docs.ghaWhyRotation}</li>
+          <li><strong>{t.docs.ghaWhyAuditLabel}</strong> {t.docs.ghaWhyAudit}</li>
+          <li><strong>{t.docs.ghaWhyKeysLabel}</strong> {t.docs.ghaWhyKeys}</li>
+          <li><strong>{t.docs.ghaWhyListLabel}</strong> {t.docs.ghaWhyList}</li>
+        </ul>
+        <p>{t.docs.ghaWhyWhenSecrets}</p>
+      </section>
+
+      <section id="gha-errors" class="docs-section">
+        <h2>{t.docs.ghaErrorsTitle}</h2>
+        <p>{t.docs.ghaErrorsDesc}</p>
+
+        <h3>{t.docs.ghaErrMapTitle}</h3>
+        <CodeBlock lang="text" code="🚨 Failed to initialize: Failed to read map file: envilder.json" />
+        <p>{t.docs.ghaErrMapFix}</p>
+
+        <h3>{t.docs.ghaErrAssumeTitle}</h3>
+        <CodeBlock lang="text" code="Could not assume role with OIDC: Not authorized to perform sts:AssumeRoleWithWebIdentity" />
+        <p>{t.docs.ghaErrAssumeFix}</p>
+
+        <h3>{t.docs.ghaErrNoCredsTitle}</h3>
+        <CodeBlock lang="text" code={`💥 GAME OVER — some secrets could not be fetched
+  ✗ DB_PASSWORD → *********************ord
+
+⭐ WHY?
+   Could not load credentials from any providers`} />
+        <p>{t.docs.ghaErrNoCredsFix}</p>
+
+        <h3>{t.docs.ghaErrDeniedTitle}</h3>
+        <CodeBlock lang="text" code="User: arn:aws:sts::123456789012:assumed-role/github-envilder/GitHubActions is not authorized to perform: ssm:GetParameter on resource: arn:aws:ssm:eu-west-1:123456789012:parameter/myapp/prod/db-password because no identity-based policy allows the ssm:GetParameter action" />
+        <p>{t.docs.ghaErrDeniedFix}</p>
+
+        <h3>{t.docs.ghaErrExpiredTitle}</h3>
+        <CodeBlock lang="text" code="AWS credentials are expired or invalid. Your security token or SSO session may have expired. Refresh your credentials and retry (for SSO, run: aws sso login)." />
+        <p>{t.docs.ghaErrExpiredFix}</p>
+
+        <h3>{t.docs.ghaErrNotFoundTitle}</h3>
+        <CodeBlock lang="text" code="✗ STRIPE_KEY           secret not found (path: *******************key) — skipped" />
+        <p>{t.docs.ghaErrNotFoundFix}</p>
+
+        <h3>{t.docs.ghaErrVaultUrlTitle}</h3>
+        <CodeBlock lang="text" code="vaultUrl is required when using Azure provider. Set it in $config.vaultUrl in your map file or via --vault-url flag." />
+        <p>{t.docs.ghaErrVaultUrlFix}</p>
+
+        <h3>{t.docs.ghaErrAzureDeniedTitle}</h3>
+        <CodeBlock lang="text" code="Caller is not authorized to perform action on resource." />
+        <p>{t.docs.ghaErrAzureDeniedFix}</p>
+
+        <h3>{t.docs.ghaErrProfileTitle}</h3>
+        <p>{t.docs.ghaErrProfileFix}</p>
       </section>
 
       <section id="gha-inputs" class="docs-section">
@@ -847,6 +990,16 @@ jobs:
             <tr><td><code>env-file-path</code></td><td>{t.docs.ghaOutputEnvPath}</td></tr>
           </tbody>
         </table>
+      </section>
+
+      <section id="gha-related" class="docs-section">
+        <h2>{t.docs.ghaRelatedTitle}</h2>
+        <ul class="docs-list">
+          <li><a href={localizedPath(lang, '/docs/providers/aws-ssm/')}>{t.docs.ghaRelatedAws}</a></li>
+          <li><a href={localizedPath(lang, '/docs/providers/azure-key-vault/')}>{t.docs.ghaRelatedAzure}</a></li>
+          <li><a href={localizedPath(lang, '/docs/map-file/')}>{t.docs.ghaRelatedMap}</a></li>
+          <li><a href="https://github.com/macalbert/envilder/tree/main/github-action" target="_blank" rel="noopener noreferrer">{t.docs.ghaRelatedRepo}</a></li>
+        </ul>
       </section>
     </>
   )}

@@ -2,7 +2,9 @@
 
 ## Status
 
-Accepted
+Accepted. The Azure Key Vault emulator was amended by
+[ADR-0014](./0014-localstack-azure-key-vault-emulator.md): LocalStack for
+Azure replaces Lowkey Vault.
 
 ## Context
 
@@ -16,8 +18,8 @@ emulators:
 - **AWS SSM** via [LocalStack](https://localstack.cloud/): requires
   `LOCALSTACK_AUTH_TOKEN` (pro feature: SSM SecureString)
 - **Azure Key Vault** via
-  [Lowkey Vault](https://github.com/nagyesta/lowkey-vault): emulates Key Vault
-  with `DefaultAzureCredential` support
+  [LocalStack for Azure](https://docs.localstack.cloud/azure/services/key-vault/):
+  requires the same `LOCALSTACK_AUTH_TOKEN` (see ADR-0014)
 
 Each SDK has its own test runner and language, but the infrastructure patterns
 must be consistent to reduce cognitive overhead and ensure parity.
@@ -32,9 +34,11 @@ Each SDK implements its own container wrapper classes with explicit
 - **`LocalStackContainer`**: Starts LocalStack, resolves
   `LOCALSTACK_AUTH_TOKEN` from `envilder.json`, exposes SSM client and
   provider.
-- **`LowkeyVaultContainer`**: Starts Lowkey Vault (`nagyesta/lowkey-vault`),
-  configures `IDENTITY_ENDPOINT`/`IDENTITY_HEADER` env vars for
-  `DefaultAzureCredential`, exposes SecretClient and provider.
+- **`LocalStackAzureContainer`**: Starts LocalStack for Azure
+  (`localstack/localstack-azure`), creates a vault through ARM, serves a local
+  managed identity token endpoint and points
+  `IDENTITY_ENDPOINT`/`IDENTITY_HEADER` at it for `DefaultAzureCredential`,
+  exposes SecretClient and provider.
 
 ### 2. Root `envilder.json` as Single Source of Truth
 
@@ -63,17 +67,20 @@ wrapper navigates to the root file via a relative path. This file:
 > credentials can resolve it. Without a valid token, LocalStack will start but
 > SSM SecureString operations will fail.
 
-### 3. Lowkey Vault Configuration
+### 3. LocalStack for Azure Configuration
 
-| Setting     | Value                                                                          |
-| ----------- | ------------------------------------------------------------------------------ |
-| Image       | `nagyesta/lowkey-vault:7.1.61` (pinned)                                       |
-| Ports       | 8443 (HTTPS), 8080 (HTTP token endpoint)                                      |
-| Args        | `--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true`                        |
-| Auth        | `IDENTITY_ENDPOINT` set to Lowkey Vault token endpoint                        |
-| TLS         | Self-signed; tests must disable certificate verification                       |
-| API version | Pinned per SDK (7.2 for .NET, 7.6 for Python)                                 |
-| Cleanup     | Restore original `IDENTITY_ENDPOINT`/`IDENTITY_HEADER` values on teardown     |
+| Setting  | Value                                                                                    |
+| -------- | ---------------------------------------------------------------------------------------- |
+| Image    | `localstack/localstack-azure:latest`                                                     |
+| Token    | Same `LOCALSTACK_AUTH_TOKEN` as the AWS emulator                                         |
+| Ports    | Free port `P` bound `P:P`; `GATEWAY_LISTEN=0.0.0.0:P`, `LOCALSTACK_HOST=localhost.localstack.cloud:P` |
+| Vault    | Created per run through ARM (`envilder-tests` resource group, `kv-{random}` vault)       |
+| Auth     | Local managed identity token endpoint via `IDENTITY_ENDPOINT`/`IDENTITY_HEADER`          |
+| TLS      | Trusted certificate; certificate verification stays enabled                              |
+| Cleanup  | Stop token endpoint and container; restore `IDENTITY_ENDPOINT`/`IDENTITY_HEADER`         |
+
+See [ADR-0014](./0014-localstack-azure-key-vault-emulator.md) for the
+rationale and the details.
 
 ### 4. CI Workflow Pattern
 
@@ -91,7 +98,7 @@ wrapper navigates to the root file via a relative path. This file:
 tests/sdks/{lang}/
 ├── containers/                   ← Container wrappers
 │   ├── localstack-container
-│   └── lowkey-vault-container
+│   └── localstack-azure-container
 ├── acceptance/                   ← Acceptance tests
 │   ├── aws-ssm.acceptance.*
 │   └── azure-key-vault.acceptance.*
@@ -118,10 +125,11 @@ tests/sdks/{lang}/
 ## Implementations
 
 - **.NET**: `tests/sdks/dotnet/Fixtures/LocalStackFixture.cs`,
-  `tests/sdks/dotnet/Fixtures/LowkeyVaultFixture.cs`
+  `tests/sdks/dotnet/Fixtures/LocalStackAzureFixture.cs`
 - **Python**: `tests/sdks/python/containers/localstack_container.py`,
-  `tests/sdks/python/containers/lowkey_vault_container.py`
+  `tests/sdks/python/containers/localstack_azure_container.py`
 - **Node.js**: `tests/sdks/nodejs/containers/localstack-container.ts`,
-  `tests/sdks/nodejs/containers/lowkey-vault-container.ts`
+  `tests/sdks/nodejs/containers/localstack-azure-container.ts`
+- **TypeScript core and E2E**: `tests/support/LocalStackAzureContainer.ts`
 - **Go**: Planned
 - **Java**: Planned

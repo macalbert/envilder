@@ -52,7 +52,7 @@ User ──→ Agent (persona + workflow) ──→ loads Skills (domain knowled
 
 | Skill | Invocable | Purpose |
 |-------|-----------|---------|
-| `sdk-acceptance-testing` | ✅ | TestContainers + LocalStack + Lowkey Vault patterns |
+| `sdk-acceptance-testing` | ✅ | TestContainers + LocalStack (AWS and Azure) patterns |
 | `sdk-release-checklist` | ✅ | New SDK or version release checklist |
 
 ### Category: Documentation

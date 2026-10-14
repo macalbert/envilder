@@ -33,7 +33,7 @@ these terms consistently to avoid drift.
 | Term | Definition |
 |------|-----------|
 | **LocalStack** | Local AWS emulator for acceptance tests. Runs in Docker via TestContainers. |
-| **Lowkey Vault** | Local Azure Key Vault emulator for acceptance tests. Runs in Docker via TestContainers. |
+| **LocalStack for Azure** | Local Azure emulator (Key Vault) for acceptance tests. Runs in Docker via TestContainers. |
 | **Container wrapper** | Test helper class with explicit `start()`/`stop()` lifecycle managing a TestContainer instance. |
 | **Conformance fixture** | Shared test data (input map + expected output) validating SDK behavior across languages. |
 
