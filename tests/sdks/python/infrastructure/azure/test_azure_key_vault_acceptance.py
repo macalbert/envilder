@@ -8,8 +8,8 @@ pytestmark = pytest.mark.acceptance
 
 
 class TestAzureKeyVaultAcceptance:
-    def Should_ResolveSecretFromKeyVault_When_SecretExistsInLowkeyVault(
-        self, azure_secret_client, azure_provider, lowkey_vault_url
+    def Should_ResolveSecretFromKeyVault_When_SecretExistsInLocalStack(
+        self, azure_secret_client, azure_provider, localstack_azure_vault_url
     ) -> None:
         # Arrange
         azure_secret_client.set_secret("test-secret", "vault-secret-value")
@@ -17,7 +17,7 @@ class TestAzureKeyVaultAcceptance:
         map_file = ParsedMapFile(
             config=MapFileConfig(
                 provider=SecretProviderType.AZURE,
-                vault_url=lowkey_vault_url,
+                vault_url=localstack_azure_vault_url,
             ),
             mappings={"VAULT_SECRET": "test-secret"},
         )
@@ -30,14 +30,14 @@ class TestAzureKeyVaultAcceptance:
         assert actual["VAULT_SECRET"] == "vault-secret-value"
 
     def Should_ReturnEmptyForMissingKeyVaultSecret_When_SecretDoesNotExist(
-        self, azure_provider, lowkey_vault_url
+        self, azure_provider, localstack_azure_vault_url
     ) -> None:
         # Arrange
         sut = EnvilderClient(azure_provider)
         map_file = ParsedMapFile(
             config=MapFileConfig(
                 provider=SecretProviderType.AZURE,
-                vault_url=lowkey_vault_url,
+                vault_url=localstack_azure_vault_url,
             ),
             mappings={"MISSING": "nonexistent-secret"},
         )

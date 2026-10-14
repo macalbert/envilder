@@ -27,7 +27,7 @@ When adding a brand-new SDK to the project, complete **every** item:
 
 - [ ] SDK source under `src/sdks/{runtime}/`
 - [ ] Unit tests under `tests/sdks/{runtime}/`
-- [ ] Acceptance tests with LocalStack + Lowkey Vault containers
+- [ ] Acceptance tests with LocalStack (AWS and Azure) containers
       (see `sdk-acceptance-testing` skill)
 - [ ] README.md in SDK root with install, quick start, and API reference
 

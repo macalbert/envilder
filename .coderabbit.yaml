@@ -88,7 +88,7 @@ reviews:
       instructions: |
         pytest with Should_Expected_When_Condition naming (python_functions = ["Should_*"]).
         AAA pattern with comment markers. No docstrings except AAA markers.
-        Acceptance tests use TestContainers (LocalStack for AWS, Lowkey Vault for Azure).
+        Acceptance tests use TestContainers (LocalStack for AWS, LocalStack for Azure).
 
     # Website
     - path: "src/website/**"
@@ -106,7 +106,7 @@ reviews:
     - path: "e2e/**"
       instructions: |
         End-to-end tests using TestContainers with LocalStack (AWS)
-        and Lowkey Vault (Azure). Run pnpm build + pack-and-install before E2E.
+        and LocalStack for Azure. Run pnpm build + pack-and-install before E2E.
 
   tools:
     gitleaks:

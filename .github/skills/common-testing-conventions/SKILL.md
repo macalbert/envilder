@@ -187,6 +187,6 @@ See the dedicated supporting file for each stack:
 
 Cross-stack:
 
-- **sdk-acceptance-testing:** TestContainers, LocalStack, Lowkey Vault (all SDKs)
+- **sdk-acceptance-testing:** TestContainers, LocalStack for AWS and Azure (all SDKs)
 - **typescript-cdk-testing:** CDK snapshot + fine-grained assertions (Vitest)
 - **core-testing:** Envilder CLI/Core specific testing procedure (Vitest)

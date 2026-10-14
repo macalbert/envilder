@@ -10,7 +10,6 @@ markers = [
 ]
 filterwarnings = [
   "ignore::DeprecationWarning:testcontainers",
-  "ignore::urllib3.exceptions.InsecureRequestWarning",
 ]
 
 [tool.black]

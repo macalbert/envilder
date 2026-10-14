@@ -11,13 +11,11 @@ import {
   PutParameterCommand,
   SSMClient,
 } from '@aws-sdk/client-ssm';
-import { DefaultAzureCredential } from '@azure/identity';
-import { SecretClient } from '@azure/keyvault-secrets';
+import type { SecretClient } from '@azure/keyvault-secrets';
 import {
   LocalstackContainer,
   type StartedLocalStackContainer,
 } from '@testcontainers/localstack';
-import { GenericContainer, type StartedTestContainer } from 'testcontainers';
 import {
   afterAll,
   afterEach,
@@ -31,6 +29,7 @@ import { Startup } from '../src/envilder/apps/gha/Startup';
 import { DispatchActionCommand } from '../src/envilder/core/application/dispatch/DispatchActionCommand';
 import type { DispatchActionCommandHandler } from '../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
 import { TYPES } from '../src/envilder/core/types';
+import { LocalStackAzureContainer } from '../tests/support/LocalStackAzureContainer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -42,11 +41,8 @@ let localstackContainer: StartedLocalStackContainer;
 let localstackEndpoint: string;
 let ssmClient: SSMClient;
 
-// Lowkey Vault (Azure Key Vault test double)
-const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.61';
-const LOWKEY_VAULT_PORT = 8443;
-const LOWKEY_VAULT_STARTUP_TIMEOUT_MS = 180_000;
-const LOWKEY_VAULT_TEST_TIMEOUT_MS = 30_000;
+// LocalStack for Azure (Azure Key Vault test double)
+const AZURE_TEST_TIMEOUT_MS = 30_000;
 
 describe('GitHub Action (E2E)', () => {
   const envFilePath = join(rootDir, 'e2e', 'sample', 'gha-validation.env');
@@ -231,10 +227,10 @@ describe('GitHub Action (E2E)', () => {
     }
   }, 30_000);
 
-  describe('Azure Key Vault', { timeout: LOWKEY_VAULT_TEST_TIMEOUT_MS }, () => {
-    let lowkeyVaultContainer: StartedTestContainer;
+  describe('Azure Key Vault', { timeout: AZURE_TEST_TIMEOUT_MS }, () => {
+    let localStackAzure: LocalStackAzureContainer;
     let azureVaultUrl: string;
-    let lowkeyVaultHost: string;
+    let azureVaultHost: string;
     let azureSecretClient: SecretClient;
     const azureMapFilePath = join(
       rootDir,
@@ -248,36 +244,12 @@ describe('GitHub Action (E2E)', () => {
       'sample',
       'azure-gha-validation.env',
     );
-    let originalTlsReject: string | undefined;
 
     beforeAll(async () => {
-      originalTlsReject = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-      // Self-signed cert on a local test container — safe to skip validation
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
-      lowkeyVaultContainer = await new GenericContainer(LOWKEY_VAULT_IMAGE)
-        .withName(`lowkey-vault-gha-${randomUUID().slice(0, 8)}`)
-        .withExposedPorts(LOWKEY_VAULT_PORT, 8080)
-        .withEnvironment({
-          LOWKEY_ARGS: '--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true',
-        })
-        .withStartupTimeout(LOWKEY_VAULT_STARTUP_TIMEOUT_MS)
-        .start();
-
-      const host = lowkeyVaultContainer.getHost();
-      const port = lowkeyVaultContainer.getMappedPort(LOWKEY_VAULT_PORT);
-      const tokenPort = lowkeyVaultContainer.getMappedPort(8080);
-      lowkeyVaultHost = host;
-      azureVaultUrl = `https://${host}:${port}`;
-
-      // Point DefaultAzureCredential to Lowkey Vault's built-in token endpoint
-      process.env.AZURE_POD_IDENTITY_AUTHORITY_HOST = `http://${host}:${tokenPort}`;
-
-      azureSecretClient = new SecretClient(
-        azureVaultUrl,
-        new DefaultAzureCredential(),
-        { disableChallengeResourceVerification: true },
-      );
+      localStackAzure = await new LocalStackAzureContainer().start();
+      azureVaultUrl = localStackAzure.getVaultUrl();
+      azureVaultHost = localStackAzure.getVaultHost();
+      azureSecretClient = localStackAzure.createSecretClient();
 
       // Write dynamic map file with container's vault URL
       writeFileSync(
@@ -297,15 +269,7 @@ describe('GitHub Action (E2E)', () => {
     }, 240_000);
 
     afterAll(async () => {
-      if (lowkeyVaultContainer) {
-        await lowkeyVaultContainer.stop();
-      }
-      if (originalTlsReject === undefined) {
-        delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-      } else {
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalTlsReject;
-      }
-      delete process.env.AZURE_POD_IDENTITY_AUTHORITY_HOST;
+      await localStackAzure?.stop();
       if (existsSync(azureMapFilePath)) {
         await unlink(azureMapFilePath);
       }
@@ -329,8 +293,7 @@ describe('GitHub Action (E2E)', () => {
       const container = Startup.build()
         .configureServices()
         .configureInfrastructure(config, {
-          allowedVaultHosts: [lowkeyVaultHost],
-          disableChallengeResourceVerification: true,
+          allowedVaultHosts: [azureVaultHost],
         })
         .create();
       const handler = container.get<DispatchActionCommandHandler>(
