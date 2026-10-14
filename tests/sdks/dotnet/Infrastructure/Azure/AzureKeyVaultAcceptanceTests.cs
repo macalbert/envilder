@@ -7,26 +7,26 @@ using global::Envilder.Tests.Fixtures;
 [Collection(nameof(ContainersCollection))]
 public class AzureKeyVaultAcceptanceTests
 {
-	private readonly LowkeyVaultFixture _lowkeyVault;
+	private readonly LocalStackAzureFixture _localStackAzure;
 
-	public AzureKeyVaultAcceptanceTests(LowkeyVaultFixture lowkeyVault)
+	public AzureKeyVaultAcceptanceTests(LocalStackAzureFixture localStackAzure)
 	{
-		_lowkeyVault = lowkeyVault;
+		_localStackAzure = localStackAzure;
 	}
 
 	[Fact(Timeout = CancellationTokenForTest.LongTimeout)]
-	public async Task Should_ResolveSecretFromKeyVault_When_SecretExistsInLowkeyVault()
+	public async Task Should_ResolveSecretFromKeyVault_When_SecretExistsInLocalStack()
 	{
 		// Arrange
-		await _lowkeyVault.SecretClient.SetSecretAsync("test-secret", "vault-secret-value", TestContext.Current.CancellationToken);
+		await _localStackAzure.SecretClient.SetSecretAsync("test-secret", "vault-secret-value", TestContext.Current.CancellationToken);
 
-		var provider = new AzureKeyVaultSecretProvider(_lowkeyVault.SecretClient);
+		var provider = new AzureKeyVaultSecretProvider(_localStackAzure.SecretClient);
 		var sut = new EnvilderClient(provider);
 		var mapFile = new ParsedMapFile(
 			new MapFileConfig
 			{
 				Provider = SecretProviderType.Azure,
-				VaultUrl = _lowkeyVault.VaultUrl,
+				VaultUrl = _localStackAzure.VaultUrl,
 			},
 			new Dictionary<string, string>
 			{
@@ -45,13 +45,13 @@ public class AzureKeyVaultAcceptanceTests
 	public async Task Should_ReturnEmptyForMissingKeyVaultSecret_When_SecretDoesNotExist()
 	{
 		// Arrange
-		var provider = new AzureKeyVaultSecretProvider(_lowkeyVault.SecretClient);
+		var provider = new AzureKeyVaultSecretProvider(_localStackAzure.SecretClient);
 		var client = new EnvilderClient(provider);
 		var mapFile = new ParsedMapFile(
 			new MapFileConfig
 			{
 				Provider = SecretProviderType.Azure,
-				VaultUrl = _lowkeyVault.VaultUrl,
+				VaultUrl = _localStackAzure.VaultUrl,
 			},
 			new Dictionary<string, string>
 			{

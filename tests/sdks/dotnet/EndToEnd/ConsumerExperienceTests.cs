@@ -12,7 +12,7 @@ using Microsoft.Extensions.Hosting;
 public class ConsumerExperienceTests : IAsyncLifetime
 {
 	private readonly LocalStackFixture _localStack;
-	private readonly LowkeyVaultFixture _lowkeyVault;
+	private readonly LocalStackAzureFixture _localStackAzure;
 
 	private readonly List<string> _tempFiles = [];
 
@@ -31,10 +31,10 @@ public class ConsumerExperienceTests : IAsyncLifetime
 	private (string Name, string? Value)[] _originalEnvValues = [];
 
 	public ConsumerExperienceTests(LocalStackFixture localStack,
-								   LowkeyVaultFixture lowkeyVault)
+								   LocalStackAzureFixture localStackAzure)
 	{
 		_localStack = localStack;
-		_lowkeyVault = lowkeyVault;
+		_localStackAzure = localStackAzure;
 	}
 
 	public ValueTask InitializeAsync()

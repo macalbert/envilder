@@ -4,31 +4,31 @@ import { EnvilderClient } from '../../../../src/sdks/nodejs/src/application/envi
 import type { ParsedMapFile } from '../../../../src/sdks/nodejs/src/domain/parsed-map-file.js';
 import { SecretProviderType } from '../../../../src/sdks/nodejs/src/domain/secret-provider-type.js';
 import type { AzureKeyVaultSecretProvider } from '../../../../src/sdks/nodejs/src/infrastructure/azure/azure-key-vault-secret-provider.js';
-import { LowkeyVaultTestContainer } from '../containers/lowkey-vault-container.js';
+import { LocalStackAzureTestContainer } from '../containers/localstack-azure-container.js';
 
-let lowkeyVault: LowkeyVaultTestContainer;
+let localStackAzure: LocalStackAzureTestContainer;
 let secretClient: SecretClient;
 let provider: AzureKeyVaultSecretProvider;
 
 describe('Azure Key Vault Acceptance', () => {
   beforeAll(async () => {
-    lowkeyVault = await new LowkeyVaultTestContainer().start();
-    secretClient = lowkeyVault.createSecretClient();
-    provider = lowkeyVault.createProvider();
+    localStackAzure = await new LocalStackAzureTestContainer().start();
+    secretClient = localStackAzure.createSecretClient();
+    provider = localStackAzure.createProvider();
   }, 300_000);
 
   afterAll(async () => {
-    await lowkeyVault.stop();
+    await localStackAzure.stop();
   });
 
-  it('Should_ResolveSecretFromKeyVault_When_SecretExistsInLowkeyVault', async () => {
+  it('Should_ResolveSecretFromKeyVault_When_SecretExistsInLocalStack', async () => {
     // Arrange
     await secretClient.setSecret('test-secret', 'vault-secret-value');
     const sut = new EnvilderClient(provider);
     const mapFile: ParsedMapFile = {
       config: {
         provider: SecretProviderType.Azure,
-        vaultUrl: lowkeyVault.getVaultUrl(),
+        vaultUrl: localStackAzure.getVaultUrl(),
       },
       mappings: new Map([['VAULT_SECRET', 'test-secret']]),
     };
@@ -46,7 +46,7 @@ describe('Azure Key Vault Acceptance', () => {
     const mapFile: ParsedMapFile = {
       config: {
         provider: SecretProviderType.Azure,
-        vaultUrl: lowkeyVault.getVaultUrl(),
+        vaultUrl: localStackAzure.getVaultUrl(),
       },
       mappings: new Map([['MISSING', 'nonexistent-secret']]),
     };
