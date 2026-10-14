@@ -6,7 +6,7 @@ import uuid
 from typing import Any
 
 import requests
-from azure.identity import ClientSecretCredential
+from azure.identity import ClientSecretCredential, DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from envilder.infrastructure.azure.azure_key_vault_secret_provider import (
     AzureKeyVaultSecretProvider,
@@ -150,10 +150,16 @@ class LocalStackAzureContainer:
         return self._vault_url
 
     def create_secret_client(self) -> SecretClient:
-        if self._credential is None:
+        """Client that authenticates like production code does, through
+        DefaultAzureCredential and the local managed identity token server.
+
+        The emulator serves reads without a token, so writes made with this
+        client are what exercise that server.
+        """
+        if self._token_server is None:
             raise RuntimeError("Container has not been started")
         return SecretClient(
-            vault_url=self._vault_url, credential=self._credential
+            vault_url=self._vault_url, credential=DefaultAzureCredential()
         )
 
     def create_provider(self) -> AzureKeyVaultSecretProvider:

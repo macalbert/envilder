@@ -122,10 +122,12 @@ AWS provider to resolve the token.
 4. Vault URL = response properties.vaultUri (trailing slash trimmed)
 5. Start a local HTTP token endpoint speaking the App Service managed
    identity protocol; it returns tokens from the ClientSecretCredential
-6. Set IDENTITY_ENDPOINT = http://127.0.0.1:{token_port}/msi/token
+6. Clear competing AZURE_* credential variables, then set
+   IDENTITY_ENDPOINT = http://127.0.0.1:{token_port}/msi/token
    and IDENTITY_HEADER = {random value checked by the endpoint}
-7. Test clients use the ClientSecretCredential directly; production code
-   (DefaultAzureCredential) goes through the token endpoint
+7. Test clients use DefaultAzureCredential, like production code. The
+   emulator serves reads without a token, so test writes (seeding secrets)
+   are what exercise the token endpoint
 8. On teardown: stop the token endpoint and the container, restore env vars
 ```
 

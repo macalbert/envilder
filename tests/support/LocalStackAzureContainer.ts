@@ -1,7 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import http from 'node:http';
 import net from 'node:net';
-import { ClientSecretCredential } from '@azure/identity';
+import {
+  ClientSecretCredential,
+  DefaultAzureCredential,
+} from '@azure/identity';
 import { SecretClient } from '@azure/keyvault-secrets';
 import {
   GenericContainer,
@@ -21,6 +24,19 @@ const CLIENT_SECRET = 'dummy';
 const RESOURCE_GROUP = 'envilder-tests';
 const LOCATION = 'westeurope';
 
+// Variables that would make DefaultAzureCredential pick a credential ahead of
+// ManagedIdentityCredential (and possibly reach real Azure). They are cleared
+// while the emulator runs and restored on stop().
+const COMPETING_AZURE_ENV_VARS = [
+  'AZURE_TENANT_ID',
+  'AZURE_CLIENT_ID',
+  'AZURE_CLIENT_SECRET',
+  'AZURE_CLIENT_CERTIFICATE_PATH',
+  'AZURE_USERNAME',
+  'AZURE_PASSWORD',
+  'AZURE_FEDERATED_TOKEN_FILE',
+  'AZURE_AUTHORITY_HOST',
+] as const;
 const IDENTITY_ENV_VARS = ['IDENTITY_ENDPOINT', 'IDENTITY_HEADER'] as const;
 
 /**
@@ -48,7 +64,7 @@ export class LocalStackAzureContainer {
       );
     }
 
-    for (const name of IDENTITY_ENV_VARS) {
+    for (const name of [...COMPETING_AZURE_ENV_VARS, ...IDENTITY_ENV_VARS]) {
       this.previousEnv.set(name, process.env[name]);
     }
 
@@ -88,6 +104,9 @@ export class LocalStackAzureContainer {
         identityHeader,
       );
       const { port: tokenPort } = this.tokenServer.address() as net.AddressInfo;
+      for (const name of COMPETING_AZURE_ENV_VARS) {
+        delete process.env[name];
+      }
       process.env.IDENTITY_ENDPOINT = `http://127.0.0.1:${tokenPort}/msi/token`;
       process.env.IDENTITY_HEADER = identityHeader;
     } catch (error) {
@@ -129,11 +148,17 @@ export class LocalStackAzureContainer {
     return new URL(this.vaultUrl).hostname;
   }
 
+  /**
+   * Creates a client that authenticates like production code does, through
+   * `DefaultAzureCredential` and the local managed identity token endpoint.
+   * The emulator serves reads without a token, so writes made with this
+   * client are what exercise that endpoint.
+   */
   createSecretClient(): SecretClient {
-    if (!this.credential) {
+    if (!this.tokenServer) {
       throw new Error('Container has not been started');
     }
-    return new SecretClient(this.vaultUrl, this.credential);
+    return new SecretClient(this.vaultUrl, new DefaultAzureCredential());
   }
 }
 

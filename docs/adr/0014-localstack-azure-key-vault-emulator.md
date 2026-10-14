@@ -46,6 +46,11 @@ Each container wrapper:
 5. Serves a local token endpoint that speaks the App Service managed identity
    protocol and points `IDENTITY_ENDPOINT`/`IDENTITY_HEADER` at it, so the
    production `DefaultAzureCredential` authenticates without code changes.
+   Competing `AZURE_*` credential variables are cleared while the emulator
+   runs, so a developer's own Azure login cannot take precedence.
+6. Builds the test `SecretClient` with `DefaultAzureCredential` as well. The
+   emulator serves reads without a token, so the writes tests make to seed
+   secrets are what prove the token endpoint works.
 
 `DefaultAzureCredential` cannot reach the emulator through
 `AZURE_TENANT_ID`/`AZURE_CLIENT_ID`/`AZURE_CLIENT_SECRET`/`AZURE_AUTHORITY_HOST`:
@@ -72,6 +77,10 @@ hides the problem until a test writes a secret.
 - The host port is fixed per run instead of randomly mapped. A free port is
   picked right before starting the container, which leaves a small race window.
 - Each wrapper carries a small managed identity token endpoint.
+- The development `docker-compose.yml` service has no such endpoint. Local
+  CLI runs against it authenticate through the Azure CLI after
+  `lstk az start-interception` (see `dev.env`); unlike Lowkey Vault, the
+  token endpoint does not ship with the container.
 - The image is used through the `latest` tag: LocalStack publishes no
   versioned tags for it yet.
 - The emulator does not enforce data-plane authentication by default, so a

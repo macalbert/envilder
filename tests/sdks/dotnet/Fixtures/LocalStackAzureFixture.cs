@@ -25,6 +25,21 @@ public sealed class LocalStackAzureFixture : IAsyncLifetime
 	private const string Location = "westeurope";
 	private const string ManagementScope = "https://management.azure.com/.default";
 
+	// Variables that would make DefaultAzureCredential pick a credential ahead of
+	// ManagedIdentityCredential (and possibly reach real Azure). They are cleared
+	// while the emulator runs and restored on dispose.
+	private static readonly string[] CompetingAzureEnvVars =
+	[
+		"AZURE_TENANT_ID",
+		"AZURE_CLIENT_ID",
+		"AZURE_CLIENT_SECRET",
+		"AZURE_CLIENT_CERTIFICATE_PATH",
+		"AZURE_USERNAME",
+		"AZURE_PASSWORD",
+		"AZURE_FEDERATED_TOKEN_FILE",
+		"AZURE_AUTHORITY_HOST",
+	];
+
 	private static readonly string[] IdentityEnvVars =
 	[
 		"IDENTITY_ENDPOINT",
@@ -39,6 +54,12 @@ public sealed class LocalStackAzureFixture : IAsyncLifetime
 
 	public string VaultUrl { get; private set; } = null!;
 
+	/// <summary>
+	/// Client that authenticates like production code does, through
+	/// <c>DefaultAzureCredential</c> and the local managed identity endpoint.
+	/// The emulator serves reads without a token, so writes made with this
+	/// client are what exercise that endpoint.
+	/// </summary>
 	public SecretClient SecretClient { get; private set; } = null!;
 
 	public async ValueTask InitializeAsync()
@@ -53,7 +74,8 @@ public sealed class LocalStackAzureFixture : IAsyncLifetime
 
 		_originalEnvValues =
 		[
-			.. IdentityEnvVars.Select(v => (Name: v, Value: Environment.GetEnvironmentVariable(v)))
+			.. CompetingAzureEnvVars.Concat(IdentityEnvVars)
+				.Select(v => (Name: v, Value: Environment.GetEnvironmentVariable(v)))
 		];
 
 		try
@@ -88,13 +110,19 @@ public sealed class LocalStackAzureFixture : IAsyncLifetime
 
 			var vaultName = $"kv-{Guid.NewGuid():N}"[..11];
 			VaultUrl = await CreateVaultAsync(authorityHost, credential, vaultName);
-			SecretClient = new SecretClient(new Uri(VaultUrl), credential);
 
 			// Lets DefaultAzureCredential (used by the SDK factory) reach the
 			// emulator through its ManagedIdentityCredential.
 			_identityEndpoint = new ManagedIdentityEndpointStub(credential, FindFreePort());
+			foreach (var name in CompetingAzureEnvVars)
+			{
+				Environment.SetEnvironmentVariable(name, null);
+			}
+
 			Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", _identityEndpoint.Endpoint.AbsoluteUri);
 			Environment.SetEnvironmentVariable("IDENTITY_HEADER", _identityEndpoint.IdentityHeader);
+
+			SecretClient = new SecretClient(new Uri(VaultUrl), new DefaultAzureCredential());
 		}
 		catch
 		{
