@@ -7,7 +7,10 @@ import type { Container } from 'inversify';
 import pc from 'picocolors';
 import { DispatchActionCommand } from '../../../core/application/dispatch/DispatchActionCommand.js';
 import type { DispatchActionCommandHandler } from '../../../core/application/dispatch/DispatchActionCommandHandler.js';
-import { formatCommandLine } from '../../../core/application/execWithSecrets/CommandLineFormatter.js';
+import {
+  formatArgument,
+  formatProgram,
+} from '../../../core/application/execWithSecrets/CommandLineFormatter.js';
 import { ExecWithSecretsCommand } from '../../../core/application/execWithSecrets/ExecWithSecretsCommand.js';
 import type {
   ExecWithSecretsCommandHandler,
@@ -299,6 +302,9 @@ function registerExecCommand(program: Command): void {
         }
         rejectRootOptionsBeforeExec(
           (execCommand.parent?.opts() ?? {}) as ExecOptions,
+          options,
+          commandName,
+          childArgs ?? [],
         );
         await runExec(commandName, childArgs ?? [], options);
       },
@@ -343,42 +349,47 @@ const EXEC_INCOMPATIBLE_ROOT_OPTIONS: ReadonlyArray<
   ['secretPath', '--secret-path'],
   ['ssmPath', '--ssm-path'],
 ];
-const ROOT_FLAGS_WITH_VALUE = new Set([
-  '--map',
-  '--envfile',
-  '--profile',
-  '--provider',
-  '--vault-url',
-  '--key',
-  '--value',
-  '--secret-path',
-  '--ssm-path',
-]);
-
 /**
  * Root options written before `exec` are parsed by the root command, which
  * exec never reads. Reject them instead of silently ignoring them. Options
  * exec supports are shown moved after `exec`; options it does not support
  * are named only, because their values (for example `--value`) can be
- * secrets and must never be echoed.
+ * secrets. The command is shown by program name only: its arguments can
+ * carry secrets too.
  */
-function rejectRootOptionsBeforeExec(rootOptions: ExecOptions): void {
-  const isSet = ([name]: [keyof ExecOptions, string]) =>
-    rootOptions[name] !== undefined;
-  const compatible = EXEC_COMPATIBLE_ROOT_OPTIONS.filter(isSet);
-  const incompatible = EXEC_INCOMPATIBLE_ROOT_OPTIONS.filter(isSet);
+function rejectRootOptionsBeforeExec(
+  rootOptions: ExecOptions,
+  execOptions: ExecOptions,
+  commandName: string,
+  childArgs: string[],
+): void {
+  const isSetIn =
+    (options: ExecOptions) =>
+    ([name]: [keyof ExecOptions, string]) =>
+      options[name] !== undefined;
+  const compatible = EXEC_COMPATIBLE_ROOT_OPTIONS.filter(isSetIn(rootOptions));
+  const incompatible = EXEC_INCOMPATIBLE_ROOT_OPTIONS.filter(
+    isSetIn(rootOptions),
+  );
   if (compatible.length === 0 && incompatible.length === 0) {
     return;
   }
 
   const lines: string[] = [];
   if (compatible.length > 0) {
-    const suggestion = formatCommandLine([
-      'envilder',
-      'exec',
-      ...compatible.map(([name, flag]) => `${flag}=${rootOptions[name]}`),
-      ...withoutForbiddenExecOptions(argumentsAfterExec(process.argv.slice(2))),
-    ]);
+    const optionFor =
+      (options: ExecOptions) =>
+      ([name, flag]: [keyof ExecOptions, string]) =>
+        formatArgument(`${flag}=${options[name]}`);
+    const suggestion = [
+      'envilder exec',
+      ...compatible.map(optionFor(rootOptions)),
+      ...EXEC_COMPATIBLE_ROOT_OPTIONS.filter(isSetIn(execOptions)).map(
+        optionFor(execOptions),
+      ),
+      '--',
+      formatProgram(commandName, childArgs),
+    ].join(' ');
     lines.push(`error: Put envilder options after "exec": ${suggestion}`);
   } else {
     lines.push('error: Put envilder options after "exec".');
@@ -389,55 +400,6 @@ function rejectRootOptionsBeforeExec(rootOptions: ExecOptions): void {
   }
   console.error(pc.red(lines.join('\n')));
   throw new SilentExitError(EXEC_ENVILDER_FAILURE);
-}
-
-/**
- * Returns the arguments that follow the `exec` subcommand, skipping root
- * option values so a value spelled `exec` is not mistaken for it.
- */
-function argumentsAfterExec(args: string[]): string[] {
-  let index = 0;
-  while (index < args.length && args[index] !== 'exec') {
-    const token = args[index];
-    index += ROOT_FLAGS_WITH_VALUE.has(token) ? 2 : 1;
-  }
-  return args.slice(index + 1);
-}
-
-const EXEC_FORBIDDEN_FLAGS = new Set(
-  EXEC_INCOMPATIBLE_ROOT_OPTIONS.map(([, flag]) => flag),
-);
-const EXEC_FLAGS_WITH_VALUE = new Set([
-  '--map',
-  '--profile',
-  '--provider',
-  '--vault-url',
-  ...[...ROOT_FLAGS_WITH_VALUE].filter((flag) =>
-    EXEC_FORBIDDEN_FLAGS.has(flag),
-  ),
-]);
-
-/**
- * Drops options exec rejects, and their values, from the options written
- * after `exec`, so a suggestion can never echo a secret passed to one of
- * them. Everything from the command on is kept verbatim.
- */
-function withoutForbiddenExecOptions(args: string[]): string[] {
-  const kept: string[] = [];
-  let index = 0;
-  while (index < args.length) {
-    const token = args[index];
-    if (token === '--' || !token.startsWith('-')) {
-      return [...kept, ...args.slice(index)];
-    }
-    const flag = token.split('=', 1)[0];
-    const takesValue = EXEC_FLAGS_WITH_VALUE.has(flag) && !token.includes('=');
-    if (!EXEC_FORBIDDEN_FLAGS.has(flag)) {
-      kept.push(...args.slice(index, index + (takesValue ? 2 : 1)));
-    }
-    index += takesValue ? 2 : 1;
-  }
-  return kept;
 }
 
 async function runExec(
@@ -511,6 +473,25 @@ async function resolveSecretsAndRun(
     describeSecretSource(config),
   );
 
+  // A stdout write error (for example EPIPE on a mask registration) also
+  // reaches the write callback, so the masker's flush rejects and the child
+  // never starts. Without a listener the 'error' event would crash Envilder.
+  // The listener is never removed: the event can be emitted after exec has
+  // already failed (for example when resolution rejects after some values
+  // were masked), and exec is the last thing this process does, so keeping
+  // it has no effect on pull or push.
+  if (!process.stdout.listeners('error').includes(ignoreStdoutError)) {
+    process.stdout.on('error', ignoreStdoutError);
+  }
+  return prepareAndStart(handler, command);
+}
+
+function ignoreStdoutError(): void {}
+
+async function prepareAndStart(
+  handler: ExecWithSecretsCommandHandler,
+  command: ExecWithSecretsCommand,
+): Promise<number> {
   // SSO recovery wraps only the resolution, so the child starts at most once.
   let prepared: PreparedExec | undefined;
   await executeWithSsoRecovery(
@@ -518,6 +499,9 @@ async function resolveSecretsAndRun(
       prepared = await handler.prepare(command);
     },
     {
+      // Exec prompts on stderr, so stdout may be redirected for the child.
+      isInteractive: () =>
+        Boolean(process.stdin.isTTY) && Boolean(process.stderr.isTTY),
       confirm: createConfirm(process.stderr),
       runLogin: createRunLogin({ stdout: 'stderr' }),
     },

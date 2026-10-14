@@ -20,7 +20,7 @@ import {
   SecretResolver,
   type UnresolvedSecret,
 } from '../secretResolution/SecretResolver.js';
-import { formatCommandLine } from './CommandLineFormatter.js';
+import { formatProgram } from './CommandLineFormatter.js';
 import type { ExecWithSecretsCommand } from './ExecWithSecretsCommand.js';
 
 /**
@@ -53,7 +53,7 @@ export class ExecWithSecretsCommandHandler {
     private readonly variableStore: IVariableStore,
     @inject(TYPES.ILogger) private readonly logger: ILogger,
     @inject(TYPES.ISecretMasker)
-    secretMasker: ISecretMasker,
+    private readonly secretMasker: ISecretMasker,
     @inject(TYPES.IProcessRunner)
     private readonly processRunner: IProcessRunner,
     @inject(TYPES.IProcessContext)
@@ -115,6 +115,9 @@ export class ExecWithSecretsCommandHandler {
    */
   async start(prepared: PreparedExec): Promise<number> {
     const { command, secrets } = prepared;
+    // The child shares stdout with the mask registrations: start it only
+    // once every registration has been written.
+    await this.secretMasker.flush();
     const { env, overridden } = buildChildEnvironment(
       this.processContext.environment(),
       secrets,
@@ -168,7 +171,7 @@ export class ExecWithSecretsCommandHandler {
   ): string {
     const noun = count === 1 ? 'secret' : 'secrets';
     const source = command.sourceLabel ? ` (${command.sourceLabel})` : '';
-    const commandLine = formatCommandLine([command.command, ...command.args]);
+    const commandLine = formatProgram(command.command, command.args);
     return `envilder: ${count} ${noun} resolved${source} \u2192 ${commandLine}`;
   }
 }

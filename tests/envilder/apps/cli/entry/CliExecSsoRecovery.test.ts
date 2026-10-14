@@ -93,6 +93,14 @@ async function runCli(args: string[]): Promise<number> {
   );
 }
 
+/** Completes a mocked stream write the way Node does: callback on next tick. */
+function completeWrite(rest: unknown[], error?: Error): void {
+  const callback = rest.find(
+    (arg): arg is (error?: Error | null) => void => typeof arg === 'function',
+  );
+  process.nextTick(() => callback?.(error ?? null));
+}
+
 function strip(value: unknown): string {
   return String(value).replace(ANSI_PATTERN, '');
 }
@@ -100,6 +108,7 @@ function strip(value: unknown): string {
 describe('Cli exec SSO recovery prompt', () => {
   const originalStdoutIsTTY = process.stdout.isTTY;
   const originalStdinIsTTY = process.stdin.isTTY;
+  const originalStderrIsTTY = process.stderr.isTTY;
   let runSpy: MockInstance;
   let stdoutChunks: string[];
   let stderrChunks: string[];
@@ -113,6 +122,10 @@ describe('Cli exec SSO recovery prompt', () => {
       configurable: true,
     });
     Object.defineProperty(process.stdin, 'isTTY', {
+      value: true,
+      configurable: true,
+    });
+    Object.defineProperty(process.stderr, 'isTTY', {
       value: true,
       configurable: true,
     });
@@ -141,12 +154,20 @@ describe('Cli exec SSO recovery prompt', () => {
     vi.spyOn(console, 'info').mockImplementation(toStdout);
     vi.spyOn(console, 'warn').mockImplementation(toStderr);
     vi.spyOn(console, 'error').mockImplementation(toStderr);
-    vi.spyOn(process.stdout, 'write').mockImplementation(((chunk: unknown) => {
+    vi.spyOn(process.stdout, 'write').mockImplementation(((
+      chunk: unknown,
+      ...rest: unknown[]
+    ) => {
       stdoutChunks.push(String(chunk));
+      completeWrite(rest);
       return true;
     }) as typeof process.stdout.write);
-    vi.spyOn(process.stderr, 'write').mockImplementation(((chunk: unknown) => {
+    vi.spyOn(process.stderr, 'write').mockImplementation(((
+      chunk: unknown,
+      ...rest: unknown[]
+    ) => {
       stderrChunks.push(String(chunk));
+      completeWrite(rest);
       return true;
     }) as typeof process.stderr.write);
     vi.spyOn(process, 'exit').mockImplementation(((code?: number) => {
@@ -162,6 +183,10 @@ describe('Cli exec SSO recovery prompt', () => {
     });
     Object.defineProperty(process.stdin, 'isTTY', {
       value: originalStdinIsTTY,
+      configurable: true,
+    });
+    Object.defineProperty(process.stderr, 'isTTY', {
+      value: originalStderrIsTTY,
       configurable: true,
     });
     vi.unstubAllEnvs();
@@ -230,6 +255,79 @@ describe('Cli exec SSO recovery prompt', () => {
       expect(actual).toBe(0);
       expect(awsCalls).toHaveLength(1);
       expect(awsCalls[0][2]).toMatchObject({ stdio: 'inherit' });
+    });
+  });
+
+  describe('interactivity', () => {
+    const SSO_PROMPT = "Run 'aws sso login --profile dev' now? [y/N]";
+
+    function setTty(
+      stream: NodeJS.ReadStream | NodeJS.WriteStream,
+      value: boolean,
+    ): void {
+      Object.defineProperty(stream, 'isTTY', { value, configurable: true });
+    }
+
+    it('Should_PromptForSsoLogin_When_StdoutIsRedirectedInExecMode', async () => {
+      // Arrange
+      setTty(process.stdout, false);
+      prompt.answer = 'y';
+      vi.mocked(AwsSsmSecretProvider.prototype.getSecret)
+        .mockReset()
+        .mockRejectedValueOnce(new SsoSessionExpiredError('dev'))
+        .mockResolvedValue('resolved-after-login');
+
+      // Act
+      const actual = await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      expect(actual).toBe(0);
+      expect(strip(stderrChunks.join(''))).toContain(SSO_PROMPT);
+      expect(strip(stdoutChunks.join(''))).toBe('');
+      expect(runSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('Should_NotPrompt_When_StderrIsNotInteractiveInExecMode', async () => {
+      // Arrange
+      setTty(process.stderr, false);
+      const { spawn } = await import('node:child_process');
+      vi.mocked(spawn).mockClear();
+
+      // Act
+      const actual = await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(
+        strip(`${stdoutChunks.join('')}${stderrChunks.join('')}`),
+      ).not.toContain(SSO_PROMPT);
+      expect(
+        vi.mocked(spawn).mock.calls.filter(([command]) => command === 'aws'),
+      ).toEqual([]);
+      expect(runSpy).not.toHaveBeenCalled();
+    });
+
+    it('Should_NotPromptInPullMode_When_StdoutIsNotInteractive', async () => {
+      // Arrange
+      setTty(process.stdout, false);
+      vi.spyOn(
+        DispatchActionCommandHandler.prototype,
+        'handleCommand',
+      ).mockRejectedValue(new SsoSessionExpiredError('dev'));
+      const { spawn } = await import('node:child_process');
+      vi.mocked(spawn).mockClear();
+
+      // Act
+      const actual = await runCli(['--map', 'map.json', '--envfile', '.env']);
+
+      // Assert
+      expect(actual).toBe(1);
+      expect(
+        strip(`${stdoutChunks.join('')}${stderrChunks.join('')}`),
+      ).not.toContain(SSO_PROMPT);
+      expect(
+        vi.mocked(spawn).mock.calls.filter(([command]) => command === 'aws'),
+      ).toEqual([]);
     });
   });
 });

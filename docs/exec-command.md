@@ -74,8 +74,12 @@ ignored, and Envilder shows the corrected command:
 
 ```text
 $ envilder --map=config/prod.json exec -- npm start
-error: Put envilder options after "exec": envilder exec --map=config/prod.json -- npm start
+error: Put envilder options after "exec": envilder exec --map=config/prod.json -- npm …
 ```
+
+The suggestion shows your command by program name only, followed by `…` when
+it has arguments: arguments can carry secrets (for example an
+`Authorization` header), so Envilder never prints them.
 
 Only the options exec supports (`--map`, `--profile`, `--provider`,
 `--vault-url`) are moved into the suggested command. Options exec does not
@@ -160,7 +164,10 @@ Other conditions that stop the command from starting:
 * The AWS credentials or SSO session expired. In an interactive terminal
   Envilder offers to run `aws sso login` and then retries **only the secret
   resolution**: your command is started at most once. If you decline or the
-  login fails, the exit code is `125`.
+  login fails, the exit code is `125`. The prompt and the login output go to
+  stderr, so the prompt also works when stdout is redirected
+  (`envilder exec -- node print.js > out.json`); it needs stdin and stderr to
+  be a terminal.
 * On Windows, the map file declares names that differ only by case (for
   example `Path` and `PATH`). Windows treats them as the same variable, so
   Envilder exits with `125` before any provider call instead of silently
@@ -202,8 +209,13 @@ to `out.json`.
 On success Envilder prints a single summary line, for example:
 
 ```text
-envilder: 2 secrets resolved (aws, profile=dev) → npm run dev
+envilder: 2 secrets resolved (aws, profile=dev) → npm …
 ```
+
+The summary names your command by program name only, followed by `…` when it
+has arguments (a command without arguments shows as `→ node`). Arguments are
+never printed by Envilder because they can carry secrets; your command still
+receives them unchanged.
 
 The per-secret block is shown only when something fails. Secret values are
 never printed; resolved values appear masked. The ASCII banner only appears in
@@ -213,9 +225,12 @@ never printed; resolved values appear masked. The ASCII banner only appears in
 
 When `GITHUB_ACTIONS=true`, Envilder registers every resolved value with
 GitHub's log masking (`::add-mask::`) **before** the command starts, so values
-your command prints are masked in the job log. GitHub reads these commands from
-stdout, so they are the one documented exception to the stdout rule above.
-Outside GitHub Actions nothing is emitted.
+your command prints are masked in the job log. Envilder waits until every mask
+registration has been written to stdout before it starts the command, so the
+command's output can never reach the log ahead of them; if a registration
+cannot be written, the command is not started (exit code `125`). GitHub reads
+these commands from stdout, so they are the one documented exception to the
+stdout rule above. Outside GitHub Actions nothing is emitted.
 
 ```yaml
 - run: npx envilder exec -- npm test

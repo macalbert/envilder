@@ -47,7 +47,7 @@ describe('ExecWithSecretsCommandHandler', () => {
     saveEnvironment: Mock;
   };
   let mockLogger: ILogger & { info: Mock; warn: Mock; error: Mock };
-  let mockSecretMasker: ISecretMasker & { mask: Mock };
+  let mockSecretMasker: ISecretMasker & { mask: Mock; flush: Mock };
   let mockProcessRunner: IProcessRunner & { run: Mock };
   let inherited: Record<string, string | undefined>;
   let platform: NodeJS.Platform;
@@ -87,7 +87,10 @@ describe('ExecWithSecretsCommandHandler', () => {
       saveEnvironment: vi.fn(),
     };
     mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
-    mockSecretMasker = { mask: vi.fn() };
+    mockSecretMasker = {
+      mask: vi.fn(),
+      flush: vi.fn().mockResolvedValue(undefined),
+    };
     mockProcessRunner = {
       run: vi.fn().mockResolvedValue({ code: 0, signal: null }),
     };
@@ -545,5 +548,111 @@ describe('ExecWithSecretsCommandHandler', () => {
     // Assert
     expect(runRequest().env.Path).toBe(DB_URL_VALUE);
     expect(runRequest().env.PATH).toBe(API_KEY_VALUE);
+  });
+
+  it('Should_FlushMaskerAfterMaskingAndBeforeStartingChild_When_AllSecretsResolve', async () => {
+    // Arrange
+    const command = ExecWithSecretsCommand.create(MAP_PATH, 'node', []);
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    expect(mockSecretMasker.flush).toHaveBeenCalled();
+    const lastMaskOrder = Math.max(
+      ...mockSecretMasker.mask.mock.invocationCallOrder,
+    );
+    const lastFlushOrder = Math.max(
+      ...mockSecretMasker.flush.mock.invocationCallOrder,
+    );
+    expect(lastMaskOrder).toBeLessThan(lastFlushOrder);
+    expect(lastFlushOrder).toBeLessThan(
+      mockProcessRunner.run.mock.invocationCallOrder[0],
+    );
+  });
+
+  it('Should_NotStartChild_When_MaskerFlushIsStillPending', async () => {
+    // Arrange
+    mockSecretMasker.flush.mockReturnValue(new Promise<void>(() => undefined));
+    const command = ExecWithSecretsCommand.create(MAP_PATH, 'node', []);
+
+    // Act
+    void sut.handle(command);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // Assert
+    expect(mockSecretMasker.flush).toHaveBeenCalled();
+    expect(mockProcessRunner.run).not.toHaveBeenCalled();
+  });
+
+  it('Should_StartChildOnce_When_PendingMaskerFlushResolves', async () => {
+    // Arrange
+    let releaseFlush: () => void = () => undefined;
+    mockSecretMasker.flush.mockReturnValue(
+      new Promise<void>((resolve) => {
+        releaseFlush = resolve;
+      }),
+    );
+    const command = ExecWithSecretsCommand.create(MAP_PATH, 'node', []);
+    const running = sut.handle(command);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const runCallsWhilePending = mockProcessRunner.run.mock.calls.length;
+
+    // Act
+    releaseFlush();
+    const actual = await running;
+
+    // Assert
+    expect(runCallsWhilePending).toBe(0);
+    expect(mockProcessRunner.run).toHaveBeenCalledTimes(1);
+    expect(actual).toBe(0);
+  });
+
+  it('Should_NotStartChild_When_MaskerFlushFails', async () => {
+    // Arrange
+    const flushError = new Error('stdout closed before mask registration');
+    mockSecretMasker.flush.mockRejectedValue(flushError);
+    const command = ExecWithSecretsCommand.create(MAP_PATH, 'node', []);
+
+    // Act
+    const actual = await sut.handle(command).catch((error: unknown) => error);
+
+    // Assert
+    expect(actual).toBe(flushError);
+    expect(mockProcessRunner.run).not.toHaveBeenCalled();
+  });
+
+  it('Should_ShowOnlyProgramNameInSummary_When_CommandHasArguments', async () => {
+    // Arrange
+    const bearer = 'tok-SECRET-5Pq1Zr';
+    const args = [
+      '-H',
+      `Authorization: Bearer ${bearer}`,
+      'https://api.example.test',
+    ];
+    const command = ExecWithSecretsCommand.create(MAP_PATH, 'curl', args);
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    const summary = strip(mockLogger.info.mock.calls[0][0]);
+    expect(summary).toContain('\u2192 curl \u2026');
+    expect(loggedText()).not.toContain(bearer);
+    expect(loggedText()).not.toContain('Authorization');
+    expect(loggedText()).not.toContain('https://api.example.test');
+    expect(runRequest().args).toEqual(args);
+  });
+
+  it('Should_ShowProgramNameWithoutEllipsis_When_CommandHasNoArguments', async () => {
+    // Arrange
+    const command = ExecWithSecretsCommand.create(MAP_PATH, 'node', []);
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    const summary = strip(mockLogger.info.mock.calls[0][0]);
+    expect(summary.endsWith('\u2192 node')).toBe(true);
   });
 });

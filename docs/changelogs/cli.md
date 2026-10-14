@@ -18,10 +18,11 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   Resolution is fail-closed: the command never starts when a secret is missing,
   empty or unreadable. Mapped values override inherited variables, naming the
   overridden variables on stderr. All Envilder output goes to stderr as a
-  single summary line. Inside GitHub Actions every value is masked before the
-  command starts. Exit codes follow GNU `env`: the command's own code, `128+n`
-  for signals, `125` for Envilder errors, `126` and `127` when the command
-  cannot be executed or found. `SIGTERM` and `SIGHUP` are forwarded and the
+  single summary line that names the program but never its arguments. Inside
+  GitHub Actions every value is registered for masking, and the registrations
+  are written, before the command starts. Exit codes follow GNU `env`: the
+  command's own code, `128+n` for signals, `125` for Envilder errors, `126`
+  and `127` when the command cannot be executed or found. `SIGTERM` and `SIGHUP` are forwarded and the
   command is awaited without a timeout. Exec mode is not a sandbox: see
   [docs/exec-command.md](../exec-command.md)
   ([#550](https://github.com/macalbert/envilder/issues/550))

@@ -21,6 +21,7 @@ import { OperationMode } from '../../../../../src/envilder/core/domain/Operation
 import type { ProcessRequest } from '../../../../../src/envilder/core/domain/ports/IProcessRunner';
 import { AwsSsmSecretProvider } from '../../../../../src/envilder/core/infrastructure/aws/AwsSsmSecretProvider';
 import { AzureKeyVaultSecretProvider } from '../../../../../src/envilder/core/infrastructure/azure/AzureKeyVaultSecretProvider';
+import { NoOpSecretMasker } from '../../../../../src/envilder/core/infrastructure/github/NoOpSecretMasker';
 import { CrossSpawnProcessRunner } from '../../../../../src/envilder/core/infrastructure/process/CrossSpawnProcessRunner';
 import { FileVariableStore } from '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore';
 
@@ -92,6 +93,14 @@ async function runCli(args: string[]): Promise<number> {
       return 1;
     },
   );
+}
+
+/** Completes a mocked stream write the way Node does: callback on next tick. */
+function completeWrite(rest: unknown[], error?: Error): void {
+  const callback = rest.find(
+    (arg): arg is (error?: Error | null) => void => typeof arg === 'function',
+  );
+  process.nextTick(() => callback?.(error ?? null));
 }
 
 function strip(value: unknown): string {
@@ -180,12 +189,20 @@ describe('Cli exec', () => {
     vi.spyOn(console, 'info').mockImplementation(toStdout);
     vi.spyOn(console, 'warn').mockImplementation(toStderr);
     vi.spyOn(console, 'error').mockImplementation(toStderr);
-    vi.spyOn(process.stdout, 'write').mockImplementation(((chunk: unknown) => {
+    vi.spyOn(process.stdout, 'write').mockImplementation(((
+      chunk: unknown,
+      ...rest: unknown[]
+    ) => {
       stdoutChunks.push(String(chunk));
+      completeWrite(rest);
       return true;
     }) as typeof process.stdout.write);
-    vi.spyOn(process.stderr, 'write').mockImplementation(((chunk: unknown) => {
+    vi.spyOn(process.stderr, 'write').mockImplementation(((
+      chunk: unknown,
+      ...rest: unknown[]
+    ) => {
       stderrChunks.push(String(chunk));
+      completeWrite(rest);
       return true;
     }) as typeof process.stderr.write);
     vi.spyOn(process, 'exit').mockImplementation(((code?: number) => {
@@ -438,6 +455,32 @@ describe('Cli exec', () => {
   });
 
   describe('root option suggestions', () => {
+    it('Should_NotPrintChildArguments_When_RootOptionSuggestionIsShown', async () => {
+      // Arrange
+      const bearer = 'tok-SECRET-3Vn7Lw';
+
+      // Act
+      const actual = await runCli([
+        '--map=cfg.json',
+        'exec',
+        '--',
+        'curl',
+        '-H',
+        `Authorization: Bearer ${bearer}`,
+        'https://api.example.test/v1',
+      ]);
+
+      // Assert
+      const output = `${stdout()}${stderr()}`;
+      expect(actual).toBe(125);
+      expect(stderr()).toContain('envilder exec --map=cfg.json');
+      expect(stderr()).toContain('curl');
+      expect(output).not.toContain(bearer);
+      expect(output).not.toContain('Authorization');
+      expect(output).not.toContain('https://api.example.test/v1');
+      expect(runSpy).not.toHaveBeenCalled();
+    });
+
     it.each([
       ['ValueInline', ['--value=s3cretVALUE-9Zq4Wx'], 's3cretVALUE-9Zq4Wx'],
       [
@@ -782,6 +825,29 @@ describe('Cli exec', () => {
   });
 
   describe('output and secret hygiene', () => {
+    it('Should_NotPrintChildArguments_When_SummaryIsLogged', async () => {
+      // Arrange
+      const bearer = 'tok-SECRET-8Hf2Kq';
+      const childArgs = [
+        '-H',
+        `Authorization: Bearer ${bearer}`,
+        'https://api.example.test/v1',
+      ];
+
+      // Act
+      const actual = await runCli(['exec', '--', 'curl', ...childArgs]);
+
+      // Assert
+      const output = `${stdout()}${stderr()}`;
+      expect(actual).toBe(0);
+      expect(stderr()).toContain('\u2192 curl');
+      expect(output).not.toContain(bearer);
+      expect(output).not.toContain('Authorization');
+      expect(output).not.toContain('https://api.example.test/v1');
+      expect(runRequest().command).toBe('curl');
+      expect(runRequest().args).toEqual(childArgs);
+    });
+
     it('Should_WriteEnvilderOutputToStderr_When_ExecModeIsUsed', async () => {
       // Arrange
       vi.stubEnv('API_KEY', 'from-shell');
@@ -865,6 +931,45 @@ describe('Cli exec', () => {
       // Assert
       expect(stdout()).not.toContain('::add-mask::');
       expect(runSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('masker flush', () => {
+    it('Should_ExitWith125_When_MaskRegistrationWriteFailsInGitHubActions', async () => {
+      // Arrange
+      vi.stubEnv('GITHUB_ACTIONS', 'true');
+      const writeError = Object.assign(new Error('write EPIPE'), {
+        code: 'EPIPE',
+      });
+      vi.mocked(process.stdout.write).mockImplementation(((
+        chunk: unknown,
+        ...rest: unknown[]
+      ) => {
+        stdoutChunks.push(String(chunk));
+        completeWrite(rest, writeError);
+        return true;
+      }) as typeof process.stdout.write);
+
+      // Act
+      const actual = await runCli(['exec', '--', 'npm', 'test']);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(runSpy).not.toHaveBeenCalled();
+    });
+
+    it('Should_ExitWith125_When_MaskerFlushFails', async () => {
+      // Arrange
+      vi.spyOn(NoOpSecretMasker.prototype, 'flush').mockRejectedValue(
+        new Error('stdout closed before mask registration'),
+      );
+
+      // Act
+      const actual = await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(runSpy).not.toHaveBeenCalled();
     });
   });
 
