@@ -161,6 +161,10 @@ Other conditions that stop the command from starting:
   Envilder offers to run `aws sso login` and then retries **only the secret
   resolution**: your command is started at most once. If you decline or the
   login fails, the exit code is `125`.
+* On Windows, the map file declares names that differ only by case (for
+  example `Path` and `PATH`). Windows treats them as the same variable, so
+  Envilder exits with `125` before any provider call instead of silently
+  dropping one. On Linux and macOS both names are kept.
 
 A map file that declares no variables (only `$config`) is not an error: the
 command starts with the inherited environment and Envilder prints
@@ -180,7 +184,10 @@ Overriding inherited variables: API_KEY
 ```
 
 On Windows, names are compared case-insensitively: an inherited `Path` and a
-mapped `PATH` are the same variable, and the command gets exactly one entry.
+mapped `PATH` are the same variable, the mapped value wins, and the command
+gets exactly one entry. Within the map file itself, names that differ only by
+case are rejected on Windows (see
+[Fail-closed resolution](#fail-closed-resolution)).
 
 Values reach the command byte for byte: multi-line values (such as PEM keys),
 `=`, quotes, `#`, `$` and non-ASCII characters are not escaped, quoted or
@@ -228,10 +235,15 @@ Outside GitHub Actions nothing is emitted.
 * **`SIGTERM` and `SIGHUP`** (for example from `docker stop`, Kubernetes or a
   process manager): Envilder forwards the signal to your command and **waits
   for it to exit, with no timeout of its own**. Escalating to `SIGKILL` after a
-  grace period is left to the process manager. No orphan process remains.
-  On Windows, when the command is a `.cmd`/`.bat` shim (such as `npm`), a
+  grace period is left to the process manager.
+* **What is guaranteed**: like `chamber exec` and `op run`, Envilder forwards
+  signals to its **direct child only**; it does not signal the child's process
+  group. Envilder never exits before its direct child. Stopping the processes that child started is the child's
+  responsibility: a launcher (`npm`, a shell script) that exits on `SIGTERM`
+  without stopping its own children can leave them running, on any operating
+  system. On Windows the same applies to `.cmd`/`.bat` shims such as `npm`: a
   forwarded signal terminates the `cmd.exe` shim and the shim's own child may
-  keep running; console Ctrl+C and closing the console reach the whole console
+  keep running. Console Ctrl+C and closing the console reach the whole console
   group.
 * stdin, stdout and stderr are inherited and the TTY is preserved, so
   interactive commands (REPLs, shells, prompts) work as usual.

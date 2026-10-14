@@ -9,6 +9,7 @@ import {
 } from 'vitest';
 import { main } from '../../../../../src/envilder/apps/cli/entry/Cli';
 import { SilentExitError } from '../../../../../src/envilder/apps/cli/errors/SilentExitError';
+import { DispatchActionCommandHandler } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
 import { SsoSessionExpiredError } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import { AwsSsmSecretProvider } from '../../../../../src/envilder/core/infrastructure/aws/AwsSsmSecretProvider';
 import { CrossSpawnProcessRunner } from '../../../../../src/envilder/core/infrastructure/process/CrossSpawnProcessRunner';
@@ -35,6 +36,25 @@ vi.mock('node:fs', async () => {
   };
 });
 
+const prompt = vi.hoisted(() => ({ answer: 'n' }));
+
+vi.mock('node:child_process', async () => {
+  const actual =
+    await vi.importActual<typeof import('node:child_process')>(
+      'node:child_process',
+    );
+  const { EventEmitter } =
+    await vi.importActual<typeof import('node:events')>('node:events');
+  return {
+    ...actual,
+    spawn: vi.fn(() => {
+      const child = new EventEmitter();
+      setImmediate(() => child.emit('close', 0));
+      return child;
+    }),
+  };
+});
+
 vi.mock('node:readline', async () => {
   const actual = await vi.importActual('node:readline');
   return {
@@ -42,7 +62,7 @@ vi.mock('node:readline', async () => {
     createInterface: vi.fn(({ output }: { output: NodeJS.WritableStream }) => ({
       question: (query: string, answer: (reply: string) => void) => {
         output.write(query);
-        answer('n');
+        answer(prompt.answer);
       },
       close: () => undefined,
     })),
@@ -86,6 +106,7 @@ describe('Cli exec SSO recovery prompt', () => {
 
   beforeEach(() => {
     process.exitCode = undefined;
+    prompt.answer = 'n';
     vi.stubEnv('GITHUB_ACTIONS', undefined);
     Object.defineProperty(process.stdout, 'isTTY', {
       value: true,
@@ -158,5 +179,57 @@ describe('Cli exec SSO recovery prompt', () => {
     );
     expect(strip(stdoutChunks.join(''))).toBe('');
     expect(runSpy).not.toHaveBeenCalled();
+  });
+
+  describe('accepted login', () => {
+    beforeEach(async () => {
+      prompt.answer = 'y';
+      const { spawn } = await import('node:child_process');
+      vi.mocked(spawn).mockClear();
+    });
+
+    it('Should_RouteLoginOutputToStderr_When_SsoRecoveryIsAcceptedInExecMode', async () => {
+      // Arrange
+      vi.mocked(AwsSsmSecretProvider.prototype.getSecret)
+        .mockReset()
+        .mockRejectedValueOnce(new SsoSessionExpiredError('dev'))
+        .mockResolvedValue('resolved-after-login');
+      runSpy.mockResolvedValue({ code: 4, signal: null });
+      const { spawn } = await import('node:child_process');
+
+      // Act
+      const actual = await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      const awsCalls = vi
+        .mocked(spawn)
+        .mock.calls.filter(([command]) => command === 'aws');
+      expect(awsCalls).toHaveLength(1);
+      const stdio = (awsCalls[0][2] as { stdio?: unknown }).stdio as unknown[];
+      expect(Array.isArray(stdio)).toBe(true);
+      expect([2, process.stderr]).toContain(stdio[1]);
+      expect(actual).toBe(4);
+      expect(runSpy).toHaveBeenCalledTimes(1);
+      expect(strip(stdoutChunks.join(''))).toBe('');
+    });
+
+    it('Should_KeepInheritedLoginOutput_When_SsoRecoveryIsAcceptedInPullMode', async () => {
+      // Arrange
+      vi.spyOn(DispatchActionCommandHandler.prototype, 'handleCommand')
+        .mockRejectedValueOnce(new SsoSessionExpiredError('dev'))
+        .mockResolvedValue(undefined);
+      const { spawn } = await import('node:child_process');
+
+      // Act
+      const actual = await runCli(['--map', 'map.json', '--envfile', '.env']);
+
+      // Assert
+      const awsCalls = vi
+        .mocked(spawn)
+        .mock.calls.filter(([command]) => command === 'aws');
+      expect(actual).toBe(0);
+      expect(awsCalls).toHaveLength(1);
+      expect(awsCalls[0][2]).toMatchObject({ stdio: 'inherit' });
+    });
   });
 });

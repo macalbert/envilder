@@ -439,6 +439,42 @@ describe('Cli exec', () => {
 
   describe('root option suggestions', () => {
     it.each([
+      ['ValueInline', ['--value=s3cretVALUE-9Zq4Wx'], 's3cretVALUE-9Zq4Wx'],
+      [
+        'ValueSeparated',
+        ['--value', 's3cretVALUE-9Zq4Wx'],
+        's3cretVALUE-9Zq4Wx',
+      ],
+      ['Key', ['--key', 'KEYNAME-4Rt8Lp'], 'KEYNAME-4Rt8Lp'],
+      [
+        'SecretPath',
+        ['--secret-path', '/hidden/path-6Yb3Nc'],
+        '/hidden/path-6Yb3Nc',
+      ],
+      ['SsmPath', ['--ssm-path', '/hidden/ssm-2Kd7Vf'], '/hidden/ssm-2Kd7Vf'],
+      ['Envfile', ['--envfile', 'private-1Mx5Qa.env'], 'private-1Mx5Qa.env'],
+    ])(
+      'Should_NotEchoExecOptionValue_When_RootOptionPrecedesExecAndExecHas%s',
+      async (_name, execOption, hiddenValue) => {
+        // Act
+        const actual = await runCli([
+          '--map=cfg.json',
+          'exec',
+          ...execOption,
+          'node',
+          'app.js',
+        ]);
+
+        // Assert
+        expect(actual).toBe(125);
+        expect(stderr()).not.toContain(hiddenValue);
+        expect(stdout()).not.toContain(hiddenValue);
+        expect(getSecretSpy).not.toHaveBeenCalled();
+        expect(runSpy).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each([
       ['Inline', ['--value=s3cretVALUE-9Zq4Wx']],
       ['Separated', ['--value', 's3cretVALUE-9Zq4Wx']],
     ])(
@@ -499,6 +535,40 @@ describe('Cli exec', () => {
         expect(runSpy).not.toHaveBeenCalled();
       },
     );
+  });
+
+  describe('windows case collisions', () => {
+    const originalPlatform = process.platform;
+
+    afterEach(() => {
+      Object.defineProperty(process, 'platform', {
+        value: originalPlatform,
+        configurable: true,
+      });
+    });
+
+    it('Should_ExitWith125_When_MapNamesDifferOnlyByCaseOnWindows', async () => {
+      // Arrange
+      Object.defineProperty(process, 'platform', {
+        value: 'win32',
+        configurable: true,
+      });
+      getMappingSpy.mockResolvedValue({
+        Path: DB_URL_PATH,
+        PATH: API_KEY_PATH,
+      });
+
+      // Act
+      const actual = await runCli(['exec', '--', 'cmd', '/c', 'echo']);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(stderr()).toContain('Path');
+      expect(stderr()).toContain('PATH');
+      expect(stderr()).toContain('differ only by case');
+      expect(getSecretSpy).not.toHaveBeenCalled();
+      expect(runSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('aws identity', () => {

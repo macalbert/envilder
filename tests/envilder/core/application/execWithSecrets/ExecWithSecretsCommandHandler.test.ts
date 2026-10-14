@@ -509,4 +509,41 @@ describe('ExecWithSecretsCommandHandler', () => {
     // Assert
     expect(actual).toBe(148);
   });
+
+  it('Should_NotStartChild_When_MapNamesDifferOnlyByCaseOnWindows', async () => {
+    // Arrange
+    platform = 'win32';
+    mockVariableStore.getMapping.mockResolvedValue({
+      Path: DB_URL_PATH,
+      PATH: API_KEY_PATH,
+    });
+    const command = ExecWithSecretsCommand.create(MAP_PATH, 'cmd', []);
+
+    // Act
+    const actual = await sut.handle(command).catch((error: unknown) => error);
+
+    // Assert
+    expect(actual).toBeInstanceOf(InvalidArgumentError);
+    expect((actual as Error).message).toContain('Path');
+    expect((actual as Error).message).toContain('PATH');
+    expect((actual as Error).message).toContain('differ only by case');
+    expect(mockSecretProvider.getSecret).not.toHaveBeenCalled();
+    expect(mockProcessRunner.run).not.toHaveBeenCalled();
+  });
+
+  it('Should_KeepBothMappedNames_When_MapNamesDifferOnlyByCaseOnPosix', async () => {
+    // Arrange
+    mockVariableStore.getMapping.mockResolvedValue({
+      Path: DB_URL_PATH,
+      PATH: API_KEY_PATH,
+    });
+    const command = ExecWithSecretsCommand.create(MAP_PATH, 'sh', []);
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    expect(runRequest().env.Path).toBe(DB_URL_VALUE);
+    expect(runRequest().env.PATH).toBe(API_KEY_VALUE);
+  });
 });

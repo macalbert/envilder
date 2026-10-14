@@ -1,5 +1,8 @@
 import { inject, injectable } from 'inversify';
-import { buildChildEnvironment } from '../../domain/ChildEnvironment.js';
+import {
+  buildChildEnvironment,
+  findCaseCollisions,
+} from '../../domain/ChildEnvironment.js';
 import { exitCodeForChild } from '../../domain/ExecExitCode.js';
 import {
   InvalidArgumentError,
@@ -81,6 +84,7 @@ export class ExecWithSecretsCommandHandler {
     if (Object.keys(mappings).length === 0) {
       this.logger.warn('Map file declares no variables.');
     }
+    this.assertNoCaseCollisions(Object.keys(mappings));
 
     const { outcomes, resolved } = await this.secretResolver.resolve(mappings);
     const failures = outcomes.filter(
@@ -137,6 +141,24 @@ export class ExecWithSecretsCommandHandler {
 
     return exitCodeForChild(exit, (signal) =>
       this.processContext.signalNumber(signal),
+    );
+  }
+
+  /**
+   * On Windows two mapped names that differ only by case are one variable,
+   * so one value would be silently dropped. Refuse before resolving.
+   */
+  private assertNoCaseCollisions(names: string[]): void {
+    const collisions = findCaseCollisions(
+      names,
+      this.processContext.platform(),
+    );
+    if (collisions.length === 0) {
+      return;
+    }
+    const listed = collisions.map((group) => group.join(', ')).join('; ');
+    throw new InvalidArgumentError(
+      `Map file declares variables that differ only by case (${listed}); Windows treats them as the same variable.`,
     );
   }
 

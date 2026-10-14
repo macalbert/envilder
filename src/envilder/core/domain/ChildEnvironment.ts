@@ -42,3 +42,23 @@ export function buildChildEnvironment(
 
   return { env, overridden };
 }
+
+/**
+ * Groups of variable names that the platform treats as one variable. On
+ * Windows names are case-insensitive, so `Path` and `PATH` collide; on other
+ * platforms there are never collisions.
+ */
+export function findCaseCollisions(
+  names: readonly string[],
+  platform: string,
+): string[][] {
+  if (platform !== 'win32') {
+    return [];
+  }
+  const groups = new Map<string, string[]>();
+  for (const name of names) {
+    const key = name.toUpperCase();
+    groups.set(key, [...(groups.get(key) ?? []), name]);
+  }
+  return [...groups.values()].filter((group) => group.length > 1);
+}

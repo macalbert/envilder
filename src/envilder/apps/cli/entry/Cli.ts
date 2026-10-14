@@ -34,6 +34,7 @@ import { presentError } from '../errors/CliErrorPresenter.js';
 import { SilentExitError } from '../errors/SilentExitError.js';
 import {
   createConfirm,
+  createRunLogin,
   executeWithSsoRecovery,
 } from '../recovery/SsoLoginRecovery.js';
 import { Startup } from '../Startup.js';
@@ -289,6 +290,13 @@ function registerExecCommand(program: Command): void {
         options: ExecOptions,
         execCommand: Command,
       ) => {
+        // Exec's own usage errors come first: their messages never echo
+        // option values, unlike the root-option suggestion.
+        const usageError = findExecUsageError(commandName, options);
+        if (usageError !== undefined || commandName === undefined) {
+          console.error(pc.red(`error: ${usageError}`));
+          throw new SilentExitError(EXEC_ENVILDER_FAILURE);
+        }
         rejectRootOptionsBeforeExec(
           (execCommand.parent?.opts() ?? {}) as ExecOptions,
         );
@@ -369,7 +377,7 @@ function rejectRootOptionsBeforeExec(rootOptions: ExecOptions): void {
       'envilder',
       'exec',
       ...compatible.map(([name, flag]) => `${flag}=${rootOptions[name]}`),
-      ...argumentsAfterExec(process.argv.slice(2)),
+      ...withoutForbiddenExecOptions(argumentsAfterExec(process.argv.slice(2))),
     ]);
     lines.push(`error: Put envilder options after "exec": ${suggestion}`);
   } else {
@@ -396,17 +404,47 @@ function argumentsAfterExec(args: string[]): string[] {
   return args.slice(index + 1);
 }
 
+const EXEC_FORBIDDEN_FLAGS = new Set(
+  EXEC_INCOMPATIBLE_ROOT_OPTIONS.map(([, flag]) => flag),
+);
+const EXEC_FLAGS_WITH_VALUE = new Set([
+  '--map',
+  '--profile',
+  '--provider',
+  '--vault-url',
+  ...[...ROOT_FLAGS_WITH_VALUE].filter((flag) =>
+    EXEC_FORBIDDEN_FLAGS.has(flag),
+  ),
+]);
+
+/**
+ * Drops options exec rejects, and their values, from the options written
+ * after `exec`, so a suggestion can never echo a secret passed to one of
+ * them. Everything from the command on is kept verbatim.
+ */
+function withoutForbiddenExecOptions(args: string[]): string[] {
+  const kept: string[] = [];
+  let index = 0;
+  while (index < args.length) {
+    const token = args[index];
+    if (token === '--' || !token.startsWith('-')) {
+      return [...kept, ...args.slice(index)];
+    }
+    const flag = token.split('=', 1)[0];
+    const takesValue = EXEC_FLAGS_WITH_VALUE.has(flag) && !token.includes('=');
+    if (!EXEC_FORBIDDEN_FLAGS.has(flag)) {
+      kept.push(...args.slice(index, index + (takesValue ? 2 : 1)));
+    }
+    index += takesValue ? 2 : 1;
+  }
+  return kept;
+}
+
 async function runExec(
-  commandName: string | undefined,
+  commandName: string,
   childArgs: string[],
   options: ExecOptions,
 ): Promise<void> {
-  const usageError = findExecUsageError(commandName, options);
-  if (usageError !== undefined || commandName === undefined) {
-    console.error(pc.red(`error: ${usageError}`));
-    throw new SilentExitError(EXEC_ENVILDER_FAILURE);
-  }
-
   let exitCode: number;
   try {
     exitCode = await resolveSecretsAndRun(commandName, childArgs, options);
@@ -479,7 +517,10 @@ async function resolveSecretsAndRun(
     async () => {
       prepared = await handler.prepare(command);
     },
-    { confirm: createConfirm(process.stderr) },
+    {
+      confirm: createConfirm(process.stderr),
+      runLogin: createRunLogin({ stdout: 'stderr' }),
+    },
   );
   if (prepared === undefined) {
     throw new InvalidArgumentError('Secrets could not be resolved.');
