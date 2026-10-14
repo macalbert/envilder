@@ -25,17 +25,26 @@ function defaultIsInteractive(): boolean {
   return [process.stdout.isTTY, process.stdin.isTTY].every(Boolean);
 }
 
-function defaultConfirm(question: string): Promise<boolean> {
-  const prompt = createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-  return new Promise((resolve) => {
-    prompt.question(`${question} `, (answer) => {
-      prompt.close();
-      resolve(answer.trim().toLowerCase() === 'y');
+/**
+ * Builds a yes/no prompt that writes its question to `output`. Exec mode
+ * prompts on stderr so stdout stays reserved for the child process.
+ */
+export function createConfirm(
+  output: NodeJS.WritableStream,
+): (question: string) => Promise<boolean> {
+  return (question) => {
+    const prompt = createInterface({ input: process.stdin, output });
+    return new Promise((resolve) => {
+      prompt.question(`${question} `, (answer) => {
+        prompt.close();
+        resolve(answer.trim().toLowerCase() === 'y');
+      });
     });
-  });
+  };
+}
+
+function defaultConfirm(question: string): Promise<boolean> {
+  return createConfirm(process.stdout)(question);
 }
 
 function defaultRunLogin(profileName?: string): Promise<number> {

@@ -1,0 +1,825 @@
+import { SSMClient } from '@aws-sdk/client-ssm';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type MockInstance,
+  vi,
+} from 'vitest';
+import { main } from '../../../../../src/envilder/apps/cli/entry/Cli';
+import { SilentExitError } from '../../../../../src/envilder/apps/cli/errors/SilentExitError';
+import { Startup } from '../../../../../src/envilder/apps/cli/Startup';
+import { DispatchActionCommandHandler } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
+import {
+  CommandNotExecutableError,
+  CommandNotFoundError,
+  SsoSessionExpiredError,
+} from '../../../../../src/envilder/core/domain/errors/DomainErrors';
+import { OperationMode } from '../../../../../src/envilder/core/domain/OperationMode';
+import type { ProcessRequest } from '../../../../../src/envilder/core/domain/ports/IProcessRunner';
+import { AwsSsmSecretProvider } from '../../../../../src/envilder/core/infrastructure/aws/AwsSsmSecretProvider';
+import { AzureKeyVaultSecretProvider } from '../../../../../src/envilder/core/infrastructure/azure/AzureKeyVaultSecretProvider';
+import { CrossSpawnProcessRunner } from '../../../../../src/envilder/core/infrastructure/process/CrossSpawnProcessRunner';
+import { FileVariableStore } from '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore';
+
+vi.mock(
+  '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore',
+  async () => {
+    const actual = await vi.importActual(
+      '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore',
+    );
+    return {
+      ...(actual as object),
+      readMapFileConfig: vi.fn().mockResolvedValue({}),
+    };
+  },
+);
+
+vi.mock('node:fs', async () => {
+  const actual = await vi.importActual('node:fs');
+  return {
+    ...(actual as object),
+    existsSync: vi.fn().mockReturnValue(true),
+  };
+});
+
+vi.mock(
+  '../../../../../src/envilder/apps/cli/recovery/SsoLoginRecovery',
+  async () => {
+    const actual = await vi.importActual(
+      '../../../../../src/envilder/apps/cli/recovery/SsoLoginRecovery',
+    );
+    return {
+      ...(actual as object),
+      executeWithSsoRecovery: vi.fn(),
+    };
+  },
+);
+
+const ANSI_PATTERN = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g');
+const DB_URL_PATH = '/app/dev/db-url';
+const API_KEY_PATH = '/app/dev/api-key';
+const DB_URL_VALUE = 'fake-db-url-value-7Qx2Lm9Rv4Tz8Kp1';
+const API_KEY_VALUE = 'fake-api-key-value-3Hn6Wc1Ys5Jd0Bg7';
+const USAGE_ERROR =
+  'Missing command. Usage: envilder exec [options] [--] <command> [args...]';
+
+class ProcessExitCalled extends Error {
+  constructor(readonly code: number) {
+    super(`process.exit(${code})`);
+  }
+}
+
+/**
+ * Models how the unchanged Index.ts entry point turns the outcome of main()
+ * into a process exit code: process.exit(code) wins, SilentExitError exits
+ * with its code, any other rejection exits with 1, and a normal return exits
+ * with process.exitCode (0 when unset).
+ */
+async function runCli(args: string[]): Promise<number> {
+  process.argv = ['node', 'envilder', ...args];
+  return main().then(
+    () => Number(process.exitCode ?? 0),
+    (error: unknown) => {
+      if (error instanceof ProcessExitCalled) {
+        return error.code;
+      }
+      if (error instanceof SilentExitError) {
+        return error.code;
+      }
+      return 1;
+    },
+  );
+}
+
+function strip(value: unknown): string {
+  return String(value).replace(ANSI_PATTERN, '');
+}
+
+describe('Cli exec', () => {
+  let secrets: Record<string, string | undefined>;
+  let getMappingSpy: MockInstance;
+  let getEnvironmentSpy: MockInstance;
+  let saveEnvironmentSpy: MockInstance;
+  let getSecretSpy: MockInstance;
+  let runSpy: MockInstance;
+  let logIdentitySpy: MockInstance;
+  let stdoutChunks: string[];
+  let stderrChunks: string[];
+
+  function stdout(): string {
+    return strip(stdoutChunks.join(''));
+  }
+
+  function stderr(): string {
+    return strip(stderrChunks.join(''));
+  }
+
+  function runRequest(): ProcessRequest {
+    return runSpy.mock.calls[0][0] as ProcessRequest;
+  }
+
+  beforeEach(async () => {
+    secrets = { [DB_URL_PATH]: DB_URL_VALUE, [API_KEY_PATH]: API_KEY_VALUE };
+    process.exitCode = undefined;
+    vi.stubEnv('GITHUB_ACTIONS', undefined);
+    vi.stubEnv('ENVILDER_ALLOWED_VAULT_HOSTS', undefined);
+    vi.stubEnv('API_KEY', undefined);
+    vi.stubEnv('DB_URL', undefined);
+
+    const { existsSync } = await import('node:fs');
+    vi.mocked(existsSync).mockReset();
+    vi.mocked(existsSync).mockReturnValue(true);
+    const { readMapFileConfig } = await import(
+      '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore'
+    );
+    vi.mocked(readMapFileConfig).mockReset();
+    vi.mocked(readMapFileConfig).mockResolvedValue({});
+    const { executeWithSsoRecovery } = await import(
+      '../../../../../src/envilder/apps/cli/recovery/SsoLoginRecovery'
+    );
+    vi.mocked(executeWithSsoRecovery).mockReset();
+    vi.mocked(executeWithSsoRecovery).mockImplementation(async (run) => {
+      await run();
+    });
+
+    getMappingSpy = vi
+      .spyOn(FileVariableStore.prototype, 'getMapping')
+      .mockResolvedValue({ DB_URL: DB_URL_PATH, API_KEY: API_KEY_PATH });
+    getEnvironmentSpy = vi
+      .spyOn(FileVariableStore.prototype, 'getEnvironment')
+      .mockResolvedValue({});
+    saveEnvironmentSpy = vi
+      .spyOn(FileVariableStore.prototype, 'saveEnvironment')
+      .mockResolvedValue(undefined);
+    getSecretSpy = vi
+      .spyOn(AwsSsmSecretProvider.prototype, 'getSecret')
+      .mockImplementation(async (name: string) => secrets[name]);
+    logIdentitySpy = vi
+      .spyOn(AwsSsmSecretProvider.prototype, 'logIdentity')
+      .mockResolvedValue(undefined);
+    vi.spyOn(
+      AzureKeyVaultSecretProvider.prototype,
+      'getSecret',
+    ).mockImplementation(async (name: string) => secrets[name]);
+    runSpy = vi
+      .spyOn(CrossSpawnProcessRunner.prototype, 'run')
+      .mockResolvedValue({ code: 0, signal: null });
+
+    stdoutChunks = [];
+    stderrChunks = [];
+    const toStdout = (...args: unknown[]) => {
+      stdoutChunks.push(`${args.map(String).join(' ')}\n`);
+    };
+    const toStderr = (...args: unknown[]) => {
+      stderrChunks.push(`${args.map(String).join(' ')}\n`);
+    };
+    vi.spyOn(console, 'log').mockImplementation(toStdout);
+    vi.spyOn(console, 'info').mockImplementation(toStdout);
+    vi.spyOn(console, 'warn').mockImplementation(toStderr);
+    vi.spyOn(console, 'error').mockImplementation(toStderr);
+    vi.spyOn(process.stdout, 'write').mockImplementation(((chunk: unknown) => {
+      stdoutChunks.push(String(chunk));
+      return true;
+    }) as typeof process.stdout.write);
+    vi.spyOn(process.stderr, 'write').mockImplementation(((chunk: unknown) => {
+      stderrChunks.push(String(chunk));
+      return true;
+    }) as typeof process.stderr.write);
+    vi.spyOn(process, 'exit').mockImplementation(((code?: number) => {
+      throw new ProcessExitCalled(code ?? 0);
+    }) as typeof process.exit);
+  });
+
+  afterEach(() => {
+    process.exitCode = undefined;
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
+  describe('command parsing', () => {
+    it('Should_StartCommandAtFirstNonOption_When_SeparatorIsOmitted', async () => {
+      // Act
+      await runCli(['exec', '--map=cfg.json', 'npm', 'run', 'dev']);
+
+      // Assert
+      expect(getMappingSpy).toHaveBeenCalledWith('cfg.json');
+      expect(runRequest().command).toBe('npm');
+      expect(runRequest().args).toEqual(['run', 'dev']);
+    });
+
+    it('Should_StartCommandAfterSeparator_When_SeparatorIsPresent', async () => {
+      // Act
+      await runCli(['exec', '--map', 'cfg.json', '--', 'npm', 'run', 'dev']);
+
+      // Assert
+      expect(getMappingSpy).toHaveBeenCalledWith('cfg.json');
+      expect(runRequest().command).toBe('npm');
+      expect(runRequest().args).toEqual(['run', 'dev']);
+    });
+
+    it('Should_PassArgumentsVerbatim_When_CommandHasArguments', async () => {
+      // Act
+      await runCli([
+        'exec',
+        '--',
+        'node',
+        'app.js',
+        '--port',
+        '3000',
+        '$DB_URL',
+      ]);
+
+      // Assert
+      expect(runRequest().command).toBe('node');
+      expect(runRequest().args).toEqual([
+        'app.js',
+        '--port',
+        '3000',
+        '$DB_URL',
+      ]);
+    });
+
+    it('Should_PassLaterOptionsToChild_When_TheyFollowTheCommand', async () => {
+      // Act
+      await runCli(['exec', 'node', 'app.js', '--map', 'foo', '--push']);
+
+      // Assert
+      expect(getMappingSpy).toHaveBeenCalledWith('envilder.json');
+      expect(runRequest().command).toBe('node');
+      expect(runRequest().args).toEqual(['app.js', '--map', 'foo', '--push']);
+    });
+
+    it('Should_AllowDashedCommand_When_CommandFollowsSeparator', async () => {
+      // Act
+      await runCli(['exec', '--', '-weird-program-name', '--flag']);
+
+      // Assert
+      expect(runRequest().command).toBe('-weird-program-name');
+      expect(runRequest().args).toEqual(['--flag']);
+    });
+
+    it('Should_ApplyProfileOverride_When_ProfileOptionIsProvided', async () => {
+      // Arrange
+      const infraSpy = vi.spyOn(Startup.prototype, 'configureInfrastructure');
+
+      // Act
+      await runCli(['exec', '--profile', 'dev', 'node', 'app.js']);
+
+      // Assert
+      expect(infraSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ profile: 'dev' }),
+        expect.any(Object),
+      );
+      expect(runSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('Should_ApplyProviderAndVaultUrlOverrides_When_OptionsAreProvided', async () => {
+      // Arrange
+      const infraSpy = vi.spyOn(Startup.prototype, 'configureInfrastructure');
+
+      // Act
+      await runCli([
+        'exec',
+        '--provider=azure',
+        '--vault-url=https://my-vault.vault.azure.net',
+        'dotnet',
+        'run',
+      ]);
+
+      // Assert
+      expect(infraSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          provider: 'azure',
+          vaultUrl: 'https://my-vault.vault.azure.net',
+        }),
+        expect.any(Object),
+      );
+      expect(runRequest().command).toBe('dotnet');
+    });
+
+    it.each([
+      ['NoArguments', ['exec']],
+      ['OnlySeparator', ['exec', '--']],
+      ['OnlyEnvilderOptions', ['exec', '--map=cfg.json']],
+    ])(
+      'Should_FailWithUsage_When_CommandIsMissingWith%s',
+      async (_name, args) => {
+        // Act
+        const actual = await runCli(args);
+
+        // Assert
+        expect(actual).toBe(125);
+        expect(stderr()).toContain(USAGE_ERROR);
+        expect(getSecretSpy).not.toHaveBeenCalled();
+        expect(runSpy).not.toHaveBeenCalled();
+      },
+    );
+
+    it('Should_FailWithUnknownOption_When_UnknownOptionPrecedesCommand', async () => {
+      // Act
+      const actual = await runCli([
+        'exec',
+        '--mapp=cfg.json',
+        'node',
+        'app.js',
+      ]);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(stderr()).toMatch(/unknown option '?--mapp/i);
+      expect(getSecretSpy).not.toHaveBeenCalled();
+      expect(runSpy).not.toHaveBeenCalled();
+    });
+
+    it('Should_RejectEnvfileOption_When_ExecModeIsUsed', async () => {
+      // Act
+      const actual = await runCli([
+        'exec',
+        '--envfile',
+        '.env',
+        'node',
+        'app.js',
+      ]);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(stderr()).toContain(
+        '--envfile cannot be used with exec: exec mode never reads or writes a .env file.',
+      );
+      expect(getSecretSpy).not.toHaveBeenCalled();
+      expect(runSpy).not.toHaveBeenCalled();
+    });
+
+    it('Should_RejectPushOptions_When_ExecModeIsUsed', async () => {
+      // Act
+      const actual = await runCli(['exec', '--push', 'node', 'app.js']);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(stderr()).toContain('--push cannot be used with exec.');
+      expect(getSecretSpy).not.toHaveBeenCalled();
+      expect(runSpy).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['Key', ['--key', 'API_KEY']],
+      ['Value', ['--value', 'secret']],
+      ['SecretPath', ['--secret-path', '/my/path']],
+      ['SsmPath', ['--ssm-path', '/my/path']],
+    ])(
+      'Should_RejectSingleSecretPushOption_When_ExecModeIsUsedWith%s',
+      async (_name, option) => {
+        // Act
+        const actual = await runCli(['exec', ...option, 'node', 'app.js']);
+
+        // Assert
+        expect(actual).toBe(125);
+        expect(stderr()).toContain(
+          'Single-secret push options cannot be used with exec.',
+        );
+        expect(getSecretSpy).not.toHaveBeenCalled();
+        expect(runSpy).not.toHaveBeenCalled();
+      },
+    );
+
+    it('Should_ExitWith125_When_NoMapFileIsFound', async () => {
+      // Arrange
+      const { existsSync } = await import('node:fs');
+      vi.mocked(existsSync).mockReturnValue(false);
+
+      // Act
+      const actual = await runCli(['exec', 'node', 'app.js']);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(stderr()).toContain(
+        'No map file found. Provide --map or create envilder.json in the current directory.',
+      );
+      expect(runSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('root options before exec', () => {
+    it.each([
+      ['MapSeparated', ['--map', 'config/prod.json']],
+      ['MapInline', ['--map=config/prod.json']],
+      ['Profile', ['--profile', 'dev']],
+      ['Provider', ['--provider', 'aws']],
+      ['VaultUrl', ['--vault-url', 'https://my-vault.vault.azure.net']],
+      ['Envfile', ['--envfile', '.env']],
+      ['Push', ['--push']],
+      ['Key', ['--key', 'API_KEY']],
+      ['Value', ['--value', 'secret']],
+      ['SecretPath', ['--secret-path', '/my/path']],
+      ['SsmPath', ['--ssm-path', '/my/path']],
+    ])(
+      'Should_RejectWith125_When_RootOptionPrecedesExecWith%s',
+      async (_name, option) => {
+        // Arrange
+        const dispatchSpy = vi
+          .spyOn(DispatchActionCommandHandler.prototype, 'handleCommand')
+          .mockResolvedValue(undefined);
+
+        // Act
+        const actual = await runCli([...option, 'exec', '--', 'npm', 'start']);
+
+        // Assert
+        expect(actual).toBe(125);
+        expect(stderr()).toContain('Put envilder options after "exec"');
+        expect(getMappingSpy).not.toHaveBeenCalled();
+        expect(getSecretSpy).not.toHaveBeenCalled();
+        expect(runSpy).not.toHaveBeenCalled();
+        expect(dispatchSpy).not.toHaveBeenCalled();
+      },
+    );
+  });
+
+  describe('root option suggestions', () => {
+    it.each([
+      ['Inline', ['--value=s3cretVALUE-9Zq4Wx']],
+      ['Separated', ['--value', 's3cretVALUE-9Zq4Wx']],
+    ])(
+      'Should_NotEchoSecretValue_When_ValueOptionPrecedesExecWith%sForm',
+      async (_name, option) => {
+        // Act
+        const actual = await runCli([
+          ...option,
+          'exec',
+          '--',
+          'node',
+          '-e',
+          '1',
+        ]);
+
+        // Assert
+        expect(actual).toBe(125);
+        expect(stderr()).toContain('Put envilder options after "exec"');
+        expect(stderr()).not.toContain('s3cretVALUE-9Zq4Wx');
+        expect(stdout()).not.toContain('s3cretVALUE-9Zq4Wx');
+        expect(runSpy).not.toHaveBeenCalled();
+      },
+    );
+
+    it('Should_SuggestActionableCommand_When_CompatibleRootOptionPrecedesExec', async () => {
+      // Act
+      const actual = await runCli([
+        '--map=cfg.json',
+        'exec',
+        '--',
+        'npm',
+        'start',
+      ]);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(stderr()).toContain('envilder exec --map=cfg.json');
+    });
+
+    it.each([
+      ['Envfile', ['--envfile', '.env'], '--envfile'],
+      ['Push', ['--push'], '--push'],
+      ['Key', ['--key', 'API_KEY'], '--key'],
+      ['Value', ['--value', 'secret'], '--value'],
+      ['SecretPath', ['--secret-path', '/my/path'], '--secret-path'],
+      ['SsmPath', ['--ssm-path', '/my/path'], '--ssm-path'],
+    ])(
+      'Should_NotSuggestIncompatibleOption_When_%sPrecedesExec',
+      async (_name, option, flag) => {
+        // Act
+        const actual = await runCli([...option, 'exec', '--', 'npm', 'start']);
+
+        // Assert
+        expect(actual).toBe(125);
+        expect(stderr()).not.toContain(`envilder exec ${flag}`);
+        expect(stderr()).toContain(flag);
+        expect(stderr()).toContain('cannot be used with exec');
+        expect(runSpy).not.toHaveBeenCalled();
+      },
+    );
+  });
+
+  describe('aws identity', () => {
+    beforeEach(() => {
+      getSecretSpy.mockRestore();
+      vi.spyOn(SSMClient.prototype, 'send').mockImplementation(
+        (async (command: { input: { Name: string } }) => ({
+          Parameter: { Value: secrets[command.input.Name] },
+        })) as never,
+      );
+    });
+
+    it('Should_NotPrintAwsIdentity_When_ExecModeResolvesSecrets', async () => {
+      // Act
+      const actual = await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      expect(actual).toBe(0);
+      expect(runRequest().env).toMatchObject({
+        DB_URL: DB_URL_VALUE,
+        API_KEY: API_KEY_VALUE,
+      });
+      expect(logIdentitySpy).not.toHaveBeenCalled();
+      expect(`${stdout()}${stderr()}`).not.toContain('AWS identity');
+    });
+  });
+
+  describe('root command compatibility', () => {
+    it('Should_DispatchPull_When_RootCommandHasNoSubcommand', async () => {
+      // Arrange
+      const dispatchSpy = vi
+        .spyOn(DispatchActionCommandHandler.prototype, 'handleCommand')
+        .mockResolvedValue(undefined);
+
+      // Act
+      await runCli(['--map', 'map.json', '--envfile', '.env']);
+
+      // Assert
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ mode: OperationMode.PULL_SECRETS_TO_ENV }),
+      );
+      expect(runSpy).not.toHaveBeenCalled();
+    });
+
+    it('Should_DispatchPush_When_RootCommandHasPushFlag', async () => {
+      // Arrange
+      const dispatchSpy = vi
+        .spyOn(DispatchActionCommandHandler.prototype, 'handleCommand')
+        .mockResolvedValue(undefined);
+
+      // Act
+      await runCli(['--push']);
+
+      // Assert
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ mode: OperationMode.PUSH_ENV_TO_SECRETS }),
+      );
+      expect(runSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('exit codes', () => {
+    it('Should_PropagateChildExitCode_When_ChildExits', async () => {
+      // Arrange
+      runSpy.mockResolvedValue({ code: 3, signal: null });
+
+      // Act
+      const actual = await runCli([
+        'exec',
+        '--',
+        'node',
+        '-e',
+        'process.exit(3)',
+      ]);
+
+      // Assert
+      expect(actual).toBe(3);
+    });
+
+    it('Should_ExitWithZero_When_ChildSucceeds', async () => {
+      // Act
+      const actual = await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      expect(actual).toBe(0);
+    });
+
+    it('Should_ExitWith128PlusSignal_When_ChildIsKilledBySignal', async () => {
+      // Arrange
+      runSpy.mockResolvedValue({ code: null, signal: 'SIGKILL' });
+
+      // Act
+      const actual = await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      expect(actual).toBe(137);
+    });
+
+    it('Should_ExitWith127_When_CommandIsNotFound', async () => {
+      // Arrange
+      runSpy.mockRejectedValue(new CommandNotFoundError('nonexistent-cmd'));
+
+      // Act
+      const actual = await runCli(['exec', '--', 'nonexistent-cmd']);
+
+      // Assert
+      expect(actual).toBe(127);
+      expect(stderr()).toContain('Command not found: nonexistent-cmd');
+      expect(getSecretSpy).toHaveBeenCalled();
+    });
+
+    it('Should_ExitWith126_When_CommandIsNotExecutable', async () => {
+      // Arrange
+      runSpy.mockRejectedValue(new CommandNotExecutableError('./script.sh'));
+
+      // Act
+      const actual = await runCli(['exec', '--', './script.sh']);
+
+      // Assert
+      expect(actual).toBe(126);
+      expect(stderr()).toContain('Permission denied: ./script.sh');
+    });
+
+    it('Should_ExitWith125_When_EnvilderFailsBeforeSpawn', async () => {
+      // Arrange
+      secrets[API_KEY_PATH] = undefined;
+
+      // Act
+      const actual = await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(stderr()).toContain('GAME OVER');
+      expect(stderr()).toContain('API_KEY');
+      expect(runSpy).not.toHaveBeenCalled();
+    });
+
+    it('Should_ExitWith125_When_ValueContainsNulByte', async () => {
+      // Arrange
+      secrets[DB_URL_PATH] = 'before\0after';
+
+      // Act
+      const actual = await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(stderr()).toContain(
+        'Secret for DB_URL contains a NUL byte and cannot be passed as an environment variable.',
+      );
+      expect(runSpy).not.toHaveBeenCalled();
+    });
+
+    it('Should_ExitWith125_When_SsoRecoveryIsDeclined', async () => {
+      // Arrange
+      const { executeWithSsoRecovery } = await import(
+        '../../../../../src/envilder/apps/cli/recovery/SsoLoginRecovery'
+      );
+      vi.mocked(executeWithSsoRecovery).mockRejectedValue(
+        new SilentExitError(1),
+      );
+
+      // Act
+      const actual = await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(runSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('sso recovery', () => {
+    beforeEach(async () => {
+      const { executeWithSsoRecovery } = await import(
+        '../../../../../src/envilder/apps/cli/recovery/SsoLoginRecovery'
+      );
+      vi.mocked(executeWithSsoRecovery).mockImplementation(async (run) => {
+        try {
+          await run();
+        } catch (error) {
+          if (!(error instanceof SsoSessionExpiredError)) {
+            throw error;
+          }
+          await run();
+        }
+      });
+      getSecretSpy.mockRejectedValueOnce(new SsoSessionExpiredError('dev'));
+    });
+
+    it('Should_RetryAndStartChild_When_SsoRecoverySucceeds', async () => {
+      // Arrange
+      runSpy.mockResolvedValue({ code: 4, signal: null });
+
+      // Act
+      const actual = await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      expect(actual).toBe(4);
+      expect(runRequest().env).toMatchObject({
+        DB_URL: DB_URL_VALUE,
+        API_KEY: API_KEY_VALUE,
+      });
+    });
+
+    it('Should_ResolveOnlyOnce_When_SsoRecoveryRetries', async () => {
+      // Act
+      await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      expect(runSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('output and secret hygiene', () => {
+    it('Should_WriteEnvilderOutputToStderr_When_ExecModeIsUsed', async () => {
+      // Arrange
+      vi.stubEnv('API_KEY', 'from-shell');
+
+      // Act
+      await runCli(['exec', '--', 'npm', 'run', 'dev']);
+
+      // Assert
+      expect(stdout()).toBe('');
+      expect(stderr()).toContain('Overriding inherited variables: API_KEY');
+      expect(stderr()).toContain('resolved');
+    });
+
+    it('Should_NotPrintBanner_When_ExecModeIsUsed', async () => {
+      // Act
+      await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      expect(`${stdout()}${stderr()}`).not.toContain('WORLD 1-1');
+      expect(runSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('Should_NotLogCompleteSecretValues_When_ExecSucceeds', async () => {
+      // Act
+      await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      const output = `${stdout()}${stderr()}`;
+      expect(runSpy).toHaveBeenCalledTimes(1);
+      expect(output).not.toContain(DB_URL_VALUE);
+      expect(output).not.toContain(API_KEY_VALUE);
+    });
+
+    it('Should_NotLogCompleteSecretValues_When_ExecFails', async () => {
+      // Arrange
+      secrets[API_KEY_PATH] = undefined;
+
+      // Act
+      const actual = await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(`${stdout()}${stderr()}`).not.toContain(DB_URL_VALUE);
+    });
+
+    it('Should_RegisterSecretsWithMasker_When_RunningInGitHubActions', async () => {
+      // Arrange
+      vi.stubEnv('GITHUB_ACTIONS', 'true');
+
+      // Act
+      await runCli(['exec', '--', 'npm', 'test']);
+
+      // Assert
+      const stdoutWrites = vi.mocked(process.stdout.write);
+      const maskWriteOrders = stdoutWrites.mock.calls
+        .map((call, index) => ({
+          text: String(call[0]),
+          order: stdoutWrites.mock.invocationCallOrder[index],
+        }))
+        .filter(({ text }) => text.startsWith('::add-mask::'));
+      expect(maskWriteOrders.map(({ text }) => text)).toEqual(
+        expect.arrayContaining([
+          `::add-mask::${DB_URL_VALUE}\n`,
+          `::add-mask::${API_KEY_VALUE}\n`,
+        ]),
+      );
+      expect(
+        Math.max(...maskWriteOrders.map(({ order }) => order)),
+      ).toBeLessThan(runSpy.mock.invocationCallOrder[0]);
+      expect(
+        stdout()
+          .split('\n')
+          .filter((line) => line !== '' && !line.startsWith('::add-mask::')),
+      ).toEqual([]);
+    });
+
+    it('Should_NotEmitMaskCommands_When_NotRunningInGitHubActions', async () => {
+      // Act
+      await runCli(['exec', '--', 'npm', 'test']);
+
+      // Assert
+      expect(stdout()).not.toContain('::add-mask::');
+      expect(runSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('files', () => {
+    it('Should_NotReadOrWriteEnvFile_When_ExecModeIsUsed', async () => {
+      // Act
+      await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      expect(getEnvironmentSpy).not.toHaveBeenCalled();
+      expect(saveEnvironmentSpy).not.toHaveBeenCalled();
+      expect(runSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('Should_NotReadOrWriteEnvFile_When_ExecModeFails', async () => {
+      // Arrange
+      secrets[API_KEY_PATH] = '';
+
+      // Act
+      const actual = await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(getEnvironmentSpy).not.toHaveBeenCalled();
+      expect(saveEnvironmentSpy).not.toHaveBeenCalled();
+    });
+  });
+});

@@ -1,48 +1,33 @@
 import { inject, injectable } from 'inversify';
 import pc from 'picocolors';
-import { EnvironmentVariable } from '../../domain/EnvironmentVariable.js';
-import {
-  ExpiredCredentialsError,
-  SecretsFetchError,
-  SsoSessionExpiredError,
-} from '../../domain/errors/DomainErrors.js';
+import { SecretsFetchError } from '../../domain/errors/DomainErrors.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretMasker } from '../../domain/ports/ISecretMasker.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
-import { describeError } from '../../infrastructure/describeError.js';
 import { TYPES } from '../../types.js';
+import { SecretResolver } from '../secretResolution/SecretResolver.js';
 import type { PullSecretsToEnvCommand } from './PullSecretsToEnvCommand.js';
-
-type ResolvedOutcome = { status: 'resolved'; envVar: string; masked: string };
-type WarningOutcome = {
-  status: 'warning';
-  envVar: string;
-  path: string;
-  reason: 'not-found' | 'empty';
-};
-type ErrorOutcome = {
-  status: 'error';
-  envVar: string;
-  path: string;
-  reason: string;
-};
-type SecretOutcome = ResolvedOutcome | WarningOutcome | ErrorOutcome;
 
 @injectable()
 export class PullSecretsToEnvCommandHandler {
-  private static readonly LABEL_WIDTH = 20;
-  private static readonly RULE = pc.yellow('\u2501'.repeat(60));
+  private readonly secretResolver: SecretResolver;
 
   constructor(
     @inject(TYPES.ISecretProvider)
-    private readonly secretProvider: ISecretProvider,
+    secretProvider: ISecretProvider,
     @inject(TYPES.IVariableStore)
     private readonly variableStore: IVariableStore,
     @inject(TYPES.ILogger) private readonly logger: ILogger,
     @inject(TYPES.ISecretMasker)
-    private readonly secretMasker: ISecretMasker,
-  ) {}
+    secretMasker: ISecretMasker,
+  ) {
+    this.secretResolver = new SecretResolver(
+      secretProvider,
+      logger,
+      secretMasker,
+    );
+  }
 
   /**
    * Handles the PullSecretsToEnvCommand which orchestrates the process of fetching
@@ -97,32 +82,17 @@ export class PullSecretsToEnvCommandHandler {
     resolvedCount: number;
     totalCount: number;
   }> {
-    const outcomes = await Promise.all(
-      Object.entries(paramMap).map(([envVar, secretName]) =>
-        this.processSecret(envVar, secretName, existingEnvVariables),
-      ),
-    );
+    const { resolved, warnings, errors } =
+      await this.secretResolver.resolve(paramMap);
 
-    const resolved = outcomes.filter(
-      (outcome): outcome is ResolvedOutcome => outcome.status === 'resolved',
-    );
-    const warnings = outcomes.filter(
-      (outcome): outcome is WarningOutcome => outcome.status === 'warning',
-    );
-    const errors = outcomes.filter(
-      (outcome): outcome is ErrorOutcome => outcome.status === 'error',
-    );
+    for (const outcome of resolved) {
+      existingEnvVariables[outcome.envVar] = outcome.value;
+    }
 
-    this.logSecretsSection(resolved, warnings);
+    this.secretResolver.logSecretsSection(resolved, warnings);
 
     if (errors.length > 0) {
-      throw new SecretsFetchError(
-        errors.map((error) => ({
-          envVar: error.envVar,
-          path: error.path,
-          reason: error.reason,
-        })),
-      );
+      throw new SecretsFetchError(errors.map(SecretResolver.toFailure));
     }
 
     return {
@@ -130,100 +100,6 @@ export class PullSecretsToEnvCommandHandler {
       resolvedCount: resolved.length,
       totalCount: Object.keys(paramMap).length,
     };
-  }
-
-  private async processSecret(
-    envVar: string,
-    secretName: string,
-    existingEnvVariables: Record<string, string>,
-  ): Promise<SecretOutcome> {
-    try {
-      const value = await this.secretProvider.getSecret(secretName);
-      if (value === undefined) {
-        return {
-          status: 'warning',
-          envVar,
-          path: secretName,
-          reason: 'not-found',
-        };
-      }
-      if (value === '') {
-        return { status: 'warning', envVar, path: secretName, reason: 'empty' };
-      }
-
-      this.secretMasker.mask(value);
-      existingEnvVariables[envVar] = value;
-      const masked = new EnvironmentVariable(envVar, value, true).maskedValue;
-
-      return { status: 'resolved', envVar, masked };
-    } catch (error) {
-      if (
-        error instanceof ExpiredCredentialsError ||
-        error instanceof SsoSessionExpiredError
-      ) {
-        throw error;
-      }
-      const maskedPath = EnvironmentVariable.maskSecretPath(secretName);
-      const reason = PullSecretsToEnvCommandHandler.describeErrorReason(
-        error,
-        maskedPath,
-      );
-      return { status: 'error', envVar, path: maskedPath, reason };
-    }
-  }
-
-  private static describeErrorReason(
-    error: unknown,
-    maskedPath: string,
-  ): string {
-    const message = describeError(error);
-    const duplicatedPrefix = `${maskedPath}: `;
-    return message.startsWith(duplicatedPrefix)
-      ? message.slice(duplicatedPrefix.length)
-      : message;
-  }
-
-  private logSecretsSection(
-    resolved: ResolvedOutcome[],
-    warnings: WarningOutcome[],
-  ): void {
-    if (resolved.length === 0 && warnings.length === 0) {
-      return;
-    }
-
-    this.logger.info(`\n${pc.bold(pc.yellow('\u{1FA99}  RESOLVING SECRETS'))}`);
-    this.logger.info(PullSecretsToEnvCommandHandler.RULE);
-    for (const outcome of resolved) {
-      this.logger.info(
-        `  ${pc.green('\u2713 ')}${pc.bold(
-          PullSecretsToEnvCommandHandler.pad(outcome.envVar),
-        )}${pc.dim('\u2192 ')}${pc.dim(outcome.masked)}`,
-      );
-    }
-    this.logWarnings(warnings);
-  }
-
-  private logWarnings(warnings: WarningOutcome[]): void {
-    for (const outcome of warnings) {
-      const maskedPath = EnvironmentVariable.maskSecretPath(outcome.path);
-      if (outcome.reason === 'not-found') {
-        this.logger.warn(
-          `  ${pc.red('\u2717 ')}${pc.bold(
-            pc.red(PullSecretsToEnvCommandHandler.pad(outcome.envVar)),
-          )} ${pc.red(`secret not found (path: ${maskedPath}) \u2014 skipped`)}`,
-        );
-        continue;
-      }
-      this.logger.warn(
-        `  ${pc.yellow('\u26A0 ')}${pc.bold(
-          PullSecretsToEnvCommandHandler.pad(outcome.envVar),
-        )} ${pc.dim(`no value found (path: ${maskedPath}) \u2014 skipped`)}`,
-      );
-    }
-  }
-
-  private static pad(name: string): string {
-    return name.padEnd(PullSecretsToEnvCommandHandler.LABEL_WIDTH);
   }
 
   private static buildSummary(

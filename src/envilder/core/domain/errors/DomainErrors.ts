@@ -102,3 +102,31 @@ export class SecretsFetchError extends DomainError {
     super('Some secrets could not be fetched');
   }
 }
+
+/**
+ * Error thrown when the command passed to exec mode cannot be found.
+ */
+export class CommandNotFoundError extends DomainError {
+  constructor(readonly command: string) {
+    super(`Command not found: ${command}`);
+  }
+}
+
+/**
+ * Error thrown when the command passed to exec mode exists but cannot be
+ * executed (for example, a script without the executable bit).
+ */
+export class CommandNotExecutableError extends DomainError {
+  constructor(readonly command: string) {
+    super(`Permission denied: ${command}`);
+  }
+}
+
+/**
+ * Error thrown when the child environment exceeds the operating system limit.
+ */
+export class EnvironmentTooLargeError extends DomainError {
+  constructor() {
+    super('Environment too large to start the command (E2BIG).');
+  }
+}

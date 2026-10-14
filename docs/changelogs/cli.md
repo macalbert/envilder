@@ -5,6 +5,29 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [Unreleased]
+
+### Added
+
+* **`envilder exec`: run a command with resolved secrets, without a `.env`
+  file**: `envilder exec [options] [--] <command> [args...]` resolves every
+  secret in the map file and starts the command with those values in its
+  environment. Nothing is written to disk. The command starts at the first
+  argument that is not an Envilder option (`--` is optional), arguments are
+  passed verbatim without a shell, and Windows `npm`/`npx` shims are supported.
+  Resolution is fail-closed: the command never starts when a secret is missing,
+  empty or unreadable. Mapped values override inherited variables, naming the
+  overridden variables on stderr. All Envilder output goes to stderr as a
+  single summary line. Inside GitHub Actions every value is masked before the
+  command starts. Exit codes follow GNU `env`: the command's own code, `128+n`
+  for signals, `125` for Envilder errors, `126` and `127` when the command
+  cannot be executed or found. `SIGTERM` and `SIGHUP` are forwarded and the
+  command is awaited without a timeout. Exec mode is not a sandbox: see
+  [docs/exec-command.md](../exec-command.md)
+  ([#550](https://github.com/macalbert/envilder/issues/550))
+
+---
+
 ## [0.14.0] - 2026-09-26
 
 ### Added

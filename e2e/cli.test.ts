@@ -1,7 +1,13 @@
 import 'reflect-metadata';
 import { execSync, spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { mkdtemp, rm, unlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -351,6 +357,44 @@ describe('Envilder (E2E)', () => {
       const ssmValue = await GetParameterSsm(ssmPath);
       expect(ssmValue).toBe(expectedValue);
     }
+  });
+
+  it('Should_StartNodeChildWithResolvedSecretAndPropagateExitCode_When_ExecModeIsUsed', async () => {
+    // Arrange
+    const execDir = await mkdtemp(
+      join(tmpdir(), `envilder-e2e-exec-${runId}-`),
+    );
+    onTestFinished(() => rm(execDir, { recursive: true, force: true }));
+    const existingEnvPath = join(execDir, '.env');
+    const existingEnvContent = 'TOKEN_SECRET=old\n';
+    await writeFile(existingEnvPath, existingEnvContent);
+    const existingEnvMtime = statSync(existingEnvPath).mtimeMs;
+    const filesBefore = readdirSync(execDir).sort();
+    const expected = `exec-value-${runId}`;
+    for (const ssmPath of Object.values(readMappings(mapFilePath))) {
+      await SetParameterSsm(ssmPath, expected);
+    }
+    const childScript =
+      "\"process.stdout.write('CHILD_TOKEN='+process.env.TOKEN_SECRET+'|');process.exit(3)\"";
+    const params = [
+      'exec',
+      '--map',
+      mapFilePath,
+      '--',
+      'node',
+      '-e',
+      childScript,
+    ];
+
+    // Act
+    const actual = await runCommand(envilder, params, { cwd: execDir });
+
+    // Assert
+    expect(actual.code).toBe(3);
+    expect(actual.output).toContain(`CHILD_TOKEN=${expected}|`);
+    expect(readFileSync(existingEnvPath, 'utf8')).toBe(existingEnvContent);
+    expect(statSync(existingEnvPath).mtimeMs).toBe(existingEnvMtime);
+    expect(readdirSync(execDir).sort()).toEqual(filesBefore);
   });
 
   describe('Azure Key Vault', { timeout: LOWKEY_VAULT_TEST_TIMEOUT_MS }, () => {
