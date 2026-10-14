@@ -45,6 +45,7 @@ _COMPETING_AZURE_ENV_VARS = (
     "AZURE_PASSWORD",
     "AZURE_FEDERATED_TOKEN_FILE",
     "AZURE_AUTHORITY_HOST",
+    "AZURE_TOKEN_CREDENTIALS",
 )
 _MANAGED_IDENTITY_ENV_VARS = ("IDENTITY_ENDPOINT", "IDENTITY_HEADER")
 
@@ -150,12 +151,10 @@ class LocalStackAzureContainer:
         return self._vault_url
 
     def create_secret_client(self) -> SecretClient:
-        """Client that authenticates like production code does, through
-        DefaultAzureCredential and the local managed identity token server.
-
-        The emulator serves reads without a token, so writes made with this
-        client are what exercise that server.
-        """
+        # Authenticates like production code does, through
+        # DefaultAzureCredential and the local managed identity token server.
+        # The emulator serves reads without a token, so writes made with this
+        # client are what exercise that server.
         if self._token_server is None:
             raise RuntimeError("Container has not been started")
         return SecretClient(

@@ -11,16 +11,13 @@ from azure.core.credentials import TokenCredential
 _TOKEN_PATH = "/msi/token"
 
 
+# Local token endpoint speaking the App Service managed identity protocol
+# (IDENTITY_ENDPOINT / IDENTITY_HEADER). Lets DefaultAzureCredential, as used
+# by the SDK factory, obtain emulator tokens through its
+# ManagedIdentityCredential. EnvironmentCredential cannot be used because MSAL
+# validates the emulator authority against login.microsoftonline.com (instance
+# discovery), which rejects it.
 class ManagedIdentityTokenServer:
-    """Local token endpoint speaking the App Service managed identity
-    protocol (IDENTITY_ENDPOINT / IDENTITY_HEADER).
-
-    Lets DefaultAzureCredential, as used by the SDK factory, obtain emulator
-    tokens through its ManagedIdentityCredential. EnvironmentCredential cannot
-    be used because MSAL validates the emulator authority against
-    login.microsoftonline.com (instance discovery), which rejects it.
-    """
-
     def __init__(self, credential: TokenCredential) -> None:
         self._credential = credential
         self._identity_header = secrets.token_hex(16)

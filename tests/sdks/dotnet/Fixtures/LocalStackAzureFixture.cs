@@ -38,6 +38,7 @@ public sealed class LocalStackAzureFixture : IAsyncLifetime
 		"AZURE_PASSWORD",
 		"AZURE_FEDERATED_TOKEN_FILE",
 		"AZURE_AUTHORITY_HOST",
+		"AZURE_TOKEN_CREDENTIALS",
 	];
 
 	private static readonly string[] IdentityEnvVars =

@@ -21,10 +21,10 @@ from testcontainers.localstack import (
 _SECRETS_MAP = Path(__file__).resolve().parents[4] / "envilder.json"
 
 
+# Resolves the LocalStack container environment (auth token included) from
+# the repository's envilder.json, falling back to AWS when the map file's
+# provider cannot be built.
 def load_localstack_environment() -> dict[str, str]:
-    """Resolve the LocalStack container environment (auth token included)
-    from the repository's envilder.json, falling back to AWS when the map
-    file's provider cannot be built."""
     json_content = _SECRETS_MAP.read_text(encoding="utf-8")
     map_file = MapFileParser().parse(json_content)
     client = _resolve_client(map_file.config)
