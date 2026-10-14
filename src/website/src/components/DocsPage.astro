@@ -15,9 +15,16 @@ interface Props {
 const { lang, routeKey } = Astro.props;
 const t = useTranslations(lang);
 const page = t.docs.pages[routeKey];
+// Only the English docs are indexed; CA/ES copies split crawl budget.
+const noindex = lang !== 'en';
 ---
 
-<BaseLayout title={page.title} description={page.description} lang={lang}>
+<BaseLayout
+  title={page.title}
+  description={page.description}
+  lang={lang}
+  noindex={noindex}
+>
   <Navbar lang={lang} />
   {routeKey === 'hub' ? (
     <DocsHub lang={lang} />

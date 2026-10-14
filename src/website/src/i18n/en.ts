@@ -2,9 +2,10 @@ import type { Translations } from './types';
 
 export const en: Translations = {
   homeMeta: {
-    title: 'Load AWS SSM & Azure Key Vault secrets into .env | Envilder',
+    title:
+      'Load AWS SSM and Azure Key Vault secrets into .env, CI and runtime | Envilder',
     description:
-      'Envilder is an open-source CLI, GitHub Action, and runtime SDK for loading secrets from AWS SSM Parameter Store and Azure Key Vault.',
+      'Open-source CLI, GitHub Action and SDKs that resolve secrets from AWS SSM Parameter Store or Azure Key Vault using one versioned JSON mapping.',
     ogImageAlt:
       'Envilder - open-source secret resolution for AWS SSM and Azure Key Vault',
   },
@@ -500,9 +501,10 @@ export const en: Translations = {
           'Find setup, provider, CLI, GitHub Action, and SDK guides.',
       },
       'getting-started': {
-        title: 'Get started with Envilder',
+        title:
+          'Get started with Envilder: install and prerequisites for AWS SSM and Azure Key Vault',
         description:
-          'Install Envilder and learn the prerequisites for resolving secrets from your cloud provider.',
+          'Install the Envilder CLI, check the prerequisites for AWS SSM or Azure Key Vault, and learn how the JSON map links variables to secret paths.',
         heading: 'Get started',
         intro:
           'Install Envilder, configure a provider, and resolve secrets from a versioned map file.',
@@ -526,9 +528,9 @@ export const en: Translations = {
           'Configure AWS credentials and the permissions Envilder needs.',
       },
       'azure-key-vault': {
-        title: 'Use Envilder with Azure Key Vault',
+        title: 'Azure Key Vault provider: credentials, RBAC and vault access',
         description:
-          'Configure Azure authentication and Key Vault access for Envilder.',
+          'Configure Envilder for Azure Key Vault: Azure default credentials, the vault URL, the minimum RBAC role or access policy, and how to verify access.',
         heading: 'Azure Key Vault',
         intro:
           'Configure Azure authentication, vault access, and a test secret for Azure Key Vault.',
@@ -539,9 +541,10 @@ export const en: Translations = {
           'Configure Azure authentication and Key Vault permissions.',
       },
       'map-file': {
-        title: 'Envilder map file reference',
+        title:
+          'envilder.json reference: map environment variables to cloud secrets',
         description:
-          'Define Envilder mappings and provider configuration in envilder.json.',
+          'Full reference for the Envilder mapping file: $config, providers, profiles, vault URL, multi-environment layouts and config precedence.',
         heading: 'Map file',
         intro:
           'Define environment variable mappings and provider settings in envilder.json.',
@@ -552,9 +555,9 @@ export const en: Translations = {
           'Map variables to secret paths and configure the selected provider.',
       },
       'cli-pull': {
-        title: 'Pull secrets with the Envilder CLI',
+        title: 'Pull mode: generate a .env from AWS SSM or Azure Key Vault',
         description:
-          'Download cloud secrets and generate a local .env file with Envilder.',
+          'Reference for pull mode: generate a local .env from the secrets in your map file, with AWS profiles and AWS SSM or Azure Key Vault providers.',
         heading: 'CLI pull',
         intro:
           'Download secrets from your provider and write them to a local .env file.',
@@ -565,9 +568,9 @@ export const en: Translations = {
           'Generate a .env file from secrets defined in your map file.',
       },
       'cli-push': {
-        title: 'Push secrets with the Envilder CLI',
+        title: 'Push mode: upload .env values to AWS SSM or Azure Key Vault',
         description:
-          'Upload local environment variables or a single secret with Envilder push mode.',
+          'Reference for push mode (--push): upload a local .env or a single variable to Parameter Store or Key Vault, using the same JSON mapping.',
         heading: 'CLI push',
         intro:
           'Upload environment variables from a .env file or push one secret directly.',
@@ -578,9 +581,9 @@ export const en: Translations = {
           'Upload a mapped .env file or one secret to your provider.',
       },
       'github-action': {
-        title: 'Use the Envilder GitHub Action',
+        title: 'Load AWS SSM and Azure Key Vault secrets in GitHub Actions',
         description:
-          'Pull AWS SSM or Azure Key Vault secrets into .env files in GitHub Actions workflows.',
+          'Pull secrets from AWS SSM Parameter Store or Azure Key Vault into a .env file inside a GitHub Actions workflow, using the same JSON mapping as the CLI.',
         heading: 'GitHub Action',
         intro: 'Pull secrets into .env files during a GitHub Actions workflow.',
         breadcrumb: 'GitHub Action',
@@ -590,9 +593,10 @@ export const en: Translations = {
           'Configure the action for AWS, Azure, and multiple environments.',
       },
       'sdk-dotnet': {
-        title: 'Envilder .NET SDK',
+        title:
+          'Load AWS SSM and Azure Key Vault secrets into .NET IConfiguration',
         description:
-          'Load secrets from Envilder map files in .NET applications.',
+          'Envilder .NET SDK: resolve secrets from AWS Parameter Store or Azure Key Vault at startup into IConfiguration, environment variables or a dictionary.',
         heading: '.NET SDK',
         intro: 'Load secrets directly into a .NET application at startup.',
         breadcrumb: '.NET SDK',
@@ -601,9 +605,9 @@ export const en: Translations = {
         cardSummary: 'Install and use the .NET runtime SDK.',
       },
       'sdk-python': {
-        title: 'Envilder Python SDK',
+        title: 'Load AWS SSM and Azure Key Vault secrets in Python at startup',
         description:
-          'Load secrets from Envilder map files in Python applications.',
+          'Envilder Python SDK: resolve secrets from AWS SSM Parameter Store or Azure Key Vault into os.environ or a dict, with no .env file on disk.',
         heading: 'Python SDK',
         intro: 'Load secrets directly into a Python application at startup.',
         breadcrumb: 'Python SDK',
@@ -612,9 +616,9 @@ export const en: Translations = {
         cardSummary: 'Install and use the Python runtime SDK.',
       },
       'sdk-nodejs': {
-        title: 'Envilder Node.js SDK',
+        title: 'Load AWS SSM and Azure Key Vault secrets in Node.js at startup',
         description:
-          'Load secrets from Envilder map files in Node.js applications.',
+          'Envilder Node.js SDK: resolve secrets from AWS SSM or Azure Key Vault into process.env or a Map from one JSON mapping.',
         heading: 'Node.js SDK',
         intro: 'Load secrets directly into a Node.js application at startup.',
         breadcrumb: 'Node.js SDK',

@@ -63,6 +63,15 @@ export function localizedLanguages(path: string): readonly Lang[] {
   return (routeLanguages ?? [defaultLang]) as readonly Lang[];
 }
 
+// Languages whose copy of a page is indexable (and so listed in hreflang).
+export function indexedLanguages(path: string): readonly Lang[] {
+  const languages = localizedLanguages(path);
+  const normalizedPath = normalizePath(
+    stripLocalePrefix(splitPath(path).pathname),
+  );
+  return normalizedPath.startsWith('/docs/') ? [defaultLang] : languages;
+}
+
 export function localizedPath(lang: string, path: string) {
   const normalized = normalizeLang(lang);
   const { pathname, suffix } = splitPath(path);
