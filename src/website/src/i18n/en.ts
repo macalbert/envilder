@@ -862,7 +862,7 @@ export const en: Translations = {
     ghaAwsTrustDesc:
       'Add token.actions.githubusercontent.com as an OpenID Connect identity provider in IAM (audience sts.amazonaws.com, once per account), then create a role with this trust policy. The sub condition limits it to one repository and branch; use repo:my-org/my-repo:environment:production to limit it to a GitHub environment instead.',
     ghaOidcSubjectNote:
-      'Repositories created on github.com after 15 July 2026, or opted in to immutable subject claims, get a sub that also carries the owner and repository IDs: repo:my-org@OWNER_ID/my-repo@REPO_ID:ref:refs/heads/main. Older repositories keep the name-only format shown above. Check the OIDC settings of your repository for the exact prefix and use the same value in the AWS trust policy and the Azure federated credential.',
+      'On github.com, repositories created, renamed or transferred on or after 15 July 2026, and those opted in to immutable subject claims, get a sub that also carries the owner and repository IDs: repo:my-org@OWNER_ID/my-repo@REPO_ID:ref:refs/heads/main. Other repositories keep the name-only format shown above. Check the OIDC settings of your repository for the exact prefix and use the same value in the AWS trust policy and the Azure federated credential.',
     ghaAwsPolicyTitle: '2. Minimum permissions',
     ghaAwsPolicyDesc:
       "The action calls ssm:GetParameter with decryption, once per entry in the map file. It never lists, writes or deletes parameters, so this is the only permission the role needs. Scope it to your application's path:",
@@ -878,7 +878,7 @@ export const en: Translations = {
       "Every value is also registered with GitHub's add-mask command, so a later step that prints it shows *** instead. The .env file stays on the runner; don't upload it as an artifact.",
     ghaAzureFedTitle: '1. Create a federated credential',
     ghaAzureFedDesc:
-      'Create an app registration and its service principal, then add a federated credential that trusts tokens from one repository and branch. No client secret is created. The subject uses the same format as the AWS sub, including the immutable variant for newer repositories.',
+      'Create an app registration and its service principal, then add a federated credential that trusts tokens from one repository and branch. No client secret is created. The subject uses the same format as the AWS sub, including the immutable variant when your repository emits it.',
     ghaAzureRoleTitle: '2. Minimum role',
     ghaAzureRoleDesc:
       'Key Vault Secrets User lets the identity read secret values and nothing more. Assign it on the vault, not on the resource group or subscription:',
@@ -889,7 +889,7 @@ export const en: Translations = {
     ghaAzureInputsNote:
       'The client, tenant and subscription IDs identify the app; they are not credentials, so repository variables are enough. When set, the provider and vault-url inputs override $config in the map file.',
     ghaMultiEnvDesc:
-      "Keep one map file per environment and pick it from the workflow input. A job that sets environment gets an OIDC token whose sub ends in :environment:<name> instead of :ref:refs/heads/main, so each environment's AWS trust policy (or Azure federated credential) must use that subject, for example repo:my-org/my-repo:environment:production. Each GitHub environment can then hold its own role ARN and protection rules.",
+      "Keep one map file per environment and pick it from the workflow input. A job that sets environment gets an OIDC token whose sub ends in :environment:<name> instead of :ref:refs/heads/main, so each environment's AWS trust policy (or Azure federated credential) must use that subject: repo:my-org/my-repo:environment:production, or repo:my-org@OWNER_ID/my-repo@REPO_ID:environment:production if your repository emits immutable subjects. Each GitHub environment can then hold its own role ARN and protection rules.",
     ghaWhyTitle: 'Why not copy the secrets into GitHub Secrets',
     ghaWhyDesc:
       'Copying values into repository secrets works until a value changes. From then on there are two copies:',
@@ -898,7 +898,7 @@ export const en: Translations = {
       'when a secret is rotated in SSM or Key Vault, every repository with a copy keeps deploying the old value until someone updates it by hand.',
     ghaWhyAuditLabel: 'Drift and audit:',
     ghaWhyAudit:
-      "GitHub Secrets can't be read back, so you can't check whether the copy still matches the source. Reading from the cloud leaves a CloudTrail or Key Vault log entry with the role or app behind each request.",
+      "GitHub Secrets can't be read back, so you can't check whether the copy still matches the source. Reading from the cloud is recorded with the role or app behind each request: in CloudTrail on AWS, and in the Key Vault audit logs on Azure once diagnostic settings are enabled for the vault.",
     ghaWhyKeysLabel: 'Long-lived keys:',
     ghaWhyKeys:
       'copying secrets usually comes with an AWS access key or Azure client secret stored in GitHub as well. With OIDC the job gets a short-lived token, and nothing stored in GitHub works outside the workflow.',

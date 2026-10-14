@@ -874,7 +874,7 @@ export const es: Translations = {
     ghaAwsTrustDesc:
       'Añade token.actions.githubusercontent.com como proveedor de identidad OpenID Connect en IAM (audiencia sts.amazonaws.com, una vez por cuenta) y crea un rol con esta política de confianza. La condición sub lo limita a un repositorio y una rama; usa repo:my-org/my-repo:environment:production para limitarlo a un entorno de GitHub.',
     ghaOidcSubjectNote:
-      'Los repositorios creados en github.com después del 15 de julio de 2026, o que han activado los sujetos inmutables, reciben un sub que también incluye los ID del propietario y del repositorio: repo:my-org@OWNER_ID/my-repo@REPO_ID:ref:refs/heads/main. Los repositorios anteriores mantienen el formato solo con nombres que se muestra arriba. Consulta la configuración OIDC de tu repositorio para conocer el prefijo exacto y usa el mismo valor en la política de confianza de AWS y en la credencial federada de Azure.',
+      'En github.com, los repositorios creados, renombrados o transferidos a partir del 15 de julio de 2026, y los que han activado los sujetos inmutables, reciben un sub que también incluye los ID del propietario y del repositorio: repo:my-org@OWNER_ID/my-repo@REPO_ID:ref:refs/heads/main. El resto mantiene el formato solo con nombres que se muestra arriba. Consulta la configuración OIDC de tu repositorio para conocer el prefijo exacto y usa el mismo valor en la política de confianza de AWS y en la credencial federada de Azure.',
     ghaAwsPolicyTitle: '2. Permisos mínimos',
     ghaAwsPolicyDesc:
       'La Action llama a ssm:GetParameter con descifrado, una vez por cada entrada del archivo de mapeo. No lista, escribe ni borra parámetros, así que es el único permiso que necesita el rol. Limítalo a la ruta de tu aplicación:',
@@ -890,7 +890,7 @@ export const es: Translations = {
       'Cada valor se registra también con el comando add-mask de GitHub, de modo que un paso posterior que lo imprima muestra ***. El archivo .env se queda en el runner; no lo subas como artefacto.',
     ghaAzureFedTitle: '1. Crea una credencial federada',
     ghaAzureFedDesc:
-      'Crea un registro de aplicación y su service principal, y añade una credencial federada que confíe en los tokens de un repositorio y una rama. No se crea ningún secreto de cliente. El sujeto usa el mismo formato que el sub de AWS, incluida la variante inmutable de los repositorios nuevos.',
+      'Crea un registro de aplicación y su service principal, y añade una credencial federada que confíe en los tokens de un repositorio y una rama. No se crea ningún secreto de cliente. El sujeto usa el mismo formato que el sub de AWS, incluida la variante inmutable cuando tu repositorio la emite.',
     ghaAzureRoleTitle: '2. Rol mínimo',
     ghaAzureRoleDesc:
       'Key Vault Secrets User permite leer los valores de los secretos y nada más. Asígnalo sobre el vault, no sobre el grupo de recursos ni la suscripción:',
@@ -901,7 +901,7 @@ export const es: Translations = {
     ghaAzureInputsNote:
       'Los ID de cliente, tenant y suscripción identifican la aplicación; no son credenciales, así que basta con variables del repositorio. Si se informan, los inputs provider y vault-url sobrescriben el $config del archivo de mapeo.',
     ghaMultiEnvDesc:
-      'Ten un archivo de mapeo por entorno y elígelo desde el input del workflow. Un job que define environment recibe un token OIDC con un sub que termina en :environment:<nombre> en lugar de :ref:refs/heads/main, así que la política de confianza de AWS (o la credencial federada de Azure) de cada entorno debe usar ese sujeto, por ejemplo repo:my-org/my-repo:environment:production. Después, cada entorno de GitHub puede tener su ARN de rol y sus reglas de protección.',
+      'Ten un archivo de mapeo por entorno y elígelo desde el input del workflow. Un job que define environment recibe un token OIDC con un sub que termina en :environment:<nombre> en lugar de :ref:refs/heads/main, así que la política de confianza de AWS (o la credencial federada de Azure) de cada entorno debe usar ese sujeto: repo:my-org/my-repo:environment:production, o repo:my-org@OWNER_ID/my-repo@REPO_ID:environment:production si tu repositorio emite sujetos inmutables. Después, cada entorno de GitHub puede tener su ARN de rol y sus reglas de protección.',
     ghaWhyTitle: 'Por qué no copiar los secretos a GitHub Secrets',
     ghaWhyDesc:
       'Copiar los valores a los secretos del repositorio funciona hasta que un valor cambia. A partir de ahí hay dos copias:',
@@ -910,7 +910,7 @@ export const es: Translations = {
       'cuando se rota un secreto en SSM o Key Vault, cada repositorio con una copia sigue desplegando el valor antiguo hasta que alguien lo actualiza a mano.',
     ghaWhyAuditLabel: 'Divergencia y auditoría:',
     ghaWhyAudit:
-      'GitHub Secrets no se puede volver a leer, así que no puedes comprobar si la copia sigue coincidiendo con el origen. Leer de la nube deja una entrada en CloudTrail o en los logs de Key Vault con el rol o la aplicación que hizo cada petición.',
+      'GitHub Secrets no se puede volver a leer, así que no puedes comprobar si la copia sigue coincidiendo con el origen. Leer de la nube queda registrado con el rol o la aplicación que hizo cada petición: en CloudTrail en AWS, y en los logs de auditoría de Key Vault en Azure una vez activada la configuración de diagnóstico del vault.',
     ghaWhyKeysLabel: 'Claves de larga duración:',
     ghaWhyKeys:
       'copiar secretos suele ir acompañado de una clave de acceso de AWS o un secreto de cliente de Azure guardados también en GitHub. Con OIDC el job recibe un token de corta duración, y nada de lo guardado en GitHub funciona fuera del workflow.',
