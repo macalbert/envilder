@@ -581,12 +581,12 @@ export const ca: Translations = {
         cardSummary: 'Puja un fitxer .env mapat o un secret al proveïdor.',
       },
       'github-action': {
-        title: "Utilitza la GitHub Action d'Envilder",
+        title: "Carrega secrets d'AWS SSM i Azure Key Vault a GitHub Actions",
         description:
-          "Descarrega secrets d'AWS SSM o Azure Key Vault a fitxers .env en fluxos de GitHub Actions.",
-        heading: 'GitHub Action',
+          "Carrega secrets d'AWS SSM Parameter Store o Azure Key Vault a un fitxer .env a GitHub Actions amb OIDC: permisos IAM i RBAC mínims, workflows complets i errors de credencials.",
+        heading: "Carrega secrets d'AWS SSM i Azure Key Vault a GitHub Actions",
         intro:
-          'Descarrega secrets a fitxers .env durant un flux de GitHub Actions.',
+          "Com fas servir secrets d'AWS SSM Parameter Store o Azure Key Vault en un job de GitHub Actions sense copiar-los a GitHub Secrets? Autentica el job amb OIDC i deixa que l'Action d'Envilder llegeixi el teu envilder.json versionat i escrigui un fitxer .env per als passos següents.",
         breadcrumb: 'GitHub Action',
         navLabel: 'GitHub Action',
         cardTitle: 'Guia de GitHub Action',
@@ -836,18 +836,19 @@ export const ca: Translations = {
     pushSingleOptProvider: 'aws (per defecte) o azure',
     pushSingleOptVault: "URL d'Azure Key Vault",
     pushSingleOptProfile: 'Perfil AWS CLI (només AWS)',
-    ghaSetupTitle: 'Configuració de GitHub Action',
+    ghaSetupTitle: "Com funciona l'Action",
     ghaSetupDesc:
-      "La GitHub Action preconstruïda d'Envilder obté secrets d'AWS SSM o Azure Key Vault en fitxers .env durant el teu workflow CI/CD. Utilitza l'etiqueta publicada macalbert/envilder/github-action@v0; el projecte consumidor no necessita cap pas de compilació.",
+      "L'Action és un pas compost: instal·la Node.js 22, llegeix el fitxer de mapeig, obté cada secret amb les credencials de núvol que ja té el job, emmascara cada valor al log i escriu el fitxer .env. No inicia sessió a AWS ni a Azure per si mateixa, així que ho ha de fer un pas anterior (aws-actions/configure-aws-credentials o azure/login). Utilitza l'etiqueta publicada macalbert/envilder/github-action@v0; no cal cap pas de compilació.",
     ghaPrerequisites: 'Prerequisits',
     ghaPrereqAws:
-      'AWS: Configura credencials amb aws-actions/configure-aws-credentials',
-    ghaPrereqAzure: 'Azure: Configura credencials amb azure/login',
+      "AWS: un rol IAM que GitHub pugui assumir, fet servir a través d'aws-actions/configure-aws-credentials.",
+    ghaPrereqAzure:
+      "Azure: un registre d'aplicació amb una credencial federada, fet servir a través d'azure/login.",
     ghaPrereqMap: 'Un envilder.json al teu repositori',
     ghaPullOnly: 'La GitHub Action només suporta el mode pull (sense push).',
-    ghaBasicTitle: 'Exemple bàsic de workflow',
+    ghaBasicTitle: 'AWS SSM Parameter Store amb OIDC',
     ghaMultiEnvTitle: 'Workflow multi-entorn',
-    ghaAzureTitle: "Workflow d'Azure Key Vault",
+    ghaAzureTitle: 'Azure Key Vault amb OIDC',
     ghaInputsTitle: "Inputs i outputs de l'Action",
     ghaInputsSubtitle: 'Inputs',
     ghaOutputsSubtitle: 'Outputs',
@@ -864,6 +865,97 @@ export const ca: Translations = {
     ghaInputEnv: 'Ruta al fitxer .env a generar',
     ghaInputProvider: 'aws o azure',
     ghaInputVault: "URL d'Azure Key Vault",
+    ghaPrereqCheckout:
+      "actions/checkout abans de l'Action, perquè el fitxer de mapeig existeixi al runner.",
+    ghaPrereqPermissions:
+      'El permís id-token: write, perquè el job pugui demanar un token OIDC, i contents: read.',
+    ghaAwsTrustTitle: '1. Permet que GitHub assumeixi un rol IAM',
+    ghaAwsTrustDesc:
+      "Afegeix token.actions.githubusercontent.com com a proveïdor d'identitat OpenID Connect a IAM (audiència sts.amazonaws.com, un cop per compte) i crea un rol amb aquesta política de confiança. La condició sub el limita a un repositori i una branca; fes servir repo:my-org/my-repo:environment:production per limitar-lo a un entorn de GitHub.",
+    ghaOidcSubjectNote:
+      "A github.com, els repositoris creats, reanomenats o transferits a partir del 15 de juliol de 2026, i els que han activat els subjectes immutables, reben un sub que també inclou els ID del propietari i del repositori: repo:my-org@OWNER_ID/my-repo@REPO_ID:ref:refs/heads/main. La resta mantenen el format només amb noms que es mostra a dalt. Consulta la configuració OIDC del teu repositori per saber el prefix exacte i fes servir el mateix valor a la política de confiança d'AWS i a la credencial federada d'Azure.",
+    ghaAwsPolicyTitle: '2. Permisos mínims',
+    ghaAwsPolicyDesc:
+      "L'Action crida ssm:GetParameter amb desxifratge, un cop per cada entrada del fitxer de mapeig. No llista, escriu ni esborra paràmetres, així que és l'únic permís que necessita el rol. Limita'l a la ruta de la teva aplicació:",
+    ghaAwsKmsNote:
+      'Els paràmetres SecureString xifrats amb la clau per defecte aws/ssm no necessiten res més. Si fan servir una clau KMS gestionada pel client, permet també kms:Decrypt sobre aquesta clau. El compte que surt al log ve de sts:GetCallerIdentity, que no necessita cap permís.',
+    ghaWorkflowTitle: '3. Fitxer de mapeig i workflow',
+    ghaAwsMapDesc:
+      "El fitxer de mapeig és el mateix que fas servir amb la CLI: cada variable d'entorn apunta al nom d'un paràmetre.",
+    ghaOutputTitle: 'Sortida esperada',
+    ghaOutputDesc:
+      "El log del pas mostra la identitat d'AWS que s'utilitza, cada variable resolta amb el valor emmascarat i un resum:",
+    ghaOutputMaskNote:
+      "Cada valor es registra també amb l'ordre add-mask de GitHub, de manera que un pas posterior que l'imprimeixi mostra ***. El fitxer .env es queda al runner; no el pugis com a artefacte.",
+    ghaAzureFedTitle: '1. Crea una credencial federada',
+    ghaAzureFedDesc:
+      "Crea un registre d'aplicació i el seu service principal, i afegeix-hi una credencial federada que confiï en els tokens d'un repositori i una branca. No es crea cap secret de client. El subjecte fa servir el mateix format que el sub d'AWS, inclosa la variant immutable quan el teu repositori l'emet.",
+    ghaAzureRoleTitle: '2. Rol mínim',
+    ghaAzureRoleDesc:
+      "Key Vault Secrets User permet llegir els valors dels secrets i res més. Assigna'l sobre el vault, no sobre el grup de recursos ni la subscripció:",
+    ghaAzurePolicyNote:
+      "Si el vault fa servir polítiques d'accés en lloc d'Azure RBAC, concedeix get sobre els secrets: az keyvault set-policy --name {VAULT} --spn {APP_ID} --secret-permissions get.",
+    ghaAzureMapDesc:
+      'Amb $config al fitxer de mapeig, el workflow no necessita els inputs provider ni vault-url. Els noms de Key Vault només admeten lletres, dígits i guions, així que Envilder converteix les rutes: /myapp/prod/stripe_key es llegeix com a myapp-prod-stripe-key (sense la barra inicial, barres i guions baixos convertits en guions, en minúscules).',
+    ghaAzureInputsNote:
+      "Els ID de client, tenant i subscripció identifiquen l'aplicació; no són credencials, així que n'hi ha prou amb variables del repositori. Si s'informen, els inputs provider i vault-url sobreescriuen el $config del fitxer de mapeig.",
+    ghaMultiEnvDesc:
+      "Tingues un fitxer de mapeig per entorn i tria'l des de l'input del workflow. Un job que defineix environment rep un token OIDC amb un sub acabat en :environment:<nom> en lloc de :ref:refs/heads/main, així que la política de confiança d'AWS (o la credencial federada d'Azure) de cada entorn ha de fer servir aquest subjecte: repo:my-org/my-repo:environment:production, o repo:my-org@OWNER_ID/my-repo@REPO_ID:environment:production si el teu repositori emet subjectes immutables. Després, cada entorn de GitHub pot tenir el seu ARN de rol i les seves regles de protecció.",
+    ghaWhyTitle: 'Per què no copiar els secrets a GitHub Secrets',
+    ghaWhyDesc:
+      "Copiar els valors als secrets del repositori funciona fins que un valor canvia. A partir d'aquí n'hi ha dues còpies:",
+    ghaWhyRotationLabel: 'Rotació:',
+    ghaWhyRotation:
+      "quan es rota un secret a SSM o Key Vault, cada repositori amb una còpia continua desplegant el valor antic fins que algú l'actualitza a mà.",
+    ghaWhyAuditLabel: 'Divergència i auditoria:',
+    ghaWhyAudit:
+      "GitHub Secrets no es pot tornar a llegir, així que no pots comprovar si la còpia encara coincideix amb l'origen. Llegir del núvol queda registrat amb el rol o l'aplicació que ha fet cada petició: a CloudTrail a AWS, i als logs d'auditoria de Key Vault a Azure un cop activada la configuració de diagnòstic del vault.",
+    ghaWhyKeysLabel: 'Claus de llarga durada:',
+    ghaWhyKeys:
+      "copiar secrets sol anar acompanyat d'una clau d'accés d'AWS o un secret de client d'Azure guardats també a GitHub. Amb OIDC el job rep un token de curta durada, i res del que hi ha guardat a GitHub funciona fora del workflow.",
+    ghaWhyListLabel: 'Una sola llista:',
+    ghaWhyList:
+      'el fitxer de mapeig es versiona amb el codi, es revisa a les pull requests i és el mateix fitxer que fan servir els desenvolupadors en local amb la CLI.',
+    ghaWhyWhenSecrets:
+      "GitHub Secrets continua sent una bona opció per a valors que només existeixen per al pipeline, com un token d'un servei de desplegament extern.",
+    ghaErrorsTitle: 'Errors habituals',
+    ghaErrorsDesc:
+      "Missatges tal com surten al log del pas i com resoldre'ls. Envilder emmascara la ruta del secret que mostra al costat de cada variable, excepte els tres últims caràcters. Els missatges que vénen d'AWS o d'Azure es mostren tal com arriben i poden incloure el nom complet del paràmetre o del recurs.",
+    ghaErrMapTitle: 'No es pot llegir el fitxer de mapeig',
+    ghaErrMapFix:
+      "Falta el pas de checkout o s'executa després de l'Action, o map-file apunta a un lloc incorrecte. Les rutes són relatives a l'arrel del repositori.",
+    ghaErrAssumeTitle: 'No es pot assumir el rol',
+    ghaErrAssumeFix:
+      "Aquest error ve d'aws-actions/configure-aws-credentials, abans que s'executi Envilder. Comprova que el workflow té id-token: write i que el sub de la política de confiança coincideix exactament amb el repositori, la branca o l'entorn, en el format de subjecte que fa servir el teu repositori (amb ID immutables o sense). Els jobs de tag, de pull_request i amb environment generen un sub diferent.",
+    ghaErrNoCredsTitle: "Sense credencials d'AWS",
+    ghaErrNoCredsFix:
+      "Cap pas ha autenticat el job a AWS abans de l'Action. Afegeix aws-actions/configure-aws-credentials abans, al mateix job: les credencials no passen d'un job a un altre.",
+    ghaErrDeniedTitle: 'Accés denegat a un paràmetre',
+    ghaErrDeniedFix:
+      "El rol és vàlid però la seva política no cobreix aquest paràmetre. Revisa la ruta de Resource i la regió de l'ARN, que ha de coincidir amb l'aws-region del pas de credencials.",
+    ghaErrExpiredTitle: 'Credencials caducades',
+    ghaErrExpiredFix:
+      "La sessió del rol ha acabat abans que s'executés el pas (una hora per defecte). Executa Envilder just després del pas de credencials, o augmenta role-duration-seconds juntament amb la durada màxima de sessió del rol.",
+    ghaErrNotFoundTitle: 'Paràmetre o secret inexistent',
+    ghaErrNotFoundFix:
+      "És un avís, no un error: el pas acaba bé, amb menys secrets al resum que al mapeig. En un fitxer .env nou la variable queda fora. Si el fitxer ja existia (al repositori, a la memòria cau o escrit per un pas anterior), es conserva el valor antic, així que esborra el fitxer abans de l'Action quan un valor obsolet no hagi de sobreviure. Revisa el nom, la regió i, a Azure, el nom convertit. Si un valor que falta ha d'aturar el desplegament, comprova'l en un pas posterior.",
+    ghaErrVaultUrlTitle: "Falta l'URL del vault d'Azure",
+    ghaErrVaultUrlFix:
+      "Informa l'input vault-url o $config.vaultUrl al fitxer de mapeig. Ha de ser una URL https acabada en .vault.azure.net, o el domini equivalent d'un núvol sobirà.",
+    ghaErrAzureDeniedTitle: 'Accés denegat a Azure Key Vault',
+    ghaErrAzureDeniedFix:
+      "azure/login ha funcionat però la identitat no té cap rol de pla de dades sobre el vault. Assigna Key Vault Secrets User sobre el vault i espera uns minuts, perquè les assignacions de rol triguen a propagar-se. Els vaults amb polítiques d'accés diuen en canvi que la identitat no té el permís get de secrets.",
+    ghaErrProfileTitle: "Perfil d'AWS al fitxer de mapeig",
+    ghaErrProfileFix:
+      "Si envilder.json defineix $config.profile per a ús local, l'Action passa aquest perfil a l'SDK d'AWS. Els runners de GitHub no tenen perfils d'AWS, i amb un perfil definit l'SDK ignora les credencials de configure-aws-credentials. Treu el perfil del mapeig que fas servir a CI, o tingues un mapeig separat per a CI.",
+    ghaRelatedTitle: 'Pàgines relacionades',
+    ghaRelatedAws:
+      "Configuració d'AWS SSM Parameter Store: credencials, permisos IAM i una comprovació ràpida",
+    ghaRelatedAzure:
+      "Configuració d'Azure Key Vault: RBAC o polítiques d'accés i una comprovació ràpida",
+    ghaRelatedMap:
+      'Referència del fitxer de mapeig: $config, proveïdors i rutes de secrets',
+    ghaRelatedRepo: "Codi font i README de l'Action a GitHub",
     configPriorityTitle: 'Prioritat de configuració',
     configPriorityDesc:
       'Quan hi ha múltiples fonts de configuració, Envilder les resol en aquest ordre (el més alt guanya):',
