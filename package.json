@@ -87,6 +87,7 @@
     "ROADMAP.md",
     "docs/CHANGELOG.md",
     "docs/changelogs/**",
+    "docs/exec-command.md",
     "docs/SECURITY.md"
   ],
   "type": "module",
