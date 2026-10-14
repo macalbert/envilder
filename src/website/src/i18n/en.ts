@@ -583,9 +583,10 @@ export const en: Translations = {
       'github-action': {
         title: 'Load AWS SSM and Azure Key Vault secrets in GitHub Actions',
         description:
-          'Pull secrets from AWS SSM Parameter Store or Azure Key Vault into a .env file inside a GitHub Actions workflow, using the same JSON mapping as the CLI.',
-        heading: 'GitHub Action',
-        intro: 'Pull secrets into .env files during a GitHub Actions workflow.',
+          'Load AWS SSM Parameter Store or Azure Key Vault secrets into a .env file in GitHub Actions with OIDC: minimal IAM and RBAC permissions, full workflows and credential errors.',
+        heading: 'Load AWS SSM and Azure Key Vault secrets in GitHub Actions',
+        intro:
+          'How do you use secrets from AWS SSM Parameter Store or Azure Key Vault in a GitHub Actions job without copying them into GitHub Secrets? Sign the job in with OIDC, then let the Envilder Action read your versioned envilder.json and write a .env file for the steps that follow.',
         breadcrumb: 'GitHub Action',
         navLabel: 'GitHub Action',
         cardTitle: 'GitHub Action guide',
@@ -824,18 +825,19 @@ export const en: Translations = {
     pushSingleOptProvider: 'aws (default) or azure',
     pushSingleOptVault: 'Azure Key Vault URL',
     pushSingleOptProfile: 'AWS CLI profile (AWS only)',
-    ghaSetupTitle: 'GitHub Action setup',
+    ghaSetupTitle: 'How the action works',
     ghaSetupDesc:
-      'The prebuilt Envilder GitHub Action pulls secrets from AWS SSM or Azure Key Vault into .env files during your CI/CD workflow. Use the published macalbert/envilder/github-action@v0 tag; no consumer build step is required.',
+      'The action is a composite step: it installs Node.js 22, reads the map file, fetches each secret with the cloud credentials the job already has, masks every value in the log and writes the .env file. It does not sign in to AWS or Azure itself, so an earlier step (aws-actions/configure-aws-credentials or azure/login) must do that. Use the published macalbert/envilder/github-action@v0 tag; no build step is needed.',
     ghaPrerequisites: 'Prerequisites',
     ghaPrereqAws:
-      'AWS: Configure credentials with aws-actions/configure-aws-credentials',
-    ghaPrereqAzure: 'Azure: Configure credentials with azure/login',
+      'AWS: an IAM role that GitHub can assume, used through aws-actions/configure-aws-credentials.',
+    ghaPrereqAzure:
+      'Azure: an app registration with a federated credential, used through azure/login.',
     ghaPrereqMap: 'An envilder.json committed to your repository',
     ghaPullOnly: 'The GitHub Action only supports pull mode (no push).',
-    ghaBasicTitle: 'Basic workflow example',
+    ghaBasicTitle: 'AWS SSM Parameter Store with OIDC',
     ghaMultiEnvTitle: 'Multi-environment workflow',
-    ghaAzureTitle: 'Azure Key Vault workflow',
+    ghaAzureTitle: 'Azure Key Vault with OIDC',
     ghaInputsTitle: 'Action inputs & outputs',
     ghaInputsSubtitle: 'Inputs',
     ghaOutputsSubtitle: 'Outputs',
@@ -852,6 +854,94 @@ export const en: Translations = {
     ghaInputEnv: 'Path to the .env file to generate',
     ghaInputProvider: 'aws or azure',
     ghaInputVault: 'Azure Key Vault URL',
+    ghaPrereqCheckout:
+      'actions/checkout before the action, so the map file exists on the runner.',
+    ghaPrereqPermissions:
+      'The id-token: write permission, so the job can request an OIDC token, plus contents: read.',
+    ghaAwsTrustTitle: '1. Let GitHub assume an IAM role',
+    ghaAwsTrustDesc:
+      'Add token.actions.githubusercontent.com as an OpenID Connect identity provider in IAM (audience sts.amazonaws.com, once per account), then create a role with this trust policy. The sub condition limits it to one repository and branch; use repo:my-org/my-repo:environment:production to limit it to a GitHub environment instead.',
+    ghaAwsPolicyTitle: '2. Minimum permissions',
+    ghaAwsPolicyDesc:
+      "The action calls ssm:GetParameter with decryption, once per entry in the map file. It never lists, writes or deletes parameters, so this is the only permission the role needs. Scope it to your application's path:",
+    ghaAwsKmsNote:
+      'SecureString parameters encrypted with the default aws/ssm key need nothing else. If they use a customer managed KMS key, also allow kms:Decrypt on that key. The account shown in the log comes from sts:GetCallerIdentity, which needs no permission.',
+    ghaWorkflowTitle: '3. Map file and workflow',
+    ghaAwsMapDesc:
+      'The map file is the same one you use with the CLI: each environment variable points to a parameter name.',
+    ghaOutputTitle: 'Expected output',
+    ghaOutputDesc:
+      'The step log shows the AWS identity in use, each resolved variable with its value masked, and a summary:',
+    ghaOutputMaskNote:
+      "Every value is also registered with GitHub's add-mask command, so a later step that prints it shows *** instead. The .env file stays on the runner; don't upload it as an artifact.",
+    ghaAzureFedTitle: '1. Create a federated credential',
+    ghaAzureFedDesc:
+      'Create an app registration and its service principal, then add a federated credential that trusts tokens from one repository and branch. No client secret is created.',
+    ghaAzureRoleTitle: '2. Minimum role',
+    ghaAzureRoleDesc:
+      'Key Vault Secrets User lets the identity read secret values and nothing more. Assign it on the vault, not on the resource group or subscription:',
+    ghaAzurePolicyNote:
+      'If the vault uses access policies instead of Azure RBAC, grant get on secrets: az keyvault set-policy --name {VAULT} --spn {APP_ID} --secret-permissions get.',
+    ghaAzureMapDesc:
+      "With $config in the map file, the workflow doesn't need the provider or vault-url inputs. Key Vault names only allow letters, digits and hyphens, so Envilder converts paths: /myapp/prod/stripe_key is read as myapp-prod-stripe-key (leading slash removed, slashes and underscores turned into hyphens, lowercased).",
+    ghaAzureInputsNote:
+      'The client, tenant and subscription IDs identify the app; they are not credentials, so repository variables are enough. When set, the provider and vault-url inputs override $config in the map file.',
+    ghaMultiEnvDesc:
+      'Keep one map file per environment and pick it from the workflow input. With GitHub environments, each one can hold its own role ARN and protection rules.',
+    ghaWhyTitle: 'Why not copy the secrets into GitHub Secrets',
+    ghaWhyDesc:
+      'Copying values into repository secrets works until a value changes. From then on there are two copies:',
+    ghaWhyRotationLabel: 'Rotation:',
+    ghaWhyRotation:
+      'when a secret is rotated in SSM or Key Vault, every repository with a copy keeps deploying the old value until someone updates it by hand.',
+    ghaWhyAuditLabel: 'Drift and audit:',
+    ghaWhyAudit:
+      "GitHub Secrets can't be read back, so you can't check whether the copy still matches the source. Reading from the cloud leaves a CloudTrail or Key Vault log entry with the role or app behind each request.",
+    ghaWhyKeysLabel: 'Long-lived keys:',
+    ghaWhyKeys:
+      'copying secrets usually comes with an AWS access key or Azure client secret stored in GitHub as well. With OIDC the job gets a short-lived token, and nothing stored in GitHub works outside the workflow.',
+    ghaWhyListLabel: 'One list:',
+    ghaWhyList:
+      'the map file is versioned with the code, reviewed in pull requests, and is the same file developers use locally with the CLI.',
+    ghaWhyWhenSecrets:
+      'GitHub Secrets is still a good fit for values that only exist for the pipeline, such as a token for a third-party deploy service.',
+    ghaErrorsTitle: 'Common errors',
+    ghaErrorsDesc:
+      'Messages as they appear in the step log, and how to fix them. Secret paths are masked except for their last three characters.',
+    ghaErrMapTitle: "The map file can't be read",
+    ghaErrMapFix:
+      'The checkout step is missing or runs after the action, or map-file points to the wrong place. Paths are relative to the repository root.',
+    ghaErrAssumeTitle: "The role can't be assumed",
+    ghaErrAssumeFix:
+      'This comes from aws-actions/configure-aws-credentials, before Envilder runs. Check that the workflow has id-token: write and that the sub in the trust policy matches the repository, branch or environment exactly. Tag and pull_request triggers produce a different sub.',
+    ghaErrNoCredsTitle: 'No AWS credentials',
+    ghaErrNoCredsFix:
+      "No step signed the job in to AWS before the action. Add aws-actions/configure-aws-credentials above it, in the same job: credentials don't carry over between jobs.",
+    ghaErrDeniedTitle: 'Access denied to a parameter',
+    ghaErrDeniedFix:
+      "The role is valid but its policy doesn't cover that parameter. Check the path in Resource and the region in the ARN, which must match the aws-region of the credentials step.",
+    ghaErrExpiredTitle: 'Expired credentials',
+    ghaErrExpiredFix:
+      "The role session ended before the step ran (one hour by default). Run Envilder right after the credentials step, or raise role-duration-seconds together with the role's maximum session duration.",
+    ghaErrNotFoundTitle: 'Parameter or secret not found',
+    ghaErrNotFoundFix:
+      'This is a warning, not a failure: the variable is left out of .env and the step still succeeds, with fewer secrets in the summary than in the map. Check the name, the region and, on Azure, the converted name. If a missing value must stop the deploy, check for it in a later step.',
+    ghaErrVaultUrlTitle: 'Azure vault URL missing',
+    ghaErrVaultUrlFix:
+      'Set the vault-url input or $config.vaultUrl in the map file. It must be an https URL ending in .vault.azure.net, or the equivalent domain of a sovereign cloud.',
+    ghaErrAzureDeniedTitle: 'Access denied on Azure Key Vault',
+    ghaErrAzureDeniedFix:
+      "azure/login worked but the identity has no data-plane role on the vault. Assign Key Vault Secrets User on the vault and wait a few minutes, since role assignments take time to propagate. Vaults that use access policies report instead that the identity doesn't have secrets get permission.",
+    ghaErrProfileTitle: 'AWS profile in the map file',
+    ghaErrProfileFix:
+      'If envilder.json sets $config.profile for local use, the action passes that profile to the AWS SDK. GitHub runners have no AWS profiles, and with a profile set the SDK ignores the credentials from configure-aws-credentials. Remove the profile from the map used in CI, or keep a separate map for CI.',
+    ghaRelatedTitle: 'Related pages',
+    ghaRelatedAws:
+      'AWS SSM Parameter Store setup: credentials, IAM permissions and a quick check',
+    ghaRelatedAzure:
+      'Azure Key Vault setup: RBAC or access policies and a quick check',
+    ghaRelatedMap: 'Map file reference: $config, providers and secret paths',
+    ghaRelatedRepo: 'Action source code and README on GitHub',
     configPriorityTitle: 'Configuration priority',
     configPriorityDesc:
       'When multiple configuration sources are present, Envilder resolves them in this order (highest wins):',
