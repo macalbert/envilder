@@ -872,6 +872,8 @@ export const ca: Translations = {
     ghaAwsTrustTitle: '1. Permet que GitHub assumeixi un rol IAM',
     ghaAwsTrustDesc:
       "Afegeix token.actions.githubusercontent.com com a proveïdor d'identitat OpenID Connect a IAM (audiència sts.amazonaws.com, un cop per compte) i crea un rol amb aquesta política de confiança. La condició sub el limita a un repositori i una branca; fes servir repo:my-org/my-repo:environment:production per limitar-lo a un entorn de GitHub.",
+    ghaOidcSubjectNote:
+      "Els repositoris creats a github.com després del 15 de juliol de 2026, o que han activat els subjectes immutables, reben un sub que també inclou els ID del propietari i del repositori: repo:my-org@OWNER_ID/my-repo@REPO_ID:ref:refs/heads/main. Els repositoris anteriors mantenen el format només amb noms que es mostra a dalt. Consulta la configuració OIDC del teu repositori per saber el prefix exacte i fes servir el mateix valor a la política de confiança d'AWS i a la credencial federada d'Azure.",
     ghaAwsPolicyTitle: '2. Permisos mínims',
     ghaAwsPolicyDesc:
       "L'Action crida ssm:GetParameter amb desxifratge, un cop per cada entrada del fitxer de mapeig. No llista, escriu ni esborra paràmetres, així que és l'únic permís que necessita el rol. Limita'l a la ruta de la teva aplicació:",
@@ -887,7 +889,7 @@ export const ca: Translations = {
       "Cada valor es registra també amb l'ordre add-mask de GitHub, de manera que un pas posterior que l'imprimeixi mostra ***. El fitxer .env es queda al runner; no el pugis com a artefacte.",
     ghaAzureFedTitle: '1. Crea una credencial federada',
     ghaAzureFedDesc:
-      "Crea un registre d'aplicació i el seu service principal, i afegeix-hi una credencial federada que confiï en els tokens d'un repositori i una branca. No es crea cap secret de client.",
+      "Crea un registre d'aplicació i el seu service principal, i afegeix-hi una credencial federada que confiï en els tokens d'un repositori i una branca. No es crea cap secret de client. El subjecte fa servir el mateix format que el sub d'AWS, inclosa la variant immutable dels repositoris nous.",
     ghaAzureRoleTitle: '2. Rol mínim',
     ghaAzureRoleDesc:
       "Key Vault Secrets User permet llegir els valors dels secrets i res més. Assigna'l sobre el vault, no sobre el grup de recursos ni la subscripció:",
@@ -898,7 +900,7 @@ export const ca: Translations = {
     ghaAzureInputsNote:
       "Els ID de client, tenant i subscripció identifiquen l'aplicació; no són credencials, així que n'hi ha prou amb variables del repositori. Si s'informen, els inputs provider i vault-url sobreescriuen el $config del fitxer de mapeig.",
     ghaMultiEnvDesc:
-      "Tingues un fitxer de mapeig per entorn i tria'l des de l'input del workflow. Amb els entorns de GitHub, cadascun pot tenir el seu ARN de rol i les seves regles de protecció.",
+      "Tingues un fitxer de mapeig per entorn i tria'l des de l'input del workflow. Un job que defineix environment rep un token OIDC amb un sub acabat en :environment:<nom> en lloc de :ref:refs/heads/main, així que la política de confiança d'AWS (o la credencial federada d'Azure) de cada entorn ha de fer servir aquest subjecte, per exemple repo:my-org/my-repo:environment:production. Després, cada entorn de GitHub pot tenir el seu ARN de rol i les seves regles de protecció.",
     ghaWhyTitle: 'Per què no copiar els secrets a GitHub Secrets',
     ghaWhyDesc:
       "Copiar els valors als secrets del repositori funciona fins que un valor canvia. A partir d'aquí n'hi ha dues còpies:",
@@ -918,13 +920,13 @@ export const ca: Translations = {
       "GitHub Secrets continua sent una bona opció per a valors que només existeixen per al pipeline, com un token d'un servei de desplegament extern.",
     ghaErrorsTitle: 'Errors habituals',
     ghaErrorsDesc:
-      "Missatges tal com surten al log del pas i com resoldre'ls. Les rutes dels secrets surten emmascarades excepte els tres últims caràcters.",
+      "Missatges tal com surten al log del pas i com resoldre'ls. Envilder emmascara la ruta del secret que mostra al costat de cada variable, excepte els tres últims caràcters. Els missatges que vénen d'AWS o d'Azure es mostren tal com arriben i poden incloure el nom complet del paràmetre o del recurs.",
     ghaErrMapTitle: 'No es pot llegir el fitxer de mapeig',
     ghaErrMapFix:
       "Falta el pas de checkout o s'executa després de l'Action, o map-file apunta a un lloc incorrecte. Les rutes són relatives a l'arrel del repositori.",
     ghaErrAssumeTitle: 'No es pot assumir el rol',
     ghaErrAssumeFix:
-      "Aquest error ve d'aws-actions/configure-aws-credentials, abans que s'executi Envilder. Comprova que el workflow té id-token: write i que el sub de la política de confiança coincideix exactament amb el repositori, la branca o l'entorn. Els triggers de tag i de pull_request generen un sub diferent.",
+      "Aquest error ve d'aws-actions/configure-aws-credentials, abans que s'executi Envilder. Comprova que el workflow té id-token: write i que el sub de la política de confiança coincideix exactament amb el repositori, la branca o l'entorn, en el format de subjecte que fa servir el teu repositori (amb ID immutables o sense). Els jobs de tag, de pull_request i amb environment generen un sub diferent.",
     ghaErrNoCredsTitle: "Sense credencials d'AWS",
     ghaErrNoCredsFix:
       "Cap pas ha autenticat el job a AWS abans de l'Action. Afegeix aws-actions/configure-aws-credentials abans, al mateix job: les credencials no passen d'un job a un altre.",
@@ -936,7 +938,7 @@ export const ca: Translations = {
       "La sessió del rol ha acabat abans que s'executés el pas (una hora per defecte). Executa Envilder just després del pas de credencials, o augmenta role-duration-seconds juntament amb la durada màxima de sessió del rol.",
     ghaErrNotFoundTitle: 'Paràmetre o secret inexistent',
     ghaErrNotFoundFix:
-      "És un avís, no un error: la variable queda fora del .env i el pas acaba bé, amb menys secrets al resum que al mapeig. Revisa el nom, la regió i, a Azure, el nom convertit. Si un valor que falta ha d'aturar el desplegament, comprova'l en un pas posterior.",
+      "És un avís, no un error: el pas acaba bé, amb menys secrets al resum que al mapeig. En un fitxer .env nou la variable queda fora. Si el fitxer ja existia (al repositori, a la memòria cau o escrit per un pas anterior), es conserva el valor antic, així que esborra el fitxer abans de l'Action quan un valor obsolet no hagi de sobreviure. Revisa el nom, la regió i, a Azure, el nom convertit. Si un valor que falta ha d'aturar el desplegament, comprova'l en un pas posterior.",
     ghaErrVaultUrlTitle: "Falta l'URL del vault d'Azure",
     ghaErrVaultUrlFix:
       "Informa l'input vault-url o $config.vaultUrl al fitxer de mapeig. Ha de ser una URL https acabada en .vault.azure.net, o el domini equivalent d'un núvol sobirà.",

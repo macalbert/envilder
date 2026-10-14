@@ -520,6 +520,7 @@ export interface DocsTranslations {
   ghaPrereqPermissions: string;
   ghaAwsTrustTitle: string;
   ghaAwsTrustDesc: string;
+  ghaOidcSubjectNote: string;
   ghaAwsPolicyTitle: string;
   ghaAwsPolicyDesc: string;
   ghaAwsKmsNote: string;

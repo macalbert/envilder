@@ -861,6 +861,8 @@ export const en: Translations = {
     ghaAwsTrustTitle: '1. Let GitHub assume an IAM role',
     ghaAwsTrustDesc:
       'Add token.actions.githubusercontent.com as an OpenID Connect identity provider in IAM (audience sts.amazonaws.com, once per account), then create a role with this trust policy. The sub condition limits it to one repository and branch; use repo:my-org/my-repo:environment:production to limit it to a GitHub environment instead.',
+    ghaOidcSubjectNote:
+      'Repositories created on github.com after 15 July 2026, or opted in to immutable subject claims, get a sub that also carries the owner and repository IDs: repo:my-org@OWNER_ID/my-repo@REPO_ID:ref:refs/heads/main. Older repositories keep the name-only format shown above. Check the OIDC settings of your repository for the exact prefix and use the same value in the AWS trust policy and the Azure federated credential.',
     ghaAwsPolicyTitle: '2. Minimum permissions',
     ghaAwsPolicyDesc:
       "The action calls ssm:GetParameter with decryption, once per entry in the map file. It never lists, writes or deletes parameters, so this is the only permission the role needs. Scope it to your application's path:",
@@ -876,7 +878,7 @@ export const en: Translations = {
       "Every value is also registered with GitHub's add-mask command, so a later step that prints it shows *** instead. The .env file stays on the runner; don't upload it as an artifact.",
     ghaAzureFedTitle: '1. Create a federated credential',
     ghaAzureFedDesc:
-      'Create an app registration and its service principal, then add a federated credential that trusts tokens from one repository and branch. No client secret is created.',
+      'Create an app registration and its service principal, then add a federated credential that trusts tokens from one repository and branch. No client secret is created. The subject uses the same format as the AWS sub, including the immutable variant for newer repositories.',
     ghaAzureRoleTitle: '2. Minimum role',
     ghaAzureRoleDesc:
       'Key Vault Secrets User lets the identity read secret values and nothing more. Assign it on the vault, not on the resource group or subscription:',
@@ -887,7 +889,7 @@ export const en: Translations = {
     ghaAzureInputsNote:
       'The client, tenant and subscription IDs identify the app; they are not credentials, so repository variables are enough. When set, the provider and vault-url inputs override $config in the map file.',
     ghaMultiEnvDesc:
-      'Keep one map file per environment and pick it from the workflow input. With GitHub environments, each one can hold its own role ARN and protection rules.',
+      "Keep one map file per environment and pick it from the workflow input. A job that sets environment gets an OIDC token whose sub ends in :environment:<name> instead of :ref:refs/heads/main, so each environment's AWS trust policy (or Azure federated credential) must use that subject, for example repo:my-org/my-repo:environment:production. Each GitHub environment can then hold its own role ARN and protection rules.",
     ghaWhyTitle: 'Why not copy the secrets into GitHub Secrets',
     ghaWhyDesc:
       'Copying values into repository secrets works until a value changes. From then on there are two copies:',
@@ -907,13 +909,13 @@ export const en: Translations = {
       'GitHub Secrets is still a good fit for values that only exist for the pipeline, such as a token for a third-party deploy service.',
     ghaErrorsTitle: 'Common errors',
     ghaErrorsDesc:
-      'Messages as they appear in the step log, and how to fix them. Secret paths are masked except for their last three characters.',
+      'Messages as they appear in the step log, and how to fix them. Envilder masks the secret path it prints next to each variable, except for the last three characters. Messages that come from AWS or Azure are shown as they are and can include the full parameter or resource name.',
     ghaErrMapTitle: "The map file can't be read",
     ghaErrMapFix:
       'The checkout step is missing or runs after the action, or map-file points to the wrong place. Paths are relative to the repository root.',
     ghaErrAssumeTitle: "The role can't be assumed",
     ghaErrAssumeFix:
-      'This comes from aws-actions/configure-aws-credentials, before Envilder runs. Check that the workflow has id-token: write and that the sub in the trust policy matches the repository, branch or environment exactly. Tag and pull_request triggers produce a different sub.',
+      'This comes from aws-actions/configure-aws-credentials, before Envilder runs. Check that the workflow has id-token: write and that the sub in the trust policy matches the repository, branch or environment exactly, in the subject format your repository uses (with or without immutable IDs). Tag, pull_request and environment jobs produce a different sub.',
     ghaErrNoCredsTitle: 'No AWS credentials',
     ghaErrNoCredsFix:
       "No step signed the job in to AWS before the action. Add aws-actions/configure-aws-credentials above it, in the same job: credentials don't carry over between jobs.",
@@ -925,7 +927,7 @@ export const en: Translations = {
       "The role session ended before the step ran (one hour by default). Run Envilder right after the credentials step, or raise role-duration-seconds together with the role's maximum session duration.",
     ghaErrNotFoundTitle: 'Parameter or secret not found',
     ghaErrNotFoundFix:
-      'This is a warning, not a failure: the variable is left out of .env and the step still succeeds, with fewer secrets in the summary than in the map. Check the name, the region and, on Azure, the converted name. If a missing value must stop the deploy, check for it in a later step.',
+      'This is a warning, not a failure: the step still succeeds, with fewer secrets in the summary than in the map. In a new .env file the variable is left out. If the file already existed (committed, cached or written by an earlier step), its old value is kept, so delete the file before the action when a stale value must not survive. Check the name, the region and, on Azure, the converted name. If a missing value must stop the deploy, check for it in a later step.',
     ghaErrVaultUrlTitle: 'Azure vault URL missing',
     ghaErrVaultUrlFix:
       'Set the vault-url input or $config.vaultUrl in the map file. It must be an https URL ending in .vault.azure.net, or the equivalent domain of a sovereign cloud.',
