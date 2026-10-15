@@ -15,6 +15,7 @@ import { DispatchActionCommandHandler } from '../../../../../src/envilder/core/a
 import {
   CommandNotExecutableError,
   CommandNotFoundError,
+  EnvironmentTooLargeError,
   SsoSessionExpiredError,
 } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import { OperationMode } from '../../../../../src/envilder/core/domain/OperationMode';
@@ -721,6 +722,20 @@ describe('Cli exec', () => {
       expect(actual).toBe(127);
       expect(stderr()).toContain('Command not found: nonexistent-cmd');
       expect(getSecretSpy).toHaveBeenCalled();
+    });
+
+    it('Should_ExitWith125_When_EnvironmentIsTooLarge', async () => {
+      // Arrange
+      runSpy.mockRejectedValue(new EnvironmentTooLargeError());
+
+      // Act
+      const actual = await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(stderr()).toContain(
+        'Environment too large to start the command (E2BIG).',
+      );
     });
 
     it('Should_ExitWith126_When_CommandIsNotExecutable', async () => {

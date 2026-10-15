@@ -106,4 +106,39 @@ describe('buildChildEnvironment', () => {
     expect(inherited).toEqual(inheritedSnapshot);
     expect(resolved).toEqual(resolvedSnapshot);
   });
+
+  it.each([
+    ['Linux', 'linux'],
+    ['Win32', 'win32'],
+  ])(
+    'Should_KeepInheritedProtoVariable_When_ComposingEnvironmentOn%s',
+    (_name, platform) => {
+      // Arrange
+      const inherited: Record<string, string | undefined> = {
+        HOME: '/home/dev',
+      };
+      Object.defineProperty(inherited, '__proto__', {
+        value: 'proto-value',
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+
+      // Act
+      const actual = buildChildEnvironment(
+        inherited,
+        { DB_URL: 'fake-db-url' },
+        platform,
+      );
+
+      // Assert
+      expect(Object.hasOwn(actual.env, '__proto__')).toBe(true);
+      expect(
+        Object.getOwnPropertyDescriptor(actual.env, '__proto__')?.value,
+      ).toBe('proto-value');
+      expect(actual.env.HOME).toBe('/home/dev');
+      expect(actual.env.DB_URL).toBe('fake-db-url');
+      expect(actual.overridden).toEqual([]);
+    },
+  );
 });

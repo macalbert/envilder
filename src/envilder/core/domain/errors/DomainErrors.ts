@@ -117,8 +117,19 @@ export class CommandNotFoundError extends DomainError {
  * executed (for example, a script without the executable bit).
  */
 export class CommandNotExecutableError extends DomainError {
-  constructor(readonly command: string) {
-    super(`Permission denied: ${command}`);
+  /**
+   * @param reason - Why the command cannot be executed. Without it the
+   * message is `Permission denied: <command>`.
+   */
+  constructor(
+    readonly command: string,
+    reason?: string,
+  ) {
+    super(
+      reason === undefined
+        ? `Permission denied: ${command}`
+        : `Cannot execute ${command}: ${reason}`,
+    );
   }
 }
 

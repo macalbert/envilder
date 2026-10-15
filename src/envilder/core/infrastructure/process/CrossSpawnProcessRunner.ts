@@ -95,6 +95,8 @@ function toSpawnError(error: unknown, command: string): unknown {
       return new CommandNotFoundError(command);
     case 'EACCES':
       return new CommandNotExecutableError(command);
+    case 'ETXTBSY':
+      return new CommandNotExecutableError(command, 'text file busy (ETXTBSY)');
     case 'E2BIG':
       return new EnvironmentTooLargeError();
     default:

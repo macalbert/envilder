@@ -24,7 +24,9 @@ export function buildChildEnvironment(
       : (name: string) => name;
   const resolvedNames = new Set(Object.keys(resolved).map(normalize));
 
-  const env: Record<string, string> = {};
+  // Null prototype: an inherited variable named `__proto__` must stay an own
+  // property instead of going through the Object.prototype setter.
+  const env: Record<string, string> = Object.create(null);
   const overridden: string[] = [];
   for (const [name, value] of Object.entries(inherited)) {
     if (value === undefined) {
