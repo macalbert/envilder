@@ -53,6 +53,8 @@ export interface HeroTranslations {
   execComment2: string;
   setupComment1: string;
   setupComment2: string;
+  setupAzureComment1: string;
+  setupAzureComment2: string;
   sdkCommentLoad: string;
   terminalSceneLabel: string;
 }
