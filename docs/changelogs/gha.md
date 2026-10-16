@@ -63,6 +63,13 @@
 
 ## [0.13.1] - 2026-07-31
 
+### Added
+
+* **GitHub Marketplace listing and root reference**: A root `action.yml`
+  publishes the Action to the GitHub Marketplace and lets workflows use it as
+  `macalbert/envilder@<version>`. The `macalbert/envilder/github-action@v0`
+  reference keeps working.
+
 ### Changed
 
 * **Bundle the GitHub Action with esbuild**: Replace the ncc bundler so the
@@ -74,7 +81,7 @@
 
 ---
 
-## [0.13.0] - 2026-06-26
+## [0.13.0] - 2026-07-11
 
 ### Added
 
@@ -228,7 +235,7 @@
 
 ---
 
-## [0.8.0] - 2026-03-22
+## [0.8.0] - 2026-03-26
 
 ### Added
 
