@@ -112,9 +112,13 @@ options are rejected before any provider call, with exit code `125`:
 
 ### No shell
 
-Arguments are passed to the command as an argument list, without a shell. The
-command receives `$DB_URL`, `%PATH%` or `&&` literally. If you need shell
-features, start a shell explicitly:
+Envilder does not start an extra shell: arguments are passed to the command as
+an argument list. Your own shell still parses the command line first, so quote
+what it should not interpret. `'$DB_URL'` or `'&&'` in single quotes reach the
+command literally, while an unquoted `$DB_URL` expands to your shell's value
+(not the resolved secret) and an unquoted `&&` runs a second command outside
+`envilder exec`. If you need shell features with the secrets, start a shell
+explicitly:
 
 ```bash
 envilder exec -- sh -c 'echo $DB_URL'

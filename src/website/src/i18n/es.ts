@@ -888,7 +888,7 @@ export const es: Translations = {
     execEnvDesc:
       'Tu comando hereda todo el entorno de la shell que ejecuta Envilder, más todas las variables del map file. Manda el map file: cuando una variable heredada tiene el mismo nombre que una mapeada, el comando recibe el valor del proveedor, y Envilder muestra los nombres (nunca los valores) en stderr:',
     execNoShellDesc:
-      'Los argumentos se pasan como una lista, sin shell, así que $DB_URL o && llegan literalmente a tu comando. Si necesitas funciones de la shell, arranca una explícitamente:',
+      "Envilder no arranca ninguna shell adicional: los argumentos llegan a tu comando como una lista. Pero tu propia shell interpreta la línea antes, así que pon entre comillas lo que no deba interpretar: '$DB_URL' o '&&' entre comillas simples llegan literalmente al comando, mientras que un $DB_URL sin comillas se expande con el valor de tu shell (no con el secreto resuelto) y un && sin comillas ejecuta un segundo comando fuera de envilder exec. Si necesitas funciones de la shell con los secretos, arranca una explícitamente:",
     execGhaTitle: 'Enmascarado en GitHub Actions',
     execGhaDesc:
       'Cuando GITHUB_ACTIONS=true, Envilder registra cada valor resuelto en el enmascarado de logs de GitHub (::add-mask::), de modo que los valores que imprima tu comando aparecen enmascarados en el log del job. Todos los registros se escriben en stderr antes de que arranque el comando; si alguno no se puede escribir, el comando no arranca (código de salida 125). La GitHub Action de Envilder no ofrece el modo exec: ejecuta la CLI desde un paso run.',
