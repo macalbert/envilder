@@ -289,8 +289,9 @@ Limitations:
 
 ## Not a sandbox
 
-Exec mode removes the `.env` file from disk. **It does not isolate the
-process.**
+Exec mode never creates a `.env` file, and it leaves any existing one
+untouched: if you are moving from pull mode, delete your old `.env`
+yourself. **It does not isolate the process.**
 
 * Your command and **every process it starts** have the secrets in their
   environment and can read them. That includes any tool or AI coding agent that
