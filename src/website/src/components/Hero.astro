@@ -803,6 +803,12 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
     overflow: hidden;
   }
 
+  /* Reduced motion renders whole transcripts at once; let readers scroll
+     back to the start with a pointer or the keyboard. */
+  .hero-term-screen.is-static {
+    overflow-y: auto;
+  }
+
   .hero-term-screen :global(.line) {
     display: block;
     min-height: 1.8em;
@@ -1164,6 +1170,8 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
     }
 
     function renderInstant(scene: Scene) {
+      screen!.classList.add('is-static');
+      screen!.tabIndex = 0;
       screen!.innerHTML = '';
       for (const line of scene.lines) {
         if (line.kind === 'editor') {
