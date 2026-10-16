@@ -441,7 +441,7 @@ export const ca: Translations = {
     commentPush: '# Pujar un secret',
     doneMessage: 'Fet! Fitxer .env generat.',
     sdkComment3: '# Els secrets ja són a os.environ',
-    sdkExampleLink: 'Veure més exemples a GitHub',
+    sdkExampleLink: 'Veure exemples executables a GitHub',
   },
   footer: {
     tagline:
@@ -928,6 +928,47 @@ export const ca: Translations = {
     execOutputTitle: 'Sortida',
     execOutputDesc:
       "L'stdout és de la teva comanda. Tota la sortida d'Envilder va a stderr, així que envilder exec -- node print.js > out.json només escriu a out.json la sortida de la teva comanda. Si tot va bé, Envilder mostra una sola línia de resum que només anomena el programa, perquè els arguments poden contenir secrets:",
+    execUseCasesTitle: "Casos d'ús habituals",
+    execUseCasesDesc:
+      "En tots els casos els valors només existeixen a l'entorn de la teva comanda i dels processos que iniciï, Envilder no crea mai cap fitxer .env, i el codi de sortida de la teva comanda passa a ser el codi de sortida d'Envilder. El que la comanda faci després amb els valors depèn d'ella: Docker, per exemple, desa l'entorn d'un contenidor a les seves metadades al disc (visibles amb docker inspect) fins que s'elimina el contenidor.",
+    execUcLocalstackTitle: "Arrenca LocalStack amb el seu token d'autenticació",
+    execUcLocalstackDesc:
+      "Quan et cal: LocalStack necessita LOCALSTACK_AUTH_TOKEN i no vols el token en un fitxer .env ni a l'historial de la shell.",
+    execUcLocalstackComposeDesc:
+      "Amb Docker Compose, fes referència a la variable al compose.yaml. Compose n'agafa el valor de l'entorn on s'executa, així que no cal cap fitxer .env:",
+    execUcLocalstackDockerDesc:
+      "Amb Docker sol, -e NOM sense valor copia la variable de l'entorn del client docker, així que el token no apareix mai a la línia d'ordres:",
+    execUcLocalstackExamplesDesc:
+      'Trobaràs la mateixa configuració amb Testcontainers (TypeScript, Python, .NET) i Aspire a',
+    execUcTestsTitle: "Tests d'integració que arrenquen contenidors",
+    execUcTestsDesc:
+      "Quan et cal: els teus tests arrenquen contenidors (per exemple, amb Testcontainers) i llegeixen un token o unes credencials de l'entorn (process.env, os.environ, Environment.GetEnvironmentVariable) per passar-los-hi.",
+    execUcTestsNote:
+      "Si els tests fallen, se'n conserva el codi de sortida i la CI continua fallant. Si un secret no es pot resoldre, els tests no s'inicien i el codi de sortida és 125.",
+    execUcMigrationsTitle: 'Migracions de base de dades i scripts puntuals',
+    execUcMigrationsDesc:
+      'Quan et cal: una eina de migracions o un script necessita DATABASE_URL una sola vegada, i no vols la cadena de connexió al disc. Fes servir --map per executar la mateixa comanda contra un altre entorn.',
+    execUcTerraformTitle: 'Terraform i altres eines IaC',
+    execUcTerraformDesc:
+      "Quan et cal: una variable d'entrada de Terraform conté un secret. Terraform llegeix les variables d'entorn TF_VAR_<nom> com a valors de la variable d'entrada <nom>.",
+    execUcTerraformNote:
+      "Declara la variable amb sensitive = true perquè Terraform l'amagui a la sortida del plan. Terraform continua desant a l'estat els valors que escriu als recursos, així que protegeix l'estat com sempre.",
+    execUcDevTitle:
+      'Servidor de desenvolupament local amb scripts de package.json',
+    execUcDevDesc:
+      "Quan et cal: tothom a l'equip ha d'arrencar l'aplicació amb els mateixos secrets executant npm run dev.",
+    execUcDevNote:
+      "Afegeix envilder com a dependència de desenvolupament (npm install --save-dev envilder) perquè l'script el trobi a node_modules/.bin.",
+    execUcGhaTitle: 'Un pas de GitHub Actions',
+    execUcGhaDesc:
+      "Quan et cal: un pas d'un workflow necessita els secrets, i només aquest pas. Configura les credencials d'AWS amb OIDC i executa la teva comanda amb npx envilder exec:",
+    execUcGhaNote:
+      "Els valors resolts es registren a l'emmascarament de logs de GitHub abans que s'iniciï la comanda, i els passos següents no els veuen.",
+    execUcChainTitle: 'Diverses comandes amb els mateixos secrets',
+    execUcChainDesc:
+      'Quan et cal: vols encadenar comandes o continuar treballant en una shell que tingui els secrets.',
+    execUcChainNote:
+      "Posa tot l'script de sh -c entre cometes simples perquè la teva shell no executi el && fora d'envilder exec. L'exec davant de l'última comanda substitueix la shell per aquesta comanda, així que els senyals que reenvia Envilder arriben directament a npm start. A la shell interactiva, totes les comandes que executis veuen els secrets; escriu exit per sortir-ne.",
     execBehaviorTitle: 'Comportament',
     execExitTitle: 'Codis de sortida',
     execExitDesc:
@@ -965,6 +1006,9 @@ export const ca: Translations = {
       "El mode exec no crea mai cap fitxer .env i no toca els que ja existeixen: si véns del mode pull, esborra tu mateix el teu .env antic. No aïlla el procés. La teva comanda i tots els processos que iniciï poden llegir els secrets del seu entorn, inclosa qualsevol eina o agent d'IA de programació que hi executi env o printenv. A Linux, altres processos del mateix usuari poden llegir /proc/<pid>/environ. Executa només comandes de confiança amb els secrets que mapes.",
     execGuideLink:
       "Guia completa de la comanda exec a GitHub: detalls de Windows, recuperació SSO i tots els missatges d'error",
+    examplesTitle: 'Exemples executables.',
+    execExamplesDesc:
+      "Arrenca LocalStack amb envilder exec docker run, amb el token d'autenticació resolt des d'AWS SSM sense cap fitxer .env (Docker el desa a les metadades del contenidor fins que s'elimina), o segueix pas a pas push, pull i exec amb npx envilder:",
     pushTitle: 'Comanda push',
     pushDesc:
       "Puja variables d'entorn d'un fitxer .env local al teu proveïdor al núvol utilitzant un fitxer de mapeig.",
@@ -1154,6 +1198,8 @@ export const ca: Translations = {
     sdkDotnetQuickStartResolveDesc:
       "Analitza el fitxer de mapeig, resol secrets i injecta'ls a les variables d'entorn:",
     sdkDotnetFullDocs: 'Documentació completa →',
+    sdkDotnetExamplesDesc:
+      'Projectes de proves xUnit amb Testcontainers i Aspire que resolen un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack i Lowkey Vault) i passen els valors als contenidors, sense cap fitxer .env:',
     sdkPythonTitle: 'Python SDK',
     sdkPythonDesc:
       "Carrega secrets directament a la teva aplicació Python a l'inici. Configuració en una línia o control detallat amb el constructor fluent.",
@@ -1174,6 +1220,8 @@ export const ca: Translations = {
     sdkPythonValidationDesc:
       'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
     sdkPythonFullDocs: 'Documentació completa →',
+    sdkPythonExamplesDesc:
+      'Un projecte pytest amb Testcontainers que resol un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack i Lowkey Vault) i passa els valors als contenidors, sense cap fitxer .env:',
     sdkNodejsTitle: 'Node.js SDK',
     sdkNodejsDesc:
       "Carrega secrets directament a la teva aplicació Node.js a l'inici. API asíncrona amb façana d'una línia o constructor fluent per a control total.",
@@ -1193,6 +1241,8 @@ export const ca: Translations = {
     sdkNodejsValidationDesc:
       'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
     sdkNodejsFullDocs: 'Documentació completa →',
+    sdkNodejsExamplesDesc:
+      "Un projecte Vitest amb Testcontainers i un AppHost d'Aspire en TypeScript que resolen un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack i Lowkey Vault) i passen els valors als contenidors, sense cap fitxer .env:",
     pagerPrev: 'Anterior',
     pagerNext: 'Següent',
   },

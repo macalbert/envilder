@@ -1,5 +1,11 @@
 # Envilder Node.js SDK: Examples
 
+> [!TIP]
+> For complete, runnable setups with tests against AWS SSM and Azure Key Vault, see
+> [`typescript-testcontainers`](https://github.com/macalbert/envilder-examples/tree/main/typescript-testcontainers) and
+> [`typescript-aspire`](https://github.com/macalbert/envilder-examples/tree/main/typescript-aspire) in
+> [envilder-examples](https://github.com/macalbert/envilder-examples).
+
 Minimal examples showing how to load secrets from AWS SSM Parameter Store using the Node.js SDK.
 
 ## Prerequisites

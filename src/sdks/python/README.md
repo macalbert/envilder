@@ -258,6 +258,14 @@ Keys follow the same rule as the CLI and the GitHub Action, so one map file work
 See [Keys and Values: What Is Accepted](https://github.com/macalbert/envilder#keys-and-values-what-is-accepted)
 for the full reference and the reasoning behind the rules.
 
+## Examples
+
+Runnable projects in [envilder-examples](https://github.com/macalbert/envilder-examples) resolve a map file
+against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to
+containers, with no `.env` file:
+
+- [python-testcontainers](https://github.com/macalbert/envilder-examples/tree/main/python-testcontainers): pytest + Testcontainers
+
 ## Links
 
 - [Changelog](https://github.com/macalbert/envilder/blob/main/docs/changelogs/sdk-python.md)

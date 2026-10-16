@@ -56,10 +56,6 @@
   session token still throws `ExpiredCredentialsError`
   ([#379](https://github.com/macalbert/envilder/issues/379))
 
----
-
-## [0.3.1] - 2026-06-26
-
 ### Fixed
 
 * **Honor the `profile` option for the AWS region, not just credentials**:
@@ -71,6 +67,19 @@
   resolution order is `AWS_REGION` > `AWS_DEFAULT_REGION` > profile
   region > `us-east-1` fallback
   ([#382](https://github.com/macalbert/envilder/issues/382))
+
+---
+
+## [0.3.1] - 2026-06-25
+
+### Fixed
+
+* **AWS SSO / assumed-role profiles now resolve correctly**: `withProfile()`
+  and `$config.profile` now resolve credentials through the full AWS provider
+  chain (`fromNodeProviderChain`), including SSO token resolution. Previously
+  SSO and assumed-role profiles were silently ignored, falling back to the
+  default credentials
+  ([#364](https://github.com/macalbert/envilder/issues/364))
 
 ---
 

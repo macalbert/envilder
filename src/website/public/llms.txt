@@ -51,8 +51,14 @@ Minimal AWS SSM map:
 
 ## Examples
 
-- [Examples README](https://raw.githubusercontent.com/macalbert/envilder-examples/main/README.md): Reproducible .NET, Python, and TypeScript examples using Testcontainers and LocalStack, plus .NET and TypeScript Aspire examples; paths, not values, are committed.
+- [Examples README](https://raw.githubusercontent.com/macalbert/envilder-examples/main/README.md): Runnable .NET, Python, and TypeScript examples that resolve secrets from AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) using Testcontainers or Aspire, plus `envilder exec`; paths, not values, are committed.
 - [Examples repository](https://github.com/macalbert/envilder-examples): Source for the supported example scope above.
+- [.NET Testcontainers example](https://github.com/macalbert/envilder-examples/tree/main/dotnet-testcontainers): xUnit v3 and Testcontainers.
+- [.NET Aspire example](https://github.com/macalbert/envilder-examples/tree/main/dotnet-aspire): Aspire AppHost tested with `Aspire.Hosting.Testing`.
+- [Python Testcontainers example](https://github.com/macalbert/envilder-examples/tree/main/python-testcontainers): pytest and Testcontainers.
+- [TypeScript Testcontainers example](https://github.com/macalbert/envilder-examples/tree/main/typescript-testcontainers): Vitest and Testcontainers.
+- [TypeScript Aspire example](https://github.com/macalbert/envilder-examples/tree/main/typescript-aspire): Aspire TypeScript AppHost.
+- [CLI example](https://github.com/macalbert/envilder-examples/tree/main/cli): Push, pull, and `envilder exec` with `npx envilder`.
 
 ## Project status and contribution
 

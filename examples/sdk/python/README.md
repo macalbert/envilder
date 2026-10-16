@@ -1,5 +1,10 @@
 # Envilder Python SDK: Examples
 
+> [!TIP]
+> For complete, runnable setups with tests against AWS SSM and Azure Key Vault, see
+> [`python-testcontainers`](https://github.com/macalbert/envilder-examples/tree/main/python-testcontainers) in
+> [envilder-examples](https://github.com/macalbert/envilder-examples).
+
 Minimal examples showing how to load secrets from AWS SSM Parameter Store using the Python SDK.
 
 Uses [PEP 723](https://peps.python.org/pep-0723/) inline script metadata,

@@ -543,6 +543,30 @@ export interface DocsTranslations {
   execPackageJsonDesc: string;
   execOutputTitle: string;
   execOutputDesc: string;
+  execUseCasesTitle: string;
+  execUseCasesDesc: string;
+  execUcLocalstackTitle: string;
+  execUcLocalstackDesc: string;
+  execUcLocalstackComposeDesc: string;
+  execUcLocalstackDockerDesc: string;
+  execUcLocalstackExamplesDesc: string;
+  execUcTestsTitle: string;
+  execUcTestsDesc: string;
+  execUcTestsNote: string;
+  execUcMigrationsTitle: string;
+  execUcMigrationsDesc: string;
+  execUcTerraformTitle: string;
+  execUcTerraformDesc: string;
+  execUcTerraformNote: string;
+  execUcDevTitle: string;
+  execUcDevDesc: string;
+  execUcDevNote: string;
+  execUcGhaTitle: string;
+  execUcGhaDesc: string;
+  execUcGhaNote: string;
+  execUcChainTitle: string;
+  execUcChainDesc: string;
+  execUcChainNote: string;
   execBehaviorTitle: string;
   execExitTitle: string;
   execExitDesc: string;
@@ -568,6 +592,8 @@ export interface DocsTranslations {
   execSandboxTitle: string;
   execSandboxDesc: string;
   execGuideLink: string;
+  examplesTitle: string;
+  execExamplesDesc: string;
   // Push command
   pushTitle: string;
   pushDesc: string;
@@ -709,6 +735,7 @@ export interface DocsTranslations {
   sdkDotnetQuickStartResolve: string;
   sdkDotnetQuickStartResolveDesc: string;
   sdkDotnetFullDocs: string;
+  sdkDotnetExamplesDesc: string;
   sdkPythonTitle: string;
   sdkPythonDesc: string;
   sdkPythonInstall: string;
@@ -723,6 +750,7 @@ export interface DocsTranslations {
   sdkPythonValidation: string;
   sdkPythonValidationDesc: string;
   sdkPythonFullDocs: string;
+  sdkPythonExamplesDesc: string;
   sdkNodejsTitle: string;
   sdkNodejsDesc: string;
   sdkNodejsInstall: string;
@@ -737,6 +765,7 @@ export interface DocsTranslations {
   sdkNodejsValidation: string;
   sdkNodejsValidationDesc: string;
   sdkNodejsFullDocs: string;
+  sdkNodejsExamplesDesc: string;
   // Pager
   pagerPrev: string;
   pagerNext: string;

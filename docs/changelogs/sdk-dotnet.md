@@ -49,6 +49,18 @@ Rename section keys in your map file:
   (provider sizes, the one value a `.env` file cannot hold, operating-system
   limits and variable expansion by other loaders)
 
+## [0.5.2] - 2026-10-16
+
+### Fixed
+
+* **AWS SSO / IAM Identity Center profiles resolve again**: The
+  `AWSSDK.SSO` and `AWSSDK.SSOOIDC` dependencies added in 0.4.1 were lost in
+  0.5.0, so SSO profiles (via `WithProfile()` or `$config.profile`) could fail
+  with `Assembly AWSSDK.SSOOIDC could not be found` instead of resolving
+  credentials. Both packages are referenced again, and a regression test now
+  fails the build if the SDK stops shipping them
+  ([#364](https://github.com/macalbert/envilder/issues/364))
+
 ---
 
 ## [0.5.1] - 2026-09-26
@@ -76,6 +88,19 @@ Rename section keys in your map file:
   `aws sso login --profile <name>` command to run. A plain expired
   session token still throws `ExpiredCredentialsException`
   ([#377](https://github.com/macalbert/envilder/issues/377))
+
+---
+
+## [0.4.1] - 2026-06-25
+
+### Fixed
+
+* **AWS SSO / assumed-role profiles now resolve at runtime**: Added the
+  `AWSSDK.SSO` and `AWSSDK.SSOOIDC` dependencies so SSO and IAM Identity
+  Center profiles (via `WithProfile()` or `$config.profile`) build their
+  credentials at runtime. Previously these profiles threw
+  `Assembly AWSSDK.SSOOIDC could not be found`
+  ([#364](https://github.com/macalbert/envilder/issues/364))
 
 ---
 

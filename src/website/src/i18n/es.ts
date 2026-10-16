@@ -441,7 +441,7 @@ export const es: Translations = {
     commentPush: '# Subir un secreto',
     doneMessage: '¡Hecho! Archivo .env generado.',
     sdkComment3: '# Los secretos ya están en os.environ',
-    sdkExampleLink: 'Ver más ejemplos en GitHub',
+    sdkExampleLink: 'Ver ejemplos ejecutables en GitHub',
   },
   footer: {
     tagline:
@@ -930,6 +930,46 @@ export const es: Translations = {
     execOutputTitle: 'Salida',
     execOutputDesc:
       'El stdout es de tu comando. Toda la salida de Envilder va a stderr, así que envilder exec -- node print.js > out.json solo escribe en out.json la salida de tu comando. Si todo va bien, Envilder muestra una única línea de resumen que solo nombra el programa, porque los argumentos pueden contener secretos:',
+    execUseCasesTitle: 'Casos de uso habituales',
+    execUseCasesDesc:
+      'En todos los casos los valores solo existen en el entorno de tu comando y de los procesos que arranque, Envilder nunca crea un archivo .env, y el código de salida de tu comando pasa a ser el código de salida de Envilder. Lo que el comando haga después con los valores depende de él: Docker, por ejemplo, guarda el entorno de un contenedor en sus metadatos en disco (visibles con docker inspect) hasta que se elimina el contenedor.',
+    execUcLocalstackTitle: 'Arranca LocalStack con su token de autenticación',
+    execUcLocalstackDesc:
+      'Cuándo lo necesitas: LocalStack necesita LOCALSTACK_AUTH_TOKEN y no quieres el token en un archivo .env ni en el historial de tu shell.',
+    execUcLocalstackComposeDesc:
+      'Con Docker Compose, haz referencia a la variable en compose.yaml. Compose toma su valor del entorno en el que se ejecuta, así que no hace falta ningún archivo .env:',
+    execUcLocalstackDockerDesc:
+      'Con Docker a secas, -e NOMBRE sin valor copia la variable del entorno del cliente docker, así que el token nunca aparece en la línea de comandos:',
+    execUcLocalstackExamplesDesc:
+      'Tienes la misma configuración con Testcontainers (TypeScript, Python, .NET) y Aspire en',
+    execUcTestsTitle: 'Tests de integración que arrancan contenedores',
+    execUcTestsDesc:
+      'Cuándo lo necesitas: tus tests arrancan contenedores (por ejemplo, con Testcontainers) y leen un token o unas credenciales del entorno (process.env, os.environ, Environment.GetEnvironmentVariable) para pasárselos.',
+    execUcTestsNote:
+      'Si los tests fallan, se conserva su código de salida y la CI sigue fallando. Si un secreto no se puede resolver, los tests no arrancan y el código de salida es 125.',
+    execUcMigrationsTitle: 'Migraciones de base de datos y scripts puntuales',
+    execUcMigrationsDesc:
+      'Cuándo lo necesitas: una herramienta de migraciones o un script necesita DATABASE_URL una sola vez, y no quieres la cadena de conexión en disco. Usa --map para ejecutar el mismo comando contra otro entorno.',
+    execUcTerraformTitle: 'Terraform y otras herramientas IaC',
+    execUcTerraformDesc:
+      'Cuándo lo necesitas: una variable de entrada de Terraform contiene un secreto. Terraform lee las variables de entorno TF_VAR_<nombre> como valores de la variable de entrada <nombre>.',
+    execUcTerraformNote:
+      'Declara la variable con sensitive = true para que Terraform la oculte en la salida del plan. Terraform sigue guardando en el estado los valores que escribe en los recursos, así que protege el estado como siempre.',
+    execUcDevTitle: 'Servidor de desarrollo local con scripts de package.json',
+    execUcDevDesc:
+      'Cuándo lo necesitas: todo el equipo debe arrancar la aplicación con los mismos secretos ejecutando npm run dev.',
+    execUcDevNote:
+      'Añade envilder como dependencia de desarrollo (npm install --save-dev envilder) para que el script lo encuentre en node_modules/.bin.',
+    execUcGhaTitle: 'Un paso de GitHub Actions',
+    execUcGhaDesc:
+      'Cuándo lo necesitas: un paso de un workflow necesita los secretos, y solo ese paso. Configura las credenciales de AWS con OIDC y ejecuta tu comando con npx envilder exec:',
+    execUcGhaNote:
+      'Los valores resueltos se registran en el enmascarado de logs de GitHub antes de que arranque el comando, y los pasos siguientes no los ven.',
+    execUcChainTitle: 'Varios comandos con los mismos secretos',
+    execUcChainDesc:
+      'Cuándo lo necesitas: quieres encadenar comandos o seguir trabajando en una shell que tenga los secretos.',
+    execUcChainNote:
+      'Pon todo el script de sh -c entre comillas simples para que tu shell no ejecute el && fuera de envilder exec. El exec delante del último comando sustituye la shell por ese comando, así que las señales que reenvía Envilder llegan directamente a npm start. En la shell interactiva, todos los comandos que ejecutes ven los secretos; escribe exit para salir.',
     execBehaviorTitle: 'Comportamiento',
     execExitTitle: 'Códigos de salida',
     execExitDesc:
@@ -967,6 +1007,9 @@ export const es: Translations = {
       'El modo exec nunca crea un archivo .env y no toca los que ya existen: si vienes del modo pull, borra tú mismo tu .env antiguo. No aísla el proceso. Tu comando y todos los procesos que arranque pueden leer los secretos de su entorno, incluida cualquier herramienta o agente de IA de programación que ejecute env o printenv a través de él. En Linux, otros procesos del mismo usuario pueden leer /proc/<pid>/environ. Ejecuta solo comandos de confianza con los secretos que mapeas.',
     execGuideLink:
       'Guía completa del comando exec en GitHub: detalles de Windows, recuperación SSO y todos los mensajes de error',
+    examplesTitle: 'Ejemplos ejecutables.',
+    execExamplesDesc:
+      'Arranca LocalStack con envilder exec docker run, con el token de autenticación resuelto desde AWS SSM sin ningún archivo .env (Docker lo guarda en los metadatos del contenedor hasta que se elimina), o sigue paso a paso push, pull y exec con npx envilder:',
     pushTitle: 'Comando push',
     pushDesc:
       'Sube variables de entorno de un archivo .env local a tu proveedor en la nube usando un archivo de mapeo.',
@@ -1156,6 +1199,8 @@ export const es: Translations = {
     sdkDotnetQuickStartResolveDesc:
       'Analiza el archivo de mapeo, resuelve secretos e inyéctalos en las variables de entorno:',
     sdkDotnetFullDocs: 'Documentación completa →',
+    sdkDotnetExamplesDesc:
+      'Proyectos de pruebas xUnit con Testcontainers y Aspire que resuelven un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack y Lowkey Vault) y pasan los valores a los contenedores, sin ningún archivo .env:',
     sdkPythonTitle: 'Python SDK',
     sdkPythonDesc:
       'Carga secretos directamente en tu aplicación Python al inicio. Configuración en una línea o control detallado con el constructor fluido.',
@@ -1176,6 +1221,8 @@ export const es: Translations = {
     sdkPythonValidationDesc:
       'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
     sdkPythonFullDocs: 'Documentación completa →',
+    sdkPythonExamplesDesc:
+      'Un proyecto pytest con Testcontainers que resuelve un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack y Lowkey Vault) y pasa los valores a los contenedores, sin ningún archivo .env:',
     sdkNodejsTitle: 'Node.js SDK',
     sdkNodejsDesc:
       'Carga secretos directamente en tu aplicación Node.js al inicio. API asíncrona con fachada de una línea o constructor fluido para control total.',
@@ -1196,6 +1243,8 @@ export const es: Translations = {
     sdkNodejsValidationDesc:
       'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
     sdkNodejsFullDocs: 'Documentación completa →',
+    sdkNodejsExamplesDesc:
+      'Un proyecto Vitest con Testcontainers y un AppHost de Aspire en TypeScript que resuelven un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack y Lowkey Vault) y pasan los valores a los contenedores, sin ningún archivo .env:',
     pagerPrev: 'Anterior',
     pagerNext: 'Siguiente',
   },

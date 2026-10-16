@@ -52,6 +52,57 @@ const execRejectedOptions = [
   },
 ];
 
+const execUcLocalstackMap = `{
+  "LOCALSTACK_AUTH_TOKEN": "/envilder/development/localstack/authToken"
+}`;
+
+const execUcLocalstackCompose = `services:
+  localstack:
+    image: localstack/localstack:stable
+    ports:
+      - "4566:4566"
+    environment:
+      LOCALSTACK_AUTH_TOKEN: \${LOCALSTACK_AUTH_TOKEN}`;
+
+const execUcLocalstackDocker =
+  'envilder exec -- docker run --rm -e LOCALSTACK_AUTH_TOKEN -p 4566:4566 localstack/localstack:stable';
+
+const execUcTests = `envilder exec -- npm test
+envilder exec -- dotnet test
+envilder exec -- pytest`;
+
+const execUcMigrationsMap = `{
+  "DATABASE_URL": "/my-app/development/database/url"
+}`;
+
+const execUcMigrations = `envilder exec -- npx prisma migrate deploy
+envilder exec -- python scripts/backfill.py`;
+
+const execUcTerraformMap = `{
+  "TF_VAR_db_password": "/my-app/development/database/password"
+}`;
+
+const execUcDevPackageJson = `{
+  "scripts": {
+    "dev": "envilder exec -- next dev"
+  }
+}`;
+
+const execUcGhaWorkflow = `permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
+steps:
+  - uses: actions/checkout@v5
+  - uses: aws-actions/configure-aws-credentials@v5
+    with:
+      role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole
+      aws-region: us-east-1
+  - run: npx envilder exec -- npm test`;
+
+const execUcChain = `envilder exec -- sh -c 'npm run migrate && exec npm start'
+envilder exec -- bash`;
+
 const execPackageJson = `{
   "scripts": {
     "dev": "envilder exec -- vite",
@@ -751,6 +802,55 @@ envilder exec -- docker compose up`} />
         <CodeBlock lang="text" code="envilder: 2 secrets resolved (aws, profile=dev) → npm …" />
       </section>
 
+      <section id="exec-use-cases" class="docs-section">
+        <h2>{t.docs.execUseCasesTitle}</h2>
+        <p>{t.docs.execUseCasesDesc}</p>
+
+        <h3>{t.docs.execUcLocalstackTitle}</h3>
+        <p>{t.docs.execUcLocalstackDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={execUcLocalstackMap} />
+        <p>{t.docs.execUcLocalstackComposeDesc}</p>
+        <CodeBlock lang="yaml" filename="compose.yaml" code={execUcLocalstackCompose} />
+        <CodeBlock lang="bash" code="envilder exec -- docker compose up" />
+        <p>{t.docs.execUcLocalstackDockerDesc}</p>
+        <CodeBlock lang="bash" code={execUcLocalstackDocker} />
+        <p>
+          {t.docs.execUcLocalstackExamplesDesc}{' '}
+          <a href="https://github.com/macalbert/envilder-examples" target="_blank" rel="noopener noreferrer"><code>envilder-examples</code></a>
+        </p>
+
+        <h3>{t.docs.execUcTestsTitle}</h3>
+        <p>{t.docs.execUcTestsDesc}</p>
+        <CodeBlock lang="bash" code={execUcTests} />
+        <p>{t.docs.execUcTestsNote}</p>
+
+        <h3>{t.docs.execUcMigrationsTitle}</h3>
+        <p>{t.docs.execUcMigrationsDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={execUcMigrationsMap} />
+        <CodeBlock lang="bash" code={execUcMigrations} />
+
+        <h3>{t.docs.execUcTerraformTitle}</h3>
+        <p>{t.docs.execUcTerraformDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={execUcTerraformMap} />
+        <CodeBlock lang="bash" code="envilder exec -- terraform plan" />
+        <p>{t.docs.execUcTerraformNote}</p>
+
+        <h3>{t.docs.execUcDevTitle}</h3>
+        <p>{t.docs.execUcDevDesc}</p>
+        <CodeBlock lang="json" filename="package.json" code={execUcDevPackageJson} />
+        <p>{t.docs.execUcDevNote}</p>
+
+        <h3>{t.docs.execUcGhaTitle}</h3>
+        <p>{t.docs.execUcGhaDesc}</p>
+        <CodeBlock lang="yaml" code={execUcGhaWorkflow} />
+        <p>{t.docs.execUcGhaNote}</p>
+
+        <h3>{t.docs.execUcChainTitle}</h3>
+        <p>{t.docs.execUcChainDesc}</p>
+        <CodeBlock lang="bash" code={execUcChain} />
+        <p>{t.docs.execUcChainNote}</p>
+      </section>
+
       <section id="exec-behavior" class="docs-section">
         <h2>{t.docs.execBehaviorTitle}</h2>
 
@@ -791,6 +891,14 @@ envilder exec -- docker compose up`} />
           <span class="callout-icon">⚠️</span>
           <div>
             <strong>{t.docs.execSandboxTitle}</strong> {t.docs.execSandboxDesc}
+          </div>
+        </div>
+
+        <div class="callout">
+          <span class="callout-icon">💡</span>
+          <div>
+            <strong>{t.docs.examplesTitle}</strong> {t.docs.execExamplesDesc}{' '}
+            <a href="https://github.com/macalbert/envilder-examples" target="_blank" rel="noopener noreferrer"><code>envilder-examples</code></a> · <a href="https://github.com/macalbert/envilder-examples/tree/main/cli" target="_blank" rel="noopener noreferrer"><code>cli</code></a>
           </div>
         </div>
 
@@ -874,6 +982,14 @@ var app = builder.Build();`} />
 var secrets = await Env.ResolveFileAsync("envilder.json");
 EnvilderClient.InjectIntoEnvironment(secrets);`} />
 
+        <div class="callout">
+          <span class="callout-icon">💡</span>
+          <div>
+            <strong>{t.docs.examplesTitle}</strong> {t.docs.sdkDotnetExamplesDesc}{' '}
+            <a href="https://github.com/macalbert/envilder-examples/tree/main/dotnet-testcontainers" target="_blank" rel="noopener noreferrer"><code>dotnet-testcontainers</code></a> · <a href="https://github.com/macalbert/envilder-examples/tree/main/dotnet-aspire" target="_blank" rel="noopener noreferrer"><code>dotnet-aspire</code></a>
+          </div>
+        </div>
+
         <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/dotnet" target="_blank" rel="noopener noreferrer">{t.docs.sdkDotnetFullDocs}</a></p>
       </section>
     </>
@@ -931,6 +1047,14 @@ secrets = (
 
 secrets = Envilder.resolve_file('envilder.json')
 validate_secrets(secrets)  # raises SecretValidationError if any value is empty`} />
+
+        <div class="callout">
+          <span class="callout-icon">💡</span>
+          <div>
+            <strong>{t.docs.examplesTitle}</strong> {t.docs.sdkPythonExamplesDesc}{' '}
+            <a href="https://github.com/macalbert/envilder-examples/tree/main/python-testcontainers" target="_blank" rel="noopener noreferrer"><code>python-testcontainers</code></a>
+          </div>
+        </div>
 
         <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/python" target="_blank" rel="noopener noreferrer">{t.docs.sdkPythonFullDocs}</a></p>
       </section>
@@ -997,6 +1121,14 @@ await Envilder.load(env, {
 
 const secrets = await Envilder.resolveFile('envilder.json');
 validateSecrets(secrets); // throws SecretValidationError if any value is empty`} />
+
+        <div class="callout">
+          <span class="callout-icon">💡</span>
+          <div>
+            <strong>{t.docs.examplesTitle}</strong> {t.docs.sdkNodejsExamplesDesc}{' '}
+            <a href="https://github.com/macalbert/envilder-examples/tree/main/typescript-testcontainers" target="_blank" rel="noopener noreferrer"><code>typescript-testcontainers</code></a> · <a href="https://github.com/macalbert/envilder-examples/tree/main/typescript-aspire" target="_blank" rel="noopener noreferrer"><code>typescript-aspire</code></a>
+          </div>
+        </div>
 
         <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/nodejs" target="_blank" rel="noopener noreferrer">{t.docs.sdkNodejsFullDocs}</a></p>
       </section>
