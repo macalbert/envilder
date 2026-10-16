@@ -1,3 +1,17 @@
+## [0.5.2] - 2026-10-16
+
+### Fixed
+
+* **AWS SSO / IAM Identity Center profiles resolve again**: The
+  `AWSSDK.SSO` and `AWSSDK.SSOOIDC` dependencies added in 0.4.1 were lost in
+  0.5.0, so SSO profiles (via `WithProfile()` or `$config.profile`) could fail
+  with `Assembly AWSSDK.SSOOIDC could not be found` instead of resolving
+  credentials. Both packages are referenced again, and a regression test now
+  fails the build if the SDK stops shipping them
+  ([#364](https://github.com/macalbert/envilder/issues/364))
+
+---
+
 ## [0.5.1] - 2026-09-26
 
 ### Documentation
