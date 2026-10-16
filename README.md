@@ -406,9 +406,9 @@ Use Envilder when your secrets already live in your cloud provider and you want 
 
 ## 🏁 What's Next
 
-Envilder already covers CLI, GitHub Action, and runtime SDKs for .NET, Python, and Node.js.
+Envilder already covers CLI (including `envilder exec`), GitHub Action, and runtime SDKs for .NET, Python, and Node.js.
 
-Next priorities include Go and Java SDKs, GCP Secret Manager, and exec mode.
+Next priorities include Go and Java SDKs and GCP Secret Manager.
 
 See the [full roadmap](./ROADMAP.md).
 

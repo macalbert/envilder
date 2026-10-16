@@ -32,6 +32,7 @@ or directly inside application code at runtime.
 | **.NET SDK** (`Envilder`) | First runtime SDK: load secrets into `IConfiguration` or `EnvilderClient`. AWS SSM + Azure Key Vault. [Documentation](./src/sdks/dotnet/README.md) |
 | **Python SDK** (`envilder`) | Runtime library for Python: Django, FastAPI, data pipelines. Sync API with `EnvilderClient`, `MapFileParser`, `SecretProviderFactory`. AWS SSM + Azure Key Vault. Published to PyPI. [Documentation](./src/sdks/python/README.md) |
 | **Node.js SDK** (`@envilder/sdk`) | Runtime library for Node.js: load secrets directly into `process.env` from a map-file. AWS SSM + Azure Key Vault. Published to npm. [Documentation](./src/sdks/nodejs/README.md) |
+| **Exec mode** (`envilder exec`) | Shipped in v0.15.0. `envilder exec [options] [--] <command> [args...]` starts a command with the resolved secrets in its environment, without writing a `.env` file. [Guide](./docs/exec-command.md) |
 
 ### 🔥 Up Next
 
@@ -41,7 +42,6 @@ or directly inside application code at runtime.
 | **Java SDK** (`envilder`) | 🔴 High | Runtime library for Java/Kotlin: Spring Boot, Android backends. Published to Maven Central |
 | **Map-file JSON Schema** | 🔴 High | Formal spec for the map-file format at `spec/`: serves as the contract between all SDKs and tools |
 | **SDK conformance tests** | 🔴 High | Language-agnostic test fixtures (JSON input → expected output) that all SDKs must pass |
-| **Exec mode** (`--exec`) | 🟡 Medium | Inject secrets into a child process env without writing to disk (`envilder exec -- node server.js`) |
 | **GCP Secret Manager** | 🟡 Medium | Third cloud provider: similar DX to AWS SSM. Completes the multi-cloud trident (AWS + Azure + GCP) |
 | **AWS Secrets Manager** | 🟡 Medium | Support AWS Secrets Manager alongside SSM Parameter Store for teams using JSON-structured secrets |
 | **Check/sync mode** (`--check`) | 🟡 Medium | Validate cloud secrets vs local `.env`, fail CI if out-of-sync |
@@ -51,7 +51,7 @@ or directly inside application code at runtime.
 | Feature | Priority | Notes |
 |---------|----------|-------|
 | **Auto-discovery mode** (`--auto`) | Medium | Fetch all parameters matching a given prefix (e.g., `/my-app/prod/*`) |
-| **Exec with refresh** (`--refresh-interval`) | Low | Kill & restart child process periodically with fresh secrets (requires `--exec`) |
+| **Exec with refresh** (`--refresh-interval`) | Low | Kill & restart child process periodically with fresh secrets (builds on `envilder exec`, [#479](https://github.com/macalbert/envilder/issues/479)) |
 | **Hierarchical mapping** | Low | Per-environment `envilder.json` with inheritance/overrides |
 
 ---

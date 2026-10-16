@@ -41,7 +41,7 @@ Developers want to know **how it works** and **how to use it quickly**.
 ### Content guidelines
 
 - Show real CLI commands and `envilder.json` examples
-- Explain pull mode, push mode, and GitHub Action inputs; mark `--exec` as planned
+- Explain pull mode, push mode, exec mode (`envilder exec`), and GitHub Action inputs
 - Use terminal mockups (`TerminalMockup.astro`) for live demos
 - Keep language direct and concise: no marketing fluff
 - Include code blocks with copy buttons
@@ -51,7 +51,7 @@ Developers want to know **how it works** and **how to use it quickly**.
 
 - One command replaces manual secret management
 - Works with existing `.env` workflows through generated files
-- Planned, not shipped: `--exec` mode to inject secrets without writing files
+- `envilder exec` runs a command with secrets in its environment, without writing files
 - Type-safe configuration via `envilder.json`
 - Works locally, in CI, and in production
 

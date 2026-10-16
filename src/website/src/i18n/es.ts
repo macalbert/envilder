@@ -370,6 +370,13 @@ export const es: Translations = {
           'Librería nativa de ejecución: carga secretos directamente en process.env desde un map-file. Publicado en npm',
       },
       {
+        status: 'done',
+        label: '✅',
+        title: 'Modo exec (envilder exec)',
+        description:
+          'Ejecuta un comando con tus secretos en su entorno, sin escribir un archivo .env: envilder exec [options] [--] <command> [args...]',
+      },
+      {
         status: 'next',
         label: '🐹',
         title: 'Go SDK (envilder)',
@@ -389,13 +396,6 @@ export const es: Translations = {
         title: 'GCP Secret Manager',
         description:
           'Tercer proveedor cloud planificado; aún no está disponible',
-      },
-      {
-        status: 'planned',
-        label: '⚡',
-        title: 'Modo exec (--exec)',
-        description:
-          'Modo planificado; aún no está disponible. Inyectaría secretos en un proceso hijo sin escribir a disco',
       },
       {
         status: 'planned',
@@ -807,6 +807,13 @@ export const es: Translations = {
     pullCommentAzureConfig: '# Azure vía $config en archivo de mapeo',
     pullCommentAzureFlags: '# Azure vía flags CLI',
     pullOutputTitle: 'Salida',
+    pullExecTitle: 'Prescinde del archivo .env con envilder exec',
+    pullExecDesc:
+      'envilder exec resuelve el mismo map file y arranca tu comando con los secretos en su entorno. No se escribe nada en disco. Las opciones de Envilder van antes del comando (o antes de un -- opcional); todo lo que va después pertenece a tu comando.',
+    pullExecNote:
+      'El modo exec es fail-closed: el comando no arranca si falta algún secreto. No es un sandbox: tu comando y todo lo que arranque pueden leer los secretos.',
+    pullExecGuideLink:
+      'Guía del comando exec: códigos de salida, señales y enmascarado en GitHub Actions',
     pushTitle: 'Comando push',
     pushDesc:
       'Sube variables de entorno de un archivo .env local a tu proveedor en la nube usando un archivo de mapeo.',
