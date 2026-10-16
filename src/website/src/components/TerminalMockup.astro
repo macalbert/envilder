@@ -1,9 +1,11 @@
 ---
 export interface Props {
   title?: string;
+  /** Show an OS-neutral terminal glyph instead of the title text. */
+  icon?: boolean;
 }
 
-const { title = 'bash' } = Astro.props;
+const { title = 'bash', icon = false } = Astro.props;
 ---
 
 <figure
@@ -17,7 +19,23 @@ const { title = 'bash' } = Astro.props;
       <span class="dot dot-yellow"></span>
       <span class="dot dot-green"></span>
     </div>
-    <span class="terminal-title">{title}</span>
+    {icon ? (
+      <svg
+        class="terminal-icon"
+        viewBox="0 0 16 16"
+        width="16"
+        height="16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="square"
+      >
+        <rect x="1" y="2" width="14" height="12" />
+        <path d="M4 6l2.5 2L4 10M8 11h4" />
+      </svg>
+    ) : (
+      <span class="terminal-title">{title}</span>
+    )}
     <div class="terminal-spacer"></div>
   </div>
   <div class="terminal-body" tabindex="0" role="code">
@@ -62,6 +80,11 @@ const { title = 'bash' } = Astro.props;
   .terminal-title {
     font-family: var(--font-mono);
     font-size: 0.75rem;
+    color: var(--term-dim);
+  }
+
+  .terminal-icon {
+    display: block;
     color: var(--term-dim);
   }
 
