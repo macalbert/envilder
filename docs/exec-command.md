@@ -140,8 +140,8 @@ failure apart from your command's own exit code:
 | ---- | ------- |
 | `n` | Your command exited with code `n` |
 | `128 + n` | Your command was killed by signal `n` (for example `137` for `SIGKILL`) |
-| `125` | Envilder failed before starting the command: bad options, missing command, no map file, unresolved secrets, expired credentials |
-| `126` | The command exists but cannot be executed: `Permission denied` (no executable bit, `EACCES`), or `Cannot execute <command>: <reason>` for a busy executable (`ETXTBSY`), a symbolic link loop (`ELOOP`), an unknown executable format (`ENOEXEC`), a directory (`EISDIR`) or a path component that is not a directory (`ENOTDIR`) |
+| `125` | Envilder failed before starting the command: bad options, missing command, no map file, unresolved secrets, expired credentials, an environment too large for the OS (`E2BIG`), or exhausted system resources (`Cannot start <command>: system resources unavailable`, for example `EAGAIN`, `EMFILE`, `ENFILE`, `ENOMEM`) |
+| `126` | The command exists but the operating system refused to execute it: `Permission denied` (no executable bit, `EACCES`), or `Cannot execute <command>: <reason> (<code>)` for any other reason, for example a busy executable (`ETXTBSY`), a symbolic link loop (`ELOOP`), an unknown executable format (`ENOEXEC`), a directory (`EISDIR`), a path component that is not a directory (`ENOTDIR`) or a name that is too long (`ENAMETOOLONG`) |
 | `127` | The command was not found |
 
 On Windows, a signal that Envilder forwards to the command is still reported

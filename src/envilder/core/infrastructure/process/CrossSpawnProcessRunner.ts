@@ -3,6 +3,7 @@ import spawn from 'cross-spawn';
 import {
   CommandNotExecutableError,
   CommandNotFoundError,
+  CommandStartError,
   EnvironmentTooLargeError,
 } from '../../domain/errors/DomainErrors.js';
 import type {
@@ -113,34 +114,55 @@ function isSpawnFailure(error: unknown): boolean {
 }
 
 /**
- * Reasons a command exists but cannot be executed, reported with exit code
- * 126. EACCES keeps the familiar `Permission denied: <command>` message.
+ * Known reasons a command exists but cannot be executed (exit code 126).
+ * Any other error code gets a generic reason with the code.
  */
 const NOT_EXECUTABLE_REASONS: Record<string, string> = {
-  ETXTBSY: 'text file busy (ETXTBSY)',
-  ELOOP: 'too many levels of symbolic links (ELOOP)',
-  ENOEXEC: 'exec format error (ENOEXEC)',
-  EISDIR: 'is a directory (EISDIR)',
-  ENOTDIR: 'a path component is not a directory (ENOTDIR)',
+  ETXTBSY: 'text file busy',
+  ELOOP: 'too many levels of symbolic links',
+  ENOEXEC: 'exec format error',
+  EISDIR: 'is a directory',
+  ENOTDIR: 'a path component is not a directory',
+  ENAMETOOLONG: 'file name too long',
 };
+const GENERIC_NOT_EXECUTABLE_REASON = 'the operating system refused to run it';
+
+/** The system could not provide what starting a process needs (exit 125). */
+const RESOURCE_ERRORS = new Set(['EAGAIN', 'EMFILE', 'ENFILE', 'ENOMEM']);
 
 /**
  * Maps a spawn failure to a domain error. Node throws some failures
  * synchronously and emits others on the child, so both paths use this.
+ *
+ * - ENOENT: the command was not found (127).
+ * - E2BIG, resource exhaustion and failures without a code: Envilder could
+ *   not start the command (125).
+ * - EACCES and every other code: the command cannot be executed (126).
+ *
+ * Messages name the command only, never its arguments.
  */
-function toSpawnError(error: unknown, command: string): unknown {
+function toSpawnError(error: unknown, command: string): Error {
   const code = (error as NodeJS.ErrnoException | undefined)?.code;
+  if (typeof code !== 'string' || code === '') {
+    return new CommandStartError(command, 'the process could not be created');
+  }
   if (code === 'ENOENT') {
     return new CommandNotFoundError(command);
-  }
-  if (code === 'EACCES') {
-    return new CommandNotExecutableError(command);
   }
   if (code === 'E2BIG') {
     return new EnvironmentTooLargeError();
   }
-  if (code !== undefined && Object.hasOwn(NOT_EXECUTABLE_REASONS, code)) {
-    return new CommandNotExecutableError(command, NOT_EXECUTABLE_REASONS[code]);
+  if (RESOURCE_ERRORS.has(code)) {
+    return new CommandStartError(
+      command,
+      `system resources unavailable (${code})`,
+    );
   }
-  return error;
+  if (code === 'EACCES') {
+    return new CommandNotExecutableError(command);
+  }
+  const reason = Object.hasOwn(NOT_EXECUTABLE_REASONS, code)
+    ? NOT_EXECUTABLE_REASONS[code]
+    : GENERIC_NOT_EXECUTABLE_REASON;
+  return new CommandNotExecutableError(command, `${reason} (${code})`);
 }

@@ -28,7 +28,9 @@ vi.mock('cross-spawn', () => {
   const spawn = vi.fn(() => {
     const error = Object.assign(
       new Error(`spawn failed: ${spawnState.errorCode}`),
-      { code: spawnState.errorCode, errno: -1, syscall: 'spawn' },
+      spawnState.errorCode === ''
+        ? {}
+        : { code: spawnState.errorCode, errno: -1, syscall: 'spawn' },
     );
     if (
       !spawnState.forceAsync &&
@@ -156,5 +158,76 @@ describe('CrossSpawnProcessRunner spawn errors', () => {
 
     // Assert
     expect(actual).toBeInstanceOf(CommandNotFoundError);
+  });
+
+  it.each([
+    ['NameTooLong', 'ENAMETOOLONG'],
+    ['UnknownCode', 'EWHATEVER'],
+  ])(
+    'Should_RejectWithCommandNotExecutableError_When_SpawnFailsWith%s',
+    async (_name, code) => {
+      // Arrange
+      spawnState.errorCode = code;
+      const sut = new CrossSpawnProcessRunner();
+
+      // Act
+      const actual = await sut
+        .run({ command: './bin/tool', args: [], env: {} })
+        .catch((error: unknown) => error);
+
+      // Assert
+      expect(actual).toBeInstanceOf(CommandNotExecutableError);
+      expect((actual as Error).message).toContain('Cannot execute ./bin/tool');
+      expect((actual as Error).message).toContain(`(${code})`);
+    },
+  );
+
+  it.each([
+    ['TryAgain', 'EAGAIN'],
+    ['ProcessFileLimit', 'EMFILE'],
+    ['SystemFileLimit', 'ENFILE'],
+    ['OutOfMemory', 'ENOMEM'],
+  ])(
+    'Should_ReportEnvilderFailure_When_SpawnFailsBecauseOf%s',
+    async (_name, code) => {
+      // Arrange
+      spawnState.errorCode = code;
+      const sut = new CrossSpawnProcessRunner();
+
+      // Act
+      const actual = await sut
+        .run({ command: './bin/tool', args: [], env: {} })
+        .catch((error: unknown) => error);
+
+      // Assert
+      expect(actual).toBeInstanceOf(Error);
+      expect(actual).not.toBeInstanceOf(CommandNotExecutableError);
+      expect(actual).not.toBeInstanceOf(CommandNotFoundError);
+      expect((actual as Error).message).toContain('./bin/tool');
+      expect((actual as Error).message).toContain(code);
+      expect((actual as Error).message).toContain('system resources');
+    },
+  );
+
+  it('Should_ReportEnvilderFailureWithoutArguments_When_SpawnErrorHasNoCode', async () => {
+    // Arrange
+    spawnState.errorCode = '';
+    const sut = new CrossSpawnProcessRunner();
+
+    // Act
+    const actual = await sut
+      .run({
+        command: 'curl',
+        args: ['-H', 'Authorization: Bearer tok-SECRET-4Zt9'],
+        env: {},
+      })
+      .catch((error: unknown) => error);
+
+    // Assert
+    expect(actual).toBeInstanceOf(Error);
+    expect(actual).not.toBeInstanceOf(CommandNotExecutableError);
+    expect(actual).not.toBeInstanceOf(CommandNotFoundError);
+    expect((actual as Error).message).not.toContain('tok-SECRET-4Zt9');
+    expect((actual as Error).message).not.toContain('Authorization');
   });
 });

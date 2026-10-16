@@ -134,6 +134,20 @@ export class CommandNotExecutableError extends DomainError {
 }
 
 /**
+ * Error thrown when Envilder could not start the command for a reason that is
+ * not about the command itself, for example exhausted system resources. The
+ * message names the command, never its arguments.
+ */
+export class CommandStartError extends DomainError {
+  constructor(
+    readonly command: string,
+    reason: string,
+  ) {
+    super(`Cannot start ${command}: ${reason}`);
+  }
+}
+
+/**
  * Error thrown when the child environment exceeds the operating system limit.
  */
 export class EnvironmentTooLargeError extends DomainError {
