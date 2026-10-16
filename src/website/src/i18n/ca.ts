@@ -54,6 +54,8 @@ export const ca: Translations = {
     viewOnGithub: '★ Veure a GitHub',
     tabCli: 'CLI',
     tabCliDesc: 'escriu .env',
+    tabExec: 'exec',
+    tabExecDesc: 'sense fitxer .env',
     tabSetup: 'Setup',
     tabSetupDesc: 'crea secrets',
     tabNode: 'Node.js',
@@ -64,6 +66,8 @@ export const ca: Translations = {
     tabDotnetDesc: 'en runtime',
     terminalComment1: '# 1. Mapeja variables a rutes SSM',
     terminalComment2: '# 2. Resol els secrets cap a .env',
+    execComment1: '# Executa qualsevol ordre amb els secrets en memòria',
+    execComment2: '# Res escrit al disc',
     setupComment1: '# AWS CLI configurat amb permisos a SSM',
     setupComment2: '# Puja cada secret a SSM Parameter Store',
     sdkCommentLoad: '# Carrega el mateix contracte en runtime',
@@ -452,6 +456,7 @@ export const ca: Translations = {
     linkGettingStarted: 'Comença',
     linkPullCommand: 'Comanda Pull',
     linkPushCommand: 'Comanda Push',
+    linkExecCommand: 'Comanda Exec',
     linkGithubAction: 'GitHub Action',
     linkIssues: 'Incidències',
     linkDiscussions: 'Discussions',
@@ -580,6 +585,19 @@ export const ca: Translations = {
         cardTitle: 'Comanda CLI push',
         cardSummary: 'Puja un fitxer .env mapat o un secret al proveïdor.',
       },
+      'cli-exec': {
+        title: "Executa una comanda amb secrets d'AWS SSM o Azure Key Vault",
+        description:
+          "Referència d'envilder exec: resol secrets d'AWS SSM o Azure Key Vault en memòria i inicia la teva comanda amb ells, sense escriure cap fitxer .env.",
+        heading: 'CLI exec',
+        intro:
+          'Executa una comanda amb els secrets al seu entorn, sense escriure cap fitxer .env.',
+        breadcrumb: 'CLI exec',
+        navLabel: 'CLI exec',
+        cardTitle: 'Comanda CLI exec',
+        cardSummary:
+          'Inicia una comanda amb els secrets mapats en memòria, sense fitxer .env.',
+      },
       'github-action': {
         title: "Carrega secrets d'AWS SSM i Azure Key Vault a GitHub Actions",
         description:
@@ -672,6 +690,10 @@ export const ca: Translations = {
     reqDownload: 'Descarregar',
     reqInstallGuide: "Guia d'instal·lació",
     installTitle: 'Instal·lació',
+    installNext: 'I ara, tria com arriben els secrets a la teva aplicació:',
+    installNextPull: 'CLI pull: genera un fitxer .env',
+    installNextExec:
+      'CLI exec: executa la teva comanda amb els secrets en memòria, sense .env',
     // AWS setup
     awsSetupTitle: 'Configuració AWS',
     awsSetupIntro:
@@ -806,13 +828,79 @@ export const ca: Translations = {
     pullCommentAzureConfig: '# Azure via $config al fitxer de mapeig',
     pullCommentAzureFlags: '# Azure via flags CLI',
     pullOutputTitle: 'Sortida',
-    pullExecTitle: 'Prescindeix del fitxer .env amb envilder exec',
+    pullExecTitle: 'No vols cap fitxer .env?',
     pullExecDesc:
-      "envilder exec resol el mateix map file i inicia la teva comanda amb els secrets al seu entorn. No s'escriu res a disc. Les opcions d'Envilder van abans de la comanda (o abans d'un -- opcional); tot el que va després pertany a la teva comanda.",
-    pullExecNote:
-      "El mode exec és fail-closed: la comanda no s'inicia si falta algun secret. No és un sandbox: la teva comanda i tot el que iniciï poden llegir els secrets.",
-    pullExecGuideLink:
-      'Guia de la comanda exec: codis de sortida, senyals i emmascarament a GitHub Actions',
+      'Fes servir envilder exec: resol el mateix map file i inicia la teva comanda amb els secrets al seu entorn, sense escriure res a disc.',
+    pullExecGuideLink: 'Consulta la guia de CLI exec',
+    execTitle: 'Comanda exec',
+    execDesc:
+      "envilder exec resol tots els secrets del map file i inicia una comanda amb aquests valors al seu entorn. No s'escriu res a disc: no hi ha cap fitxer .env per afegir al .gitignore, mantenir sincronitzat o esborrar. El map file i el seu $config funcionen exactament igual que en el mode pull.",
+    execUsageTitle: 'Ús',
+    execSeparatorTitle: 'On comença la teva comanda: la regla del --',
+    execSeparatorDesc:
+      "Primer van les opcions d'Envilder. La teva comanda comença al primer argument que no és una opció d'Envilder, o just després del -- si n'hi ha. Tot el que ve a continuació arriba tal qual a la teva comanda, encara que sembli una opció d'Envilder. El -- és opcional: només el necessites quan la comanda mateixa comença amb -.",
+    execSepComment1: '# Tot és de npm',
+    execSepComment2: "# --map és d'Envilder, la resta és de npm",
+    execSepComment3: '# --map=x és de npm: va després de la comanda',
+    execSepComment4: '# El mateix, amb un separador explícit',
+    execOptions: 'Opcions',
+    execOptMap: 'Ruta al map file (per defecte: envilder.json)',
+    execOptProfile: 'Perfil AWS CLI. Té prioritat sobre $config.profile',
+    execOptProvider: 'aws o azure. Té prioritat sobre $config.provider',
+    execOptVault:
+      "URL de l'Azure Key Vault. Té prioritat sobre $config.vaultUrl",
+    execOptionsOrderDesc:
+      "Les opcions d'Envilder van després d'exec, mai abans. Una opció escrita abans d'exec es rebutja amb el codi de sortida 125, i Envilder et mostra la comanda corregida:",
+    execRejectedDesc:
+      'El mode exec mai llegeix ni escriu cap fitxer .env i mai puja secrets, així que --envfile, --push, --key, --value i --secret-path es rebutgen amb el codi de sortida 125 abans de cap crida al proveïdor. Una opció desconeguda abans de la comanda també és un error: un error tipogràfic com --mapp mai arriba a la teva comanda per accident.',
+    execExamples: 'Exemples',
+    execCommentNpx:
+      "# Arrenca el servidor de desenvolupament amb els secrets d'envilder.json",
+    execCommentMap: '# Fes servir un map file concret',
+    execCommentAzure: '# Azure Key Vault amb flags de la CLI',
+    execCommentDocker:
+      '# Docker Compose pot interpolar els secrets al compose.yaml',
+    execPackageJsonDesc: 'O integra-ho als scripts del package.json:',
+    execOutputTitle: 'Sortida',
+    execOutputDesc:
+      "L'stdout és de la teva comanda. Tota la sortida d'Envilder va a stderr, així que envilder exec -- node print.js > out.json només escriu a out.json la sortida de la teva comanda. Si tot va bé, Envilder mostra una sola línia de resum que només anomena el programa, perquè els arguments poden contenir secrets:",
+    execBehaviorTitle: 'Comportament',
+    execExitTitle: 'Codis de sortida',
+    execExitDesc:
+      "Els codis de sortida segueixen els de GNU env i docker run, així pots distingir un error d'Envilder del codi de sortida de la teva comanda:",
+    execThCode: 'Codi',
+    execThMeaning: 'Significat',
+    execThMessage: 'Missatge',
+    execExitChild: 'La teva comanda ha acabat amb el codi n',
+    execExitSignal:
+      'La teva comanda ha estat aturada pel senyal n (per exemple, 137 per SIGKILL)',
+    execExit125:
+      "Envilder ha fallat abans d'iniciar la comanda: opcions incorrectes, comanda absent, cap map file, secrets no resolts o credencials caducades",
+    execExit126:
+      "La comanda existeix però el sistema operatiu n'ha impedit l'execució (per exemple, Permission denied)",
+    execExit127: "No s'ha trobat la comanda",
+    execExitNote: 'Els modes pull i push continuen sortint amb 1 quan fallen.',
+    execFailClosedTitle: 'Fail-closed',
+    execFailClosedDesc:
+      "El mode pull avisa i se salta un secret que falta. El mode exec mai inicia la teva comanda amb un conjunt de secrets incomplet: si algun secret falta, és buit o no es pot llegir (per exemple, per accés denegat), la comanda no s'inicia, Envilder llista les variables afectades amb les rutes emmascarades i surt amb 125. Els valors es resolen una sola vegada, quan s'inicia la comanda.",
+    execEnvTitle: 'Entorn',
+    execEnvDesc:
+      "La teva comanda hereta tot l'entorn de l'intèrpret que executa Envilder, més totes les variables del map file. Mana el map file: quan una variable heretada té el mateix nom que una de mapada, la comanda rep el valor del proveïdor, i Envilder mostra els noms (mai els valors) a stderr:",
+    execNoShellDesc:
+      "Envilder no inicia cap intèrpret d'ordres addicional: els arguments arriben a la teva comanda com una llista. Però la teva pròpia shell interpreta la línia abans, així que posa entre cometes el que no ha d'interpretar: '$DB_URL' o '&&' entre cometes simples arriben literalment a la comanda, mentre que un $DB_URL sense cometes s'expandeix amb el valor de la teva shell (no amb el secret resolt) i un && sense cometes executa una segona comanda fora d'envilder exec. Si necessites funcions de la shell amb els secrets, inicia'n una explícitament:",
+    execGhaTitle: 'Emmascarament a GitHub Actions',
+    execGhaDesc:
+      "Quan GITHUB_ACTIONS=true, Envilder registra cada valor resolt a l'emmascarament de logs de GitHub (::add-mask::), de manera que els valors que imprimeixi la teva comanda surten emmascarats al log del job. Tots els registres s'escriuen a stderr abans que s'iniciï la comanda; si algun no es pot escriure, la comanda no s'inicia (codi de sortida 125). La GitHub Action d'Envilder no ofereix el mode exec: executa la CLI des d'un pas run.",
+    execGhaNote:
+      "No redirigeixis l'stderr d'envilder exec fora del log del pas (per exemple, amb 2> fitxer o 2>/dev/null): és d'allà d'on el runner llegeix les màscares. El runner llegeix stdout i stderr per canals separats, així que un valor que la teva comanda imprimeixi de seguida pot arribar al log, en casos rars, abans que se n'hagi processat la màscara.",
+    execSignalsTitle: 'Senyals',
+    execSignalsDesc:
+      "stdin, stdout i stderr s'hereten i es conserva el TTY, així que els REPL, els intèrprets i les preguntes interactives funcionen com sempre. El Ctrl+C d'un terminal arriba directament a la teva comanda. SIGTERM i SIGHUP (per exemple, de docker stop o Kubernetes) es reenvien a la comanda, i Envilder espera que acabi, sense cap temps límit propi, abans de retornar-ne el codi de sortida. Els senyals només arriben al fill directe: un llançador com npm s'ha d'encarregar d'aturar els seus propis fills.",
+    execSandboxTitle: 'No és un sandbox.',
+    execSandboxDesc:
+      "El mode exec no crea mai cap fitxer .env i no toca els que ja existeixen: si véns del mode pull, esborra tu mateix el teu .env antic. No aïlla el procés. La teva comanda i tots els processos que iniciï poden llegir els secrets del seu entorn, inclosa qualsevol eina o agent d'IA de programació que hi executi env o printenv. A Linux, altres processos del mateix usuari poden llegir /proc/<pid>/environ. Executa només comandes de confiança amb els secrets que mapes.",
+    execGuideLink:
+      "Guia completa de la comanda exec a GitHub: detalls de Windows, recuperació SSO i tots els missatges d'error",
     pushTitle: 'Comanda push',
     pushDesc:
       "Puja variables d'entorn d'un fitxer .env local al teu proveïdor al núvol utilitzant un fitxer de mapeig.",
