@@ -15,6 +15,7 @@
 [![CI Tests](https://github.com/macalbert/envilder/actions/workflows/tests.yml/badge.svg)](https://github.com/macalbert/envilder/actions/workflows/tests.yml)
 [![Overall Coverage](https://macalbert.github.io/envilder/badge_combined.svg)](https://macalbert.github.io/envilder/)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Context7](https://img.shields.io/badge/Context7-docs_for_AI_agents-blue.svg)](https://context7.com/macalbert/envilder)
 
 ## Why Envilder?
 
@@ -113,6 +114,19 @@ Add `.env` to `.gitignore`. The mapping file is versioned and reviewable in PRs.
 
 > 💡 Using Azure Key Vault? Add a `$config` section to your mapping file.
 > See [Mapping File Format](#️-mapping-file-format) below.
+
+### 4. Or skip the `.env` file entirely
+
+```bash
+npx envilder exec -- npm run dev
+```
+
+`envilder exec` resolves the same mapping and starts your command with the secrets in its environment.
+Nothing is written to disk. Envilder options go before the command (or before an optional `--`); everything
+after belongs to your command. Exec mode is fail-closed: the command does not start if any secret is missing.
+It is not a sandbox: your command and everything it starts can read the secrets.
+
+📖 See the [Exec Command Guide](docs/exec-command.md) for exit codes, signals and GitHub Actions masking.
 
 ### 🎥 See it in action
 
@@ -436,6 +450,9 @@ prebuilt action, so consumers do not need an Envilder build step.
 - [📖 Full Documentation](https://envilder.com/docs/getting-started/?utm_source=github&utm_medium=readme&utm_campaign=root-docs): the complete guide at envilder.com
 - [Push Command Guide](docs/push-command.md)
 - [Pull Command Guide](docs/pull-command.md)
+- [Exec Command Guide](docs/exec-command.md)
+- [🤖 Envilder on Context7](https://context7.com/macalbert/envilder): up-to-date docs for AI coding assistants
+  (Claude Code, Cursor, Copilot). Add `use context7` to your prompt, or reference the library ID `/macalbert/envilder`.
 
 ## 🛠️ How it works
 
@@ -475,9 +492,9 @@ Use Envilder when your secrets already live in your cloud provider and you want 
 
 ## 🏁 What's Next
 
-Envilder already covers CLI, GitHub Action, and runtime SDKs for .NET, Python, and Node.js.
+Envilder already covers CLI (including `envilder exec`), GitHub Action, and runtime SDKs for .NET, Python, and Node.js.
 
-Next priorities include Go and Java SDKs, GCP Secret Manager, and exec mode.
+Next priorities include Go and Java SDKs and GCP Secret Manager.
 
 See the [full roadmap](./ROADMAP.md).
 

@@ -27,7 +27,7 @@ behind tooling choices and architectural patterns before proposing changes.
 
 | ADR | Title | Scope | Key Decision |
 | --- | ----- | ----- | ------------ |
-| [ADR-0001](../../../docs/adr/0001-sdk-acceptance-test-infrastructure.md) | SDK Acceptance Test Infrastructure | All SDKs | TestContainers + LocalStack + Lowkey Vault; container wrappers with explicit lifecycle; `envilder.json` as single source for test tokens |
+| [ADR-0001](../../../docs/adr/0001-sdk-acceptance-test-infrastructure.md) | SDK Acceptance Test Infrastructure | All SDKs | TestContainers + LocalStack (AWS and Azure); container wrappers with explicit lifecycle; `envilder.json` as single source for test tokens |
 | [ADR-0002](../../../docs/adr/0002-test-tooling-per-stack.md) | Test Tooling per Stack | All stacks | Vitest (TS), xUnit+NSubstitute+AwesomeAssertions (NET), pytest+unittest.mock (Py) |
 | [ADR-0003](../../../docs/adr/0003-sdk-architecture-pattern.md) | SDK Architecture Pattern | All SDKs | Three-layer (Domain→App→Infra), no DI framework, facade as primary API, internal factory |
 | [ADR-0004](../../../docs/adr/0004-code-quality-tooling.md) | Code Quality and Formatting | All stacks | Biome (TS), dotnet format (.NET), black+isort (Py); Secretlint for credentials |
@@ -37,6 +37,7 @@ behind tooling choices and architectural patterns before proposing changes.
 | [ADR-0008](../../../docs/adr/0008-map-file-schema.md) | Map-File Schema Specification | All components | JSON Schema v1, `$` prefix reserved, `$config` strict fields, `file` provider for testing (planned), `EnvilderOptions.FromFile` (planned) |
 | [ADR-0009](../../../docs/adr/0009-sdk-dependency-compatibility-policy.md) | SDK Dependency Compatibility Policy | All SDKs | Minimum viable engine + dep versions in published SDKs; devDeps unconstrained; acceptance tests verify minimum |
 | [ADR-0013](../../../docs/adr/0013-verification-first-agent-workflow.md) | Verification-First Agent Workflow | AI workflow | Independent verification contracts, intent-specific oracles, isolated implementation, review, and final evaluation |
+| [ADR-0014](../../../docs/adr/0014-localstack-azure-key-vault-emulator.md) | Azure Key Vault Emulator | All test suites | LocalStack for Azure replaces Lowkey Vault; vault created through ARM; local managed identity token endpoint for `DefaultAzureCredential` |
 
 ## Quick Reference: Test Doubles per Stack
 
@@ -50,9 +51,9 @@ behind tooling choices and architectural patterns before proposing changes.
 
 | Stack | Package | AWS | Azure |
 | ----- | ------- | --- | ----- |
-| TypeScript | `testcontainers` | `@testcontainers/localstack` | Custom (Lowkey Vault) |
-| .NET | `Testcontainers` | `Testcontainers.LocalStack` | Custom (Lowkey Vault) |
-| Python | `testcontainers` | `testcontainers[localstack]` | Custom (Lowkey Vault) |
+| TypeScript | `testcontainers` | `@testcontainers/localstack` | Custom (LocalStack for Azure) |
+| .NET | `Testcontainers` | `Testcontainers.LocalStack` | Custom (LocalStack for Azure) |
+| Python | `testcontainers` | `testcontainers[localstack]` | Custom (LocalStack for Azure) |
 
 ## Rules
 

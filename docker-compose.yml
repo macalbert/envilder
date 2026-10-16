@@ -1,11 +1,11 @@
-# Development environment: LocalStack (AWS SSM) + Lowkey Vault (Azure Key Vault)
+# Development environment: LocalStack for AWS (SSM) and Azure (Key Vault)
 #
 # Usage:
 #   docker compose -f docker-compose.yml up -d
 #
 # AWS SSM endpoint:        http://localhost:4566
-# Azure Key Vault URL:     https://localhost:8443
-# Azure Token endpoint:    http://localhost:8080
+# Azure emulator:          https://azure.localhost.localstack.cloud:4567
+# Azure Key Vault URLs:    https://<vault>.vault.azure.localhost.localstack.cloud:4567
 
 services:
   localstack:
@@ -21,16 +21,19 @@ services:
       timeout: 3s
       retries: 10
 
-  lowkey-vault:
-    image: nagyesta/lowkey-vault:7.1.32
-    container_name: envilder-lowkey-vault
+  localstack-azure:
+    image: localstack/localstack-azure:latest
+    container_name: envilder-localstack-azure
     ports:
-      - "8443:8443"
-      - "8080:8080"
+      - "4567:4567"
     environment:
-      LOWKEY_ARGS: "--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true"
+      LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN:?LOCALSTACK_AUTH_TOKEN is required — run pnpx envilder to generate .env}
+      # Vault URIs embed the gateway port, so it must match the host port.
+      GATEWAY_LISTEN: 0.0.0.0:4567
+      LOCALSTACK_HOST: localhost.localstack.cloud:4567
     healthcheck:
-      test: ["CMD", "curl", "-fk", "https://localhost:8443/ping"]
+      # The Azure image ships without curl.
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4567/_localstack/health')"]
       interval: 5s
       timeout: 3s
       retries: 10

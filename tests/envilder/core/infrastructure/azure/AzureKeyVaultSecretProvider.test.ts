@@ -1,6 +1,4 @@
-import { DefaultAzureCredential } from '@azure/identity';
 import type { SecretClient } from '@azure/keyvault-secrets';
-import { GenericContainer, type StartedTestContainer } from 'testcontainers';
 import {
   afterAll,
   beforeAll,
@@ -16,11 +14,9 @@ import {
   SecretOperationError,
 } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import { AzureKeyVaultSecretProvider } from '../../../../../src/envilder/core/infrastructure/azure/AzureKeyVaultSecretProvider';
+import { LocalStackAzureContainer } from '../../../../support/LocalStackAzureContainer';
 
 // Constants for integration tests
-const LOWKEY_VAULT_IMAGE = 'nagyesta/lowkey-vault:7.1.32';
-const LOWKEY_VAULT_PORT = 8443;
-const LOWKEY_VAULT_STARTUP_TIMEOUT_MS = 180_000;
 const SECRET_NAME = 'test-secret';
 const SECRET_VALUE = 'super-secret-value';
 const NON_EXISTENT_SECRET = 'non-existent-secret';
@@ -307,55 +303,21 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
   });
 });
 
-// Integration tests with Lowkey Vault
-describe('AzureKeyVaultSecretProvider (integration with Lowkey Vault)', () => {
-  let container: StartedTestContainer;
-  let vaultUrl: string;
+// Integration tests with LocalStack for Azure — requires Docker
+describe('AzureKeyVaultSecretProvider (integration with LocalStack)', () => {
+  let localStackAzure: LocalStackAzureContainer;
   let secretClient: SecretClient;
-  let originalTlsRejectUnauthorized: string | undefined;
 
   beforeAll(async () => {
-    // Self-signed cert on a local test container — safe to skip validation
-    originalTlsRejectUnauthorized = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
-    // Start Lowkey Vault container (exposes HTTPS 8443 + HTTP 8080 for token endpoint)
-    container = await new GenericContainer(LOWKEY_VAULT_IMAGE)
-      .withExposedPorts(LOWKEY_VAULT_PORT, 8080)
-      .withEnvironment({
-        LOWKEY_ARGS: '--server.port=8443 --LOWKEY_VAULT_RELAXED_PORTS=true',
-      })
-      .withStartupTimeout(LOWKEY_VAULT_STARTUP_TIMEOUT_MS)
-      .start();
-
-    const host = container.getHost();
-    const port = container.getMappedPort(LOWKEY_VAULT_PORT);
-    const tokenPort = container.getMappedPort(8080);
-    vaultUrl = `https://${host}:${port}`;
-
-    // Point DefaultAzureCredential to Lowkey Vault's built-in token endpoint
-    process.env.AZURE_POD_IDENTITY_AUTHORITY_HOST = `http://${host}:${tokenPort}`;
-
-    const { SecretClient } = await import('@azure/keyvault-secrets');
-
-    secretClient = new SecretClient(vaultUrl, new DefaultAzureCredential(), {
-      disableChallengeResourceVerification: true,
-    });
+    localStackAzure = await new LocalStackAzureContainer().start();
+    secretClient = localStackAzure.createSecretClient();
 
     // Set up initial test secret
     await secretClient.setSecret(SECRET_NAME, SECRET_VALUE);
   }, 240_000);
 
   afterAll(async () => {
-    if (container) {
-      await container.stop();
-    }
-    if (originalTlsRejectUnauthorized === undefined) {
-      delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-    } else {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalTlsRejectUnauthorized;
-    }
-    delete process.env.AZURE_POD_IDENTITY_AUTHORITY_HOST;
+    await localStackAzure?.stop();
   });
 
   it('Should_ReturnSecretValue_When_SecretExists', async () => {

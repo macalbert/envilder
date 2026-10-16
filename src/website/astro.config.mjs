@@ -57,11 +57,14 @@ export default defineConfig({
   output: 'static',
   integrations: [
     sitemap({
+      // CA/ES docs are noindex; only their homes stay in the sitemap.
       filter: (page) =>
         ![
           'https://envilder.com/ca/changelog/',
           'https://envilder.com/es/changelog/',
-        ].includes(page),
+        ].includes(page) &&
+        !page.startsWith('https://envilder.com/ca/docs/') &&
+        !page.startsWith('https://envilder.com/es/docs/'),
     }),
   ],
   trailingSlash: 'always',

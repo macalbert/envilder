@@ -28,7 +28,7 @@ jobs:
   # blocks merging forever. A job-level `if:` skip reports "success"
   # instead, so the path check moves here and gates powerup-test below.
   changes:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       core: ${{ steps.filter.outputs.core }}
     steps:
@@ -53,7 +53,7 @@ jobs:
 
   powerup-test:
     needs: changes
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_dispatch' || (needs.changes.outputs.core == 'true' && !github.event.pull_request.draft) }}
     timeout-minutes: 30
     env:
@@ -73,7 +73,7 @@ jobs:
           cache: "pnpm"
 
       - name: 🪙 Collect Coins (Configure AWS credentials)
-        uses: aws-actions/configure-aws-credentials@v6.2.4
+        uses: aws-actions/configure-aws-credentials@v6.3.0
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -100,3 +100,38 @@ jobs:
           name: ✅ Test Core Unit Tests
           path: ./coverage/junit/test-results.xml
           reporter: jest-junit
+
+  # Exec mode spawns processes, merges environment names case-insensitively
+  # and resolves .cmd/.bat shims on Windows. These suites need no Docker, so
+  # they run here; the Docker-backed suites stay on the Linux job above.
+  powerup-test-windows:
+    needs: changes
+    runs-on: windows-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || (needs.changes.outputs.core == 'true' && !github.event.pull_request.draft) }}
+    timeout-minutes: 20
+    # Least privilege: this job only checks out the code and runs tests.
+    permissions:
+      contents: read
+
+    steps:
+      - name: 🧱 Enter the Pipe (Checkout)
+        uses: actions/checkout@v7
+
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: 🍄 Grab a Mushroom (Setup Node.js with Cache)
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22.x"
+          cache: "pnpm"
+
+      - name: 📦 Open the ? Block (Install packages)
+        run: pnpm install --frozen-lockfile
+
+      # With CI=true the Vitest global setup skips the envilder .env fetch but
+      # still builds the GitHub Action bundle (tsc + esbuild), which needs no
+      # Docker or secrets. `test:exec` (package.json) runs an explicit list of
+      # Windows-relevant suites: add new exec/process test files there.
+      - name: 🪟 Warp Zone (Run exec tests on Windows)
+        run: pnpm test:exec

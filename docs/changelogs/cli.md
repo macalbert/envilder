@@ -5,6 +5,53 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [0.15.0] - 2026-10-16
+
+### Added
+
+* **`envilder exec`: run a command with resolved secrets, without a `.env`
+  file**: `envilder exec [options] [--] <command> [args...]` resolves every
+  secret in the map file and starts the command with those values in its
+  environment. Nothing is written to disk. The command starts at the first
+  argument that is not an Envilder option (`--` is optional), arguments are
+  passed verbatim without a shell, and Windows `npm`/`npx` shims are supported.
+  Resolution is fail-closed: the command never starts when a secret is missing,
+  empty or unreadable. Mapped values override inherited variables, naming the
+  overridden variables on stderr. All Envilder output goes to stderr as a
+  single summary line that names the program but never its arguments, so
+  stdout carries only the command's output. Inside GitHub Actions every value
+  is registered for masking, and every registration is written to stderr
+  before the command starts. Exit codes follow GNU `env`: the command's own
+  code, `128+n` for signals, `125` for Envilder errors, `126` and `127` when
+  the command cannot be executed or found. `SIGTERM` and `SIGHUP` are
+  forwarded and the command is awaited without a timeout, even if a signal
+  cannot be delivered. Exec mode is not a sandbox: see
+  [docs/exec-command.md](../exec-command.md)
+  ([#550](https://github.com/macalbert/envilder/issues/550))
+
+### Security
+
+* **Parse errors no longer echo option values or arguments**: parse errors
+  are rebuilt from safe forms, so option values and extra arguments are never
+  printed. An unknown long option is named only when it is a near-typo of a
+  real option, together with the suggestion (`--valeu=<value>` is shown as
+  `unknown option '--valeu' (Did you mean --value?)`); any other unknown long
+  option gets a generic message, so a mistyped secret is never echoed. An
+  unknown short option is named by its single character, "too many
+  arguments" shows only the counts, and any other parse error is replaced
+  with a generic message. Exit codes are unchanged
+  ([#554](https://github.com/macalbert/envilder/issues/554))
+
+* **Path and name options never swallow the next option**: `--map`,
+  `--envfile`, `--profile`, `--provider`, `--vault-url`, `--key`,
+  `--secret-path` and `--ssm-path` (and their `exec` counterparts) reject a
+  value that starts with `-` as a missing argument, before any map file is
+  read, instead of taking the following option as their value. `--value` is
+  exempt, so a secret may still start with `-`
+  ([#554](https://github.com/macalbert/envilder/issues/554))
+
+---
+
 ## [0.14.0] - 2026-09-26
 
 ### Added
