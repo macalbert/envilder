@@ -23,6 +23,8 @@ type Scene = {
   name: string;
   desc: string;
   icon: string;
+  /** Alt text for the tab icon when it tells scenes apart (e.g. provider). */
+  iconAlt?: string;
   lines: Line[];
 };
 
@@ -84,6 +86,7 @@ const maskPath = (path: string) => '*'.repeat(path.length - 3) + path.slice(-3);
 const setupScene = (opts: {
   id: string;
   icon: string;
+  provider: string;
   mapComment: string;
   pushComment: string;
   configLines: string[];
@@ -93,6 +96,7 @@ const setupScene = (opts: {
   name: t.hero.tabSetup,
   desc: t.hero.tabSetupDesc,
   icon: opts.icon,
+  iconAlt: opts.provider,
   lines: [
     {
       kind: 'type',
@@ -242,14 +246,16 @@ const scenes: Scene[] = [
   setupScene({
     id: 'setup-aws',
     icon: '/AWS.svg',
+    provider: 'AWS',
     mapComment: t.hero.setupComment1,
     pushComment: t.hero.setupComment2,
-    configLines: ['  "$config": { "provider": "aws" },'],
+    configLines: ['  "$config": {', '    "provider": "aws"', '  },'],
     secretPath: '/localstack/prod/auth-token',
   }),
   setupScene({
     id: 'setup-azure',
     icon: '/Azure.svg',
+    provider: 'Azure',
     mapComment: t.hero.setupAzureComment1,
     pushComment: t.hero.setupAzureComment2,
     configLines: [
@@ -672,7 +678,7 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
           >
             <img
               src={scene.icon}
-              alt=""
+              alt={scene.iconAlt ?? ''}
               class="hero-term-mode-icon"
               width="18"
               height="18"
@@ -915,19 +921,33 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
   }
 
   .hero-term-screen :global(.vim-buffer) {
+    position: relative;
     flex: 1;
     min-height: 0;
     overflow: hidden;
   }
 
-  .hero-term-screen :global(.vim-line),
+  .hero-term-screen :global(.vim-line) {
+    display: flex;
+    min-height: 1.8em;
+  }
+
+  /* Long lines wrap past the gutter (like vim's breakindent) so narrow
+     screens never clip the code or the cursor. */
+  .hero-term-screen :global(.vim-code) {
+    flex: 1;
+    min-width: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
   .hero-term-screen :global(.vim-tilde) {
     display: block;
     min-height: 1.8em;
   }
 
   .hero-term-screen :global(.vim-num) {
-    display: inline-block;
+    flex-shrink: 0;
     width: 3ch;
     margin-right: 1.5ch;
     text-align: right;
@@ -1109,12 +1129,24 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       });
     }
 
+    // Keeps the line being typed in view when wrapped code outgrows the
+    // editor buffer (narrow screens).
+    function followEditorCursor(): void {
+      const buffer = screen!.querySelector<HTMLElement>('.vim-buffer');
+      const lines = buffer?.querySelectorAll<HTMLElement>('.vim-line');
+      if (!buffer || !lines?.length) return;
+      const last = lines[lines.length - 1];
+      const top = last.offsetTop + last.offsetHeight - buffer.clientHeight;
+      if (top > buffer.scrollTop) buffer.scrollTop = top;
+    }
+
     function keepLatestLineVisible(): void {
+      followEditorCursor();
       if (scrollFrame !== undefined) return;
       scrollFrame = window.requestAnimationFrame(() => {
         const top = screen!.scrollHeight - screen!.clientHeight;
         if (top > screen!.scrollTop) {
-          screen!.scrollTo({ top, behavior: 'smooth' });
+          screen!.scrollTo({ top, behavior: reduceMotion ? 'auto' : 'smooth' });
         }
         scrollFrame = undefined;
       });
