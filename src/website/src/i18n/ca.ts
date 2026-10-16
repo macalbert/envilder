@@ -866,7 +866,7 @@ export const ca: Translations = {
       "L'stdout és de la teva comanda. Tota la sortida d'Envilder va a stderr, així que envilder exec -- node print.js > out.json només escriu a out.json la sortida de la teva comanda. Si tot va bé, Envilder mostra una sola línia de resum que només anomena el programa, perquè els arguments poden contenir secrets:",
     execUseCasesTitle: "Casos d'ús habituals",
     execUseCasesDesc:
-      "En tots els casos els valors només existeixen a l'entorn de la teva comanda i dels processos que iniciï, no s'escriu res a disc, i el codi de sortida de la teva comanda passa a ser el codi de sortida d'Envilder.",
+      "En tots els casos els valors només existeixen a l'entorn de la teva comanda i dels processos que iniciï, Envilder no crea mai cap fitxer .env, i el codi de sortida de la teva comanda passa a ser el codi de sortida d'Envilder. El que la comanda faci després amb els valors depèn d'ella: Docker, per exemple, desa l'entorn d'un contenidor a les seves metadades al disc (visibles amb docker inspect) fins que s'elimina el contenidor.",
     execUcLocalstackTitle: "Arrenca LocalStack amb el seu token d'autenticació",
     execUcLocalstackDesc:
       "Quan et cal: LocalStack necessita LOCALSTACK_AUTH_TOKEN i no vols el token en un fitxer .env ni a l'historial de la shell.",
@@ -944,7 +944,7 @@ export const ca: Translations = {
       "Guia completa de la comanda exec a GitHub: detalls de Windows, recuperació SSO i tots els missatges d'error",
     examplesTitle: 'Exemples executables.',
     execExamplesDesc:
-      "Arrenca LocalStack amb envilder exec docker run, amb el token d'autenticació resolt des d'AWS SSM i sense escriure'l mai al disc, o segueix pas a pas push, pull i exec amb npx envilder:",
+      "Arrenca LocalStack amb envilder exec docker run, amb el token d'autenticació resolt des d'AWS SSM sense cap fitxer .env (Docker el desa a les metadades del contenidor fins que s'elimina), o segueix pas a pas push, pull i exec amb npx envilder:",
     pushTitle: 'Comanda push',
     pushDesc:
       "Puja variables d'entorn d'un fitxer .env local al teu proveïdor al núvol utilitzant un fitxer de mapeig.",

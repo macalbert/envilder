@@ -867,7 +867,7 @@ export const es: Translations = {
       'El stdout es de tu comando. Toda la salida de Envilder va a stderr, así que envilder exec -- node print.js > out.json solo escribe en out.json la salida de tu comando. Si todo va bien, Envilder muestra una única línea de resumen que solo nombra el programa, porque los argumentos pueden contener secretos:',
     execUseCasesTitle: 'Casos de uso habituales',
     execUseCasesDesc:
-      'En todos los casos los valores solo existen en el entorno de tu comando y de los procesos que arranque, no se escribe nada en disco, y el código de salida de tu comando pasa a ser el código de salida de Envilder.',
+      'En todos los casos los valores solo existen en el entorno de tu comando y de los procesos que arranque, Envilder nunca crea un archivo .env, y el código de salida de tu comando pasa a ser el código de salida de Envilder. Lo que el comando haga después con los valores depende de él: Docker, por ejemplo, guarda el entorno de un contenedor en sus metadatos en disco (visibles con docker inspect) hasta que se elimina el contenedor.',
     execUcLocalstackTitle: 'Arranca LocalStack con su token de autenticación',
     execUcLocalstackDesc:
       'Cuándo lo necesitas: LocalStack necesita LOCALSTACK_AUTH_TOKEN y no quieres el token en un archivo .env ni en el historial de tu shell.',
@@ -944,7 +944,7 @@ export const es: Translations = {
       'Guía completa del comando exec en GitHub: detalles de Windows, recuperación SSO y todos los mensajes de error',
     examplesTitle: 'Ejemplos ejecutables.',
     execExamplesDesc:
-      'Arranca LocalStack con envilder exec docker run, con el token de autenticación resuelto desde AWS SSM y sin escribirlo nunca en disco, o sigue paso a paso push, pull y exec con npx envilder:',
+      'Arranca LocalStack con envilder exec docker run, con el token de autenticación resuelto desde AWS SSM sin ningún archivo .env (Docker lo guarda en los metadatos del contenedor hasta que se elimina), o sigue paso a paso push, pull y exec con npx envilder:',
     pushTitle: 'Comando push',
     pushDesc:
       'Sube variables de entorno de un archivo .env local a tu proveedor en la nube usando un archivo de mapeo.',

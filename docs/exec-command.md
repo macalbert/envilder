@@ -137,9 +137,13 @@ via `cmd.exe /d /s /c` with every argument escaped. Two visible consequences:
 
 ## Common use cases
 
-In every case the values exist only in the environment of the command and
-the processes it starts, nothing is written to disk, and the command's exit
-code becomes Envilder's exit code. The paths follow the
+In every case Envilder passes the values to the command and the processes it
+starts without creating a `.env` file, and the command's exit code becomes
+Envilder's exit code. What the command does with the values afterwards is up
+to it: Docker, for example, stores a container's environment in its on-disk
+container metadata (visible with `docker inspect`) until the container is
+removed, and a stopped `docker compose up` leaves its containers behind until
+`docker compose down`. The paths follow the
 `/<project>/<environment>/<service>/<key>` style used in
 [envilder-examples](https://github.com/macalbert/envilder-examples).
 
@@ -481,7 +485,8 @@ Only run commands you trust with the secrets you map.
 [envilder-examples](https://github.com/macalbert/envilder-examples) has runnable setups:
 
 * The repository README starts LocalStack with `envilder exec docker run ...`,
-  passing the auth token from AWS SSM into the container without writing it to
-  disk.
+  passing the auth token from AWS SSM into the container without a `.env`
+  file. Docker itself keeps the container's environment in its metadata until
+  the container is removed.
 * The [`cli`](https://github.com/macalbert/envilder-examples/tree/main/cli)
   folder walks through push, pull and exec with `npx envilder`.

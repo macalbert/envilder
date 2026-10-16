@@ -856,7 +856,7 @@ export const en: Translations = {
       "Your command owns stdout. All Envilder output goes to stderr, so envilder exec -- node print.js > out.json writes only your command's output to out.json. On success Envilder prints a single summary line that names your command by program name only, because arguments can carry secrets:",
     execUseCasesTitle: 'Common use cases',
     execUseCasesDesc:
-      "In every case the values exist only in the environment of your command and the processes it starts, nothing is written to disk, and your command's exit code becomes Envilder's exit code.",
+      "In every case the values exist only in the environment of your command and the processes it starts, Envilder never creates a .env file, and your command's exit code becomes Envilder's exit code. What your command does with the values is up to it: Docker, for example, keeps a container's environment in its on-disk metadata (visible with docker inspect) until the container is removed.",
     execUcLocalstackTitle: 'Start LocalStack with its auth token',
     execUcLocalstackDesc:
       'When you need it: LocalStack needs LOCALSTACK_AUTH_TOKEN and you do not want the token in a .env file or in your shell history.',
@@ -933,7 +933,7 @@ export const en: Translations = {
       'Full exec command guide on GitHub: Windows details, SSO recovery and every error message',
     examplesTitle: 'Runnable examples.',
     execExamplesDesc:
-      'Start LocalStack with envilder exec docker run, with the auth token resolved from AWS SSM and never written to disk, or walk through push, pull and exec with npx envilder:',
+      'Start LocalStack with envilder exec docker run, with the auth token resolved from AWS SSM without a .env file (Docker keeps it in the container metadata until the container is removed), or walk through push, pull and exec with npx envilder:',
     pushTitle: 'Push command',
     pushDesc:
       'Upload environment variables from a local .env file to your cloud provider using a mapping file.',
