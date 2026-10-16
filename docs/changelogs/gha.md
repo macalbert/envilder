@@ -1,3 +1,16 @@
+## [0.15.0] - 2026-10-16
+
+### Changed
+
+* **Shared secret masker can report when registrations are written**: The
+  masker the Action shares with the CLI gained an internal capability to
+  report when its `::add-mask::` writes have completed, used by the new
+  CLI-only `envilder exec` command. The Action's pull flow does not use it,
+  and the registrations it prints are unchanged
+  ([#550](https://github.com/macalbert/envilder/issues/550))
+
+---
+
 ## [0.14.0] - 2026-09-26
 
 ### Fixed

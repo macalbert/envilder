@@ -3,6 +3,8 @@ export const DOMAIN = {
   ISecretProvider: Symbol.for('ISecretProvider'),
   ISecretMasker: Symbol.for('ISecretMasker'),
   IVariableStore: Symbol.for('IVariableStore'),
+  IProcessRunner: Symbol.for('IProcessRunner'),
+  IProcessContext: Symbol.for('IProcessContext'),
 };
 
 export const APPLICATION = {
@@ -10,6 +12,7 @@ export const APPLICATION = {
   PushEnvToSecretsCommandHandler: Symbol.for('PushEnvToSecretsCommandHandler'),
   PushSingleCommandHandler: Symbol.for('PushSingleCommandHandler'),
   DispatchActionCommandHandler: Symbol.for('DispatchActionCommandHandler'),
+  ExecWithSecretsCommandHandler: Symbol.for('ExecWithSecretsCommandHandler'),
 };
 
 export const INFRASTRUCTURE = {

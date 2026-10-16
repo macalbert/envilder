@@ -25,32 +25,57 @@ function defaultIsInteractive(): boolean {
   return [process.stdout.isTTY, process.stdin.isTTY].every(Boolean);
 }
 
-function defaultConfirm(question: string): Promise<boolean> {
-  const prompt = createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-  return new Promise((resolve) => {
-    prompt.question(`${question} `, (answer) => {
-      prompt.close();
-      resolve(answer.trim().toLowerCase() === 'y');
+/**
+ * Builds a yes/no prompt that writes its question to `output`. Exec mode
+ * prompts on stderr so stdout stays reserved for the child process.
+ */
+export function createConfirm(
+  output: NodeJS.WritableStream,
+): (question: string) => Promise<boolean> {
+  return (question) => {
+    const prompt = createInterface({ input: process.stdin, output });
+    return new Promise((resolve) => {
+      prompt.question(`${question} `, (answer) => {
+        prompt.close();
+        resolve(answer.trim().toLowerCase() === 'y');
+      });
     });
-  });
+  };
 }
 
-function defaultRunLogin(profileName?: string): Promise<number> {
-  return new Promise((resolve) => {
-    const child = spawn('aws', buildLoginArgs(profileName), {
-      stdio: 'inherit',
-    });
-    child.on('error', (error: NodeJS.ErrnoException) => {
-      resolve(error.code === 'ENOENT' ? AWS_CLI_NOT_FOUND : LOGIN_FAILED);
-    });
-    child.on('close', (code) => {
-      resolve(code ?? LOGIN_FAILED);
-    });
-  });
+function defaultConfirm(question: string): Promise<boolean> {
+  return createConfirm(process.stdout)(question);
 }
+
+const STDERR_FD = 2;
+
+/**
+ * Builds the `aws sso login` runner. With `stdout: 'stderr'` the login's
+ * output goes to stderr, so stdout stays reserved for an exec child; the
+ * default inherits every stream.
+ */
+export function createRunLogin(
+  options: { stdout?: 'inherit' | 'stderr' } = {},
+): (profileName?: string) => Promise<number> {
+  const stdio =
+    options.stdout === 'stderr'
+      ? (['inherit', STDERR_FD, 'inherit'] as const)
+      : ('inherit' as const);
+  return (profileName) =>
+    new Promise((resolve) => {
+      const child = spawn('aws', buildLoginArgs(profileName), {
+        stdio: stdio === 'inherit' ? stdio : [...stdio],
+      });
+      child.on('error', (error: NodeJS.ErrnoException) => {
+        resolve(error.code === 'ENOENT' ? AWS_CLI_NOT_FOUND : LOGIN_FAILED);
+      });
+      child.on('close', (code) => {
+        resolve(code ?? LOGIN_FAILED);
+      });
+    });
+}
+
+const defaultRunLogin = createRunLogin();
 
 function defaultWrite(message: string): void {
   console.error(message);
