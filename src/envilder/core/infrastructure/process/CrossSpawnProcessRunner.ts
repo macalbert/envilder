@@ -88,18 +88,35 @@ function forwardSignals(child: ChildProcess): () => void {
   };
 }
 
+/**
+ * Reasons a command exists but cannot be executed, reported with exit code
+ * 126. EACCES keeps the familiar `Permission denied: <command>` message.
+ */
+const NOT_EXECUTABLE_REASONS: Record<string, string> = {
+  ETXTBSY: 'text file busy (ETXTBSY)',
+  ELOOP: 'too many levels of symbolic links (ELOOP)',
+  ENOEXEC: 'exec format error (ENOEXEC)',
+  EISDIR: 'is a directory (EISDIR)',
+  ENOTDIR: 'a path component is not a directory (ENOTDIR)',
+};
+
+/**
+ * Maps a spawn failure to a domain error. Node throws some failures
+ * synchronously and emits others on the child, so both paths use this.
+ */
 function toSpawnError(error: unknown, command: string): unknown {
   const code = (error as NodeJS.ErrnoException | undefined)?.code;
-  switch (code) {
-    case 'ENOENT':
-      return new CommandNotFoundError(command);
-    case 'EACCES':
-      return new CommandNotExecutableError(command);
-    case 'ETXTBSY':
-      return new CommandNotExecutableError(command, 'text file busy (ETXTBSY)');
-    case 'E2BIG':
-      return new EnvironmentTooLargeError();
-    default:
-      return error;
+  if (code === 'ENOENT') {
+    return new CommandNotFoundError(command);
   }
+  if (code === 'EACCES') {
+    return new CommandNotExecutableError(command);
+  }
+  if (code === 'E2BIG') {
+    return new EnvironmentTooLargeError();
+  }
+  if (code !== undefined && Object.hasOwn(NOT_EXECUTABLE_REASONS, code)) {
+    return new CommandNotExecutableError(command, NOT_EXECUTABLE_REASONS[code]);
+  }
+  return error;
 }

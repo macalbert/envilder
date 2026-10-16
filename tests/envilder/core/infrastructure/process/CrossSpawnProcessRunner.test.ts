@@ -301,6 +301,82 @@ describe('CrossSpawnProcessRunner', () => {
     15_000,
   );
 
+  describe('SIGINT policy', () => {
+    const originalStdinIsTTY = process.stdin.isTTY;
+
+    function setStdinTty(value: boolean): void {
+      Object.defineProperty(process.stdin, 'isTTY', {
+        value,
+        configurable: true,
+      });
+    }
+
+    afterEach(() => {
+      setStdinTty(originalStdinIsTTY);
+    });
+
+    it.skipIf(isWindows)(
+      'Should_ForwardInterrupt_When_StdinIsNotATerminal',
+      async () => {
+        // Arrange
+        setStdinTty(false);
+        const readyFile = join(workDir, 'ready');
+        const script = `require('fs').writeFileSync(process.argv[1], 'ready'); setTimeout(() => process.exit(99), ${CHILD_SELF_EXIT_MS})`;
+        const running = sut.run({
+          command: process.execPath,
+          args: ['-e', script, readyFile],
+          env: parentEnvironment(),
+        });
+        await waitForFile(readyFile);
+
+        // Act
+        process.emit('SIGINT', 'SIGINT');
+        const actual = await running;
+
+        // Assert
+        expect(actual).toEqual({ code: null, signal: 'SIGINT' });
+      },
+      15_000,
+    );
+
+    it.skipIf(isWindows)(
+      'Should_NotDuplicateSigint_When_TerminalSendsInterrupt',
+      async () => {
+        // Arrange
+        setStdinTty(true);
+        const sigintListenersBefore = process.listenerCount('SIGINT');
+        const readyFile = join(workDir, 'ready');
+        const interruptedFile = join(workDir, 'interrupted');
+        const script = [
+          `const fs = require('fs');`,
+          `process.on('SIGINT', () => { fs.writeFileSync(process.argv[2], 'interrupted'); process.exit(42); });`,
+          `fs.writeFileSync(process.argv[1], 'ready');`,
+          'setTimeout(() => process.exit(0), 1500);',
+        ].join(' ');
+        const running = sut.run({
+          command: process.execPath,
+          args: ['-e', script, readyFile, interruptedFile],
+          env: parentEnvironment(),
+        });
+        await waitForFile(readyFile);
+        const sigintListenersWhileRunning = process.listenerCount('SIGINT');
+
+        // Act
+        process.emit('SIGINT', 'SIGINT');
+        const actual = await running;
+
+        // Assert
+        expect(actual).toEqual({ code: 0, signal: null });
+        expect(existsSync(interruptedFile)).toBe(false);
+        expect(sigintListenersWhileRunning).toBeGreaterThan(
+          sigintListenersBefore,
+        );
+        expect(process.listenerCount('SIGINT')).toBe(sigintListenersBefore);
+      },
+      15_000,
+    );
+  });
+
   it('Should_RemoveSignalListeners_When_ChildExits', async () => {
     // Arrange
     const listenerCounts = () =>

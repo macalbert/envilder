@@ -330,4 +330,22 @@ describe('Cli exec SSO recovery prompt', () => {
       ).toEqual([]);
     });
   });
+
+  it('Should_NotPromptOrRestartChild_When_SsoErrorIsRaisedAfterSpawn', async () => {
+    // Arrange
+    vi.mocked(AwsSsmSecretProvider.prototype.getSecret)
+      .mockReset()
+      .mockResolvedValue('resolved-value');
+    runSpy.mockRejectedValue(new SsoSessionExpiredError('dev'));
+
+    // Act
+    const actual = await runCli(['exec', '--', 'node', 'app.js']);
+
+    // Assert
+    expect(actual).toBe(125);
+    expect(
+      strip(`${stdoutChunks.join('')}${stderrChunks.join('')}`),
+    ).not.toContain('now? [y/N]');
+    expect(runSpy).toHaveBeenCalledTimes(1);
+  });
 });

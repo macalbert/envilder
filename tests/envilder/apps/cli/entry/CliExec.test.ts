@@ -797,6 +797,36 @@ describe('Cli exec', () => {
     });
   });
 
+  describe('sso error after the child started', () => {
+    beforeEach(async () => {
+      const { executeWithSsoRecovery } = await import(
+        '../../../../../src/envilder/apps/cli/recovery/SsoLoginRecovery'
+      );
+      vi.mocked(executeWithSsoRecovery).mockImplementation(async (run) => {
+        try {
+          await run();
+        } catch (error) {
+          if (!(error instanceof SsoSessionExpiredError)) {
+            throw error;
+          }
+          await run();
+        }
+      });
+    });
+
+    it('Should_NotRetryOrRestartChild_When_SsoErrorIsRaisedAfterSpawn', async () => {
+      // Arrange
+      runSpy.mockRejectedValue(new SsoSessionExpiredError('dev'));
+
+      // Act
+      const actual = await runCli(['exec', '--', 'node', 'app.js']);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(runSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('sso recovery', () => {
     beforeEach(async () => {
       const { executeWithSsoRecovery } = await import(

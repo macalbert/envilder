@@ -5,8 +5,11 @@ import {
 } from '../../domain/ChildEnvironment.js';
 import { exitCodeForChild } from '../../domain/ExecExitCode.js';
 import {
+  ExecInterruptedError,
+  ExpiredCredentialsError,
   InvalidArgumentError,
   SecretsFetchError,
+  SsoSessionExpiredError,
 } from '../../domain/errors/DomainErrors.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { IProcessContext } from '../../domain/ports/IProcessContext.js';
@@ -38,9 +41,11 @@ const NUL = '\0';
  * writing anything to disk.
  *
  * Exec mode is fail-closed: the child is never started when a secret is
- * missing, empty or unreadable. Work is split in two steps so callers can
- * retry the resolution (for example after an SSO login) without ever starting
- * the child twice: `prepare` resolves, `start` runs the child once.
+ * missing, empty or unreadable. `handle` is the entry point (reached through
+ * the dispatcher): `prepare` resolves every secret and `start` runs the child
+ * once. Only `prepare` raises retriable errors, such as an expired SSO
+ * session; `start` turns any SSO or credentials error into a non-retriable
+ * `ExecInterruptedError`, so retrying `handle` never starts the child twice.
  */
 @injectable()
 export class ExecWithSecretsCommandHandler {
@@ -112,8 +117,26 @@ export class ExecWithSecretsCommandHandler {
   /**
    * Starts the child once with the inherited environment plus the resolved
    * secrets (the map file wins) and waits for it to exit.
+   *
+   * SSO and credentials errors are only retriable before this point. Raised
+   * from here on, they become a non-retriable `ExecInterruptedError` so a
+   * caller's recovery never runs the command again.
    */
   async start(prepared: PreparedExec): Promise<number> {
+    try {
+      return await this.supervise(prepared);
+    } catch (error) {
+      if (
+        error instanceof SsoSessionExpiredError ||
+        error instanceof ExpiredCredentialsError
+      ) {
+        throw new ExecInterruptedError(error);
+      }
+      throw error;
+    }
+  }
+
+  private async supervise(prepared: PreparedExec): Promise<number> {
     const { command, secrets } = prepared;
     // The child shares stdout with the mask registrations: start it only
     // once every registration has been written.

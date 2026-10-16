@@ -655,4 +655,25 @@ describe('ExecWithSecretsCommandHandler', () => {
     const summary = strip(mockLogger.info.mock.calls[0][0]);
     expect(summary.endsWith('\u2192 node')).toBe(true);
   });
+
+  it.each([
+    ['SsoSessionExpired', () => new SsoSessionExpiredError('dev')],
+    ['ExpiredCredentials', () => new ExpiredCredentialsError()],
+  ])(
+    'Should_RejectWithNonRetriableError_When_RunnerThrows%sAfterResolution',
+    async (_name, buildError) => {
+      // Arrange
+      mockProcessRunner.run.mockRejectedValue(buildError());
+      const command = ExecWithSecretsCommand.create(MAP_PATH, 'node', []);
+
+      // Act
+      const actual = await sut.handle(command).catch((error: unknown) => error);
+
+      // Assert
+      expect(actual).toBeInstanceOf(Error);
+      expect(actual).not.toBeInstanceOf(SsoSessionExpiredError);
+      expect(actual).not.toBeInstanceOf(ExpiredCredentialsError);
+      expect(mockProcessRunner.run).toHaveBeenCalledTimes(1);
+    },
+  );
 });

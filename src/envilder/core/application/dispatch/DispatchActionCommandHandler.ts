@@ -1,8 +1,11 @@
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { InvalidArgumentError } from '../../domain/errors/DomainErrors.js';
 import { OperationMode } from '../../domain/OperationMode.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import { TYPES } from '../../types.js';
+import { ExecWithSecretsCommand } from '../execWithSecrets/ExecWithSecretsCommand.js';
+// Type-only: the GitHub Action bundle must not pull in exec mode.
+import type { ExecWithSecretsCommandHandler } from '../execWithSecrets/ExecWithSecretsCommandHandler.js';
 import { PullSecretsToEnvCommand } from '../pullSecretsToEnv/PullSecretsToEnvCommand.js';
 import type { PullSecretsToEnvCommandHandler } from '../pullSecretsToEnv/PullSecretsToEnvCommandHandler.js';
 import { PushEnvToSecretsCommand } from '../pushEnvToSecrets/PushEnvToSecretsCommand.js';
@@ -22,9 +25,24 @@ export class DispatchActionCommandHandler {
     private readonly pushSingleHandler: PushSingleCommandHandler,
     @inject(TYPES.ISecretProvider)
     private readonly secretProvider: ISecretProvider,
+    // Bound only by the CLI exec startup; absent in the GitHub Action.
+    @inject(TYPES.ExecWithSecretsCommandHandler)
+    @optional()
+    private readonly execHandler?: ExecWithSecretsCommandHandler,
   ) {}
 
-  async handleCommand(command: DispatchActionCommand): Promise<void> {
+  /**
+   * Runs the command's mode. Returns the exit code of the child process in
+   * exec mode, and `undefined` for every other mode.
+   */
+  async handleCommand(
+    command: DispatchActionCommand,
+  ): Promise<number | undefined> {
+    if (command.mode === OperationMode.EXEC) {
+      // No identity banner: exec prints a single summary line.
+      return this.handleExec(command);
+    }
+
     this.validateRequiredArguments(command);
 
     if (typeof this.secretProvider.logIdentity === 'function') {
@@ -54,6 +72,28 @@ export class DispatchActionCommandHandler {
     }
 
     this.validateMapAndEnvFileOptions(command);
+  }
+
+  private async handleExec(command: DispatchActionCommand): Promise<number> {
+    if (!command.map || !command.command) {
+      throw new InvalidArgumentError(
+        'Missing required arguments for exec: a map file and a command',
+      );
+    }
+    if (this.execHandler === undefined) {
+      throw new InvalidArgumentError(
+        'exec mode is not available in this entry point',
+      );
+    }
+
+    return this.execHandler.handle(
+      ExecWithSecretsCommand.create(
+        command.map,
+        command.command,
+        command.args,
+        command.sourceLabel,
+      ),
+    );
   }
 
   private async handlePushSingle(

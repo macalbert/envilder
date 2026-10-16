@@ -11,11 +11,6 @@ import {
   formatArgument,
   formatProgram,
 } from '../../../core/application/execWithSecrets/CommandLineFormatter.js';
-import { ExecWithSecretsCommand } from '../../../core/application/execWithSecrets/ExecWithSecretsCommand.js';
-import type {
-  ExecWithSecretsCommandHandler,
-  PreparedExec,
-} from '../../../core/application/execWithSecrets/ExecWithSecretsCommandHandler.js';
 import type { CliOptions } from '../../../core/domain/CliOptions.js';
 import {
   EXEC_COMMAND_NOT_EXECUTABLE,
@@ -463,10 +458,10 @@ async function resolveSecretsAndRun(
       identityBanner: false,
     })
     .create();
-  const handler = container.get<ExecWithSecretsCommandHandler>(
-    TYPES.ExecWithSecretsCommandHandler,
+  const dispatcher = container.get<DispatchActionCommandHandler>(
+    TYPES.DispatchActionCommandHandler,
   );
-  const command = ExecWithSecretsCommand.create(
+  const command = DispatchActionCommand.forExec(
     mapPath,
     commandName,
     childArgs,
@@ -483,20 +478,21 @@ async function resolveSecretsAndRun(
   if (!process.stdout.listeners('error').includes(ignoreStdoutError)) {
     process.stdout.on('error', ignoreStdoutError);
   }
-  return prepareAndStart(handler, command);
+  return dispatchExec(dispatcher, command);
 }
 
 function ignoreStdoutError(): void {}
 
-async function prepareAndStart(
-  handler: ExecWithSecretsCommandHandler,
-  command: ExecWithSecretsCommand,
+async function dispatchExec(
+  dispatcher: DispatchActionCommandHandler,
+  command: DispatchActionCommand,
 ): Promise<number> {
-  // SSO recovery wraps only the resolution, so the child starts at most once.
-  let prepared: PreparedExec | undefined;
+  // An SSO session error can only be raised while resolving secrets, before
+  // the child is spawned, so retrying the dispatch never starts it twice.
+  let exitCode: number | undefined;
   await executeWithSsoRecovery(
     async () => {
-      prepared = await handler.prepare(command);
+      exitCode = await dispatcher.handleCommand(command);
     },
     {
       // Exec prompts on stderr, so stdout may be redirected for the child.
@@ -506,10 +502,10 @@ async function prepareAndStart(
       runLogin: createRunLogin({ stdout: 'stderr' }),
     },
   );
-  if (prepared === undefined) {
+  if (exitCode === undefined) {
     throw new InvalidArgumentError('Secrets could not be resolved.');
   }
-  return handler.start(prepared);
+  return exitCode;
 }
 
 function reportExecFailure(error: unknown): number {

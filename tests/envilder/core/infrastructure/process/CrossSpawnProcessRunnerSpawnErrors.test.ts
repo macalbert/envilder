@@ -7,13 +7,22 @@ import {
 } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import { CrossSpawnProcessRunner } from '../../../../../src/envilder/core/infrastructure/process/CrossSpawnProcessRunner';
 
-const spawnState = vi.hoisted(() => ({ errorCode: 'ENOENT' }));
+const spawnState = vi.hoisted(() => ({
+  errorCode: 'ENOENT',
+  forceAsync: false,
+}));
 
 /**
- * Node throws some spawn failures synchronously (for example ETXTBSY and
- * E2BIG) and emits others asynchronously on the child (EACCES, ENOENT, ...).
+ * Node emits only these spawn failures asynchronously on the child; every
+ * other spawn failure (ETXTBSY, E2BIG, ELOOP, ...) is thrown synchronously.
  */
-const SYNCHRONOUS_SPAWN_ERRORS = new Set(['ETXTBSY', 'E2BIG']);
+const ASYNCHRONOUS_SPAWN_ERRORS = new Set([
+  'EACCES',
+  'EAGAIN',
+  'EMFILE',
+  'ENFILE',
+  'ENOENT',
+]);
 
 vi.mock('cross-spawn', () => {
   const spawn = vi.fn(() => {
@@ -21,7 +30,10 @@ vi.mock('cross-spawn', () => {
       new Error(`spawn failed: ${spawnState.errorCode}`),
       { code: spawnState.errorCode, errno: -1, syscall: 'spawn' },
     );
-    if (SYNCHRONOUS_SPAWN_ERRORS.has(spawnState.errorCode)) {
+    if (
+      !spawnState.forceAsync &&
+      !ASYNCHRONOUS_SPAWN_ERRORS.has(spawnState.errorCode)
+    ) {
       throw error;
     }
     const child = Object.assign(new EventEmitter(), {
@@ -39,6 +51,7 @@ vi.mock('cross-spawn', () => {
 describe('CrossSpawnProcessRunner spawn errors', () => {
   afterEach(() => {
     spawnState.errorCode = 'ENOENT';
+    spawnState.forceAsync = false;
   });
 
   it('Should_ExitWith126_When_ExecutableIsBusy', async () => {
@@ -73,6 +86,48 @@ describe('CrossSpawnProcessRunner spawn errors', () => {
     expect((actual as Error).message).toBe(
       'Environment too large to start the command (E2BIG).',
     );
+  });
+
+  it.each([
+    ['SymlinkLoop', 'ELOOP'],
+    ['ExecFormatError', 'ENOEXEC'],
+    ['Directory', 'EISDIR'],
+    ['PathComponentNotDirectory', 'ENOTDIR'],
+  ])(
+    'Should_RejectWithCommandNotExecutableError_When_SpawnThrows%s',
+    async (_name, code) => {
+      // Arrange
+      spawnState.errorCode = code;
+      const sut = new CrossSpawnProcessRunner();
+
+      // Act
+      const actual = await sut
+        .run({ command: './bin/tool', args: [], env: {} })
+        .catch((error: unknown) => error);
+
+      // Assert
+      expect(actual).toBeInstanceOf(CommandNotExecutableError);
+      expect((actual as Error).message).toContain('./bin/tool');
+      expect((actual as Error).message).toContain(code);
+      expect((actual as Error).message).not.toContain('Permission denied');
+    },
+  );
+
+  it('Should_RejectWithCommandNotExecutableError_When_ChildEmitsExecFormatError', async () => {
+    // Arrange
+    spawnState.errorCode = 'ENOEXEC';
+    spawnState.forceAsync = true;
+    const sut = new CrossSpawnProcessRunner();
+
+    // Act
+    const actual = await sut
+      .run({ command: './bin/tool', args: [], env: {} })
+      .catch((error: unknown) => error);
+
+    // Assert
+    expect(actual).toBeInstanceOf(CommandNotExecutableError);
+    expect((actual as Error).message).toContain('./bin/tool');
+    expect((actual as Error).message).toContain('ENOEXEC');
   });
 
   it('Should_KeepPermissionDeniedMessage_When_SpawnFailsWithEacces', async () => {

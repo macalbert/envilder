@@ -1,5 +1,6 @@
 import pc from 'picocolors';
 import {
+  ExecInterruptedError,
   ExpiredCredentialsError,
   SecretsFetchError,
   SsoSessionExpiredError,
@@ -15,6 +16,9 @@ export function presentError(error: unknown): string {
   }
   if (error instanceof SecretsFetchError) {
     return renderSecretsFetchError(error);
+  }
+  if (error instanceof ExecInterruptedError) {
+    return pc.red(error.message);
   }
   return renderFallback(error);
 }

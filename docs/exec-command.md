@@ -135,7 +135,7 @@ failure apart from your command's own exit code:
 | `n` | Your command exited with code `n` |
 | `128 + n` | Your command was killed by signal `n` (for example `137` for `SIGKILL`) |
 | `125` | Envilder failed before starting the command: bad options, missing command, no map file, unresolved secrets, expired credentials |
-| `126` | The command exists but cannot be executed (for example, a script without the executable bit) |
+| `126` | The command exists but cannot be executed: `Permission denied` (no executable bit, `EACCES`), or `Cannot execute <command>: <reason>` for a busy executable (`ETXTBSY`), a symbolic link loop (`ELOOP`), an unknown executable format (`ENOEXEC`), a directory (`EISDIR`) or a path component that is not a directory (`ENOTDIR`) |
 | `127` | The command was not found |
 
 On Windows, a signal that Envilder forwards to the command is still reported
@@ -167,7 +167,10 @@ Other conditions that stop the command from starting:
   login fails, the exit code is `125`. The prompt and the login output go to
   stderr, so the prompt also works when stdout is redirected
   (`envilder exec -- node print.js > out.json`); it needs stdin and stderr to
-  be a terminal.
+  be a terminal. Recovery only happens **before** the command starts: an SSO
+  or credentials error reported after that point is never retried, Envilder
+  prints `The command could not be supervised after it started: <reason>` and
+  exits with `125`.
 * On Windows, the map file declares names that differ only by case (for
   example `Path` and `PATH`). Windows treats them as the same variable, so
   Envilder exits with `125` before any provider call instead of silently
