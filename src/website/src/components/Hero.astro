@@ -12,9 +12,11 @@ const t = useTranslations(lang);
 type Seg = { text: string; cls: string; instant?: boolean };
 type Editor = { file: string; lang: string; code: Seg[][] };
 type Line = {
-  kind: 'type' | 'output' | 'blank' | 'editor';
+  kind: 'type' | 'output' | 'blank' | 'editor' | 'pause';
   segments?: Seg[];
   editor?: Editor;
+  /** For `pause`: how long the running process stays quiet. */
+  ms?: number;
 };
 type Scene = {
   id: string;
@@ -39,6 +41,42 @@ const jsonLines: Line[] = [
 ];
 
 const cliRule = '━'.repeat(60);
+
+// One LocalStack log line, with the same column padding the container uses.
+const localstackLog = (
+  time: string,
+  logger: string,
+  message: string,
+  thread = '  MainThread',
+): Line => ({
+  kind: 'output',
+  segments: [
+    { text: `2026-10-16T${time}  `, cls: 'comment' },
+    { text: 'INFO', cls: 'flag' },
+    { text: ` --- [${thread}] `, cls: 'output' },
+    { text: logger.padEnd(26), cls: 'command' },
+    { text: ` : ${message}`, cls: 'output' },
+  ],
+});
+
+const outputLine = (text: string, cls = 'output'): Line => ({
+  kind: 'output',
+  segments: [{ text, cls }],
+});
+
+const twinApp = (time: string, app: string, port: number): Line =>
+  localstackLog(
+    time,
+    'l.pro.apps.twin_plugin',
+    `Apps: ${app} ready at http://${app}.localhost.localstack.cloud:4566 -> 127.0.0.1:${port}`,
+  );
+
+const alembicPlugin = (name: string): Line =>
+  localstackLog(
+    '23:21:09.626',
+    'alembic.runtime.plugins',
+    `setup plugin alembic.${name}`,
+  );
 
 // Mirrors EnvironmentVariable.maskSecretPath: keep the last 3 characters.
 const maskPath = (path: string) => '*'.repeat(path.length - 3) + path.slice(-3);
@@ -350,27 +388,27 @@ const scenes: Scene[] = [
       {
         kind: 'output',
         segments: [
-          { text: 'envilder: 1 secret resolved (aws) → ', cls: 'output' },
+          {
+            text: 'envilder: 1 secret resolved (aws, profile=default) → ',
+            cls: 'output',
+          },
           { text: 'docker …', cls: 'command' },
         ],
       },
+      { kind: 'pause', ms: 700 },
       { kind: 'blank' },
-      {
-        kind: 'output',
-        segments: [{ text: 'LocalStack version: 2026.10.0', cls: 'output' }],
-      },
+      outputLine('LocalStack version: 2026.10.0'),
+      outputLine('LocalStack build date: 2026-10-13'),
+      outputLine('LocalStack build git hash: 738d58ee'),
+      { kind: 'blank' },
+      outputLine('Docker not available'),
       {
         kind: 'output',
         segments: [
-          { text: 'LocalStack build date: 2026-10-13', cls: 'output' },
-        ],
-      },
-      { kind: 'blank' },
-      {
-        kind: 'output',
-        segments: [
-          { text: 'INFO --- ', cls: 'output' },
-          { text: 'l.licensing.licensingv2', cls: 'command' },
+          { text: '2026-10-16T23:21:04.821  ', cls: 'comment' },
+          { text: 'INFO', cls: 'flag' },
+          { text: ' --- [  MainThread] ', cls: 'output' },
+          { text: 'l.licensing.licensingv2'.padEnd(26), cls: 'command' },
           {
             text: ' : Successfully requested and activated new license ',
             cls: 'output',
@@ -382,18 +420,39 @@ const scenes: Scene[] = [
           { text: ' 🔑✅', cls: 'output' },
         ],
       },
-      {
-        kind: 'output',
-        segments: [{ text: 'Ready.', cls: 'highlight' }],
-      },
-      {
-        kind: 'type',
-        segments: [{ text: '^C', cls: 'output' }],
-      },
-      {
-        kind: 'output',
-        segments: [{ text: '[shutdown] Stopping all services', cls: 'output' }],
-      },
+      localstackLog(
+        '23:21:05.607',
+        'localstack.utils.bootstrap',
+        'Execution of "_resolve_api_provider_specs" took 752.28ms',
+      ),
+      { kind: 'pause', ms: 900 },
+      twinApp('23:21:09.067', 'logodev', 4115),
+      twinApp('23:21:09.073', 'posthog', 4113),
+      twinApp('23:21:09.079', 'resend', 4114),
+      twinApp('23:21:09.086', 'stripe', 4111),
+      twinApp('23:21:09.096', 'twilio', 4112),
+      localstackLog(
+        '23:21:09.096',
+        'l.extensions.plugins',
+        'loaded 0 extensions',
+      ),
+      { kind: 'pause', ms: 400 },
+      alembicPlugin('autogenerate.schemas'),
+      alembicPlugin('autogenerate.tables'),
+      alembicPlugin('autogenerate.types'),
+      alembicPlugin('autogenerate.constraints'),
+      alembicPlugin('autogenerate.defaults'),
+      alembicPlugin('autogenerate.comments'),
+      alembicPlugin('ext.checkconstraint_byname'),
+      outputLine('Ready.', 'highlight'),
+      { kind: 'pause', ms: 1500 },
+      outputLine('Localstack runtime received signal 15'),
+      localstackLog(
+        '23:21:15.867',
+        'l.runtime.shutdown',
+        '[shutdown] Stopping all services',
+        'ime-Shutdown',
+      ),
       { kind: 'blank' },
       {
         kind: 'type',
@@ -940,9 +999,10 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
   type Seg = { text: string; cls: string; instant?: boolean };
   type Editor = { file: string; lang: string; code: Seg[][] };
   type Line = {
-    kind: 'type' | 'output' | 'blank' | 'editor';
+    kind: 'type' | 'output' | 'blank' | 'editor' | 'pause';
     segments?: Seg[];
     editor?: Editor;
+    ms?: number;
   };
   type Scene = { id: string; name: string; desc: string; lines: Line[] };
 
@@ -1075,6 +1135,7 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
           screen!.appendChild(renderEditorStatic(line.editor!));
           continue;
         }
+        if (line.kind === 'pause') continue;
         const el = makeLineEl();
         if (line.kind === 'blank') {
           el.innerHTML = '&nbsp;';
@@ -1327,6 +1388,11 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
 
       if (line.kind === 'editor') {
         if (!(await playEditor(line.editor!, cursor, id))) return -1;
+        return i + 1;
+      }
+
+      if (line.kind === 'pause') {
+        await sleep(line.ms ?? 0);
         return i + 1;
       }
 
