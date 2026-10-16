@@ -25,16 +25,30 @@ export class AwsSsmSecretProvider implements ISecretProvider {
   private sts: STS;
   private profile?: string;
   private identityLogged = false;
+  private readonly identityBanner: boolean;
 
-  constructor(ssm: SSM, logger: ILogger, sts: STS, profile?: string) {
+  /**
+   * @param identityBanner - Log the AWS identity on first use. Exec mode turns
+   * it off to keep its output to a single summary line.
+   */
+  constructor(
+    ssm: SSM,
+    logger: ILogger,
+    sts: STS,
+    profile?: string,
+    identityBanner = true,
+  ) {
     this.ssm = ssm;
     this.logger = logger;
     this.sts = sts;
     this.profile = profile;
+    this.identityBanner = identityBanner;
   }
 
   async getSecret(name: string): Promise<string | undefined> {
-    await this.logIdentity();
+    if (this.identityBanner) {
+      await this.logIdentity();
+    }
     try {
       const command = new GetParameterCommand({
         Name: name,
