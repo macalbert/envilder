@@ -131,7 +131,7 @@ jobs:
 
       # With CI=true the Vitest global setup skips the envilder .env fetch but
       # still builds the GitHub Action bundle (tsc + esbuild), which needs no
-      # Docker or secrets. This step runs an explicit list of Windows-relevant
-      # suites: add new exec/process test files here too.
+      # Docker or secrets. `test:exec` (package.json) runs an explicit list of
+      # Windows-relevant suites: add new exec/process test files there.
       - name: 🪟 Warp Zone (Run exec tests on Windows)
-        run: pnpm exec vitest run tests/envilder/core/infrastructure/process tests/envilder/apps/cli/entry/CliExec.test.ts tests/envilder/apps/cli/entry/CliExecSsoRecovery.test.ts tests/envilder/core/domain/ChildEnvironment.test.ts
+        run: pnpm test:exec

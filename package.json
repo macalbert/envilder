@@ -33,6 +33,7 @@
     "test": "pnpm --filter @envilder/website build && vitest run --reporter=verbose --coverage",
     "test:ci": "pnpm --filter @envilder/website build && vitest run --reporter=verbose --reporter=junit --coverage --outputFile=coverage/junit/test-results.xml",
     "test:update": "vitest run --reporter=verbose --update",
+    "test:exec": "vitest run tests/envilder/core/infrastructure/process tests/envilder/apps/cli/entry/CliExec.test.ts tests/envilder/apps/cli/entry/CliExecSsoRecovery.test.ts tests/envilder/core/domain/ChildEnvironment.test.ts",
     "release:publish": "npm pack --dry-run && npm publish --provenance",
     "action-publish": "pnpm build:gha && pnpm verify:gha",
     "release-patch": "pnpm version patch",
