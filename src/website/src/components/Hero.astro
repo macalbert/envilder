@@ -202,6 +202,62 @@ const scenes: Scene[] = [
     ],
   },
   {
+    id: 'exec',
+    name: t.hero.tabExec,
+    desc: t.hero.tabExecDesc,
+    icon: '/favicon.svg',
+    lines: [
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.execComment1, cls: 'comment' }],
+      },
+      {
+        kind: 'type',
+        delay: 500,
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' npx envilder', cls: 'command' },
+          { text: ' exec', cls: 'flag' },
+          { text: ' --', cls: 'output' },
+          { text: ' node server.js', cls: 'command' },
+        ],
+      },
+      {
+        kind: 'output',
+        delay: 550,
+        segments: [
+          { text: 'envilder: 1 secret resolved (aws) → ', cls: 'output' },
+          { text: 'node …', cls: 'command' },
+        ],
+      },
+      {
+        kind: 'output',
+        delay: 300,
+        segments: [
+          { text: 'Server listening on http://localhost:3000', cls: 'output' },
+        ],
+      },
+      { kind: 'blank' },
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.execComment2, cls: 'comment' }],
+      },
+      {
+        kind: 'type',
+        delay: 500,
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' ls -a', cls: 'command' },
+        ],
+      },
+      {
+        kind: 'output',
+        delay: 250,
+        segments: [{ text: '.  ..  envilder.json  server.js', cls: 'output' }],
+      },
+    ],
+  },
+  {
     id: 'nodejs',
     name: t.hero.tabNode,
     desc: t.hero.tabNodeDesc,
@@ -630,10 +686,10 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
   }
 
   .hero-term-modes {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-sm);
     margin-top: var(--space-md);
-    flex-wrap: wrap;
   }
 
   .hero-term-mode {
@@ -641,9 +697,8 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
     align-items: center;
     justify-content: center;
     gap: var(--space-xs);
-    flex: 1 1 auto;
     min-width: 0;
-    padding: var(--space-sm) var(--space-md);
+    padding: var(--space-sm);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     color: var(--color-text-muted);
