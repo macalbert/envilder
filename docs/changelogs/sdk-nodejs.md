@@ -6,9 +6,15 @@
   now links to the changelog and to `envilder.com/docs/sdks/nodejs/` with UTM
   tags, so visits from npm to envilder.com can be measured
 
+### Dependencies
+
+* Raise the minimum AWS SDK versions: `@aws-sdk/client-ssm` and
+  `@aws-sdk/credential-providers` now require `^3.1101.0` (previously
+  `^3.700.0`)
+
 ---
 
-## [0.4.0] - 2026-06-26
+## [0.4.0] - 2026-07-11
 
 ### Added
 
@@ -100,6 +106,8 @@
 * **Initial release**: Node.js runtime SDK for loading secrets directly
   into `process.env` from a map file. Supports AWS SSM Parameter Store and
   Azure Key Vault
+* **Batched AWS fetching**: Up to 10 SSM parameters per request
+  ([#170](https://github.com/macalbert/envilder/pull/170))
 * **Envilder facade**: `load()`, `resolveFile()`, `fromMapFile()` fluent
   builder for one-liner or fine-grained secret loading
 * **EnvilderClient**: Core resolver with `resolveSecrets()` and
