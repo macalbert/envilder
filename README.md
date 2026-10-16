@@ -35,6 +35,9 @@ npx envilder
 
 # Or with explicit paths
 npx envilder --map=envilder.json --envfile=.env
+
+# Or skip the file: run your app with the secrets in memory
+npx envilder exec -- npm run dev
 ```
 
 No SaaS middleman. One versioned mapping contract. Secrets stay in your cloud.
@@ -56,6 +59,8 @@ No SaaS middleman. One versioned mapping contract. Secrets stay in your cloud.
   needs and where they live. Git-versioned, PR-reviewable, and reused across environments.
 - ⚡ **Works everywhere your code runs.** CLI for local dev, GitHub Action for CI/CD, runtime SDKs
   for application startup. Same file, same result.
+- 🚫 **No `.env` file when you don't want one.** `envilder exec` starts any command with the
+  secrets in its environment, in any language, without writing anything to disk.
 - 🔄 **Rotate secrets without config drift.** Keep application-facing variable names stable while
   rotating real secret values in AWS SSM or Azure Key Vault. Generated `.env` files update only
   when Envilder runs again; runtime consumers must restart or resolve again.
@@ -69,6 +74,7 @@ No SaaS middleman. One versioned mapping contract. Secrets stay in your cloud.
 |---------|-------------|
 | 📋 **Declarative Mapping** | One JSON file defines how application variables map to cloud secrets. Git-versioned, PR-reviewable, and diff-able |
 | ☁️ **Cloud-native Providers** | AWS SSM and Azure Key Vault today |
+| ⚡ **Exec Mode** | `envilder exec -- <command>` runs any command with the secrets in its environment. Nothing written to disk, fail-closed, exit codes propagated. [Guide](docs/exec-command.md) |
 | 🔌 **Runtime SDKs** | Load secrets into memory at app startup: [.NET](./src/sdks/dotnet/README.md), [Python](./src/sdks/python/README.md), [Node.js](./src/sdks/nodejs/README.md). No `.env` on disk |
 | ⚙️ **GitHub Action** | Pull secrets in CI/CD. Same mapping, zero manual config |
 | 🔄 **Pull & Controlled Push** | Pull secrets to `.env`, or intentionally push local values to your cloud provider when bootstrapping or rotating |
@@ -374,6 +380,7 @@ prebuilt action, so consumers do not need an Envilder build step.
 graph LR
     A["Mapping Contract<br/>(envilder.json)"] --> B[Envilder]:::core
     B --> C["CLI → .env file"]
+    B --> X["CLI exec → process env"]
     B --> D["GitHub Action → CI/CD"]
     B --> E["SDK → app memory"]
     F["AWS SSM / Azure Key Vault"]:::cloud --> B
@@ -384,7 +391,8 @@ graph LR
 
 1. **Define**: create an `envilder.json` mapping env var names to cloud secret paths
 2. **Resolve**: Envilder fetches each secret from your cloud vault
-3. **Deliver**: secrets arrive as a `.env` file (CLI/GHA) or in-memory (SDKs)
+3. **Deliver**: secrets arrive as a `.env` file (CLI/GHA), in the environment of a command you
+   start with `envilder exec` (CLI), or in-memory (SDKs)
 4. **Rotate**: update secret values in your cloud provider while keeping the same
    application-facing mapping. Rerun Envilder to refresh a generated `.env`, or restart/re-resolve
    in runtime consumers
