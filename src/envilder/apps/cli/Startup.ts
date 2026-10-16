@@ -44,10 +44,15 @@ export class Startup {
       .bind<ILogger>(TYPES.ILogger)
       .to(StderrConsoleLogger)
       .inSingletonScope();
+    // Exec writes mask registrations to stderr: the runner reads workflow
+    // commands from both streams, and stdout belongs to the child.
     this.container
       .bind<ISecretMasker>(TYPES.ISecretMasker)
-      .to(options.githubActions ? GitHubActionsSecretMasker : NoOpSecretMasker)
-      .inSingletonScope();
+      .toConstantValue(
+        options.githubActions
+          ? new GitHubActionsSecretMasker({ stream: process.stderr })
+          : new NoOpSecretMasker(),
+      );
     this.container
       .bind<IProcessRunner>(TYPES.IProcessRunner)
       .to(CrossSpawnProcessRunner)

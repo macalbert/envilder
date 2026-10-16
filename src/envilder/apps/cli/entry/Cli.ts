@@ -29,6 +29,10 @@ import { PackageVersionReader } from '../../../core/infrastructure/package/Packa
 import { readMapFileConfig } from '../../../core/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../../core/types.js';
 import { presentError } from '../errors/CliErrorPresenter.js';
+import {
+  type KnownOption,
+  redactParseError,
+} from '../errors/ParseErrorRedactor.js';
 import { SilentExitError } from '../errors/SilentExitError.js';
 import {
   createConfirm,
@@ -104,6 +108,12 @@ export async function main() {
     .version(version)
     .enablePositionalOptions()
     .helpCommand(false)
+    // Inherited by `exec`, which is created after this call.
+    .configureOutput({
+      // Parse errors can quote secrets typed by the user (#554).
+      outputError: (message, write) =>
+        write(redactParseError(message, registeredOptions(program))),
+    })
     .option(
       '--map <path>',
       `Path to the JSON file with environment variable mapping (default: ${DEFAULT_MAP_FILE})`,
@@ -241,6 +251,19 @@ export async function main() {
     }
     throw error;
   }
+}
+
+/**
+ * Every option the CLI registers, on the root command and its subcommands,
+ * so parse-error suggestions can be checked against real options.
+ */
+function registeredOptions(program: Command): KnownOption[] {
+  return [program, ...program.commands].flatMap((command) =>
+    command.options.map((option) => ({
+      flags: option.flags,
+      long: option.long,
+    })),
+  );
 }
 
 function registerExecCommand(program: Command): void {
@@ -468,20 +491,23 @@ async function resolveSecretsAndRun(
     describeSecretSource(config),
   );
 
-  // A stdout write error (for example EPIPE on a mask registration) also
-  // reaches the write callback, so the masker's flush rejects and the child
-  // never starts. Without a listener the 'error' event would crash Envilder.
+  // A write error on stdout or stderr (for example EPIPE on a mask
+  // registration) also reaches the write callback, so the masker's flush
+  // rejects and the child never starts. Without a listener the 'error' event
+  // would crash Envilder.
   // The listener is never removed: the event can be emitted after exec has
   // already failed (for example when resolution rejects after some values
   // were masked), and exec is the last thing this process does, so keeping
   // it has no effect on pull or push.
-  if (!process.stdout.listeners('error').includes(ignoreStdoutError)) {
-    process.stdout.on('error', ignoreStdoutError);
+  for (const stream of [process.stdout, process.stderr]) {
+    if (!stream.listeners('error').includes(ignoreStreamError)) {
+      stream.on('error', ignoreStreamError);
+    }
   }
   return dispatchExec(dispatcher, command);
 }
 
-function ignoreStdoutError(): void {}
+function ignoreStreamError(): void {}
 
 async function dispatchExec(
   dispatcher: DispatchActionCommandHandler,

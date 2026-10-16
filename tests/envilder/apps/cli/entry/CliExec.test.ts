@@ -640,6 +640,191 @@ describe('Cli exec', () => {
     });
   });
 
+  describe('parse errors never echo option values (#554)', () => {
+    let dispatchSpy: MockInstance;
+
+    /** Flags passed here are `-x` or `--name`, so they need no escaping. */
+    function unknownOptionLine(flag: string): RegExp {
+      return new RegExp(
+        `(^|\\n)error: unknown option '${flag}'( \\(Did you mean --[A-Za-z0-9-]+\\?\\))?(\\n|$)`,
+      );
+    }
+
+    beforeEach(() => {
+      dispatchSpy = vi
+        .spyOn(DispatchActionCommandHandler.prototype, 'handleCommand')
+        .mockResolvedValue(undefined);
+    });
+
+    it('Should_NotEchoValue_When_UnknownOptionHasInlineValue', async () => {
+      // Arrange
+      const secret = 's3cretVALUE-root-6Gk2Pz';
+
+      // Act
+      const actual = await runCli([
+        `--valeu=${secret}`,
+        '--key=API_KEY',
+        '--secret-path=/app/api-key',
+      ]);
+
+      // Assert
+      expect(actual).toBe(1);
+      expect(stderr()).toContain("unknown option '--valeu'");
+      expect(stderr()).not.toContain(secret);
+      expect(stdout()).not.toContain(secret);
+      expect(getSecretSpy).not.toHaveBeenCalled();
+      expect(dispatchSpy).not.toHaveBeenCalled();
+    });
+
+    it('Should_KeepUnknownOptionMessage_When_UnknownOptionHasNoValue', async () => {
+      // Act
+      const actual = await runCli(['--valeu']);
+
+      // Assert
+      expect(actual).toBe(1);
+      expect(stderr()).toContain("error: unknown option '--valeu'");
+      expect(dispatchSpy).not.toHaveBeenCalled();
+    });
+
+    it('Should_NotEchoValue_When_ExecUnknownOptionHasInlineValue', async () => {
+      // Arrange
+      const secret = 's3cretVALUE-exec-1Tq8Wd';
+
+      // Act
+      const actual = await runCli([
+        'exec',
+        `--vaule=${secret}`,
+        'node',
+        'app.js',
+      ]);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(stderr()).toContain('--vaule');
+      expect(stderr()).not.toContain(secret);
+      expect(stdout()).not.toContain(secret);
+      expect(getSecretSpy).not.toHaveBeenCalled();
+      expect(runSpy).not.toHaveBeenCalled();
+    });
+
+    it('Should_KeepUnknownOptionMessage_When_ExecUnknownOptionHasNoValue', async () => {
+      // Act
+      const actual = await runCli(['exec', '--vaule', 'node', 'app.js']);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(stderr()).toContain("unknown option '--vaule'");
+      expect(runSpy).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      [
+        'RootValueWithQuote',
+        ["--valeu=ab'SECRET2-4Kd"],
+        'SECRET2-4Kd',
+        '--valeu',
+        1,
+      ],
+      [
+        'RootQuoteInsideName',
+        ["--va'leu=SECRET3-7Nw"],
+        'SECRET3-7Nw',
+        '--va',
+        1,
+      ],
+      ['RootAttachedShortValue', ['-xSECRET4-2Pq'], 'SECRET4-2Pq', '-x', 1],
+      [
+        'ExecValueWithQuote',
+        ['exec', "--vaule=x'SECRETb-8Hm", 'node'],
+        'SECRETb-8Hm',
+        '--vaule',
+        125,
+      ],
+      [
+        'ExecAttachedShortValue',
+        ['exec', '-zSECRETc-5Tr', 'node'],
+        'SECRETc-5Tr',
+        '-z',
+        125,
+      ],
+    ] as const)(
+      'Should_PrintOnlySafeOptionName_When_UnknownOptionIs%s',
+      async (_name, args, secret, flag, expectedCode) => {
+        // Act
+        const actual = await runCli([...args]);
+
+        // Assert
+        expect(actual).toBe(expectedCode);
+        expect(stderr()).toMatch(unknownOptionLine(flag));
+        expect(stderr()).not.toContain(secret);
+        expect(stdout()).not.toContain(secret);
+        expect(getSecretSpy).not.toHaveBeenCalled();
+        expect(runSpy).not.toHaveBeenCalled();
+      },
+    );
+
+    it('Should_PrintGenericUnknownOption_When_NameCannotBeExtractedSafely', async () => {
+      // Arrange
+      const secret = 'SECRET5-9Vx';
+
+      // Act
+      const actual = await runCli([`--'abc=${secret}`]);
+
+      // Assert
+      expect(actual).toBe(1);
+      expect(stderr()).toContain('unknown option');
+      expect(stderr()).not.toContain(secret);
+      expect(stderr()).not.toContain('abc');
+      expect(stdout()).not.toContain(secret);
+      expect(dispatchSpy).not.toHaveBeenCalled();
+    });
+
+    it('Should_NotEchoValue_When_RootReceivesExcessArgument', async () => {
+      // Arrange
+      const secret = 's3cretVALUE-arg-9Hc4Mv';
+
+      // Act
+      const actual = await runCli([`TOKEN=${secret}`]);
+
+      // Assert
+      expect(actual).toBe(1);
+      expect(stderr()).toMatch(
+        /(^|\n)error: too many arguments\. Expected 0 arguments but got 1\.(\n|$)/,
+      );
+      expect(stderr()).not.toContain(secret);
+      expect(stdout()).not.toContain(secret);
+      expect(dispatchSpy).not.toHaveBeenCalled();
+    });
+
+    it('Should_NotEchoValue_When_OptionArgumentIsMissing', async () => {
+      // Arrange
+      const secret = 's3cretVALUE-missing-3Rf7Ny';
+
+      // Act
+      const actual = await runCli([`--value=${secret}`, '--key']);
+
+      // Assert
+      expect(actual).toBe(1);
+      expect(stderr()).not.toContain(secret);
+      expect(stdout()).not.toContain(secret);
+      expect(dispatchSpy).not.toHaveBeenCalled();
+    });
+
+    it('Should_NotEchoValue_When_ExecOptionArgumentIsMissing', async () => {
+      // Arrange
+      const secret = 's3cretVALUE-execmissing-5Lb0Qs';
+
+      // Act
+      const actual = await runCli(['exec', `--profile=${secret}`, '--map']);
+
+      // Assert
+      expect(actual).toBe(125);
+      expect(stderr()).not.toContain(secret);
+      expect(stdout()).not.toContain(secret);
+      expect(runSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('root command compatibility', () => {
     it('Should_DispatchPull_When_RootCommandHasNoSubcommand', async () => {
       // Arrange
@@ -946,11 +1131,11 @@ describe('Cli exec', () => {
       await runCli(['exec', '--', 'npm', 'test']);
 
       // Assert
-      const stdoutWrites = vi.mocked(process.stdout.write);
-      const maskWriteOrders = stdoutWrites.mock.calls
+      const stderrWrites = vi.mocked(process.stderr.write);
+      const maskWriteOrders = stderrWrites.mock.calls
         .map((call, index) => ({
           text: String(call[0]),
-          order: stdoutWrites.mock.invocationCallOrder[index],
+          order: stderrWrites.mock.invocationCallOrder[index],
         }))
         .filter(({ text }) => text.startsWith('::add-mask::'));
       expect(maskWriteOrders.map(({ text }) => text)).toEqual(
@@ -962,11 +1147,22 @@ describe('Cli exec', () => {
       expect(
         Math.max(...maskWriteOrders.map(({ order }) => order)),
       ).toBeLessThan(runSpy.mock.invocationCallOrder[0]);
-      expect(
-        stdout()
-          .split('\n')
-          .filter((line) => line !== '' && !line.startsWith('::add-mask::')),
-      ).toEqual([]);
+      expect(stdout()).toBe('');
+    });
+
+    it('Should_NotWriteMaskCommandsToStdout_When_ExecRunsInGitHubActions', async () => {
+      // Arrange
+      vi.stubEnv('GITHUB_ACTIONS', 'true');
+
+      // Act
+      const actual = await runCli(['exec', '--', 'node', 'print.js']);
+
+      // Assert
+      expect(actual).toBe(0);
+      expect(stdout()).not.toContain('::add-mask::');
+      expect(stderr()).toContain(`::add-mask::${DB_URL_VALUE}`);
+      expect(stderr()).toContain(`::add-mask::${API_KEY_VALUE}`);
+      expect(runSpy).toHaveBeenCalledTimes(1);
     });
 
     it('Should_NotEmitMaskCommands_When_NotRunningInGitHubActions', async () => {
@@ -975,6 +1171,7 @@ describe('Cli exec', () => {
 
       // Assert
       expect(stdout()).not.toContain('::add-mask::');
+      expect(stderr()).not.toContain('::add-mask::');
       expect(runSpy).toHaveBeenCalledTimes(1);
     });
   });
@@ -986,14 +1183,14 @@ describe('Cli exec', () => {
       const writeError = Object.assign(new Error('write EPIPE'), {
         code: 'EPIPE',
       });
-      vi.mocked(process.stdout.write).mockImplementation(((
+      vi.mocked(process.stderr.write).mockImplementation(((
         chunk: unknown,
         ...rest: unknown[]
       ) => {
-        stdoutChunks.push(String(chunk));
+        stderrChunks.push(String(chunk));
         completeWrite(rest, writeError);
         return true;
-      }) as typeof process.stdout.write);
+      }) as typeof process.stderr.write);
 
       // Act
       const actual = await runCli(['exec', '--', 'npm', 'test']);

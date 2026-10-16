@@ -207,7 +207,7 @@ expanded.
 
 Your command owns stdout. All Envilder output goes to **stderr**, so
 `envilder exec -- node print.js > out.json` writes only your command's output
-to `out.json`.
+to `out.json`. This holds in every environment, GitHub Actions included.
 
 On success Envilder prints a single summary line, for example:
 
@@ -227,13 +227,26 @@ never printed; resolved values appear masked. The ASCII banner only appears in
 ### GitHub Actions masking
 
 When `GITHUB_ACTIONS=true`, Envilder registers every resolved value with
-GitHub's log masking (`::add-mask::`) **before** the command starts, so values
-your command prints are masked in the job log. Envilder waits until every mask
-registration has been written to stdout before it starts the command, so the
-command's output can never reach the log ahead of them; if a registration
-cannot be written, the command is not started (exit code `125`). GitHub reads
-these commands from stdout, so they are the one documented exception to the
-stdout rule above. Outside GitHub Actions nothing is emitted.
+GitHub's log masking (`::add-mask::`) so values your command prints are masked
+in the job log. **Every registration is written to stderr before the command
+starts**: Envilder waits for each write to complete, and if one cannot be
+written the command is not started (exit code `125`). Outside GitHub Actions
+nothing is emitted.
+
+The registrations go to stderr, which the runner reads workflow commands from
+just like stdout, because writing them to stdout would put the secret values
+into any file your command's output is redirected to. stdout therefore carries
+only your command's output.
+
+Limitations:
+
+* Envilder's stderr must reach the runner for the masks to be registered: do
+  not redirect the stderr of `envilder exec` away from the step log (for
+  example with `2> file` or `2>/dev/null`).
+* The runner reads stdout and stderr through separate pipes, so strict
+  ordering between the two streams in the job log cannot be guaranteed.
+  Envilder guarantees what it controls: the registrations are written before
+  the command starts.
 
 ```yaml
 - run: npx envilder exec -- npm test
@@ -256,7 +269,9 @@ stdout rule above. Outside GitHub Actions nothing is emitted.
   grace period is left to the process manager.
 * **What is guaranteed**: like `chamber exec` and `op run`, Envilder forwards
   signals to its **direct child only**; it does not signal the child's process
-  group. Envilder never exits before its direct child. Stopping the processes that child started is the child's
+  group. Envilder never exits before its direct child, even when delivering a
+  signal to it fails (for example `EPERM`): it keeps waiting for the command
+  to exit. Stopping the processes that child started is the child's
   responsibility: a launcher (`npm`, a shell script) that exits on `SIGTERM`
   without stopping its own children can leave them running, on any operating
   system. On Windows the same applies to `.cmd`/`.bat` shims such as `npm`: a

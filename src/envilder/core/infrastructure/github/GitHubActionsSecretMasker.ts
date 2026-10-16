@@ -2,7 +2,7 @@ import type { ISecretMasker } from '../../domain/ports/ISecretMasker.js';
 
 /**
  * Registers values with GitHub Actions log masking through `::add-mask::`
- * workflow commands on stdout.
+ * workflow commands, on stdout unless another stream is given.
  *
  * Writes to a piped stdout are asynchronous on POSIX, so each write is
  * tracked through its callback: `flush()` resolves once every registration
@@ -13,6 +13,16 @@ import type { ISecretMasker } from '../../domain/ports/ISecretMasker.js';
  */
 export class GitHubActionsSecretMasker implements ISecretMasker {
   private pending: Promise<void> = Promise.resolve();
+  private readonly stream: NodeJS.WritableStream;
+
+  /**
+   * @param options.stream - Where workflow commands are written (default:
+   * stdout). The runner reads them from stdout and stderr; exec mode uses
+   * stderr so stdout carries only the child's output.
+   */
+  constructor(options: { stream?: NodeJS.WritableStream } = {}) {
+    this.stream = options.stream ?? process.stdout;
+  }
 
   mask(value: string): void {
     const escapedValue = value
@@ -20,7 +30,7 @@ export class GitHubActionsSecretMasker implements ISecretMasker {
       .replace(/\r/g, '%0D')
       .replace(/\n/g, '%0A');
     const written = new Promise<void>((resolve, reject) => {
-      process.stdout.write(`::add-mask::${escapedValue}\n`, (error) => {
+      this.stream.write(`::add-mask::${escapedValue}\n`, (error) => {
         if (error) {
           reject(error);
           return;

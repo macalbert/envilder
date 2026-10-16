@@ -49,12 +49,25 @@ export class CrossSpawnProcessRunner implements IProcessRunner {
         finish();
       };
 
-      child.once('error', (error) => {
+      let spawned = false;
+      child.once('spawn', () => {
+        spawned = true;
+      });
+      // Kept attached for the child's whole life: a later 'error' with no
+      // listener would crash Envilder while the child is still running.
+      child.on('error', (error) => {
+        if (spawned && !isSpawnFailure(error)) {
+          // For example a failed signal delivery (EPERM from kill): the child
+          // is still running, so keep forwarding signals and wait for it.
+          return;
+        }
         settle(() => reject(toSpawnError(error, request.command)));
       });
-      child.once('exit', (code, signal) => {
+      const onExit = (code: number | null, signal: NodeJS.Signals | null) => {
         settle(() => resolve({ code, signal }));
-      });
+      };
+      child.once('exit', onExit);
+      child.once('close', onExit);
     });
   }
 }
@@ -86,6 +99,17 @@ function forwardSignals(child: ChildProcess): () => void {
       process.removeListener(signal, listener);
     }
   };
+}
+
+/**
+ * Whether an error reports that the command could not be started. cross-spawn
+ * reports an unresolvable command on Windows after the `cmd.exe` wrapper has
+ * spawned, with a `spawn <command>` syscall, so the syscall is checked rather
+ * than only the moment the error arrives.
+ */
+function isSpawnFailure(error: unknown): boolean {
+  const syscall = (error as NodeJS.ErrnoException | undefined)?.syscall;
+  return typeof syscall === 'string' && syscall.startsWith('spawn');
 }
 
 /**

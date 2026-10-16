@@ -18,14 +18,27 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   Resolution is fail-closed: the command never starts when a secret is missing,
   empty or unreadable. Mapped values override inherited variables, naming the
   overridden variables on stderr. All Envilder output goes to stderr as a
-  single summary line that names the program but never its arguments. Inside
-  GitHub Actions every value is registered for masking, and the registrations
-  are written, before the command starts. Exit codes follow GNU `env`: the
-  command's own code, `128+n` for signals, `125` for Envilder errors, `126`
-  and `127` when the command cannot be executed or found. `SIGTERM` and `SIGHUP` are forwarded and the
-  command is awaited without a timeout. Exec mode is not a sandbox: see
+  single summary line that names the program but never its arguments, so
+  stdout carries only the command's output. Inside GitHub Actions every value
+  is registered for masking, and every registration is written to stderr
+  before the command starts. Exit codes follow GNU `env`: the command's own
+  code, `128+n` for signals, `125` for Envilder errors, `126` and `127` when
+  the command cannot be executed or found. `SIGTERM` and `SIGHUP` are
+  forwarded and the command is awaited without a timeout, even if a signal
+  cannot be delivered. Exec mode is not a sandbox: see
   [docs/exec-command.md](../exec-command.md)
   ([#550](https://github.com/macalbert/envilder/issues/550))
+
+### Security
+
+* **Parse errors no longer echo option values or arguments**: parse errors
+  are rebuilt from safe forms, so option values and extra arguments are never
+  printed. An unknown option is reported by its name only (`--valeu=<value>`
+  is shown as `unknown option '--valeu'`, or as a generic message when no safe
+  name can be extracted), "too many arguments" shows only the counts, and any
+  other parse error is replaced with a generic message. Exit codes are
+  unchanged
+  ([#554](https://github.com/macalbert/envilder/issues/554))
 
 ---
 

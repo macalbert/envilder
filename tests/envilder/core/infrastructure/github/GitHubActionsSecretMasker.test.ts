@@ -215,6 +215,105 @@ describe('GitHubActionsSecretMasker', () => {
     expect(settled).toBe(true);
   });
 
+  describe('stderr destination', () => {
+    function callbackOf(args: unknown[]): (error?: Error | null) => void {
+      return (
+        args.find(
+          (arg): arg is (error?: Error | null) => void =>
+            typeof arg === 'function',
+        ) ?? (() => undefined)
+      );
+    }
+
+    it('Should_WriteRegistrationToStderr_When_StreamIsStderr', () => {
+      // Arrange
+      const stdoutWrite = vi
+        .spyOn(process.stdout, 'write')
+        .mockReturnValue(true);
+      const stderrWrite = vi
+        .spyOn(process.stderr, 'write')
+        .mockReturnValue(true);
+      const sut = new GitHubActionsSecretMasker({ stream: process.stderr });
+
+      // Act
+      sut.mask('secret%value\r\nnext');
+
+      // Assert
+      expect(stdoutWrite).not.toHaveBeenCalled();
+      expect(stderrWrite).toHaveBeenCalledTimes(1);
+      expect(String(stderrWrite.mock.calls[0][0])).toBe(
+        '::add-mask::secret%25value%0D%0Anext\n',
+      );
+    });
+
+    it('Should_ResolveFlushOnlyAfterStderrWriteCallback_When_StreamIsStderr', async () => {
+      // Arrange
+      const callbacks: Array<(error?: Error | null) => void> = [];
+      vi.spyOn(process.stdout, 'write').mockImplementation(((
+        ...args: unknown[]
+      ) => {
+        const callback = callbackOf(args);
+        process.nextTick(() => callback(null));
+        return true;
+      }) as typeof process.stdout.write);
+      vi.spyOn(process.stderr, 'write').mockImplementation(((
+        ...args: unknown[]
+      ) => {
+        callbacks.push(callbackOf(args));
+        return true;
+      }) as typeof process.stderr.write);
+      const sut = new GitHubActionsSecretMasker({ stream: process.stderr });
+      sut.mask('first-value');
+      sut.mask('second-value');
+      let settled = false;
+
+      // Act
+      const flushing = sut.flush().then(() => {
+        settled = true;
+      });
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      const settledBeforeCallbacks = settled;
+      for (const callback of callbacks) {
+        callback(null);
+      }
+      await flushing;
+
+      // Assert
+      expect(settledBeforeCallbacks).toBe(false);
+      expect(callbacks).toHaveLength(2);
+      expect(settled).toBe(true);
+    });
+
+    it('Should_RejectFlush_When_StderrWriteFails', async () => {
+      // Arrange
+      const writeError = Object.assign(new Error('write EPIPE'), {
+        code: 'EPIPE',
+      });
+      vi.spyOn(process.stdout, 'write').mockImplementation(((
+        ...args: unknown[]
+      ) => {
+        const callback = callbackOf(args);
+        process.nextTick(() => callback(null));
+        return true;
+      }) as typeof process.stdout.write);
+      vi.spyOn(process.stderr, 'write').mockImplementation(((
+        ...args: unknown[]
+      ) => {
+        const callback = callbackOf(args);
+        process.nextTick(() => callback(writeError));
+        return true;
+      }) as typeof process.stderr.write);
+      const sut = new GitHubActionsSecretMasker({ stream: process.stderr });
+      sut.mask('registered-value');
+
+      // Act
+      const actual = sut.flush();
+
+      // Assert
+      await expect(actual).rejects.toBe(writeError);
+    });
+  });
+
   // Pipe writes are synchronous on Windows, so this ordering check can only
   // catch a regression on POSIX, where stdout pipe writes are asynchronous.
   it('Should_DeliverEveryMaskBeforeChildOutput_When_StdoutPipeIsBackpressured', async () => {
