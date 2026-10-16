@@ -1,5 +1,11 @@
 # Envilder .NET SDK: Examples
 
+> [!TIP]
+> For complete, runnable setups with tests against AWS SSM and Azure Key Vault, see
+> [`dotnet-testcontainers`](https://github.com/macalbert/envilder-examples/tree/main/dotnet-testcontainers) and
+> [`dotnet-aspire`](https://github.com/macalbert/envilder-examples/tree/main/dotnet-aspire) in
+> [envilder-examples](https://github.com/macalbert/envilder-examples).
+
 Minimal examples showing how to load secrets from AWS SSM Parameter Store using the .NET SDK.
 
 Uses .NET 10
