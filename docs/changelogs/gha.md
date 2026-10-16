@@ -2,10 +2,11 @@
 
 ### Changed
 
-* **Track mask registration writes**: The Action's secret masker now waits
-  for each `::add-mask::` write to complete and reports write failures. The
-  registrations it prints are unchanged, and the Action still only pulls
-  secrets; the new `envilder exec` command is CLI-only
+* **Shared secret masker can report when registrations are written**: The
+  masker the Action shares with the CLI gained an internal capability to
+  report when its `::add-mask::` writes have completed, used by the new
+  CLI-only `envilder exec` command. The Action's pull flow does not use it,
+  and the registrations it prints are unchanged
   ([#550](https://github.com/macalbert/envilder/issues/550))
 
 ---
