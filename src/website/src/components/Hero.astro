@@ -891,6 +891,7 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
   .hero-term-screen :global(.vim[data-lang='typescript']) {
     --vim-accent: #3178c6;
     --vim-accent-text: #ffffff;
+    --vim-accent-label: #5a9be8;
     --tok-kw: #569cd6;
     --tok-type: #4ec9b0;
     --tok-fn: #dcdcaa;
@@ -909,6 +910,7 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
   .hero-term-screen :global(.vim[data-lang='cs']) {
     --vim-accent: #7c4dff;
     --vim-accent-text: #ffffff;
+    --vim-accent-label: #a78bfa;
     --tok-kw: #a78bfa;
     --tok-type: #4ec9b0;
     --tok-fn: #dcdcaa;
@@ -989,8 +991,9 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
     padding: 0 1ch;
   }
 
+  /* Lighter shade where the accent alone is under 4.5:1 on the bar. */
   .hero-term-screen :global(.vim-lang) {
-    color: var(--vim-accent);
+    color: var(--vim-accent-label, var(--vim-accent));
   }
 
   .hero-term-screen :global(.vim-spacer) {
@@ -1424,7 +1427,16 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       }
 
       if (line.kind === 'pause') {
-        await sleep(line.ms ?? 0);
+        // Sleep in short steps so a hover pause or a newer run takes effect
+        // mid-pause instead of after it.
+        let left = line.ms ?? 0;
+        while (left > 0) {
+          await waitWhilePaused();
+          if (!alive(id)) return -1;
+          const step = Math.min(left, 100);
+          await sleep(step);
+          left -= step;
+        }
         return i + 1;
       }
 
