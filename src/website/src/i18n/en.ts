@@ -368,6 +368,13 @@ export const en: Translations = {
           'Native runtime library: load secrets directly into process.env from a map-file. Published to npm',
       },
       {
+        status: 'done',
+        label: '✅',
+        title: 'Exec mode (envilder exec)',
+        description:
+          'Run a command with your secrets in its environment, without writing a .env file: envilder exec [options] [--] <command> [args...]',
+      },
+      {
         status: 'next',
         label: '🐹',
         title: 'Go SDK (envilder)',
@@ -380,13 +387,6 @@ export const en: Translations = {
         title: 'Java SDK (envilder)',
         description:
           'Runtime library for Spring Boot and Android backends. Published to Maven Central',
-      },
-      {
-        status: 'planned',
-        label: '⚡',
-        title: 'Exec mode (--exec)',
-        description:
-          'Planned mode; not available yet. It would inject secrets into a child process without writing to disk',
       },
       {
         status: 'planned',
@@ -796,6 +796,13 @@ export const en: Translations = {
     pullCommentAzureConfig: '# Azure via $config in map file',
     pullCommentAzureFlags: '# Azure via CLI flags',
     pullOutputTitle: 'Output',
+    pullExecTitle: 'Skip the .env file with envilder exec',
+    pullExecDesc:
+      'envilder exec resolves the same map file and starts your command with the secrets in its environment. Nothing is written to disk. Envilder options go before the command (or before an optional --); everything after belongs to your command.',
+    pullExecNote:
+      'Exec mode is fail-closed: the command does not start if any secret is missing. It is not a sandbox: your command and everything it starts can read the secrets.',
+    pullExecGuideLink:
+      'Exec command guide: exit codes, signals and GitHub Actions masking',
     pushTitle: 'Push command',
     pushDesc:
       'Upload environment variables from a local .env file to your cloud provider using a mapping file.',

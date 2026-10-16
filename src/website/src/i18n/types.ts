@@ -462,6 +462,10 @@ export interface DocsTranslations {
   pullCommentAzureConfig: string;
   pullCommentAzureFlags: string;
   pullOutputTitle: string;
+  pullExecTitle: string;
+  pullExecDesc: string;
+  pullExecNote: string;
+  pullExecGuideLink: string;
   // Push command
   pushTitle: string;
   pushDesc: string;

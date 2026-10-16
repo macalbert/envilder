@@ -133,7 +133,7 @@ For documentation work, include:
 Product names, CLI flags, code tokens, and acronyms stay in English:
 
 `envilder`, `AWS SSM`, `Azure Key Vault`, `GitHub Action`, `envilder.json`,
-`.env`, `--map`, `--envfile`, `--exec`, `--provider`, `--push`, `--profile`,
+`.env`, `--map`, `--envfile`, `envilder exec`, `--provider`, `--push`, `--profile`,
 `--vault-url`, `CI/CD`, `IAM`, `RBAC`, `CLI`, `API`, `JSON`, `YAML`,
 `Node.js`, `pnpm`, `npx`, `$config`
 

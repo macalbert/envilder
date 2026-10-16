@@ -370,6 +370,13 @@ export const ca: Translations = {
           'Biblioteca nativa de runtime: carrega secrets directament a process.env des d’un map-file. Publicat a npm',
       },
       {
+        status: 'done',
+        label: '✅',
+        title: 'Mode exec (envilder exec)',
+        description:
+          'Executa una comanda amb els teus secrets al seu entorn, sense escriure cap fitxer .env: envilder exec [options] [--] <command> [args...]',
+      },
+      {
         status: 'next',
         label: '🐹',
         title: 'Go SDK (envilder)',
@@ -389,13 +396,6 @@ export const ca: Translations = {
         title: 'GCP Secret Manager',
         description:
           'Tercer proveïdor cloud planificat; encara no està disponible',
-      },
-      {
-        status: 'planned',
-        label: '⚡',
-        title: 'Mode exec (--exec)',
-        description:
-          'Mode planificat; encara no està disponible. Injectaria secrets en un procés fill sense escriure a disc',
       },
       {
         status: 'planned',
@@ -806,6 +806,13 @@ export const ca: Translations = {
     pullCommentAzureConfig: '# Azure via $config al fitxer de mapeig',
     pullCommentAzureFlags: '# Azure via flags CLI',
     pullOutputTitle: 'Sortida',
+    pullExecTitle: 'Prescindeix del fitxer .env amb envilder exec',
+    pullExecDesc:
+      "envilder exec resol el mateix map file i inicia la teva comanda amb els secrets al seu entorn. No s'escriu res a disc. Les opcions d'Envilder van abans de la comanda (o abans d'un -- opcional); tot el que va després pertany a la teva comanda.",
+    pullExecNote:
+      "El mode exec és fail-closed: la comanda no s'inicia si falta algun secret. No és un sandbox: la teva comanda i tot el que iniciï poden llegir els secrets.",
+    pullExecGuideLink:
+      'Guia de la comanda exec: codis de sortida, senyals i emmascarament a GitHub Actions',
     pushTitle: 'Comanda push',
     pushDesc:
       "Puja variables d'entorn d'un fitxer .env local al teu proveïdor al núvol utilitzant un fitxer de mapeig.",
