@@ -55,6 +55,8 @@ export const en: Translations = {
     viewOnGithub: '★ View on GitHub',
     tabCli: 'CLI',
     tabCliDesc: 'writes .env',
+    tabExec: 'exec',
+    tabExecDesc: 'no .env file',
     tabSetup: 'Setup',
     tabSetupDesc: 'create secrets',
     tabNode: 'Node.js',
@@ -65,6 +67,8 @@ export const en: Translations = {
     tabDotnetDesc: 'at runtime',
     terminalComment1: '# 1. Map env vars to SSM paths',
     terminalComment2: '# 2. Resolve secrets into .env',
+    execComment1: '# Run any command with secrets in memory',
+    execComment2: '# Nothing written to disk',
     setupComment1: '# AWS CLI configured with permissions to SSM',
     setupComment2: '# Push each secret to SSM Parameter Store',
     sdkCommentLoad: '# Load the same contract at runtime',
@@ -449,6 +453,7 @@ export const en: Translations = {
     linkGettingStarted: 'Getting Started',
     linkPullCommand: 'Pull Command',
     linkPushCommand: 'Push Command',
+    linkExecCommand: 'Exec Command',
     linkGithubAction: 'GitHub Action',
     linkIssues: 'Issues',
     linkDiscussions: 'Discussions',
@@ -580,6 +585,20 @@ export const en: Translations = {
         cardSummary:
           'Upload a mapped .env file or one secret to your provider.',
       },
+      'cli-exec': {
+        title:
+          'Exec mode: run a command with AWS SSM or Azure Key Vault secrets',
+        description:
+          'Reference for envilder exec: resolve AWS SSM or Azure Key Vault secrets in memory and start your command with them, without writing a .env file.',
+        heading: 'CLI exec',
+        intro:
+          'Run a command with your secrets in its environment, without writing a .env file.',
+        breadcrumb: 'CLI exec',
+        navLabel: 'CLI exec',
+        cardTitle: 'CLI exec command',
+        cardSummary:
+          'Start a command with mapped secrets in memory, with no .env file.',
+      },
       'github-action': {
         title: 'Load AWS SSM and Azure Key Vault secrets in GitHub Actions',
         description:
@@ -671,6 +690,10 @@ export const en: Translations = {
     reqDownload: 'Download',
     reqInstallGuide: 'Install guide',
     installTitle: 'Installation',
+    installNext: 'Next, choose how the secrets reach your app:',
+    installNextPull: 'CLI pull: generate a .env file',
+    installNextExec:
+      'CLI exec: run your command with the secrets in memory, no .env file',
     // AWS setup
     awsSetupTitle: 'AWS setup',
     awsSetupIntro:
@@ -858,13 +881,78 @@ export const en: Translations = {
     pullCommentAzureConfig: '# Azure via $config in map file',
     pullCommentAzureFlags: '# Azure via CLI flags',
     pullOutputTitle: 'Output',
-    pullExecTitle: 'Skip the .env file with envilder exec',
+    pullExecTitle: "Don't want a .env file?",
     pullExecDesc:
-      'envilder exec resolves the same map file and starts your command with the secrets in its environment. Nothing is written to disk. Envilder options go before the command (or before an optional --); everything after belongs to your command.',
-    pullExecNote:
-      'Exec mode is fail-closed: the command does not start if any secret is missing. It is not a sandbox: your command and everything it starts can read the secrets.',
-    pullExecGuideLink:
-      'Exec command guide: exit codes, signals and GitHub Actions masking',
+      'Use envilder exec: it resolves the same map file and starts your command with the secrets in its environment, without writing anything to disk.',
+    pullExecGuideLink: 'Read the CLI exec guide',
+    execTitle: 'Exec command',
+    execDesc:
+      'envilder exec resolves every secret in your map file and starts a command with those values in its environment. Nothing is written to disk: there is no .env file to gitignore, keep in sync or clean up. The map file and its $config work exactly as in pull mode.',
+    execUsageTitle: 'Usage',
+    execSeparatorTitle: 'Where your command starts: the -- rule',
+    execSeparatorDesc:
+      'Envilder options come first. Your command starts at the first argument that is not an Envilder option, or right after -- when present. Everything from there on is passed to your command verbatim, even if it looks like an Envilder option. The -- is optional; you only need it when the command itself starts with -.',
+    execSepComment1: '# Everything belongs to npm',
+    execSepComment2: "# --map is Envilder's, the rest is npm's",
+    execSepComment3: '# --map=x belongs to npm: it comes after the command',
+    execSepComment4: '# Same as above, with an explicit separator',
+    execOptions: 'Options',
+    execOptMap: 'Path to the map file (default: envilder.json)',
+    execOptProfile: 'AWS CLI profile. Overrides $config.profile',
+    execOptProvider: 'aws or azure. Overrides $config.provider',
+    execOptVault: 'Azure Key Vault URL. Overrides $config.vaultUrl',
+    execOptionsOrderDesc:
+      'Envilder options go after exec, never before it. An option written before exec is rejected with exit code 125, and Envilder shows the corrected command:',
+    execRejectedDesc:
+      'Exec mode never reads or writes a .env file and never pushes secrets, so --envfile, --push, --key, --value and --secret-path are rejected with exit code 125 before any provider call. An unknown option before your command is also an error, so a typo such as --mapp never reaches your command by accident.',
+    execExamples: 'Examples',
+    execCommentNpx:
+      '# Start your dev server with the secrets from envilder.json',
+    execCommentMap: '# Use a specific map file',
+    execCommentAzure: '# Azure Key Vault via CLI flags',
+    execCommentDocker:
+      '# Docker Compose can interpolate the secrets in compose.yaml',
+    execPackageJsonDesc: 'Or wire it into your package.json scripts:',
+    execOutputTitle: 'Output',
+    execOutputDesc:
+      "Your command owns stdout. All Envilder output goes to stderr, so envilder exec -- node print.js > out.json writes only your command's output to out.json. On success Envilder prints a single summary line that names your command by program name only, because arguments can carry secrets:",
+    execBehaviorTitle: 'Behavior',
+    execExitTitle: 'Exit codes',
+    execExitDesc:
+      "Exit codes follow GNU env and docker run, so you can tell an Envilder failure apart from your command's own exit code:",
+    execThCode: 'Code',
+    execThMeaning: 'Meaning',
+    execThMessage: 'Message',
+    execExitChild: 'Your command exited with code n',
+    execExitSignal:
+      'Your command was killed by signal n (for example, 137 for SIGKILL)',
+    execExit125:
+      'Envilder failed before starting the command: bad options, missing command, no map file, unresolved secrets or expired credentials',
+    execExit126:
+      'The command exists but the operating system refused to run it (for example, Permission denied)',
+    execExit127: 'The command was not found',
+    execExitNote: 'Pull and push modes keep exiting with 1 on failure.',
+    execFailClosedTitle: 'Fail-closed',
+    execFailClosedDesc:
+      'Pull mode warns and skips a missing secret. Exec mode never starts your command with an incomplete set of secrets: if any secret is missing, empty or cannot be read (for example, access denied), the command is not started, Envilder lists the affected variables with their masked paths and exits with 125. Values are resolved once, when the command starts.',
+    execEnvTitle: 'Environment',
+    execEnvDesc:
+      'Your command inherits the full environment of the shell that runs Envilder, plus every variable in the map file. The map file wins: when an inherited variable has the same name as a mapped one, your command sees the value from the provider, and Envilder prints the names (never the values) on stderr:',
+    execNoShellDesc:
+      "Envilder does not start an extra shell: arguments are passed to your command as a list. Your own shell still parses the command line first, so quote what it should not interpret: '$DB_URL' or '&&' in single quotes reach your command literally, while an unquoted $DB_URL expands to your shell's value (not the resolved secret) and an unquoted && runs a second command outside envilder exec. If you need shell features with the secrets, start a shell explicitly:",
+    execGhaTitle: 'GitHub Actions masking',
+    execGhaDesc:
+      'When GITHUB_ACTIONS=true, Envilder registers every resolved value with GitHub log masking (::add-mask::), so values your command prints are masked in the job log. Every registration is written to stderr before your command starts; if one cannot be written, the command does not start (exit code 125). The Envilder GitHub Action does not offer exec mode: run the CLI from a run step.',
+    execGhaNote:
+      'Do not redirect the stderr of envilder exec away from the step log (for example, with 2> file or 2>/dev/null): that is where the runner reads the masks from. The runner reads stdout and stderr through separate pipes, so a value your command prints immediately can, in rare cases, reach the log before its mask is processed.',
+    execSignalsTitle: 'Signals',
+    execSignalsDesc:
+      'stdin, stdout and stderr are inherited and the TTY is preserved, so REPLs, shells and prompts work as usual. Ctrl+C in a terminal reaches your command directly. SIGTERM and SIGHUP (for example, from docker stop or Kubernetes) are forwarded to your command, and Envilder waits for it to exit, with no timeout of its own, before returning its exit code. Signals go to the direct child only: a launcher such as npm is responsible for stopping its own children.',
+    execSandboxTitle: 'Not a sandbox.',
+    execSandboxDesc:
+      'Exec mode never creates a .env file, and it leaves any existing one untouched: if you are moving from pull, delete your old .env yourself. It does not isolate the process. Your command and every process it starts can read the secrets in their environment, including any tool or AI coding agent that runs env or printenv through it. On Linux, other processes running as the same user can read /proc/<pid>/environ. Only run commands you trust with the secrets you map.',
+    execGuideLink:
+      'Full exec command guide on GitHub: Windows details, SSO recovery and every error message',
     pushTitle: 'Push command',
     pushDesc:
       'Upload environment variables from a local .env file to your cloud provider using a mapping file.',

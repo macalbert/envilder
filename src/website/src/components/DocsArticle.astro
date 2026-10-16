@@ -36,6 +36,29 @@ const azVaultPolicy = `az keyvault set-policy \
 const pushSingleCmd =
   'envilder --key=API_KEY --value={SECRET} --secret-path=/myapp/api/key';
 
+const execRootOptionError = `$ envilder --map=config/prod.json exec -- npm start
+error: Put envilder options after "exec": envilder exec --map=config/prod.json -- npm …`;
+
+const execRejectedOptions = [
+  {
+    option: '--envfile',
+    message:
+      '--envfile cannot be used with exec: exec mode never reads or writes a .env file.',
+  },
+  { option: '--push', message: '--push cannot be used with exec.' },
+  {
+    option: '--key, --value, --secret-path',
+    message: 'Single-secret push options cannot be used with exec.',
+  },
+];
+
+const execPackageJson = `{
+  "scripts": {
+    "dev": "envilder exec -- vite",
+    "start": "envilder exec --map=config/prod.json -- node server.js"
+  }
+}`;
+
 const awsVerifyCmd = `# 1. Create a test parameter
 aws ssm put-parameter --name "/test/hello" --value "world" --type SecureString --overwrite
 
@@ -154,6 +177,11 @@ const ghaAzureRole = `az role assignment create \\
             <CodeBlock lang="bash" code="npx envilder --help" />
           </div>
         </div>
+        <p>{t.docs.installNext}</p>
+        <ul class="docs-list">
+          <li><a href={localizedPath(lang, '/docs/cli/pull/')}>{t.docs.installNextPull}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/exec/')}>{t.docs.installNextExec}</a></li>
+        </ul>
       </section>
     </>
   )}
@@ -577,14 +605,13 @@ envilder --provider=azure \\
 API_KEY=abc123
 DB_PASSWORD=secret456`} />
 
-        <h3>{t.docs.pullExecTitle}</h3>
-        <p>{t.docs.pullExecDesc}</p>
-        <CodeBlock lang="bash" code={`envilder exec [options] [--] <command> [args...]
-
-npx envilder exec -- npm run dev
-npx envilder exec --map=config/envilder.json -- node server.js`} />
-        <p class="note">{t.docs.pullExecNote}</p>
-        <p><a href="https://github.com/macalbert/envilder/blob/main/docs/exec-command.md" target="_blank" rel="noopener noreferrer">{t.docs.pullExecGuideLink}</a></p>
+        <div class="callout">
+          <span class="callout-icon">💡</span>
+          <div>
+            <strong>{t.docs.pullExecTitle}</strong> {t.docs.pullExecDesc}{' '}
+            <a href={localizedPath(lang, '/docs/cli/exec/')}>{t.docs.pullExecGuideLink}</a>
+          </div>
+        </div>
       </section>
     </>
   )}
@@ -650,6 +677,124 @@ envilder --push --provider=azure \\
             <tr><td><code>--profile</code></td><td>{t.docs.pushSingleOptProfile}</td></tr>
           </tbody>
         </table>
+      </section>
+    </>
+  )}
+
+  {routeKey === 'cli-exec' && (
+    <>
+      <section id="exec-command" class="docs-section">
+        <h2>{t.docs.execTitle}</h2>
+        <p>{t.docs.execDesc}</p>
+
+        <h3>{t.docs.execUsageTitle}</h3>
+        <CodeBlock lang="bash" code="envilder exec [options] [--] <command> [args...]" />
+
+        <h3>{t.docs.execSeparatorTitle}</h3>
+        <p>{t.docs.execSeparatorDesc}</p>
+        <CodeBlock lang="bash" code={`${t.docs.execSepComment1}
+envilder exec npm run dev
+
+${t.docs.execSepComment2}
+envilder exec --map=cfg.json npm run dev
+
+${t.docs.execSepComment3}
+envilder exec npm run dev --map=x
+
+${t.docs.execSepComment4}
+envilder exec --map=cfg.json -- npm run dev`} />
+
+        <h3>{t.docs.execOptions}</h3>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.optionHeader}</th><th>{t.docs.mapThDescription}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>--map</code></td><td>{t.docs.execOptMap}</td></tr>
+            <tr><td><code>--profile</code></td><td>{t.docs.execOptProfile}</td></tr>
+            <tr><td><code>--provider</code></td><td>{t.docs.execOptProvider}</td></tr>
+            <tr><td><code>--vault-url</code></td><td>{t.docs.execOptVault}</td></tr>
+          </tbody>
+        </table>
+        <p>{t.docs.execOptionsOrderDesc}</p>
+        <CodeBlock lang="text" code={execRootOptionError} />
+        <p>{t.docs.execRejectedDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.optionHeader}</th><th>{t.docs.execThMessage}</th></tr>
+          </thead>
+          <tbody>
+            {execRejectedOptions.map((row) => (
+              <tr><td><code>{row.option}</code></td><td><code>{row.message}</code></td></tr>
+            ))}
+          </tbody>
+        </table>
+
+        <h3>{t.docs.execExamples}</h3>
+        <CodeBlock lang="bash" code={`${t.docs.execCommentNpx}
+npx envilder exec -- npm run dev
+
+${t.docs.execCommentMap}
+envilder exec --map=config/envilder.json -- node server.js
+
+${t.docs.execCommentAzure}
+envilder exec --provider=azure \
+  --vault-url=https://my-vault.vault.azure.net -- dotnet run
+
+${t.docs.execCommentDocker}
+envilder exec -- docker compose up`} />
+        <p>{t.docs.execPackageJsonDesc}</p>
+        <CodeBlock lang="json" filename="package.json" code={execPackageJson} />
+
+        <h3>{t.docs.execOutputTitle}</h3>
+        <p>{t.docs.execOutputDesc}</p>
+        <CodeBlock lang="text" code="envilder: 2 secrets resolved (aws, profile=dev) → npm …" />
+      </section>
+
+      <section id="exec-behavior" class="docs-section">
+        <h2>{t.docs.execBehaviorTitle}</h2>
+
+        <h3>{t.docs.execExitTitle}</h3>
+        <p>{t.docs.execExitDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.execThCode}</th><th>{t.docs.execThMeaning}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>n</code></td><td>{t.docs.execExitChild}</td></tr>
+            <tr><td><code>128 + n</code></td><td>{t.docs.execExitSignal}</td></tr>
+            <tr><td><code>125</code></td><td>{t.docs.execExit125}</td></tr>
+            <tr><td><code>126</code></td><td>{t.docs.execExit126}</td></tr>
+            <tr><td><code>127</code></td><td>{t.docs.execExit127}</td></tr>
+          </tbody>
+        </table>
+        <p class="note">{t.docs.execExitNote}</p>
+
+        <h3>{t.docs.execFailClosedTitle}</h3>
+        <p>{t.docs.execFailClosedDesc}</p>
+
+        <h3>{t.docs.execEnvTitle}</h3>
+        <p>{t.docs.execEnvDesc}</p>
+        <CodeBlock lang="text" code="Overriding inherited variables: API_KEY" />
+        <p>{t.docs.execNoShellDesc}</p>
+        <CodeBlock lang="bash" code="envilder exec -- sh -c 'echo $DB_URL'" />
+
+        <h3>{t.docs.execGhaTitle}</h3>
+        <p>{t.docs.execGhaDesc}</p>
+        <CodeBlock lang="yaml" code="- run: npx envilder exec -- npm test" />
+        <p class="note">{t.docs.execGhaNote}</p>
+
+        <h3>{t.docs.execSignalsTitle}</h3>
+        <p>{t.docs.execSignalsDesc}</p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>
+            <strong>{t.docs.execSandboxTitle}</strong> {t.docs.execSandboxDesc}
+          </div>
+        </div>
+
+        <p><a href="https://github.com/macalbert/envilder/blob/main/docs/exec-command.md" target="_blank" rel="noopener noreferrer">{t.docs.execGuideLink}</a></p>
       </section>
     </>
   )}

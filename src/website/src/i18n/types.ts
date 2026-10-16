@@ -37,6 +37,8 @@ export interface HeroTranslations {
   viewOnGithub: string;
   tabCli: string;
   tabCliDesc: string;
+  tabExec: string;
+  tabExecDesc: string;
   tabSetup: string;
   tabSetupDesc: string;
   tabNode: string;
@@ -47,6 +49,8 @@ export interface HeroTranslations {
   tabDotnetDesc: string;
   terminalComment1: string;
   terminalComment2: string;
+  execComment1: string;
+  execComment2: string;
   setupComment1: string;
   setupComment2: string;
   sdkCommentLoad: string;
@@ -253,6 +257,7 @@ export interface FooterTranslations {
   linkGettingStarted: string;
   linkPullCommand: string;
   linkPushCommand: string;
+  linkExecCommand: string;
   linkGithubAction: string;
   linkIssues: string;
   linkDiscussions: string;
@@ -307,6 +312,7 @@ export interface DocsTranslations {
     | 'map-file'
     | 'cli-pull'
     | 'cli-push'
+    | 'cli-exec'
     | 'github-action'
     | 'sdk-dotnet'
     | 'sdk-python'
@@ -357,6 +363,9 @@ export interface DocsTranslations {
   reqInstallGuide: string;
   // Installation
   installTitle: string;
+  installNext: string;
+  installNextPull: string;
+  installNextExec: string;
   // AWS setup
   awsSetupTitle: string;
   awsSetupIntro: string;
@@ -508,8 +517,57 @@ export interface DocsTranslations {
   pullOutputTitle: string;
   pullExecTitle: string;
   pullExecDesc: string;
-  pullExecNote: string;
   pullExecGuideLink: string;
+  // Exec command
+  execTitle: string;
+  execDesc: string;
+  execUsageTitle: string;
+  execSeparatorTitle: string;
+  execSeparatorDesc: string;
+  execSepComment1: string;
+  execSepComment2: string;
+  execSepComment3: string;
+  execSepComment4: string;
+  execOptions: string;
+  execOptMap: string;
+  execOptProfile: string;
+  execOptProvider: string;
+  execOptVault: string;
+  execOptionsOrderDesc: string;
+  execRejectedDesc: string;
+  execExamples: string;
+  execCommentNpx: string;
+  execCommentMap: string;
+  execCommentAzure: string;
+  execCommentDocker: string;
+  execPackageJsonDesc: string;
+  execOutputTitle: string;
+  execOutputDesc: string;
+  execBehaviorTitle: string;
+  execExitTitle: string;
+  execExitDesc: string;
+  execThCode: string;
+  execThMeaning: string;
+  execThMessage: string;
+  execExitChild: string;
+  execExitSignal: string;
+  execExit125: string;
+  execExit126: string;
+  execExit127: string;
+  execExitNote: string;
+  execFailClosedTitle: string;
+  execFailClosedDesc: string;
+  execEnvTitle: string;
+  execEnvDesc: string;
+  execNoShellDesc: string;
+  execGhaTitle: string;
+  execGhaDesc: string;
+  execGhaNote: string;
+  execSignalsTitle: string;
+  execSignalsDesc: string;
+  execSandboxTitle: string;
+  execSandboxDesc: string;
+  execGuideLink: string;
   // Push command
   pushTitle: string;
   pushDesc: string;

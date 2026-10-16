@@ -6,6 +6,7 @@ export const docsRouteKeys = [
   'map-file',
   'cli-pull',
   'cli-push',
+  'cli-exec',
   'github-action',
   'sdk-dotnet',
   'sdk-python',
@@ -64,6 +65,12 @@ export const docsRouteManifest = [
     path: '/docs/cli/push/',
     navGroup: 'cli',
     legacyHashes: ['push-command', 'push-single'],
+  },
+  {
+    key: 'cli-exec',
+    path: '/docs/cli/exec/',
+    navGroup: 'cli',
+    legacyHashes: [],
   },
   {
     key: 'github-action',
