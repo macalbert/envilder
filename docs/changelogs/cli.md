@@ -361,8 +361,6 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 * **README:** Replace `#gh-light-mode-only` / `#gh-dark-mode-only` image fragments with a `<picture>`
   element using `prefers-color-scheme` media queries
 * **ci:** Update version check in publish workflow to use published version from npm
-* **deps:** Move `@types/node` from `dependencies` to `devDependencies` to prevent it from being bundled as a runtime dependency
-  ([#135](https://github.com/macalbert/envilder/pull/135))
 
 ### Dependencies
 
@@ -390,6 +388,8 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ### Fixed
 
+* **deps:** Move `@types/node` from `dependencies` to `devDependencies` to prevent it from being bundled as a runtime dependency
+  ([#135](https://github.com/macalbert/envilder/pull/135))
 * **e2e:** Use unique SSM paths per CLI test run to prevent race conditions between parallel test executions
 
 ### Dependencies
