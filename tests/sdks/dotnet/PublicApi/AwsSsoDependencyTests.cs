@@ -17,8 +17,11 @@ public class AwsSsoDependencyTests
 	[InlineData("AWSSDK.SSOOIDC")]
 	public void Should_ShipAwsSsoAssembly_When_SdkIsReferenced(string assemblyName)
 	{
+		// Arrange
+		var name = new AssemblyName(assemblyName);
+
 		// Act
-		var act = () => Assembly.Load(new AssemblyName(assemblyName));
+		var act = () => Assembly.Load(name);
 
 		// Assert
 		act.Should().NotThrow();
