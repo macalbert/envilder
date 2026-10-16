@@ -864,6 +864,47 @@ export const ca: Translations = {
     execOutputTitle: 'Sortida',
     execOutputDesc:
       "L'stdout és de la teva comanda. Tota la sortida d'Envilder va a stderr, així que envilder exec -- node print.js > out.json només escriu a out.json la sortida de la teva comanda. Si tot va bé, Envilder mostra una sola línia de resum que només anomena el programa, perquè els arguments poden contenir secrets:",
+    execUseCasesTitle: "Casos d'ús habituals",
+    execUseCasesDesc:
+      "En tots els casos els valors només existeixen a l'entorn de la teva comanda i dels processos que iniciï, no s'escriu res a disc, i el codi de sortida de la teva comanda passa a ser el codi de sortida d'Envilder.",
+    execUcLocalstackTitle: "Arrenca LocalStack amb el seu token d'autenticació",
+    execUcLocalstackDesc:
+      "Quan et cal: LocalStack necessita LOCALSTACK_AUTH_TOKEN i no vols el token en un fitxer .env ni a l'historial de la shell.",
+    execUcLocalstackComposeDesc:
+      "Amb Docker Compose, fes referència a la variable al compose.yaml. Compose n'agafa el valor de l'entorn on s'executa, així que no cal cap fitxer .env:",
+    execUcLocalstackDockerDesc:
+      "Amb Docker sol, -e NOM sense valor copia la variable de l'entorn del client docker, així que el token no apareix mai a la línia d'ordres:",
+    execUcLocalstackExamplesDesc:
+      'Trobaràs la mateixa configuració amb Testcontainers (TypeScript, Python, .NET) i Aspire a',
+    execUcTestsTitle: "Tests d'integració que arrenquen contenidors",
+    execUcTestsDesc:
+      "Quan et cal: els teus tests arrenquen contenidors (per exemple, amb Testcontainers) i llegeixen un token o unes credencials de l'entorn (process.env, os.environ, Environment.GetEnvironmentVariable) per passar-los-hi.",
+    execUcTestsNote:
+      "Si els tests fallen, se'n conserva el codi de sortida i la CI continua fallant. Si un secret no es pot resoldre, els tests no s'inicien i el codi de sortida és 125.",
+    execUcMigrationsTitle: 'Migracions de base de dades i scripts puntuals',
+    execUcMigrationsDesc:
+      'Quan et cal: una eina de migracions o un script necessita DATABASE_URL una sola vegada, i no vols la cadena de connexió al disc. Fes servir --map per executar la mateixa comanda contra un altre entorn.',
+    execUcTerraformTitle: 'Terraform i altres eines IaC',
+    execUcTerraformDesc:
+      "Quan et cal: una variable d'entrada de Terraform conté un secret. Terraform llegeix les variables d'entorn TF_VAR_<nom> com a valors de la variable d'entrada <nom>.",
+    execUcTerraformNote:
+      "Declara la variable amb sensitive = true perquè Terraform l'amagui a la sortida del plan. Terraform continua desant a l'estat els valors que escriu als recursos, així que protegeix l'estat com sempre.",
+    execUcDevTitle:
+      'Servidor de desenvolupament local amb scripts de package.json',
+    execUcDevDesc:
+      "Quan et cal: tothom a l'equip ha d'arrencar l'aplicació amb els mateixos secrets executant npm run dev.",
+    execUcDevNote:
+      "Afegeix envilder com a dependència de desenvolupament (npm install --save-dev envilder) perquè l'script el trobi a node_modules/.bin.",
+    execUcGhaTitle: 'Un pas de GitHub Actions',
+    execUcGhaDesc:
+      "Quan et cal: un pas d'un workflow necessita els secrets, i només aquest pas. Configura les credencials d'AWS amb OIDC i executa la teva comanda amb npx envilder exec:",
+    execUcGhaNote:
+      "Els valors resolts es registren a l'emmascarament de logs de GitHub abans que s'iniciï la comanda, i els passos següents no els veuen.",
+    execUcChainTitle: 'Diverses comandes amb els mateixos secrets',
+    execUcChainDesc:
+      'Quan et cal: vols encadenar comandes o continuar treballant en una shell que tingui els secrets.',
+    execUcChainNote:
+      "Posa tot l'script de sh -c entre cometes simples perquè la teva shell no executi el && fora d'envilder exec. L'exec davant de l'última comanda substitueix la shell per aquesta comanda, així que els senyals que reenvia Envilder arriben directament a npm start. A la shell interactiva, totes les comandes que executis veuen els secrets; escriu exit per sortir-ne.",
     execBehaviorTitle: 'Comportament',
     execExitTitle: 'Codis de sortida',
     execExitDesc:

@@ -854,6 +854,46 @@ export const en: Translations = {
     execOutputTitle: 'Output',
     execOutputDesc:
       "Your command owns stdout. All Envilder output goes to stderr, so envilder exec -- node print.js > out.json writes only your command's output to out.json. On success Envilder prints a single summary line that names your command by program name only, because arguments can carry secrets:",
+    execUseCasesTitle: 'Common use cases',
+    execUseCasesDesc:
+      "In every case the values exist only in the environment of your command and the processes it starts, nothing is written to disk, and your command's exit code becomes Envilder's exit code.",
+    execUcLocalstackTitle: 'Start LocalStack with its auth token',
+    execUcLocalstackDesc:
+      'When you need it: LocalStack needs LOCALSTACK_AUTH_TOKEN and you do not want the token in a .env file or in your shell history.',
+    execUcLocalstackComposeDesc:
+      'With Docker Compose, reference the variable in compose.yaml. Compose takes its value from the environment it runs in, so no .env file is needed:',
+    execUcLocalstackDockerDesc:
+      'With plain Docker, -e NAME without a value copies the variable from the environment of the docker client, so the token never appears on the command line:',
+    execUcLocalstackExamplesDesc:
+      'The same setup with Testcontainers (TypeScript, Python, .NET) and Aspire is in',
+    execUcTestsTitle: 'Integration tests that start containers',
+    execUcTestsDesc:
+      'When you need it: your tests start containers (for example, with Testcontainers) and read a token or credentials from the environment (process.env, os.environ, Environment.GetEnvironmentVariable) to pass them in.',
+    execUcTestsNote:
+      'A failing test run keeps its exit code, so CI still fails. If a secret cannot be resolved, the tests do not start and the exit code is 125.',
+    execUcMigrationsTitle: 'Database migrations and one-off scripts',
+    execUcMigrationsDesc:
+      'When you need it: a migration tool or a script needs DATABASE_URL once, and you do not want the connection string on disk. Use --map to run the same command against another environment.',
+    execUcTerraformTitle: 'Terraform and other IaC tools',
+    execUcTerraformDesc:
+      'When you need it: a Terraform input variable holds a secret. Terraform reads TF_VAR_<name> environment variables as values for the input variable <name>.',
+    execUcTerraformNote:
+      'Declare the variable with sensitive = true so Terraform hides it in plan output. Terraform still stores values it writes into resources in its state, so protect the state as usual.',
+    execUcDevTitle: 'Local dev server through package scripts',
+    execUcDevDesc:
+      'When you need it: everyone on the team should start the app with the same secrets by running npm run dev.',
+    execUcDevNote:
+      'Add envilder as a dev dependency (npm install --save-dev envilder) so the script finds it in node_modules/.bin.',
+    execUcGhaTitle: 'A step in GitHub Actions',
+    execUcGhaDesc:
+      'When you need it: one step of a workflow needs the secrets, and only that step. Configure AWS credentials with OIDC, then run your command through npx envilder exec:',
+    execUcGhaNote:
+      'Resolved values are registered with GitHub log masking before your command starts, and the next steps do not see them.',
+    execUcChainTitle: 'Several commands with the same secrets',
+    execUcChainDesc:
+      'When you need it: you want to chain commands or keep working in a shell that has the secrets.',
+    execUcChainNote:
+      'Quote the whole sh -c script in single quotes so your own shell does not run && outside envilder exec. The exec before the last command replaces the shell with it, so signals forwarded by Envilder reach npm start directly. In the interactive shell every command you run sees the secrets; type exit to leave it.',
     execBehaviorTitle: 'Behavior',
     execExitTitle: 'Exit codes',
     execExitDesc:

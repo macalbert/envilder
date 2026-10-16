@@ -135,6 +135,165 @@ via `cmd.exe /d /s /c` with every argument escaped. Two visible consequences:
   still `127`.
 * `cmd.exe` builtins such as `echo` or `dir` resolve and run.
 
+## Common use cases
+
+In every case the values exist only in the environment of the command and
+the processes it starts, nothing is written to disk, and the command's exit
+code becomes Envilder's exit code. The paths follow the
+`/<project>/<environment>/<service>/<key>` style used in
+[envilder-examples](https://github.com/macalbert/envilder-examples).
+
+### Start LocalStack with its auth token
+
+When you need it: LocalStack needs `LOCALSTACK_AUTH_TOKEN` and you do not want
+the token in a `.env` file or in your shell history.
+
+```json
+{
+  "LOCALSTACK_AUTH_TOKEN": "/envilder/development/localstack/authToken"
+}
+```
+
+With Docker Compose, reference the variable in `compose.yaml`. Compose
+interpolates `${...}` from the environment it runs in, so no `.env` file is
+needed:
+
+```yaml
+services:
+  localstack:
+    image: localstack/localstack:stable
+    ports:
+      - "4566:4566"
+    environment:
+      LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
+```
+
+```bash
+envilder exec -- docker compose up
+```
+
+With plain Docker, `-e NAME` without a value copies the variable from the
+environment of the `docker` client, so the token never appears on the command
+line:
+
+```bash
+envilder exec -- docker run --rm -e LOCALSTACK_AUTH_TOKEN -p 4566:4566 localstack/localstack:stable
+```
+
+[envilder-examples](https://github.com/macalbert/envilder-examples) has the
+same setup with Testcontainers (TypeScript, Python, .NET) and Aspire.
+
+### Integration tests that start containers
+
+When you need it: your tests start containers (for example with
+Testcontainers) and read a token or credentials from the environment
+(`process.env`, `os.environ`, `Environment.GetEnvironmentVariable`) to pass
+them in.
+
+```bash
+envilder exec -- npm test
+envilder exec -- dotnet test
+envilder exec -- pytest
+```
+
+A failing test run keeps its exit code, so CI still fails. If a secret cannot
+be resolved, the tests do not start and the exit code is `125`.
+
+### Database migrations and one-off scripts
+
+When you need it: a migration tool or a script needs `DATABASE_URL` once, and
+you do not want the connection string on disk.
+
+```json
+{
+  "DATABASE_URL": "/my-app/development/database/url"
+}
+```
+
+```bash
+envilder exec -- npx prisma migrate deploy
+envilder exec -- python scripts/backfill.py
+```
+
+Use `--map` to run the same command against another environment, for example
+`envilder exec --map=config/envilder.staging.json -- npx prisma migrate deploy`.
+
+### Terraform and other IaC tools
+
+When you need it: a Terraform input variable holds a secret. Terraform reads
+`TF_VAR_<name>` environment variables as values for the input variable
+`<name>`.
+
+```json
+{
+  "TF_VAR_db_password": "/my-app/development/database/password"
+}
+```
+
+```bash
+envilder exec -- terraform plan
+```
+
+Declare the variable with `sensitive = true` so Terraform hides it in plan
+output. Terraform still stores values it writes into resources in its state,
+so protect the state as usual.
+
+### Local dev server through package scripts
+
+When you need it: everyone on the team should start the app with the same
+secrets by running `npm run dev`.
+
+```json
+{
+  "scripts": {
+    "dev": "envilder exec -- next dev"
+  }
+}
+```
+
+Add `envilder` as a dev dependency (`npm install --save-dev envilder`) so the
+script finds it in `node_modules/.bin`.
+
+### A step in GitHub Actions
+
+When you need it: one step of a workflow needs the secrets, and only that step.
+Configure AWS credentials with OIDC, then run the command through
+`npx envilder exec`:
+
+```yaml
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
+steps:
+  - uses: actions/checkout@v5
+  - uses: aws-actions/configure-aws-credentials@v5
+    with:
+      role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole
+      aws-region: us-east-1
+  - run: npx envilder exec -- npm test
+```
+
+Resolved values are registered with GitHub's log masking before the command
+starts, and the next steps do not see them. See
+[GitHub Actions masking](#github-actions-masking).
+
+### Several commands with the same secrets
+
+When you need it: you want to chain commands or keep working in a shell that
+has the secrets.
+
+```bash
+envilder exec -- sh -c 'npm run migrate && exec npm start'
+envilder exec -- bash
+```
+
+Quote the whole `sh -c` script in single quotes so your own shell does not run
+`&&` outside `envilder exec` (see [No shell](#no-shell)). The `exec` before
+the last command replaces the shell with it, so signals forwarded by Envilder
+reach `npm start` directly. In the interactive shell every command you run sees
+the secrets; type `exit` to leave it.
+
 ## Exit codes
 
 Exit codes follow GNU `env` and `docker run`, so you can tell an Envilder
