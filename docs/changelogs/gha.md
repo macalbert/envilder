@@ -1,3 +1,15 @@
+## [0.15.0] - 2026-10-16
+
+### Changed
+
+* **Track mask registration writes**: The Action's secret masker now waits
+  for each `::add-mask::` write to complete and reports write failures. The
+  registrations it prints are unchanged, and the Action still only pulls
+  secrets; the new `envilder exec` command is CLI-only
+  ([#550](https://github.com/macalbert/envilder/issues/550))
+
+---
+
 ## [0.14.0] - 2026-09-26
 
 ### Fixed
