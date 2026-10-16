@@ -893,13 +893,13 @@ export const es: Translations = {
     execGhaDesc:
       'Cuando GITHUB_ACTIONS=true, Envilder registra cada valor resuelto en el enmascarado de logs de GitHub (::add-mask::), de modo que los valores que imprima tu comando aparecen enmascarados en el log del job. Todos los registros se escriben en stderr antes de que arranque el comando; si alguno no se puede escribir, el comando no arranca (código de salida 125). La GitHub Action de Envilder no ofrece el modo exec: ejecuta la CLI desde un paso run.',
     execGhaNote:
-      'No redirijas el stderr de envilder exec fuera del log del paso (por ejemplo, con 2> fichero o 2>/dev/null): es de ahí de donde el runner lee las máscaras.',
+      'No redirijas el stderr de envilder exec fuera del log del paso (por ejemplo, con 2> fichero o 2>/dev/null): es de ahí de donde el runner lee las máscaras. El runner lee stdout y stderr por canales separados, así que un valor que tu comando imprima enseguida puede llegar al log, en casos raros, antes de que se haya procesado su máscara.',
     execSignalsTitle: 'Señales',
     execSignalsDesc:
       'stdin, stdout y stderr se heredan y se conserva el TTY, así que los REPL, las shells y las preguntas interactivas funcionan como siempre. El Ctrl+C de un terminal llega directamente a tu comando. SIGTERM y SIGHUP (por ejemplo, de docker stop o Kubernetes) se reenvían al comando, y Envilder espera a que termine, sin ningún tiempo límite propio, antes de devolver su código de salida. Las señales solo llegan al hijo directo: un lanzador como npm debe encargarse de detener a sus propios hijos.',
     execSandboxTitle: 'No es un sandbox.',
     execSandboxDesc:
-      'El modo exec elimina el archivo .env del disco; no aísla el proceso. Tu comando y todos los procesos que arranque pueden leer los secretos de su entorno, incluida cualquier herramienta o agente de IA de programación que ejecute env o printenv a través de él. En Linux, otros procesos del mismo usuario pueden leer /proc/<pid>/environ. Ejecuta solo comandos de confianza con los secretos que mapeas.',
+      'El modo exec nunca crea un archivo .env y no toca los que ya existen: si vienes del modo pull, borra tú mismo tu .env antiguo. No aísla el proceso. Tu comando y todos los procesos que arranque pueden leer los secretos de su entorno, incluida cualquier herramienta o agente de IA de programación que ejecute env o printenv a través de él. En Linux, otros procesos del mismo usuario pueden leer /proc/<pid>/environ. Ejecuta solo comandos de confianza con los secretos que mapeas.',
     execGuideLink:
       'Guía completa del comando exec en GitHub: detalles de Windows, recuperación SSO y todos los mensajes de error',
     pushTitle: 'Comando push',
