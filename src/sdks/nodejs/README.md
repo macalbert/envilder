@@ -241,6 +241,15 @@ For Azure, add `vaultUrl`:
 
 See the [root README](https://github.com/macalbert/envilder#%EF%B8%8F-mapping-file-format) for the full map file reference.
 
+## Examples
+
+Runnable projects in [envilder-examples](https://github.com/macalbert/envilder-examples) resolve a map file
+against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to
+containers, with no `.env` file:
+
+- [typescript-testcontainers](https://github.com/macalbert/envilder-examples/tree/main/typescript-testcontainers): Vitest + Testcontainers
+- [typescript-aspire](https://github.com/macalbert/envilder-examples/tree/main/typescript-aspire): Aspire TypeScript AppHost
+
 ## Links
 
 - [Changelog](https://github.com/macalbert/envilder/blob/main/docs/changelogs/sdk-nodejs.md)

@@ -316,3 +316,13 @@ Only run commands you trust with the secrets you map.
   temp directory or any Envilder configuration directory.
 * The GitHub Action and the runtime SDKs do not offer exec mode. The SDKs
   already resolve secrets in-process.
+
+## Examples
+
+[envilder-examples](https://github.com/macalbert/envilder-examples) has runnable setups:
+
+* The repository README starts LocalStack with `envilder exec docker run ...`,
+  passing the auth token from AWS SSM into the container without writing it to
+  disk.
+* The [`cli`](https://github.com/macalbert/envilder-examples/tree/main/cli)
+  folder walks through push, pull and exec with `npx envilder`.

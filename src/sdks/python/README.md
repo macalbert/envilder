@@ -242,6 +242,14 @@ For Azure, add `vaultUrl`:
 }
 ```
 
+## Examples
+
+Runnable projects in [envilder-examples](https://github.com/macalbert/envilder-examples) resolve a map file
+against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to
+containers, with no `.env` file:
+
+- [python-testcontainers](https://github.com/macalbert/envilder-examples/tree/main/python-testcontainers): pytest + Testcontainers
+
 ## Links
 
 - [Changelog](https://github.com/macalbert/envilder/blob/main/docs/changelogs/sdk-python.md)

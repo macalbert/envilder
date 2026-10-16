@@ -441,7 +441,7 @@ export const es: Translations = {
     commentPush: '# Subir un secreto',
     doneMessage: '¡Hecho! Archivo .env generado.',
     sdkComment3: '# Los secretos ya están en os.environ',
-    sdkExampleLink: 'Ver más ejemplos en GitHub',
+    sdkExampleLink: 'Ver ejemplos ejecutables en GitHub',
   },
   footer: {
     tagline:
@@ -902,6 +902,9 @@ export const es: Translations = {
       'El modo exec nunca crea un archivo .env y no toca los que ya existen: si vienes del modo pull, borra tú mismo tu .env antiguo. No aísla el proceso. Tu comando y todos los procesos que arranque pueden leer los secretos de su entorno, incluida cualquier herramienta o agente de IA de programación que ejecute env o printenv a través de él. En Linux, otros procesos del mismo usuario pueden leer /proc/<pid>/environ. Ejecuta solo comandos de confianza con los secretos que mapeas.',
     execGuideLink:
       'Guía completa del comando exec en GitHub: detalles de Windows, recuperación SSO y todos los mensajes de error',
+    examplesTitle: 'Ejemplos ejecutables.',
+    execExamplesDesc:
+      'Arranca LocalStack con envilder exec docker run, con el token de autenticación resuelto desde AWS SSM y sin escribirlo nunca en disco, o sigue paso a paso push, pull y exec con npx envilder:',
     pushTitle: 'Comando push',
     pushDesc:
       'Sube variables de entorno de un archivo .env local a tu proveedor en la nube usando un archivo de mapeo.',
@@ -1091,6 +1094,8 @@ export const es: Translations = {
     sdkDotnetQuickStartResolveDesc:
       'Analiza el archivo de mapeo, resuelve secretos e inyéctalos en las variables de entorno:',
     sdkDotnetFullDocs: 'Documentación completa →',
+    sdkDotnetExamplesDesc:
+      'Proyectos de pruebas xUnit con Testcontainers y Aspire que resuelven un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack y Lowkey Vault) y pasan los valores a los contenedores, sin ningún archivo .env:',
     sdkPythonTitle: 'Python SDK',
     sdkPythonDesc:
       'Carga secretos directamente en tu aplicación Python al inicio. Configuración en una línea o control detallado con el constructor fluido.',
@@ -1111,6 +1116,8 @@ export const es: Translations = {
     sdkPythonValidationDesc:
       'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
     sdkPythonFullDocs: 'Documentación completa →',
+    sdkPythonExamplesDesc:
+      'Un proyecto pytest con Testcontainers que resuelve un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack y Lowkey Vault) y pasa los valores a los contenedores, sin ningún archivo .env:',
     sdkNodejsTitle: 'Node.js SDK',
     sdkNodejsDesc:
       'Carga secretos directamente en tu aplicación Node.js al inicio. API asíncrona con fachada de una línea o constructor fluido para control total.',
@@ -1131,6 +1138,8 @@ export const es: Translations = {
     sdkNodejsValidationDesc:
       'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
     sdkNodejsFullDocs: 'Documentación completa →',
+    sdkNodejsExamplesDesc:
+      'Un proyecto Vitest con Testcontainers y un AppHost de Aspire en TypeScript que resuelven un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack y Lowkey Vault) y pasan los valores a los contenedores, sin ningún archivo .env:',
     pagerPrev: 'Anterior',
     pagerNext: 'Siguiente',
   },

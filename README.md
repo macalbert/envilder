@@ -128,6 +128,9 @@ It is not a sandbox: your command and everything it starts can read the secrets.
 
 📖 See the [Exec Command Guide](docs/exec-command.md) for exit codes, signals and GitHub Actions masking.
 
+💡 Runnable examples: [envilder-examples](https://github.com/macalbert/envilder-examples) (Testcontainers and Aspire for
+.NET, Python and TypeScript, AWS SSM and Azure Key Vault, plus `envilder exec`).
+
 ### 🎥 See it in action
 
 Watch how easy it is to automate your `.env` management in less than 1 minute:
@@ -252,7 +255,7 @@ Env.Load("envilder.json");
 var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 ```
 
-📖 **[Full .NET SDK docs](./src/sdks/dotnet/README.md)** · 💡 **[Examples](./examples/sdk/dotnet/)**
+📖 **[Full .NET SDK docs](./src/sdks/dotnet/README.md)** · 💡 **Examples:** [Testcontainers](https://github.com/macalbert/envilder-examples/tree/main/dotnet-testcontainers) · [Aspire](https://github.com/macalbert/envilder-examples/tree/main/dotnet-aspire)
 
 ### Python SDK
 
@@ -285,7 +288,7 @@ Envilder.load('production', {
 })
 ```
 
-📖 **[Full Python SDK docs](./src/sdks/python/README.md)** · 💡 **[Examples](./examples/sdk/python/)**
+📖 **[Full Python SDK docs](./src/sdks/python/README.md)** · 💡 **Examples:** [Testcontainers](https://github.com/macalbert/envilder-examples/tree/main/python-testcontainers)
 
 ### Node.js SDK
 
@@ -315,7 +318,7 @@ const secrets = await Envilder.fromMapFile('envilder.json')
   .resolve();
 ```
 
-📖 **[Full Node.js SDK docs](./src/sdks/nodejs/README.md)** · 💡 **[Examples](./examples/sdk/nodejs/)**
+📖 **[Full Node.js SDK docs](./src/sdks/nodejs/README.md)** · 💡 **Examples:** [Testcontainers](https://github.com/macalbert/envilder-examples/tree/main/typescript-testcontainers) · [Aspire](https://github.com/macalbert/envilder-examples/tree/main/typescript-aspire)
 
 ## 🤖 GitHub Action
 
@@ -365,6 +368,8 @@ prebuilt action, so consumers do not need an Envilder build step.
 - [Push Command Guide](docs/push-command.md)
 - [Pull Command Guide](docs/pull-command.md)
 - [Exec Command Guide](docs/exec-command.md)
+- [envilder-examples](https://github.com/macalbert/envilder-examples): runnable examples for the SDKs and `envilder exec`
+  (Testcontainers and Aspire, AWS SSM and Azure Key Vault)
 - [🤖 Envilder on Context7](https://context7.com/macalbert/envilder): up-to-date docs for AI coding assistants
   (Claude Code, Cursor, Copilot). Add `use context7` to your prompt, or reference the library ID `/macalbert/envilder`.
 

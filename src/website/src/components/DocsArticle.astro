@@ -684,6 +684,14 @@ envilder exec -- docker compose up`} />
           </div>
         </div>
 
+        <div class="callout">
+          <span class="callout-icon">💡</span>
+          <div>
+            <strong>{t.docs.examplesTitle}</strong> {t.docs.execExamplesDesc}{' '}
+            <a href="https://github.com/macalbert/envilder-examples" target="_blank" rel="noopener noreferrer"><code>envilder-examples</code></a> · <a href="https://github.com/macalbert/envilder-examples/tree/main/cli" target="_blank" rel="noopener noreferrer"><code>cli</code></a>
+          </div>
+        </div>
+
         <p><a href="https://github.com/macalbert/envilder/blob/main/docs/exec-command.md" target="_blank" rel="noopener noreferrer">{t.docs.execGuideLink}</a></p>
       </section>
     </>
@@ -764,6 +772,14 @@ var app = builder.Build();`} />
 var secrets = await Env.ResolveFileAsync("envilder.json");
 EnvilderClient.InjectIntoEnvironment(secrets);`} />
 
+        <div class="callout">
+          <span class="callout-icon">💡</span>
+          <div>
+            <strong>{t.docs.examplesTitle}</strong> {t.docs.sdkDotnetExamplesDesc}{' '}
+            <a href="https://github.com/macalbert/envilder-examples/tree/main/dotnet-testcontainers" target="_blank" rel="noopener noreferrer"><code>dotnet-testcontainers</code></a> · <a href="https://github.com/macalbert/envilder-examples/tree/main/dotnet-aspire" target="_blank" rel="noopener noreferrer"><code>dotnet-aspire</code></a>
+          </div>
+        </div>
+
         <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/dotnet" target="_blank" rel="noopener noreferrer">{t.docs.sdkDotnetFullDocs}</a></p>
       </section>
     </>
@@ -821,6 +837,14 @@ secrets = (
 
 secrets = Envilder.resolve_file('envilder.json')
 validate_secrets(secrets)  # raises SecretValidationError if any value is empty`} />
+
+        <div class="callout">
+          <span class="callout-icon">💡</span>
+          <div>
+            <strong>{t.docs.examplesTitle}</strong> {t.docs.sdkPythonExamplesDesc}{' '}
+            <a href="https://github.com/macalbert/envilder-examples/tree/main/python-testcontainers" target="_blank" rel="noopener noreferrer"><code>python-testcontainers</code></a>
+          </div>
+        </div>
 
         <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/python" target="_blank" rel="noopener noreferrer">{t.docs.sdkPythonFullDocs}</a></p>
       </section>
@@ -887,6 +911,14 @@ await Envilder.load(env, {
 
 const secrets = await Envilder.resolveFile('envilder.json');
 validateSecrets(secrets); // throws SecretValidationError if any value is empty`} />
+
+        <div class="callout">
+          <span class="callout-icon">💡</span>
+          <div>
+            <strong>{t.docs.examplesTitle}</strong> {t.docs.sdkNodejsExamplesDesc}{' '}
+            <a href="https://github.com/macalbert/envilder-examples/tree/main/typescript-testcontainers" target="_blank" rel="noopener noreferrer"><code>typescript-testcontainers</code></a> · <a href="https://github.com/macalbert/envilder-examples/tree/main/typescript-aspire" target="_blank" rel="noopener noreferrer"><code>typescript-aspire</code></a>
+          </div>
+        </div>
 
         <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/nodejs" target="_blank" rel="noopener noreferrer">{t.docs.sdkNodejsFullDocs}</a></p>
       </section>

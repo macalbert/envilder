@@ -438,7 +438,7 @@ export const en: Translations = {
     commentPush: '# Push a secret',
     doneMessage: 'Done! .env file generated.',
     sdkComment3: '# Secrets are now in os.environ',
-    sdkExampleLink: 'View more examples on GitHub',
+    sdkExampleLink: 'View runnable examples on GitHub',
   },
   footer: {
     tagline:
@@ -891,6 +891,9 @@ export const en: Translations = {
       'Exec mode never creates a .env file, and it leaves any existing one untouched: if you are moving from pull, delete your old .env yourself. It does not isolate the process. Your command and every process it starts can read the secrets in their environment, including any tool or AI coding agent that runs env or printenv through it. On Linux, other processes running as the same user can read /proc/<pid>/environ. Only run commands you trust with the secrets you map.',
     execGuideLink:
       'Full exec command guide on GitHub: Windows details, SSO recovery and every error message',
+    examplesTitle: 'Runnable examples.',
+    execExamplesDesc:
+      'Start LocalStack with envilder exec docker run, with the auth token resolved from AWS SSM and never written to disk, or walk through push, pull and exec with npx envilder:',
     pushTitle: 'Push command',
     pushDesc:
       'Upload environment variables from a local .env file to your cloud provider using a mapping file.',
@@ -1078,6 +1081,8 @@ export const en: Translations = {
     sdkDotnetQuickStartResolveDesc:
       'Parse the map file, resolve secrets, and inject them into environment variables:',
     sdkDotnetFullDocs: 'Full documentation →',
+    sdkDotnetExamplesDesc:
+      'xUnit test projects with Testcontainers and Aspire resolve a map file against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to containers, with no .env file:',
     sdkPythonTitle: 'Python SDK',
     sdkPythonDesc:
       'Load secrets directly into your Python application at startup. One-liner setup or fine-grained control with the fluent builder.',
@@ -1098,6 +1103,8 @@ export const en: Translations = {
     sdkPythonValidationDesc:
       'Opt-in validation ensures all resolved secrets have non-empty values:',
     sdkPythonFullDocs: 'Full documentation →',
+    sdkPythonExamplesDesc:
+      'A pytest project with Testcontainers resolves a map file against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and passes the values to containers, with no .env file:',
     sdkNodejsTitle: 'Node.js SDK',
     sdkNodejsDesc:
       'Load secrets directly into your Node.js application at startup. Async-first API with one-liner facade or fluent builder for full control.',
@@ -1118,6 +1125,8 @@ export const en: Translations = {
     sdkNodejsValidationDesc:
       'Opt-in validation ensures all resolved secrets have non-empty values:',
     sdkNodejsFullDocs: 'Full documentation →',
+    sdkNodejsExamplesDesc:
+      'A Vitest project with Testcontainers and an Aspire TypeScript AppHost resolve a map file against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to containers, with no .env file:',
     pagerPrev: 'Previous',
     pagerNext: 'Next',
   },

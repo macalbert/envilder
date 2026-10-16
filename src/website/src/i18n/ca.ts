@@ -441,7 +441,7 @@ export const ca: Translations = {
     commentPush: '# Pujar un secret',
     doneMessage: 'Fet! Fitxer .env generat.',
     sdkComment3: '# Els secrets ja són a os.environ',
-    sdkExampleLink: 'Veure més exemples a GitHub',
+    sdkExampleLink: 'Veure exemples executables a GitHub',
   },
   footer: {
     tagline:
@@ -901,6 +901,9 @@ export const ca: Translations = {
       "El mode exec no crea mai cap fitxer .env i no toca els que ja existeixen: si véns del mode pull, esborra tu mateix el teu .env antic. No aïlla el procés. La teva comanda i tots els processos que iniciï poden llegir els secrets del seu entorn, inclosa qualsevol eina o agent d'IA de programació que hi executi env o printenv. A Linux, altres processos del mateix usuari poden llegir /proc/<pid>/environ. Executa només comandes de confiança amb els secrets que mapes.",
     execGuideLink:
       "Guia completa de la comanda exec a GitHub: detalls de Windows, recuperació SSO i tots els missatges d'error",
+    examplesTitle: 'Exemples executables.',
+    execExamplesDesc:
+      "Arrenca LocalStack amb envilder exec docker run, amb el token d'autenticació resolt des d'AWS SSM i sense escriure'l mai al disc, o segueix pas a pas push, pull i exec amb npx envilder:",
     pushTitle: 'Comanda push',
     pushDesc:
       "Puja variables d'entorn d'un fitxer .env local al teu proveïdor al núvol utilitzant un fitxer de mapeig.",
@@ -1090,6 +1093,8 @@ export const ca: Translations = {
     sdkDotnetQuickStartResolveDesc:
       "Analitza el fitxer de mapeig, resol secrets i injecta'ls a les variables d'entorn:",
     sdkDotnetFullDocs: 'Documentació completa →',
+    sdkDotnetExamplesDesc:
+      'Projectes de proves xUnit amb Testcontainers i Aspire que resolen un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack i Lowkey Vault) i passen els valors als contenidors, sense cap fitxer .env:',
     sdkPythonTitle: 'Python SDK',
     sdkPythonDesc:
       "Carrega secrets directament a la teva aplicació Python a l'inici. Configuració en una línia o control detallat amb el constructor fluent.",
@@ -1110,6 +1115,8 @@ export const ca: Translations = {
     sdkPythonValidationDesc:
       'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
     sdkPythonFullDocs: 'Documentació completa →',
+    sdkPythonExamplesDesc:
+      'Un projecte pytest amb Testcontainers que resol un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack i Lowkey Vault) i passa els valors als contenidors, sense cap fitxer .env:',
     sdkNodejsTitle: 'Node.js SDK',
     sdkNodejsDesc:
       "Carrega secrets directament a la teva aplicació Node.js a l'inici. API asíncrona amb façana d'una línia o constructor fluent per a control total.",
@@ -1129,6 +1136,8 @@ export const ca: Translations = {
     sdkNodejsValidationDesc:
       'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
     sdkNodejsFullDocs: 'Documentació completa →',
+    sdkNodejsExamplesDesc:
+      "Un projecte Vitest amb Testcontainers i un AppHost d'Aspire en TypeScript que resolen un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack i Lowkey Vault) i passen els valors als contenidors, sense cap fitxer .env:",
     pagerPrev: 'Anterior',
     pagerNext: 'Següent',
   },
