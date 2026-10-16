@@ -31,6 +31,7 @@ import { TYPES } from '../../../core/types.js';
 import { presentError } from '../errors/CliErrorPresenter.js';
 import {
   type KnownOption,
+  missingArgumentMessage,
   redactParseError,
 } from '../errors/ParseErrorRedactor.js';
 import { SilentExitError } from '../errors/SilentExitError.js';
@@ -112,7 +113,7 @@ export async function main() {
     .configureOutput({
       // Parse errors can quote secrets typed by the user (#554).
       outputError: (message, write) =>
-        write(redactParseError(message, registeredOptions(program))),
+        write(redactParseError(message, knownOptionsOf(program))),
     })
     .option(
       '--map <path>',
@@ -236,10 +237,16 @@ export async function main() {
     );
 
   registerExecCommand(program);
+  rejectDashValues(program, 1);
 
   try {
     await program.parseAsync(process.argv);
   } catch (error) {
+    if (error instanceof DashValueError) {
+      // Same plain format as the parser's own errors.
+      process.stderr.write(missingArgumentMessage(error.flags));
+      throw new SilentExitError(error.exitCode);
+    }
     // Only the exec subcommand overrides Commander's exit, so a parse error
     // reaching this point belongs to exec and uses its exit code. Commander
     // has already printed the message.
@@ -254,20 +261,71 @@ export async function main() {
 }
 
 /**
- * Every option the CLI registers, on the root command and its subcommands,
- * so parse-error suggestions can be checked against real options.
+ * The options a command registers, flagged with whether `--help` lists them,
+ * so parse-error suggestions only ever name visible options of the command
+ * being parsed.
  */
-function registeredOptions(program: Command): KnownOption[] {
-  return [program, ...program.commands].flatMap((command) =>
-    command.options.map((option) => ({
+function knownOptionsOf(command: Command): KnownOption[] {
+  const visible = command.createHelp().visibleOptions(command);
+  const all = [...command.options, ...visible];
+  const byFlags = new Map<string, KnownOption>();
+  for (const option of all) {
+    byFlags.set(option.flags, {
       flags: option.flags,
       long: option.long,
-    })),
-  );
+      visible: visible.includes(option),
+    });
+  }
+  return [...byFlags.values()];
+}
+
+/**
+ * Thrown by the option parser when a path or name option would take the next
+ * option as its value, for example `--map --key=...`.
+ */
+class DashValueError extends Error {
+  constructor(
+    readonly flags: string,
+    readonly exitCode: number,
+  ) {
+    super(`option '${flags}' argument missing`);
+  }
+}
+
+const DASH_GUARDED_OPTIONS = new Set([
+  '--map',
+  '--envfile',
+  '--profile',
+  '--provider',
+  '--vault-url',
+  '--key',
+  '--secret-path',
+  '--ssm-path',
+]);
+
+/**
+ * Path and name options never accept a value that starts with `-`: such a
+ * value is almost always the next option, and accepting it would silently
+ * swallow that option (and later echo it). `--value` is exempt because a
+ * secret may legitimately start with `-`. One parser serves the root command
+ * and `exec`.
+ */
+function rejectDashValues(command: Command, exitCode: number): void {
+  for (const option of command.options) {
+    if (!option.required || !DASH_GUARDED_OPTIONS.has(option.long ?? '')) {
+      continue;
+    }
+    option.argParser((value: string) => {
+      if (value.startsWith('-')) {
+        throw new DashValueError(option.flags, exitCode);
+      }
+      return value;
+    });
+  }
 }
 
 function registerExecCommand(program: Command): void {
-  program
+  const exec = program
     .command('exec')
     .summary('Run a command with the resolved secrets in its environment')
     .description(
@@ -327,6 +385,13 @@ function registerExecCommand(program: Command): void {
         await runExec(commandName, childArgs ?? [], options);
       },
     );
+
+  // Suggestions for exec's parse errors come from exec's own options.
+  exec.configureOutput({
+    outputError: (message, write) =>
+      write(redactParseError(message, knownOptionsOf(exec))),
+  });
+  rejectDashValues(exec, EXEC_ENVILDER_FAILURE);
 }
 
 const EXEC_HELP = `

@@ -641,13 +641,20 @@ describe('Cli exec', () => {
   });
 
   describe('parse errors never echo option values (#554)', () => {
+    const GENERIC_UNKNOWN_OPTION =
+      'error: unknown option. Run envilder --help.';
     let dispatchSpy: MockInstance;
 
-    /** Flags passed here are `-x` or `--name`, so they need no escaping. */
-    function unknownOptionLine(flag: string): RegExp {
+    /** Exact line for a near-typo of a registered option. */
+    function suggestedLine(flag: string, suggestion: string): RegExp {
       return new RegExp(
-        `(^|\\n)error: unknown option '${flag}'( \\(Did you mean --[A-Za-z0-9-]+\\?\\))?(\\n|$)`,
+        `(^|\\n)error: unknown option '${flag}' \\(Did you mean ${suggestion}\\?\\)(\\n|$)`,
       );
+    }
+
+    /** Exact line for a single-character short option. */
+    function shortOptionLine(flag: string): RegExp {
+      return new RegExp(`(^|\\n)error: unknown option '${flag}'(\\n|$)`);
     }
 
     beforeEach(() => {
@@ -669,7 +676,7 @@ describe('Cli exec', () => {
 
       // Assert
       expect(actual).toBe(1);
-      expect(stderr()).toContain("unknown option '--valeu'");
+      expect(stderr()).toMatch(suggestedLine('--valeu', '--value'));
       expect(stderr()).not.toContain(secret);
       expect(stdout()).not.toContain(secret);
       expect(getSecretSpy).not.toHaveBeenCalled();
@@ -682,80 +689,48 @@ describe('Cli exec', () => {
 
       // Assert
       expect(actual).toBe(1);
-      expect(stderr()).toContain("error: unknown option '--valeu'");
+      expect(stderr()).toMatch(suggestedLine('--valeu', '--value'));
       expect(dispatchSpy).not.toHaveBeenCalled();
     });
 
-    it('Should_NotEchoValue_When_ExecUnknownOptionHasInlineValue', async () => {
-      // Arrange
-      const secret = 's3cretVALUE-exec-1Tq8Wd';
-
+    it('Should_SuggestRegisteredOption_When_ExecOptionIsNearTypo', async () => {
       // Act
-      const actual = await runCli([
-        'exec',
-        `--vaule=${secret}`,
-        'node',
-        'app.js',
-      ]);
+      const actual = await runCli(['exec', '--mapp=cfg.json', 'node']);
 
       // Assert
       expect(actual).toBe(125);
-      expect(stderr()).toContain('--vaule');
-      expect(stderr()).not.toContain(secret);
-      expect(stdout()).not.toContain(secret);
-      expect(getSecretSpy).not.toHaveBeenCalled();
+      expect(stderr()).toMatch(suggestedLine('--mapp', '--map'));
+      expect(stderr()).not.toContain('cfg.json');
       expect(runSpy).not.toHaveBeenCalled();
     });
 
-    it('Should_KeepUnknownOptionMessage_When_ExecUnknownOptionHasNoValue', async () => {
+    it('Should_SuggestRegisteredOption_When_ValueContainsQuote', async () => {
+      // Arrange
+      const secret = 'SECRET2-4Kd';
+
       // Act
-      const actual = await runCli(['exec', '--vaule', 'node', 'app.js']);
+      const actual = await runCli([`--valeu=ab'${secret}`]);
 
       // Assert
-      expect(actual).toBe(125);
-      expect(stderr()).toContain("unknown option '--vaule'");
-      expect(runSpy).not.toHaveBeenCalled();
+      expect(actual).toBe(1);
+      expect(stderr()).toMatch(suggestedLine('--valeu', '--value'));
+      expect(stderr()).not.toContain(secret);
+      expect(stdout()).not.toContain(secret);
+      expect(dispatchSpy).not.toHaveBeenCalled();
     });
 
     it.each([
-      [
-        'RootValueWithQuote',
-        ["--valeu=ab'SECRET2-4Kd"],
-        'SECRET2-4Kd',
-        '--valeu',
-        1,
-      ],
-      [
-        'RootQuoteInsideName',
-        ["--va'leu=SECRET3-7Nw"],
-        'SECRET3-7Nw',
-        '--va',
-        1,
-      ],
-      ['RootAttachedShortValue', ['-xSECRET4-2Pq'], 'SECRET4-2Pq', '-x', 1],
-      [
-        'ExecValueWithQuote',
-        ['exec', "--vaule=x'SECRETb-8Hm", 'node'],
-        'SECRETb-8Hm',
-        '--vaule',
-        125,
-      ],
-      [
-        'ExecAttachedShortValue',
-        ['exec', '-zSECRETc-5Tr', 'node'],
-        'SECRETc-5Tr',
-        '-z',
-        125,
-      ],
+      ['Root', ['-xSECRET4-2Pq'], 'SECRET4-2Pq', '-x', 1],
+      ['Exec', ['exec', '-zSECRETc-5Tr', 'node'], 'SECRETc-5Tr', '-z', 125],
     ] as const)(
-      'Should_PrintOnlySafeOptionName_When_UnknownOptionIs%s',
+      'Should_PrintOnlyShortOptionCharacter_When_%sShortOptionHasAttachedValue',
       async (_name, args, secret, flag, expectedCode) => {
         // Act
         const actual = await runCli([...args]);
 
         // Assert
         expect(actual).toBe(expectedCode);
-        expect(stderr()).toMatch(unknownOptionLine(flag));
+        expect(stderr()).toMatch(shortOptionLine(flag));
         expect(stderr()).not.toContain(secret);
         expect(stdout()).not.toContain(secret);
         expect(getSecretSpy).not.toHaveBeenCalled();
@@ -763,21 +738,61 @@ describe('Cli exec', () => {
       },
     );
 
-    it('Should_PrintGenericUnknownOption_When_NameCannotBeExtractedSafely', async () => {
-      // Arrange
-      const secret = 'SECRET5-9Vx';
+    it.each([
+      ['RootQuoteInsideName', ["--va'leu=SECRET3-7Nw"], 'SECRET3-7Nw', 1],
+      ['RootNameStartsWithQuote', ["--'abc=SECRET5-9Vx"], 'SECRET5-9Vx', 1],
+      ['RootBadName', ['--bad=SECRET6-3Wy'], 'SECRET6-3Wy', 1],
+      ['RootFooName', ['--foo=SECRET7-1Ju'], 'SECRET7-1Ju', 1],
+      ['RootSingleLetterName', ['--a=b=SECRET8-6Ko'], 'SECRET8-6Ko', 1],
+      ['RootNameThenQuote', ["--x'SECRET9-2Lm"], 'SECRET9-2Lm', 1],
+      [
+        'ExecInlineValue',
+        ['exec', '--vaule=s3cretVALUE-exec-1Tq8Wd', 'node', 'app.js'],
+        's3cretVALUE-exec-1Tq8Wd',
+        125,
+      ],
+      [
+        'ExecValueWithQuote',
+        ['exec', "--vaule=x'SECRETb-8Hm", 'node'],
+        'SECRETb-8Hm',
+        125,
+      ],
+      ['ExecNoValue', ['exec', '--vaule', 'node', 'app.js'], 'vaule', 125],
+    ] as const)(
+      'Should_PrintGenericUnknownOption_When_%sHasNoSuggestion',
+      async (_name, args, secret, expectedCode) => {
+        // Act
+        const actual = await runCli([...args]);
 
-      // Act
-      const actual = await runCli([`--'abc=${secret}`]);
+        // Assert
+        expect(actual).toBe(expectedCode);
+        expect(stderr()).toContain(GENERIC_UNKNOWN_OPTION);
+        expect(stderr()).not.toContain("unknown option '");
+        expect(stderr()).not.toContain(secret);
+        expect(stdout()).not.toContain(secret);
+        expect(getSecretSpy).not.toHaveBeenCalled();
+        expect(runSpy).not.toHaveBeenCalled();
+      },
+    );
 
-      // Assert
-      expect(actual).toBe(1);
-      expect(stderr()).toContain('unknown option');
-      expect(stderr()).not.toContain(secret);
-      expect(stderr()).not.toContain('abc');
-      expect(stdout()).not.toContain(secret);
-      expect(dispatchSpy).not.toHaveBeenCalled();
-    });
+    it.each([
+      ['Root', ['--tokenS3CRETx9'], 1],
+      ['Exec', ['exec', '--ZQXS3CRETx9', 'node'], 125],
+    ] as const)(
+      'Should_PrintGenericUnknownOption_When_NameIsNotNearAnyOption%s',
+      async (_name, args, expectedCode) => {
+        // Act
+        const actual = await runCli([...args]);
+
+        // Assert
+        expect(actual).toBe(expectedCode);
+        expect(stderr()).toContain(GENERIC_UNKNOWN_OPTION);
+        expect(stderr()).not.toContain('S3CRETx9');
+        expect(stdout()).not.toContain('S3CRETx9');
+        expect(dispatchSpy).not.toHaveBeenCalled();
+        expect(runSpy).not.toHaveBeenCalled();
+      },
+    );
 
     it('Should_NotEchoValue_When_RootReceivesExcessArgument', async () => {
       // Arrange
@@ -822,6 +837,140 @@ describe('Cli exec', () => {
       expect(stderr()).not.toContain(secret);
       expect(stdout()).not.toContain(secret);
       expect(runSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('value-taking options never swallow the next option', () => {
+    let dispatchSpy: MockInstance;
+
+    beforeEach(() => {
+      dispatchSpy = vi
+        .spyOn(DispatchActionCommandHandler.prototype, 'handleCommand')
+        .mockResolvedValue(undefined);
+    });
+
+    it.each([
+      ['MapSeparated', ['--map', '--key=S3CRETx1'], '--map <path>', 'S3CRETx1'],
+      ['MapInline', ['--map=--key=S3CRETx2'], '--map <path>', 'S3CRETx2'],
+      [
+        'Envfile',
+        ['--envfile', '--key=S3CRETx5'],
+        '--envfile <path>',
+        'S3CRETx5',
+      ],
+      [
+        'Profile',
+        ['--profile', '--key=S3CRETx6'],
+        '--profile <name>',
+        'S3CRETx6',
+      ],
+      [
+        'Provider',
+        ['--provider', '--key=S3CRETx7'],
+        '--provider <name>',
+        'S3CRETx7',
+      ],
+      [
+        'VaultUrl',
+        ['--vault-url', '--key=S3CRETx8'],
+        '--vault-url <url>',
+        'S3CRETx8',
+      ],
+      [
+        'SecretPath',
+        ['--secret-path', '--key=S3CRETx9'],
+        '--secret-path <path>',
+        'S3CRETx9',
+      ],
+      [
+        'SsmPath',
+        ['--ssm-path', '--key=S3CRETy1'],
+        '--ssm-path <path>',
+        'S3CRETy1',
+      ],
+      ['Key', ['--key', '--map=S3CRETy2'], '--key <name>', 'S3CRETy2'],
+    ] as const)(
+      'Should_RejectDashValue_When_Root%sIsFollowedByAnotherOption',
+      async (_name, args, flags, marker) => {
+        // Arrange
+        const { readMapFileConfig } = await import(
+          '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore'
+        );
+
+        // Act
+        const actual = await runCli([...args]);
+
+        // Assert
+        expect(actual).toBe(1);
+        expect(stderr()).toContain(`error: option '${flags}' argument missing`);
+        expect(stderr()).not.toContain(marker);
+        expect(stdout()).not.toContain(marker);
+        expect(readMapFileConfig).not.toHaveBeenCalled();
+        expect(getMappingSpy).not.toHaveBeenCalled();
+        expect(dispatchSpy).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each([
+      [
+        'MapSeparated',
+        ['exec', '--map', '--key=S3CRETx3', 'node'],
+        '--map <path>',
+        'S3CRETx3',
+      ],
+      [
+        'ProfileShortLike',
+        ['exec', '--profile', '-zS3CRETx4', 'node'],
+        '--profile <name>',
+        'S3CRETx4',
+      ],
+      [
+        'MapInline',
+        ['exec', '--map=--key=S3CRETy3', 'node'],
+        '--map <path>',
+        'S3CRETy3',
+      ],
+    ] as const)(
+      'Should_RejectDashValue_When_Exec%sIsFollowedByAnotherOption',
+      async (_name, args, flags, marker) => {
+        // Arrange
+        const { readMapFileConfig } = await import(
+          '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore'
+        );
+
+        // Act
+        const actual = await runCli([...args]);
+
+        // Assert
+        expect(actual).toBe(125);
+        expect(stderr()).toContain(`error: option '${flags}' argument missing`);
+        expect(stderr()).not.toContain(marker);
+        expect(stdout()).not.toContain(marker);
+        expect(readMapFileConfig).not.toHaveBeenCalled();
+        expect(getMappingSpy).not.toHaveBeenCalled();
+        expect(runSpy).not.toHaveBeenCalled();
+      },
+    );
+
+    it('Should_AcceptValueStartingWithDash_When_PushingSingleSecret', async () => {
+      // Act
+      const actual = await runCli([
+        '--key=K',
+        '--value=-startsWithDash',
+        '--secret-path=/p',
+      ]);
+
+      // Assert
+      expect(actual).toBe(0);
+      expect(stderr()).not.toContain('argument missing');
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mode: OperationMode.PUSH_SINGLE,
+          key: 'K',
+          value: '-startsWithDash',
+          secretPath: '/p',
+        }),
+      );
     });
   });
 

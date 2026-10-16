@@ -66,7 +66,13 @@ envilder exec -- -weird-program-name            # use -- when the command itself
 ```
 
 An unknown option before the command is an error (exit code `125`), so a typo
-such as `--mapp` never reaches your command by accident.
+such as `--mapp` never reaches your command by accident. Error messages never
+repeat what you typed beyond a safe option name: an unknown option is named
+only when it is a near-typo of a real option, with a suggestion, and gets a
+generic message otherwise. Options such as `--map` or `--profile` never take a
+value that starts with `-`: `envilder exec --map --profile dev node` is
+reported as `error: option '--map <path>' argument missing` instead of
+treating `--profile` as the map path.
 
 Envilder options also go **after** `exec`, never before it. An option written
 before `exec` is rejected with exit code `125` instead of being silently

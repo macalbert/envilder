@@ -5,7 +5,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
-## [Unreleased]
+## [0.15.0] - 2026-10-16
 
 ### Added
 
@@ -33,11 +33,21 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 * **Parse errors no longer echo option values or arguments**: parse errors
   are rebuilt from safe forms, so option values and extra arguments are never
-  printed. An unknown option is reported by its name only (`--valeu=<value>`
-  is shown as `unknown option '--valeu'`, or as a generic message when no safe
-  name can be extracted), "too many arguments" shows only the counts, and any
-  other parse error is replaced with a generic message. Exit codes are
-  unchanged
+  printed. An unknown long option is named only when it is a near-typo of a
+  real option, together with the suggestion (`--valeu=<value>` is shown as
+  `unknown option '--valeu' (Did you mean --value?)`); any other unknown long
+  option gets a generic message, so a mistyped secret is never echoed. An
+  unknown short option is named by its single character, "too many
+  arguments" shows only the counts, and any other parse error is replaced
+  with a generic message. Exit codes are unchanged
+  ([#554](https://github.com/macalbert/envilder/issues/554))
+
+* **Path and name options never swallow the next option**: `--map`,
+  `--envfile`, `--profile`, `--provider`, `--vault-url`, `--key`,
+  `--secret-path` and `--ssm-path` (and their `exec` counterparts) reject a
+  value that starts with `-` as a missing argument, before any map file is
+  read, instead of taking the following option as their value. `--value` is
+  exempt, so a secret may still start with `-`
   ([#554](https://github.com/macalbert/envilder/issues/554))
 
 ---
