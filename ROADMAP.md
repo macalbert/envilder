@@ -18,40 +18,49 @@ or directly inside application code at runtime.
 
 ### ✅ Shipped
 
-| Feature | Notes |
-|---------|-------|
-| **Mapping-based resolution** | Core functionality |
-| **`.env` file generation** | Core functionality |
-| **AWS SSM Parameter Store** | Default provider |
-| **AWS profile support** | `--profile` flag |
-| **Push mode** (`--push`) | [Guide](./docs/push-command.md) |
-| **GitHub Action** | [Documentation](./github-action/README.md) |
-| **Azure Key Vault** | Multi-backend via `$config` map-file section ([#90](https://github.com/macalbert/envilder/pull/90)) |
-| **Documentation website** | [envilder.com](https://envilder.com) |
-| **Onboarding documentation** | [Setup guide](./docs/requirements-installation.md) |
-| **.NET SDK** (`Envilder`) | First runtime SDK: load secrets into `IConfiguration` or `EnvilderClient`. AWS SSM + Azure Key Vault. [Documentation](./src/sdks/dotnet/README.md) |
-| **Python SDK** (`envilder`) | Runtime library for Python: Django, FastAPI, data pipelines. Sync API with `EnvilderClient`, `MapFileParser`, `SecretProviderFactory`. AWS SSM + Azure Key Vault. Published to PyPI. [Documentation](./src/sdks/python/README.md) |
-| **Node.js SDK** (`@envilder/sdk`) | Runtime library for Node.js: load secrets directly into `process.env` from a map-file. AWS SSM + Azure Key Vault. Published to npm. [Documentation](./src/sdks/nodejs/README.md) |
+Versions refer to each component's own changelog: [CLI](./docs/changelogs/cli.md), [GitHub Action](./docs/changelogs/gha.md), [.NET SDK](./docs/changelogs/sdk-dotnet.md), [Python SDK](./docs/changelogs/sdk-python.md) and [Node.js SDK](./docs/changelogs/sdk-nodejs.md).
+
+| Feature | Version | Notes |
+|---------|---------|-------|
+| **Mapping-based resolution** | CLI v0.1.4 | Core functionality: resolve every variable declared in a JSON map file |
+| **`.env` file generation** | CLI v0.1.4 | Core functionality |
+| **AWS SSM Parameter Store** | CLI v0.1.4 | Default provider |
+| **AWS profile support** | CLI v0.3.0 | `--profile` flag |
+| **Push mode** (`--push`) | CLI v0.6.0 | Upload a `.env` file or a single variable (`--key`, `--value`, `--secret-path`) to the provider. Throttling retry and duplicate path checks since v0.7.7. [Guide](./docs/push-command.md) |
+| **GitHub Action** | Action v0.7.0 | Pull secrets into `.env` files during workflow runs. [Documentation](./github-action/README.md) |
+| **Azure Key Vault** | CLI v0.8.0, Action v0.8.0 | `--provider`, `--vault-url` and the `$config` map-file section. Precedence: flags > `$config` > defaults ([#90](https://github.com/macalbert/envilder/pull/90)) |
+| **Documentation website** | CLI v0.9.1 | [envilder.com](https://envilder.com), in English, Spanish and Catalan. [Setup guide](./docs/requirements-installation.md) |
+| **.NET SDK** (`Envilder`) | .NET SDK v0.1.0 | Load secrets into `IConfiguration`, `IServiceCollection` or `EnvilderClient`. Static facade, fluent builder and environment routing since v0.2.0. Published to NuGet. [Documentation](./src/sdks/dotnet/README.md) |
+| **Python SDK** (`envilder`) | Python SDK v0.1.0 | Runtime library for Django, FastAPI and data pipelines. Fluent facade since v0.2.0, environment routing since v0.3.0. Published to PyPI. [Documentation](./src/sdks/python/README.md) |
+| **Node.js SDK** (`@envilder/sdk`) | Node.js SDK v0.1.0 | Load secrets into `process.env` from a map file, with fluent builder, secret validation and environment routing. Published to npm. [Documentation](./src/sdks/nodejs/README.md) |
+| **Map-file JSON Schema** | CLI v0.10.0, .NET SDK v0.3.0, Node.js SDK v0.2.0, Python SDK v0.4.0 | Formal spec at [`spec/map-file.v1.json`](./spec/map-file.v1.json), published at `https://envilder.com/schema/map-file.v1.json`: the contract between all SDKs and tools |
+| **AWS identity banner** | CLI v0.12.1, Action v0.12.1 | Logs the effective AWS identity before resolving secrets (colorized since v0.13.0) |
+| **Actionable credential errors** | CLI v0.13.0, .NET SDK v0.5.0, Node.js SDK v0.4.0, Python SDK v0.5.0 | Typed expired-credentials and expired-SSO-session errors with the exact fix (ADR-0010) |
+| **SSO login recovery** | CLI v0.13.0 | On an interactive terminal, offers to run `aws sso login` and retries |
+| **Secret masking in GitHub Actions** | Action v0.13.2 | Every resolved value is registered with `::add-mask::` before the `.env` file is written |
+| **Zero-config defaults** | CLI v0.14.0 | `envilder` with no flags reads `envilder.json` and writes `.env` |
+| **Safe `.env` writing** | CLI v0.14.0, Action v0.14.0 | Values round-trip exactly, and mapping keys a `.env` file cannot represent are rejected |
+| **Exec mode** (`envilder exec`) | CLI v0.15.0 | `envilder exec [options] [--] <command> [args...]` starts a command with the resolved secrets in its environment, without writing a `.env` file. [Guide](./docs/exec-command.md) |
 
 ### 🔥 Up Next
 
 | Feature | Priority | Notes |
 |---------|----------|-------|
-| **Go SDK** (`envilder`) | 🔴 High | Runtime library for Go: cloud-native apps, Kubernetes tooling. Published as Go module |
-| **Java SDK** (`envilder`) | 🔴 High | Runtime library for Java/Kotlin: Spring Boot, Android backends. Published to Maven Central |
-| **Map-file JSON Schema** | 🔴 High | Formal spec for the map-file format at `spec/`: serves as the contract between all SDKs and tools |
+| **Go SDK** (`envilder`) | 🔴 High | Runtime library for Go: cloud-native apps, Kubernetes tooling. Published as Go module ([#561](https://github.com/macalbert/envilder/issues/561) → [#562](https://github.com/macalbert/envilder/issues/562) → [#563](https://github.com/macalbert/envilder/issues/563)) |
+| **Java SDK** (`envilder`) | 🔴 High | Runtime library for Java/Kotlin: Spring Boot, Android backends. Published to Maven Central ([#569](https://github.com/macalbert/envilder/issues/569)) |
 | **SDK conformance tests** | 🔴 High | Language-agnostic test fixtures (JSON input → expected output) that all SDKs must pass |
-| **Exec mode** (`--exec`) | 🟡 Medium | Inject secrets into a child process env without writing to disk (`envilder exec -- node server.js`) |
-| **GCP Secret Manager** | 🟡 Medium | Third cloud provider: similar DX to AWS SSM. Completes the multi-cloud trident (AWS + Azure + GCP) |
+| **Validate command** (`envilder validate`) | 🟡 Medium | Preflight check: map file, remote key existence and optional `.env` comparison, without printing values. CLI first, then the SDKs ([#532](https://github.com/macalbert/envilder/issues/532)) |
+| **GCP Secret Manager** | 🟡 Medium | Third cloud provider: similar DX to AWS SSM. Completes the multi-cloud trident (AWS + Azure + GCP) ([#573](https://github.com/macalbert/envilder/issues/573)) |
 | **AWS Secrets Manager** | 🟡 Medium | Support AWS Secrets Manager alongside SSM Parameter Store for teams using JSON-structured secrets |
-| **Check/sync mode** (`--check`) | 🟡 Medium | Validate cloud secrets vs local `.env`, fail CI if out-of-sync |
 
 ### 💡 Planned
 
 | Feature | Priority | Notes |
 |---------|----------|-------|
 | **Auto-discovery mode** (`--auto`) | Medium | Fetch all parameters matching a given prefix (e.g., `/my-app/prod/*`) |
-| **Exec with refresh** (`--refresh-interval`) | Low | Kill & restart child process periodically with fresh secrets (requires `--exec`) |
+| **Local override map file** (`envilder.local.json`) | Medium | Personal, gitignored layer on top of the committed map file, on every surface (ADR-0011, [#385](https://github.com/macalbert/envilder/issues/385)) |
+| **Environment delivery in the GitHub Action** | Medium | Export resolved values to later job steps instead of writing a `.env` file ([#478](https://github.com/macalbert/envilder/issues/478)) |
+| **Exec with refresh** (`--refresh-interval`) | Low | Kill & restart child process periodically with fresh secrets (builds on `envilder exec`, [#479](https://github.com/macalbert/envilder/issues/479)) |
 | **Hierarchical mapping** | Low | Per-environment `envilder.json` with inheritance/overrides |
 
 ---
@@ -89,7 +98,7 @@ All five SDKs are developed **in parallel**: same map-file contract, same confor
 - **One map-file spec**: formal JSON Schema at `spec/` is the source of truth for all SDKs
 - **Conformance tests**: language-agnostic fixtures that every SDK must pass
 - **Independent versioning**: each SDK has its own semver (`sdk-node@1.2.0`, `sdk-py@0.3.0`)
-- **Shared test infrastructure**: LocalStack (AWS) and Lowkey Vault (Azure) via Docker Compose serve all SDKs
+- **Shared test infrastructure**: LocalStack for AWS and Azure via Docker Compose serve all SDKs
 
 ---
 

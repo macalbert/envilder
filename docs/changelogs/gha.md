@@ -1,3 +1,16 @@
+## [0.15.0] - 2026-10-16
+
+### Changed
+
+* **Shared secret masker can report when registrations are written**: The
+  masker the Action shares with the CLI gained an internal capability to
+  report when its `::add-mask::` writes have completed, used by the new
+  CLI-only `envilder exec` command. The Action's pull flow does not use it,
+  and the registrations it prints are unchanged
+  ([#550](https://github.com/macalbert/envilder/issues/550))
+
+---
+
 ## [0.14.0] - 2026-09-26
 
 ### Fixed
@@ -50,6 +63,13 @@
 
 ## [0.13.1] - 2026-07-31
 
+### Added
+
+* **GitHub Marketplace listing and root reference**: A root `action.yml`
+  publishes the Action to the GitHub Marketplace and lets workflows use it as
+  `macalbert/envilder@<version>`. The `macalbert/envilder/github-action@v0`
+  reference keeps working.
+
 ### Changed
 
 * **Bundle the GitHub Action with esbuild**: Replace the ncc bundler so the
@@ -61,7 +81,7 @@
 
 ---
 
-## [0.13.0] - 2026-06-26
+## [0.13.0] - 2026-07-11
 
 ### Added
 
@@ -141,6 +161,18 @@
 
 ---
 
+## [0.11.1] - 2026-06-25
+
+### Fixed
+
+* **AWS SSO / assumed-role profiles now resolve correctly**: The bundled CLI
+  now resolves SSO, IAM Identity Center, and assumed-role profiles (via the
+  `profile` input or `$config.profile`) through the full AWS provider chain
+  instead of silently falling back to the default credentials
+  ([#364](https://github.com/macalbert/envilder/issues/364))
+
+---
+
 ## [0.11.0] - 2026-05-31
 
 ### Changed
@@ -203,7 +235,7 @@
 
 ---
 
-## [0.8.0] - 2026-03-22
+## [0.8.0] - 2026-03-26
 
 ### Added
 

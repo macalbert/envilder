@@ -36,6 +36,80 @@ const azVaultPolicy = `az keyvault set-policy \
 const pushSingleCmd =
   'envilder --key=API_KEY --value={SECRET} --secret-path=/myapp/api/key';
 
+const execRootOptionError = `$ envilder --map=config/prod.json exec -- npm start
+error: Put envilder options after "exec": envilder exec --map=config/prod.json -- npm …`;
+
+const execRejectedOptions = [
+  {
+    option: '--envfile',
+    message:
+      '--envfile cannot be used with exec: exec mode never reads or writes a .env file.',
+  },
+  { option: '--push', message: '--push cannot be used with exec.' },
+  {
+    option: '--key, --value, --secret-path',
+    message: 'Single-secret push options cannot be used with exec.',
+  },
+];
+
+const execUcLocalstackMap = `{
+  "LOCALSTACK_AUTH_TOKEN": "/envilder/development/localstack/authToken"
+}`;
+
+const execUcLocalstackCompose = `services:
+  localstack:
+    image: localstack/localstack:stable
+    ports:
+      - "4566:4566"
+    environment:
+      LOCALSTACK_AUTH_TOKEN: \${LOCALSTACK_AUTH_TOKEN}`;
+
+const execUcLocalstackDocker =
+  'envilder exec -- docker run --rm -e LOCALSTACK_AUTH_TOKEN -p 4566:4566 localstack/localstack:stable';
+
+const execUcTests = `envilder exec -- npm test
+envilder exec -- dotnet test
+envilder exec -- pytest`;
+
+const execUcMigrationsMap = `{
+  "DATABASE_URL": "/my-app/development/database/url"
+}`;
+
+const execUcMigrations = `envilder exec -- npx prisma migrate deploy
+envilder exec -- python scripts/backfill.py`;
+
+const execUcTerraformMap = `{
+  "TF_VAR_db_password": "/my-app/development/database/password"
+}`;
+
+const execUcDevPackageJson = `{
+  "scripts": {
+    "dev": "envilder exec -- next dev"
+  }
+}`;
+
+const execUcGhaWorkflow = `permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
+steps:
+  - uses: actions/checkout@v5
+  - uses: aws-actions/configure-aws-credentials@v5
+    with:
+      role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole
+      aws-region: us-east-1
+  - run: npx envilder exec -- npm test`;
+
+const execUcChain = `envilder exec -- sh -c 'npm run migrate && exec npm start'
+envilder exec -- bash`;
+
+const execPackageJson = `{
+  "scripts": {
+    "dev": "envilder exec -- vite",
+    "start": "envilder exec --map=config/prod.json -- node server.js"
+  }
+}`;
+
 const awsVerifyCmd = `# 1. Create a test parameter
 aws ssm put-parameter --name "/test/hello" --value "world" --type SecureString --overwrite
 
@@ -53,6 +127,62 @@ echo '{ "$config": { "provider": "azure", "vaultUrl": "https://{VAULT_NAME}.vaul
 
 # 3. Pull with Envilder
 envilder --map=test-map.json --envfile=.env`;
+
+const ghaAwsTrustPolicy = `{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": {
+      "Federated": "arn:aws:iam::123456789012:oidc-provider/token.actions.githubusercontent.com"
+    },
+    "Action": "sts:AssumeRoleWithWebIdentity",
+    "Condition": {
+      "StringEquals": {
+        "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+        "token.actions.githubusercontent.com:sub": "repo:my-org/my-repo:ref:refs/heads/main"
+      }
+    }
+  }]
+}`;
+
+const ghaAwsReadPolicy = `{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": "ssm:GetParameter",
+    "Resource": "arn:aws:ssm:eu-west-1:123456789012:parameter/myapp/prod/*"
+  }]
+}`;
+
+const ghaExpectedOutput = `🔑 Envilder GitHub Action - Starting secret pull...
+📋 Map file: envilder.json
+📄 Env file: .env
+
+☁ AWS identity · account=123456789012 · region=eu-west-1 · profile=default
+
+🪙  RESOLVING SECRETS
+${'━'.repeat(60)}
+  ✓ DB_PASSWORD         → *****************x9Q
+  ✓ STRIPE_KEY          → *****************************4Rt
+
+⭐ LEVEL CLEARED  —  2/2 secrets loaded · .env written
+
+✅ Secrets pulled successfully!`;
+
+const ghaAzureFederated = `az ad app create --display-name github-envilder
+az ad sp create --id {APP_ID}
+
+az ad app federated-credential create --id {APP_ID} --parameters '{
+  "name": "github-main",
+  "issuer": "https://token.actions.githubusercontent.com",
+  "subject": "repo:my-org/my-repo:ref:refs/heads/main",
+  "audiences": ["api://AzureADTokenExchange"]
+}'`;
+
+const ghaAzureRole = `az role assignment create \\
+  --role "Key Vault Secrets User" \\
+  --assignee {APP_ID} \\
+  --scope /subscriptions/{SUB}/resourceGroups/{RG}/providers/Microsoft.KeyVault/vaults/{VAULT}`;
 ---
 
 <DocsShell lang={lang} routeKey={routeKey}>
@@ -98,6 +228,11 @@ envilder --map=test-map.json --envfile=.env`;
             <CodeBlock lang="bash" code="npx envilder --help" />
           </div>
         </div>
+        <p>{t.docs.installNext}</p>
+        <ul class="docs-list">
+          <li><a href={localizedPath(lang, '/docs/cli/pull/')}>{t.docs.installNextPull}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/exec/')}>{t.docs.installNextExec}</a></li>
+        </ul>
       </section>
     </>
   )}
@@ -410,6 +545,14 @@ envilder --provider=azure \\
         <CodeBlock lang="dotenv" filename=".env" code={`# Generated by Envilder
 API_KEY=abc123
 DB_PASSWORD=secret456`} />
+
+        <div class="callout">
+          <span class="callout-icon">💡</span>
+          <div>
+            <strong>{t.docs.pullExecTitle}</strong> {t.docs.pullExecDesc}{' '}
+            <a href={localizedPath(lang, '/docs/cli/exec/')}>{t.docs.pullExecGuideLink}</a>
+          </div>
+        </div>
       </section>
     </>
   )}
@@ -475,6 +618,181 @@ envilder --push --provider=azure \\
             <tr><td><code>--profile</code></td><td>{t.docs.pushSingleOptProfile}</td></tr>
           </tbody>
         </table>
+      </section>
+    </>
+  )}
+
+  {routeKey === 'cli-exec' && (
+    <>
+      <section id="exec-command" class="docs-section">
+        <h2>{t.docs.execTitle}</h2>
+        <p>{t.docs.execDesc}</p>
+
+        <h3>{t.docs.execUsageTitle}</h3>
+        <CodeBlock lang="bash" code="envilder exec [options] [--] <command> [args...]" />
+
+        <h3>{t.docs.execSeparatorTitle}</h3>
+        <p>{t.docs.execSeparatorDesc}</p>
+        <CodeBlock lang="bash" code={`${t.docs.execSepComment1}
+envilder exec npm run dev
+
+${t.docs.execSepComment2}
+envilder exec --map=cfg.json npm run dev
+
+${t.docs.execSepComment3}
+envilder exec npm run dev --map=x
+
+${t.docs.execSepComment4}
+envilder exec --map=cfg.json -- npm run dev`} />
+
+        <h3>{t.docs.execOptions}</h3>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.optionHeader}</th><th>{t.docs.mapThDescription}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>--map</code></td><td>{t.docs.execOptMap}</td></tr>
+            <tr><td><code>--profile</code></td><td>{t.docs.execOptProfile}</td></tr>
+            <tr><td><code>--provider</code></td><td>{t.docs.execOptProvider}</td></tr>
+            <tr><td><code>--vault-url</code></td><td>{t.docs.execOptVault}</td></tr>
+          </tbody>
+        </table>
+        <p>{t.docs.execOptionsOrderDesc}</p>
+        <CodeBlock lang="text" code={execRootOptionError} />
+        <p>{t.docs.execRejectedDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.optionHeader}</th><th>{t.docs.execThMessage}</th></tr>
+          </thead>
+          <tbody>
+            {execRejectedOptions.map((row) => (
+              <tr><td><code>{row.option}</code></td><td><code>{row.message}</code></td></tr>
+            ))}
+          </tbody>
+        </table>
+
+        <h3>{t.docs.execExamples}</h3>
+        <CodeBlock lang="bash" code={`${t.docs.execCommentNpx}
+npx envilder exec -- npm run dev
+
+${t.docs.execCommentMap}
+envilder exec --map=config/envilder.json -- node server.js
+
+${t.docs.execCommentAzure}
+envilder exec --provider=azure \
+  --vault-url=https://my-vault.vault.azure.net -- dotnet run
+
+${t.docs.execCommentDocker}
+envilder exec -- docker compose up`} />
+        <p>{t.docs.execPackageJsonDesc}</p>
+        <CodeBlock lang="json" filename="package.json" code={execPackageJson} />
+
+        <h3>{t.docs.execOutputTitle}</h3>
+        <p>{t.docs.execOutputDesc}</p>
+        <CodeBlock lang="text" code="envilder: 2 secrets resolved (aws, profile=dev) → npm …" />
+      </section>
+
+      <section id="exec-use-cases" class="docs-section">
+        <h2>{t.docs.execUseCasesTitle}</h2>
+        <p>{t.docs.execUseCasesDesc}</p>
+
+        <h3>{t.docs.execUcLocalstackTitle}</h3>
+        <p>{t.docs.execUcLocalstackDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={execUcLocalstackMap} />
+        <p>{t.docs.execUcLocalstackComposeDesc}</p>
+        <CodeBlock lang="yaml" filename="compose.yaml" code={execUcLocalstackCompose} />
+        <CodeBlock lang="bash" code="envilder exec -- docker compose up" />
+        <p>{t.docs.execUcLocalstackDockerDesc}</p>
+        <CodeBlock lang="bash" code={execUcLocalstackDocker} />
+        <p>
+          {t.docs.execUcLocalstackExamplesDesc}{' '}
+          <a href="https://github.com/macalbert/envilder-examples" target="_blank" rel="noopener noreferrer"><code>envilder-examples</code></a>
+        </p>
+
+        <h3>{t.docs.execUcTestsTitle}</h3>
+        <p>{t.docs.execUcTestsDesc}</p>
+        <CodeBlock lang="bash" code={execUcTests} />
+        <p>{t.docs.execUcTestsNote}</p>
+
+        <h3>{t.docs.execUcMigrationsTitle}</h3>
+        <p>{t.docs.execUcMigrationsDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={execUcMigrationsMap} />
+        <CodeBlock lang="bash" code={execUcMigrations} />
+
+        <h3>{t.docs.execUcTerraformTitle}</h3>
+        <p>{t.docs.execUcTerraformDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={execUcTerraformMap} />
+        <CodeBlock lang="bash" code="envilder exec -- terraform plan" />
+        <p>{t.docs.execUcTerraformNote}</p>
+
+        <h3>{t.docs.execUcDevTitle}</h3>
+        <p>{t.docs.execUcDevDesc}</p>
+        <CodeBlock lang="json" filename="package.json" code={execUcDevPackageJson} />
+        <p>{t.docs.execUcDevNote}</p>
+
+        <h3>{t.docs.execUcGhaTitle}</h3>
+        <p>{t.docs.execUcGhaDesc}</p>
+        <CodeBlock lang="yaml" code={execUcGhaWorkflow} />
+        <p>{t.docs.execUcGhaNote}</p>
+
+        <h3>{t.docs.execUcChainTitle}</h3>
+        <p>{t.docs.execUcChainDesc}</p>
+        <CodeBlock lang="bash" code={execUcChain} />
+        <p>{t.docs.execUcChainNote}</p>
+      </section>
+
+      <section id="exec-behavior" class="docs-section">
+        <h2>{t.docs.execBehaviorTitle}</h2>
+
+        <h3>{t.docs.execExitTitle}</h3>
+        <p>{t.docs.execExitDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.execThCode}</th><th>{t.docs.execThMeaning}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>n</code></td><td>{t.docs.execExitChild}</td></tr>
+            <tr><td><code>128 + n</code></td><td>{t.docs.execExitSignal}</td></tr>
+            <tr><td><code>125</code></td><td>{t.docs.execExit125}</td></tr>
+            <tr><td><code>126</code></td><td>{t.docs.execExit126}</td></tr>
+            <tr><td><code>127</code></td><td>{t.docs.execExit127}</td></tr>
+          </tbody>
+        </table>
+        <p class="note">{t.docs.execExitNote}</p>
+
+        <h3>{t.docs.execFailClosedTitle}</h3>
+        <p>{t.docs.execFailClosedDesc}</p>
+
+        <h3>{t.docs.execEnvTitle}</h3>
+        <p>{t.docs.execEnvDesc}</p>
+        <CodeBlock lang="text" code="Overriding inherited variables: API_KEY" />
+        <p>{t.docs.execNoShellDesc}</p>
+        <CodeBlock lang="bash" code="envilder exec -- sh -c 'echo $DB_URL'" />
+
+        <h3>{t.docs.execGhaTitle}</h3>
+        <p>{t.docs.execGhaDesc}</p>
+        <CodeBlock lang="yaml" code="- run: npx envilder exec -- npm test" />
+        <p class="note">{t.docs.execGhaNote}</p>
+
+        <h3>{t.docs.execSignalsTitle}</h3>
+        <p>{t.docs.execSignalsDesc}</p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>
+            <strong>{t.docs.execSandboxTitle}</strong> {t.docs.execSandboxDesc}
+          </div>
+        </div>
+
+        <div class="callout">
+          <span class="callout-icon">💡</span>
+          <div>
+            <strong>{t.docs.examplesTitle}</strong> {t.docs.execExamplesDesc}{' '}
+            <a href="https://github.com/macalbert/envilder-examples" target="_blank" rel="noopener noreferrer"><code>envilder-examples</code></a> · <a href="https://github.com/macalbert/envilder-examples/tree/main/cli" target="_blank" rel="noopener noreferrer"><code>cli</code></a>
+          </div>
+        </div>
+
+        <p><a href="https://github.com/macalbert/envilder/blob/main/docs/exec-command.md" target="_blank" rel="noopener noreferrer">{t.docs.execGuideLink}</a></p>
       </section>
     </>
   )}
@@ -554,6 +872,14 @@ var app = builder.Build();`} />
 var secrets = await Env.ResolveFileAsync("envilder.json");
 EnvilderClient.InjectIntoEnvironment(secrets);`} />
 
+        <div class="callout">
+          <span class="callout-icon">💡</span>
+          <div>
+            <strong>{t.docs.examplesTitle}</strong> {t.docs.sdkDotnetExamplesDesc}{' '}
+            <a href="https://github.com/macalbert/envilder-examples/tree/main/dotnet-testcontainers" target="_blank" rel="noopener noreferrer"><code>dotnet-testcontainers</code></a> · <a href="https://github.com/macalbert/envilder-examples/tree/main/dotnet-aspire" target="_blank" rel="noopener noreferrer"><code>dotnet-aspire</code></a>
+          </div>
+        </div>
+
         <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/dotnet" target="_blank" rel="noopener noreferrer">{t.docs.sdkDotnetFullDocs}</a></p>
       </section>
     </>
@@ -611,6 +937,14 @@ secrets = (
 
 secrets = Envilder.resolve_file('envilder.json')
 validate_secrets(secrets)  # raises SecretValidationError if any value is empty`} />
+
+        <div class="callout">
+          <span class="callout-icon">💡</span>
+          <div>
+            <strong>{t.docs.examplesTitle}</strong> {t.docs.sdkPythonExamplesDesc}{' '}
+            <a href="https://github.com/macalbert/envilder-examples/tree/main/python-testcontainers" target="_blank" rel="noopener noreferrer"><code>python-testcontainers</code></a>
+          </div>
+        </div>
 
         <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/python" target="_blank" rel="noopener noreferrer">{t.docs.sdkPythonFullDocs}</a></p>
       </section>
@@ -678,6 +1012,14 @@ await Envilder.load(env, {
 const secrets = await Envilder.resolveFile('envilder.json');
 validateSecrets(secrets); // throws SecretValidationError if any value is empty`} />
 
+        <div class="callout">
+          <span class="callout-icon">💡</span>
+          <div>
+            <strong>{t.docs.examplesTitle}</strong> {t.docs.sdkNodejsExamplesDesc}{' '}
+            <a href="https://github.com/macalbert/envilder-examples/tree/main/typescript-testcontainers" target="_blank" rel="noopener noreferrer"><code>typescript-testcontainers</code></a> · <a href="https://github.com/macalbert/envilder-examples/tree/main/typescript-aspire" target="_blank" rel="noopener noreferrer"><code>typescript-aspire</code></a>
+          </div>
+        </div>
+
         <p><a href="https://github.com/macalbert/envilder/tree/main/src/sdks/nodejs" target="_blank" rel="noopener noreferrer">{t.docs.sdkNodejsFullDocs}</a></p>
       </section>
     </>
@@ -691,6 +1033,8 @@ validateSecrets(secrets); // throws SecretValidationError if any value is empty`
 
         <h3>{t.docs.ghaPrerequisites}</h3>
         <ul class="docs-list">
+          <li>{t.docs.ghaPrereqCheckout}</li>
+          <li>{t.docs.ghaPrereqPermissions}</li>
           <li>{t.docs.ghaPrereqAws}</li>
           <li>{t.docs.ghaPrereqAzure}</li>
           <li>{t.docs.ghaPrereqMap}</li>
@@ -699,8 +1043,25 @@ validateSecrets(secrets); // throws SecretValidationError if any value is empty`
         <p class="note">{t.docs.ghaPullOnly}</p>
       </section>
 
-      <section id="gha-basic" class="docs-section">
+      <section id="gha-aws" class="docs-section">
         <h2>{t.docs.ghaBasicTitle}</h2>
+
+        <h3>{t.docs.ghaAwsTrustTitle}</h3>
+        <p>{t.docs.ghaAwsTrustDesc}</p>
+        <CodeBlock lang="json" filename="trust-policy.json" code={ghaAwsTrustPolicy} />
+        <p class="note">{t.docs.ghaOidcSubjectNote}</p>
+
+        <h3>{t.docs.ghaAwsPolicyTitle}</h3>
+        <p>{t.docs.ghaAwsPolicyDesc}</p>
+        <CodeBlock lang="json" filename="envilder-read.json" code={ghaAwsReadPolicy} />
+        <p class="note">{t.docs.ghaAwsKmsNote}</p>
+
+        <h3>{t.docs.ghaWorkflowTitle}</h3>
+        <p>{t.docs.ghaAwsMapDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={`{
+  "DB_PASSWORD": "/myapp/prod/db-password",
+  "STRIPE_KEY": "/myapp/prod/stripe-key"
+}`} />
         <CodeBlock lang="yaml" filename=".github/workflows/deploy.yml" code={`name: Deploy Application
 
 on:
@@ -713,33 +1074,53 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: \${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::123456789012:role/github-envilder
+          aws-region: eu-west-1
 
       - name: Pull Secrets from AWS SSM
         uses: macalbert/envilder/github-action@v0
         with:
-          map-file: config/envilder.json
+          map-file: envilder.json
           env-file: .env
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "22.x"
+      - run: npm ci
+      - run: npm run deploy`} />
 
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm deploy`} />
+        <h3>{t.docs.ghaOutputTitle}</h3>
+        <p>{t.docs.ghaOutputDesc}</p>
+        <CodeBlock lang="text" code={ghaExpectedOutput} />
+        <p class="note">{t.docs.ghaOutputMaskNote}</p>
       </section>
 
       <section id="gha-azure" class="docs-section">
         <h2>{t.docs.ghaAzureTitle}</h2>
+
+        <h3>{t.docs.ghaAzureFedTitle}</h3>
+        <p>{t.docs.ghaAzureFedDesc}</p>
+        <CodeBlock lang="bash" code={ghaAzureFederated} />
+
+        <h3>{t.docs.ghaAzureRoleTitle}</h3>
+        <p>{t.docs.ghaAzureRoleDesc}</p>
+        <CodeBlock lang="bash" code={ghaAzureRole} />
+        <p class="note">{t.docs.ghaAzurePolicyNote}</p>
+
+        <h3>{t.docs.ghaWorkflowTitle}</h3>
+        <p>{t.docs.ghaAzureMapDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={`{
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "DB_PASSWORD": "myapp-prod-db-password",
+  "STRIPE_KEY": "/myapp/prod/stripe_key"
+}`} />
         <CodeBlock lang="yaml" filename=".github/workflows/deploy-azure.yml" code={`name: Deploy with Azure Key Vault
 
 on:
@@ -752,35 +1133,31 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
       - name: Azure Login
         uses: azure/login@v2
         with:
-          client-id: \${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: \${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: \${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: \${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: \${{ vars.AZURE_TENANT_ID }}
+          subscription-id: \${{ vars.AZURE_SUBSCRIPTION_ID }}
 
       - name: Pull Secrets from Azure Key Vault
         uses: macalbert/envilder/github-action@v0
         with:
-          map-file: config/envilder.json
+          map-file: envilder.json
           env-file: .env
-          provider: azure
-          vault-url: https://my-vault.vault.azure.net
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "22.x"
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm deploy`} />
+      - run: npm ci
+      - run: npm run deploy`} />
+        <p>{t.docs.ghaAzureInputsNote}</p>
       </section>
 
       <section id="gha-multi-env" class="docs-section">
         <h2>{t.docs.ghaMultiEnvTitle}</h2>
+        <p>{t.docs.ghaMultiEnvDesc}</p>
         <CodeBlock lang="yaml" filename=".github/workflows/deploy-env.yml" code={`name: Deploy to Environment
 
 on:
@@ -798,15 +1175,15 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment: \${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v5
 
       - uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: \${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: us-east-1
+          role-to-assume: \${{ vars.AWS_ROLE_ARN }}
+          aws-region: eu-west-1
 
       - name: Pull \${{ inputs.environment }} secrets
         uses: macalbert/envilder/github-action@v0
@@ -814,12 +1191,64 @@ jobs:
           map-file: config/\${{ inputs.environment }}/envilder.json
           env-file: .env
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "22.x"
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm deploy`} />
+      - run: npm ci
+      - run: npm run deploy`} />
+      </section>
+
+      <section id="gha-why" class="docs-section">
+        <h2>{t.docs.ghaWhyTitle}</h2>
+        <p>{t.docs.ghaWhyDesc}</p>
+        <ul class="docs-list">
+          <li><strong>{t.docs.ghaWhyRotationLabel}</strong> {t.docs.ghaWhyRotation}</li>
+          <li><strong>{t.docs.ghaWhyAuditLabel}</strong> {t.docs.ghaWhyAudit}</li>
+          <li><strong>{t.docs.ghaWhyKeysLabel}</strong> {t.docs.ghaWhyKeys}</li>
+          <li><strong>{t.docs.ghaWhyListLabel}</strong> {t.docs.ghaWhyList}</li>
+        </ul>
+        <p>{t.docs.ghaWhyWhenSecrets}</p>
+      </section>
+
+      <section id="gha-errors" class="docs-section">
+        <h2>{t.docs.ghaErrorsTitle}</h2>
+        <p>{t.docs.ghaErrorsDesc}</p>
+
+        <h3>{t.docs.ghaErrMapTitle}</h3>
+        <CodeBlock lang="text" code="🚨 Failed to initialize: Failed to read map file: envilder.json" />
+        <p>{t.docs.ghaErrMapFix}</p>
+
+        <h3>{t.docs.ghaErrAssumeTitle}</h3>
+        <CodeBlock lang="text" code="Could not assume role with OIDC: Not authorized to perform sts:AssumeRoleWithWebIdentity" />
+        <p>{t.docs.ghaErrAssumeFix}</p>
+
+        <h3>{t.docs.ghaErrNoCredsTitle}</h3>
+        <CodeBlock lang="text" code={`💥 GAME OVER — some secrets could not be fetched
+  ✗ DB_PASSWORD → *********************ord
+
+⭐ WHY?
+   Could not load credentials from any providers`} />
+        <p>{t.docs.ghaErrNoCredsFix}</p>
+
+        <h3>{t.docs.ghaErrDeniedTitle}</h3>
+        <CodeBlock lang="text" code="User: arn:aws:sts::123456789012:assumed-role/github-envilder/GitHubActions is not authorized to perform: ssm:GetParameter on resource: arn:aws:ssm:eu-west-1:123456789012:parameter/myapp/prod/db-password because no identity-based policy allows the ssm:GetParameter action" />
+        <p>{t.docs.ghaErrDeniedFix}</p>
+
+        <h3>{t.docs.ghaErrExpiredTitle}</h3>
+        <CodeBlock lang="text" code="AWS credentials are expired or invalid. Your security token or SSO session may have expired. Refresh your credentials and retry (for SSO, run: aws sso login)." />
+        <p>{t.docs.ghaErrExpiredFix}</p>
+
+        <h3>{t.docs.ghaErrNotFoundTitle}</h3>
+        <CodeBlock lang="text" code="✗ STRIPE_KEY           secret not found (path: *******************key) — skipped" />
+        <p>{t.docs.ghaErrNotFoundFix}</p>
+
+        <h3>{t.docs.ghaErrVaultUrlTitle}</h3>
+        <CodeBlock lang="text" code="vaultUrl is required when using Azure provider. Set it in $config.vaultUrl in your map file or via --vault-url flag." />
+        <p>{t.docs.ghaErrVaultUrlFix}</p>
+
+        <h3>{t.docs.ghaErrAzureDeniedTitle}</h3>
+        <CodeBlock lang="text" code="Caller is not authorized to perform action on resource." />
+        <p>{t.docs.ghaErrAzureDeniedFix}</p>
+
+        <h3>{t.docs.ghaErrProfileTitle}</h3>
+        <p>{t.docs.ghaErrProfileFix}</p>
       </section>
 
       <section id="gha-inputs" class="docs-section">
@@ -847,6 +1276,16 @@ jobs:
             <tr><td><code>env-file-path</code></td><td>{t.docs.ghaOutputEnvPath}</td></tr>
           </tbody>
         </table>
+      </section>
+
+      <section id="gha-related" class="docs-section">
+        <h2>{t.docs.ghaRelatedTitle}</h2>
+        <ul class="docs-list">
+          <li><a href={localizedPath(lang, '/docs/providers/aws-ssm/')}>{t.docs.ghaRelatedAws}</a></li>
+          <li><a href={localizedPath(lang, '/docs/providers/azure-key-vault/')}>{t.docs.ghaRelatedAzure}</a></li>
+          <li><a href={localizedPath(lang, '/docs/map-file/')}>{t.docs.ghaRelatedMap}</a></li>
+          <li><a href="https://github.com/macalbert/envilder/tree/main/github-action" target="_blank" rel="noopener noreferrer">{t.docs.ghaRelatedRepo}</a></li>
+        </ul>
       </section>
     </>
   )}

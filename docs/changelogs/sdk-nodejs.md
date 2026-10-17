@@ -6,9 +6,15 @@
   now links to the changelog and to `envilder.com/docs/sdks/nodejs/` with UTM
   tags, so visits from npm to envilder.com can be measured
 
+### Dependencies
+
+* Raise the minimum AWS SDK versions: `@aws-sdk/client-ssm` and
+  `@aws-sdk/credential-providers` now require `^3.1101.0` (previously
+  `^3.700.0`)
+
 ---
 
-## [0.4.0] - 2026-06-26
+## [0.4.0] - 2026-07-11
 
 ### Added
 
@@ -24,10 +30,6 @@
   session token still throws `ExpiredCredentialsError`
   ([#379](https://github.com/macalbert/envilder/issues/379))
 
----
-
-## [0.3.1] - 2026-06-26
-
 ### Fixed
 
 * **Honor the `profile` option for the AWS region, not just credentials**:
@@ -39,6 +41,19 @@
   resolution order is `AWS_REGION` > `AWS_DEFAULT_REGION` > profile
   region > `us-east-1` fallback
   ([#382](https://github.com/macalbert/envilder/issues/382))
+
+---
+
+## [0.3.1] - 2026-06-25
+
+### Fixed
+
+* **AWS SSO / assumed-role profiles now resolve correctly**: `withProfile()`
+  and `$config.profile` now resolve credentials through the full AWS provider
+  chain (`fromNodeProviderChain`), including SSO token resolution. Previously
+  SSO and assumed-role profiles were silently ignored, falling back to the
+  default credentials
+  ([#364](https://github.com/macalbert/envilder/issues/364))
 
 ---
 
@@ -91,6 +106,8 @@
 * **Initial release**: Node.js runtime SDK for loading secrets directly
   into `process.env` from a map file. Supports AWS SSM Parameter Store and
   Azure Key Vault
+* **Batched AWS fetching**: Up to 10 SSM parameters per request
+  ([#170](https://github.com/macalbert/envilder/pull/170))
 * **Envilder facade**: `load()`, `resolveFile()`, `fromMapFile()` fluent
   builder for one-liner or fine-grained secret loading
 * **EnvilderClient**: Core resolver with `resolveSecrets()` and

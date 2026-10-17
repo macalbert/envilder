@@ -10,25 +10,33 @@ const { lang = 'en' } = Astro.props;
 const t = useTranslations(lang);
 
 type Seg = { text: string; cls: string; instant?: boolean };
+type Editor = { file: string; lang: string; code: Seg[][] };
 type Line = {
-  kind: 'type' | 'output' | 'blank';
+  kind: 'type' | 'output' | 'blank' | 'editor' | 'pause';
   segments?: Seg[];
-  delay?: number;
+  editor?: Editor;
+  /** For `pause`: how long the running process stays quiet. */
+  ms?: number;
 };
 type Scene = {
   id: string;
   name: string;
   desc: string;
   icon: string;
+  /** Alt text for the tab icon when it tells scenes apart (e.g. provider). */
+  iconAlt?: string;
   lines: Line[];
 };
 
 const jsonLines: Line[] = [
-  { kind: 'output', delay: 140, segments: [{ text: '{', cls: 'output' }] },
+  { kind: 'output', segments: [{ text: '{', cls: 'output' }] },
   {
     kind: 'output',
     segments: [
-      { text: '  "OPENAI_API_KEY": "/openai/prod/api-key"', cls: 'output' },
+      {
+        text: '  "LOCALSTACK_AUTH_TOKEN": "/localstack/prod/auth-token"',
+        cls: 'output',
+      },
     ],
   },
   { kind: 'output', segments: [{ text: '}', cls: 'output' }] },
@@ -36,103 +44,228 @@ const jsonLines: Line[] = [
 
 const cliRule = '━'.repeat(60);
 
+// One LocalStack log line, with the same column padding the container uses.
+const localstackLog = (
+  time: string,
+  logger: string,
+  message: string,
+  thread = '  MainThread',
+): Line => ({
+  kind: 'output',
+  segments: [
+    { text: `2026-10-16T${time}  `, cls: 'comment' },
+    { text: 'INFO', cls: 'flag' },
+    { text: ` --- [${thread}] `, cls: 'output' },
+    { text: logger.padEnd(26), cls: 'command' },
+    { text: ` : ${message}`, cls: 'output' },
+  ],
+});
+
+const outputLine = (text: string, cls = 'output'): Line => ({
+  kind: 'output',
+  segments: [{ text, cls }],
+});
+
+const twinApp = (time: string, app: string, port: number): Line =>
+  localstackLog(
+    time,
+    'l.pro.apps.twin_plugin',
+    `Apps: ${app} ready at http://${app}.localhost.localstack.cloud:4566 -> 127.0.0.1:${port}`,
+  );
+
+const alembicPlugin = (name: string): Line =>
+  localstackLog(
+    '23:21:09.626',
+    'alembic.runtime.plugins',
+    `setup plugin alembic.${name}`,
+  );
+
+// Mirrors EnvironmentVariable.maskSecretPath: keep the last 3 characters.
+const maskPath = (path: string) => '*'.repeat(path.length - 3) + path.slice(-3);
+
+const setupScene = (opts: {
+  id: string;
+  icon: string;
+  provider: string;
+  mapComment: string;
+  pushComment: string;
+  configLines: string[];
+  secretPath: string;
+}): Scene => ({
+  id: opts.id,
+  name: t.hero.tabSetup,
+  desc: t.hero.tabSetupDesc,
+  icon: opts.icon,
+  iconAlt: opts.provider,
+  lines: [
+    {
+      kind: 'type',
+      segments: [{ text: opts.mapComment, cls: 'comment' }],
+    },
+    {
+      kind: 'type',
+      segments: [
+        { text: '❯', cls: 'prompt', instant: true },
+        { text: ' ls -a', cls: 'command' },
+      ],
+    },
+    {
+      kind: 'output',
+      segments: [{ text: '.  ..  .env  envilder.json', cls: 'output' }],
+    },
+    {
+      kind: 'type',
+      segments: [
+        { text: '❯', cls: 'prompt', instant: true },
+        { text: ' cat ', cls: 'command' },
+        { text: 'envilder.json', cls: 'flag' },
+      ],
+    },
+    { kind: 'output', segments: [{ text: '{', cls: 'output' }] },
+    ...opts.configLines.map(
+      (text): Line => ({ kind: 'output', segments: [{ text, cls: 'output' }] }),
+    ),
+    {
+      kind: 'output',
+      segments: [
+        {
+          text: `  "LOCALSTACK_AUTH_TOKEN": "${opts.secretPath}"`,
+          cls: 'output',
+        },
+      ],
+    },
+    { kind: 'output', segments: [{ text: '}', cls: 'output' }] },
+    {
+      kind: 'type',
+      segments: [
+        { text: '❯', cls: 'prompt', instant: true },
+        { text: ' cat ', cls: 'command' },
+        { text: '.env', cls: 'flag' },
+      ],
+    },
+    {
+      kind: 'output',
+      segments: [
+        { text: 'LOCALSTACK_AUTH_TOKEN', cls: 'command' },
+        { text: '=example-not-a-real-secret', cls: 'output' },
+      ],
+    },
+    { kind: 'blank' },
+    {
+      kind: 'type',
+      segments: [{ text: opts.pushComment, cls: 'comment' }],
+    },
+    {
+      kind: 'type',
+      segments: [
+        { text: '❯', cls: 'prompt', instant: true },
+        { text: ' npx envilder', cls: 'command' },
+        { text: ' --push', cls: 'flag' },
+      ],
+    },
+    {
+      kind: 'output',
+      segments: [
+        { text: 'Pushed ', cls: 'output' },
+        { text: 'LOCALSTACK_AUTH_TOKEN', cls: 'command' },
+        {
+          text: `=*******************secret → ${maskPath(opts.secretPath)}`,
+          cls: 'output',
+        },
+      ],
+    },
+    {
+      kind: 'output',
+      segments: [
+        { text: '⭐ ', cls: 'highlight' },
+        {
+          text: "Successfully pushed environment variables from '.env'",
+          cls: 'output',
+        },
+      ],
+    },
+  ],
+});
+
+// Syntax tokens for the in-terminal editor. Colours come from the editor's
+// `data-lang`, so each stack gets its own palette.
+const kw = (text: string): Seg => ({ text, cls: 'tok-kw' });
+const ty = (text: string): Seg => ({ text, cls: 'tok-type' });
+const fn = (text: string): Seg => ({ text, cls: 'tok-fn' });
+const str = (text: string): Seg => ({ text, cls: 'tok-str' });
+const p = (text: string): Seg => ({ text, cls: 'tok-plain' });
+const indent = (text: string): Seg => ({
+  text,
+  cls: 'tok-plain',
+  instant: true,
+});
+
+const sdkScene = (opts: {
+  id: string;
+  name: string;
+  desc: string;
+  icon: string;
+  editor: Editor;
+  run: [string, string];
+  output: string;
+}): Scene => ({
+  id: opts.id,
+  name: opts.name,
+  desc: opts.desc,
+  icon: opts.icon,
+  lines: [
+    {
+      kind: 'type',
+      segments: [{ text: t.hero.sdkCommentLoad, cls: 'comment' }],
+    },
+    {
+      kind: 'type',
+      segments: [
+        { text: '❯', cls: 'prompt', instant: true },
+        { text: ' vim ', cls: 'command' },
+        { text: opts.editor.file, cls: 'flag' },
+      ],
+    },
+    { kind: 'editor', editor: opts.editor },
+    {
+      kind: 'type',
+      segments: [
+        { text: '❯', cls: 'prompt', instant: true },
+        { text: opts.run[0], cls: 'command' },
+        { text: opts.run[1], cls: 'flag' },
+      ],
+    },
+    {
+      kind: 'output',
+      segments: [{ text: opts.output, cls: 'output' }],
+    },
+  ],
+});
+
 const scenes: Scene[] = [
-  {
-    id: 'setup',
-    name: t.hero.tabSetup,
-    desc: t.hero.tabSetupDesc,
+  setupScene({
+    id: 'setup-aws',
     icon: '/AWS.svg',
-    lines: [
-      {
-        kind: 'type',
-        segments: [{ text: t.hero.setupComment1, cls: 'comment' }],
-      },
-      {
-        kind: 'type',
-        delay: 500,
-        segments: [
-          { text: '❯', cls: 'prompt', instant: true },
-          { text: ' aws sts ', cls: 'command' },
-          { text: 'get-caller-identity', cls: 'flag' },
-        ],
-      },
-      { kind: 'output', delay: 500, segments: [{ text: '{', cls: 'output' }] },
-      {
-        kind: 'output',
-        segments: [
-          {
-            text: '    "UserId": "AROAADALOVELACE1815DC",',
-            cls: 'output',
-          },
-        ],
-      },
-      {
-        kind: 'output',
-        segments: [{ text: '    "Account": "123456789012",', cls: 'output' }],
-      },
-      {
-        kind: 'output',
-        segments: [
-          {
-            text: '    "Arn": "arn:aws:sts::123456789012:assumed-role/secrets-role/ada.lovelace"',
-            cls: 'output',
-          },
-        ],
-      },
-      { kind: 'output', segments: [{ text: '}', cls: 'output' }] },
-      { kind: 'blank' },
-      {
-        kind: 'type',
-        segments: [{ text: t.hero.setupComment2, cls: 'comment' }],
-      },
-      {
-        kind: 'type',
-        delay: 500,
-        segments: [
-          { text: '❯', cls: 'prompt', instant: true },
-          { text: ' npx envilder', cls: 'command' },
-          { text: ' --push', cls: 'flag' },
-          { text: ' --key', cls: 'flag' },
-          { text: '=OPENAI_API_KEY', cls: 'command' },
-          { text: ' --value', cls: 'flag' },
-          { text: '=example-not-a-real-secret', cls: 'command' },
-          { text: ' --secret-path', cls: 'flag' },
-          { text: '=/openai/prod/api-key', cls: 'command' },
-        ],
-      },
-      { kind: 'blank' },
-      {
-        kind: 'output',
-        delay: 450,
-        segments: [{ text: '📤 PUSHING SECRET', cls: 'highlight' }],
-      },
-      {
-        kind: 'output',
-        segments: [{ text: cliRule, cls: 'highlight' }],
-      },
-      {
-        kind: 'output',
-        segments: [
-          { text: '  → ', cls: 'output' },
-          { text: 'OPENAI_API_KEY', cls: 'command' },
-          { text: ' → *****************key', cls: 'output' },
-        ],
-      },
-      { kind: 'blank' },
-      {
-        kind: 'output',
-        segments: [
-          { text: '⭐ SECRET PUSHED', cls: 'highlight' },
-          { text: '  -  ', cls: 'output' },
-          { text: 'OPENAI_API_KEY', cls: 'command' },
-          {
-            text: '=*******************secret → *****************key',
-            cls: 'output',
-          },
-        ],
-      },
+    provider: 'AWS',
+    mapComment: t.hero.setupComment1,
+    pushComment: t.hero.setupComment2,
+    configLines: ['  "$config": {', '    "provider": "aws"', '  },'],
+    secretPath: '/localstack/prod/auth-token',
+  }),
+  setupScene({
+    id: 'setup-azure',
+    icon: '/Azure.svg',
+    provider: 'Azure',
+    mapComment: t.hero.setupAzureComment1,
+    pushComment: t.hero.setupAzureComment2,
+    configLines: [
+      '  "$config": {',
+      '    "provider": "azure",',
+      '    "vaultUrl": "https://my-vault.vault.azure.net"',
+      '  },',
     ],
-  },
+    secretPath: 'localstack-prod-auth-token',
+  }),
   {
     id: 'cli',
     name: t.hero.tabCli,
@@ -145,7 +278,17 @@ const scenes: Scene[] = [
       },
       {
         kind: 'type',
-        delay: 500,
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' ls -a', cls: 'command' },
+        ],
+      },
+      {
+        kind: 'output',
+        segments: [{ text: '.  ..  envilder.json', cls: 'output' }],
+      },
+      {
+        kind: 'type',
         segments: [
           { text: '❯', cls: 'prompt', instant: true },
           { text: ' cat ', cls: 'command' },
@@ -160,7 +303,6 @@ const scenes: Scene[] = [
       },
       {
         kind: 'type',
-        delay: 600,
         segments: [
           { text: '❯', cls: 'prompt', instant: true },
           { text: ' npx envilder', cls: 'command' },
@@ -173,7 +315,6 @@ const scenes: Scene[] = [
       { kind: 'blank' },
       {
         kind: 'output',
-        delay: 550,
         segments: [{ text: '🪙  RESOLVING SECRETS', cls: 'highlight' }],
       },
       {
@@ -184,14 +325,13 @@ const scenes: Scene[] = [
         kind: 'output',
         segments: [
           { text: '  ✓ ', cls: 'flag' },
-          { text: 'OPENAI_API_KEY'.padEnd(20), cls: 'command' },
+          { text: 'LOCALSTACK_AUTH_TOKEN'.padEnd(22), cls: 'command' },
           { text: '→ *******************secret', cls: 'output' },
         ],
       },
       { kind: 'blank' },
       {
         kind: 'output',
-        delay: 220,
         segments: [
           { text: '⭐ LEVEL CLEARED', cls: 'highlight' },
           { text: '  -  1/1 secrets loaded · ', cls: 'output' },
@@ -199,214 +339,255 @@ const scenes: Scene[] = [
           { text: ' written', cls: 'output' },
         ],
       },
+      { kind: 'blank' },
+      {
+        kind: 'type',
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' ls -a', cls: 'command' },
+        ],
+      },
+      {
+        kind: 'output',
+        segments: [{ text: '.  ..  .env  envilder.json', cls: 'output' }],
+      },
+      {
+        kind: 'type',
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' cat ', cls: 'command' },
+          { text: '.env', cls: 'flag' },
+        ],
+      },
+      {
+        kind: 'output',
+        segments: [
+          { text: 'LOCALSTACK_AUTH_TOKEN', cls: 'command' },
+          { text: '=example-not-a-real-secret', cls: 'output' },
+        ],
+      },
     ],
   },
   {
+    id: 'exec',
+    name: t.hero.tabExec,
+    desc: t.hero.tabExecDesc,
+    icon: '/favicon.svg',
+    lines: [
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.execComment1, cls: 'comment' }],
+      },
+      {
+        kind: 'type',
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' npx envilder', cls: 'command' },
+          { text: ' exec', cls: 'flag' },
+          { text: ' --', cls: 'output' },
+          { text: ' docker run --rm', cls: 'command' },
+          { text: ' --env', cls: 'flag' },
+          { text: ' LOCALSTACK_AUTH_TOKEN', cls: 'command' },
+          { text: ' localstack/localstack', cls: 'command' },
+        ],
+      },
+      {
+        kind: 'output',
+        segments: [
+          {
+            text: 'envilder: 1 secret resolved (aws, profile=default) → ',
+            cls: 'output',
+          },
+          { text: 'docker …', cls: 'command' },
+        ],
+      },
+      { kind: 'pause', ms: 700 },
+      { kind: 'blank' },
+      outputLine('LocalStack version: 2026.10.0'),
+      outputLine('LocalStack build date: 2026-10-13'),
+      outputLine('LocalStack build git hash: 738d58ee'),
+      { kind: 'blank' },
+      outputLine('Docker not available'),
+      {
+        kind: 'output',
+        segments: [
+          { text: '2026-10-16T23:21:04.821  ', cls: 'comment' },
+          { text: 'INFO', cls: 'flag' },
+          { text: ' --- [  MainThread] ', cls: 'output' },
+          { text: 'l.licensing.licensingv2'.padEnd(26), cls: 'command' },
+          {
+            text: ' : Successfully requested and activated new license ',
+            cls: 'output',
+          },
+          {
+            text: '00000000-0000-0000-0000-000000000000:ultimate',
+            cls: 'flag',
+          },
+          { text: ' 🔑✅', cls: 'output' },
+        ],
+      },
+      localstackLog(
+        '23:21:05.607',
+        'localstack.utils.bootstrap',
+        'Execution of "_resolve_api_provider_specs" took 752.28ms',
+      ),
+      { kind: 'pause', ms: 900 },
+      twinApp('23:21:09.067', 'logodev', 4115),
+      twinApp('23:21:09.073', 'posthog', 4113),
+      twinApp('23:21:09.079', 'resend', 4114),
+      twinApp('23:21:09.086', 'stripe', 4111),
+      twinApp('23:21:09.096', 'twilio', 4112),
+      localstackLog(
+        '23:21:09.096',
+        'l.extensions.plugins',
+        'loaded 0 extensions',
+      ),
+      { kind: 'pause', ms: 400 },
+      alembicPlugin('autogenerate.schemas'),
+      alembicPlugin('autogenerate.tables'),
+      alembicPlugin('autogenerate.types'),
+      alembicPlugin('autogenerate.constraints'),
+      alembicPlugin('autogenerate.defaults'),
+      alembicPlugin('autogenerate.comments'),
+      alembicPlugin('ext.checkconstraint_byname'),
+      outputLine('Ready.', 'highlight'),
+      { kind: 'pause', ms: 1500 },
+      outputLine('Localstack runtime received signal 15'),
+      localstackLog(
+        '23:21:15.867',
+        'l.runtime.shutdown',
+        '[shutdown] Stopping all services',
+        'ime-Shutdown',
+      ),
+      { kind: 'blank' },
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.execComment2, cls: 'comment' }],
+      },
+      {
+        kind: 'type',
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' ls -a', cls: 'command' },
+        ],
+      },
+      {
+        kind: 'output',
+        segments: [{ text: '.  ..  envilder.json', cls: 'output' }],
+      },
+    ],
+  },
+  sdkScene({
     id: 'nodejs',
     name: t.hero.tabNode,
     desc: t.hero.tabNodeDesc,
     icon: '/sdk-logo.svg',
-    lines: [
-      {
-        kind: 'type',
-        segments: [{ text: t.hero.sdkCommentLoad, cls: 'comment' }],
-      },
-      {
-        kind: 'type',
-        delay: 300,
-        segments: [
-          { text: 'import { Envilder } from ', cls: 'command' },
-          { text: "'@envilder/sdk'", cls: 'flag' },
-          { text: ';', cls: 'command' },
+    editor: {
+      file: 'config.ts',
+      lang: 'typescript',
+      code: [
+        [
+          kw('import'),
+          p(' { '),
+          ty('Envilder'),
+          p(' } '),
+          kw('from'),
+          p(' '),
+          str("'@envilder/sdk'"),
+          p(';'),
         ],
-      },
-      { kind: 'blank' },
-      {
-        kind: 'type',
-        delay: 500,
-        segments: [
-          { text: 'const secrets = ', cls: 'command' },
-          { text: 'await', cls: 'flag' },
-          { text: ' Envilder.', cls: 'command' },
-          { text: 'load', cls: 'highlight' },
-          { text: '(', cls: 'command' },
-          { text: "'envilder.json'", cls: 'flag' },
-          { text: ');', cls: 'command' },
+        [],
+        [
+          kw('const'),
+          p(' secrets = '),
+          kw('await'),
+          p(' '),
+          ty('Envilder'),
+          p('.'),
+          fn('load'),
+          p('('),
+          str("'envilder.json'"),
+          p(');'),
         ],
-      },
-      {
-        kind: 'type',
-        delay: 600,
-        segments: [
-          { text: 'console.', cls: 'command' },
-          { text: 'log', cls: 'highlight' },
-          { text: '(secrets);', cls: 'command' },
-        ],
-      },
-      { kind: 'blank' },
-      {
-        kind: 'type',
-        delay: 500,
-        segments: [
-          { text: '❯', cls: 'prompt', instant: true },
-          { text: ' node ', cls: 'command' },
-          { text: 'config.ts', cls: 'flag' },
-        ],
-      },
-      { kind: 'blank' },
-      {
-        kind: 'output',
-        delay: 550,
-        segments: [
-          {
-            text: "Map(1) { 'OPENAI_API_KEY' => 'example-not-a-real-secret' }",
-            cls: 'output',
-          },
-        ],
-      },
-    ],
-  },
-  {
+        [p('console.'), fn('log'), p('(secrets);')],
+      ],
+    },
+    run: [' node ', 'config.ts'],
+    output: "Map(1) { 'LOCALSTACK_AUTH_TOKEN' => 'example-not-a-real-secret' }",
+  }),
+  sdkScene({
     id: 'python',
     name: t.hero.tabPython,
     desc: t.hero.tabPythonDesc,
     icon: '/sdk-python.svg',
-    lines: [
-      {
-        kind: 'type',
-        segments: [{ text: t.hero.sdkCommentLoad, cls: 'comment' }],
-      },
-      {
-        kind: 'type',
-        delay: 300,
-        segments: [
-          { text: 'from', cls: 'flag' },
-          { text: ' envilder ', cls: 'command' },
-          { text: 'import', cls: 'flag' },
-          { text: ' Envilder', cls: 'command' },
+    editor: {
+      file: 'settings.py',
+      lang: 'python',
+      code: [
+        [kw('from'), p(' envilder '), kw('import'), p(' '), ty('Envilder')],
+        [],
+        [
+          p('secrets = '),
+          ty('Envilder'),
+          p('.'),
+          fn('load'),
+          p('('),
+          str('"envilder.json"'),
+          p(')'),
         ],
-      },
-      { kind: 'blank' },
-      {
-        kind: 'type',
-        delay: 500,
-        segments: [
-          { text: 'secrets = Envilder.', cls: 'command' },
-          { text: 'load', cls: 'highlight' },
-          { text: '(', cls: 'command' },
-          { text: '"envilder.json"', cls: 'flag' },
-          { text: ')', cls: 'command' },
-        ],
-      },
-      {
-        kind: 'type',
-        delay: 600,
-        segments: [
-          { text: 'print', cls: 'highlight' },
-          { text: '(secrets)', cls: 'command' },
-        ],
-      },
-      { kind: 'blank' },
-      {
-        kind: 'type',
-        delay: 500,
-        segments: [
-          { text: '❯', cls: 'prompt', instant: true },
-          { text: ' python ', cls: 'command' },
-          { text: 'settings.py', cls: 'flag' },
-        ],
-      },
-      { kind: 'blank' },
-      {
-        kind: 'output',
-        delay: 550,
-        segments: [
-          {
-            text: "{'OPENAI_API_KEY': 'example-not-a-real-secret'}",
-            cls: 'output',
-          },
-        ],
-      },
-    ],
-  },
-  {
+        [fn('print'), p('(secrets)')],
+      ],
+    },
+    run: [' python ', 'settings.py'],
+    output: "{'LOCALSTACK_AUTH_TOKEN': 'example-not-a-real-secret'}",
+  }),
+  sdkScene({
     id: 'dotnet',
     name: t.hero.tabDotnet,
     desc: t.hero.tabDotnetDesc,
     icon: '/sdk-dotnet.svg',
-    lines: [
-      {
-        kind: 'type',
-        segments: [{ text: t.hero.sdkCommentLoad, cls: 'comment' }],
-      },
-      {
-        kind: 'type',
-        delay: 300,
-        segments: [
-          { text: 'using', cls: 'flag' },
-          { text: ' Envilder;', cls: 'command' },
+    editor: {
+      file: 'Program.cs',
+      lang: 'cs',
+      code: [
+        [kw('using'), p(' '), ty('Envilder'), p(';')],
+        [],
+        [
+          kw('var'),
+          p(' secrets = '),
+          kw('await'),
+          p(' '),
+          ty('Env'),
+          p('.'),
+          fn('LoadAsync'),
+          p('('),
+          str('"envilder.json"'),
+          p(');'),
         ],
-      },
-      { kind: 'blank' },
-      {
-        kind: 'type',
-        delay: 500,
-        segments: [
-          { text: 'var', cls: 'flag' },
-          { text: ' secrets = ', cls: 'command' },
-          { text: 'await', cls: 'flag' },
-          { text: ' Env.', cls: 'command' },
-          { text: 'LoadAsync', cls: 'highlight' },
-          { text: '(', cls: 'command' },
-          { text: '"envilder.json"', cls: 'flag' },
-          { text: ');', cls: 'command' },
+        [
+          kw('foreach'),
+          p(' ('),
+          kw('var'),
+          p(' (key, value) '),
+          kw('in'),
+          p(' secrets)'),
         ],
-      },
-      {
-        kind: 'type',
-        delay: 500,
-        segments: [
-          { text: 'foreach', cls: 'flag' },
-          { text: ' (', cls: 'command' },
-          { text: 'var', cls: 'flag' },
-          { text: ' (key, value) ', cls: 'command' },
-          { text: 'in', cls: 'flag' },
-          { text: ' secrets)', cls: 'command' },
+        [p('{')],
+        [
+          indent('    '),
+          ty('Console'),
+          p('.'),
+          fn('WriteLine'),
+          p('('),
+          str('$"{key} = {value}"'),
+          p(');'),
         ],
-      },
-      {
-        kind: 'type',
-        delay: 600,
-        segments: [
-          { text: '    Console.', cls: 'command' },
-          { text: 'WriteLine', cls: 'highlight' },
-          { text: '($', cls: 'command' },
-          { text: '"{key} = {value}"', cls: 'flag' },
-          { text: ');', cls: 'command' },
-        ],
-      },
-      { kind: 'blank' },
-      {
-        kind: 'type',
-        delay: 500,
-        segments: [
-          { text: '❯', cls: 'prompt', instant: true },
-          { text: ' dotnet run', cls: 'command' },
-        ],
-      },
-      { kind: 'blank' },
-      {
-        kind: 'output',
-        delay: 550,
-        segments: [
-          {
-            text: 'OPENAI_API_KEY = example-not-a-real-secret',
-            cls: 'output',
-          },
-        ],
-      },
-    ],
-  },
+        [p('}')],
+      ],
+    },
+    run: [' dotnet ', 'run'],
+    output: 'LOCALSTACK_AUTH_TOKEN = example-not-a-real-secret',
+  }),
 ];
 
 // Escape `<` so the serialized scenes can never break out of the
@@ -460,7 +641,7 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
     </div>
 
     <div class="hero-terminal">
-      <TerminalMockup title="envilder">
+      <TerminalMockup title="envilder" icon>
         <div class="hero-term-screen" data-hero-screen aria-live="off">
           {scenes[0].lines.map((line) =>
             line.kind === 'blank' ? (
@@ -497,7 +678,7 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
           >
             <img
               src={scene.icon}
-              alt=""
+              alt={scene.iconAlt ?? ''}
               class="hero-term-mode-icon"
               width="18"
               height="18"
@@ -622,6 +803,12 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
     overflow: hidden;
   }
 
+  /* Reduced motion renders whole transcripts at once; let readers scroll
+     back to the start with a pointer or the keyboard. */
+  .hero-term-screen.is-static {
+    overflow-y: auto;
+  }
+
   .hero-term-screen :global(.line) {
     display: block;
     min-height: 1.8em;
@@ -629,11 +816,21 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
     word-break: break-word;
   }
 
+  /* 12-column grid: the setup/CLI/exec row holds four tabs and the SDK row
+     holds three, each row filling the full width. */
   .hero-term-modes {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: var(--space-sm);
     margin-top: var(--space-md);
-    flex-wrap: wrap;
+  }
+
+  .hero-term-mode {
+    grid-column: span 3;
+  }
+
+  .hero-term-mode:nth-child(n + 5) {
+    grid-column: span 4;
   }
 
   .hero-term-mode {
@@ -641,9 +838,8 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
     align-items: center;
     justify-content: center;
     gap: var(--space-xs);
-    flex: 1 1 auto;
     min-width: 0;
-    padding: var(--space-sm) var(--space-md);
+    padding: var(--space-sm);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     color: var(--color-text-muted);
@@ -683,6 +879,138 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
     white-space: nowrap;
   }
 
+  /* In-terminal editor for the SDK scenes. Each stack sets its own accent
+     and syntax palette through data-lang. */
+  .hero-term-screen :global(.vim) {
+    --vim-accent: var(--term-highlight);
+    --vim-accent-text: var(--term-header);
+    --tok-kw: var(--term-highlight);
+    --tok-type: var(--term-path);
+    --tok-fn: var(--term-yellow);
+    --tok-str: var(--term-flag);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    white-space: pre;
+  }
+
+  .hero-term-screen :global(.vim[data-lang='typescript']) {
+    --vim-accent: #3178c6;
+    --vim-accent-text: #ffffff;
+    --vim-accent-label: #5a9be8;
+    --tok-kw: #569cd6;
+    --tok-type: #4ec9b0;
+    --tok-fn: #dcdcaa;
+    --tok-str: #ce9178;
+  }
+
+  .hero-term-screen :global(.vim[data-lang='python']) {
+    --vim-accent: #ffd43b;
+    --vim-accent-text: #1e1e2e;
+    --tok-kw: #ffd43b;
+    --tok-type: #7aa7e0;
+    --tok-fn: #8ec07c;
+    --tok-str: #e5a46b;
+  }
+
+  .hero-term-screen :global(.vim[data-lang='cs']) {
+    --vim-accent: #7c4dff;
+    --vim-accent-text: #ffffff;
+    --vim-accent-label: #a78bfa;
+    --tok-kw: #a78bfa;
+    --tok-type: #4ec9b0;
+    --tok-fn: #dcdcaa;
+    --tok-str: #d69d85;
+  }
+
+  .hero-term-screen :global(.vim.is-static) {
+    height: auto;
+    margin-bottom: var(--space-sm);
+  }
+
+  .hero-term-screen :global(.vim-buffer) {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .hero-term-screen :global(.vim-line) {
+    display: flex;
+    min-height: 1.8em;
+  }
+
+  /* Long lines wrap past the gutter (like vim's breakindent) so narrow
+     screens never clip the code or the cursor. */
+  .hero-term-screen :global(.vim-code) {
+    flex: 1;
+    min-width: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .hero-term-screen :global(.vim-tilde) {
+    display: block;
+    min-height: 1.8em;
+  }
+
+  .hero-term-screen :global(.vim-num) {
+    flex-shrink: 0;
+    width: 3ch;
+    margin-right: 1.5ch;
+    text-align: right;
+    color: var(--term-dim);
+  }
+
+  .hero-term-screen :global(.vim-tilde) {
+    color: var(--term-border);
+  }
+
+  .hero-term-screen :global(.vim.is-static .vim-tildes) {
+    display: none;
+  }
+
+  .hero-term-screen :global(.tok-kw) { color: var(--tok-kw); }
+  .hero-term-screen :global(.tok-type) { color: var(--tok-type); }
+  .hero-term-screen :global(.tok-fn) { color: var(--tok-fn); }
+  .hero-term-screen :global(.tok-str) { color: var(--tok-str); }
+  .hero-term-screen :global(.tok-plain) { color: var(--term-text); }
+
+  .hero-term-screen :global(.vim-status) {
+    display: flex;
+    background: var(--term-header);
+    color: var(--term-muted);
+    font-size: 0.75rem;
+    line-height: 1.8;
+  }
+
+  .hero-term-screen :global(.vim-mode),
+  .hero-term-screen :global(.vim-pos) {
+    padding: 0 1ch;
+    background: var(--vim-accent);
+    color: var(--vim-accent-text);
+    font-weight: 700;
+  }
+
+  .hero-term-screen :global(.vim-file),
+  .hero-term-screen :global(.vim-lang) {
+    padding: 0 1ch;
+  }
+
+  /* Lighter shade where the accent alone is under 4.5:1 on the bar. */
+  .hero-term-screen :global(.vim-lang) {
+    color: var(--vim-accent-label, var(--vim-accent));
+  }
+
+  .hero-term-screen :global(.vim-spacer) {
+    flex: 1;
+  }
+
+  .hero-term-screen :global(.vim-cmd) {
+    min-height: 1.8em;
+    color: var(--term-text);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .hero-term-screen :global(.cursor) {
       animation: none;
@@ -698,10 +1026,12 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
 
 <script>
   type Seg = { text: string; cls: string; instant?: boolean };
+  type Editor = { file: string; lang: string; code: Seg[][] };
   type Line = {
-    kind: 'type' | 'output' | 'blank';
+    kind: 'type' | 'output' | 'blank' | 'editor' | 'pause';
     segments?: Seg[];
-    delay?: number;
+    editor?: Editor;
+    ms?: number;
   };
   type Scene = { id: string; name: string; desc: string; lines: Line[] };
 
@@ -773,8 +1103,31 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       });
     }
 
-    function typeDelay(): number {
-      return 18 + Math.random() * 30;
+    // Playback timing (ms). Every scene shares these so the rhythm stays
+    // consistent; the jitter makes the typing read as a person at a keyboard.
+    const TIMING = {
+      sceneHold: 3000,
+      thinkAfterPrompt: [250, 450],
+      enterAfterCommand: [450, 700],
+      enterAfterComment: [250, 400],
+      outputSettle: [300, 450],
+      blankLine: 120,
+      editorOpen: 600,
+      editorNewline: [120, 220],
+      editorModeSwitch: [300, 450],
+    } as const;
+
+    const between = ([min, max]: readonly [number, number]) =>
+      min + Math.random() * (max - min);
+
+    // Roughly bell-shaped around 40ms per key, slower at word boundaries and
+    // punctuation, with an occasional short hesitation mid-word.
+    function keyDelay(ch: string): number {
+      const base = 28 + (Math.random() + Math.random()) * 12;
+      if (ch === ' ') return base + between([40, 100]);
+      if (/[=\-/.,:'"(){}]/.test(ch)) return base + between([15, 45]);
+      if (Math.random() < 0.03) return base + between([120, 260]);
+      return base;
     }
 
     function setActiveMode(index: number) {
@@ -785,10 +1138,25 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       });
     }
 
+    // Keeps the line being typed in view when wrapped code outgrows the
+    // editor buffer (narrow screens).
+    function followEditorCursor(): void {
+      const buffer = screen!.querySelector<HTMLElement>('.vim-buffer');
+      const lines = buffer?.querySelectorAll<HTMLElement>('.vim-line');
+      if (!buffer || !lines?.length) return;
+      const last = lines[lines.length - 1];
+      const top = last.offsetTop + last.offsetHeight - buffer.clientHeight;
+      if (top > buffer.scrollTop) buffer.scrollTop = top;
+    }
+
     function keepLatestLineVisible(): void {
+      followEditorCursor();
       if (scrollFrame !== undefined) return;
       scrollFrame = window.requestAnimationFrame(() => {
-        screen!.scrollTop = screen!.scrollHeight;
+        const top = screen!.scrollHeight - screen!.clientHeight;
+        if (top > screen!.scrollTop) {
+          screen!.scrollTo({ top, behavior: reduceMotion ? 'auto' : 'smooth' });
+        }
         scrollFrame = undefined;
       });
     }
@@ -802,8 +1170,15 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
     }
 
     function renderInstant(scene: Scene) {
+      screen!.classList.add('is-static');
+      screen!.tabIndex = 0;
       screen!.innerHTML = '';
       for (const line of scene.lines) {
+        if (line.kind === 'editor') {
+          screen!.appendChild(renderEditorStatic(line.editor!));
+          continue;
+        }
+        if (line.kind === 'pause') continue;
         const el = makeLineEl();
         if (line.kind === 'blank') {
           el.innerHTML = '&nbsp;';
@@ -826,7 +1201,7 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       if (reduceMotion) return;
       holdTimer = setTimeout(() => {
         play((index + 1) % scenes.length);
-      }, 7000);
+      }, TIMING.sceneHold);
     }
 
     // A playback is "alive" while it owns the current run id and no newer
@@ -870,6 +1245,8 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       if (seg.instant) {
         span.textContent = seg.text;
         keepLatestLineVisible();
+        // The prompt appears at once; give the "user" a beat before typing.
+        if (seg.cls === 'prompt') await sleep(between(TIMING.thinkAfterPrompt));
         return true;
       }
       for (const ch of seg.text) {
@@ -877,7 +1254,7 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
         if (!alive(id)) return false;
         span.textContent += ch;
         keepLatestLineVisible();
-        await sleep(typeDelay());
+        await sleep(keyDelay(ch));
       }
       return true;
     }
@@ -892,7 +1269,13 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       for (const seg of line.segments ?? []) {
         if (!(await typeSegment(el, seg, cursor, id))) return false;
       }
-      await sleep(line.delay ?? 280);
+      // Mini pause for pressing Enter; a command also "runs" for a moment.
+      const isCommand = line.segments?.[0]?.instant === true;
+      await sleep(
+        between(
+          isCommand ? TIMING.enterAfterCommand : TIMING.enterAfterComment,
+        ),
+      );
       return true;
     }
 
@@ -909,6 +1292,120 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       prompt.appendChild(cursor);
     }
 
+    type EditorView = {
+      root: HTMLElement;
+      buffer: HTMLElement;
+      tildes: HTMLElement;
+      mode: HTMLElement;
+      pos: HTMLElement;
+      cmd: HTMLElement;
+    };
+
+    function mk(tag: string, cls: string, text = ''): HTMLElement {
+      const node = document.createElement(tag);
+      node.className = cls;
+      node.textContent = text;
+      return node;
+    }
+
+    // A vim-like editor: numbered buffer, `~` filler, status line, cmdline.
+    function buildEditor(editor: Editor): EditorView {
+      const root = mk('div', 'vim');
+      root.dataset.lang = editor.lang;
+      const buffer = mk('div', 'vim-buffer');
+      const tildes = mk('div', 'vim-tildes');
+      for (let i = 0; i < 20; i++) tildes.appendChild(mk('span', 'vim-tilde', '~'));
+      buffer.appendChild(tildes);
+      const status = mk('div', 'vim-status');
+      const mode = mk('span', 'vim-mode', 'NORMAL');
+      const pos = mk('span', 'vim-pos', '1:1');
+      status.append(
+        mode,
+        mk('span', 'vim-file', editor.file),
+        mk('span', 'vim-spacer'),
+        mk('span', 'vim-lang', editor.lang),
+        pos,
+      );
+      const cmd = mk('div', 'vim-cmd');
+      root.append(buffer, status, cmd);
+      return { root, buffer, tildes, mode, pos, cmd };
+    }
+
+    // Adds buffer line `n` and returns the element that holds its code.
+    function addEditorLine(view: EditorView, n: number): HTMLElement {
+      const line = mk('div', 'vim-line');
+      const code = mk('span', 'vim-code');
+      line.append(mk('span', 'vim-num', String(n)), code);
+      view.buffer.insertBefore(line, view.tildes);
+      return code;
+    }
+
+    function setEditorMode(view: EditorView, insert: boolean): void {
+      view.mode.textContent = insert ? 'INSERT' : 'NORMAL';
+      view.root.classList.toggle('is-insert', insert);
+      view.cmd.textContent = insert ? '-- INSERT --' : '';
+    }
+
+    function renderEditorStatic(editor: Editor): HTMLElement {
+      const view = buildEditor(editor);
+      view.root.classList.add('is-static');
+      editor.code.forEach((row, r) => {
+        const code = addEditorLine(view, r + 1);
+        for (const seg of row) appendSeg(code, seg).textContent = seg.text;
+      });
+      return view.root;
+    }
+
+    // Opens the editor full screen (like vim's alternate screen), types the
+    // file in INSERT mode, saves with `:wq` and restores the shell.
+    async function playEditor(
+      editor: Editor,
+      cursor: HTMLElement,
+      id: number,
+    ): Promise<boolean> {
+      const shell = Array.from(screen!.childNodes);
+      const view = buildEditor(editor);
+      screen!.replaceChildren(view.root);
+      screen!.scrollTop = 0;
+
+      let code = addEditorLine(view, 1);
+      code.appendChild(cursor);
+      view.cmd.textContent = `"${editor.file}" [New]`;
+      await sleep(TIMING.editorOpen);
+      if (!alive(id)) return false;
+
+      setEditorMode(view, true);
+      await sleep(between(TIMING.editorModeSwitch));
+
+      for (const [r, row] of editor.code.entries()) {
+        if (r > 0) {
+          await sleep(between(TIMING.editorNewline));
+          code = addEditorLine(view, r + 1);
+          code.appendChild(cursor);
+        }
+        view.pos.textContent = `${r + 1}:1`;
+        for (const seg of row) {
+          if (!(await typeSegment(code, seg, cursor, id))) return false;
+        }
+        view.pos.textContent = `${r + 1}:${code.textContent!.length + 1}`;
+      }
+
+      await sleep(between(TIMING.editorModeSwitch));
+      if (!alive(id)) return false;
+      setEditorMode(view, false);
+      await sleep(between(TIMING.editorModeSwitch));
+
+      view.cmd.appendChild(cursor);
+      const save = { text: ':wq', cls: 'tok-plain' };
+      if (!(await typeSegment(view.cmd, save, cursor, id))) return false;
+      await sleep(between(TIMING.enterAfterCommand));
+      if (!alive(id)) return false;
+
+      screen!.replaceChildren(...shell);
+      keepLatestLineVisible();
+      return true;
+    }
+
     // Renders a single line and returns the next index, or -1 if a newer
     // run superseded this one.
     async function playLine(
@@ -920,14 +1417,34 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       const line = lines[i];
 
       if (line.kind === 'output') {
-        await sleep(line.delay ?? 450);
-        if (!alive(id)) return -1;
-        return dumpOutputRun(lines, i);
+        const next = dumpOutputRun(lines, i);
+        // Let the output land before the next keystroke.
+        await sleep(between(TIMING.outputSettle));
+        return next;
       }
 
       if (line.kind === 'blank') {
         appendBlankLine();
-        await sleep(150);
+        await sleep(TIMING.blankLine);
+        return i + 1;
+      }
+
+      if (line.kind === 'editor') {
+        if (!(await playEditor(line.editor!, cursor, id))) return -1;
+        return i + 1;
+      }
+
+      if (line.kind === 'pause') {
+        // Sleep in short steps so a hover pause or a newer run takes effect
+        // mid-pause instead of after it.
+        let left = line.ms ?? 0;
+        while (left > 0) {
+          await waitWhilePaused();
+          if (!alive(id)) return -1;
+          const step = Math.min(left, 100);
+          await sleep(step);
+          left -= step;
+        }
         return i + 1;
       }
 

@@ -5,6 +5,54 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [0.15.0] - 2026-10-16
+
+### Added
+
+* **`envilder exec`: run a command with resolved secrets, without a `.env`
+  file**: `envilder exec [options] [--] <command> [args...]` resolves every
+  secret in the map file and starts the command with those values in its
+  environment. Nothing is written to disk. The command starts at the first
+  argument that is not an Envilder option (`--` is optional), arguments are
+  passed verbatim without a shell, and Windows `npm`/`npx` shims are supported.
+  Resolution is fail-closed: the command never starts when a secret is missing,
+  empty or unreadable. Mapped values override inherited variables, naming the
+  overridden variables on stderr. All Envilder output goes to stderr as a
+  single summary line that names the program but never its arguments, so
+  stdout carries only the command's output. Inside GitHub Actions every value
+  is registered for masking, and every registration is written to stderr
+  before the command starts. Exit codes follow GNU `env`: the command's own
+  code, `128+n` for signals, `125` for Envilder errors, `126` and `127` when
+  the command cannot be executed or found. `SIGTERM` and `SIGHUP` are
+  forwarded and the command is awaited without a timeout, even if a signal
+  cannot be delivered. An expired AWS SSO session is recovered interactively
+  before the command starts. Exec mode is not a sandbox: see
+  [docs/exec-command.md](../exec-command.md)
+  ([#550](https://github.com/macalbert/envilder/issues/550))
+
+### Security
+
+* **Parse errors no longer echo option values or arguments**: parse errors
+  are rebuilt from safe forms, so option values and extra arguments are never
+  printed. An unknown long option is named only when it is a near-typo of a
+  real option, together with the suggestion (`--valeu=<value>` is shown as
+  `unknown option '--valeu' (Did you mean --value?)`); any other unknown long
+  option gets a generic message, so a mistyped secret is never echoed. An
+  unknown short option is named by its single character, "too many
+  arguments" shows only the counts, and any other parse error is replaced
+  with a generic message. Exit codes are unchanged
+  ([#554](https://github.com/macalbert/envilder/issues/554))
+
+* **Path and name options never swallow the next option**: `--map`,
+  `--envfile`, `--profile`, `--provider`, `--vault-url`, `--key`,
+  `--secret-path` and `--ssm-path` (and their `exec` counterparts) reject a
+  value that starts with `-` as a missing argument, before any map file is
+  read, instead of taking the following option as their value. `--value` is
+  exempt, so a secret may still start with `-`
+  ([#554](https://github.com/macalbert/envilder/issues/554))
+
+---
+
 ## [0.14.0] - 2026-09-26
 
 ### Added
@@ -80,7 +128,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
-## [0.13.0] - 2026-06-26
+## [0.13.0] - 2026-07-11
 
 ### Added
 
@@ -171,6 +219,20 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [0.11.1] - 2026-06-25
+
+### Fixed
+
+* **AWS SSO / assumed-role profiles now resolve correctly**: Selecting an
+  SSO, IAM Identity Center, or assumed-role profile (via `--profile` or
+  `$config.profile`) now resolves credentials through the full AWS provider
+  chain instead of silently falling back to the default credentials.
+  Previously these profiles were ignored, reading and writing secrets against
+  the wrong AWS account
+  ([#364](https://github.com/macalbert/envilder/issues/364))
+
+---
+
 ## [0.11.0] - 2026-05-31
 
 ### Changed
@@ -197,7 +259,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   published at `https://envilder.com/schema/map-file.v1.json`. Add
   `"$schema": "https://envilder.com/schema/map-file.v1.json"` to any map file
   for IDE autocomplete, inline documentation, and validation
-  ([#218](https://github.com/macalbert/envilder/pull/218))
+  ([#217](https://github.com/macalbert/envilder/pull/217))
 * **Schema contract tests**: 39 tests validating the JSON Schema across all
   providers (AWS, Azure, GCP, HashiCorp Vault, file)
 
@@ -327,6 +389,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 ### Fixed
 
 * **deps:** Move `@types/node` from `dependencies` to `devDependencies` to prevent it from being bundled as a runtime dependency
+  ([#135](https://github.com/macalbert/envilder/pull/135))
 * **e2e:** Use unique SSM paths per CLI test run to prevent race conditions between parallel test executions
 
 ### Dependencies
@@ -336,7 +399,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
-## [0.8.0] - 2026-03-22
+## [0.8.0] - 2026-03-26
 
 ### Added
 
@@ -350,6 +413,13 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 * New infrastructure adapter: `AzureKeyVaultSecretProvider` implementing `ISecretProvider`
 * New CLI option `--provider <name>` to select cloud provider (`aws` or `azure`, default: `aws`)
 * Azure authentication via `DefaultAzureCredential` (supports Azure CLI, managed identity, etc.)
+* Automatic secret name normalization for Key Vault naming constraints (alphanumeric and hyphens,
+  1–127 characters)
+
+### Security
+
+* **Vault URL validation**: Azure Key Vault URLs must use HTTPS and match an Azure domain allowlist
+  (with dot-boundary checks), preventing SSRF through spoofed hostnames
 
 ### Changed
 
@@ -701,3 +771,52 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 * CLI command not recognized after global install (`npm install -g envilder`)
 * Fixed missing compiled `lib/` files in published package
+
+---
+
+## [0.3.0] - 2025-05-09
+
+### Added
+
+* **`--profile` option**: Choose which AWS CLI profile to use for credentials,
+  so you can work with different AWS accounts or configurations
+  ([#31](https://github.com/macalbert/envilder/pull/31))
+
+### Dependencies
+
+* Bumped commander from 12.1.0 to 13.1.0, @aws-sdk/client-ssm, @types/node,
+  vite and @secretlint/secretlint-rule-preset-recommend
+
+---
+
+## [0.2.3] - 2025-04-13
+
+### Dependencies
+
+* Bumped @aws-sdk/client-ssm from 3.670.0 to 3.716.0
+* Bumped nanoid (security patch), @types/node, @biomejs/biome, secretlint and
+  @secretlint/secretlint-rule-preset-recommend
+
+---
+
+## [0.2.1] - 2024-10-16
+
+### Added
+
+* **Preserve existing `.env` variables**: When the target `.env` already
+  exists, its variables are kept and only the mapped ones are added or updated
+  ([#5](https://github.com/macalbert/envilder/pull/5))
+* Secret values are masked in console output
+* Code coverage reporting published to GitHub Pages
+  ([#2](https://github.com/macalbert/envilder/pull/2))
+* CodeQL code scanning ([#4](https://github.com/macalbert/envilder/pull/4))
+
+---
+
+## [0.1.4] - 2024-10-01
+
+### Added
+
+* **Initial release**: Generate `.env` files from AWS SSM Parameter Store
+  using a JSON map of environment variable names to SSM parameter paths
+* Supports both encrypted (`SecureString`) and plain SSM parameters

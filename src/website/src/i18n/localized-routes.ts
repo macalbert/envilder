@@ -7,6 +7,7 @@ export const localizedRoutes = {
   '/docs/map-file/': ['en', 'ca', 'es'],
   '/docs/cli/pull/': ['en', 'ca', 'es'],
   '/docs/cli/push/': ['en', 'ca', 'es'],
+  '/docs/cli/exec/': ['en', 'ca', 'es'],
   '/docs/github-action/': ['en', 'ca', 'es'],
   '/docs/sdks/dotnet/': ['en', 'ca', 'es'],
   '/docs/sdks/python/': ['en', 'ca', 'es'],

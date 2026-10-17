@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   test-action:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: ${{ !github.event.pull_request.draft }}
     timeout-minutes: 15
 
@@ -46,7 +46,7 @@ jobs:
           cache: "pnpm"
 
       - name: 🪙 Collect Coins (Configure AWS credentials)
-        uses: aws-actions/configure-aws-credentials@v6.2.4
+        uses: aws-actions/configure-aws-credentials@v6.3.0
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}

@@ -177,7 +177,7 @@ Every SDK must have:
 - [ ] Unit tests for `SecretValidation`
 - [ ] Unit tests for cross-provider validation
 - [ ] Acceptance tests with LocalStack (AWS SSM)
-- [ ] Acceptance tests with Lowkey Vault (Azure Key Vault)
+- [ ] Acceptance tests with LocalStack for Azure (Azure Key Vault)
 
 Follow `sdk-acceptance-testing` skill for container wrapper patterns.
 

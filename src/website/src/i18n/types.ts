@@ -37,6 +37,8 @@ export interface HeroTranslations {
   viewOnGithub: string;
   tabCli: string;
   tabCliDesc: string;
+  tabExec: string;
+  tabExecDesc: string;
   tabSetup: string;
   tabSetupDesc: string;
   tabNode: string;
@@ -47,8 +49,12 @@ export interface HeroTranslations {
   tabDotnetDesc: string;
   terminalComment1: string;
   terminalComment2: string;
+  execComment1: string;
+  execComment2: string;
   setupComment1: string;
   setupComment2: string;
+  setupAzureComment1: string;
+  setupAzureComment2: string;
   sdkCommentLoad: string;
   terminalSceneLabel: string;
 }
@@ -253,6 +259,7 @@ export interface FooterTranslations {
   linkGettingStarted: string;
   linkPullCommand: string;
   linkPushCommand: string;
+  linkExecCommand: string;
   linkGithubAction: string;
   linkIssues: string;
   linkDiscussions: string;
@@ -307,6 +314,7 @@ export interface DocsTranslations {
     | 'map-file'
     | 'cli-pull'
     | 'cli-push'
+    | 'cli-exec'
     | 'github-action'
     | 'sdk-dotnet'
     | 'sdk-python'
@@ -357,6 +365,9 @@ export interface DocsTranslations {
   reqInstallGuide: string;
   // Installation
   installTitle: string;
+  installNext: string;
+  installNextPull: string;
+  installNextExec: string;
   // AWS setup
   awsSetupTitle: string;
   awsSetupIntro: string;
@@ -462,6 +473,85 @@ export interface DocsTranslations {
   pullCommentAzureConfig: string;
   pullCommentAzureFlags: string;
   pullOutputTitle: string;
+  pullExecTitle: string;
+  pullExecDesc: string;
+  pullExecGuideLink: string;
+  // Exec command
+  execTitle: string;
+  execDesc: string;
+  execUsageTitle: string;
+  execSeparatorTitle: string;
+  execSeparatorDesc: string;
+  execSepComment1: string;
+  execSepComment2: string;
+  execSepComment3: string;
+  execSepComment4: string;
+  execOptions: string;
+  execOptMap: string;
+  execOptProfile: string;
+  execOptProvider: string;
+  execOptVault: string;
+  execOptionsOrderDesc: string;
+  execRejectedDesc: string;
+  execExamples: string;
+  execCommentNpx: string;
+  execCommentMap: string;
+  execCommentAzure: string;
+  execCommentDocker: string;
+  execPackageJsonDesc: string;
+  execOutputTitle: string;
+  execOutputDesc: string;
+  execUseCasesTitle: string;
+  execUseCasesDesc: string;
+  execUcLocalstackTitle: string;
+  execUcLocalstackDesc: string;
+  execUcLocalstackComposeDesc: string;
+  execUcLocalstackDockerDesc: string;
+  execUcLocalstackExamplesDesc: string;
+  execUcTestsTitle: string;
+  execUcTestsDesc: string;
+  execUcTestsNote: string;
+  execUcMigrationsTitle: string;
+  execUcMigrationsDesc: string;
+  execUcTerraformTitle: string;
+  execUcTerraformDesc: string;
+  execUcTerraformNote: string;
+  execUcDevTitle: string;
+  execUcDevDesc: string;
+  execUcDevNote: string;
+  execUcGhaTitle: string;
+  execUcGhaDesc: string;
+  execUcGhaNote: string;
+  execUcChainTitle: string;
+  execUcChainDesc: string;
+  execUcChainNote: string;
+  execBehaviorTitle: string;
+  execExitTitle: string;
+  execExitDesc: string;
+  execThCode: string;
+  execThMeaning: string;
+  execThMessage: string;
+  execExitChild: string;
+  execExitSignal: string;
+  execExit125: string;
+  execExit126: string;
+  execExit127: string;
+  execExitNote: string;
+  execFailClosedTitle: string;
+  execFailClosedDesc: string;
+  execEnvTitle: string;
+  execEnvDesc: string;
+  execNoShellDesc: string;
+  execGhaTitle: string;
+  execGhaDesc: string;
+  execGhaNote: string;
+  execSignalsTitle: string;
+  execSignalsDesc: string;
+  execSandboxTitle: string;
+  execSandboxDesc: string;
+  execGuideLink: string;
+  examplesTitle: string;
+  execExamplesDesc: string;
   // Push command
   pushTitle: string;
   pushDesc: string;
@@ -516,6 +606,63 @@ export interface DocsTranslations {
   ghaInputProvider: string;
   ghaInputVault: string;
   ghaOutputEnvPath: string;
+  ghaPrereqCheckout: string;
+  ghaPrereqPermissions: string;
+  ghaAwsTrustTitle: string;
+  ghaAwsTrustDesc: string;
+  ghaOidcSubjectNote: string;
+  ghaAwsPolicyTitle: string;
+  ghaAwsPolicyDesc: string;
+  ghaAwsKmsNote: string;
+  ghaWorkflowTitle: string;
+  ghaAwsMapDesc: string;
+  ghaOutputTitle: string;
+  ghaOutputDesc: string;
+  ghaOutputMaskNote: string;
+  ghaAzureFedTitle: string;
+  ghaAzureFedDesc: string;
+  ghaAzureRoleTitle: string;
+  ghaAzureRoleDesc: string;
+  ghaAzurePolicyNote: string;
+  ghaAzureMapDesc: string;
+  ghaAzureInputsNote: string;
+  ghaMultiEnvDesc: string;
+  ghaWhyTitle: string;
+  ghaWhyDesc: string;
+  ghaWhyRotationLabel: string;
+  ghaWhyRotation: string;
+  ghaWhyAuditLabel: string;
+  ghaWhyAudit: string;
+  ghaWhyKeysLabel: string;
+  ghaWhyKeys: string;
+  ghaWhyListLabel: string;
+  ghaWhyList: string;
+  ghaWhyWhenSecrets: string;
+  ghaErrorsTitle: string;
+  ghaErrorsDesc: string;
+  ghaErrMapTitle: string;
+  ghaErrMapFix: string;
+  ghaErrAssumeTitle: string;
+  ghaErrAssumeFix: string;
+  ghaErrNoCredsTitle: string;
+  ghaErrNoCredsFix: string;
+  ghaErrDeniedTitle: string;
+  ghaErrDeniedFix: string;
+  ghaErrExpiredTitle: string;
+  ghaErrExpiredFix: string;
+  ghaErrNotFoundTitle: string;
+  ghaErrNotFoundFix: string;
+  ghaErrVaultUrlTitle: string;
+  ghaErrVaultUrlFix: string;
+  ghaErrAzureDeniedTitle: string;
+  ghaErrAzureDeniedFix: string;
+  ghaErrProfileTitle: string;
+  ghaErrProfileFix: string;
+  ghaRelatedTitle: string;
+  ghaRelatedAws: string;
+  ghaRelatedAzure: string;
+  ghaRelatedMap: string;
+  ghaRelatedRepo: string;
   // Config priority
   configPriorityTitle: string;
   configPriorityDesc: string;
@@ -546,6 +693,7 @@ export interface DocsTranslations {
   sdkDotnetQuickStartResolve: string;
   sdkDotnetQuickStartResolveDesc: string;
   sdkDotnetFullDocs: string;
+  sdkDotnetExamplesDesc: string;
   sdkPythonTitle: string;
   sdkPythonDesc: string;
   sdkPythonInstall: string;
@@ -560,6 +708,7 @@ export interface DocsTranslations {
   sdkPythonValidation: string;
   sdkPythonValidationDesc: string;
   sdkPythonFullDocs: string;
+  sdkPythonExamplesDesc: string;
   sdkNodejsTitle: string;
   sdkNodejsDesc: string;
   sdkNodejsInstall: string;
@@ -574,6 +723,7 @@ export interface DocsTranslations {
   sdkNodejsValidation: string;
   sdkNodejsValidationDesc: string;
   sdkNodejsFullDocs: string;
+  sdkNodejsExamplesDesc: string;
   // Pager
   pagerPrev: string;
   pagerNext: string;

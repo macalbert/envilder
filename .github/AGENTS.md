@@ -6,7 +6,7 @@ AWS SSM Parameter Store or Azure Key Vault via a Git-versioned map-file format.
 ## Setup
 
 - **Runtime**: Node.js 22.12+, pnpm 11+
-- **Optional** (for e2e tests): Docker (LocalStack for AWS, Lowkey Vault for Azure)
+- **Optional** (for e2e tests): Docker (LocalStack for AWS and Azure)
 - Install: `pnpm install`
 
 ## Build & Validate
@@ -53,7 +53,7 @@ e2e/                         End-to-end tests (TestContainers)
   validation only.
 - SDKs are independent: they share the map-file format but have zero code
   dependency on the TypeScript core.
-- E2E tests require Docker running (LocalStack + Lowkey Vault containers).
+- E2E tests require Docker running (LocalStack AWS + LocalStack Azure containers).
 
 ## Architecture Reference
 

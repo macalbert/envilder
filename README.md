@@ -15,6 +15,7 @@
 [![CI Tests](https://github.com/macalbert/envilder/actions/workflows/tests.yml/badge.svg)](https://github.com/macalbert/envilder/actions/workflows/tests.yml)
 [![Overall Coverage](https://macalbert.github.io/envilder/badge_combined.svg)](https://macalbert.github.io/envilder/)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Context7](https://img.shields.io/badge/Context7-docs_for_AI_agents-blue.svg)](https://context7.com/macalbert/envilder)
 
 ## Why Envilder?
 
@@ -34,6 +35,9 @@ npx envilder
 
 # Or with explicit paths
 npx envilder --map=envilder.json --envfile=.env
+
+# Or skip the file: run your app with the secrets in memory
+npx envilder exec -- npm run dev
 ```
 
 No SaaS middleman. One versioned mapping contract. Secrets stay in your cloud.
@@ -55,6 +59,8 @@ No SaaS middleman. One versioned mapping contract. Secrets stay in your cloud.
   needs and where they live. Git-versioned, PR-reviewable, and reused across environments.
 - ⚡ **Works everywhere your code runs.** CLI for local dev, GitHub Action for CI/CD, runtime SDKs
   for application startup. Same file, same result.
+- 🚫 **No `.env` file when you don't want one.** `envilder exec` starts any command with the
+  secrets in its environment, in any language, without writing anything to disk.
 - 🔄 **Rotate secrets without config drift.** Keep application-facing variable names stable while
   rotating real secret values in AWS SSM or Azure Key Vault. Generated `.env` files update only
   when Envilder runs again; runtime consumers must restart or resolve again.
@@ -68,6 +74,7 @@ No SaaS middleman. One versioned mapping contract. Secrets stay in your cloud.
 |---------|-------------|
 | 📋 **Declarative Mapping** | One JSON file defines how application variables map to cloud secrets. Git-versioned, PR-reviewable, and diff-able |
 | ☁️ **Cloud-native Providers** | AWS SSM and Azure Key Vault today |
+| ⚡ **Exec Mode** | `envilder exec -- <command>` runs any command with the secrets in its environment. Nothing written to disk, fail-closed, exit codes propagated. [Guide](docs/exec-command.md) |
 | 🔌 **Runtime SDKs** | Load secrets into memory at app startup: [.NET](./src/sdks/dotnet/README.md), [Python](./src/sdks/python/README.md), [Node.js](./src/sdks/nodejs/README.md). No `.env` on disk |
 | ⚙️ **GitHub Action** | Pull secrets in CI/CD. Same mapping, zero manual config |
 | 🔄 **Pull & Controlled Push** | Pull secrets to `.env`, or intentionally push local values to your cloud provider when bootstrapping or rotating |
@@ -113,6 +120,22 @@ Add `.env` to `.gitignore`. The mapping file is versioned and reviewable in PRs.
 
 > 💡 Using Azure Key Vault? Add a `$config` section to your mapping file.
 > See [Mapping File Format](#️-mapping-file-format) below.
+
+### 4. Or skip the `.env` file entirely
+
+```bash
+npx envilder exec -- npm run dev
+```
+
+`envilder exec` resolves the same mapping and starts your command with the secrets in its environment.
+Nothing is written to disk. Envilder options go before the command (or before an optional `--`); everything
+after belongs to your command. Exec mode is fail-closed: the command does not start if any secret is missing.
+It is not a sandbox: your command and everything it starts can read the secrets.
+
+📖 See the [Exec Command Guide](docs/exec-command.md) for exit codes, signals and GitHub Actions masking.
+
+💡 Runnable examples: [envilder-examples](https://github.com/macalbert/envilder-examples) (Testcontainers and Aspire for
+.NET, Python and TypeScript, AWS SSM and Azure Key Vault, plus `envilder exec`).
 
 ### 🎥 See it in action
 
@@ -238,7 +261,7 @@ Env.Load("envilder.json");
 var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 ```
 
-📖 **[Full .NET SDK docs](./src/sdks/dotnet/README.md)** · 💡 **[Examples](./examples/sdk/dotnet/)**
+📖 **[Full .NET SDK docs](./src/sdks/dotnet/README.md)** · 💡 **Examples:** [Testcontainers](https://github.com/macalbert/envilder-examples/tree/main/dotnet-testcontainers) · [Aspire](https://github.com/macalbert/envilder-examples/tree/main/dotnet-aspire)
 
 ### Python SDK
 
@@ -271,7 +294,7 @@ Envilder.load('production', {
 })
 ```
 
-📖 **[Full Python SDK docs](./src/sdks/python/README.md)** · 💡 **[Examples](./examples/sdk/python/)**
+📖 **[Full Python SDK docs](./src/sdks/python/README.md)** · 💡 **Examples:** [Testcontainers](https://github.com/macalbert/envilder-examples/tree/main/python-testcontainers)
 
 ### Node.js SDK
 
@@ -301,7 +324,7 @@ const secrets = await Envilder.fromMapFile('envilder.json')
   .resolve();
 ```
 
-📖 **[Full Node.js SDK docs](./src/sdks/nodejs/README.md)** · 💡 **[Examples](./examples/sdk/nodejs/)**
+📖 **[Full Node.js SDK docs](./src/sdks/nodejs/README.md)** · 💡 **Examples:** [Testcontainers](https://github.com/macalbert/envilder-examples/tree/main/typescript-testcontainers) · [Aspire](https://github.com/macalbert/envilder-examples/tree/main/typescript-aspire)
 
 ## 🤖 GitHub Action
 
@@ -350,6 +373,11 @@ prebuilt action, so consumers do not need an Envilder build step.
 - [📖 Full Documentation](https://envilder.com/docs/getting-started/?utm_source=github&utm_medium=readme&utm_campaign=root-docs): the complete guide at envilder.com
 - [Push Command Guide](docs/push-command.md)
 - [Pull Command Guide](docs/pull-command.md)
+- [Exec Command Guide](docs/exec-command.md)
+- [envilder-examples](https://github.com/macalbert/envilder-examples): runnable examples for the SDKs and `envilder exec`
+  (Testcontainers and Aspire, AWS SSM and Azure Key Vault)
+- [🤖 Envilder on Context7](https://context7.com/macalbert/envilder): up-to-date docs for AI coding assistants
+  (Claude Code, Cursor, Copilot). Add `use context7` to your prompt, or reference the library ID `/macalbert/envilder`.
 
 ## 🛠️ How it works
 
@@ -357,6 +385,7 @@ prebuilt action, so consumers do not need an Envilder build step.
 graph LR
     A["Mapping Contract<br/>(envilder.json)"] --> B[Envilder]:::core
     B --> C["CLI → .env file"]
+    B --> X["CLI exec → process env"]
     B --> D["GitHub Action → CI/CD"]
     B --> E["SDK → app memory"]
     F["AWS SSM / Azure Key Vault"]:::cloud --> B
@@ -367,7 +396,8 @@ graph LR
 
 1. **Define**: create an `envilder.json` mapping env var names to cloud secret paths
 2. **Resolve**: Envilder fetches each secret from your cloud vault
-3. **Deliver**: secrets arrive as a `.env` file (CLI/GHA) or in-memory (SDKs)
+3. **Deliver**: secrets arrive as a `.env` file (CLI/GHA), in the environment of a command you
+   start with `envilder exec` (CLI), or in-memory (SDKs)
 4. **Rotate**: update secret values in your cloud provider while keeping the same
    application-facing mapping. Rerun Envilder to refresh a generated `.env`, or restart/re-resolve
    in runtime consumers
@@ -389,9 +419,9 @@ Use Envilder when your secrets already live in your cloud provider and you want 
 
 ## 🏁 What's Next
 
-Envilder already covers CLI, GitHub Action, and runtime SDKs for .NET, Python, and Node.js.
+Envilder already covers CLI (including `envilder exec`), GitHub Action, and runtime SDKs for .NET, Python, and Node.js.
 
-Next priorities include Go and Java SDKs, GCP Secret Manager, and exec mode.
+Next priorities include Go and Java SDKs and GCP Secret Manager.
 
 See the [full roadmap](./ROADMAP.md).
 

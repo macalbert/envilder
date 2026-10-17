@@ -25,7 +25,7 @@ export class LocalStackTestContainer {
   async start(): Promise<LocalStackTestContainer> {
     console.log('\n[LocalStack] Starting container...');
 
-    const environment = await loadEnvironment();
+    const environment = await loadLocalStackEnvironment();
     if (!environment.get('LOCALSTACK_AUTH_TOKEN')) {
       throw new Error(
         'LOCALSTACK_AUTH_TOKEN could not be resolved from envilder.json',
@@ -82,7 +82,9 @@ export class LocalStackTestContainer {
 // resolveSecrets() time, not at provider construction. When the configured
 // provider fails, fall back to default AWS credentials so integration tests
 // can still resolve the LOCALSTACK_AUTH_TOKEN from real SSM.
-async function loadEnvironment(): Promise<Map<string, string>> {
+export async function loadLocalStackEnvironment(): Promise<
+  Map<string, string>
+> {
   const json = await readFile(SECRETS_MAP, 'utf-8');
   const parser = new MapFileParser();
   const mapFile = parser.parse(json);

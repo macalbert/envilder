@@ -211,7 +211,7 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: 🧱 Checkout
@@ -253,7 +253,7 @@ If your workflow uses `working-directory` for steps, remember that
 ```yaml
 jobs:
   deploy:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./app  # Commands run here
@@ -299,7 +299,7 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
 
     steps:
@@ -336,7 +336,7 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         environment: [dev, staging, production]

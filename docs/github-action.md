@@ -67,7 +67,7 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: 🧱 Checkout
@@ -124,7 +124,7 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
 
     steps:
@@ -379,11 +379,13 @@ For maintainers releasing new versions:
 
 ## Examples
 
-See the [examples directory](examples/) for complete workflow examples:
+Workflow examples are on this page:
 
-- [Basic Pull Workflow](examples/pull-secrets-workflow.yml)
-- [Multi-Environment Deployment](examples/multi-environment.yml)
-- [Monorepo Setup](examples/monorepo.yml)
+- [Basic Example](#basic-example)
+- [Multi-Environment Example](#multi-environment-example)
+
+For runnable SDK and `envilder exec` setups (Testcontainers and Aspire, AWS SSM and
+Azure Key Vault), see [envilder-examples](https://github.com/macalbert/envilder-examples).
 
 ## Related Documentation
 

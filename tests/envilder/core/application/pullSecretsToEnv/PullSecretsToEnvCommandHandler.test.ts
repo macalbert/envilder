@@ -37,7 +37,7 @@ describe('PullSecretsToEnvCommandHandler', () => {
     saveEnvironment: Mock;
   };
   let mockLogger: ILogger & { info: Mock; warn: Mock; error: Mock };
-  let mockSecretMasker: ISecretMasker & { mask: Mock };
+  let mockSecretMasker: ISecretMasker & { mask: Mock; flush: Mock };
   let sut: PullSecretsToEnvCommandHandler;
 
   const mockMapPath = './tests/envilder.json';
@@ -70,6 +70,7 @@ describe('PullSecretsToEnvCommandHandler', () => {
     };
     mockSecretMasker = {
       mask: vi.fn(),
+      flush: vi.fn().mockResolvedValue(undefined),
     };
 
     sut = new PullSecretsToEnvCommandHandler(

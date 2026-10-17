@@ -54,6 +54,8 @@ export const ca: Translations = {
     viewOnGithub: '★ Veure a GitHub',
     tabCli: 'CLI',
     tabCliDesc: 'escriu .env',
+    tabExec: 'exec',
+    tabExecDesc: 'sense fitxer .env',
     tabSetup: 'Setup',
     tabSetupDesc: 'crea secrets',
     tabNode: 'Node.js',
@@ -64,8 +66,12 @@ export const ca: Translations = {
     tabDotnetDesc: 'en runtime',
     terminalComment1: '# 1. Mapeja variables a rutes SSM',
     terminalComment2: '# 2. Resol els secrets cap a .env',
-    setupComment1: '# AWS CLI configurat amb permisos a SSM',
-    setupComment2: '# Puja cada secret a SSM Parameter Store',
+    execComment1: '# Executa qualsevol ordre amb els secrets en memòria',
+    execComment2: '# Res escrit al disc',
+    setupComment1: '# 1. Mapeja cada variable a una ruta de SSM',
+    setupComment2: '# 2. Puja els valors del .env a SSM Parameter Store',
+    setupAzureComment1: '# 1. Mapeja cada variable a un secret de Key Vault',
+    setupAzureComment2: '# 2. Puja els valors del .env a Azure Key Vault',
     sdkCommentLoad: '# Carrega el mateix contracte en runtime',
     terminalSceneLabel: 'Escena de demostració del terminal',
   },
@@ -370,6 +376,13 @@ export const ca: Translations = {
           'Biblioteca nativa de runtime: carrega secrets directament a process.env des d’un map-file. Publicat a npm',
       },
       {
+        status: 'done',
+        label: '✅',
+        title: 'Mode exec (envilder exec)',
+        description:
+          'Executa una comanda amb els teus secrets al seu entorn, sense escriure cap fitxer .env: envilder exec [options] [--] <command> [args...]',
+      },
+      {
         status: 'next',
         label: '🐹',
         title: 'Go SDK (envilder)',
@@ -389,13 +402,6 @@ export const ca: Translations = {
         title: 'GCP Secret Manager',
         description:
           'Tercer proveïdor cloud planificat; encara no està disponible',
-      },
-      {
-        status: 'planned',
-        label: '⚡',
-        title: 'Mode exec (--exec)',
-        description:
-          'Mode planificat; encara no està disponible. Injectaria secrets en un procés fill sense escriure a disc',
       },
       {
         status: 'planned',
@@ -437,7 +443,7 @@ export const ca: Translations = {
     commentPush: '# Pujar un secret',
     doneMessage: 'Fet! Fitxer .env generat.',
     sdkComment3: '# Els secrets ja són a os.environ',
-    sdkExampleLink: 'Veure més exemples a GitHub',
+    sdkExampleLink: 'Veure exemples executables a GitHub',
   },
   footer: {
     tagline:
@@ -452,6 +458,7 @@ export const ca: Translations = {
     linkGettingStarted: 'Comença',
     linkPullCommand: 'Comanda Pull',
     linkPushCommand: 'Comanda Push',
+    linkExecCommand: 'Comanda Exec',
     linkGithubAction: 'GitHub Action',
     linkIssues: 'Incidències',
     linkDiscussions: 'Discussions',
@@ -580,13 +587,26 @@ export const ca: Translations = {
         cardTitle: 'Comanda CLI push',
         cardSummary: 'Puja un fitxer .env mapat o un secret al proveïdor.',
       },
-      'github-action': {
-        title: "Utilitza la GitHub Action d'Envilder",
+      'cli-exec': {
+        title: "Executa una comanda amb secrets d'AWS SSM o Azure Key Vault",
         description:
-          "Descarrega secrets d'AWS SSM o Azure Key Vault a fitxers .env en fluxos de GitHub Actions.",
-        heading: 'GitHub Action',
+          "Referència d'envilder exec: resol secrets d'AWS SSM o Azure Key Vault en memòria i inicia la teva comanda amb ells, sense escriure cap fitxer .env.",
+        heading: 'CLI exec',
         intro:
-          'Descarrega secrets a fitxers .env durant un flux de GitHub Actions.',
+          'Executa una comanda amb els secrets al seu entorn, sense escriure cap fitxer .env.',
+        breadcrumb: 'CLI exec',
+        navLabel: 'CLI exec',
+        cardTitle: 'Comanda CLI exec',
+        cardSummary:
+          'Inicia una comanda amb els secrets mapats en memòria, sense fitxer .env.',
+      },
+      'github-action': {
+        title: "Carrega secrets d'AWS SSM i Azure Key Vault a GitHub Actions",
+        description:
+          "Carrega secrets d'AWS SSM Parameter Store o Azure Key Vault a un fitxer .env a GitHub Actions amb OIDC: permisos IAM i RBAC mínims, workflows complets i errors de credencials.",
+        heading: "Carrega secrets d'AWS SSM i Azure Key Vault a GitHub Actions",
+        intro:
+          "Com fas servir secrets d'AWS SSM Parameter Store o Azure Key Vault en un job de GitHub Actions sense copiar-los a GitHub Secrets? Autentica el job amb OIDC i deixa que l'Action d'Envilder llegeixi el teu envilder.json versionat i escrigui un fitxer .env per als passos següents.",
         breadcrumb: 'GitHub Action',
         navLabel: 'GitHub Action',
         cardTitle: 'Guia de GitHub Action',
@@ -672,6 +692,10 @@ export const ca: Translations = {
     reqDownload: 'Descarregar',
     reqInstallGuide: "Guia d'instal·lació",
     installTitle: 'Instal·lació',
+    installNext: 'I ara, tria com arriben els secrets a la teva aplicació:',
+    installNextPull: 'CLI pull: genera un fitxer .env',
+    installNextExec:
+      'CLI exec: executa la teva comanda amb els secrets en memòria, sense .env',
     // AWS setup
     awsSetupTitle: 'Configuració AWS',
     awsSetupIntro:
@@ -806,6 +830,123 @@ export const ca: Translations = {
     pullCommentAzureConfig: '# Azure via $config al fitxer de mapeig',
     pullCommentAzureFlags: '# Azure via flags CLI',
     pullOutputTitle: 'Sortida',
+    pullExecTitle: 'No vols cap fitxer .env?',
+    pullExecDesc:
+      'Fes servir envilder exec: resol el mateix map file i inicia la teva comanda amb els secrets al seu entorn, sense escriure res a disc.',
+    pullExecGuideLink: 'Consulta la guia de CLI exec',
+    execTitle: 'Comanda exec',
+    execDesc:
+      "envilder exec resol tots els secrets del map file i inicia una comanda amb aquests valors al seu entorn. No s'escriu res a disc: no hi ha cap fitxer .env per afegir al .gitignore, mantenir sincronitzat o esborrar. El map file i el seu $config funcionen exactament igual que en el mode pull.",
+    execUsageTitle: 'Ús',
+    execSeparatorTitle: 'On comença la teva comanda: la regla del --',
+    execSeparatorDesc:
+      "Primer van les opcions d'Envilder. La teva comanda comença al primer argument que no és una opció d'Envilder, o just després del -- si n'hi ha. Tot el que ve a continuació arriba tal qual a la teva comanda, encara que sembli una opció d'Envilder. El -- és opcional: només el necessites quan la comanda mateixa comença amb -.",
+    execSepComment1: '# Tot és de npm',
+    execSepComment2: "# --map és d'Envilder, la resta és de npm",
+    execSepComment3: '# --map=x és de npm: va després de la comanda',
+    execSepComment4: '# El mateix, amb un separador explícit',
+    execOptions: 'Opcions',
+    execOptMap: 'Ruta al map file (per defecte: envilder.json)',
+    execOptProfile: 'Perfil AWS CLI. Té prioritat sobre $config.profile',
+    execOptProvider: 'aws o azure. Té prioritat sobre $config.provider',
+    execOptVault:
+      "URL de l'Azure Key Vault. Té prioritat sobre $config.vaultUrl",
+    execOptionsOrderDesc:
+      "Les opcions d'Envilder van després d'exec, mai abans. Una opció escrita abans d'exec es rebutja amb el codi de sortida 125, i Envilder et mostra la comanda corregida:",
+    execRejectedDesc:
+      'El mode exec mai llegeix ni escriu cap fitxer .env i mai puja secrets, així que --envfile, --push, --key, --value i --secret-path es rebutgen amb el codi de sortida 125 abans de cap crida al proveïdor. Una opció desconeguda abans de la comanda també és un error: un error tipogràfic com --mapp mai arriba a la teva comanda per accident.',
+    execExamples: 'Exemples',
+    execCommentNpx:
+      "# Arrenca el servidor de desenvolupament amb els secrets d'envilder.json",
+    execCommentMap: '# Fes servir un map file concret',
+    execCommentAzure: '# Azure Key Vault amb flags de la CLI',
+    execCommentDocker:
+      '# Docker Compose pot interpolar els secrets al compose.yaml',
+    execPackageJsonDesc: 'O integra-ho als scripts del package.json:',
+    execOutputTitle: 'Sortida',
+    execOutputDesc:
+      "L'stdout és de la teva comanda. Tota la sortida d'Envilder va a stderr, així que envilder exec -- node print.js > out.json només escriu a out.json la sortida de la teva comanda. Si tot va bé, Envilder mostra una sola línia de resum que només anomena el programa, perquè els arguments poden contenir secrets:",
+    execUseCasesTitle: "Casos d'ús habituals",
+    execUseCasesDesc:
+      "En tots els casos els valors només existeixen a l'entorn de la teva comanda i dels processos que iniciï, Envilder no crea mai cap fitxer .env, i el codi de sortida de la teva comanda passa a ser el codi de sortida d'Envilder. El que la comanda faci després amb els valors depèn d'ella: Docker, per exemple, desa l'entorn d'un contenidor a les seves metadades al disc (visibles amb docker inspect) fins que s'elimina el contenidor.",
+    execUcLocalstackTitle: "Arrenca LocalStack amb el seu token d'autenticació",
+    execUcLocalstackDesc:
+      "Quan et cal: LocalStack necessita LOCALSTACK_AUTH_TOKEN i no vols el token en un fitxer .env ni a l'historial de la shell.",
+    execUcLocalstackComposeDesc:
+      "Amb Docker Compose, fes referència a la variable al compose.yaml. Compose n'agafa el valor de l'entorn on s'executa, així que no cal cap fitxer .env:",
+    execUcLocalstackDockerDesc:
+      "Amb Docker sol, -e NOM sense valor copia la variable de l'entorn del client docker, així que el token no apareix mai a la línia d'ordres:",
+    execUcLocalstackExamplesDesc:
+      'Trobaràs la mateixa configuració amb Testcontainers (TypeScript, Python, .NET) i Aspire a',
+    execUcTestsTitle: "Tests d'integració que arrenquen contenidors",
+    execUcTestsDesc:
+      "Quan et cal: els teus tests arrenquen contenidors (per exemple, amb Testcontainers) i llegeixen un token o unes credencials de l'entorn (process.env, os.environ, Environment.GetEnvironmentVariable) per passar-los-hi.",
+    execUcTestsNote:
+      "Si els tests fallen, se'n conserva el codi de sortida i la CI continua fallant. Si un secret no es pot resoldre, els tests no s'inicien i el codi de sortida és 125.",
+    execUcMigrationsTitle: 'Migracions de base de dades i scripts puntuals',
+    execUcMigrationsDesc:
+      'Quan et cal: una eina de migracions o un script necessita DATABASE_URL una sola vegada, i no vols la cadena de connexió al disc. Fes servir --map per executar la mateixa comanda contra un altre entorn.',
+    execUcTerraformTitle: 'Terraform i altres eines IaC',
+    execUcTerraformDesc:
+      "Quan et cal: una variable d'entrada de Terraform conté un secret. Terraform llegeix les variables d'entorn TF_VAR_<nom> com a valors de la variable d'entrada <nom>.",
+    execUcTerraformNote:
+      "Declara la variable amb sensitive = true perquè Terraform l'amagui a la sortida del plan. Terraform continua desant a l'estat els valors que escriu als recursos, així que protegeix l'estat com sempre.",
+    execUcDevTitle:
+      'Servidor de desenvolupament local amb scripts de package.json',
+    execUcDevDesc:
+      "Quan et cal: tothom a l'equip ha d'arrencar l'aplicació amb els mateixos secrets executant npm run dev.",
+    execUcDevNote:
+      "Afegeix envilder com a dependència de desenvolupament (npm install --save-dev envilder) perquè l'script el trobi a node_modules/.bin.",
+    execUcGhaTitle: 'Un pas de GitHub Actions',
+    execUcGhaDesc:
+      "Quan et cal: un pas d'un workflow necessita els secrets, i només aquest pas. Configura les credencials d'AWS amb OIDC i executa la teva comanda amb npx envilder exec:",
+    execUcGhaNote:
+      "Els valors resolts es registren a l'emmascarament de logs de GitHub abans que s'iniciï la comanda, i els passos següents no els veuen.",
+    execUcChainTitle: 'Diverses comandes amb els mateixos secrets',
+    execUcChainDesc:
+      'Quan et cal: vols encadenar comandes o continuar treballant en una shell que tingui els secrets.',
+    execUcChainNote:
+      "Posa tot l'script de sh -c entre cometes simples perquè la teva shell no executi el && fora d'envilder exec. L'exec davant de l'última comanda substitueix la shell per aquesta comanda, així que els senyals que reenvia Envilder arriben directament a npm start. A la shell interactiva, totes les comandes que executis veuen els secrets; escriu exit per sortir-ne.",
+    execBehaviorTitle: 'Comportament',
+    execExitTitle: 'Codis de sortida',
+    execExitDesc:
+      "Els codis de sortida segueixen els de GNU env i docker run, així pots distingir un error d'Envilder del codi de sortida de la teva comanda:",
+    execThCode: 'Codi',
+    execThMeaning: 'Significat',
+    execThMessage: 'Missatge',
+    execExitChild: 'La teva comanda ha acabat amb el codi n',
+    execExitSignal:
+      'La teva comanda ha estat aturada pel senyal n (per exemple, 137 per SIGKILL)',
+    execExit125:
+      "Envilder ha fallat abans d'iniciar la comanda: opcions incorrectes, comanda absent, cap map file, secrets no resolts o credencials caducades",
+    execExit126:
+      "La comanda existeix però el sistema operatiu n'ha impedit l'execució (per exemple, Permission denied)",
+    execExit127: "No s'ha trobat la comanda",
+    execExitNote: 'Els modes pull i push continuen sortint amb 1 quan fallen.',
+    execFailClosedTitle: 'Fail-closed',
+    execFailClosedDesc:
+      "El mode pull avisa i se salta un secret que falta. El mode exec mai inicia la teva comanda amb un conjunt de secrets incomplet: si algun secret falta, és buit o no es pot llegir (per exemple, per accés denegat), la comanda no s'inicia, Envilder llista les variables afectades amb les rutes emmascarades i surt amb 125. Els valors es resolen una sola vegada, quan s'inicia la comanda.",
+    execEnvTitle: 'Entorn',
+    execEnvDesc:
+      "La teva comanda hereta tot l'entorn de l'intèrpret que executa Envilder, més totes les variables del map file. Mana el map file: quan una variable heretada té el mateix nom que una de mapada, la comanda rep el valor del proveïdor, i Envilder mostra els noms (mai els valors) a stderr:",
+    execNoShellDesc:
+      "Envilder no inicia cap intèrpret d'ordres addicional: els arguments arriben a la teva comanda com una llista. Però la teva pròpia shell interpreta la línia abans, així que posa entre cometes el que no ha d'interpretar: '$DB_URL' o '&&' entre cometes simples arriben literalment a la comanda, mentre que un $DB_URL sense cometes s'expandeix amb el valor de la teva shell (no amb el secret resolt) i un && sense cometes executa una segona comanda fora d'envilder exec. Si necessites funcions de la shell amb els secrets, inicia'n una explícitament:",
+    execGhaTitle: 'Emmascarament a GitHub Actions',
+    execGhaDesc:
+      "Quan GITHUB_ACTIONS=true, Envilder registra cada valor resolt a l'emmascarament de logs de GitHub (::add-mask::), de manera que els valors que imprimeixi la teva comanda surten emmascarats al log del job. Tots els registres s'escriuen a stderr abans que s'iniciï la comanda; si algun no es pot escriure, la comanda no s'inicia (codi de sortida 125). La GitHub Action d'Envilder no ofereix el mode exec: executa la CLI des d'un pas run.",
+    execGhaNote:
+      "No redirigeixis l'stderr d'envilder exec fora del log del pas (per exemple, amb 2> fitxer o 2>/dev/null): és d'allà d'on el runner llegeix les màscares. El runner llegeix stdout i stderr per canals separats, així que un valor que la teva comanda imprimeixi de seguida pot arribar al log, en casos rars, abans que se n'hagi processat la màscara.",
+    execSignalsTitle: 'Senyals',
+    execSignalsDesc:
+      "stdin, stdout i stderr s'hereten i es conserva el TTY, així que els REPL, els intèrprets i les preguntes interactives funcionen com sempre. El Ctrl+C d'un terminal arriba directament a la teva comanda. SIGTERM i SIGHUP (per exemple, de docker stop o Kubernetes) es reenvien a la comanda, i Envilder espera que acabi, sense cap temps límit propi, abans de retornar-ne el codi de sortida. Els senyals només arriben al fill directe: un llançador com npm s'ha d'encarregar d'aturar els seus propis fills.",
+    execSandboxTitle: 'No és un sandbox.',
+    execSandboxDesc:
+      "El mode exec no crea mai cap fitxer .env i no toca els que ja existeixen: si véns del mode pull, esborra tu mateix el teu .env antic. No aïlla el procés. La teva comanda i tots els processos que iniciï poden llegir els secrets del seu entorn, inclosa qualsevol eina o agent d'IA de programació que hi executi env o printenv. A Linux, altres processos del mateix usuari poden llegir /proc/<pid>/environ. Executa només comandes de confiança amb els secrets que mapes.",
+    execGuideLink:
+      "Guia completa de la comanda exec a GitHub: detalls de Windows, recuperació SSO i tots els missatges d'error",
+    examplesTitle: 'Exemples executables.',
+    execExamplesDesc:
+      "Arrenca LocalStack amb envilder exec docker run, amb el token d'autenticació resolt des d'AWS SSM sense cap fitxer .env (Docker el desa a les metadades del contenidor fins que s'elimina), o segueix pas a pas push, pull i exec amb npx envilder:",
     pushTitle: 'Comanda push',
     pushDesc:
       "Puja variables d'entorn d'un fitxer .env local al teu proveïdor al núvol utilitzant un fitxer de mapeig.",
@@ -836,18 +977,19 @@ export const ca: Translations = {
     pushSingleOptProvider: 'aws (per defecte) o azure',
     pushSingleOptVault: "URL d'Azure Key Vault",
     pushSingleOptProfile: 'Perfil AWS CLI (només AWS)',
-    ghaSetupTitle: 'Configuració de GitHub Action',
+    ghaSetupTitle: "Com funciona l'Action",
     ghaSetupDesc:
-      "La GitHub Action preconstruïda d'Envilder obté secrets d'AWS SSM o Azure Key Vault en fitxers .env durant el teu workflow CI/CD. Utilitza l'etiqueta publicada macalbert/envilder/github-action@v0; el projecte consumidor no necessita cap pas de compilació.",
+      "L'Action és un pas compost: instal·la Node.js 22, llegeix el fitxer de mapeig, obté cada secret amb les credencials de núvol que ja té el job, emmascara cada valor al log i escriu el fitxer .env. No inicia sessió a AWS ni a Azure per si mateixa, així que ho ha de fer un pas anterior (aws-actions/configure-aws-credentials o azure/login). Utilitza l'etiqueta publicada macalbert/envilder/github-action@v0; no cal cap pas de compilació.",
     ghaPrerequisites: 'Prerequisits',
     ghaPrereqAws:
-      'AWS: Configura credencials amb aws-actions/configure-aws-credentials',
-    ghaPrereqAzure: 'Azure: Configura credencials amb azure/login',
+      "AWS: un rol IAM que GitHub pugui assumir, fet servir a través d'aws-actions/configure-aws-credentials.",
+    ghaPrereqAzure:
+      "Azure: un registre d'aplicació amb una credencial federada, fet servir a través d'azure/login.",
     ghaPrereqMap: 'Un envilder.json al teu repositori',
     ghaPullOnly: 'La GitHub Action només suporta el mode pull (sense push).',
-    ghaBasicTitle: 'Exemple bàsic de workflow',
+    ghaBasicTitle: 'AWS SSM Parameter Store amb OIDC',
     ghaMultiEnvTitle: 'Workflow multi-entorn',
-    ghaAzureTitle: "Workflow d'Azure Key Vault",
+    ghaAzureTitle: 'Azure Key Vault amb OIDC',
     ghaInputsTitle: "Inputs i outputs de l'Action",
     ghaInputsSubtitle: 'Inputs',
     ghaOutputsSubtitle: 'Outputs',
@@ -864,6 +1006,97 @@ export const ca: Translations = {
     ghaInputEnv: 'Ruta al fitxer .env a generar',
     ghaInputProvider: 'aws o azure',
     ghaInputVault: "URL d'Azure Key Vault",
+    ghaPrereqCheckout:
+      "actions/checkout abans de l'Action, perquè el fitxer de mapeig existeixi al runner.",
+    ghaPrereqPermissions:
+      'El permís id-token: write, perquè el job pugui demanar un token OIDC, i contents: read.',
+    ghaAwsTrustTitle: '1. Permet que GitHub assumeixi un rol IAM',
+    ghaAwsTrustDesc:
+      "Afegeix token.actions.githubusercontent.com com a proveïdor d'identitat OpenID Connect a IAM (audiència sts.amazonaws.com, un cop per compte) i crea un rol amb aquesta política de confiança. La condició sub el limita a un repositori i una branca; fes servir repo:my-org/my-repo:environment:production per limitar-lo a un entorn de GitHub.",
+    ghaOidcSubjectNote:
+      "A github.com, els repositoris creats, reanomenats o transferits a partir del 15 de juliol de 2026, i els que han activat els subjectes immutables, reben un sub que també inclou els ID del propietari i del repositori: repo:my-org@OWNER_ID/my-repo@REPO_ID:ref:refs/heads/main. La resta mantenen el format només amb noms que es mostra a dalt. Consulta la configuració OIDC del teu repositori per saber el prefix exacte i fes servir el mateix valor a la política de confiança d'AWS i a la credencial federada d'Azure.",
+    ghaAwsPolicyTitle: '2. Permisos mínims',
+    ghaAwsPolicyDesc:
+      "L'Action crida ssm:GetParameter amb desxifratge, un cop per cada entrada del fitxer de mapeig. No llista, escriu ni esborra paràmetres, així que és l'únic permís que necessita el rol. Limita'l a la ruta de la teva aplicació:",
+    ghaAwsKmsNote:
+      'Els paràmetres SecureString xifrats amb la clau per defecte aws/ssm no necessiten res més. Si fan servir una clau KMS gestionada pel client, permet també kms:Decrypt sobre aquesta clau. El compte que surt al log ve de sts:GetCallerIdentity, que no necessita cap permís.',
+    ghaWorkflowTitle: '3. Fitxer de mapeig i workflow',
+    ghaAwsMapDesc:
+      "El fitxer de mapeig és el mateix que fas servir amb la CLI: cada variable d'entorn apunta al nom d'un paràmetre.",
+    ghaOutputTitle: 'Sortida esperada',
+    ghaOutputDesc:
+      "El log del pas mostra la identitat d'AWS que s'utilitza, cada variable resolta amb el valor emmascarat i un resum:",
+    ghaOutputMaskNote:
+      "Cada valor es registra també amb l'ordre add-mask de GitHub, de manera que un pas posterior que l'imprimeixi mostra ***. El fitxer .env es queda al runner; no el pugis com a artefacte.",
+    ghaAzureFedTitle: '1. Crea una credencial federada',
+    ghaAzureFedDesc:
+      "Crea un registre d'aplicació i el seu service principal, i afegeix-hi una credencial federada que confiï en els tokens d'un repositori i una branca. No es crea cap secret de client. El subjecte fa servir el mateix format que el sub d'AWS, inclosa la variant immutable quan el teu repositori l'emet.",
+    ghaAzureRoleTitle: '2. Rol mínim',
+    ghaAzureRoleDesc:
+      "Key Vault Secrets User permet llegir els valors dels secrets i res més. Assigna'l sobre el vault, no sobre el grup de recursos ni la subscripció:",
+    ghaAzurePolicyNote:
+      "Si el vault fa servir polítiques d'accés en lloc d'Azure RBAC, concedeix get sobre els secrets: az keyvault set-policy --name {VAULT} --spn {APP_ID} --secret-permissions get.",
+    ghaAzureMapDesc:
+      'Amb $config al fitxer de mapeig, el workflow no necessita els inputs provider ni vault-url. Els noms de Key Vault només admeten lletres, dígits i guions, així que Envilder converteix les rutes: /myapp/prod/stripe_key es llegeix com a myapp-prod-stripe-key (sense la barra inicial, barres i guions baixos convertits en guions, en minúscules).',
+    ghaAzureInputsNote:
+      "Els ID de client, tenant i subscripció identifiquen l'aplicació; no són credencials, així que n'hi ha prou amb variables del repositori. Si s'informen, els inputs provider i vault-url sobreescriuen el $config del fitxer de mapeig.",
+    ghaMultiEnvDesc:
+      "Tingues un fitxer de mapeig per entorn i tria'l des de l'input del workflow. Un job que defineix environment rep un token OIDC amb un sub acabat en :environment:<nom> en lloc de :ref:refs/heads/main, així que la política de confiança d'AWS (o la credencial federada d'Azure) de cada entorn ha de fer servir aquest subjecte: repo:my-org/my-repo:environment:production, o repo:my-org@OWNER_ID/my-repo@REPO_ID:environment:production si el teu repositori emet subjectes immutables. Després, cada entorn de GitHub pot tenir el seu ARN de rol i les seves regles de protecció.",
+    ghaWhyTitle: 'Per què no copiar els secrets a GitHub Secrets',
+    ghaWhyDesc:
+      "Copiar els valors als secrets del repositori funciona fins que un valor canvia. A partir d'aquí n'hi ha dues còpies:",
+    ghaWhyRotationLabel: 'Rotació:',
+    ghaWhyRotation:
+      "quan es rota un secret a SSM o Key Vault, cada repositori amb una còpia continua desplegant el valor antic fins que algú l'actualitza a mà.",
+    ghaWhyAuditLabel: 'Divergència i auditoria:',
+    ghaWhyAudit:
+      "GitHub Secrets no es pot tornar a llegir, així que no pots comprovar si la còpia encara coincideix amb l'origen. Llegir del núvol queda registrat amb el rol o l'aplicació que ha fet cada petició: a CloudTrail a AWS, i als logs d'auditoria de Key Vault a Azure un cop activada la configuració de diagnòstic del vault.",
+    ghaWhyKeysLabel: 'Claus de llarga durada:',
+    ghaWhyKeys:
+      "copiar secrets sol anar acompanyat d'una clau d'accés d'AWS o un secret de client d'Azure guardats també a GitHub. Amb OIDC el job rep un token de curta durada, i res del que hi ha guardat a GitHub funciona fora del workflow.",
+    ghaWhyListLabel: 'Una sola llista:',
+    ghaWhyList:
+      'el fitxer de mapeig es versiona amb el codi, es revisa a les pull requests i és el mateix fitxer que fan servir els desenvolupadors en local amb la CLI.',
+    ghaWhyWhenSecrets:
+      "GitHub Secrets continua sent una bona opció per a valors que només existeixen per al pipeline, com un token d'un servei de desplegament extern.",
+    ghaErrorsTitle: 'Errors habituals',
+    ghaErrorsDesc:
+      "Missatges tal com surten al log del pas i com resoldre'ls. Envilder emmascara la ruta del secret que mostra al costat de cada variable, excepte els tres últims caràcters. Els missatges que vénen d'AWS o d'Azure es mostren tal com arriben i poden incloure el nom complet del paràmetre o del recurs.",
+    ghaErrMapTitle: 'No es pot llegir el fitxer de mapeig',
+    ghaErrMapFix:
+      "Falta el pas de checkout o s'executa després de l'Action, o map-file apunta a un lloc incorrecte. Les rutes són relatives a l'arrel del repositori.",
+    ghaErrAssumeTitle: 'No es pot assumir el rol',
+    ghaErrAssumeFix:
+      "Aquest error ve d'aws-actions/configure-aws-credentials, abans que s'executi Envilder. Comprova que el workflow té id-token: write i que el sub de la política de confiança coincideix exactament amb el repositori, la branca o l'entorn, en el format de subjecte que fa servir el teu repositori (amb ID immutables o sense). Els jobs de tag, de pull_request i amb environment generen un sub diferent.",
+    ghaErrNoCredsTitle: "Sense credencials d'AWS",
+    ghaErrNoCredsFix:
+      "Cap pas ha autenticat el job a AWS abans de l'Action. Afegeix aws-actions/configure-aws-credentials abans, al mateix job: les credencials no passen d'un job a un altre.",
+    ghaErrDeniedTitle: 'Accés denegat a un paràmetre',
+    ghaErrDeniedFix:
+      "El rol és vàlid però la seva política no cobreix aquest paràmetre. Revisa la ruta de Resource i la regió de l'ARN, que ha de coincidir amb l'aws-region del pas de credencials.",
+    ghaErrExpiredTitle: 'Credencials caducades',
+    ghaErrExpiredFix:
+      "La sessió del rol ha acabat abans que s'executés el pas (una hora per defecte). Executa Envilder just després del pas de credencials, o augmenta role-duration-seconds juntament amb la durada màxima de sessió del rol.",
+    ghaErrNotFoundTitle: 'Paràmetre o secret inexistent',
+    ghaErrNotFoundFix:
+      "És un avís, no un error: el pas acaba bé, amb menys secrets al resum que al mapeig. En un fitxer .env nou la variable queda fora. Si el fitxer ja existia (al repositori, a la memòria cau o escrit per un pas anterior), es conserva el valor antic, així que esborra el fitxer abans de l'Action quan un valor obsolet no hagi de sobreviure. Revisa el nom, la regió i, a Azure, el nom convertit. Si un valor que falta ha d'aturar el desplegament, comprova'l en un pas posterior.",
+    ghaErrVaultUrlTitle: "Falta l'URL del vault d'Azure",
+    ghaErrVaultUrlFix:
+      "Informa l'input vault-url o $config.vaultUrl al fitxer de mapeig. Ha de ser una URL https acabada en .vault.azure.net, o el domini equivalent d'un núvol sobirà.",
+    ghaErrAzureDeniedTitle: 'Accés denegat a Azure Key Vault',
+    ghaErrAzureDeniedFix:
+      "azure/login ha funcionat però la identitat no té cap rol de pla de dades sobre el vault. Assigna Key Vault Secrets User sobre el vault i espera uns minuts, perquè les assignacions de rol triguen a propagar-se. Els vaults amb polítiques d'accés diuen en canvi que la identitat no té el permís get de secrets.",
+    ghaErrProfileTitle: "Perfil d'AWS al fitxer de mapeig",
+    ghaErrProfileFix:
+      "Si envilder.json defineix $config.profile per a ús local, l'Action passa aquest perfil a l'SDK d'AWS. Els runners de GitHub no tenen perfils d'AWS, i amb un perfil definit l'SDK ignora les credencials de configure-aws-credentials. Treu el perfil del mapeig que fas servir a CI, o tingues un mapeig separat per a CI.",
+    ghaRelatedTitle: 'Pàgines relacionades',
+    ghaRelatedAws:
+      "Configuració d'AWS SSM Parameter Store: credencials, permisos IAM i una comprovació ràpida",
+    ghaRelatedAzure:
+      "Configuració d'Azure Key Vault: RBAC o polítiques d'accés i una comprovació ràpida",
+    ghaRelatedMap:
+      'Referència del fitxer de mapeig: $config, proveïdors i rutes de secrets',
+    ghaRelatedRepo: "Codi font i README de l'Action a GitHub",
     configPriorityTitle: 'Prioritat de configuració',
     configPriorityDesc:
       'Quan hi ha múltiples fonts de configuració, Envilder les resol en aquest ordre (el més alt guanya):',
@@ -903,6 +1136,8 @@ export const ca: Translations = {
     sdkDotnetQuickStartResolveDesc:
       "Analitza el fitxer de mapeig, resol secrets i injecta'ls a les variables d'entorn:",
     sdkDotnetFullDocs: 'Documentació completa →',
+    sdkDotnetExamplesDesc:
+      'Projectes de proves xUnit amb Testcontainers i Aspire que resolen un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack i Lowkey Vault) i passen els valors als contenidors, sense cap fitxer .env:',
     sdkPythonTitle: 'Python SDK',
     sdkPythonDesc:
       "Carrega secrets directament a la teva aplicació Python a l'inici. Configuració en una línia o control detallat amb el constructor fluent.",
@@ -923,6 +1158,8 @@ export const ca: Translations = {
     sdkPythonValidationDesc:
       'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
     sdkPythonFullDocs: 'Documentació completa →',
+    sdkPythonExamplesDesc:
+      'Un projecte pytest amb Testcontainers que resol un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack i Lowkey Vault) i passa els valors als contenidors, sense cap fitxer .env:',
     sdkNodejsTitle: 'Node.js SDK',
     sdkNodejsDesc:
       "Carrega secrets directament a la teva aplicació Node.js a l'inici. API asíncrona amb façana d'una línia o constructor fluent per a control total.",
@@ -942,6 +1179,8 @@ export const ca: Translations = {
     sdkNodejsValidationDesc:
       'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
     sdkNodejsFullDocs: 'Documentació completa →',
+    sdkNodejsExamplesDesc:
+      "Un projecte Vitest amb Testcontainers i un AppHost d'Aspire en TypeScript que resolen un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack i Lowkey Vault) i passen els valors als contenidors, sense cap fitxer .env:",
     pagerPrev: 'Anterior',
     pagerNext: 'Següent',
   },

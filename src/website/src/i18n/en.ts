@@ -2,9 +2,10 @@ import type { Translations } from './types';
 
 export const en: Translations = {
   homeMeta: {
-    title: 'Load AWS SSM & Azure Key Vault secrets into .env | Envilder',
+    title:
+      'Load AWS SSM and Azure Key Vault secrets into .env, CI and runtime | Envilder',
     description:
-      'Envilder is an open-source CLI, GitHub Action, and runtime SDK for loading secrets from AWS SSM Parameter Store and Azure Key Vault.',
+      'Open-source CLI, GitHub Action and SDKs that resolve secrets from AWS SSM Parameter Store or Azure Key Vault using one versioned JSON mapping.',
     ogImageAlt:
       'Envilder - open-source secret resolution for AWS SSM and Azure Key Vault',
   },
@@ -54,6 +55,8 @@ export const en: Translations = {
     viewOnGithub: '★ View on GitHub',
     tabCli: 'CLI',
     tabCliDesc: 'writes .env',
+    tabExec: 'exec',
+    tabExecDesc: 'no .env file',
     tabSetup: 'Setup',
     tabSetupDesc: 'create secrets',
     tabNode: 'Node.js',
@@ -64,8 +67,12 @@ export const en: Translations = {
     tabDotnetDesc: 'at runtime',
     terminalComment1: '# 1. Map env vars to SSM paths',
     terminalComment2: '# 2. Resolve secrets into .env',
-    setupComment1: '# AWS CLI configured with permissions to SSM',
-    setupComment2: '# Push each secret to SSM Parameter Store',
+    execComment1: '# Run any command with secrets in memory',
+    execComment2: '# Nothing written to disk',
+    setupComment1: '# 1. Map each variable to an SSM path',
+    setupComment2: '# 2. Push the .env values to SSM Parameter Store',
+    setupAzureComment1: '# 1. Map each variable to a Key Vault secret',
+    setupAzureComment2: '# 2. Push the .env values to Azure Key Vault',
     sdkCommentLoad: '# Load the same contract at runtime',
     terminalSceneLabel: 'Terminal demo scene',
   },
@@ -367,6 +374,13 @@ export const en: Translations = {
           'Native runtime library: load secrets directly into process.env from a map-file. Published to npm',
       },
       {
+        status: 'done',
+        label: '✅',
+        title: 'Exec mode (envilder exec)',
+        description:
+          'Run a command with your secrets in its environment, without writing a .env file: envilder exec [options] [--] <command> [args...]',
+      },
+      {
         status: 'next',
         label: '🐹',
         title: 'Go SDK (envilder)',
@@ -379,13 +393,6 @@ export const en: Translations = {
         title: 'Java SDK (envilder)',
         description:
           'Runtime library for Spring Boot and Android backends. Published to Maven Central',
-      },
-      {
-        status: 'planned',
-        label: '⚡',
-        title: 'Exec mode (--exec)',
-        description:
-          'Planned mode; not available yet. It would inject secrets into a child process without writing to disk',
       },
       {
         status: 'planned',
@@ -433,7 +440,7 @@ export const en: Translations = {
     commentPush: '# Push a secret',
     doneMessage: 'Done! .env file generated.',
     sdkComment3: '# Secrets are now in os.environ',
-    sdkExampleLink: 'View more examples on GitHub',
+    sdkExampleLink: 'View runnable examples on GitHub',
   },
   footer: {
     tagline:
@@ -448,6 +455,7 @@ export const en: Translations = {
     linkGettingStarted: 'Getting Started',
     linkPullCommand: 'Pull Command',
     linkPushCommand: 'Push Command',
+    linkExecCommand: 'Exec Command',
     linkGithubAction: 'GitHub Action',
     linkIssues: 'Issues',
     linkDiscussions: 'Discussions',
@@ -500,9 +508,10 @@ export const en: Translations = {
           'Find setup, provider, CLI, GitHub Action, and SDK guides.',
       },
       'getting-started': {
-        title: 'Get started with Envilder',
+        title:
+          'Get started with Envilder: install and prerequisites for AWS SSM and Azure Key Vault',
         description:
-          'Install Envilder and learn the prerequisites for resolving secrets from your cloud provider.',
+          'Install the Envilder CLI, check the prerequisites for AWS SSM or Azure Key Vault, and learn how the JSON map links variables to secret paths.',
         heading: 'Get started',
         intro:
           'Install Envilder, configure a provider, and resolve secrets from a versioned map file.',
@@ -526,9 +535,9 @@ export const en: Translations = {
           'Configure AWS credentials and the permissions Envilder needs.',
       },
       'azure-key-vault': {
-        title: 'Use Envilder with Azure Key Vault',
+        title: 'Azure Key Vault provider: credentials, RBAC and vault access',
         description:
-          'Configure Azure authentication and Key Vault access for Envilder.',
+          'Configure Envilder for Azure Key Vault: Azure default credentials, the vault URL, the minimum RBAC role or access policy, and how to verify access.',
         heading: 'Azure Key Vault',
         intro:
           'Configure Azure authentication, vault access, and a test secret for Azure Key Vault.',
@@ -539,9 +548,10 @@ export const en: Translations = {
           'Configure Azure authentication and Key Vault permissions.',
       },
       'map-file': {
-        title: 'Envilder map file reference',
+        title:
+          'envilder.json reference: map environment variables to cloud secrets',
         description:
-          'Define Envilder mappings and provider configuration in envilder.json.',
+          'Full reference for the Envilder mapping file: $config, providers, profiles, vault URL, multi-environment layouts and config precedence.',
         heading: 'Map file',
         intro:
           'Define environment variable mappings and provider settings in envilder.json.',
@@ -552,9 +562,9 @@ export const en: Translations = {
           'Map variables to secret paths and configure the selected provider.',
       },
       'cli-pull': {
-        title: 'Pull secrets with the Envilder CLI',
+        title: 'Pull mode: generate a .env from AWS SSM or Azure Key Vault',
         description:
-          'Download cloud secrets and generate a local .env file with Envilder.',
+          'Reference for pull mode: generate a local .env from the secrets in your map file, with AWS profiles and AWS SSM or Azure Key Vault providers.',
         heading: 'CLI pull',
         intro:
           'Download secrets from your provider and write them to a local .env file.',
@@ -565,9 +575,9 @@ export const en: Translations = {
           'Generate a .env file from secrets defined in your map file.',
       },
       'cli-push': {
-        title: 'Push secrets with the Envilder CLI',
+        title: 'Push mode: upload .env values to AWS SSM or Azure Key Vault',
         description:
-          'Upload local environment variables or a single secret with Envilder push mode.',
+          'Reference for push mode (--push): upload a local .env or a single variable to Parameter Store or Key Vault, using the same JSON mapping.',
         heading: 'CLI push',
         intro:
           'Upload environment variables from a .env file or push one secret directly.',
@@ -577,12 +587,27 @@ export const en: Translations = {
         cardSummary:
           'Upload a mapped .env file or one secret to your provider.',
       },
-      'github-action': {
-        title: 'Use the Envilder GitHub Action',
+      'cli-exec': {
+        title:
+          'Exec mode: run a command with AWS SSM or Azure Key Vault secrets',
         description:
-          'Pull AWS SSM or Azure Key Vault secrets into .env files in GitHub Actions workflows.',
-        heading: 'GitHub Action',
-        intro: 'Pull secrets into .env files during a GitHub Actions workflow.',
+          'Reference for envilder exec: resolve AWS SSM or Azure Key Vault secrets in memory and start your command with them, without writing a .env file.',
+        heading: 'CLI exec',
+        intro:
+          'Run a command with your secrets in its environment, without writing a .env file.',
+        breadcrumb: 'CLI exec',
+        navLabel: 'CLI exec',
+        cardTitle: 'CLI exec command',
+        cardSummary:
+          'Start a command with mapped secrets in memory, with no .env file.',
+      },
+      'github-action': {
+        title: 'Load AWS SSM and Azure Key Vault secrets in GitHub Actions',
+        description:
+          'Load AWS SSM Parameter Store or Azure Key Vault secrets into a .env file in GitHub Actions with OIDC: minimal IAM and RBAC permissions, full workflows and credential errors.',
+        heading: 'Load AWS SSM and Azure Key Vault secrets in GitHub Actions',
+        intro:
+          'How do you use secrets from AWS SSM Parameter Store or Azure Key Vault in a GitHub Actions job without copying them into GitHub Secrets? Sign the job in with OIDC, then let the Envilder Action read your versioned envilder.json and write a .env file for the steps that follow.',
         breadcrumb: 'GitHub Action',
         navLabel: 'GitHub Action',
         cardTitle: 'GitHub Action guide',
@@ -590,9 +615,10 @@ export const en: Translations = {
           'Configure the action for AWS, Azure, and multiple environments.',
       },
       'sdk-dotnet': {
-        title: 'Envilder .NET SDK',
+        title:
+          'Load AWS SSM and Azure Key Vault secrets into .NET IConfiguration',
         description:
-          'Load secrets from Envilder map files in .NET applications.',
+          'Envilder .NET SDK: resolve secrets from AWS Parameter Store or Azure Key Vault at startup into IConfiguration, environment variables or a dictionary.',
         heading: '.NET SDK',
         intro: 'Load secrets directly into a .NET application at startup.',
         breadcrumb: '.NET SDK',
@@ -601,9 +627,9 @@ export const en: Translations = {
         cardSummary: 'Install and use the .NET runtime SDK.',
       },
       'sdk-python': {
-        title: 'Envilder Python SDK',
+        title: 'Load AWS SSM and Azure Key Vault secrets in Python at startup',
         description:
-          'Load secrets from Envilder map files in Python applications.',
+          'Envilder Python SDK: resolve secrets from AWS SSM Parameter Store or Azure Key Vault into os.environ or a dict, with no .env file on disk.',
         heading: 'Python SDK',
         intro: 'Load secrets directly into a Python application at startup.',
         breadcrumb: 'Python SDK',
@@ -612,9 +638,9 @@ export const en: Translations = {
         cardSummary: 'Install and use the Python runtime SDK.',
       },
       'sdk-nodejs': {
-        title: 'Envilder Node.js SDK',
+        title: 'Load AWS SSM and Azure Key Vault secrets in Node.js at startup',
         description:
-          'Load secrets from Envilder map files in Node.js applications.',
+          'Envilder Node.js SDK: resolve secrets from AWS SSM or Azure Key Vault into process.env or a Map from one JSON mapping.',
         heading: 'Node.js SDK',
         intro: 'Load secrets directly into a Node.js application at startup.',
         breadcrumb: 'Node.js SDK',
@@ -666,6 +692,10 @@ export const en: Translations = {
     reqDownload: 'Download',
     reqInstallGuide: 'Install guide',
     installTitle: 'Installation',
+    installNext: 'Next, choose how the secrets reach your app:',
+    installNextPull: 'CLI pull: generate a .env file',
+    installNextExec:
+      'CLI exec: run your command with the secrets in memory, no .env file',
     // AWS setup
     awsSetupTitle: 'AWS setup',
     awsSetupIntro:
@@ -791,6 +821,121 @@ export const en: Translations = {
     pullCommentAzureConfig: '# Azure via $config in map file',
     pullCommentAzureFlags: '# Azure via CLI flags',
     pullOutputTitle: 'Output',
+    pullExecTitle: "Don't want a .env file?",
+    pullExecDesc:
+      'Use envilder exec: it resolves the same map file and starts your command with the secrets in its environment, without writing anything to disk.',
+    pullExecGuideLink: 'Read the CLI exec guide',
+    execTitle: 'Exec command',
+    execDesc:
+      'envilder exec resolves every secret in your map file and starts a command with those values in its environment. Nothing is written to disk: there is no .env file to gitignore, keep in sync or clean up. The map file and its $config work exactly as in pull mode.',
+    execUsageTitle: 'Usage',
+    execSeparatorTitle: 'Where your command starts: the -- rule',
+    execSeparatorDesc:
+      'Envilder options come first. Your command starts at the first argument that is not an Envilder option, or right after -- when present. Everything from there on is passed to your command verbatim, even if it looks like an Envilder option. The -- is optional; you only need it when the command itself starts with -.',
+    execSepComment1: '# Everything belongs to npm',
+    execSepComment2: "# --map is Envilder's, the rest is npm's",
+    execSepComment3: '# --map=x belongs to npm: it comes after the command',
+    execSepComment4: '# Same as above, with an explicit separator',
+    execOptions: 'Options',
+    execOptMap: 'Path to the map file (default: envilder.json)',
+    execOptProfile: 'AWS CLI profile. Overrides $config.profile',
+    execOptProvider: 'aws or azure. Overrides $config.provider',
+    execOptVault: 'Azure Key Vault URL. Overrides $config.vaultUrl',
+    execOptionsOrderDesc:
+      'Envilder options go after exec, never before it. An option written before exec is rejected with exit code 125, and Envilder shows the corrected command:',
+    execRejectedDesc:
+      'Exec mode never reads or writes a .env file and never pushes secrets, so --envfile, --push, --key, --value and --secret-path are rejected with exit code 125 before any provider call. An unknown option before your command is also an error, so a typo such as --mapp never reaches your command by accident.',
+    execExamples: 'Examples',
+    execCommentNpx:
+      '# Start your dev server with the secrets from envilder.json',
+    execCommentMap: '# Use a specific map file',
+    execCommentAzure: '# Azure Key Vault via CLI flags',
+    execCommentDocker:
+      '# Docker Compose can interpolate the secrets in compose.yaml',
+    execPackageJsonDesc: 'Or wire it into your package.json scripts:',
+    execOutputTitle: 'Output',
+    execOutputDesc:
+      "Your command owns stdout. All Envilder output goes to stderr, so envilder exec -- node print.js > out.json writes only your command's output to out.json. On success Envilder prints a single summary line that names your command by program name only, because arguments can carry secrets:",
+    execUseCasesTitle: 'Common use cases',
+    execUseCasesDesc:
+      "In every case the values exist only in the environment of your command and the processes it starts, Envilder never creates a .env file, and your command's exit code becomes Envilder's exit code. What your command does with the values is up to it: Docker, for example, keeps a container's environment in its on-disk metadata (visible with docker inspect) until the container is removed.",
+    execUcLocalstackTitle: 'Start LocalStack with its auth token',
+    execUcLocalstackDesc:
+      'When you need it: LocalStack needs LOCALSTACK_AUTH_TOKEN and you do not want the token in a .env file or in your shell history.',
+    execUcLocalstackComposeDesc:
+      'With Docker Compose, reference the variable in compose.yaml. Compose takes its value from the environment it runs in, so no .env file is needed:',
+    execUcLocalstackDockerDesc:
+      'With plain Docker, -e NAME without a value copies the variable from the environment of the docker client, so the token never appears on the command line:',
+    execUcLocalstackExamplesDesc:
+      'The same setup with Testcontainers (TypeScript, Python, .NET) and Aspire is in',
+    execUcTestsTitle: 'Integration tests that start containers',
+    execUcTestsDesc:
+      'When you need it: your tests start containers (for example, with Testcontainers) and read a token or credentials from the environment (process.env, os.environ, Environment.GetEnvironmentVariable) to pass them in.',
+    execUcTestsNote:
+      'A failing test run keeps its exit code, so CI still fails. If a secret cannot be resolved, the tests do not start and the exit code is 125.',
+    execUcMigrationsTitle: 'Database migrations and one-off scripts',
+    execUcMigrationsDesc:
+      'When you need it: a migration tool or a script needs DATABASE_URL once, and you do not want the connection string on disk. Use --map to run the same command against another environment.',
+    execUcTerraformTitle: 'Terraform and other IaC tools',
+    execUcTerraformDesc:
+      'When you need it: a Terraform input variable holds a secret. Terraform reads TF_VAR_<name> environment variables as values for the input variable <name>.',
+    execUcTerraformNote:
+      'Declare the variable with sensitive = true so Terraform hides it in plan output. Terraform still stores values it writes into resources in its state, so protect the state as usual.',
+    execUcDevTitle: 'Local dev server through package scripts',
+    execUcDevDesc:
+      'When you need it: everyone on the team should start the app with the same secrets by running npm run dev.',
+    execUcDevNote:
+      'Add envilder as a dev dependency (npm install --save-dev envilder) so the script finds it in node_modules/.bin.',
+    execUcGhaTitle: 'A step in GitHub Actions',
+    execUcGhaDesc:
+      'When you need it: one step of a workflow needs the secrets, and only that step. Configure AWS credentials with OIDC, then run your command through npx envilder exec:',
+    execUcGhaNote:
+      'Resolved values are registered with GitHub log masking before your command starts, and the next steps do not see them.',
+    execUcChainTitle: 'Several commands with the same secrets',
+    execUcChainDesc:
+      'When you need it: you want to chain commands or keep working in a shell that has the secrets.',
+    execUcChainNote:
+      'Quote the whole sh -c script in single quotes so your own shell does not run && outside envilder exec. The exec before the last command replaces the shell with it, so signals forwarded by Envilder reach npm start directly. In the interactive shell every command you run sees the secrets; type exit to leave it.',
+    execBehaviorTitle: 'Behavior',
+    execExitTitle: 'Exit codes',
+    execExitDesc:
+      "Exit codes follow GNU env and docker run, so you can tell an Envilder failure apart from your command's own exit code:",
+    execThCode: 'Code',
+    execThMeaning: 'Meaning',
+    execThMessage: 'Message',
+    execExitChild: 'Your command exited with code n',
+    execExitSignal:
+      'Your command was killed by signal n (for example, 137 for SIGKILL)',
+    execExit125:
+      'Envilder failed before starting the command: bad options, missing command, no map file, unresolved secrets or expired credentials',
+    execExit126:
+      'The command exists but the operating system refused to run it (for example, Permission denied)',
+    execExit127: 'The command was not found',
+    execExitNote: 'Pull and push modes keep exiting with 1 on failure.',
+    execFailClosedTitle: 'Fail-closed',
+    execFailClosedDesc:
+      'Pull mode warns and skips a missing secret. Exec mode never starts your command with an incomplete set of secrets: if any secret is missing, empty or cannot be read (for example, access denied), the command is not started, Envilder lists the affected variables with their masked paths and exits with 125. Values are resolved once, when the command starts.',
+    execEnvTitle: 'Environment',
+    execEnvDesc:
+      'Your command inherits the full environment of the shell that runs Envilder, plus every variable in the map file. The map file wins: when an inherited variable has the same name as a mapped one, your command sees the value from the provider, and Envilder prints the names (never the values) on stderr:',
+    execNoShellDesc:
+      "Envilder does not start an extra shell: arguments are passed to your command as a list. Your own shell still parses the command line first, so quote what it should not interpret: '$DB_URL' or '&&' in single quotes reach your command literally, while an unquoted $DB_URL expands to your shell's value (not the resolved secret) and an unquoted && runs a second command outside envilder exec. If you need shell features with the secrets, start a shell explicitly:",
+    execGhaTitle: 'GitHub Actions masking',
+    execGhaDesc:
+      'When GITHUB_ACTIONS=true, Envilder registers every resolved value with GitHub log masking (::add-mask::), so values your command prints are masked in the job log. Every registration is written to stderr before your command starts; if one cannot be written, the command does not start (exit code 125). The Envilder GitHub Action does not offer exec mode: run the CLI from a run step.',
+    execGhaNote:
+      'Do not redirect the stderr of envilder exec away from the step log (for example, with 2> file or 2>/dev/null): that is where the runner reads the masks from. The runner reads stdout and stderr through separate pipes, so a value your command prints immediately can, in rare cases, reach the log before its mask is processed.',
+    execSignalsTitle: 'Signals',
+    execSignalsDesc:
+      'stdin, stdout and stderr are inherited and the TTY is preserved, so REPLs, shells and prompts work as usual. Ctrl+C in a terminal reaches your command directly. SIGTERM and SIGHUP (for example, from docker stop or Kubernetes) are forwarded to your command, and Envilder waits for it to exit, with no timeout of its own, before returning its exit code. Signals go to the direct child only: a launcher such as npm is responsible for stopping its own children.',
+    execSandboxTitle: 'Not a sandbox.',
+    execSandboxDesc:
+      'Exec mode never creates a .env file, and it leaves any existing one untouched: if you are moving from pull, delete your old .env yourself. It does not isolate the process. Your command and every process it starts can read the secrets in their environment, including any tool or AI coding agent that runs env or printenv through it. On Linux, other processes running as the same user can read /proc/<pid>/environ. Only run commands you trust with the secrets you map.',
+    execGuideLink:
+      'Full exec command guide on GitHub: Windows details, SSO recovery and every error message',
+    examplesTitle: 'Runnable examples.',
+    execExamplesDesc:
+      'Start LocalStack with envilder exec docker run, with the auth token resolved from AWS SSM without a .env file (Docker keeps it in the container metadata until the container is removed), or walk through push, pull and exec with npx envilder:',
     pushTitle: 'Push command',
     pushDesc:
       'Upload environment variables from a local .env file to your cloud provider using a mapping file.',
@@ -820,18 +965,19 @@ export const en: Translations = {
     pushSingleOptProvider: 'aws (default) or azure',
     pushSingleOptVault: 'Azure Key Vault URL',
     pushSingleOptProfile: 'AWS CLI profile (AWS only)',
-    ghaSetupTitle: 'GitHub Action setup',
+    ghaSetupTitle: 'How the action works',
     ghaSetupDesc:
-      'The prebuilt Envilder GitHub Action pulls secrets from AWS SSM or Azure Key Vault into .env files during your CI/CD workflow. Use the published macalbert/envilder/github-action@v0 tag; no consumer build step is required.',
+      'The action is a composite step: it installs Node.js 22, reads the map file, fetches each secret with the cloud credentials the job already has, masks every value in the log and writes the .env file. It does not sign in to AWS or Azure itself, so an earlier step (aws-actions/configure-aws-credentials or azure/login) must do that. Use the published macalbert/envilder/github-action@v0 tag; no build step is needed.',
     ghaPrerequisites: 'Prerequisites',
     ghaPrereqAws:
-      'AWS: Configure credentials with aws-actions/configure-aws-credentials',
-    ghaPrereqAzure: 'Azure: Configure credentials with azure/login',
+      'AWS: an IAM role that GitHub can assume, used through aws-actions/configure-aws-credentials.',
+    ghaPrereqAzure:
+      'Azure: an app registration with a federated credential, used through azure/login.',
     ghaPrereqMap: 'An envilder.json committed to your repository',
     ghaPullOnly: 'The GitHub Action only supports pull mode (no push).',
-    ghaBasicTitle: 'Basic workflow example',
+    ghaBasicTitle: 'AWS SSM Parameter Store with OIDC',
     ghaMultiEnvTitle: 'Multi-environment workflow',
-    ghaAzureTitle: 'Azure Key Vault workflow',
+    ghaAzureTitle: 'Azure Key Vault with OIDC',
     ghaInputsTitle: 'Action inputs & outputs',
     ghaInputsSubtitle: 'Inputs',
     ghaOutputsSubtitle: 'Outputs',
@@ -848,6 +994,96 @@ export const en: Translations = {
     ghaInputEnv: 'Path to the .env file to generate',
     ghaInputProvider: 'aws or azure',
     ghaInputVault: 'Azure Key Vault URL',
+    ghaPrereqCheckout:
+      'actions/checkout before the action, so the map file exists on the runner.',
+    ghaPrereqPermissions:
+      'The id-token: write permission, so the job can request an OIDC token, plus contents: read.',
+    ghaAwsTrustTitle: '1. Let GitHub assume an IAM role',
+    ghaAwsTrustDesc:
+      'Add token.actions.githubusercontent.com as an OpenID Connect identity provider in IAM (audience sts.amazonaws.com, once per account), then create a role with this trust policy. The sub condition limits it to one repository and branch; use repo:my-org/my-repo:environment:production to limit it to a GitHub environment instead.',
+    ghaOidcSubjectNote:
+      'On github.com, repositories created, renamed or transferred on or after 15 July 2026, and those opted in to immutable subject claims, get a sub that also carries the owner and repository IDs: repo:my-org@OWNER_ID/my-repo@REPO_ID:ref:refs/heads/main. Other repositories keep the name-only format shown above. Check the OIDC settings of your repository for the exact prefix and use the same value in the AWS trust policy and the Azure federated credential.',
+    ghaAwsPolicyTitle: '2. Minimum permissions',
+    ghaAwsPolicyDesc:
+      "The action calls ssm:GetParameter with decryption, once per entry in the map file. It never lists, writes or deletes parameters, so this is the only permission the role needs. Scope it to your application's path:",
+    ghaAwsKmsNote:
+      'SecureString parameters encrypted with the default aws/ssm key need nothing else. If they use a customer managed KMS key, also allow kms:Decrypt on that key. The account shown in the log comes from sts:GetCallerIdentity, which needs no permission.',
+    ghaWorkflowTitle: '3. Map file and workflow',
+    ghaAwsMapDesc:
+      'The map file is the same one you use with the CLI: each environment variable points to a parameter name.',
+    ghaOutputTitle: 'Expected output',
+    ghaOutputDesc:
+      'The step log shows the AWS identity in use, each resolved variable with its value masked, and a summary:',
+    ghaOutputMaskNote:
+      "Every value is also registered with GitHub's add-mask command, so a later step that prints it shows *** instead. The .env file stays on the runner; don't upload it as an artifact.",
+    ghaAzureFedTitle: '1. Create a federated credential',
+    ghaAzureFedDesc:
+      'Create an app registration and its service principal, then add a federated credential that trusts tokens from one repository and branch. No client secret is created. The subject uses the same format as the AWS sub, including the immutable variant when your repository emits it.',
+    ghaAzureRoleTitle: '2. Minimum role',
+    ghaAzureRoleDesc:
+      'Key Vault Secrets User lets the identity read secret values and nothing more. Assign it on the vault, not on the resource group or subscription:',
+    ghaAzurePolicyNote:
+      'If the vault uses access policies instead of Azure RBAC, grant get on secrets: az keyvault set-policy --name {VAULT} --spn {APP_ID} --secret-permissions get.',
+    ghaAzureMapDesc:
+      "With $config in the map file, the workflow doesn't need the provider or vault-url inputs. Key Vault names only allow letters, digits and hyphens, so Envilder converts paths: /myapp/prod/stripe_key is read as myapp-prod-stripe-key (leading slash removed, slashes and underscores turned into hyphens, lowercased).",
+    ghaAzureInputsNote:
+      'The client, tenant and subscription IDs identify the app; they are not credentials, so repository variables are enough. When set, the provider and vault-url inputs override $config in the map file.',
+    ghaMultiEnvDesc:
+      "Keep one map file per environment and pick it from the workflow input. A job that sets environment gets an OIDC token whose sub ends in :environment:<name> instead of :ref:refs/heads/main, so each environment's AWS trust policy (or Azure federated credential) must use that subject: repo:my-org/my-repo:environment:production, or repo:my-org@OWNER_ID/my-repo@REPO_ID:environment:production if your repository emits immutable subjects. Each GitHub environment can then hold its own role ARN and protection rules.",
+    ghaWhyTitle: 'Why not copy the secrets into GitHub Secrets',
+    ghaWhyDesc:
+      'Copying values into repository secrets works until a value changes. From then on there are two copies:',
+    ghaWhyRotationLabel: 'Rotation:',
+    ghaWhyRotation:
+      'when a secret is rotated in SSM or Key Vault, every repository with a copy keeps deploying the old value until someone updates it by hand.',
+    ghaWhyAuditLabel: 'Drift and audit:',
+    ghaWhyAudit:
+      "GitHub Secrets can't be read back, so you can't check whether the copy still matches the source. Reading from the cloud is recorded with the role or app behind each request: in CloudTrail on AWS, and in the Key Vault audit logs on Azure once diagnostic settings are enabled for the vault.",
+    ghaWhyKeysLabel: 'Long-lived keys:',
+    ghaWhyKeys:
+      'copying secrets usually comes with an AWS access key or Azure client secret stored in GitHub as well. With OIDC the job gets a short-lived token, and nothing stored in GitHub works outside the workflow.',
+    ghaWhyListLabel: 'One list:',
+    ghaWhyList:
+      'the map file is versioned with the code, reviewed in pull requests, and is the same file developers use locally with the CLI.',
+    ghaWhyWhenSecrets:
+      'GitHub Secrets is still a good fit for values that only exist for the pipeline, such as a token for a third-party deploy service.',
+    ghaErrorsTitle: 'Common errors',
+    ghaErrorsDesc:
+      'Messages as they appear in the step log, and how to fix them. Envilder masks the secret path it prints next to each variable, except for the last three characters. Messages that come from AWS or Azure are shown as they are and can include the full parameter or resource name.',
+    ghaErrMapTitle: "The map file can't be read",
+    ghaErrMapFix:
+      'The checkout step is missing or runs after the action, or map-file points to the wrong place. Paths are relative to the repository root.',
+    ghaErrAssumeTitle: "The role can't be assumed",
+    ghaErrAssumeFix:
+      'This comes from aws-actions/configure-aws-credentials, before Envilder runs. Check that the workflow has id-token: write and that the sub in the trust policy matches the repository, branch or environment exactly, in the subject format your repository uses (with or without immutable IDs). Tag, pull_request and environment jobs produce a different sub.',
+    ghaErrNoCredsTitle: 'No AWS credentials',
+    ghaErrNoCredsFix:
+      "No step signed the job in to AWS before the action. Add aws-actions/configure-aws-credentials above it, in the same job: credentials don't carry over between jobs.",
+    ghaErrDeniedTitle: 'Access denied to a parameter',
+    ghaErrDeniedFix:
+      "The role is valid but its policy doesn't cover that parameter. Check the path in Resource and the region in the ARN, which must match the aws-region of the credentials step.",
+    ghaErrExpiredTitle: 'Expired credentials',
+    ghaErrExpiredFix:
+      "The role session ended before the step ran (one hour by default). Run Envilder right after the credentials step, or raise role-duration-seconds together with the role's maximum session duration.",
+    ghaErrNotFoundTitle: 'Parameter or secret not found',
+    ghaErrNotFoundFix:
+      'This is a warning, not a failure: the step still succeeds, with fewer secrets in the summary than in the map. In a new .env file the variable is left out. If the file already existed (committed, cached or written by an earlier step), its old value is kept, so delete the file before the action when a stale value must not survive. Check the name, the region and, on Azure, the converted name. If a missing value must stop the deploy, check for it in a later step.',
+    ghaErrVaultUrlTitle: 'Azure vault URL missing',
+    ghaErrVaultUrlFix:
+      'Set the vault-url input or $config.vaultUrl in the map file. It must be an https URL ending in .vault.azure.net, or the equivalent domain of a sovereign cloud.',
+    ghaErrAzureDeniedTitle: 'Access denied on Azure Key Vault',
+    ghaErrAzureDeniedFix:
+      "azure/login worked but the identity has no data-plane role on the vault. Assign Key Vault Secrets User on the vault and wait a few minutes, since role assignments take time to propagate. Vaults that use access policies report instead that the identity doesn't have secrets get permission.",
+    ghaErrProfileTitle: 'AWS profile in the map file',
+    ghaErrProfileFix:
+      'If envilder.json sets $config.profile for local use, the action passes that profile to the AWS SDK. GitHub runners have no AWS profiles, and with a profile set the SDK ignores the credentials from configure-aws-credentials. Remove the profile from the map used in CI, or keep a separate map for CI.',
+    ghaRelatedTitle: 'Related pages',
+    ghaRelatedAws:
+      'AWS SSM Parameter Store setup: credentials, IAM permissions and a quick check',
+    ghaRelatedAzure:
+      'Azure Key Vault setup: RBAC or access policies and a quick check',
+    ghaRelatedMap: 'Map file reference: $config, providers and secret paths',
+    ghaRelatedRepo: 'Action source code and README on GitHub',
     configPriorityTitle: 'Configuration priority',
     configPriorityDesc:
       'When multiple configuration sources are present, Envilder resolves them in this order (highest wins):',
@@ -887,6 +1123,8 @@ export const en: Translations = {
     sdkDotnetQuickStartResolveDesc:
       'Parse the map file, resolve secrets, and inject them into environment variables:',
     sdkDotnetFullDocs: 'Full documentation →',
+    sdkDotnetExamplesDesc:
+      'xUnit test projects with Testcontainers and Aspire resolve a map file against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to containers, with no .env file:',
     sdkPythonTitle: 'Python SDK',
     sdkPythonDesc:
       'Load secrets directly into your Python application at startup. One-liner setup or fine-grained control with the fluent builder.',
@@ -907,6 +1145,8 @@ export const en: Translations = {
     sdkPythonValidationDesc:
       'Opt-in validation ensures all resolved secrets have non-empty values:',
     sdkPythonFullDocs: 'Full documentation →',
+    sdkPythonExamplesDesc:
+      'A pytest project with Testcontainers resolves a map file against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and passes the values to containers, with no .env file:',
     sdkNodejsTitle: 'Node.js SDK',
     sdkNodejsDesc:
       'Load secrets directly into your Node.js application at startup. Async-first API with one-liner facade or fluent builder for full control.',
@@ -927,6 +1167,8 @@ export const en: Translations = {
     sdkNodejsValidationDesc:
       'Opt-in validation ensures all resolved secrets have non-empty values:',
     sdkNodejsFullDocs: 'Full documentation →',
+    sdkNodejsExamplesDesc:
+      'A Vitest project with Testcontainers and an Aspire TypeScript AppHost resolve a map file against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to containers, with no .env file:',
     pagerPrev: 'Previous',
     pagerNext: 'Next',
   },

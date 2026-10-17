@@ -43,6 +43,32 @@ const secrets = await Envilder.resolveFile('envilder.json');
 console.log(secrets.get('DB_PASSWORD')); // avoid logging secrets in production
 ```
 
+### Azure Key Vault
+
+Set the provider in the map file's `$config`; values are Key Vault secret names:
+
+```json
+{
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "DB_PASSWORD": "myapp-prod-db-password"
+}
+```
+
+The code is the same as for AWS. Credentials are resolved with `DefaultAzureCredential`
+(`az login`, managed identity, or environment variables):
+
+```typescript
+import { Envilder } from '@envilder/sdk';
+
+await Envilder.load('envilder.json');
+
+console.log('DB_PASSWORD loaded:', !!process.env.DB_PASSWORD);
+```
+
 ### Fluent builder (with overrides)
 
 Override the map file's `$config` at runtime: useful for switching providers,
@@ -214,6 +240,15 @@ For Azure, add `vaultUrl`:
 ```
 
 See the [root README](https://github.com/macalbert/envilder#%EF%B8%8F-mapping-file-format) for the full map file reference.
+
+## Examples
+
+Runnable projects in [envilder-examples](https://github.com/macalbert/envilder-examples) resolve a map file
+against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to
+containers, with no `.env` file:
+
+- [typescript-testcontainers](https://github.com/macalbert/envilder-examples/tree/main/typescript-testcontainers): Vitest + Testcontainers
+- [typescript-aspire](https://github.com/macalbert/envilder-examples/tree/main/typescript-aspire): Aspire TypeScript AppHost
 
 ## Links
 

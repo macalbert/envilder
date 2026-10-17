@@ -46,6 +46,34 @@ secrets = Envilder.resolve_file('envilder.json')
 print(secrets['DB_PASSWORD'])
 ```
 
+### Azure Key Vault
+
+Set the provider in the map file's `$config`; values are Key Vault secret names:
+
+```json
+{
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "DB_PASSWORD": "myapp-prod-db-password"
+}
+```
+
+The code is the same as for AWS. Credentials are resolved with `DefaultAzureCredential`
+(`az login`, managed identity, or environment variables):
+
+```python
+import os
+
+from envilder import Envilder
+
+Envilder.load('envilder.json')
+
+db_password = os.environ['DB_PASSWORD']
+```
+
 ### Fluent builder (with overrides)
 
 Override the map file's `$config` at runtime: useful for switching providers,
@@ -213,6 +241,14 @@ For Azure, add `vaultUrl`:
   "API_KEY": "api-key"
 }
 ```
+
+## Examples
+
+Runnable projects in [envilder-examples](https://github.com/macalbert/envilder-examples) resolve a map file
+against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to
+containers, with no `.env` file:
+
+- [python-testcontainers](https://github.com/macalbert/envilder-examples/tree/main/python-testcontainers): pytest + Testcontainers
 
 ## Links
 

@@ -21,6 +21,25 @@ from testcontainers.localstack import (
 _SECRETS_MAP = Path(__file__).resolve().parents[4] / "envilder.json"
 
 
+# Resolves the LocalStack container environment (auth token included) from
+# the repository's envilder.json, falling back to AWS when the map file's
+# provider cannot be built.
+def load_localstack_environment() -> dict[str, str]:
+    json_content = _SECRETS_MAP.read_text(encoding="utf-8")
+    map_file = MapFileParser().parse(json_content)
+    client = _resolve_client(map_file.config)
+    return client.resolve_secrets(map_file)
+
+
+def _resolve_client(config: MapFileConfig) -> EnvilderClient:
+    try:
+        provider = _SecretProviderFactory.create(config)
+        return EnvilderClient(provider)
+    except ValueError:
+        fallback = MapFileConfig(provider=SecretProviderType.AWS)
+        return EnvilderClient(_SecretProviderFactory.create(fallback))
+
+
 class LocalStackContainer:
     def __init__(self) -> None:
         self._container: BaseLocalStackContainer | None = None
@@ -29,7 +48,7 @@ class LocalStackContainer:
     def start(self) -> "LocalStackContainer":
         print("\n[LocalStack] Starting container...")
 
-        environment = self._load_environment()
+        environment = load_localstack_environment()
         if not environment.get("LOCALSTACK_AUTH_TOKEN"):
             raise EnvironmentError(
                 "LOCALSTACK_AUTH_TOKEN could not be resolved from envilder.json"
@@ -67,22 +86,3 @@ class LocalStackContainer:
 
     def create_provider(self) -> AwsSsmSecretProvider:
         return AwsSsmSecretProvider(self.get_ssm_client())
-
-    @staticmethod
-    def _load_environment() -> dict[str, str]:
-        json_content = _SECRETS_MAP.read_text(encoding="utf-8")
-        parser = MapFileParser()
-        map_file = parser.parse(json_content)
-        client = LocalStackContainer._resolve_client(map_file.config)
-        return client.resolve_secrets(map_file)
-
-    @staticmethod
-    def _resolve_client(
-        config: MapFileConfig,
-    ) -> EnvilderClient:
-        try:
-            provider = _SecretProviderFactory.create(config)
-            return EnvilderClient(provider)
-        except ValueError:
-            fallback = MapFileConfig(provider=SecretProviderType.AWS)
-            return EnvilderClient(_SecretProviderFactory.create(fallback))
