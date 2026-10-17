@@ -73,7 +73,7 @@ Rename section keys in your map file:
 
 ---
 
-## [0.5.0] - 2026-06-26
+## [0.5.0] - 2026-07-11
 
 ### Added
 
@@ -237,7 +237,7 @@ may need to add them explicitly.
 ### Added
 
 * **Initial release**: Runtime library for loading secrets from AWS SSM Parameter Store or Azure Key Vault
-  directly into .NET applications ([#147](https://github.com/macalbert/envilder/pull/147))
+  directly into .NET applications ([#146](https://github.com/macalbert/envilder/pull/146))
 * `EnvilderClient`: Resolves secrets from a map-file and returns them as a dictionary
 * `MapFileParser`: Parses `envilder.json` files with `$config` section and variable mappings
 * `SecretProviderFactory`: Creates the appropriate secret provider based on configuration
@@ -248,6 +248,11 @@ may need to add them explicitly.
 * `EnvilderOptions`: Runtime overrides for provider, vault URL, and AWS profile
 * Targets .NET Standard 2.0 (compatible with .NET 6+, .NET Framework 4.6.1+)
 * Published to NuGet as `Envilder`
+
+### Fixed
+
+* **Default AWS region**: `SecretProviderFactory` provides a default AWS region
+  when none is configured ([#147](https://github.com/macalbert/envilder/pull/147))
 
 ### Testing
 

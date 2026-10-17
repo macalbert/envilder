@@ -40,7 +40,7 @@
 
 ---
 
-## [0.5.0] - 2026-06-26
+## [0.5.0] - 2026-07-11
 
 ### Added
 
@@ -140,7 +140,6 @@
 * **Initial release**: Runtime library for loading secrets from AWS SSM Parameter Store or
   Azure Key Vault directly into Python applications
   ([#157](https://github.com/macalbert/envilder/pull/157))
-* `Envilder` facade: High-level entry point with `load()`, `resolve_file()`, and `from_map_file()` methods
 * `EnvilderClient`: Resolves secrets from a map-file and injects them into `os.environ`
 * `MapFileParser`: Parses `envilder.json` files with `$config` section and variable mappings
 * `SecretProviderFactory`: Creates the appropriate secret provider based on configuration
