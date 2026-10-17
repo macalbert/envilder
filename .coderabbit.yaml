@@ -3,9 +3,11 @@
 #   - TypeScript CLI + GitHub Action (core engine)
 #   - .NET SDK (NuGet: Envilder)
 #   - Python SDK (PyPI: envilder)
+#   - Node.js SDK (npm)
 #   - Astro website (docs + marketing)
 #   - AWS CDK infrastructure
 # https://docs.coderabbit.ai/guides/configure-coderabbit
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 
 language: en-US
 
@@ -14,26 +16,32 @@ reviews:
   request_changes_workflow: false
   high_level_summary: true
   poem: false
+  in_progress_fortune: false
   review_status: true
-  collapse_walkthrough: false
+  collapse_walkthrough: true
+  sequence_diagrams: false
+  suggested_reviewers: false
 
+  # Exclusions only: an include pattern would silently drop everything else
+  # (workflows, action.yml, package.json, root configs) from the review.
   path_filters:
     - "!pnpm-lock.yaml"
     - "!**/package-lock.json"
+    - "!**/uv.lock"
     - "!lib/**"
     - "!coverage/**"
+    - "!TestResults/**"
     - "!github-action/dist/**"
+    - "!src/website/dist/**"
     - "!**/bin/**"
     - "!**/obj/**"
     - "!**/.venv/**"
     - "!**/node_modules/**"
-    - "src/**"
-    - "tests/**"
-    - "e2e/**"
-    - "docs/**"
-    - "scripts/**"
-    - "examples/**"
+    - "!**/*.gif"
+    - "!**/*.mp4"
 
+  # General conventions come from knowledge_base.code_guidelines below.
+  # Keep these to rules that are specific to one area.
   path_instructions:
     # TypeScript core (CLI + GHA)
     - path: "src/envilder/core/domain/**"
@@ -49,13 +57,14 @@ reviews:
     - path: "src/envilder/core/infrastructure/**"
       instructions: |
         Infrastructure adapters implementing domain ports.
-        Verify AWS credential handling, no hardcoded secrets.
+        Verify AWS/Azure credential handling, no hardcoded secrets.
         Check proper error handling for SDK calls.
+        Secret values must never reach logs or error messages.
     - path: "src/envilder/apps/**"
       instructions: |
         Entry points (CLI + GHA). Shared DI setup in shared/.
-        GHA is pull-only (no push mode).
-        After code changes, verify pnpm build:gha updates dist/.
+        If the PR changes code bundled into the GitHub Action, the PR
+        must also update github-action/dist/ (pnpm build:gha).
 
     # .NET SDK
     - path: "src/sdks/dotnet/**"
@@ -73,7 +82,6 @@ reviews:
         IAsyncLifetime returns ValueTask (not Task).
         Test naming: Should_Expected_When_Condition. AAA pattern with comment markers.
         No try/catch/finally in tests — use IAsyncLifetime or fixtures for cleanup.
-        GlobalSuppressions.cs suppresses VSTHRD200 and CA1707 for test naming.
 
     # Python SDK
     - path: "src/sdks/python/**"
@@ -81,20 +89,25 @@ reviews:
         Python SDK using boto3 (AWS) and azure-identity (Azure).
         Synchronous API — no async/await. Protocol-based ports.
         Factory pattern (SecretProviderFactory.create).
-        Envilder facade is the primary public API with fluent builder.
         Strict mypy (disallow_untyped_defs). Format: black + isort (79 cols).
         SDK public APIs SHOULD have docstrings with examples.
     - path: "tests/sdks/python/**"
       instructions: |
         pytest with Should_Expected_When_Condition naming (python_functions = ["Should_*"]).
         AAA pattern with comment markers. No docstrings except AAA markers.
-        Acceptance tests use TestContainers (LocalStack for AWS, LocalStack for Azure).
+
+    # Node.js SDK
+    - path: "src/sdks/nodejs/**"
+      instructions: |
+        Independent SDK: zero code dependency on src/envilder (shares only
+        the map-file format). Public API changes need a matching README update.
 
     # Website
     - path: "src/website/**"
       instructions: |
         Astro + pure CSS website. Dual theme (retro/light).
-        i18n system with multiple locales. Check responsive design.
+        Every user-facing string must exist in all i18n locales.
+        Check responsive design down to phone width.
 
     # Infrastructure as Code
     - path: "src/iac/**"
@@ -102,14 +115,37 @@ reviews:
         AWS CDK in TypeScript. Review IAM permissions carefully.
         No overly permissive policies. Verify resource naming conventions.
 
-    # E2E tests
-    - path: "e2e/**"
+    # CI / release
+    - path: ".github/workflows/**"
       instructions: |
-        End-to-end tests using TestContainers with LocalStack (AWS)
-        and LocalStack for Azure. Run pnpm build + pack-and-install before E2E.
+        Third-party actions must be pinned to a full commit SHA.
+        Use least-privilege `permissions:`; flag pull_request_target and any
+        untrusted input (PR titles, branch names) interpolated into `run:`.
+    - path: "action.yml"
+      instructions: |
+        Public GitHub Action interface. Input/output changes are breaking for
+        users: check README and docs/github-action.md are updated.
 
   tools:
     gitleaks:
+      enabled: true
+    biome:
+      enabled: true
+    eslint:
+      enabled: false
+    oxc:
+      enabled: false
+    actionlint:
+      enabled: true
+    zizmor:
+      enabled: true
+    shellcheck:
+      enabled: true
+    markdownlint:
+      enabled: true
+    ruff:
+      enabled: true
+    yamllint:
       enabled: true
 
   auto_review:
@@ -120,9 +156,32 @@ reviews:
       - "draft"
       - "dependabot"
 
+  pre_merge_checks:
+    title:
+      mode: warning
+      requirements: |
+        Conventional Commits, as enforced by .commitlintrc.json:
+        `type(scope): subject`, type one of feat, fix, docs, style, refactor,
+        perf, test, chore, ci, build, revert. Subject not upper-case,
+        whole header at most 100 characters.
+    description:
+      mode: warning
+    docstrings:
+      mode: "off"
+
   finishing_touches:
     docstrings:
       enabled: false
+
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - ".github/copilot-instructions.md"
+      - ".github/instructions/*.instructions.md"
+      - "**/AGENTS.md"
+      - "CONTEXT.md"
+      - "docs/adr/*.md"
 
 chat:
   auto_reply: true
