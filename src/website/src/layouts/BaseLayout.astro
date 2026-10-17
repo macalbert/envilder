@@ -109,6 +109,8 @@ const structuredData = JSON.stringify({
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Synced to the active theme background by ThemeSwitcher -->
+    <meta name="theme-color" content="#182016" />
     <meta name="description" content={description} />
     <meta name="author" content="Marçal Albert Castellví" />
     <meta name="generator" content={Astro.generator} />
@@ -151,7 +153,7 @@ const structuredData = JSON.stringify({
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Press+Start+2P&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Press+Start+2P&display=swap"
       rel="stylesheet"
     />
 
@@ -159,7 +161,7 @@ const structuredData = JSON.stringify({
     <script is:inline>
       (function() {
         var stored = localStorage.getItem('envilder-theme');
-        if (stored && ['retro','light'].includes(stored)) {
+        if (stored && ['retro','light','cream'].includes(stored)) {
           document.documentElement.setAttribute('data-theme', stored);
         } else {
           var preferLight = window.matchMedia('(prefers-color-scheme: light)').matches;

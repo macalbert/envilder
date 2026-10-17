@@ -353,7 +353,10 @@ const parsedById = Object.fromEntries(parsed.map((p) => [p.id, p]));
     font-size: 0.55rem;
     color: var(--color-text-muted);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition:
+      color var(--transition-fast),
+      background-color var(--transition-fast),
+      border-color var(--transition-fast);
     letter-spacing: 0.05em;
   }
 
@@ -448,7 +451,9 @@ const parsedById = Object.fromEntries(parsed.map((p) => [p.id, p]));
     font-size: 0.72rem;
     color: var(--color-text-muted);
     text-decoration: none;
-    transition: all var(--transition-fast);
+    transition:
+      color var(--transition-fast),
+      background-color var(--transition-fast);
     flex: 1;
     min-width: 0;
   }

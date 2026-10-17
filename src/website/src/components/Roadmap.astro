@@ -132,7 +132,8 @@ const t = useTranslations(lang);
       0 1px 0 rgba(139, 172, 15, 0.25);
   }
 
-  :global([data-theme="light"]) .roadmap-label {
+  :global([data-theme="light"]) .roadmap-label,
+  :global([data-theme="cream"]) .roadmap-label {
     filter: grayscale(100%) sepia(40%) saturate(100%) brightness(0.7) contrast(1.1);
     text-shadow:
       1px 0 0 rgba(107, 104, 96, 0.2),
@@ -140,7 +141,7 @@ const t = useTranslations(lang);
   }
 
   .roadmap-header h3 {
-    font-size: 0.65rem;
+    font-size: clamp(1.05rem, 1.6vw, 1.15rem);
     color: var(--color-text);
   }
 

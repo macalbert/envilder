@@ -20,6 +20,7 @@ export interface NavLinks {
 export interface ThemeTranslations {
   retro: string;
   light: string;
+  cream: string;
   ariaTheme: string;
 }
 
@@ -59,6 +60,8 @@ export interface HeroTranslations {
   setupAzureComment2: string;
   sdkCommentLoad: string;
   terminalSceneLabel: string;
+  terminalPause: string;
+  terminalPlay: string;
   execMapComment: string;
 }
 
