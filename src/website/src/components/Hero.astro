@@ -693,10 +693,7 @@ const tabRows = [
             <span class="hero-term-row-label" aria-hidden="true">
               {row.label}
             </span>
-            <div
-              class="hero-term-row-tabs"
-              style={`--hero-tab-count: ${row.scenes.length}`}
-            >
+            <div class="hero-term-row-tabs">
               {row.scenes.map((scene) => {
                 const first = scene.id === scenes[0].id;
                 return (
@@ -876,8 +873,17 @@ const tabRows = [
 
   .hero-term-row-tabs {
     display: grid;
-    grid-template-columns: repeat(var(--hero-tab-count), minmax(0, 1fr));
+    /* auto-fit keeps each row on one line while the tabs fit, and wraps them
+       when they cannot (narrow screens, 200% text zoom). */
+    grid-template-columns: repeat(auto-fit, minmax(4rem, 1fr));
     gap: var(--space-sm);
+  }
+
+  /* Four CLI tabs only fit a 375px screen with tighter side padding. */
+  @media (max-width: 479px) {
+    .hero-term-row-tabs .hero-term-mode {
+      padding-inline: var(--space-xs);
+    }
   }
 
   .hero-term-mode {
