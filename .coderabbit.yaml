@@ -1,149 +1,135 @@
-# CodeRabbit configuration for envilder
-# Multi-runtime secret management platform:
-#   - TypeScript CLI + GitHub Action (core engine)
-#   - .NET SDK (NuGet: Envilder)
-#   - Python SDK (PyPI: envilder)
-#   - Node.js SDK (npm)
-#   - Astro website (docs + marketing)
-#   - AWS CDK infrastructure
-# https://docs.coderabbit.ai/guides/configure-coderabbit
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit configuration for envilder
+# https://docs.coderabbit.ai/reference/configuration
+#
+# Conventions live in the repo guideline files (knowledge_base below):
+# AGENTS.md, .github/copilot-instructions.md, .github/instructions/ and
+# docs/adr/. path_instructions only covers gaps those files leave, so the
+# rules are written once. Inspect the resolved config on a PR with
+# `@coderabbitai configuration`.
 
 language: en-US
+tone_instructions: >-
+  Be concise and concrete. When flagging a convention, cite the guideline
+  file or ADR it comes from. Skip formatting nits: Biome, dotnet format and
+  black/isort enforce style.
 
 reviews:
   profile: "chill"
-  request_changes_workflow: false
+  # Request changes on blocking findings, approve once every CodeRabbit
+  # thread is resolved and no pre-merge check fails. `@coderabbitai approve`
+  # also works on demand (allow_author_approval).
+  request_changes_workflow: true
+  allow_author_approval: true
   high_level_summary: true
   poem: false
   in_progress_fortune: false
   review_status: true
   collapse_walkthrough: true
   sequence_diagrams: false
+  # Labels come from .github/workflows/pr-labeler.yml; reviews from CODEOWNERS.
+  suggested_labels: false
   suggested_reviewers: false
 
-  # Exclusions only: an include pattern would silently drop everything else
-  # (workflows, action.yml, package.json, root configs) from the review.
+  # Exclusions only: any include pattern restricts the review to matching
+  # files. Lockfiles, dist/, node_modules/ and images are excluded by default.
   path_filters:
-    - "!pnpm-lock.yaml"
-    - "!**/package-lock.json"
-    - "!**/uv.lock"
     - "!lib/**"
     - "!coverage/**"
     - "!TestResults/**"
     - "!github-action/dist/**"
-    - "!src/website/dist/**"
     - "!**/bin/**"
     - "!**/obj/**"
     - "!**/.venv/**"
-    - "!**/node_modules/**"
-    - "!**/*.gif"
     - "!**/*.mp4"
+    - "!**/*.gif"
 
-  # General conventions come from knowledge_base.code_guidelines below.
-  # Keep these to rules that are specific to one area.
   path_instructions:
-    # TypeScript core (CLI + GHA)
-    - path: "src/envilder/core/domain/**"
-      instructions: |
-        Pure domain layer — NO external dependencies allowed.
-        Entities must be immutable. Ports are interfaces only.
-        Custom errors extend DomainError.
-    - path: "src/envilder/core/application/**"
-      instructions: |
-        Application layer — Command/Handler pattern with InversifyJS DI.
-        Each feature = Command + CommandHandler pair.
-        Commands have static .create() factory methods.
     - path: "src/envilder/core/infrastructure/**"
       instructions: |
-        Infrastructure adapters implementing domain ports.
-        Verify AWS/Azure credential handling, no hardcoded secrets.
-        Check proper error handling for SDK calls.
-        Secret values must never reach logs or error messages.
+        Secret values must never reach logs, error messages or exception
+        causes in clear text; use EnvironmentVariable.maskedValue.
+        Provider SDK errors map to typed domain errors (ADR-0010).
     - path: "src/envilder/apps/**"
       instructions: |
-        Entry points (CLI + GHA). Shared DI setup in shared/.
-        If the PR changes code bundled into the GitHub Action, the PR
-        must also update github-action/dist/ (pnpm build:gha).
+        Code here is bundled into the GitHub Action. A behaviour change must
+        come with an updated github-action/dist/index.js (pnpm build:gha);
+        CI rejects stale bundles via pnpm verify:gha.
 
-    # .NET SDK
     - path: "src/sdks/dotnet/**"
       instructions: |
-        .NET SDK targeting netstandard2.0 — no default interface methods,
-        no File.ReadAllTextAsync with CancellationToken, no cancelable ReadToEndAsync.
-        Uses Central Package Management (Directory.Packages.props).
-        EditorConfig enforces tabs, _prefix for private fields, PascalCase for const/static readonly.
-        ISecretProvider has sync GetSecret + async GetSecretAsync.
-        Factory pattern (SecretProviderFactory.Create) — no DI container.
-        Envilder static facade is the primary public API.
+        Targets netstandard2.0: no default interface methods, no
+        File.ReadAllTextAsync with CancellationToken, no cancelable
+        ReadToEndAsync. Package versions go in Directory.Packages.props
+        (Central Package Management). ISecretProvider keeps both sync
+        GetSecret and async GetSecretAsync.
     - path: "tests/sdks/dotnet/**"
       instructions: |
-        xUnit v3 with NSubstitute + AwesomeAssertions + AutoFixture.
-        IAsyncLifetime returns ValueTask (not Task).
-        Test naming: Should_Expected_When_Condition. AAA pattern with comment markers.
-        No try/catch/finally in tests — use IAsyncLifetime or fixtures for cleanup.
-
-    # Python SDK
+        xUnit v3: IAsyncLifetime returns ValueTask, not Task. No
+        try/catch/finally in tests; clean up with IAsyncLifetime or fixtures.
     - path: "src/sdks/python/**"
       instructions: |
-        Python SDK using boto3 (AWS) and azure-identity (Azure).
-        Synchronous API — no async/await. Protocol-based ports.
-        Factory pattern (SecretProviderFactory.create).
-        Strict mypy (disallow_untyped_defs). Format: black + isort (79 cols).
-        SDK public APIs SHOULD have docstrings with examples.
-    - path: "tests/sdks/python/**"
+        Synchronous API only (no async/await). Strict mypy
+        (disallow_untyped_defs). Public SDK APIs need docstrings with
+        examples.
+    - path: "src/sdks/{nodejs,python,dotnet}/**"
       instructions: |
-        pytest with Should_Expected_When_Condition naming (python_functions = ["Should_*"]).
-        AAA pattern with comment markers. No docstrings except AAA markers.
+        SDKs are independent: no imports from src/envilder or another SDK.
+        Public API changes need matching README and website docs updates.
 
-    # Node.js SDK
-    - path: "src/sdks/nodejs/**"
-      instructions: |
-        Independent SDK: zero code dependency on src/envilder (shares only
-        the map-file format). Public API changes need a matching README update.
-
-    # Website
     - path: "src/website/**"
       instructions: |
-        Astro + pure CSS website. Dual theme (retro/light).
-        Every user-facing string must exist in all i18n locales.
-        Check responsive design down to phone width.
-
-    # Infrastructure as Code
+        Every user-facing string must exist in all i18n locales. Check both
+        themes (retro/light) and layouts down to phone width.
     - path: "src/iac/**"
       instructions: |
-        AWS CDK in TypeScript. Review IAM permissions carefully.
-        No overly permissive policies. Verify resource naming conventions.
+        AWS CDK. Flag IAM statements with wildcard actions or resources
+        unless scoped by a condition.
 
-    # CI / release
     - path: ".github/workflows/**"
       instructions: |
-        Third-party actions must be pinned to a full commit SHA.
-        Use least-privilege `permissions:`; flag pull_request_target and any
-        untrusted input (PR titles, branch names) interpolated into `run:`.
-    - path: "action.yml"
+        Actions are pinned to version tags and kept current by Dependabot;
+        do not ask for SHA pinning. Flag missing or broad `permissions:`,
+        pull_request_target, and untrusted input (PR title, branch name,
+        issue body) interpolated directly into `run:`.
+    - path: "{action.yml,github-action/action.yml}"
       instructions: |
-        Public GitHub Action interface. Input/output changes are breaking for
-        users: check README and docs/github-action.md are updated.
+        Public GitHub Action interface: renamed or removed inputs/outputs are
+        breaking. README and docs/github-action.md must match.
 
   tools:
-    gitleaks:
-      enabled: true
+    # Repo linters: Biome (TS), black/isort/mypy (Python). Turn off the
+    # overlapping defaults so findings come from one tool per language.
     biome:
       enabled: true
     eslint:
       enabled: false
     oxc:
       enabled: false
+    pylint:
+      enabled: false
+    flake8:
+      enabled: false
+    ruff:
+      enabled: true
+    # GitHub Actions and supply chain.
     actionlint:
       enabled: true
     zizmor:
       enabled: true
-    shellcheck:
+    osvScanner:
       enabled: true
+    # Secret detection: core concern for a secrets tool.
+    gitleaks:
+      enabled: true
+    trufflehog:
+      enabled: true
+    dotenvLint:
+      enabled: true
+    # Docs and scripts.
     markdownlint:
       enabled: true
-    ruff:
+    shellcheck:
       enabled: true
     yamllint:
       enabled: true
@@ -151,37 +137,85 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
+    # Review quota is limited: review on open, re-review on demand with
+    # `@coderabbitai review`.
+    auto_incremental_review: false
     ignore_title_keywords:
       - "wip"
       - "draft"
-      - "dependabot"
+    ignore_usernames:
+      - "dependabot[bot]"
 
   pre_merge_checks:
     title:
       mode: warning
       requirements: |
-        Conventional Commits, as enforced by .commitlintrc.json:
+        Conventional Commits as enforced by .commitlintrc.json:
         `type(scope): subject`, type one of feat, fix, docs, style, refactor,
-        perf, test, chore, ci, build, revert. Subject not upper-case,
-        whole header at most 100 characters.
+        perf, test, chore, ci, build, revert. Subject not upper-case; whole
+        title at most 100 characters.
     description:
       mode: warning
     docstrings:
       mode: "off"
+    custom_checks:
+      - name: "Architecture boundaries"
+        mode: warning
+        instructions: |
+          Fail if any changed file under src/envilder/core/domain/ imports
+          from src/envilder/core/application/, src/envilder/core/infrastructure/,
+          src/envilder/apps/, an @aws-sdk/* or @azure/* package, inversify,
+          node:fs, fs or process.
+          Fail if any changed file under src/envilder/core/application/
+          imports from src/envilder/core/infrastructure/ or src/envilder/apps/,
+          or from an @aws-sdk/* or @azure/* package.
+          Pass otherwise. Type-only imports count as imports.
+      - name: "Tests accompany code changes"
+        mode: warning
+        instructions: |
+          Consider non-test source files changed under src/envilder/ and
+          src/sdks/ (ignore README, *.md, config and generated files).
+          Fail if behaviour changes (new or modified logic) and the PR
+          changes no file under tests/ or e2e/. Pass for pure renames,
+          comments, formatting or type-only changes. Pass when no such
+          source file changed.
+      - name: "Release coherence"
+        mode: warning
+        instructions: |
+          Applies only when a version field changes in package.json (root),
+          src/sdks/nodejs/package.json, src/sdks/python/pyproject.toml,
+          src/sdks/dotnet/Envilder.csproj or github-action/action.yml.
+          Fail if the same PR adds no changelog entry for that component
+          under docs/ (CHANGELOG.md or docs/changelogs/). Pass when no
+          version field changed.
 
   finishing_touches:
     docstrings:
       enabled: false
 
 knowledge_base:
+  learnings:
+    scope: local
+  pull_requests:
+    scope: local
+  issues:
+    scope: local
   code_guidelines:
     enabled: true
+    # Guideline files apply only to their own directory tree unless mapped.
+    # Defaults (AGENTS.md, copilot-instructions, *.instructions.md, skills)
+    # are still picked up; these entries scope them to the code they govern.
     filePatterns:
-      - ".github/copilot-instructions.md"
-      - ".github/instructions/*.instructions.md"
-      - "**/AGENTS.md"
-      - "CONTEXT.md"
-      - "docs/adr/*.md"
+      - files: ".github/copilot-instructions.md,AGENTS.md,.github/AGENTS.md,CONTEXT.md"
+        applyTo: "**"
+      - files: ".github/instructions/architecture-boundaries.instructions.md"
+        applyTo: "src/envilder/**/*.ts"
+      - files: ".github/instructions/coding-and-testing-conventions.instructions.md"
+        applyTo: "src/**/*.ts,tests/**/*.ts,e2e/**/*.ts"
+      - files: ".github/instructions/release-coherence.instructions.md"
+        applyTo: "package.json,src/sdks/**,github-action/action.yml"
+      - files: "docs/adr/*.md"
+        applyTo: "**"
 
 chat:
   auto_reply: true
