@@ -1189,6 +1189,13 @@ const tabRows = [
     let runId = 0;
     let current = 0;
     let paused = false;
+    // Hover/focus pauses temporarily; the pause button pauses until the
+    // user resumes it (touch users have no hover to stop the loop).
+    let hovering = false;
+    let userPaused = false;
+    // True while a manually selected scene is shown statically during an
+    // explicit pause, so Resume knows to replay it.
+    let showingStatic = false;
     let holdTimer: ReturnType<typeof setTimeout> | undefined;
     let scrollFrame: number | undefined;
 
@@ -1273,6 +1280,13 @@ const tabRows = [
       screen!.appendChild(el);
       keepLatestLineVisible();
       return el;
+    }
+
+    // Holds while paused, then reports whether this run is still current.
+    // Gate every delayed DOM update on this so a pause freezes the frame.
+    async function settle(id: number): Promise<boolean> {
+      await waitWhilePaused();
+      return alive(id);
     }
 
     function renderInstant(scene: Scene) {
@@ -1478,14 +1492,16 @@ const tabRows = [
       code.appendChild(cursor);
       view.cmd.textContent = `"${editor.file}" [New]`;
       await sleep(TIMING.editorOpen);
-      if (!alive(id)) return false;
+      if (!(await settle(id))) return false;
 
       setEditorMode(view, true);
       await sleep(between(TIMING.editorModeSwitch));
+      if (!(await settle(id))) return false;
 
       for (const [r, row] of editor.code.entries()) {
         if (r > 0) {
           await sleep(between(TIMING.editorNewline));
+          if (!(await settle(id))) return false;
           code = addEditorLine(view, r + 1);
           code.appendChild(cursor);
         }
@@ -1497,15 +1513,16 @@ const tabRows = [
       }
 
       await sleep(between(TIMING.editorModeSwitch));
-      if (!alive(id)) return false;
+      if (!(await settle(id))) return false;
       setEditorMode(view, false);
       await sleep(between(TIMING.editorModeSwitch));
+      if (!(await settle(id))) return false;
 
       view.cmd.appendChild(cursor);
       const save = { text: ':wq', cls: 'tok-plain' };
       if (!(await typeSegment(view.cmd, save, cursor, id))) return false;
       await sleep(between(TIMING.enterAfterCommand));
-      if (!alive(id)) return false;
+      if (!(await settle(id))) return false;
 
       screen!.replaceChildren(...shell);
       keepLatestLineVisible();
@@ -1575,10 +1592,15 @@ const tabRows = [
       return true;
     }
 
-    async function play(index: number) {
+    async function play(index: number, manual = false) {
       if (isStale()) return;
       const id = ++runId;
       if (holdTimer) clearTimeout(holdTimer);
+
+      // Auto-rotation waits out any pause before switching the active
+      // button, so the selection never runs ahead of the screen.
+      if (!manual && !reduceMotion && !(await settle(id))) return;
+
       current = index;
       setActiveMode(index);
 
@@ -1586,6 +1608,19 @@ const tabRows = [
       if (reduceMotion) {
         renderInstant(scene);
         return;
+      }
+
+      // An explicit pause shows the chosen scene at once instead of leaving
+      // the previous one on screen until Resume.
+      if (manual && userPaused) {
+        showingStatic = true;
+        renderInstant(scene);
+        return;
+      }
+      if (showingStatic) {
+        showingStatic = false;
+        screen!.classList.remove('is-static');
+        screen!.removeAttribute('tabindex');
       }
 
       // Wait for any pause to lift before clearing the screen, so an
@@ -1608,17 +1643,13 @@ const tabRows = [
 
     modes.forEach((mode, index) => {
       mode.addEventListener('click', () => {
-        play(index);
+        play(index, true);
       });
     });
 
     // Pause only while the user hovers/focuses the terminal itself, so the
     // mode buttons can switch scenes without stalling playback.
     const hoverTarget = screen.closest('.terminal') ?? screen;
-    // Hover/focus pauses temporarily; the pause button pauses until the
-    // user resumes it (touch users have no hover to stop the loop).
-    let hovering = false;
-    let userPaused = false;
     const syncPaused = () => {
       paused = hovering || userPaused;
     };
@@ -1647,6 +1678,8 @@ const tabRows = [
       pauseBtn.addEventListener('click', () => {
         userPaused = !userPaused;
         syncPaused();
+        // Resuming after a scene was picked while paused replays it
+        if (!userPaused && showingStatic) play(current);
         pauseBtn.setAttribute('aria-pressed', String(userPaused));
         const label = userPaused
           ? pauseBtn.dataset.labelPlay
