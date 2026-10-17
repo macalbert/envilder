@@ -1,5 +1,9 @@
 ---
-import { type DocsRouteKey, docsRouteManifest } from '../i18n/docs-routes';
+import {
+  type DocsRouteKey,
+  docsArticleRoutes,
+  docsNavGroups,
+} from '../i18n/docs-routes';
 import { localizedPath, useTranslations } from '../i18n/utils';
 import Footer from './Footer.astro';
 
@@ -12,15 +16,12 @@ const { lang, routeKey } = Astro.props;
 const t = useTranslations(lang);
 const page = t.docs.pages[routeKey];
 
-const navGroups = [
-  { key: 'gettingStarted', label: t.docs.navGettingStarted },
-  { key: 'providers', label: t.docs.navProviders },
-  { key: 'cli', label: t.docs.sidebarCli },
-  { key: 'githubAction', label: t.docs.sidebarGha },
-  { key: 'sdks', label: t.docs.sidebarSdks },
-] as const;
+const navGroups = docsNavGroups.map((group) => ({
+  key: group.key,
+  label: t.docs[group.labelKey],
+}));
 
-const articleRoutes = docsRouteManifest.filter((route) => route.key !== 'hub');
+const articleRoutes = docsArticleRoutes;
 ---
 
 <main class="docs-page" id="main-content">
