@@ -35,12 +35,14 @@ export interface HeroTranslations {
   descSuffix: string;
   getStarted: string;
   viewOnGithub: string;
-  tabCli: string;
-  tabCliDesc: string;
+  tabGroupCli: string;
+  tabGroupSdk: string;
+  tabPull: string;
+  tabPullDesc: string;
   tabExec: string;
   tabExecDesc: string;
-  tabSetup: string;
-  tabSetupDesc: string;
+  tabPush: string;
+  tabPushDesc: string;
   tabNode: string;
   tabNodeDesc: string;
   tabPython: string;

@@ -25,6 +25,8 @@ type Scene = {
   icon: string;
   /** Alt text for the tab icon when it tells scenes apart (e.g. provider). */
   iconAlt?: string;
+  /** Row the tab sits in: CLI commands or runtime SDKs. */
+  group: 'cli' | 'sdk';
   lines: Line[];
 };
 
@@ -93,10 +95,11 @@ const setupScene = (opts: {
   secretPath: string;
 }): Scene => ({
   id: opts.id,
-  name: t.hero.tabSetup,
-  desc: t.hero.tabSetupDesc,
+  name: t.hero.tabPush,
+  desc: t.hero.tabPushDesc,
   icon: opts.icon,
   iconAlt: opts.provider,
+  group: 'cli',
   lines: [
     {
       kind: 'type',
@@ -213,6 +216,7 @@ const sdkScene = (opts: {
   name: opts.name,
   desc: opts.desc,
   icon: opts.icon,
+  group: 'sdk',
   lines: [
     {
       kind: 'type',
@@ -268,9 +272,10 @@ const scenes: Scene[] = [
   }),
   {
     id: 'cli',
-    name: t.hero.tabCli,
-    desc: t.hero.tabCliDesc,
+    name: t.hero.tabPull,
+    desc: t.hero.tabPullDesc,
     icon: '/favicon.svg',
+    group: 'cli',
     lines: [
       {
         kind: 'type',
@@ -373,6 +378,7 @@ const scenes: Scene[] = [
     name: t.hero.tabExec,
     desc: t.hero.tabExecDesc,
     icon: '/favicon.svg',
+    group: 'cli',
     lines: [
       {
         kind: 'type',
@@ -593,6 +599,19 @@ const scenes: Scene[] = [
 // Escape `<` so the serialized scenes can never break out of the
 // <script type="application/json"> tag (e.g. a stray "</script>").
 const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
+
+// Tab rows in scene order: the client script pairs the Nth tab with the Nth
+// scene, so every CLI scene must come before the SDK scenes.
+const tabRows = [
+  {
+    label: t.hero.tabGroupCli,
+    scenes: scenes.filter((s) => s.group === 'cli'),
+  },
+  {
+    label: t.hero.tabGroupSdk,
+    scenes: scenes.filter((s) => s.group === 'sdk'),
+  },
+];
 ---
 
 <section class="hero scanlines" id="hero">
@@ -669,22 +688,38 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
         role="group"
         aria-label={t.hero.terminalSceneLabel}
       >
-        {scenes.map((scene, i) => (
-          <button
-            class:list={['hero-term-mode', { active: i === 0 }]}
-            aria-pressed={i === 0 ? 'true' : 'false'}
-            data-hero-mode={scene.id}
-            type="button"
-          >
-            <img
-              src={scene.icon}
-              alt={scene.iconAlt ?? ''}
-              class="hero-term-mode-icon"
-              width="18"
-              height="18"
-            />
-            <span class="hero-term-mode-name">{scene.name}</span>
-          </button>
+        {tabRows.map((row) => (
+          <div class="hero-term-row" role="group" aria-label={row.label}>
+            <span class="hero-term-row-label" aria-hidden="true">
+              {row.label}
+            </span>
+            <div
+              class="hero-term-row-tabs"
+              style={`--hero-tab-count: ${row.scenes.length}`}
+            >
+              {row.scenes.map((scene) => {
+                const first = scene.id === scenes[0].id;
+                return (
+                  <button
+                    class:list={['hero-term-mode', { active: first }]}
+                    aria-pressed={first ? 'true' : 'false'}
+                    data-hero-mode={scene.id}
+                    title={scene.desc}
+                    type="button"
+                  >
+                    <img
+                      src={scene.icon}
+                      alt={scene.iconAlt ?? ''}
+                      class="hero-term-mode-icon"
+                      width="18"
+                      height="18"
+                    />
+                    <span class="hero-term-mode-name">{scene.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         ))}
       </div>
     </div>
@@ -816,21 +851,33 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
     word-break: break-word;
   }
 
-  /* 12-column grid: the setup/CLI/exec row holds four tabs and the SDK row
-     holds three, each row filling the full width. */
+  /* One row per surface (CLI commands, runtime SDKs). The label column has a
+     fixed width so both rows of tabs start at the same edge, and each row's
+     tabs share the remaining width. */
   .hero-term-modes {
     display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: var(--space-sm);
     margin-top: var(--space-md);
   }
 
-  .hero-term-mode {
-    grid-column: span 3;
+  .hero-term-row {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-sm);
   }
 
-  .hero-term-mode:nth-child(n + 5) {
-    grid-column: span 4;
+  .hero-term-row-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+  }
+
+  .hero-term-row-tabs {
+    display: grid;
+    grid-template-columns: repeat(var(--hero-tab-count), minmax(0, 1fr));
+    gap: var(--space-sm);
   }
 
   .hero-term-mode {
