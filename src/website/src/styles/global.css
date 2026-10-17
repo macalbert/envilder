@@ -176,13 +176,13 @@ html.smooth-scroll {
 
   --color-primary: #2f5d32; /* forest green — links, small accents */
   --color-primary-dim: #1f3326; /* deep forest ink */
-  --color-secondary: #5f7d3a; /* olive */
-  --color-secondary-dim: #4a6330; /* deeper olive */
-  --color-accent: #4f8a2b; /* leaf green — link hover */
+  --color-secondary: #4a6330; /* olive (AA on cream) */
+  --color-secondary-dim: #3b5026; /* deeper olive */
+  --color-accent: #3d6b22; /* leaf green — link hover (AA on cream) */
 
   --color-text: #1b2a1f; /* forest ink */
   --color-text-muted: #47533f; /* muted ink */
-  --color-text-dim: #7b8270; /* hint text */
+  --color-text-dim: #4d5644; /* hint text (AA on cream surfaces) */
 
   --color-success: #3f7a3a; /* green */
   --color-warning: #9a741a; /* ochre */
@@ -779,7 +779,7 @@ pre code,
   [data-theme="cream"] {
     --color-border: #8a7d62;
     --color-text-muted: #2a3526;
-    --color-text-dim: #4d5644;
+    --color-text-dim: #3f4838;
   }
 
   :focus-visible {
