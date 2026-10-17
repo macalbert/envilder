@@ -427,17 +427,28 @@ the process: your command and every process it starts can read them. It also lea
 
 ### How it compares
 
-| Tool | Where secrets live | How it differs from Envilder |
-|------|--------------------|------------------------------|
-| `chamber exec` | AWS SSM | AWS only. Variable names are derived from parameter paths under a service prefix instead of an explicit, reviewable mapping |
-| `aws-vault exec` | Your OS keychain | Injects AWS credentials, not application secrets. Works well alongside Envilder to authenticate it |
-| `doppler run`, `infisical run` | Their own secrets platform | You move your secrets into their store. Envilder reads them where they already are |
-| `op run` | 1Password | Secrets live in 1Password vaults, not in AWS SSM or Azure Key Vault |
-| `dotenvx` | Encrypted `.env` committed to Git | Secret values live in the repo, encrypted. Envilder keeps only names and paths in Git |
-| `direnv` | `.envrc` in your working tree | Loads variables from a file on disk. It does not fetch from a cloud provider by itself |
+Envilder is not the only tool that maps variables to cloud secrets and runs a command with them.
+This table was checked against each project's official documentation in October 2026.
 
-Envilder's niche: secrets already in AWS SSM or Azure Key Vault, one mapping file shared by the
-CLI, the GitHub Action, and the runtime SDKs, and no extra service to run or pay for.
+| Tool | Where secrets live | Compared with Envilder |
+|------|--------------------|------------------------|
+| [fnox](https://github.com/jdx/fnox) (`fnox exec`) | Where they already are: AWS SSM Parameter Store, AWS Secrets Manager, Azure Key Vault, and many more providers | Closest match. Per-variable mapping in `fnox.toml`, in-memory exec, and `.env` export. Supports far more providers, plus profiles and encrypted-in-Git secrets. No dedicated GitHub Action or language SDKs |
+| [varlock](https://github.com/dmno-dev/varlock) (`varlock run`) | Where they already are, through plugins: `awsParam()`, `awsSecret()`, Azure Key Vault, and many more | Close match. Mapping in `.env.schema`, plus schema validation, types, and log redaction. Has a GitHub Action. Its Python and C# integrations read the values injected by `varlock run` instead of fetching them from the provider |
+| [vals](https://github.com/helmfile/vals) (`vals exec`) | Where they already are: `ref+awsssm://`, `ref+awssecrets://`, `ref+azurekeyvault://`, and more | Per-variable mapping in a YAML file and an exec mode. Built for Helm and helmfile users; library for Go only |
+| [chamber](https://github.com/segmentio/chamber) (`chamber exec`) | AWS SSM Parameter Store (default) or AWS Secrets Manager. AWS only | Loads every secret under a service path. Variable names are the uppercased key names, with no per-variable mapping file |
+| [teller](https://github.com/tellerops/teller) (`teller run`) | AWS SSM Parameter Store, AWS Secrets Manager, Google Secret Manager, HashiCorp Vault, and others | Per-variable mapping in `.teller.yml`. Version 2 has no Azure Key Vault provider, and there has been no release since May 2024 |
+| [sops](https://github.com/getsops/sops) (`sops exec-env`) | Encrypted values in files committed to Git. AWS KMS, Azure Key Vault, age, or PGP keys only decrypt them | Also injects secrets into a child process without writing them to disk. The secret values live in your repository; Key Vault holds the key, not the secrets |
+| [dotenvx](https://github.com/dotenvx/dotenvx) (`dotenvx run`) | Encrypted values in a `.env` committed to Git, or `op://` and `bw://` references to 1Password and Bitwarden | Works without a cloud account. Secret values live encrypted in your repository, and you manage the decryption key. No AWS or Azure secret stores |
+| [1Password CLI](https://www.1password.dev/cli/secrets-environment-variables/) (`op run`) | 1Password vaults or Environments. One-way sync to AWS Secrets Manager (beta) | An env file of `op://` references works like a mapping file, but the values must live in 1Password. It cannot read AWS SSM or Azure Key Vault |
+| [Doppler](https://docs.doppler.com/docs/accessing-secrets) (`doppler run`) | Doppler's hosted platform, with copies synced out to AWS or Azure | You move secrets into Doppler; its AWS integrations push out and cannot import. `doppler run` keeps an encrypted fallback snapshot on disk by default |
+| [Infisical](https://github.com/Infisical/infisical) (`infisical run`) | Infisical, hosted or self-hosted (open source), with copies synced out to AWS or Azure | A separate secrets store you run or rent. Importing from AWS or Azure copies the secrets into Infisical |
+| [aws-vault](https://github.com/ByteNess/aws-vault) (`aws-vault exec`) | AWS credentials in your OS keychain or password manager | Injects temporary AWS credentials, not application secrets. It can authenticate Envilder: `aws-vault exec dev -- envilder exec -- npm run dev`. The original 99designs project is abandoned; use the ByteNess fork |
+| [direnv](https://github.com/direnv/direnv) | Whatever your `.envrc` shell script sets | No built-in secret provider and no mapping file. Exported values stay in your interactive shell, available to every process you start from it |
+
+Choose Envilder when your secrets already live in AWS SSM Parameter Store or Azure Key Vault and
+you want one plain JSON mapping shared by the CLI, a dedicated GitHub Action, and runtime SDKs for
+.NET, Python, and Node.js that read from the provider in-process. If you need many providers, schema
+validation, or secrets encrypted in Git, fnox, varlock, or sops may fit better.
 
 ## 🏁 What's Next
 
