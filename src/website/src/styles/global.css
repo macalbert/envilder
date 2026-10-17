@@ -1,5 +1,5 @@
 /* ── Envilder Design System ─────────────────────────────── */
-/* Retro Game Boy · Pixel accents · Professional             */
+/* Retro Game Boy · Cream light · Pixel accents              */
 
 /* ── Reset ────────────────────────────────────────────── */
 *,
@@ -51,6 +51,9 @@ html.smooth-scroll {
   --color-nav-bg: rgba(24, 32, 22, 0.95);
   --color-nav-mobile: rgba(24, 32, 22, 0.98);
   --color-btn-text: #182016; /* dark bg for button labels */
+  --color-cta: var(--color-primary); /* call-to-action fill */
+  --color-cta-text: var(--color-btn-text); /* call-to-action label */
+  --color-cta-shadow: var(--color-primary-dim); /* call-to-action shadow */
   --color-code-bg: #1a2418; /* dark green-tinted code blocks */
   --color-code-header: #202c1e; /* slightly lighter for headers */
   --color-code-text: var(--color-text);
@@ -80,6 +83,7 @@ html.smooth-scroll {
 
   /* Typography */
   --font-pixel: "Press Start 2P", monospace;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
   --font-body:
     "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
@@ -109,49 +113,51 @@ html.smooth-scroll {
   --transition-base: 250ms ease;
 }
 
-/* ── Theme: light (US Super Nintendo SNES) ────────────── */
+/* ── Theme: light (cream paper · forest ink · lime CTA) ── */
 /*
- * Inspired by the US SNES controller palette:
- * #b5b6e4 · #4f43ae · #908a99 · #cec9cc · #211a21
- * Violet (#4f43ae) is reserved for small accents:
- * links, buttons, badges, and tiny section titles.
- * The base is neutral grey-lavender for readability.
+ * Warm cream base with deep forest-green ink. Lime is reserved for
+ * call-to-action buttons only (it is unreadable as text on cream),
+ * paired with a hard ink offset shadow. Links and small accents use
+ * the forest green so they keep contrast.
  */
 [data-theme="light"] {
-  --color-bg: #f0eff5; /* white with subtle lavender tint */
-  --color-bg-alt: #e8e6f0; /* soft lavender band */
-  --color-surface: #ffffff; /* pure white cards */
-  --color-surface-alt: #ecebf3; /* surface with violet hint */
-  --color-border: #cec9cc; /* SNES light grey */
-  --color-border-light: #b8b4b6; /* slightly deeper grey */
+  --color-bg: #f5efe4; /* cream paper */
+  --color-bg-alt: #ede5d5; /* deeper cream band */
+  --color-surface: #fbf8f1; /* off-white cards */
+  --color-surface-alt: #f1eadc; /* surface hover */
+  --color-border: #d8cdb8; /* sand border */
+  --color-border-light: #1f3326; /* ink frame for pixel cards */
 
-  --color-primary: #4f43ae; /* SNES violet — links, buttons, small accents */
-  --color-primary-dim: #3d3490; /* dimmed violet */
-  --color-secondary: #908a99; /* SNES grey-mauve */
-  --color-secondary-dim: #7a7484; /* deeper mauve */
-  --color-accent: #b5b6e4; /* SNES lavender highlight */
+  --color-primary: #2f5d32; /* forest green — links, small accents */
+  --color-primary-dim: #1f3326; /* deep forest ink */
+  --color-secondary: #5f7d3a; /* olive */
+  --color-secondary-dim: #4a6330; /* deeper olive */
+  --color-accent: #4f8a2b; /* leaf green — link hover */
 
-  --color-text: #211a21; /* SNES near-black */
-  --color-text-muted: #5c5462; /* dark mauve-grey */
-  --color-text-dim: #908a99; /* SNES grey-mauve */
+  --color-text: #1b2a1f; /* forest ink */
+  --color-text-muted: #47533f; /* muted ink */
+  --color-text-dim: #7b8270; /* hint text */
 
-  --color-success: #4f7a5c; /* muted green */
-  --color-warning: #a09040; /* warm yellow */
+  --color-success: #3f7a3a; /* green */
+  --color-warning: #9a741a; /* ochre */
   --color-error: #a04848; /* muted red */
 
-  --color-nav-bg: rgba(240, 239, 245, 0.92);
-  --color-nav-mobile: rgba(240, 239, 245, 0.98);
-  --color-btn-text: #ffffff; /* white text on violet buttons */
-  --color-code-bg: #e6e4ee; /* lavender-tinted code block */
-  --color-code-header: #dddae8; /* slightly deeper header */
+  --color-nav-bg: rgba(245, 239, 228, 0.92);
+  --color-nav-mobile: rgba(245, 239, 228, 0.98);
+  --color-btn-text: #f5efe4; /* cream text on forest fills */
+  --color-cta: #c6ec5a; /* lime call-to-action fill */
+  --color-cta-text: #1b2a1f; /* ink label on lime */
+  --color-cta-shadow: #1b2a1f; /* hard ink offset shadow */
+  --color-code-bg: #ede5d5; /* cream code block */
+  --color-code-header: #e4d9c4; /* slightly deeper header */
   --color-sponsor: #c74b8e; /* GitHub sponsor pink — light */
   --color-prompt: #b0468a; /* terminal prompt accent (Starship-style) */
   --color-path: #3f7d8c; /* terminal directory segment (teal) */
 
   --pixel-shadow: 4px 4px 0 var(--color-border);
   --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);
-  --glow-primary: 0 0 20px rgba(79, 67, 174, 0.12);
-  --glow-secondary: 0 0 15px rgba(181, 182, 228, 0.15);
+  --glow-primary: 0 0 20px rgba(47, 93, 50, 0.12);
+  --glow-secondary: 0 0 15px rgba(198, 236, 90, 0.2);
 }
 
 /* ── Base ─────────────────────────────────────────────── */
@@ -220,25 +226,27 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-pixel);
-  line-height: 1.6;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-optical-sizing: auto;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
 }
 
 h1 {
-  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  font-size: clamp(2rem, 5vw, 3.25rem);
   color: var(--color-text);
 }
 
 h2 {
-  font-size: clamp(0.9rem, 2vw, 1.2rem);
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
   color: var(--color-text);
   margin-bottom: var(--space-lg);
 }
 
 h3 {
-  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
-  color: var(--color-text-muted);
+  font-size: clamp(1.15rem, 2vw, 1.35rem);
+  color: var(--color-text);
 }
 
 p {
@@ -317,10 +325,10 @@ pre code,
 }
 
 .btn-primary {
-  background: var(--color-primary);
-  color: var(--color-btn-text);
-  border-color: var(--color-primary);
-  box-shadow: var(--pixel-shadow-primary);
+  background: var(--color-cta);
+  color: var(--color-cta-text);
+  border-color: var(--color-cta-shadow);
+  box-shadow: 4px 4px 0 var(--color-cta-shadow);
 }
 
 .btn-primary:hover {

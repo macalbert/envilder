@@ -26,7 +26,7 @@ The site uses `data-theme` attribute on `<html>`. Two themes are supported:
 | Theme | Selector | Palette |
 |-------|----------|---------|
 | Retro (default) | `:root` | Game Boy green |
-| Light | `[data-theme="light"]` | Warm neutrals |
+| Light | `[data-theme="light"]` | Cream paper, forest ink, lime CTA |
 
 ### Rules
 
@@ -70,12 +70,17 @@ Use the spacing scale defined in `global.css`:
 
 | Use | Font | Access |
 |-----|------|--------|
-| Section titles / pixel style | Press Start 2P | Via `.pixel-card h3` or custom class |
+| Headings (`h1`–`h4`) | Fraunces | `var(--font-display)` (default for headings) |
+| Pixel accents (logo, buttons, labels) | Press Start 2P | `var(--font-pixel)` |
 | Body text | Inter | Default (inherited) |
 | Code / terminal | JetBrains Mono | `<code>`, `<pre>`, or mono class |
 
 - Use `clamp()` for fluid typography
 - Never use fixed `px` font sizes
+- Keep the pixel font for short labels only; long headings use the display font
+
+Primary buttons use `--color-cta`, `--color-cta-text` and `--color-cta-shadow`
+(lime fill in the light theme). Links keep `--color-primary`.
 
 ## Component Patterns
 
