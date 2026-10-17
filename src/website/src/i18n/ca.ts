@@ -202,6 +202,10 @@ export const ca: Translations = {
         a: "No. Els valors es queden a AWS SSM Parameter Store o Azure Key Vault. envilder.json només conté noms de variables i rutes de secrets, així que se'n pot fer commit sense risc. No hi ha cap servidor ni servei allotjat d'Envilder.",
       },
       {
+        q: 'Envilder té un mode exec?',
+        a: "Sí. Des de la CLI v0.15.0, envilder exec -- <ordre> resol els secrets del teu map file i arrenca l'ordre amb ells com a variables d'entorn, sense escriure cap fitxer .env. Funciona amb AWS SSM Parameter Store i Azure Key Vault.",
+      },
+      {
         q: 'En què es diferencia envilder exec d’un fitxer .env?',
         a: "exec resol els secrets i els passa a la teva ordre com a variables d'entorn, de manera que no s'escriu res al disc. Falla de manera tancada: si un secret falta, és buit o no es pot llegir, l'ordre no arrenca. L'ordre i els processos que llança poden llegir els valors; exec no és un sandbox.",
       },

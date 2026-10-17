@@ -202,6 +202,10 @@ export const en: Translations = {
         a: 'No. Values stay in AWS SSM Parameter Store or Azure Key Vault. envilder.json holds only variable names and secret paths, so it is safe to commit. There is no Envilder server or hosted service.',
       },
       {
+        q: 'Does Envilder have an exec mode?',
+        a: 'Yes. Since CLI v0.15.0, envilder exec -- <command> resolves the secrets in your map file and starts the command with them as environment variables, without writing a .env file. It works with AWS SSM Parameter Store and Azure Key Vault.',
+      },
+      {
         q: 'How is envilder exec different from a .env file?',
         a: 'exec resolves the secrets and passes them to your command as environment variables, so nothing is written to disk. It is fail-closed: if a secret is missing, empty or unreadable, the command does not start. The command and the processes it launches can still read the values; exec is not a sandbox.',
       },
