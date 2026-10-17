@@ -706,7 +706,7 @@ envilder exec -- docker compose up`} />
         <CodeBlock lang="bash" code={execUcLocalstackDocker} />
         <p>
           {t.docs.execUcLocalstackExamplesDesc}{' '}
-          <a href="https://github.com/macalbert/envilder-examples" target="_blank" rel="noopener noreferrer"><code>envilder-examples</code></a>
+          <a href="https://github.com/macalbert/envilder-examples/tree/main/cli/aws" target="_blank" rel="noopener noreferrer"><code>envilder-examples</code></a>
         </p>
 
         <h3>{t.docs.execUcTestsTitle}</h3>
@@ -1371,6 +1371,19 @@ jobs:
     color: var(--color-text-muted);
     margin-bottom: var(--space-lg);
     line-height: 1.7;
+  }
+
+  /* Inline links in prose must read as links, even when they wrap <code> */
+  .docs-section p a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .docs-section p a code {
+    color: inherit;
+    border-color: currentColor;
+    text-decoration: inherit;
+    text-underline-offset: 2px;
   }
 
   /* Spacing for code blocks inside docs */
