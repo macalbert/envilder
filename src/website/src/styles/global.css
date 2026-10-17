@@ -744,6 +744,14 @@ pre code,
   outline-offset: 3px;
 }
 
+/* Terminals stay dark in every theme, so their focus ring uses the fixed
+   terminal palette instead of the theme primary; drawn inside the frame */
+.terminal :focus-visible,
+.hero-term-pause:focus-visible {
+  outline-color: var(--term-highlight);
+  outline-offset: -3px;
+}
+
 :focus:not(:focus-visible) {
   outline: none;
 }
