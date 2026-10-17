@@ -53,6 +53,9 @@ No SaaS middleman. One versioned mapping contract. Secrets stay in your cloud.
 - **No single mapping contract.** Your cloud provider may be the source of truth for secret
   values, but each environment still needs to know how application variables map to those
   secrets. Without a versioned contract, dev, staging, and production configurations drift apart.
+- **The `.env` file is readable by everything in your repo.** `.gitignore` keeps it out of commits,
+  not out of reach. Editors, indexers, install scripts, and AI coding agents can all read the
+  plaintext values sitting in your working tree.
 
 ## How Envilder solves it
 
@@ -417,6 +420,24 @@ layer that makes those secrets usable consistently across local development, CI/
 
 Use Envilder when your secrets already live in your cloud provider and you want one versioned
 `envilder.json` mapping contract everywhere your code runs.
+
+`envilder exec` is not a sandbox either. It keeps secrets off the disk, but it does not isolate
+the process: your command and every process it starts can read them. It also leaves an existing
+`.env` file untouched, so delete it yourself when you move from pull mode to exec mode.
+
+### How it compares
+
+| Tool | Where secrets live | How it differs from Envilder |
+|------|--------------------|------------------------------|
+| `chamber exec` | AWS SSM | AWS only. Variable names are derived from parameter paths under a service prefix instead of an explicit, reviewable mapping |
+| `aws-vault exec` | Your OS keychain | Injects AWS credentials, not application secrets. Works well alongside Envilder to authenticate it |
+| `doppler run`, `infisical run` | Their own secrets platform | You move your secrets into their store. Envilder reads them where they already are |
+| `op run` | 1Password | Secrets live in 1Password vaults, not in AWS SSM or Azure Key Vault |
+| `dotenvx` | Encrypted `.env` committed to Git | Secret values live in the repo, encrypted. Envilder keeps only names and paths in Git |
+| `direnv` | `.envrc` in your working tree | Loads variables from a file on disk. It does not fetch from a cloud provider by itself |
+
+Envilder's niche: secrets already in AWS SSM or Azure Key Vault, one mapping file shared by the
+CLI, the GitHub Action, and the runtime SDKs, and no extra service to run or pay for.
 
 ## 🏁 What's Next
 
