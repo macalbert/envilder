@@ -78,6 +78,8 @@ export const en: Translations = {
     setupAzureComment2: '# 2. Push the .env values to Azure Key Vault',
     sdkCommentLoad: '# Load the same contract at runtime',
     terminalSceneLabel: 'Terminal demo scene',
+    terminalPause: 'Pause demo',
+    terminalPlay: 'Resume demo',
   },
   trust: {
     label: 'WORKS WITH',

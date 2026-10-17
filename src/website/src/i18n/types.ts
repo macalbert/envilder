@@ -60,6 +60,8 @@ export interface HeroTranslations {
   setupAzureComment2: string;
   sdkCommentLoad: string;
   terminalSceneLabel: string;
+  terminalPause: string;
+  terminalPlay: string;
 }
 
 export interface TrustTranslations {

@@ -340,7 +340,9 @@ const docsDropdown = docsNavGroups.map((group) => ({
     width: 20px;
     height: 2px;
     background: var(--color-text);
-    transition: all var(--transition-fast);
+    transition:
+      transform var(--transition-fast),
+      opacity var(--transition-fast);
   }
 
   @media (min-width: 900px) {
@@ -412,5 +414,30 @@ const docsDropdown = docsNavGroups.map((group) => ({
     dropdown.querySelector('.nav-dropdown-menu')?.addEventListener('click', (e) => {
       e.stopPropagation();
     });
+
+    // role="button" on a link: Space must activate it like a real button
+    dropdownBtn.addEventListener('keydown', (e) => {
+      if ((e as KeyboardEvent).key === ' ') {
+        e.preventDefault();
+        (dropdownBtn as HTMLElement).click();
+      }
+    });
   }
+
+  // Escape closes the open dropdown or mobile menu and returns focus to
+  // the control that opened it
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (dropdown?.classList.contains('open')) {
+      dropdown.classList.remove('open');
+      dropdownBtn?.setAttribute('aria-expanded', 'false');
+      (dropdownBtn as HTMLElement | null)?.focus();
+      return;
+    }
+    if (toggle && navbar?.classList.contains('nav-open')) {
+      navbar.classList.remove('nav-open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.focus();
+    }
+  });
 </script>

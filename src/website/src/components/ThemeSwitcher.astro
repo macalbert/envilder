@@ -64,12 +64,16 @@ const t = useTranslations(lang);
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
     padding: 3px 5px;
     background: none;
     border: none;
     color: var(--color-text-dim);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition:
+      color var(--transition-fast),
+      background-color var(--transition-fast);
   }
 
   .theme-btn:hover {
@@ -90,6 +94,15 @@ const t = useTranslations(lang);
       '.theme-btn[data-theme-value]',
     );
 
+    // Keep the browser UI (mobile address bar) matching the page background
+    function syncThemeColor() {
+      const bg = getComputedStyle(document.documentElement)
+        .getPropertyValue('--color-bg')
+        .trim();
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (bg && meta) meta.setAttribute('content', bg);
+    }
+
     function syncButtons(theme: string) {
       buttons.forEach((btn) => {
         const isActive = btn.dataset.themeValue === theme;
@@ -102,6 +115,7 @@ const t = useTranslations(lang);
     function applyTheme(theme: string, persist = true) {
       document.documentElement.setAttribute('data-theme', theme);
       syncButtons(theme);
+      syncThemeColor();
       if (persist) localStorage.setItem('envilder-theme', theme);
     }
 

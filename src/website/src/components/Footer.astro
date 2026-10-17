@@ -301,12 +301,17 @@ const links = {
   }
 
   .lang-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
     font-family: var(--font-mono);
     font-size: 0.7rem;
     color: var(--color-text-dim);
     padding: 2px 6px;
     text-decoration: none;
-    transition: all var(--transition-fast);
+    transition:
+      color var(--transition-fast),
+      background-color var(--transition-fast);
   }
 
   .lang-link:hover {

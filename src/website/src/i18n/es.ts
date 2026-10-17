@@ -77,6 +77,8 @@ export const es: Translations = {
     setupAzureComment2: '# 2. Sube los valores del .env a Azure Key Vault',
     sdkCommentLoad: '# Carga el mismo contrato en runtime',
     terminalSceneLabel: 'Escena de demostración del terminal',
+    terminalPause: 'Pausa la demostración',
+    terminalPlay: 'Reanuda la demostración',
   },
   trust: {
     label: 'COMPATIBLE CON',

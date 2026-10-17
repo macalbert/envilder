@@ -77,6 +77,8 @@ export const ca: Translations = {
     setupAzureComment2: '# 2. Puja els valors del .env a Azure Key Vault',
     sdkCommentLoad: '# Carrega el mateix contracte en runtime',
     terminalSceneLabel: 'Escena de demostració del terminal',
+    terminalPause: 'Pausa la demostració',
+    terminalPlay: 'Reprèn la demostració',
   },
   trust: {
     label: 'COMPATIBLE AMB',

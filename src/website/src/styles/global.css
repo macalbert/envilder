@@ -11,6 +11,7 @@
 }
 
 html {
+  color-scheme: dark;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -207,6 +208,12 @@ html.smooth-scroll {
   --glow-secondary: 0 0 15px rgba(198, 236, 90, 0.2);
 }
 
+/* Native controls and scrollbars follow the light palettes */
+html[data-theme="light"],
+html[data-theme="cream"] {
+  color-scheme: light;
+}
+
 /* ── Base ─────────────────────────────────────────────── */
 body {
   font-family: var(--font-body);
@@ -278,6 +285,13 @@ h4 {
   font-optical-sizing: auto;
   line-height: 1.15;
   letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+/* Anchor targets land below the fixed navbar (zero specificity so
+   page-specific offsets still win) */
+:where([id]) {
+  scroll-margin-top: calc(var(--nav-height) + var(--space-lg));
 }
 
 h1 {
@@ -366,7 +380,12 @@ pre code,
   padding: var(--space-md) var(--space-xl);
   border: 2px solid transparent;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
   text-decoration: none;
   position: relative;
 }
