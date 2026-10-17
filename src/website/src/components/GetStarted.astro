@@ -97,21 +97,23 @@ const t = useTranslations(lang);
           </span>
           <span class="line">&nbsp;</span>
           <span class="line">
+            <span class="comment">{t.getStarted.commentExec}</span>
+          </span>
+          <span class="line">
+            <span class="prompt">$</span><span class="command"> npx envilder</span><span class="flag"> exec</span><span class="output"> --</span><span class="command"> npm start</span>
+          </span>
+          <span class="line">
+            <span class="output">envilder: 1 secret resolved (aws, profile=default) → npm …</span>
+          </span>
+          <span class="line">&nbsp;</span>
+          <span class="line">
             <span class="comment">{t.getStarted.commentPull}</span>
           </span>
           <span class="line">
             <span class="prompt">$</span><span class="command"> npx envilder</span>
           </span>
-          <span class="line">&nbsp;</span>
           <span class="line">
             <span class="highlight">✔</span>{' '}<span class="output">{t.getStarted.doneMessage}</span>
-          </span>
-          <span class="line">&nbsp;</span>
-          <span class="line">
-            <span class="comment">{t.getStarted.commentPush}</span>
-          </span>
-          <span class="line">
-            <span class="prompt">$</span><span class="command"> npx envilder</span><span class="flag"> --push</span><span class="flag"> --key</span><span class="command">=API_KEY</span><span class="flag"> --value</span><span class="command">=example-not-a-real-secret</span><span class="flag"> --secret-path</span><span class="command">=/app/api-key</span>
           </span>
         </TerminalMockup>
 

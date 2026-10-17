@@ -1,0 +1,94 @@
+---
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+
+// FAQPage structured data mirrors the visible questions exactly
+const faqSchema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  inLanguage: lang,
+  mainEntity: t.faq.items.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a },
+  })),
+}).replace(/</g, '\\u003c');
+---
+
+<section class="section section-alt" id="faq">
+  <div class="container">
+    <div class="section-title">
+      <h2>{t.faq.title}<span>{t.faq.titleAccent}</span></h2>
+    </div>
+
+    <div class="faq-list">
+      {t.faq.items.map((item, i) => (
+        <details class="faq-item" open={i === 0}>
+          <summary>{item.q}</summary>
+          <p>{item.a}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+  <script type="application/ld+json" set:html={faqSchema} />
+</section>
+
+<style>
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .faq-item {
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    padding: var(--space-md) var(--space-lg);
+  }
+
+  .faq-item[open] {
+    border-color: var(--color-primary);
+  }
+
+  .faq-item summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    min-height: 24px;
+    font-size: clamp(1rem, 1.6vw, 1.1rem);
+    font-weight: 600;
+    color: var(--color-text);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-item summary::after {
+    content: '+';
+    flex-shrink: 0;
+    font-family: var(--font-pixel);
+    font-size: 0.75rem;
+    color: var(--color-primary);
+  }
+
+  .faq-item[open] summary::after {
+    content: '−';
+  }
+
+  .faq-item p {
+    margin-top: var(--space-md);
+    max-width: none;
+  }
+</style>
