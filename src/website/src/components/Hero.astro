@@ -46,41 +46,10 @@ const jsonLines: Line[] = [
 
 const cliRule = '━'.repeat(60);
 
-// One LocalStack log line, with the same column padding the container uses.
-const localstackLog = (
-  time: string,
-  logger: string,
-  message: string,
-  thread = '  MainThread',
-): Line => ({
-  kind: 'output',
-  segments: [
-    { text: `2026-10-16T${time}  `, cls: 'comment' },
-    { text: 'INFO', cls: 'flag' },
-    { text: ` --- [${thread}] `, cls: 'output' },
-    { text: logger.padEnd(26), cls: 'command' },
-    { text: ` : ${message}`, cls: 'output' },
-  ],
-});
-
 const outputLine = (text: string, cls = 'output'): Line => ({
   kind: 'output',
   segments: [{ text, cls }],
 });
-
-const twinApp = (time: string, app: string, port: number): Line =>
-  localstackLog(
-    time,
-    'l.pro.apps.twin_plugin',
-    `Apps: ${app} ready at http://${app}.localhost.localstack.cloud:4566 -> 127.0.0.1:${port}`,
-  );
-
-const alembicPlugin = (name: string): Line =>
-  localstackLog(
-    '23:21:09.626',
-    'alembic.runtime.plugins',
-    `setup plugin alembic.${name}`,
-  );
 
 // Mirrors EnvironmentVariable.maskSecretPath: keep the last 3 characters.
 const maskPath = (path: string) => '*'.repeat(path.length - 3) + path.slice(-3);
@@ -247,29 +216,95 @@ const sdkScene = (opts: {
 });
 
 const scenes: Scene[] = [
-  setupScene({
-    id: 'setup-aws',
-    icon: '/AWS.svg',
-    provider: 'AWS',
-    mapComment: t.hero.setupComment1,
-    pushComment: t.hero.setupComment2,
-    configLines: ['  "$config": {', '    "provider": "aws"', '  },'],
-    secretPath: '/localstack/prod/auth-token',
-  }),
-  setupScene({
-    id: 'setup-azure',
-    icon: '/Azure.svg',
-    provider: 'Azure',
-    mapComment: t.hero.setupAzureComment1,
-    pushComment: t.hero.setupAzureComment2,
-    configLines: [
-      '  "$config": {',
-      '    "provider": "azure",',
-      '    "vaultUrl": "https://my-vault.vault.azure.net"',
-      '  },',
+  {
+    id: 'exec',
+    name: t.hero.tabExec,
+    desc: t.hero.tabExecDesc,
+    icon: '/favicon.svg',
+    group: 'cli',
+    lines: [
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.execMapComment, cls: 'comment' }],
+      },
+      {
+        kind: 'type',
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' cat ', cls: 'command' },
+          { text: 'envilder.json', cls: 'flag' },
+        ],
+      },
+      ...jsonLines,
+      { kind: 'blank' },
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.execComment1, cls: 'comment' }],
+      },
+      {
+        kind: 'type',
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' npx envilder', cls: 'command' },
+          { text: ' exec', cls: 'flag' },
+          { text: ' --', cls: 'output' },
+          { text: ' docker run --rm', cls: 'command' },
+          { text: ' --env', cls: 'flag' },
+          { text: ' LOCALSTACK_AUTH_TOKEN', cls: 'command' },
+          { text: ' localstack/localstack', cls: 'command' },
+        ],
+      },
+      {
+        kind: 'output',
+        segments: [
+          {
+            text: 'envilder: 1 secret resolved (aws, profile=default) → ',
+            cls: 'output',
+          },
+          { text: 'docker …', cls: 'command' },
+        ],
+      },
+      { kind: 'pause', ms: 700 },
+      { kind: 'blank' },
+      outputLine('LocalStack version: 2026.10.0'),
+      {
+        kind: 'output',
+        segments: [
+          { text: '2026-10-16T23:21:04.821  ', cls: 'comment' },
+          { text: 'INFO', cls: 'flag' },
+          { text: ' --- [  MainThread] ', cls: 'output' },
+          { text: 'l.licensing.licensingv2'.padEnd(26), cls: 'command' },
+          {
+            text: ' : Successfully requested and activated new license ',
+            cls: 'output',
+          },
+          {
+            text: '00000000-0000-0000-0000-000000000000:ultimate',
+            cls: 'flag',
+          },
+          { text: ' 🔑✅', cls: 'output' },
+        ],
+      },
+      outputLine('Ready.', 'highlight'),
+      { kind: 'pause', ms: 1500 },
+      { kind: 'blank' },
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.execComment2, cls: 'comment' }],
+      },
+      {
+        kind: 'type',
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' ls -a', cls: 'command' },
+        ],
+      },
+      {
+        kind: 'output',
+        segments: [{ text: '.  ..  envilder.json', cls: 'output' }],
+      },
     ],
-    secretPath: 'localstack-prod-auth-token',
-  }),
+  },
   {
     id: 'cli',
     name: t.hero.tabPull,
@@ -373,116 +408,29 @@ const scenes: Scene[] = [
       },
     ],
   },
-  {
-    id: 'exec',
-    name: t.hero.tabExec,
-    desc: t.hero.tabExecDesc,
-    icon: '/favicon.svg',
-    group: 'cli',
-    lines: [
-      {
-        kind: 'type',
-        segments: [{ text: t.hero.execComment1, cls: 'comment' }],
-      },
-      {
-        kind: 'type',
-        segments: [
-          { text: '❯', cls: 'prompt', instant: true },
-          { text: ' npx envilder', cls: 'command' },
-          { text: ' exec', cls: 'flag' },
-          { text: ' --', cls: 'output' },
-          { text: ' docker run --rm', cls: 'command' },
-          { text: ' --env', cls: 'flag' },
-          { text: ' LOCALSTACK_AUTH_TOKEN', cls: 'command' },
-          { text: ' localstack/localstack', cls: 'command' },
-        ],
-      },
-      {
-        kind: 'output',
-        segments: [
-          {
-            text: 'envilder: 1 secret resolved (aws, profile=default) → ',
-            cls: 'output',
-          },
-          { text: 'docker …', cls: 'command' },
-        ],
-      },
-      { kind: 'pause', ms: 700 },
-      { kind: 'blank' },
-      outputLine('LocalStack version: 2026.10.0'),
-      outputLine('LocalStack build date: 2026-10-13'),
-      outputLine('LocalStack build git hash: 738d58ee'),
-      { kind: 'blank' },
-      outputLine('Docker not available'),
-      {
-        kind: 'output',
-        segments: [
-          { text: '2026-10-16T23:21:04.821  ', cls: 'comment' },
-          { text: 'INFO', cls: 'flag' },
-          { text: ' --- [  MainThread] ', cls: 'output' },
-          { text: 'l.licensing.licensingv2'.padEnd(26), cls: 'command' },
-          {
-            text: ' : Successfully requested and activated new license ',
-            cls: 'output',
-          },
-          {
-            text: '00000000-0000-0000-0000-000000000000:ultimate',
-            cls: 'flag',
-          },
-          { text: ' 🔑✅', cls: 'output' },
-        ],
-      },
-      localstackLog(
-        '23:21:05.607',
-        'localstack.utils.bootstrap',
-        'Execution of "_resolve_api_provider_specs" took 752.28ms',
-      ),
-      { kind: 'pause', ms: 900 },
-      twinApp('23:21:09.067', 'logodev', 4115),
-      twinApp('23:21:09.073', 'posthog', 4113),
-      twinApp('23:21:09.079', 'resend', 4114),
-      twinApp('23:21:09.086', 'stripe', 4111),
-      twinApp('23:21:09.096', 'twilio', 4112),
-      localstackLog(
-        '23:21:09.096',
-        'l.extensions.plugins',
-        'loaded 0 extensions',
-      ),
-      { kind: 'pause', ms: 400 },
-      alembicPlugin('autogenerate.schemas'),
-      alembicPlugin('autogenerate.tables'),
-      alembicPlugin('autogenerate.types'),
-      alembicPlugin('autogenerate.constraints'),
-      alembicPlugin('autogenerate.defaults'),
-      alembicPlugin('autogenerate.comments'),
-      alembicPlugin('ext.checkconstraint_byname'),
-      outputLine('Ready.', 'highlight'),
-      { kind: 'pause', ms: 1500 },
-      outputLine('Localstack runtime received signal 15'),
-      localstackLog(
-        '23:21:15.867',
-        'l.runtime.shutdown',
-        '[shutdown] Stopping all services',
-        'ime-Shutdown',
-      ),
-      { kind: 'blank' },
-      {
-        kind: 'type',
-        segments: [{ text: t.hero.execComment2, cls: 'comment' }],
-      },
-      {
-        kind: 'type',
-        segments: [
-          { text: '❯', cls: 'prompt', instant: true },
-          { text: ' ls -a', cls: 'command' },
-        ],
-      },
-      {
-        kind: 'output',
-        segments: [{ text: '.  ..  envilder.json', cls: 'output' }],
-      },
+  setupScene({
+    id: 'setup-aws',
+    icon: '/AWS.svg',
+    provider: 'AWS',
+    mapComment: t.hero.setupComment1,
+    pushComment: t.hero.setupComment2,
+    configLines: ['  "$config": {', '    "provider": "aws"', '  },'],
+    secretPath: '/localstack/prod/auth-token',
+  }),
+  setupScene({
+    id: 'setup-azure',
+    icon: '/Azure.svg',
+    provider: 'Azure',
+    mapComment: t.hero.setupAzureComment1,
+    pushComment: t.hero.setupAzureComment2,
+    configLines: [
+      '  "$config": {',
+      '    "provider": "azure",',
+      '    "vaultUrl": "https://my-vault.vault.azure.net"',
+      '  },',
     ],
-  },
+    secretPath: 'localstack-prod-auth-token',
+  }),
   sdkScene({
     id: 'nodejs',
     name: t.hero.tabNode,

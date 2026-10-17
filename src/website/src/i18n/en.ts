@@ -2,12 +2,11 @@ import type { Translations } from './types';
 
 export const en: Translations = {
   homeMeta: {
-    title:
-      'Load AWS SSM and Azure Key Vault secrets into .env, CI and runtime | Envilder',
+    title: 'Run apps with AWS SSM & Azure Key Vault secrets | Envilder',
     description:
-      'Open-source CLI, GitHub Action and SDKs that resolve secrets from AWS SSM Parameter Store or Azure Key Vault using one versioned JSON mapping.',
+      'Map env vars to AWS SSM or Azure Key Vault once, then run any command with the secrets in its environment. No .env on disk. Open-source CLI, Action and SDKs.',
     ogImageAlt:
-      'Envilder - open-source secret resolution for AWS SSM and Azure Key Vault',
+      'Envilder - run apps with AWS SSM and Azure Key Vault secrets, no .env file',
   },
   notFound: {
     title: 'Page not found | Envilder',
@@ -41,13 +40,13 @@ export const en: Translations = {
     ariaTheme: 'Theme',
   },
   hero: {
-    title1: 'Standardize how',
-    title2: 'your apps consume',
-    titleAccent: 'secrets.',
+    title1: 'Run your app with',
+    title2: 'cloud secrets.',
+    titleAccent: 'No .env file.',
     description:
-      'Stop reinventing secret loading in every project. Define one environment contract and resolve it everywhere.',
+      'Map each environment variable to an AWS SSM or Azure Key Vault path in envilder.json. One command resolves them and starts your app with the values in its environment.',
     positioning:
-      'Open-source secret resolution for AWS SSM and Azure Key Vault, across local development, CI/CD and application runtime.',
+      'Open source, with no server or SaaS in between: secrets stay in your cloud account. Need a file for a tool or CI? pull writes .env. Prefer code? SDKs for Node.js, Python and .NET.',
     descAws: 'AWS SSM',
     descAzure: 'Azure Key Vault',
     descOr: '·',
@@ -59,7 +58,7 @@ export const en: Translations = {
     tabPull: 'pull',
     tabPullDesc: 'writes .env',
     tabExec: 'exec',
-    tabExecDesc: 'secrets in memory, no .env',
+    tabExecDesc: 'runs your app, no .env',
     tabPush: 'push',
     tabPushDesc: 'uploads .env to the vault',
     tabNode: 'Node.js',
@@ -70,7 +69,7 @@ export const en: Translations = {
     tabDotnetDesc: 'at runtime',
     terminalComment1: '# 1. Map env vars to SSM paths',
     terminalComment2: '# 2. Resolve secrets into .env',
-    execComment1: '# Run any command with secrets in memory',
+    execComment1: '# Run your app with the secrets in its environment',
     execComment2: '# Nothing written to disk',
     setupComment1: '# 1. Map each variable to an SSM path',
     setupComment2: '# 2. Push the .env values to SSM Parameter Store',
@@ -80,9 +79,17 @@ export const en: Translations = {
     terminalSceneLabel: 'Terminal demo scene',
     terminalPause: 'Pause demo',
     terminalPlay: 'Resume demo',
+    execMapComment: '# Map each variable to a secret path',
   },
   trust: {
     label: 'WORKS WITH',
+  },
+  proof: {
+    ariaLabel: 'Adoption',
+    stars: 'GitHub stars',
+    npmMonthly: 'npm downloads last month',
+    pypiMonthly: 'PyPI downloads last month',
+    nugetTotal: 'NuGet downloads',
   },
   sponsors: {
     title: 'Sponsors',
@@ -90,163 +97,74 @@ export const en: Translations = {
     awsCreditsAlt: 'AWS Open Source Credits Program',
     awsCreditsLabel: 'AWS Open Source Credits',
   },
-  problemSolution: {
-    title: 'Why secret management ',
-    titleAccent: 'is broken',
-    titleSuffix: '',
-    subtitle:
-      'Every team, every stage, every runtime handles secrets differently. No standard. No consistency. No confidence.',
-    problems: [
-      {
-        icon: 'skull',
-        title: 'Fragmented across tools',
-        description:
-          'Local dev uses .env files. CI/CD reads from vault integrations. Production has its own method. Same app, different configuration workflows everywhere.',
-      },
-      {
-        icon: 'lock',
-        title: 'Secrets shared through unsafe channels',
-        description:
-          'API keys sent over Slack, .env files committed to repos, wiki pages with plain-text credentials. A security incident waiting to happen.',
-      },
-      {
-        icon: 'snail',
-        title: 'Configuration drift is inevitable',
-        description:
-          'No single source of truth for what secrets an app needs. Dev, staging, and production desync. Deployments fail. Nobody knows which config is correct.',
-      },
-    ],
-  },
   howItWorks: {
     title: 'How it ',
     titleAccent: 'works',
-    subtitle: 'Define. Resolve. Ship.',
+    subtitle: 'Map once. Run it anywhere.',
     stepLabel: 'STEP',
     steps: [
       {
-        title: 'Define the mapping model',
+        title: 'Map each variable once',
         description:
-          'A JSON file mapping env var names to cloud secret paths. Commit it. Review it in PRs. Diff it between environments. One model for every stage and runtime.',
+          'envilder.json lists env var names and their secret paths, never the values. Commit it and review changes in pull requests like any other code.',
       },
       {
-        title: 'Resolve with the CLI',
+        title: 'Run your app with exec',
         description:
-          'One command fetches every secret from your cloud vault and writes them to .env. Use it locally or in scripts. Same mapping, same behavior.',
+          'envilder exec resolves every mapped secret and starts your command with them in its environment. No .env file on disk, nothing to clean up, and the command never starts if a secret is missing.',
       },
       {
-        title: 'Load at runtime with SDKs',
+        title: 'Or load them in code',
         description:
-          'Skip the .env file entirely. Load secrets directly into your application at startup with native SDKs: Python, .NET, Node.js, and more.',
+          'Runtime SDKs for Node.js, Python and .NET resolve the same map in-process at startup.',
       },
       {
-        title: 'Push from dev to the vault',
+        title: 'Need a file? Use pull',
         description:
-          'Need to add or rotate a secret? Push values from your local environment back to the cloud provider. No console needed.',
-      },
-      {
-        title: 'Secrets stay in your vault',
-        description:
-          'No intermediaries. Your cloud manages the storage, rotation, and access control. Envilder resolves. It never stores.',
+          'Some tools and CI steps expect a .env file. pull writes one from the same map, and the GitHub Action does it in your workflows. Treat the generated file as a secret.',
       },
     ],
-    terminalFetched1: '✔ Fetched DB_PASSWORD  → ···word',
-    terminalFetched2: '✔ Fetched API_KEY      → ···key',
-    terminalFetched3: '✔ Fetched SECRET_TOKEN → ···oken',
-    terminalWritten: '✔ Environment file written to .env',
     sdkTabPython: 'Python',
     sdkTabDotnet: '.NET',
     sdkTabNodejs: 'Node.js',
-    pushTerminalPushed1: '✔ Pushed DB_PASSWORD  → /my-app/prod/db-password',
-    pushTerminalPushed2: '✔ Pushed API_KEY      → /my-app/prod/api-key',
-    pushTerminalPushed3: '✔ Pushed SECRET_TOKEN → /my-app/prod/secret-token',
   },
   features: {
     title: 'Why ',
     titleAccent: 'Envilder?',
     subtitle:
-      'Envilder is a resolution layer over your existing secret manager. Secrets stay in your cloud. The JSON mapping is just the contract that keeps every environment consistent.',
+      'Envilder is a resolution layer over the secret store you already run. It never stores secrets: the map file is the only thing it adds to your repo.',
     highlights: [
       {
-        icon: 'brick',
-        title: 'Zero Infrastructure',
+        icon: 'plug',
+        title: 'Secrets Stay Off Disk',
         description:
-          'No servers, no proxies, no SaaS middleman. Built on AWS SSM and Azure Key Vault, services you already use and pay for.',
+          'exec and the SDKs put values straight into the process environment. No plaintext .env left in the project folder, in backups or in a container image.',
+      },
+      {
+        icon: 'brick',
+        title: 'No Server, No SaaS',
+        description:
+          'Nothing to host or pay for. Envilder reads AWS SSM Parameter Store or Azure Key Vault directly with your own cloud credentials.',
       },
       {
         icon: 'clipboard',
-        title: 'One File, All Secrets',
+        title: 'One Reviewed Map File',
         description:
-          'A single JSON contract defines every secret for every environment. Git-versioned, PR-reviewable, diff-able. Your team reviews secret changes in the same PR as the code.',
-      },
-      {
-        icon: 'refresh',
-        title: 'Safe Secret Rotation',
-        description:
-          'Rotate values in AWS SSM or Azure Key Vault without changing envilder.json. Existing generated .env files update only when you rerun Envilder; runtime consumers must restart or resolve again.',
-      },
-      {
-        icon: 'cloud',
-        title: 'Your Secret Store, One Map Contract',
-        description:
-          'Keep secrets in the AWS SSM or Azure Key Vault setup you already use. Envilder preserves the envilder.json mapping contract across tools; provider credentials and secret migration stay provider-specific.',
-      },
-    ],
-    extrasTitle: 'Also included',
-    extras: [
-      {
-        icon: 'gear',
-        title: 'GitHub Action',
-        description:
-          'Pull secrets in CI/CD workflows. Same mapping, zero manual intervention.',
-      },
-      {
-        icon: 'refresh',
-        title: 'Bidirectional Sync',
-        description:
-          'Pull to .env or push .env values back to your cloud provider via CLI.',
-      },
-      {
-        icon: 'plug',
-        title: 'Secrets Never Touch Disk',
-        description:
-          'Runtime SDKs load secrets directly into memory at app startup. No .env files written to disk.',
+          'envilder.json is the single list of what each app needs, the same for local development, CI and production. Changes go through pull requests.',
       },
       {
         icon: 'lock',
-        title: 'Native IAM & RBAC',
+        title: 'Native IAM and RBAC',
         description:
-          'AWS IAM policies or Azure RBAC. No extra auth layer needed.',
-      },
-      {
-        icon: 'chart',
-        title: 'Provider-Native Access Logs',
-        description:
-          'CloudTrail or Azure Monitor can record provider access when configured. Envilder does not create an audit trail itself.',
-      },
-      {
-        icon: 'person',
-        title: 'AWS Profile Support',
-        description:
-          'Switch between AWS CLI profiles for multi-account setups.',
+          'Access is governed by AWS IAM or Azure RBAC, and CloudTrail or Azure Monitor can log it when configured. No extra auth layer.',
       },
     ],
-  },
-  demo: {
-    title: 'See it in ',
-    titleAccent: 'action',
-    subtitle:
-      'Watch how Envilder simplifies secret management in under 2 minutes.',
-    cliDemo: 'CLI Demo: Pull Secrets',
-    transcript:
-      'Demo command: envilder --map=envilder.json --envfile=.env. Envilder resolves mapped secrets from your configured cloud provider and writes the resulting variables to .env.',
-    ghaWorkflow: 'GitHub Action Workflow',
-    comingSoon: 'Coming soon',
   },
   providers: {
     title: 'Your cloud. ',
     titleAccent: 'Your choice.',
     subtitle:
-      'Envilder works today with AWS SSM Parameter Store and Azure Key Vault. GCP Secret Manager is planned and not available yet. Configure shipped providers in envilder.json or with CLI flags.',
+      'Envilder works today with AWS SSM Parameter Store and Azure Key Vault. Choose the provider in envilder.json or with CLI flags.',
     awsTitle: 'AWS SSM Parameter Store',
     awsDefault: 'Default provider',
     awsFeatures: [
@@ -263,17 +181,47 @@ export const en: Translations = {
       'Azure RBAC access control',
       'Azure Monitor access logging when configured',
     ],
-    gcpTitle: 'GCP Secret Manager',
-    gcpBadge: 'Planned',
-    gcpFeatures: [
-      'Planned GCP Secret Manager integration',
-      'Not available in the CLI, GitHub Action, or runtime SDKs',
-    ],
-    gcpRoadmapLink: 'View roadmap',
     configPriorityTitle: 'Configuration priority',
     priorityHigh: 'CLI flags / GHA inputs',
     priorityMid: '$config in map file',
     priorityLow: 'Defaults (AWS)',
+    roadmapNote:
+      'Need Google Cloud Secret Manager or AWS Secrets Manager? Both are on the roadmap, not available yet.',
+    roadmapLink: 'View roadmap',
+  },
+  faq: {
+    title: 'Frequently asked ',
+    titleAccent: 'questions',
+    items: [
+      {
+        q: 'What is Envilder?',
+        a: 'Envilder is an open-source CLI, GitHub Action and set of runtime SDKs that resolves application secrets from AWS SSM Parameter Store or Azure Key Vault using one versioned JSON map file. It can run your command with those secrets in its environment, write a .env file when a tool needs one, or load them in-process.',
+      },
+      {
+        q: 'Does Envilder store my secrets?',
+        a: 'No. Values stay in AWS SSM Parameter Store or Azure Key Vault. envilder.json holds only variable names and secret paths, so it is safe to commit. There is no Envilder server or hosted service.',
+      },
+      {
+        q: 'How is envilder exec different from a .env file?',
+        a: 'exec resolves the secrets and passes them to your command as environment variables, so nothing is written to disk. It is fail-closed: if a secret is missing, empty or unreadable, the command does not start. The command and the processes it launches can still read the values; exec is not a sandbox.',
+      },
+      {
+        q: 'Can I use it in CI/CD?',
+        a: 'Yes. The GitHub Action pulls the mapped secrets into a .env file in your workflow, and the CLI (exec or pull) works in any CI runner that has cloud credentials.',
+      },
+      {
+        q: 'Which secret stores are supported?',
+        a: 'AWS SSM Parameter Store and Azure Key Vault. Google Cloud Secret Manager and AWS Secrets Manager are on the roadmap but not available yet.',
+      },
+      {
+        q: 'How does it compare to dotenvx, Chamber or Doppler?',
+        a: 'dotenvx encrypts .env files so they can be committed. Doppler is a hosted secrets platform. Chamber is a CLI for AWS secret stores. Envilder keeps values in the AWS SSM or Azure Key Vault you already use, adds one reviewed map file, and covers the CLI, CI and runtime SDKs with that same map.',
+      },
+      {
+        q: 'Is it free?',
+        a: "Yes. Envilder is MIT-licensed. You only pay your cloud provider's usual costs for SSM Parameter Store or Key Vault.",
+      },
+    ],
   },
   gha: {
     title: 'GitHub Action',
@@ -437,15 +385,15 @@ export const en: Translations = {
     install: 'Install',
     quickStart: 'Quick start',
     step1: 'Create an envilder.json mapping env vars to secret paths',
-    step2: 'Run npx envilder',
-    step3: 'Your .env file is ready ✔',
+    step2: 'Run npx envilder exec -- followed by your usual start command',
+    step3: 'Your app starts with its secrets ✔',
     terminalTitle: 'Quick start',
     commentCreate: '# Create mapping file',
-    commentPull: '# Pull secrets',
-    commentPush: '# Push a secret',
-    doneMessage: 'Done! .env file generated.',
+    commentPull: '# Or write a .env file',
+    doneMessage: '.env file generated.',
     sdkComment3: '# Secrets are now in os.environ',
     sdkExampleLink: 'View runnable examples on GitHub',
+    commentExec: '# Run your app with the secrets',
   },
   footer: {
     tagline:
