@@ -138,6 +138,26 @@ describe('changelogToHtml', () => {
     expect(actual).not.toContain('<p>');
   });
 
+  it('Should_KeepCodeLinesSeparate_When_FencedBlockContainsListLikeLines', () => {
+    // Arrange
+    const md = `* **SDKs available**:
+
+  \`\`\`yaml
+  - uses: macalbert/envilder/github-action@v0
+    with:
+      map-file: envilder.json
+      env-file: .env
+  \`\`\``;
+
+    // Act
+    const actual = changelogToHtml(md);
+
+    // Assert
+    expect(actual).toContain(
+      '<pre><code>- uses: macalbert/envilder/github-action@v0\n  with:\n    map-file: envilder.json\n    env-file: .env\n</code></pre>',
+    );
+  });
+
   it('Should_ResolveRelativeLinksToGitHub_When_LinkPointsToRepositoryDoc', () => {
     // Arrange
     const md = '* See [docs/exec-command.md](../exec-command.md)';
