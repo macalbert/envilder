@@ -61,7 +61,12 @@ Versions refer to each component's own changelog: [CLI](./docs/changelogs/cli.md
 | **Local override map file** (`envilder.local.json`) | Medium | Personal, gitignored layer on top of the committed map file, on every surface (ADR-0011, [#385](https://github.com/macalbert/envilder/issues/385)) |
 | **Environment delivery in the GitHub Action** | Medium | Export resolved values to later job steps instead of writing a `.env` file ([#478](https://github.com/macalbert/envilder/issues/478)) |
 | **Exec with refresh** (`--refresh-interval`) | Low | Kill & restart child process periodically with fresh secrets (builds on `envilder exec`, [#479](https://github.com/macalbert/envilder/issues/479)) |
-| **Hierarchical mapping** | Low | Per-environment `envilder.json` with inheritance/overrides |
+| **Named providers and per-environment config** | Medium | Several providers in one map file, per-environment provider settings and optional secrets, through `$config.providers`. Additive to the current schema; the flat `$config` fields are deprecated, with `envilder migrate` ([#586](https://github.com/macalbert/envilder/issues/586)) |
+| **Per-provider packages** | Medium | Split the SDK packages per provider, so an app installs only the cloud SDKs it uses. Prerequisite for adding more providers |
+| **Kubernetes Secrets** | Low | Read secrets from a cluster: in-cluster service account in production, kubeconfig locally |
+| **HashiCorp Vault / OpenBao** | Low | KV secrets engine, with GitHub OIDC (JWT auth) in the Action |
+| **Infisical** | Low | Cloud or self-hosted Infisical, with machine identities and GitHub OIDC |
+| **Azure App Configuration** | Low | Settings and Key Vault references from App Configuration, for .NET-centric teams on Azure |
 
 ---
 
