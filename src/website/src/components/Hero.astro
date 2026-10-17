@@ -1583,7 +1583,8 @@ const tabRows = [
       cursor.className = 'cursor';
 
       if (await playScene(scene, cursor, id)) {
-        if (!alive(id)) return;
+        // A pause during the last line also holds the closing prompt
+        if (!(await settle(id))) return;
         appendPromptLine(cursor);
         scheduleNext(index);
       }
