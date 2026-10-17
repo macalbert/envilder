@@ -98,6 +98,22 @@ export const docsRouteManifest = [
   },
 ] as const satisfies readonly DocsRoute[];
 
+/** Docs navigation sections, in display order, shared by the sidebar and the navbar. */
+export const docsNavGroups = [
+  { key: 'gettingStarted', labelKey: 'navGettingStarted' },
+  { key: 'providers', labelKey: 'navProviders' },
+  { key: 'cli', labelKey: 'sidebarCli' },
+  { key: 'githubAction', labelKey: 'sidebarGha' },
+  { key: 'sdks', labelKey: 'sidebarSdks' },
+] as const satisfies readonly {
+  key: DocsRoute['navGroup'];
+  labelKey: string;
+}[];
+
+export const docsArticleRoutes = docsRouteManifest.filter(
+  (route) => route.key !== 'hub',
+);
+
 export function getDocsRoute(key: DocsRouteKey) {
   return docsRouteManifest.find((route) => route.key === key);
 }

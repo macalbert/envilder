@@ -59,12 +59,36 @@ export function extractVersions(
   return versions;
 }
 
-/** Join continuation lines back into their parent list item. */
+/** Join every wrapped continuation line back into its parent list item. */
 function joinMultiLineListItems(md: string): string {
-  return md.replace(
-    /^([*-] .+)\n(?![\s]*[*-] |#{1,6} |```|---|\s*$)(.+)/gm,
-    '$1 $2',
-  );
+  const listItem = /^\s*[*-] /;
+  const blockStart = /^\s*(?:[*-] |#{1,6} |```|---)/;
+  const out: string[] = [];
+  for (const line of md.split('\n')) {
+    const prev = out.at(-1);
+    if (
+      prev !== undefined &&
+      listItem.test(prev) &&
+      line.trim() !== '' &&
+      !blockStart.test(line)
+    ) {
+      out[out.length - 1] = `${prev} ${line.trim()}`;
+    } else {
+      out.push(line);
+    }
+  }
+  return out.join('\n');
+}
+
+/** Changelogs live in docs/changelogs/, so relative links resolve there on GitHub. */
+const CHANGELOG_BASE_URL =
+  'https://github.com/macalbert/envilder/blob/main/docs/changelogs/';
+
+function resolveLinkHref(href: string): string {
+  if (/^(?:[a-z]+:|#)/i.test(href)) {
+    return href;
+  }
+  return new URL(href, CHANGELOG_BASE_URL).href;
 }
 
 /** Convert the cleaned markdown to HTML, adding `id` anchors on version headings. */
@@ -116,7 +140,8 @@ export function changelogToHtml(md: string, idPrefix = ''): string {
       )
       .replace(
         /\[([^\]]+)\]\(([^)]+)\)/g,
-        '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
+        (_m, text, href) =>
+          `<a href="${resolveLinkHref(href)}" target="_blank" rel="noopener noreferrer">${text}</a>`,
       )
       // Both * and - list items (including indented sub-items)
       .replace(/^\s*[*-] (.+)$/gm, '<li>$1</li>')

@@ -116,4 +116,38 @@ describe('changelogToHtml', () => {
     expect(result).toContain('<h3>Changed</h3>');
     expect(result).toContain('<li><strong>README rewritten</strong>');
   });
+
+  it('Should_JoinAllContinuationLines_When_ListItemWrapsOverSeveralLines', () => {
+    // Arrange
+    const md = `### Added
+
+* **Exec**: first line
+  second line
+  third line
+  fourth line
+* Next item`;
+
+    // Act
+    const actual = changelogToHtml(md);
+
+    // Assert
+    expect(actual).toContain(
+      '<li><strong>Exec</strong>: first line second line third line fourth line</li>',
+    );
+    expect(actual).toContain('<li>Next item</li>');
+    expect(actual).not.toContain('<p>');
+  });
+
+  it('Should_ResolveRelativeLinksToGitHub_When_LinkPointsToRepositoryDoc', () => {
+    // Arrange
+    const md = '* See [docs/exec-command.md](../exec-command.md)';
+
+    // Act
+    const actual = changelogToHtml(md);
+
+    // Assert
+    expect(actual).toContain(
+      'href="https://github.com/macalbert/envilder/blob/main/docs/exec-command.md"',
+    );
+  });
 });
