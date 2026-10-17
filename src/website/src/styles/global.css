@@ -186,8 +186,8 @@ html.smooth-scroll {
   --color-text-dim: #4d5644; /* hint text (AA on cream surfaces) */
 
   --color-success: #356b30; /* green (AA on cream code surfaces) */
-  --color-warning: #9a741a; /* ochre */
-  --color-error: #a04848; /* muted red */
+  --color-warning: #765914; /* ochre */
+  --color-error: #984444; /* muted red */
 
   --color-nav-bg: rgba(245, 239, 228, 0.92);
   --color-nav-mobile: rgba(245, 239, 228, 0.98);
@@ -198,9 +198,9 @@ html.smooth-scroll {
   --color-cta-border: #1b2a1f; /* ink outline on lime */
   --color-code-bg: #ede5d5; /* cream code block */
   --color-code-header: #e4d9c4; /* slightly deeper header */
-  --color-sponsor: #c74b8e; /* GitHub sponsor pink — light */
-  --color-prompt: #b0468a; /* terminal prompt accent (Starship-style) */
-  --color-path: #3f7d8c; /* terminal directory segment (teal) */
+  --color-sponsor: #9b3a6e; /* GitHub sponsor pink — light */
+  --color-prompt: #973c76; /* terminal prompt accent (Starship-style) */
+  --color-path: #336571; /* terminal directory segment (teal) */
 
   --pixel-shadow: 4px 4px 0 var(--color-border);
   --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);
