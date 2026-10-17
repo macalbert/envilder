@@ -59,10 +59,30 @@ export interface HeroTranslations {
   setupAzureComment2: string;
   sdkCommentLoad: string;
   terminalSceneLabel: string;
+  execMapComment: string;
 }
 
 export interface TrustTranslations {
   label: string;
+}
+
+export interface ProofTranslations {
+  ariaLabel: string;
+  stars: string;
+  npmMonthly: string;
+  pypiMonthly: string;
+  nugetTotal: string;
+}
+
+export interface FaqItem {
+  q: string;
+  a: string;
+}
+
+export interface FaqTranslations {
+  title: string;
+  titleAccent: string;
+  items: FaqItem[];
 }
 
 export type PixelSpriteName =
@@ -78,20 +98,6 @@ export type PixelSpriteName =
   | 'chart'
   | 'person';
 
-export interface ProblemItem {
-  icon: PixelSpriteName;
-  title: string;
-  description: string;
-}
-
-export interface ProblemSolutionTranslations {
-  title: string;
-  titleAccent: string;
-  titleSuffix: string;
-  subtitle: string;
-  problems: ProblemItem[];
-}
-
 export interface StepItem {
   title: string;
   description: string;
@@ -103,16 +109,9 @@ export interface HowItWorksTranslations {
   subtitle: string;
   stepLabel: string;
   steps: StepItem[];
-  terminalFetched1: string;
-  terminalFetched2: string;
-  terminalFetched3: string;
-  terminalWritten: string;
   sdkTabPython: string;
   sdkTabDotnet: string;
   sdkTabNodejs: string;
-  pushTerminalPushed1: string;
-  pushTerminalPushed2: string;
-  pushTerminalPushed3: string;
 }
 
 export interface FeatureItem {
@@ -122,29 +121,11 @@ export interface FeatureItem {
   badge?: string;
 }
 
-export interface FeatureExtraItem {
-  icon: PixelSpriteName;
-  title: string;
-  description: string;
-}
-
 export interface FeaturesTranslations {
   title: string;
   titleAccent: string;
   subtitle: string;
   highlights: FeatureItem[];
-  extras: FeatureExtraItem[];
-  extrasTitle: string;
-}
-
-export interface DemoTranslations {
-  title: string;
-  titleAccent: string;
-  subtitle: string;
-  cliDemo: string;
-  transcript: string;
-  ghaWorkflow: string;
-  comingSoon: string;
 }
 
 export interface ProvidersTranslations {
@@ -157,14 +138,12 @@ export interface ProvidersTranslations {
   azureTitle: string;
   azureBadge: string;
   azureFeatures: string[];
-  gcpTitle: string;
-  gcpBadge: string;
-  gcpFeatures: string[];
-  gcpRoadmapLink: string;
   configPriorityTitle: string;
   priorityHigh: string;
   priorityMid: string;
   priorityLow: string;
+  roadmapNote: string;
+  roadmapLink: string;
 }
 
 export interface GhaTranslations {
@@ -242,8 +221,8 @@ export interface GetStartedTranslations {
   step3: string;
   terminalTitle: string;
   commentCreate: string;
+  commentExec: string;
   commentPull: string;
-  commentPush: string;
   doneMessage: string;
   sdkComment3: string;
   sdkExampleLink: string;
@@ -759,12 +738,12 @@ export interface Translations {
   theme: ThemeTranslations;
   hero: HeroTranslations;
   trust: TrustTranslations;
+  proof: ProofTranslations;
   sponsors: SponsorsTranslations;
-  problemSolution: ProblemSolutionTranslations;
   howItWorks: HowItWorksTranslations;
   features: FeaturesTranslations;
-  demo: DemoTranslations;
   providers: ProvidersTranslations;
+  faq: FaqTranslations;
   gha: GhaTranslations;
   sdks: SdksTranslations;
   roadmap: RoadmapTranslations;

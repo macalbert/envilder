@@ -335,23 +335,40 @@ describe('Static website SEO', () => {
     expect(actual).toEqual(expected);
   });
 
-  it('Should_DeferDemoMedia_When_HomePageIsBuilt', () => {
+  it('Should_MirrorVisibleFaqInStructuredData_When_HomePagesAreBuilt', () => {
     // Arrange
-    const expected = {
-      hasEagerSource: false,
-      hasAutoplay: false,
-      hasPoster: true,
-      hasPreloadNone: true,
-    };
+    const homePages = ['index.html', 'ca/index.html', 'es/index.html'];
+    const expected = homePages.map((file) => ({ file, matches: true }));
 
     // Act
-    const videoTag = getTags(readDistFile('index.html'), 'video')[0] ?? '';
-    const actual = {
-      hasEagerSource: /(?:^|\s)src="/.test(videoTag),
-      hasAutoplay: videoTag.includes('autoplay'),
-      hasPoster: videoTag.includes('poster="/Envilder-demo-poster.webp"'),
-      hasPreloadNone: videoTag.includes('preload="none"'),
-    };
+    const actual = homePages.map((file) => {
+      const html = readDistFile(file);
+      const visibleQuestions = [
+        ...html.matchAll(/<summary(?:\s[^>]*)?>([\s\S]*?)<\/summary>/g),
+      ].map((match) => match[1].trim());
+      const faqSchema = [
+        ...html.matchAll(
+          /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g,
+        ),
+      ]
+        .map((match) => JSON.parse(match[1]))
+        .find((schema) => schema['@type'] === 'FAQPage');
+      const schemaQuestions: string[] = (faqSchema?.mainEntity ?? []).map(
+        (question: { name: string }) => question.name,
+      );
+      const decode = (text: string) =>
+        text
+          .replace(/&#39;/g, "'")
+          .replace(/&quot;/g, '"')
+          .replace(/&amp;/g, '&');
+      return {
+        file,
+        matches:
+          schemaQuestions.length > 0 &&
+          JSON.stringify(visibleQuestions.map(decode)) ===
+            JSON.stringify(schemaQuestions),
+      };
+    });
 
     // Assert
     expect(actual).toEqual(expected);
