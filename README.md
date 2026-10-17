@@ -53,6 +53,9 @@ No SaaS middleman. One versioned mapping contract. Secrets stay in your cloud.
 - **No single mapping contract.** Your cloud provider may be the source of truth for secret
   values, but each environment still needs to know how application variables map to those
   secrets. Without a versioned contract, dev, staging, and production configurations drift apart.
+- **The `.env` file is readable by everything in your repo.** `.gitignore` keeps it out of commits,
+  not out of reach. Editors, indexers, install scripts, and AI coding agents can all read the
+  plaintext values sitting in your working tree.
 
 ## How Envilder solves it
 
@@ -417,6 +420,10 @@ layer that makes those secrets usable consistently across local development, CI/
 
 Use Envilder when your secrets already live in your cloud provider and you want one versioned
 `envilder.json` mapping contract everywhere your code runs.
+
+`envilder exec` is not a sandbox either. It keeps secrets off the disk, but it does not isolate
+the process: your command and every process it starts can read them. It also leaves an existing
+`.env` file untouched, so delete it yourself when you move from pull mode to exec mode.
 
 ## 🏁 What's Next
 
