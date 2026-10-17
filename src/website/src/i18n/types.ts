@@ -20,6 +20,7 @@ export interface NavLinks {
 export interface ThemeTranslations {
   retro: string;
   light: string;
+  cream: string;
   ariaTheme: string;
 }
 

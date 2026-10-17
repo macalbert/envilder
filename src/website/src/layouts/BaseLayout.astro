@@ -159,7 +159,7 @@ const structuredData = JSON.stringify({
     <script is:inline>
       (function() {
         var stored = localStorage.getItem('envilder-theme');
-        if (stored && ['retro','light'].includes(stored)) {
+        if (stored && ['retro','light','cream'].includes(stored)) {
           document.documentElement.setAttribute('data-theme', stored);
         } else {
           var preferLight = window.matchMedia('(prefers-color-scheme: light)').matches;

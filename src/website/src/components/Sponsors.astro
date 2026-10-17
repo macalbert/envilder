@@ -108,6 +108,7 @@ const t = useTranslations(lang);
 
   /* Show correct logo per theme — no JS needed */
   :global([data-theme="light"]) .logo-dark { display: none; }
+  :global([data-theme="cream"]) .logo-dark { display: none; }
   :global([data-theme="retro"]) .logo-light { display: none; }
   /* Default (retro) before JS sets data-theme */
   :global(:root:not([data-theme])) .logo-light { display: none; }

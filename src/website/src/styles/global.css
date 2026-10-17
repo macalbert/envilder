@@ -1,5 +1,5 @@
 /* ── Envilder Design System ─────────────────────────────── */
-/* Retro Game Boy · Cream light · Pixel accents              */
+/* Retro Game Boy · SNES light · Cream · Pixel accents      */
 
 /* ── Reset ────────────────────────────────────────────── */
 *,
@@ -54,6 +54,7 @@ html.smooth-scroll {
   --color-cta: var(--color-primary); /* call-to-action fill */
   --color-cta-text: var(--color-btn-text); /* call-to-action label */
   --color-cta-shadow: var(--color-primary-dim); /* call-to-action shadow */
+  --color-cta-border: var(--color-primary); /* call-to-action outline */
   --color-code-bg: #1a2418; /* dark green-tinted code blocks */
   --color-code-header: #202c1e; /* slightly lighter for headers */
   --color-code-text: var(--color-text);
@@ -113,14 +114,59 @@ html.smooth-scroll {
   --transition-base: 250ms ease;
 }
 
-/* ── Theme: light (cream paper · forest ink · lime CTA) ── */
+/* ── Theme: light (US Super Nintendo SNES) ────────────── */
+/*
+ * Inspired by the US SNES controller palette:
+ * #b5b6e4 · #4f43ae · #908a99 · #cec9cc · #211a21
+ * Violet (#4f43ae) is reserved for small accents:
+ * links, buttons, badges, and tiny section titles.
+ * The base is neutral grey-lavender for readability.
+ */
+[data-theme="light"] {
+  --color-bg: #f0eff5; /* white with subtle lavender tint */
+  --color-bg-alt: #e8e6f0; /* soft lavender band */
+  --color-surface: #ffffff; /* pure white cards */
+  --color-surface-alt: #ecebf3; /* surface with violet hint */
+  --color-border: #cec9cc; /* SNES light grey */
+  --color-border-light: #b8b4b6; /* slightly deeper grey */
+
+  --color-primary: #4f43ae; /* SNES violet — links, buttons, small accents */
+  --color-primary-dim: #3d3490; /* dimmed violet */
+  --color-secondary: #908a99; /* SNES grey-mauve */
+  --color-secondary-dim: #7a7484; /* deeper mauve */
+  --color-accent: #b5b6e4; /* SNES lavender highlight */
+
+  --color-text: #211a21; /* SNES near-black */
+  --color-text-muted: #5c5462; /* dark mauve-grey */
+  --color-text-dim: #908a99; /* SNES grey-mauve */
+
+  --color-success: #4f7a5c; /* muted green */
+  --color-warning: #a09040; /* warm yellow */
+  --color-error: #a04848; /* muted red */
+
+  --color-nav-bg: rgba(240, 239, 245, 0.92);
+  --color-nav-mobile: rgba(240, 239, 245, 0.98);
+  --color-btn-text: #ffffff; /* white text on violet buttons */
+  --color-code-bg: #e6e4ee; /* lavender-tinted code block */
+  --color-code-header: #dddae8; /* slightly deeper header */
+  --color-sponsor: #c74b8e; /* GitHub sponsor pink — light */
+  --color-prompt: #b0468a; /* terminal prompt accent (Starship-style) */
+  --color-path: #3f7d8c; /* terminal directory segment (teal) */
+
+  --pixel-shadow: 4px 4px 0 var(--color-border);
+  --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);
+  --glow-primary: 0 0 20px rgba(79, 67, 174, 0.12);
+  --glow-secondary: 0 0 15px rgba(181, 182, 228, 0.15);
+}
+
+/* ── Theme: cream (paper · forest ink · lime CTA) ─────── */
 /*
  * Warm cream base with deep forest-green ink. Lime is reserved for
  * call-to-action buttons only (it is unreadable as text on cream),
  * paired with a hard ink offset shadow. Links and small accents use
  * the forest green so they keep contrast.
  */
-[data-theme="light"] {
+[data-theme="cream"] {
   --color-bg: #f5efe4; /* cream paper */
   --color-bg-alt: #ede5d5; /* deeper cream band */
   --color-surface: #fbf8f1; /* off-white cards */
@@ -148,6 +194,7 @@ html.smooth-scroll {
   --color-cta: #c6ec5a; /* lime call-to-action fill */
   --color-cta-text: #1b2a1f; /* ink label on lime */
   --color-cta-shadow: #1b2a1f; /* hard ink offset shadow */
+  --color-cta-border: #1b2a1f; /* ink outline on lime */
   --color-code-bg: #ede5d5; /* cream code block */
   --color-code-header: #e4d9c4; /* slightly deeper header */
   --color-sponsor: #c74b8e; /* GitHub sponsor pink — light */
@@ -327,7 +374,7 @@ pre code,
 .btn-primary {
   background: var(--color-cta);
   color: var(--color-cta-text);
-  border-color: var(--color-cta-shadow);
+  border-color: var(--color-cta-border);
   box-shadow: 4px 4px 0 var(--color-cta-shadow);
 }
 
@@ -464,7 +511,8 @@ pre code,
     0 1px 0 rgba(139, 172, 15, 0.25);
 }
 
-[data-theme="light"] .pixel-icon {
+[data-theme="light"] .pixel-icon,
+[data-theme="cream"] .pixel-icon {
   filter: grayscale(100%) sepia(40%) saturate(100%) brightness(0.7)
     contrast(1.1);
   text-shadow:
@@ -726,6 +774,12 @@ pre code,
     --color-border: #7a749a;
     --color-text-muted: #2a2230;
     --color-text-dim: #4a4060;
+  }
+
+  [data-theme="cream"] {
+    --color-border: #8a7d62;
+    --color-text-muted: #2a3526;
+    --color-text-dim: #4d5644;
   }
 
   :focus-visible {

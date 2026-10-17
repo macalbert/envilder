@@ -189,7 +189,8 @@ const ariaLabel = filename ? `${filename} (${lang})` : `${lang} code block`;
     opacity: 0;
   }
 
-  :global([data-theme="light"]) .codeblock-body :global(span) {
+  :global([data-theme="light"]) .codeblock-body :global(span),
+  :global([data-theme="cream"]) .codeblock-body :global(span) {
     color: var(--shiki-light) !important;
   }
 

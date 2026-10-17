@@ -36,6 +36,7 @@ export const es: Translations = {
   theme: {
     retro: 'Retro',
     light: 'Claro',
+    cream: 'Crema',
     ariaTheme: 'Tema',
   },
   hero: {
