@@ -608,6 +608,23 @@ const tabRows = [
     </div>
 
     <div class="hero-terminal">
+      <button
+        type="button"
+        class="hero-term-pause"
+        data-hero-pause
+        data-label-pause={t.hero.terminalPause}
+        data-label-play={t.hero.terminalPlay}
+        aria-label={t.hero.terminalPause}
+        aria-pressed="false"
+        hidden
+      >
+        <svg class="icon-pause" width="12" height="12" viewBox="0 0 12 12" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true">
+          <path d="M2 1h3v10H2z M7 1h3v10H7z"/>
+        </svg>
+        <svg class="icon-play" width="12" height="12" viewBox="0 0 12 12" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true">
+          <path d="M2 1h2v1h2v1h2v2h2v2H8v2H6v1H4v1H2z"/>
+        </svg>
+      </button>
       <TerminalMockup title="envilder" icon>
         <div class="hero-term-screen" data-hero-screen aria-live="off">
           {scenes[0].lines.map((line) =>
@@ -713,8 +730,8 @@ const tabRows = [
   }
 
   .hero-title {
-    font-size: clamp(1.2rem, 4vw, 1.8rem);
-    line-height: 1.5;
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    line-height: 1.05;
   }
 
   .hero-accent {
@@ -774,7 +791,43 @@ const tabRows = [
   }
 
   .hero-terminal {
+    position: relative;
     width: 100%;
+  }
+
+  /* Pause/play for the autoplaying demo, overlaid on the terminal title bar */
+  .hero-term-pause {
+    position: absolute;
+    top: 3px;
+    right: var(--space-sm);
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
+    background: none;
+    border: none;
+    color: var(--term-muted);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+  }
+
+  .hero-term-pause:hover {
+    color: var(--term-text);
+  }
+
+  .hero-term-pause[hidden] {
+    display: none;
+  }
+
+  .hero-term-pause .icon-play,
+  .hero-term-pause[aria-pressed='true'] .icon-pause {
+    display: none;
+  }
+
+  .hero-term-pause[aria-pressed='true'] .icon-play {
+    display: block;
   }
 
   .hero-term-screen {
@@ -1084,6 +1137,13 @@ const tabRows = [
     let runId = 0;
     let current = 0;
     let paused = false;
+    // Hover/focus pauses temporarily; the pause button pauses until the
+    // user resumes it (touch users have no hover to stop the loop).
+    let hovering = false;
+    let userPaused = false;
+    // True while a manually selected scene is shown statically during an
+    // explicit pause, so Resume knows to replay it.
+    let showingStatic = false;
     let holdTimer: ReturnType<typeof setTimeout> | undefined;
     let scrollFrame: number | undefined;
 
@@ -1168,6 +1228,13 @@ const tabRows = [
       screen!.appendChild(el);
       keepLatestLineVisible();
       return el;
+    }
+
+    // Holds while paused, then reports whether this run is still current.
+    // Gate every delayed DOM update on this so a pause freezes the frame.
+    async function settle(id: number): Promise<boolean> {
+      await waitWhilePaused();
+      return alive(id);
     }
 
     function renderInstant(scene: Scene) {
@@ -1373,14 +1440,16 @@ const tabRows = [
       code.appendChild(cursor);
       view.cmd.textContent = `"${editor.file}" [New]`;
       await sleep(TIMING.editorOpen);
-      if (!alive(id)) return false;
+      if (!(await settle(id))) return false;
 
       setEditorMode(view, true);
       await sleep(between(TIMING.editorModeSwitch));
+      if (!(await settle(id))) return false;
 
       for (const [r, row] of editor.code.entries()) {
         if (r > 0) {
           await sleep(between(TIMING.editorNewline));
+          if (!(await settle(id))) return false;
           code = addEditorLine(view, r + 1);
           code.appendChild(cursor);
         }
@@ -1392,15 +1461,16 @@ const tabRows = [
       }
 
       await sleep(between(TIMING.editorModeSwitch));
-      if (!alive(id)) return false;
+      if (!(await settle(id))) return false;
       setEditorMode(view, false);
       await sleep(between(TIMING.editorModeSwitch));
+      if (!(await settle(id))) return false;
 
       view.cmd.appendChild(cursor);
       const save = { text: ':wq', cls: 'tok-plain' };
       if (!(await typeSegment(view.cmd, save, cursor, id))) return false;
       await sleep(between(TIMING.enterAfterCommand));
-      if (!alive(id)) return false;
+      if (!(await settle(id))) return false;
 
       screen!.replaceChildren(...shell);
       keepLatestLineVisible();
@@ -1470,10 +1540,15 @@ const tabRows = [
       return true;
     }
 
-    async function play(index: number) {
+    async function play(index: number, manual = false) {
       if (isStale()) return;
       const id = ++runId;
       if (holdTimer) clearTimeout(holdTimer);
+
+      // Auto-rotation waits out any pause before switching the active
+      // button, so the selection never runs ahead of the screen.
+      if (!manual && !reduceMotion && !(await settle(id))) return;
+
       current = index;
       setActiveMode(index);
 
@@ -1481,6 +1556,19 @@ const tabRows = [
       if (reduceMotion) {
         renderInstant(scene);
         return;
+      }
+
+      // An explicit pause shows the chosen scene at once instead of leaving
+      // the previous one on screen until Resume.
+      if (manual && userPaused) {
+        showingStatic = true;
+        renderInstant(scene);
+        return;
+      }
+      if (showingStatic) {
+        showingStatic = false;
+        screen!.classList.remove('is-static');
+        screen!.removeAttribute('tabindex');
       }
 
       // Wait for any pause to lift before clearing the screen, so an
@@ -1495,7 +1583,8 @@ const tabRows = [
       cursor.className = 'cursor';
 
       if (await playScene(scene, cursor, id)) {
-        if (!alive(id)) return;
+        // A pause during the last line also holds the closing prompt
+        if (!(await settle(id))) return;
         appendPromptLine(cursor);
         scheduleNext(index);
       }
@@ -1503,25 +1592,50 @@ const tabRows = [
 
     modes.forEach((mode, index) => {
       mode.addEventListener('click', () => {
-        play(index);
+        play(index, true);
       });
     });
 
     // Pause only while the user hovers/focuses the terminal itself, so the
     // mode buttons can switch scenes without stalling playback.
     const hoverTarget = screen.closest('.terminal') ?? screen;
+    const syncPaused = () => {
+      paused = hovering || userPaused;
+    };
     hoverTarget.addEventListener('mouseenter', () => {
-      paused = true;
+      hovering = true;
+      syncPaused();
     });
     hoverTarget.addEventListener('mouseleave', () => {
-      paused = false;
+      hovering = false;
+      syncPaused();
     });
     hoverTarget.addEventListener('focusin', () => {
-      paused = true;
+      hovering = true;
+      syncPaused();
     });
     hoverTarget.addEventListener('focusout', () => {
-      paused = false;
+      hovering = false;
+      syncPaused();
     });
+
+    const pauseBtn = wrapper.querySelector<HTMLButtonElement>(
+      '[data-hero-pause]',
+    );
+    if (pauseBtn && !reduceMotion) {
+      pauseBtn.hidden = false;
+      pauseBtn.addEventListener('click', () => {
+        userPaused = !userPaused;
+        syncPaused();
+        // Resuming after a scene was picked while paused replays it
+        if (!userPaused && showingStatic) play(current);
+        pauseBtn.setAttribute('aria-pressed', String(userPaused));
+        const label = userPaused
+          ? pauseBtn.dataset.labelPlay
+          : pauseBtn.dataset.labelPause;
+        if (label) pauseBtn.setAttribute('aria-label', label);
+      });
+    }
 
     wrapper.dataset.heroStarted = 'true';
     play(0);

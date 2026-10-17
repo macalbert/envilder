@@ -36,6 +36,7 @@ export const ca: Translations = {
   theme: {
     retro: 'Retro',
     light: 'Clar',
+    cream: 'Crema',
     ariaTheme: 'Tema',
   },
   hero: {
@@ -76,6 +77,8 @@ export const ca: Translations = {
     setupAzureComment2: '# 2. Puja els valors del .env a Azure Key Vault',
     sdkCommentLoad: '# Carrega el mateix contracte en runtime',
     terminalSceneLabel: 'Escena de demostració del terminal',
+    terminalPause: 'Pausa la demostració',
+    terminalPlay: 'Reprèn la demostració',
     execMapComment: '# Mapeja cada variable a una ruta de secret',
   },
   trust: {
