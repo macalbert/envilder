@@ -573,6 +573,10 @@ export interface DocsTranslations {
   ghaPullOnly: string;
   ghaBasicTitle: string;
   ghaMultiEnvTitle: string;
+  ghaExecTitle: string;
+  ghaExecDesc: string;
+  ghaExecNote: string;
+  ghaExecLink: string;
   ghaAzureTitle: string;
   ghaInputsTitle: string;
   ghaInputsSubtitle: string;

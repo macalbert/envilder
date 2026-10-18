@@ -934,6 +934,12 @@ export const en: Translations = {
     ghaPullOnly: 'The GitHub Action only supports pull mode (no push).',
     ghaBasicTitle: 'AWS SSM Parameter Store with OIDC',
     ghaMultiEnvTitle: 'Multi-environment workflow',
+    ghaExecTitle: 'Run a command without writing a .env file',
+    ghaExecDesc:
+      'The action always writes a .env file. If you would rather keep secrets off the runner disk, skip the action and run envilder exec in a run step, after the same credentials step. Options for Envilder go before --, and your command goes after it. Envilder masks every resolved value in the job log, and the command does not start if any secret is missing.',
+    ghaExecNote:
+      'The CLI needs Node.js 22.12 or later, so set it up with actions/setup-node before the step. Do not redirect the stderr of envilder exec away from the step log: GitHub reads the masks from there.',
+    ghaExecLink: 'Read the full exec guide →',
     ghaAzureTitle: 'Azure Key Vault with OIDC',
     ghaInputsTitle: 'Action inputs & outputs',
     ghaInputsSubtitle: 'Inputs',
