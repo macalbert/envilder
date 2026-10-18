@@ -948,6 +948,12 @@ export const ca: Translations = {
     ghaPullOnly: 'La GitHub Action només suporta el mode pull (sense push).',
     ghaBasicTitle: 'AWS SSM Parameter Store amb OIDC',
     ghaMultiEnvTitle: 'Workflow multi-entorn',
+    ghaExecTitle: 'Executar una ordre sense escriure cap fitxer .env',
+    ghaExecDesc:
+      "L'acció sempre escriu un fitxer .env. Si prefereixes que els secrets no toquin el disc del runner, no facis servir l'acció i executa envilder exec en un pas run, després del mateix pas de credencials. Les opcions d'Envilder van abans de --, i la teva ordre, després. Envilder emmascara tots els valors resolts al log del job, i l'ordre no arrenca si falta algun secret.",
+    ghaExecNote:
+      "La CLI necessita Node.js 22.12 o posterior, així que configura'l amb actions/setup-node abans del pas. No redirigeixis l'stderr d'envilder exec fora del log del pas: és d'allà d'on GitHub llegeix les màscares.",
+    ghaExecLink: "Llegeix la guia completa d'exec →",
     ghaAzureTitle: 'Azure Key Vault amb OIDC',
     ghaInputsTitle: "Inputs i outputs de l'Action",
     ghaInputsSubtitle: 'Inputs',

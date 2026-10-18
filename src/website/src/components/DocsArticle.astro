@@ -1195,6 +1195,40 @@ jobs:
       - run: npm run deploy`} />
       </section>
 
+      <section id="gha-exec" class="docs-section">
+        <h2>{t.docs.ghaExecTitle}</h2>
+        <p>{t.docs.ghaExecDesc}</p>
+        <CodeBlock lang="yaml" filename=".github/workflows/test.yml" code={`name: Test
+
+on: [push]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/github-envilder
+          aws-region: eu-west-1
+
+      - run: npm ci
+      - name: Run tests with secrets in memory
+        run: npx envilder exec --map=envilder.json -- npm test`} />
+        <p class="note">{t.docs.ghaExecNote}</p>
+        <p><a href={localizedPath(lang, '/docs/cli/exec/')}>{t.docs.ghaExecLink}</a></p>
+      </section>
+
       <section id="gha-why" class="docs-section">
         <h2>{t.docs.ghaWhyTitle}</h2>
         <p>{t.docs.ghaWhyDesc}</p>
