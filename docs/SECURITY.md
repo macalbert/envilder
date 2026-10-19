@@ -9,6 +9,12 @@ We release patches for security vulnerabilities only in the latest version:
 | Latest  | ✅ |
 | Older   | ❌ |
 
+## 🎯 Security Requirements
+
+Envilder reads secrets from AWS SSM Parameter Store or Azure Key Vault with your own credentials and writes them only to the `.env` file, process environment or application configuration you ask for. It never logs secret values, runs no server and implements no cryptography of its own.
+
+It does not protect the generated `.env` file, the command started by `envilder exec`, or a map file that someone with write access to your repository has changed. The full list of what you can and cannot expect, together with the threat model, trust boundaries and the reasoning behind them, is in the [Security Requirements and Assurance Case](./security-assurance-case.md).
+
 ## 🚨 Reporting a Vulnerability
 
 **Please do not report security vulnerabilities through public GitHub issues.**
@@ -135,11 +141,27 @@ When using Envilder GitHub Action:
 - ❌ Store AWS credentials in GitHub Secrets (use OIDC roles)
 - ❌ Use overly permissive IAM policies
 
+## 🔏 Verifying Releases
+
+Packages are built and published only by GitHub Actions workflows in this repository, using OIDC instead of long-lived registry tokens.
+
+- **npm** (`envilder`, `@envilder/sdk`): published with [npm provenance](https://docs.npmjs.com/generating-provenance-statements), signed through Sigstore. After installing, run `npm audit signatures` in your project to verify the registry signatures and provenance attestations. The npm package page also links each version to the commit and workflow run that built it.
+- **PyPI** (`envilder`): published with [PEP 740 attestations](https://docs.pypi.org/attestations/) through trusted publishing. The "Provenance" section of each file on PyPI shows the source repository and workflow. To verify locally:
+
+  ```bash
+  pip install pypi-attestations
+  pypi-attestations verify pypi --repository https://github.com/macalbert/envilder pypi:envilder-<version>-py3-none-any.whl
+  ```
+
+- **NuGet** (`Envilder`): every package carries the NuGet.org repository signature, which you can check with `dotnet nuget verify Envilder.<version>.nupkg`.
+- **GitHub Action**: referenced directly from this repository. For an immutable reference, pin the action to a full commit SHA instead of a tag.
+
 ## 🔍 Security Audits
 
 This project uses:
 
 - **Snyk**: Vulnerability scanning for dependencies
+- **CodeQL**: Static analysis for security issues in the TypeScript code
 - **Secretlint**: Prevents accidental secret commits
 - **Biome**: Code quality and security linting
 - **Dependabot**: Automated dependency updates

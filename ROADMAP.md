@@ -11,6 +11,9 @@ or directly inside application code at runtime.
 > **Note:** This roadmap contains ideas and potential features based on initial vision and community feedback.
 > Not all features are guaranteed to be implemented. Priorities may change based on user needs, feedback,
 > and real-world usage patterns. Your input matters. Feel free to share your thoughts and suggestions!
+>
+> **Horizon:** "Up Next" covers the coming months and "Planned" the rest of the next twelve months
+> (through October 2027). The [Out of scope](#-out-of-scope) section lists what Envilder does not intend to do.
 
 ---
 
@@ -67,6 +70,16 @@ Versions refer to each component's own changelog: [CLI](./docs/changelogs/cli.md
 | **HashiCorp Vault / OpenBao** | Low | KV secrets engine, with GitHub OIDC (JWT auth) in the Action |
 | **Infisical** | Low | Cloud or self-hosted Infisical, with machine identities and GitHub OIDC |
 | **Azure App Configuration** | Low | Settings and Key Vault references from App Configuration, for .NET-centric teams on Azure |
+
+### 🚫 Out of scope
+
+Envilder resolves secrets from stores you already run. It does not intend to:
+
+- **Be a secret store**: values stay in the cloud provider; Envilder never keeps its own copy outside the `.env` file or process environment you ask for
+- **Run a hosted service or server**: everything runs locally, in CI or inside your application, with your own credentials
+- **Manage secret lifecycle**: creating vaults, rotating values, setting expiry or access policies stays with the provider's own tooling
+- **Encrypt `.env` files**: protecting the generated file on disk is the job of the environment that consumes it
+- **Ship a graphical interface**: the CLI, GitHub Action and SDKs are the supported surfaces
 
 ---
 
