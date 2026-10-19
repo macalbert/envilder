@@ -14,6 +14,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/envilder.svg)](https://npmcharts.com/compare/envilder)
 [![CI Tests](https://github.com/macalbert/envilder/actions/workflows/tests.yml/badge.svg)](https://github.com/macalbert/envilder/actions/workflows/tests.yml)
 [![Overall Coverage](https://macalbert.github.io/envilder/badge_combined.svg)](https://macalbert.github.io/envilder/)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15703/badge)](https://www.bestpractices.dev/projects/15703)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Context7](https://img.shields.io/badge/Context7-docs_for_AI_agents-blue.svg)](https://context7.com/macalbert/envilder)
 [![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/macalbert/envilder?utm_source=oss&utm_medium=github&utm_campaign=macalbert%2Fenvilder&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)](https://coderabbit.ai)
