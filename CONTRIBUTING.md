@@ -165,6 +165,8 @@ ci(coverage): add Node.js SDK to coverage report
 
 ## Test Conventions
 
+- **Policy**: new features and bug fixes must come with automated tests
+  that cover the change. Pull requests that only touch docs are exempt.
 - **Naming**: `Should_<Expected>_When_<Condition>`
 - **Structure**: AAA pattern with explicit `// Arrange`, `// Act`,
   `// Assert` markers (each at most once per test)
