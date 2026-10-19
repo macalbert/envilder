@@ -17,18 +17,22 @@ If you discover a security vulnerability in Envilder, please report it privately
 
 ### How to Report
 
-1. **Email**: Send details to <mac.albert@gmail.com>
-2. **Subject**: `[SECURITY] Envilder - [Brief Description]`
-3. **Include**:
-   - Description of the vulnerability
-   - Steps to reproduce the issue
-   - Potential impact
-   - Suggested fix (if available)
-   - Your contact information for follow-up
+Use either channel:
+
+- **GitHub (preferred)**: [open a private security advisory](https://github.com/macalbert/envilder/security/advisories/new)
+- **Email**: send details to <mac.albert@gmail.com> with the subject `[SECURITY] Envilder - [Brief Description]`
+
+Please include:
+
+- Description of the vulnerability
+- Steps to reproduce the issue
+- Potential impact
+- Suggested fix (if available)
+- Your contact information for follow-up
 
 ### What to Expect
 
-- **Acknowledgment**: I will acknowledge your email as soon as possible
+- **Acknowledgment**: I aim to acknowledge every report within 14 days
 - **Initial Assessment**: I'll provide an initial assessment and prioritize based on severity
 - **Updates**: I'll keep you informed about the progress
 - **Resolution**: I'll work to release a fix as soon as feasible (timeline depends on severity and complexity)
