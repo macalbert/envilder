@@ -97,7 +97,6 @@ export const es: Translations = {
     awsCreditsAlt: 'AWS Open Source Credits Program',
     awsCreditsLabel: 'AWS Open Source Credits',
     snykAlt: 'Snyk Secure Developer Program',
-    snykLabel: 'Snyk Secure Developer',
   },
   howItWorks: {
     title: 'Cómo ',

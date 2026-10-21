@@ -454,6 +454,14 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md).
       <img src="./src/website/public/localstack-logo-horizontal-Dark.svg" alt="LocalStack" height="40">
     </picture>
   </a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://snyk.io/open-source/" target="_blank" rel="noopener noreferrer">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="./src/website/public/snyk-logo-Light.svg">
+      <source media="(prefers-color-scheme: light)" srcset="./src/website/public/snyk-logo-Dark.svg">
+      <img src="./src/website/public/snyk-logo-Dark.svg" alt="Snyk" height="40">
+    </picture>
+  </a>
 </p>
 
 <p align="center">
@@ -464,10 +472,6 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md).
   Envilder is also supported through the
   <a href="https://aws.amazon.com/blogs/opensource/aws-cloud-credits-for-open-source-projects-affirming-our-commitment/">
     AWS Open Source Credits Program
-  </a>
-  and the
-  <a href="https://snyk.io/open-source/">
-    Snyk Secure Developer Program
   </a>.
 </p>
 
