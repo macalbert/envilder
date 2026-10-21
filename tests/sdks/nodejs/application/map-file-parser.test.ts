@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { MapFileParser } from '../../../../src/sdks/nodejs/src/application/map-file-parser.js';
 
+const LINE_SEPARATOR = String.fromCharCode(0x2028);
+const PARAGRAPH_SEPARATOR = String.fromCharCode(0x2029);
+const ANY_LINE_TERMINATOR = new RegExp(
+  `[\\r\\n${LINE_SEPARATOR}${PARAGRAPH_SEPARATOR}]`,
+);
+
 describe('MapFileParser', () => {
   it('Should_ParseMappings_When_ValidJsonProvided', () => {
     // Arrange
@@ -145,5 +151,71 @@ describe('MapFileParser', () => {
     expect(actual.mappings.has('$schema')).toBe(false);
     expect(actual.mappings.get('DB_URL')).toBe('/app/db-url');
     expect(actual.config.provider).toBe('aws');
+  });
+
+  it.each([
+    '',
+    '   ',
+    'SAFE=prefix',
+    'SAFE\nINJECTED',
+    'SAFE\rINJECTED',
+    `SAFE${LINE_SEPARATOR}INJECTED`,
+    `SAFE${PARAGRAPH_SEPARATOR}INJECTED`,
+    'LOST NAME',
+    'LOST\tNAME',
+    'LOST#NAME',
+    'SAFE\n',
+    'SAFE\r',
+    'SAFE\r\n',
+    `SAFE${LINE_SEPARATOR}`,
+    `SAFE${PARAGRAPH_SEPARATOR}`,
+    'CAFÉ_URL',
+    '__proto__',
+  ])('Should_RejectMapFile_When_MappingNameIsInvalid', (invalidName) => {
+    // Arrange
+    const json = `{${JSON.stringify(invalidName)}: "/app/secret"}`;
+    const sut = new MapFileParser();
+
+    // Act
+    const act = () => sut.parse(json);
+
+    // Assert
+    expect(act).toThrow(/environment variable name/i);
+    expect(act).toThrow(
+      expect.objectContaining({
+        message: expect.not.stringMatching(ANY_LINE_TERMINATOR),
+      }),
+    );
+  });
+
+  it('Should_RejectMapFile_When_InvalidNameMapsToNonStringValue', () => {
+    // Arrange
+    const json = JSON.stringify({ 'SAFE=prefix': 42 });
+    const sut = new MapFileParser();
+
+    // Act
+    const act = () => sut.parse(json);
+
+    // Assert
+    expect(act).toThrow(/environment variable name/i);
+  });
+
+  it('Should_AcceptMappings_When_NamesAreDottedHyphenatedOrStartWithDigit', () => {
+    // Arrange
+    const json = JSON.stringify({
+      'APP.NAME': '/app/name',
+      'APP-NAME': '/app/name-hyphen',
+      '1PASSWORD_TOKEN': '/app/token',
+      __proto__x: '/app/proto-like',
+    });
+    const sut = new MapFileParser();
+
+    // Act
+    const actual = sut.parse(json);
+
+    // Assert
+    expect([...actual.mappings.keys()].sort()).toEqual(
+      ['1PASSWORD_TOKEN', 'APP-NAME', 'APP.NAME', '__proto__x'].sort(),
+    );
   });
 });

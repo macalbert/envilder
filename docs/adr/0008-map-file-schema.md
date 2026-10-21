@@ -82,16 +82,14 @@ The constraint applies to variable mappings. `$`-prefixed keys stay reserved
 and ignored under the rule above, so they are never written to a `.env` file.
 
 > **Implementation status:** enforced by the TypeScript CLI and GitHub Action
-> (`FileVariableStore`) and by the published JSON Schema. The runtime SDK
-> parsers do **not** enforce it yet:
-> `src/sdks/nodejs/src/application/map-file-parser.ts`,
+> (`FileVariableStore`), by the published JSON Schema, and by every runtime
+> SDK parser: `src/sdks/nodejs/src/application/map-file-parser.ts`,
 > `src/sdks/python/envilder/application/map_file_parser.py` and
-> `src/sdks/dotnet/Application/MapFileParser.cs` still only skip `$`-prefixed
-> keys and require string values. Until they are aligned, a map file rejected
-> by the CLI can still be parsed by an SDK. The threat differs by surface —
-> the CLI and Action write a `.env` file, whereas the SDKs resolve into
-> process environment — but the contract should be uniform, and closing this
-> gap is tracked as follow-up work.
+> `src/sdks/dotnet/Application/MapFileParser.cs`. As in the CLI, the name is
+> checked before non-string values are skipped, so a map file the CLI rejects
+> is rejected by every SDK too. The threat differs by surface — the CLI and
+> Action write a `.env` file, whereas the SDKs resolve into process
+> environment — but the contract is uniform.
 
 At least one variable mapping is required for meaningful operation.
 
