@@ -737,7 +737,6 @@ export interface SponsorsTranslations {
   awsCreditsAlt: string;
   awsCreditsLabel: string;
   snykAlt: string;
-  snykLabel: string;
 }
 
 export interface Translations {

@@ -38,24 +38,40 @@ const t = useTranslations(lang);
       />
     </a>
     <a
-      href="https://aws.amazon.com/blogs/opensource/aws-cloud-credits-for-open-source-projects-affirming-our-commitment/"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="backer-link program-link"
-      title={t.sponsors.awsCreditsAlt}
-      aria-label={t.sponsors.awsCreditsAlt}
-    >
-      <span class="program-badge">{t.sponsors.awsCreditsLabel}</span>
-    </a>
-    <a
       href="https://snyk.io/open-source/"
       target="_blank"
       rel="noopener noreferrer"
-      class="backer-link program-link"
+      class="backer-link"
       title={t.sponsors.snykAlt}
-      aria-label={t.sponsors.snykAlt}
     >
-      <span class="program-badge">{t.sponsors.snykLabel}</span>
+      <img
+        class="sponsor-icon logo-dark"
+        src="/snyk-logo-Light.svg"
+        alt={t.sponsors.snykAlt}
+        width="24"
+        height="24"
+        loading="lazy"
+        decoding="async"
+      />
+      <img
+        class="sponsor-icon logo-light"
+        src="/snyk-logo-Dark.svg"
+        alt={t.sponsors.snykAlt}
+        width="24"
+        height="24"
+        loading="lazy"
+        decoding="async"
+      />
+    </a>
+    <a
+      href="https://aws.amazon.com/blogs/opensource/aws-cloud-credits-for-open-source-projects-affirming-our-commitment/"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="backer-link aws-credits-link"
+      title={t.sponsors.awsCreditsAlt}
+      aria-label={t.sponsors.awsCreditsAlt}
+    >
+      <span class="aws-credits-badge">{t.sponsors.awsCreditsLabel}</span>
     </a>
   </div>
 </section>
@@ -96,7 +112,7 @@ const t = useTranslations(lang);
     opacity: 1;
   }
 
-  .program-badge {
+  .aws-credits-badge {
     font-family: var(--font-mono);
     font-size: 0.75rem;
     color: var(--color-text-muted);
@@ -106,7 +122,7 @@ const t = useTranslations(lang);
     white-space: nowrap;
   }
 
-  .program-link:hover .program-badge {
+  .aws-credits-link:hover .aws-credits-badge {
     color: var(--color-text);
     border-color: var(--color-primary);
   }
@@ -114,6 +130,12 @@ const t = useTranslations(lang);
   .sponsor-logo {
     max-width: 160px;
     height: auto;
+  }
+
+  .sponsor-icon {
+    width: 40px;
+    max-width: none;
+    height: 40px;
   }
 
   /* Show correct logo per theme — no JS needed */
