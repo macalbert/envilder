@@ -49,6 +49,9 @@ exports[`Static website Stack > Should_CreateWebsite_When_StackIsCalled > static
         "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
       ],
       "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-account-eu-west-1",
         },
@@ -63,6 +66,7 @@ exports[`Static website Stack > Should_CreateWebsite_When_StackIsCalled > static
             "Ref": "deploystaticwebsiteAwsCliLayer31B11195",
           },
         ],
+        "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
             "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",

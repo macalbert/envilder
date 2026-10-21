@@ -14,8 +14,11 @@
 [![npm downloads](https://img.shields.io/npm/dm/envilder.svg)](https://npmcharts.com/compare/envilder)
 [![CI Tests](https://github.com/macalbert/envilder/actions/workflows/tests.yml/badge.svg)](https://github.com/macalbert/envilder/actions/workflows/tests.yml)
 [![Overall Coverage](https://macalbert.github.io/envilder/badge_combined.svg)](https://macalbert.github.io/envilder/)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15703/badge)](https://www.bestpractices.dev/projects/15703)
+[![Known Vulnerabilities](https://snyk.io/test/github/macalbert/envilder/badge.svg)](https://snyk.io/test/github/macalbert/envilder)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Context7](https://img.shields.io/badge/Context7-docs_for_AI_agents-blue.svg)](https://context7.com/macalbert/envilder)
+[![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/macalbert/envilder?utm_source=oss&utm_medium=github&utm_campaign=macalbert%2Fenvilder&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)](https://coderabbit.ai)
 
 ## Why Envilder?
 
@@ -52,6 +55,9 @@ No SaaS middleman. One versioned mapping contract. Secrets stay in your cloud.
 - **No single mapping contract.** Your cloud provider may be the source of truth for secret
   values, but each environment still needs to know how application variables map to those
   secrets. Without a versioned contract, dev, staging, and production configurations drift apart.
+- **The `.env` file is readable by everything in your repo.** `.gitignore` keeps it out of commits,
+  not out of reach. Editors, indexers, install scripts, and AI coding agents can all read the
+  plaintext values sitting in your working tree.
 
 ## How Envilder solves it
 
@@ -503,6 +509,10 @@ layer that makes those secrets usable consistently across local development, CI/
 Use Envilder when your secrets already live in your cloud provider and you want one versioned
 `envilder.json` mapping contract everywhere your code runs.
 
+`envilder exec` is not a sandbox either. It keeps secrets off the disk, but it does not isolate
+the process: your command and every process it starts can read them. It also leaves an existing
+`.env` file untouched, so delete it yourself when you move from pull mode to exec mode.
+
 ## 🏁 What's Next
 
 Envilder already covers CLI (including `envilder exec`), GitHub Action, and runtime SDKs for .NET, Python, and Node.js.
@@ -530,17 +540,19 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md).
       <img src="./src/website/public/localstack-logo-horizontal-Dark.svg" alt="LocalStack" height="40">
     </picture>
   </a>
-</p>
-
-<p align="center">
-  Supported by <a href="https://localstack.cloud">LocalStack</a>.
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://snyk.io/open-source/" target="_blank" rel="noopener noreferrer">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="./src/website/public/snyk-logo-Light.svg">
+      <source media="(prefers-color-scheme: light)" srcset="./src/website/public/snyk-logo-Dark.svg">
+      <img src="./src/website/public/snyk-logo-Dark.svg" alt="Snyk" height="40">
+    </picture>
+  </a>
 </p>
 
 <p align="center">
   Envilder is also supported through the
-  <a href="https://aws.amazon.com/blogs/opensource/aws-cloud-credits-for-open-source-projects-affirming-our-commitment/">
-    AWS Open Source Credits Program
-  </a>.
+  <a href="https://aws.amazon.com/blogs/opensource/aws-cloud-credits-for-open-source-projects-affirming-our-commitment/">AWS Open Source Credits Program</a>.
 </p>
 
 ## 📜 License

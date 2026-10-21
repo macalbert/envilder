@@ -2,11 +2,11 @@ import type { Translations } from './types';
 
 export const es: Translations = {
   homeMeta: {
-    title: 'Carga secretos de AWS SSM y Azure Key Vault | Envilder',
+    title: 'Ejecuta apps con secretos de AWS SSM y Azure Key Vault | Envilder',
     description:
-      'Envilder es una CLI, GitHub Action y SDK de runtime open source para cargar secretos desde AWS SSM Parameter Store y Azure Key Vault.',
+      'Mapea variables de entorno a AWS SSM o Azure Key Vault una vez y ejecuta cualquier comando con los secretos en su entorno. Sin .env en disco. CLI, Action y SDKs open source.',
     ogImageAlt:
-      'Envilder - resolución de secretos open source para AWS SSM y Azure Key Vault',
+      'Envilder - ejecuta apps con secretos de AWS SSM y Azure Key Vault, sin archivo .env',
   },
   notFound: {
     title: 'Página no encontrada | Envilder',
@@ -36,28 +36,31 @@ export const es: Translations = {
   theme: {
     retro: 'Retro',
     light: 'Claro',
+    cream: 'Crema',
     ariaTheme: 'Tema',
   },
   hero: {
-    title1: 'Estandariza cómo',
-    title2: 'tus apps consumen',
-    titleAccent: 'secretos.',
+    title1: 'Ejecuta tu app',
+    title2: 'con secretos de la nube.',
+    titleAccent: 'Sin archivo .env.',
     description:
-      'Deja de reinventar la carga de secretos en cada proyecto. Define un contrato de entorno y resuélvelo en todas partes.',
+      'Mapea cada variable de entorno a una ruta de AWS SSM o Azure Key Vault en envilder.json. Un solo comando las resuelve y arranca tu app con los valores en su entorno.',
     positioning:
-      'Resolución de secretos open source para AWS SSM y Azure Key Vault, para desarrollo local, CI/CD y el runtime de la aplicación.',
+      'Open source, sin servidor ni SaaS de por medio: los secretos se quedan en tu cuenta de la nube. ¿Necesitas un archivo para una herramienta o la CI? pull escribe el .env. ¿Prefieres código? SDKs para Node.js, Python y .NET.',
     descAws: 'AWS SSM',
     descAzure: 'Azure Key Vault',
     descOr: '·',
     descSuffix: ' · GitHub Action · SDKs de runtime',
     getStarted: '▶ Empezar',
     viewOnGithub: '★ Ver en GitHub',
-    tabCli: 'CLI',
-    tabCliDesc: 'escribe .env',
+    tabGroupCli: 'CLI',
+    tabGroupSdk: 'SDK',
+    tabPull: 'pull',
+    tabPullDesc: 'escribe .env',
     tabExec: 'exec',
-    tabExecDesc: 'sin fichero .env',
-    tabSetup: 'Setup',
-    tabSetupDesc: 'crea secretos',
+    tabExecDesc: 'ejecuta tu app, sin .env',
+    tabPush: 'push',
+    tabPushDesc: 'sube el .env al vault',
     tabNode: 'Node.js',
     tabNodeDesc: 'en runtime',
     tabPython: 'Python',
@@ -66,7 +69,7 @@ export const es: Translations = {
     tabDotnetDesc: 'en runtime',
     terminalComment1: '# 1. Mapea variables a rutas SSM',
     terminalComment2: '# 2. Resuelve los secretos a .env',
-    execComment1: '# Ejecuta cualquier comando con los secretos en memoria',
+    execComment1: '# Ejecuta tu app con los secretos en su entorno',
     execComment2: '# Nada escrito en disco',
     setupComment1: '# 1. Mapea cada variable a una ruta de SSM',
     setupComment2: '# 2. Sube los valores del .env a SSM Parameter Store',
@@ -74,173 +77,98 @@ export const es: Translations = {
     setupAzureComment2: '# 2. Sube los valores del .env a Azure Key Vault',
     sdkCommentLoad: '# Carga el mismo contrato en runtime',
     terminalSceneLabel: 'Escena de demostración del terminal',
+    terminalPause: 'Pausa la demostración',
+    terminalPlay: 'Reanuda la demostración',
+    execMapComment: '# Mapea cada variable a una ruta de secreto',
   },
   trust: {
     label: 'COMPATIBLE CON',
+  },
+  proof: {
+    ariaLabel: 'Adopción',
+    stars: 'estrellas en GitHub',
+    npmMonthly: 'descargas de npm el último mes',
+    pypiMonthly: 'descargas de PyPI el último mes',
+    nugetTotal: 'descargas de NuGet',
+    openssfBadge: 'Insignia de OpenSSF Best Practices',
+    openssfLevel: 'passing',
+    openssfLabel: 'OpenSSF Best Practices',
   },
   sponsors: {
     title: 'Sponsors',
     localstackAlt: 'LocalStack',
     awsCreditsAlt: 'AWS Open Source Credits Program',
     awsCreditsLabel: 'AWS Open Source Credits',
-  },
-  problemSolution: {
-    title: 'Por qué la gestión de secretos ',
-    titleAccent: 'está rota',
-    titleSuffix: '',
-    subtitle:
-      'Cada equipo, cada etapa, cada runtime gestiona los secretos de forma diferente. Sin estándar. Sin consistencia. Sin confianza.',
-    problems: [
-      {
-        icon: 'skull',
-        title: 'Fragmentada entre herramientas',
-        description:
-          'El entorno local usa archivos .env. CI/CD lee de integraciones con vaults. Producción tiene su propio método. Misma app, diferentes flujos de configuración.',
-      },
-      {
-        icon: 'lock',
-        title: 'Secretos compartidos por canales inseguros',
-        description:
-          'Claves API enviadas por Slack, archivos .env en repositorios, páginas wiki con credenciales en texto plano. Un incidente de seguridad esperando a ocurrir.',
-      },
-      {
-        icon: 'snail',
-        title: 'El desfase de configuración es inevitable',
-        description:
-          'Sin una fuente única de verdad sobre qué secretos necesita una app. Dev, staging y producción se desincronizan. Los despliegues fallan. Nadie sabe qué config es la correcta.',
-      },
-    ],
+    snykAlt: 'Snyk Secure Developer Program',
   },
   howItWorks: {
     title: 'Cómo ',
     titleAccent: 'funciona',
-    subtitle: 'Define. Resuelve. Despliega.',
+    subtitle: 'Mapea una vez. Ejecútalo en cualquier sitio.',
     stepLabel: 'PASO',
     steps: [
       {
-        title: 'Define el modelo de mapeo',
+        title: 'Mapea cada variable una vez',
         description:
-          'Un archivo JSON que mapea nombres de variables de entorno a rutas de secretos en la nube. Haz commit. Revísalo en PRs. Compara entre entornos. Un modelo para cada etapa y runtime.',
+          'envilder.json lista los nombres de las variables de entorno y las rutas de los secretos, nunca los valores. Haz commit y revisa los cambios en pull requests como cualquier otro código.',
       },
       {
-        title: 'Resuelve con la CLI',
+        title: 'Ejecuta tu app con exec',
         description:
-          'Un comando obtiene cada secreto de tu vault en la nube y los escribe en .env. Úsalo localmente o en scripts. Mismo mapeo, mismo comportamiento.',
+          'envilder exec resuelve todos los secretos mapeados y arranca tu comando con ellos en su entorno. Ningún archivo .env en disco, nada que limpiar, y el comando nunca arranca si falta un secreto.',
       },
       {
-        title: 'Carga en runtime con SDKs',
+        title: 'O cárgalos desde el código',
         description:
-          'Sáltate el archivo .env por completo. Carga secretos directamente en tu aplicación al iniciar con SDKs nativos: Python, .NET, Node.js y más.',
+          'Los SDKs de runtime para Node.js, Python y .NET resuelven el mismo mapeo dentro del proceso al arrancar.',
       },
       {
-        title: 'Push desde dev al vault',
+        title: '¿Necesitas un archivo? Usa pull',
         description:
-          '¿Necesitas añadir o rotar un secreto? Sube valores desde tu entorno local al proveedor en la nube. Sin necesidad de consola.',
-      },
-      {
-        title: 'Los secretos se quedan en tu vault',
-        description:
-          'Sin intermediarios. Tu nube gestiona el almacenamiento, la rotación y el control de acceso. Envilder resuelve, nunca almacena.',
+          'Algunas herramientas y pasos de CI esperan un archivo .env. pull escribe uno a partir del mismo mapeo, y la GitHub Action lo hace en tus workflows. Trata el archivo generado como un secreto.',
       },
     ],
-    terminalFetched1: '✔ Obtenido DB_PASSWORD  → ···word',
-    terminalFetched2: '✔ Obtenido API_KEY      → ···key',
-    terminalFetched3: '✔ Obtenido SECRET_TOKEN → ···oken',
-    terminalWritten: '✔ Archivo de entorno escrito en .env',
     sdkTabPython: 'Python',
     sdkTabDotnet: '.NET',
     sdkTabNodejs: 'Node.js',
-    pushTerminalPushed1: '✔ Subido DB_PASSWORD  → /my-app/prod/db-password',
-    pushTerminalPushed2: '✔ Subido API_KEY      → /my-app/prod/api-key',
-    pushTerminalPushed3: '✔ Subido SECRET_TOKEN → /my-app/prod/secret-token',
   },
   features: {
-    title: 'Por qué ',
+    title: '¿Por qué ',
     titleAccent: 'Envilder?',
     subtitle:
-      'Envilder es una capa de resolución sobre tu gestor de secretos existente. Los secretos se quedan en tu nube. El mapeo JSON es solo el contrato que mantiene cada entorno consistente.',
+      'Envilder es una capa de resolución sobre el gestor de secretos que ya usas. Nunca almacena secretos: el archivo de mapeo es lo único que añade a tu repositorio.',
     highlights: [
       {
-        icon: 'brick',
-        title: 'Cero infraestructura',
+        icon: 'plug',
+        title: 'Secretos fuera del disco',
         description:
-          'Sin servidores, sin proxies, sin SaaS intermediario. Construido sobre AWS SSM y Azure Key Vault, servicios que ya usas y pagas.',
+          'exec y los SDKs ponen los valores directamente en el entorno del proceso. Ningún .env en texto plano en la carpeta del proyecto, en las copias de seguridad ni en una imagen de contenedor.',
+      },
+      {
+        icon: 'brick',
+        title: 'Sin servidor ni SaaS',
+        description:
+          'Nada que alojar ni pagar. Envilder lee AWS SSM Parameter Store o Azure Key Vault directamente con tus propias credenciales de la nube.',
       },
       {
         icon: 'clipboard',
-        title: 'Un archivo, todos los secretos',
+        title: 'Un solo archivo revisado',
         description:
-          'Un solo contrato JSON define cada secreto para cada entorno. Versionado en Git, revisable en PRs, comparable. Tu equipo revisa cambios de secretos en el mismo PR que el código.',
-      },
-      {
-        icon: 'refresh',
-        title: 'Rotación de secretos segura',
-        description:
-          'Rota valores en AWS SSM o Azure Key Vault sin cambiar envilder.json. Los archivos .env generados solo se actualizan al volver a ejecutar Envilder; los consumidores de runtime deben reiniciarse o volver a resolver los secretos.',
-      },
-      {
-        icon: 'cloud',
-        title: 'Tu almacén de secretos, un contrato de mapeo',
-        description:
-          'Mantén los secretos en la configuración de AWS SSM o Azure Key Vault que ya utilizas. Envilder preserva el contrato de mapeo envilder.json entre herramientas; las credenciales y la migración de secretos siguen siendo específicas de cada proveedor.',
-      },
-    ],
-    extrasTitle: 'También incluye',
-    extras: [
-      {
-        icon: 'gear',
-        title: 'GitHub Action',
-        description:
-          'Obtiene secretos en workflows CI/CD. Mismo mapeo, cero intervención manual.',
-      },
-      {
-        icon: 'refresh',
-        title: 'Sincronización bidireccional',
-        description:
-          'Obtiene en .env o sube valores .env a tu proveedor en la nube vía CLI.',
-      },
-      {
-        icon: 'plug',
-        title: 'Los secretos no tocan disco',
-        description:
-          'SDKs de runtime cargan secretos directamente en memoria al iniciar la app. Sin archivos .env escritos a disco.',
+          'envilder.json es la lista única de lo que necesita cada app, igual para el desarrollo local, la CI y producción. Los cambios pasan por pull requests.',
       },
       {
         icon: 'lock',
-        title: 'IAM y RBAC nativo',
+        title: 'IAM y RBAC nativos',
         description:
-          'Políticas IAM de AWS o RBAC de Azure. Sin capa de auth extra.',
-      },
-      {
-        icon: 'chart',
-        title: 'Registros de acceso nativos del proveedor',
-        description:
-          'CloudTrail o Azure Monitor pueden registrar el acceso al proveedor cuando están configurados. Envilder no crea un registro de auditoría por sí mismo.',
-      },
-      {
-        icon: 'person',
-        title: 'Soporte de perfiles AWS',
-        description:
-          'Cambia entre perfiles AWS CLI para configuraciones multi-cuenta.',
+          'El acceso lo gobiernan AWS IAM o Azure RBAC, y CloudTrail o Azure Monitor pueden registrarlo si está configurado. Sin capa de autenticación extra.',
       },
     ],
-  },
-  demo: {
-    title: 'Míralo en ',
-    titleAccent: 'acción',
-    subtitle:
-      'Mira cómo Envilder simplifica la gestión de secretos en menos de 2 minutos.',
-    cliDemo: 'Demo CLI: Obtener Secretos',
-    transcript:
-      'Comando de la demo: envilder --map=envilder.json --envfile=.env. Envilder resuelve los secretos mapeados de tu proveedor en la nube configurado y escribe las variables resultantes en .env.',
-    ghaWorkflow: 'Workflow de GitHub Action',
-    comingSoon: 'Próximamente',
   },
   providers: {
     title: 'Tu nube. ',
     titleAccent: 'Tu elección.',
     subtitle:
-      'Envilder funciona actualmente con AWS SSM Parameter Store y Azure Key Vault. GCP Secret Manager está planificado y aún no está disponible. Configura los proveedores disponibles en envilder.json o con flags CLI.',
+      'Envilder funciona hoy con AWS SSM Parameter Store y Azure Key Vault. Elige el proveedor en envilder.json o con flags de la CLI.',
     awsTitle: 'AWS SSM Parameter Store',
     awsDefault: 'Proveedor por defecto',
     awsFeatures: [
@@ -257,17 +185,51 @@ export const es: Translations = {
       'Control de acceso Azure RBAC',
       'Registro de acceso de Azure Monitor cuando está configurado',
     ],
-    gcpTitle: 'GCP Secret Manager',
-    gcpBadge: 'Planificado',
-    gcpFeatures: [
-      'Integración planificada con GCP Secret Manager',
-      'No disponible en la CLI, la GitHub Action ni los SDKs de runtime',
-    ],
-    gcpRoadmapLink: 'Ver roadmap',
     configPriorityTitle: 'Prioridad de configuración',
     priorityHigh: 'Flags CLI / Inputs GHA',
     priorityMid: '$config en archivo de mapeo',
     priorityLow: 'Por defecto (AWS)',
+    roadmapNote:
+      '¿Necesitas Google Cloud Secret Manager o AWS Secrets Manager? Ambos están en el roadmap, aún no disponibles.',
+    roadmapLink: 'Ver el roadmap',
+  },
+  faq: {
+    title: 'Preguntas ',
+    titleAccent: 'frecuentes',
+    items: [
+      {
+        q: '¿Qué es Envilder?',
+        a: 'Envilder es una CLI, una GitHub Action y un conjunto de SDKs de runtime open source que resuelven los secretos de la aplicación desde AWS SSM Parameter Store o Azure Key Vault con un único archivo de mapeo JSON versionado. Puede ejecutar tu comando con esos secretos en su entorno, escribir un archivo .env cuando una herramienta lo necesita, o cargarlos dentro del proceso.',
+      },
+      {
+        q: '¿Envilder almacena mis secretos?',
+        a: 'No. Los valores se quedan en AWS SSM Parameter Store o Azure Key Vault. envilder.json solo contiene nombres de variables y rutas de secretos, así que puedes hacer commit sin riesgo. No hay ningún servidor ni servicio alojado de Envilder.',
+      },
+      {
+        q: '¿Envilder tiene un modo exec?',
+        a: 'Sí. Desde la CLI v0.15.0, envilder exec -- <comando> resuelve los secretos de tu map file y arranca el comando con ellos como variables de entorno, sin escribir un archivo .env. Funciona con AWS SSM Parameter Store y Azure Key Vault.',
+      },
+      {
+        q: '¿En qué se diferencia envilder exec de un archivo .env?',
+        a: 'exec resuelve los secretos y se los pasa a tu comando como variables de entorno, así que no se escribe nada en disco. Falla de forma cerrada: si un secreto falta, está vacío o no se puede leer, el comando no arranca. El comando y los procesos que lanza pueden leer los valores; exec no es un sandbox.',
+      },
+      {
+        q: '¿Puedo usarlo en CI/CD?',
+        a: 'Sí. La GitHub Action obtiene los secretos mapeados en un archivo .env dentro del workflow, y la CLI (exec o pull) funciona en cualquier runner de CI con credenciales de la nube.',
+      },
+      {
+        q: '¿Qué almacenes de secretos soporta?',
+        a: 'AWS SSM Parameter Store y Azure Key Vault. Google Cloud Secret Manager y AWS Secrets Manager están en el roadmap pero aún no están disponibles.',
+      },
+      {
+        q: '¿Cómo se compara con dotenvx, Chamber o Doppler?',
+        a: 'dotenvx cifra archivos .env para que se pueda hacer commit de ellos. Doppler es una plataforma de secretos alojada. Chamber es una CLI para los almacenes de secretos de AWS. Envilder mantiene los valores en el AWS SSM o Azure Key Vault que ya usas, añade un único archivo de mapeo revisado y cubre la CLI, la CI y los SDKs de runtime con ese mismo mapeo.',
+      },
+      {
+        q: '¿Es gratuito?',
+        a: 'Sí. Envilder tiene licencia MIT. Solo pagas los costes habituales de tu proveedor por SSM Parameter Store o Key Vault.',
+      },
+    ],
   },
   gha: {
     title: 'GitHub Action',
@@ -435,15 +397,16 @@ export const es: Translations = {
     quickStart: 'Inicio rápido',
     step1:
       'Crea un envilder.json que mapee variables de entorno a rutas de secretos',
-    step2: 'Ejecuta npx envilder',
-    step3: 'Tu archivo .env está listo ✔',
+    step2:
+      'Ejecuta npx envilder exec -- seguido de tu comando de arranque habitual',
+    step3: 'Tu app arranca con sus secretos ✔',
     terminalTitle: 'Inicio rápido',
     commentCreate: '# Crear archivo de mapeo',
-    commentPull: '# Obtener secretos',
-    commentPush: '# Subir un secreto',
-    doneMessage: '¡Hecho! Archivo .env generado.',
+    commentPull: '# O escribe un archivo .env',
+    doneMessage: 'Archivo .env generado.',
     sdkComment3: '# Los secretos ya están en os.environ',
     sdkExampleLink: 'Ver ejemplos ejecutables en GitHub',
+    commentExec: '# Ejecuta tu app con los secretos',
   },
   footer: {
     tagline:
@@ -1054,6 +1017,12 @@ export const es: Translations = {
     ghaPullOnly: 'La GitHub Action solo soporta el modo pull (sin push).',
     ghaBasicTitle: 'AWS SSM Parameter Store con OIDC',
     ghaMultiEnvTitle: 'Workflow multi-entorno',
+    ghaExecTitle: 'Ejecutar un comando sin escribir un archivo .env',
+    ghaExecDesc:
+      'La acción siempre escribe un archivo .env. Si prefieres que los secretos no toquen el disco del runner, no uses la acción y ejecuta envilder exec en un paso run, después del mismo paso de credenciales. Las opciones de Envilder van antes de --, y tu comando, después. Envilder enmascara todos los valores resueltos en el log del job, y el comando no arranca si falta algún secreto.',
+    ghaExecNote:
+      'La CLI necesita Node.js 22.12 o posterior, así que configúralo con actions/setup-node antes del paso. No redirijas el stderr de envilder exec fuera del log del paso: es de ahí de donde GitHub lee las máscaras.',
+    ghaExecLink: 'Lee la guía completa de exec →',
     ghaAzureTitle: 'Azure Key Vault con OIDC',
     ghaInputsTitle: 'Inputs y outputs de la Action',
     ghaInputsSubtitle: 'Inputs',

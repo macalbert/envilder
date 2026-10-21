@@ -3,7 +3,7 @@
   "url": "https://context7.com/macalbert/envilder",
   "public_key": "pk_4hBjJRoWeI9KtICh7CJff",
   "projectTitle": "Envilder",
-  "description": "Resolves secrets from AWS SSM Parameter Store or Azure Key Vault using a Git-versioned envilder.json mapping, via CLI, GitHub Action, or runtime SDKs (.NET, Python, Node.js).",
+  "description": "Resolves secrets from AWS SSM Parameter Store or Azure Key Vault using a Git-versioned envilder.json mapping, via CLI (write a .env file, or run a command with the secrets in its environment using `envilder exec`), GitHub Action, or runtime SDKs (.NET, Python, Node.js).",
   "folders": ["docs", "github-action", "src/sdks", "examples"],
   "excludeFolders": [
     "docs/adr",
@@ -28,6 +28,8 @@
     "With no $config block, the provider is AWS SSM Parameter Store; Azure Key Vault requires $config.provider = \"azure\" (or the CLI/GitHub Action override).",
     "Precedence: CLI flags / GitHub Action inputs > $config in the map file > defaults.",
     "`npx envilder` with no flags uses envilder.json as the map and .env as the output file.",
+    "`npx envilder exec -- <command>` resolves the same mapping and starts the command with the secrets in its environment; no .env file is written. Envilder options go before the command (or before an optional `--`).",
+    "Exec mode is fail-closed (the command never starts if a secret is missing) and is not a sandbox: the command and its children can read the secrets. It is CLI-only; the GitHub Action and SDKs do not offer it.",
     "Runtime SDKs resolve secrets into process memory; no .env file is needed.",
     "Never suggest committing generated .env files or secret values to Git.",
     "SDK APIs differ per language; use only the API documented in each SDK README."

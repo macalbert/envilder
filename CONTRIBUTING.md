@@ -1,5 +1,11 @@
 # Contributing to Envilder
 
+Everyone taking part in the project is expected to follow the
+[Code of Conduct](CODE_OF_CONDUCT.md). How decisions are made and who does
+what is described in [GOVERNANCE.md](GOVERNANCE.md). To report a
+vulnerability, follow [SECURITY.md](docs/SECURITY.md) instead of opening a
+public issue.
+
 ## Prerequisites
 
 | Tool | Version | Purpose |
@@ -126,6 +132,23 @@ pnpm -C src/iac build
 pnpm -C tests/iac vitest run
 ```
 
+## Coding Standards
+
+Contributions must follow the style guide of each language, as decided in
+[ADR-0004](docs/adr/0004-code-quality-tooling.md). The tools are the
+reference: if they pass, the style is right.
+
+| Language | Style guide | Check |
+|----------|-------------|-------|
+| TypeScript | [Biome](https://biomejs.dev/) rules in [`biome.json`](biome.json), `tsc` strict mode | `pnpm format:check` and `pnpm lint` |
+| C# | [.NET coding conventions](https://learn.microsoft.com/dotnet/csharp/fundamentals/coding-style/coding-conventions) as configured in [`.editorconfig`](src/sdks/dotnet/.editorconfig) | `make check-sdk-dotnet` |
+| Python | [PEP 8](https://peps.python.org/pep-0008/) through [black](https://black.readthedocs.io/) and isort, typed with mypy strict mode ([`pyproject.toml`](src/sdks/python/pyproject.toml)) | `make check-sdk-python` |
+| Markdown | [markdownlint](https://github.com/DavidAnson/markdownlint) rules in [`.markdownlint.json`](.markdownlint.json) | `markdownlint "**/*.md"` |
+
+CI runs these checks on every pull request and fails on any violation.
+Architecture and naming conventions are described in
+[`docs/architecture/README.md`](docs/architecture/README.md).
+
 ## Quality Gates
 
 Before pushing, ensure:
@@ -165,6 +188,8 @@ ci(coverage): add Node.js SDK to coverage report
 
 ## Test Conventions
 
+- **Policy**: new features and bug fixes must come with automated tests
+  that cover the change. Pull requests that only touch docs are exempt.
 - **Naming**: `Should_<Expected>_When_<Condition>`
 - **Structure**: AAA pattern with explicit `// Arrange`, `// Act`,
   `// Assert` markers (each at most once per test)

@@ -16,7 +16,7 @@ const t = useTranslations(lang);
       href="https://localstack.cloud"
       target="_blank"
       rel="sponsored noopener noreferrer"
-      class="sponsor-link"
+      class="backer-link"
     >
       <img
         class="sponsor-logo logo-dark"
@@ -38,10 +38,36 @@ const t = useTranslations(lang);
       />
     </a>
     <a
+      href="https://snyk.io/open-source/"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="backer-link"
+      title={t.sponsors.snykAlt}
+    >
+      <img
+        class="sponsor-icon logo-dark"
+        src="/snyk-logo-Light.svg"
+        alt={t.sponsors.snykAlt}
+        width="24"
+        height="24"
+        loading="lazy"
+        decoding="async"
+      />
+      <img
+        class="sponsor-icon logo-light"
+        src="/snyk-logo-Dark.svg"
+        alt={t.sponsors.snykAlt}
+        width="24"
+        height="24"
+        loading="lazy"
+        decoding="async"
+      />
+    </a>
+    <a
       href="https://aws.amazon.com/blogs/opensource/aws-cloud-credits-for-open-source-projects-affirming-our-commitment/"
       target="_blank"
       rel="noopener noreferrer"
-      class="sponsor-link aws-credits-link"
+      class="backer-link aws-credits-link"
       title={t.sponsors.awsCreditsAlt}
       aria-label={t.sponsors.awsCreditsAlt}
     >
@@ -73,14 +99,16 @@ const t = useTranslations(lang);
     margin: 0;
   }
 
-  .sponsor-link {
+  /* Not "sponsor-link": EasyList hides that class on every site, so ad
+     blockers would remove the logos and leave only the label. */
+  .backer-link {
     display: flex;
     align-items: center;
     opacity: 0.85;
     transition: opacity 0.2s ease;
   }
 
-  .sponsor-link:hover {
+  .backer-link:hover {
     opacity: 1;
   }
 
@@ -104,8 +132,15 @@ const t = useTranslations(lang);
     height: auto;
   }
 
+  .sponsor-icon {
+    width: 40px;
+    max-width: none;
+    height: 40px;
+  }
+
   /* Show correct logo per theme — no JS needed */
   :global([data-theme="light"]) .logo-dark { display: none; }
+  :global([data-theme="cream"]) .logo-dark { display: none; }
   :global([data-theme="retro"]) .logo-light { display: none; }
   /* Default (retro) before JS sets data-theme */
   :global(:root:not([data-theme])) .logo-light { display: none; }

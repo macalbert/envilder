@@ -18,9 +18,9 @@ const t = useTranslations(lang);
     role="radio"
     aria-checked="false"
   >
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-      <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" fill="none"/>
-      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+    <!-- Game Boy: body with screen, d-pad and A/B buttons cut out -->
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" fill-rule="evenodd" shape-rendering="crispEdges" aria-hidden="true">
+      <path d="M3 1h10v12l-2 2H3z M5 3h6v5H5z M6 10h1v1h1v1H7v1H6v-1H5v-1h1z M11 10h1v1h-1z M10 11h1v1h-1z"/>
     </svg>
   </button>
   <button
@@ -31,12 +31,22 @@ const t = useTranslations(lang);
     role="radio"
     aria-checked="false"
   >
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-      <circle cx="8" cy="8" r="4" fill="currentColor"/>
-      <line x1="8" y1="1" x2="8" y2="3" stroke="currentColor" stroke-width="1.5"/>
-      <line x1="8" y1="13" x2="8" y2="15" stroke="currentColor" stroke-width="1.5"/>
-      <line x1="1" y1="8" x2="3" y2="8" stroke="currentColor" stroke-width="1.5"/>
-      <line x1="13" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.5"/>
+    <!-- SNES controller: dog-bone pad with d-pad and diamond buttons cut out -->
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" fill-rule="evenodd" shape-rendering="crispEdges" aria-hidden="true">
+      <path d="M3 4h3v1h4V4h3v1h1v1h1v4h-1v1h-1v1h-3v-1H6v1H3v-1H2v-1H1V6h1V5h1z M4 6h1v1h1v1H5v1H4V8H3V7h1z M12 6h1v1h-1z M11 7h1v1h-1z M13 7h1v1h-1z M12 8h1v1h-1z M7 8h2v1H7z"/>
+    </svg>
+  </button>
+  <button
+    class="theme-btn"
+    data-theme-value="cream"
+    title={t.theme.cream}
+    aria-label={t.theme.cream}
+    role="radio"
+    aria-checked="false"
+  >
+    <!-- Pixel house with a door notch -->
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true">
+      <path d="M7 2h2v1h1v1h1v1h1v1h1v1h1v1h-2v6H9v-4H7v4H4V8H2V7h1V6h1V5h1V4h1V3h1z"/>
     </svg>
   </button>
 </div>
@@ -54,12 +64,16 @@ const t = useTranslations(lang);
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
     padding: 3px 5px;
     background: none;
     border: none;
     color: var(--color-text-dim);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition:
+      color var(--transition-fast),
+      background-color var(--transition-fast);
   }
 
   .theme-btn:hover {
@@ -80,6 +94,15 @@ const t = useTranslations(lang);
       '.theme-btn[data-theme-value]',
     );
 
+    // Keep the browser UI (mobile address bar) matching the page background
+    function syncThemeColor() {
+      const bg = getComputedStyle(document.documentElement)
+        .getPropertyValue('--color-bg')
+        .trim();
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (bg && meta) meta.setAttribute('content', bg);
+    }
+
     function syncButtons(theme: string) {
       buttons.forEach((btn) => {
         const isActive = btn.dataset.themeValue === theme;
@@ -92,6 +115,7 @@ const t = useTranslations(lang);
     function applyTheme(theme: string, persist = true) {
       document.documentElement.setAttribute('data-theme', theme);
       syncButtons(theme);
+      syncThemeColor();
       if (persist) localStorage.setItem('envilder-theme', theme);
     }
 

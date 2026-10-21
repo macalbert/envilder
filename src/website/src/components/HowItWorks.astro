@@ -164,12 +164,15 @@ const override = await Envilder.fromMapFile('envilder.json')
           <p>
             {t.howItWorks.steps[1].description}
           </p>
-          <CodeBlock lang="bash" filename="terminal" code={`$ envilder
+          <CodeBlock lang="bash" filename="terminal" code={`$ envilder exec -- npm start
+envilder: 3 secrets resolved (aws, profile=default) → npm …
 
-${t.howItWorks.terminalFetched1}
-${t.howItWorks.terminalFetched2}
-${t.howItWorks.terminalFetched3}
-${t.howItWorks.terminalWritten}`} />
+> my-app@1.0.0 start
+> node server.js
+Listening on http://localhost:3000
+
+$ ls -a
+.  ..  envilder.json  package.json  server.js`} />
         </div>
       </div>
 
@@ -271,7 +274,7 @@ ${t.howItWorks.terminalWritten}`} />
         <span class="connector-line"></span>
       </div>
 
-      <div class="step">
+      <div class="step step-final">
         <div class="step-number">
           <span class="step-label">{t.howItWorks.stepLabel}</span>
           <span>04</span>
@@ -281,30 +284,18 @@ ${t.howItWorks.terminalWritten}`} />
           <p>
             {t.howItWorks.steps[3].description}
           </p>
-          <CodeBlock lang="bash" filename="terminal" code={`$ envilder --push
+          <CodeBlock lang="bash" filename="terminal" code={`$ envilder --map=envilder.json --envfile=.env
 
-${t.howItWorks.pushTerminalPushed1}
-${t.howItWorks.pushTerminalPushed2}
-${t.howItWorks.pushTerminalPushed3}`} />
-        </div>
-      </div>
+🪙  RESOLVING SECRETS
+  ✓ DB_PASSWORD           → ********word
+  ✓ API_KEY               → ********_key
+  ✓ SECRET_TOKEN          → ********oken
 
-      <div class="step-connector">
-        <span class="connector-line"></span>
-        <span class="connector-arrow">▼</span>
-        <span class="connector-line"></span>
-      </div>
-
-      <div class="step step-final">
-        <div class="step-number">
-          <span class="step-label">{t.howItWorks.stepLabel}</span>
-          <span>05</span>
-        </div>
-        <div class="step-content">
-          <h3>{t.howItWorks.steps[4].title}</h3>
-          <p>
-            {t.howItWorks.steps[4].description}
-          </p>
+⭐ LEVEL CLEARED  —  3/3 secrets loaded · .env written`} />
+          <CodeBlock lang="yaml" filename=".github/workflows/deploy.yml" code={`- uses: macalbert/envilder/github-action@v0
+  with:
+    map-file: envilder.json
+    env-file: .env`} />
         </div>
       </div>
     </div>

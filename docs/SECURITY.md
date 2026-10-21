@@ -9,6 +9,12 @@ We release patches for security vulnerabilities only in the latest version:
 | Latest  | ✅ |
 | Older   | ❌ |
 
+## 🎯 Security Requirements
+
+Envilder reads secrets from AWS SSM Parameter Store or Azure Key Vault with your own credentials and writes them only to the `.env` file, process environment or application configuration you ask for. It never logs secret values, runs no server and implements no cryptography of its own.
+
+It does not protect the generated `.env` file, the command started by `envilder exec`, or a map file that someone with write access to your repository has changed. The full list of what you can and cannot expect, together with the threat model, trust boundaries and the reasoning behind them, is in the [Security Requirements and Assurance Case](./security-assurance-case.md).
+
 ## 🚨 Reporting a Vulnerability
 
 **Please do not report security vulnerabilities through public GitHub issues.**
@@ -17,18 +23,22 @@ If you discover a security vulnerability in Envilder, please report it privately
 
 ### How to Report
 
-1. **Email**: Send details to <mac.albert@gmail.com>
-2. **Subject**: `[SECURITY] Envilder - [Brief Description]`
-3. **Include**:
-   - Description of the vulnerability
-   - Steps to reproduce the issue
-   - Potential impact
-   - Suggested fix (if available)
-   - Your contact information for follow-up
+Use either channel:
+
+- **GitHub (preferred)**: [open a private security advisory](https://github.com/macalbert/envilder/security/advisories/new)
+- **Email**: send details to <mac.albert@gmail.com> with the subject `[SECURITY] Envilder - [Brief Description]`
+
+Please include:
+
+- Description of the vulnerability
+- Steps to reproduce the issue
+- Potential impact
+- Suggested fix (if available)
+- Your contact information for follow-up
 
 ### What to Expect
 
-- **Acknowledgment**: I will acknowledge your email as soon as possible
+- **Acknowledgment**: I aim to acknowledge every report within 14 days
 - **Initial Assessment**: I'll provide an initial assessment and prioritize based on severity
 - **Updates**: I'll keep you informed about the progress
 - **Resolution**: I'll work to release a fix as soon as feasible (timeline depends on severity and complexity)
@@ -131,11 +141,27 @@ When using Envilder GitHub Action:
 - ❌ Store AWS credentials in GitHub Secrets (use OIDC roles)
 - ❌ Use overly permissive IAM policies
 
+## 🔏 Verifying Releases
+
+Packages are built and published only by GitHub Actions workflows in this repository, using OIDC instead of long-lived registry tokens.
+
+- **npm** (`envilder`, `@envilder/sdk`): published with [npm provenance](https://docs.npmjs.com/generating-provenance-statements), signed through Sigstore. After installing, run `npm audit signatures` in your project to verify the registry signatures and provenance attestations. The npm package page also links each version to the commit and workflow run that built it.
+- **PyPI** (`envilder`): published with [PEP 740 attestations](https://docs.pypi.org/attestations/) through trusted publishing. The "Provenance" section of each file on PyPI shows the source repository and workflow. To verify locally:
+
+  ```bash
+  pip install pypi-attestations
+  pypi-attestations verify pypi --repository https://github.com/macalbert/envilder pypi:envilder-<version>-py3-none-any.whl
+  ```
+
+- **NuGet** (`Envilder`): every package carries the NuGet.org repository signature, which you can check with `dotnet nuget verify Envilder.<version>.nupkg`.
+- **GitHub Action**: referenced directly from this repository. For an immutable reference, pin the action to a full commit SHA instead of a tag.
+
 ## 🔍 Security Audits
 
 This project uses:
 
 - **Snyk**: Vulnerability scanning for dependencies
+- **CodeQL**: Static analysis for security issues in the TypeScript code
 - **Secretlint**: Prevents accidental secret commits
 - **Biome**: Code quality and security linting
 - **Dependabot**: Automated dependency updates

@@ -4,7 +4,7 @@ description: >-
   Envilder website design system: themes, CSS variables, breakpoints, spacing,
   typography, and component patterns. Use when creating or editing Astro
   components, adding CSS, or styling website pages. Ensures visual consistency
-  across retro and light themes.
+  across retro, light and cream themes.
 ---
 
 # Website Design System
@@ -21,18 +21,21 @@ Rules and patterns for the Envilder website's pure CSS design system.
 
 ## Themes
 
-The site uses `data-theme` attribute on `<html>`. Two themes are supported:
+The site uses `data-theme` attribute on `<html>`. Three themes are supported:
 
 | Theme | Selector | Palette |
 |-------|----------|---------|
 | Retro (default) | `:root` | Game Boy green |
-| Light | `[data-theme="light"]` | Warm neutrals |
+| Light | `[data-theme="light"]` | US SNES (lavender, violet) |
+| Cream | `[data-theme="cream"]` | Cream paper, forest ink, lime CTA |
 
 ### Rules
 
 - **All colors MUST use CSS variables**: never hardcode hex values
-- New variables MUST be defined in **both** `:root` (retro) and
-  `[data-theme="light"]` blocks in `global.css`
+- New variables MUST be defined in `:root` (retro) and in every theme
+  block that needs a different value in `global.css`
+- Light-theme overrides (`[data-theme="light"]`) usually also apply to
+  `[data-theme="cream"]`: list both selectors
 - Never modify the theme switcher mechanism or its localStorage key
 
 ```css
@@ -70,12 +73,17 @@ Use the spacing scale defined in `global.css`:
 
 | Use | Font | Access |
 |-----|------|--------|
-| Section titles / pixel style | Press Start 2P | Via `.pixel-card h3` or custom class |
+| Headings (`h1`–`h4`) | Fraunces | `var(--font-display)` (default for headings) |
+| Pixel accents (logo, buttons, labels) | Press Start 2P | `var(--font-pixel)` |
 | Body text | Inter | Default (inherited) |
 | Code / terminal | JetBrains Mono | `<code>`, `<pre>`, or mono class |
 
 - Use `clamp()` for fluid typography
 - Never use fixed `px` font sizes
+- Keep the pixel font for short labels only; long headings use the display font
+
+Primary buttons use `--color-cta`, `--color-cta-text` and `--color-cta-shadow`
+(lime fill in the cream theme). Links keep `--color-primary`.
 
 ## Component Patterns
 
@@ -107,4 +115,4 @@ Reuse existing CSS classes for visual consistency:
 - DO NOT break existing responsive layouts when adding new sections
 - DO NOT add JavaScript frameworks (React, Vue): Astro components +
   `<script>` tags only
-- ONLY add new CSS variables if defined in both theme blocks
+- ONLY add new CSS variables if defined in `:root` and checked in every theme

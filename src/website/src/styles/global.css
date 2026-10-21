@@ -1,5 +1,5 @@
 /* ── Envilder Design System ─────────────────────────────── */
-/* Retro Game Boy · Pixel accents · Professional             */
+/* Retro Game Boy · SNES light · Cream · Pixel accents      */
 
 /* ── Reset ────────────────────────────────────────────── */
 *,
@@ -11,6 +11,7 @@
 }
 
 html {
+  color-scheme: dark;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -51,6 +52,10 @@ html.smooth-scroll {
   --color-nav-bg: rgba(24, 32, 22, 0.95);
   --color-nav-mobile: rgba(24, 32, 22, 0.98);
   --color-btn-text: #182016; /* dark bg for button labels */
+  --color-cta: var(--color-primary); /* call-to-action fill */
+  --color-cta-text: var(--color-btn-text); /* call-to-action label */
+  --color-cta-shadow: var(--color-primary-dim); /* call-to-action shadow */
+  --color-cta-border: var(--color-primary); /* call-to-action outline */
   --color-code-bg: #1a2418; /* dark green-tinted code blocks */
   --color-code-header: #202c1e; /* slightly lighter for headers */
   --color-code-text: var(--color-text);
@@ -80,6 +85,7 @@ html.smooth-scroll {
 
   /* Typography */
   --font-pixel: "Press Start 2P", monospace;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
   --font-body:
     "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
@@ -154,6 +160,60 @@ html.smooth-scroll {
   --glow-secondary: 0 0 15px rgba(181, 182, 228, 0.15);
 }
 
+/* ── Theme: cream (paper · forest ink · lime CTA) ─────── */
+/*
+ * Warm cream base with deep forest-green ink. Lime is reserved for
+ * call-to-action buttons only (it is unreadable as text on cream),
+ * paired with a hard ink offset shadow. Links and small accents use
+ * the forest green so they keep contrast.
+ */
+[data-theme="cream"] {
+  --color-bg: #f5efe4; /* cream paper */
+  --color-bg-alt: #ede5d5; /* deeper cream band */
+  --color-surface: #fbf8f1; /* off-white cards */
+  --color-surface-alt: #f1eadc; /* surface hover */
+  --color-border: #d8cdb8; /* sand border */
+  --color-border-light: #1f3326; /* ink frame for pixel cards */
+
+  --color-primary: #2f5d32; /* forest green — links, small accents */
+  --color-primary-dim: #1f3326; /* deep forest ink */
+  --color-secondary: #4a6330; /* olive (AA on cream) */
+  --color-secondary-dim: #3b5026; /* deeper olive */
+  --color-accent: #3d6b22; /* leaf green — link hover (AA on cream) */
+
+  --color-text: #1b2a1f; /* forest ink */
+  --color-text-muted: #47533f; /* muted ink */
+  --color-text-dim: #4d5644; /* hint text (AA on cream surfaces) */
+
+  --color-success: #356b30; /* green (AA on cream code surfaces) */
+  --color-warning: #765914; /* ochre */
+  --color-error: #984444; /* muted red */
+
+  --color-nav-bg: rgba(245, 239, 228, 0.92);
+  --color-nav-mobile: rgba(245, 239, 228, 0.98);
+  --color-btn-text: #f5efe4; /* cream text on forest fills */
+  --color-cta: #c6ec5a; /* lime call-to-action fill */
+  --color-cta-text: #1b2a1f; /* ink label on lime */
+  --color-cta-shadow: #1b2a1f; /* hard ink offset shadow */
+  --color-cta-border: #1b2a1f; /* ink outline on lime */
+  --color-code-bg: #ede5d5; /* cream code block */
+  --color-code-header: #e4d9c4; /* slightly deeper header */
+  --color-sponsor: #9b3a6e; /* GitHub sponsor pink — light */
+  --color-prompt: #973c76; /* terminal prompt accent (Starship-style) */
+  --color-path: #336571; /* terminal directory segment (teal) */
+
+  --pixel-shadow: 4px 4px 0 var(--color-border);
+  --pixel-shadow-primary: 4px 4px 0 var(--color-primary-dim);
+  --glow-primary: 0 0 20px rgba(47, 93, 50, 0.12);
+  --glow-secondary: 0 0 15px rgba(198, 236, 90, 0.2);
+}
+
+/* Native controls and scrollbars follow the light palettes */
+html[data-theme="light"],
+html[data-theme="cream"] {
+  color-scheme: light;
+}
+
 /* ── Base ─────────────────────────────────────────────── */
 body {
   font-family: var(--font-body);
@@ -220,25 +280,34 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-pixel);
-  line-height: 1.6;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-optical-sizing: auto;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+/* Anchor targets land below the fixed navbar (zero specificity so
+   page-specific offsets still win) */
+:where([id]) {
+  scroll-margin-top: calc(var(--nav-height) + var(--space-lg));
 }
 
 h1 {
-  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  font-size: clamp(2rem, 5vw, 3.25rem);
   color: var(--color-text);
 }
 
 h2 {
-  font-size: clamp(0.9rem, 2vw, 1.2rem);
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
   color: var(--color-text);
   margin-bottom: var(--space-lg);
 }
 
 h3 {
-  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
-  color: var(--color-text-muted);
+  font-size: clamp(1.15rem, 2vw, 1.35rem);
+  color: var(--color-text);
 }
 
 p {
@@ -311,16 +380,21 @@ pre code,
   padding: var(--space-md) var(--space-xl);
   border: 2px solid transparent;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
   text-decoration: none;
   position: relative;
 }
 
 .btn-primary {
-  background: var(--color-primary);
-  color: var(--color-btn-text);
-  border-color: var(--color-primary);
-  box-shadow: var(--pixel-shadow-primary);
+  background: var(--color-cta);
+  color: var(--color-cta-text);
+  border-color: var(--color-cta-border);
+  box-shadow: 4px 4px 0 var(--color-cta-shadow);
 }
 
 .btn-primary:hover {
@@ -456,7 +530,8 @@ pre code,
     0 1px 0 rgba(139, 172, 15, 0.25);
 }
 
-[data-theme="light"] .pixel-icon {
+[data-theme="light"] .pixel-icon,
+[data-theme="cream"] .pixel-icon {
   filter: grayscale(100%) sepia(40%) saturate(100%) brightness(0.7)
     contrast(1.1);
   text-shadow:
@@ -669,6 +744,14 @@ pre code,
   outline-offset: 3px;
 }
 
+/* Terminals stay dark in every theme, so their focus ring uses the fixed
+   terminal palette instead of the theme primary; drawn inside the frame */
+.terminal :focus-visible,
+.hero-term-pause:focus-visible {
+  outline-color: var(--term-highlight);
+  outline-offset: -3px;
+}
+
 :focus:not(:focus-visible) {
   outline: none;
 }
@@ -718,6 +801,12 @@ pre code,
     --color-border: #7a749a;
     --color-text-muted: #2a2230;
     --color-text-dim: #4a4060;
+  }
+
+  [data-theme="cream"] {
+    --color-border: #8a7d62;
+    --color-text-muted: #2a3526;
+    --color-text-dim: #3f4838;
   }
 
   :focus-visible {

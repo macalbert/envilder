@@ -25,6 +25,8 @@ type Scene = {
   icon: string;
   /** Alt text for the tab icon when it tells scenes apart (e.g. provider). */
   iconAlt?: string;
+  /** Row the tab sits in: CLI commands or runtime SDKs. */
+  group: 'cli' | 'sdk';
   lines: Line[];
 };
 
@@ -44,41 +46,10 @@ const jsonLines: Line[] = [
 
 const cliRule = '━'.repeat(60);
 
-// One LocalStack log line, with the same column padding the container uses.
-const localstackLog = (
-  time: string,
-  logger: string,
-  message: string,
-  thread = '  MainThread',
-): Line => ({
-  kind: 'output',
-  segments: [
-    { text: `2026-10-16T${time}  `, cls: 'comment' },
-    { text: 'INFO', cls: 'flag' },
-    { text: ` --- [${thread}] `, cls: 'output' },
-    { text: logger.padEnd(26), cls: 'command' },
-    { text: ` : ${message}`, cls: 'output' },
-  ],
-});
-
 const outputLine = (text: string, cls = 'output'): Line => ({
   kind: 'output',
   segments: [{ text, cls }],
 });
-
-const twinApp = (time: string, app: string, port: number): Line =>
-  localstackLog(
-    time,
-    'l.pro.apps.twin_plugin',
-    `Apps: ${app} ready at http://${app}.localhost.localstack.cloud:4566 -> 127.0.0.1:${port}`,
-  );
-
-const alembicPlugin = (name: string): Line =>
-  localstackLog(
-    '23:21:09.626',
-    'alembic.runtime.plugins',
-    `setup plugin alembic.${name}`,
-  );
 
 // Mirrors EnvironmentVariable.maskSecretPath: keep the last 3 characters.
 const maskPath = (path: string) => '*'.repeat(path.length - 3) + path.slice(-3);
@@ -93,10 +64,11 @@ const setupScene = (opts: {
   secretPath: string;
 }): Scene => ({
   id: opts.id,
-  name: t.hero.tabSetup,
-  desc: t.hero.tabSetupDesc,
+  name: t.hero.tabPush,
+  desc: t.hero.tabPushDesc,
   icon: opts.icon,
   iconAlt: opts.provider,
+  group: 'cli',
   lines: [
     {
       kind: 'type',
@@ -213,6 +185,7 @@ const sdkScene = (opts: {
   name: opts.name,
   desc: opts.desc,
   icon: opts.icon,
+  group: 'sdk',
   lines: [
     {
       kind: 'type',
@@ -243,34 +216,101 @@ const sdkScene = (opts: {
 });
 
 const scenes: Scene[] = [
-  setupScene({
-    id: 'setup-aws',
-    icon: '/AWS.svg',
-    provider: 'AWS',
-    mapComment: t.hero.setupComment1,
-    pushComment: t.hero.setupComment2,
-    configLines: ['  "$config": {', '    "provider": "aws"', '  },'],
-    secretPath: '/localstack/prod/auth-token',
-  }),
-  setupScene({
-    id: 'setup-azure',
-    icon: '/Azure.svg',
-    provider: 'Azure',
-    mapComment: t.hero.setupAzureComment1,
-    pushComment: t.hero.setupAzureComment2,
-    configLines: [
-      '  "$config": {',
-      '    "provider": "azure",',
-      '    "vaultUrl": "https://my-vault.vault.azure.net"',
-      '  },',
+  {
+    id: 'exec',
+    name: t.hero.tabExec,
+    desc: t.hero.tabExecDesc,
+    icon: '/favicon.svg',
+    group: 'cli',
+    lines: [
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.execMapComment, cls: 'comment' }],
+      },
+      {
+        kind: 'type',
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' cat ', cls: 'command' },
+          { text: 'envilder.json', cls: 'flag' },
+        ],
+      },
+      ...jsonLines,
+      { kind: 'blank' },
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.execComment1, cls: 'comment' }],
+      },
+      {
+        kind: 'type',
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' npx envilder', cls: 'command' },
+          { text: ' exec', cls: 'flag' },
+          { text: ' --', cls: 'output' },
+          { text: ' docker run --rm', cls: 'command' },
+          { text: ' --env', cls: 'flag' },
+          { text: ' LOCALSTACK_AUTH_TOKEN', cls: 'command' },
+          { text: ' localstack/localstack', cls: 'command' },
+        ],
+      },
+      {
+        kind: 'output',
+        segments: [
+          {
+            text: 'envilder: 1 secret resolved (aws, profile=default) → ',
+            cls: 'output',
+          },
+          { text: 'docker …', cls: 'command' },
+        ],
+      },
+      { kind: 'pause', ms: 700 },
+      { kind: 'blank' },
+      outputLine('LocalStack version: 2026.10.0'),
+      {
+        kind: 'output',
+        segments: [
+          { text: '2026-10-16T23:21:04.821  ', cls: 'comment' },
+          { text: 'INFO', cls: 'flag' },
+          { text: ' --- [  MainThread] ', cls: 'output' },
+          { text: 'l.licensing.licensingv2'.padEnd(26), cls: 'command' },
+          {
+            text: ' : Successfully requested and activated new license ',
+            cls: 'output',
+          },
+          {
+            text: '00000000-0000-0000-0000-000000000000:ultimate',
+            cls: 'flag',
+          },
+          { text: ' 🔑✅', cls: 'output' },
+        ],
+      },
+      outputLine('Ready.', 'highlight'),
+      { kind: 'pause', ms: 1500 },
+      { kind: 'blank' },
+      {
+        kind: 'type',
+        segments: [{ text: t.hero.execComment2, cls: 'comment' }],
+      },
+      {
+        kind: 'type',
+        segments: [
+          { text: '❯', cls: 'prompt', instant: true },
+          { text: ' ls -a', cls: 'command' },
+        ],
+      },
+      {
+        kind: 'output',
+        segments: [{ text: '.  ..  envilder.json', cls: 'output' }],
+      },
     ],
-    secretPath: 'localstack-prod-auth-token',
-  }),
+  },
   {
     id: 'cli',
-    name: t.hero.tabCli,
-    desc: t.hero.tabCliDesc,
+    name: t.hero.tabPull,
+    desc: t.hero.tabPullDesc,
     icon: '/favicon.svg',
+    group: 'cli',
     lines: [
       {
         kind: 'type',
@@ -368,115 +408,29 @@ const scenes: Scene[] = [
       },
     ],
   },
-  {
-    id: 'exec',
-    name: t.hero.tabExec,
-    desc: t.hero.tabExecDesc,
-    icon: '/favicon.svg',
-    lines: [
-      {
-        kind: 'type',
-        segments: [{ text: t.hero.execComment1, cls: 'comment' }],
-      },
-      {
-        kind: 'type',
-        segments: [
-          { text: '❯', cls: 'prompt', instant: true },
-          { text: ' npx envilder', cls: 'command' },
-          { text: ' exec', cls: 'flag' },
-          { text: ' --', cls: 'output' },
-          { text: ' docker run --rm', cls: 'command' },
-          { text: ' --env', cls: 'flag' },
-          { text: ' LOCALSTACK_AUTH_TOKEN', cls: 'command' },
-          { text: ' localstack/localstack', cls: 'command' },
-        ],
-      },
-      {
-        kind: 'output',
-        segments: [
-          {
-            text: 'envilder: 1 secret resolved (aws, profile=default) → ',
-            cls: 'output',
-          },
-          { text: 'docker …', cls: 'command' },
-        ],
-      },
-      { kind: 'pause', ms: 700 },
-      { kind: 'blank' },
-      outputLine('LocalStack version: 2026.10.0'),
-      outputLine('LocalStack build date: 2026-10-13'),
-      outputLine('LocalStack build git hash: 738d58ee'),
-      { kind: 'blank' },
-      outputLine('Docker not available'),
-      {
-        kind: 'output',
-        segments: [
-          { text: '2026-10-16T23:21:04.821  ', cls: 'comment' },
-          { text: 'INFO', cls: 'flag' },
-          { text: ' --- [  MainThread] ', cls: 'output' },
-          { text: 'l.licensing.licensingv2'.padEnd(26), cls: 'command' },
-          {
-            text: ' : Successfully requested and activated new license ',
-            cls: 'output',
-          },
-          {
-            text: '00000000-0000-0000-0000-000000000000:ultimate',
-            cls: 'flag',
-          },
-          { text: ' 🔑✅', cls: 'output' },
-        ],
-      },
-      localstackLog(
-        '23:21:05.607',
-        'localstack.utils.bootstrap',
-        'Execution of "_resolve_api_provider_specs" took 752.28ms',
-      ),
-      { kind: 'pause', ms: 900 },
-      twinApp('23:21:09.067', 'logodev', 4115),
-      twinApp('23:21:09.073', 'posthog', 4113),
-      twinApp('23:21:09.079', 'resend', 4114),
-      twinApp('23:21:09.086', 'stripe', 4111),
-      twinApp('23:21:09.096', 'twilio', 4112),
-      localstackLog(
-        '23:21:09.096',
-        'l.extensions.plugins',
-        'loaded 0 extensions',
-      ),
-      { kind: 'pause', ms: 400 },
-      alembicPlugin('autogenerate.schemas'),
-      alembicPlugin('autogenerate.tables'),
-      alembicPlugin('autogenerate.types'),
-      alembicPlugin('autogenerate.constraints'),
-      alembicPlugin('autogenerate.defaults'),
-      alembicPlugin('autogenerate.comments'),
-      alembicPlugin('ext.checkconstraint_byname'),
-      outputLine('Ready.', 'highlight'),
-      { kind: 'pause', ms: 1500 },
-      outputLine('Localstack runtime received signal 15'),
-      localstackLog(
-        '23:21:15.867',
-        'l.runtime.shutdown',
-        '[shutdown] Stopping all services',
-        'ime-Shutdown',
-      ),
-      { kind: 'blank' },
-      {
-        kind: 'type',
-        segments: [{ text: t.hero.execComment2, cls: 'comment' }],
-      },
-      {
-        kind: 'type',
-        segments: [
-          { text: '❯', cls: 'prompt', instant: true },
-          { text: ' ls -a', cls: 'command' },
-        ],
-      },
-      {
-        kind: 'output',
-        segments: [{ text: '.  ..  envilder.json', cls: 'output' }],
-      },
+  setupScene({
+    id: 'setup-aws',
+    icon: '/AWS.svg',
+    provider: 'AWS',
+    mapComment: t.hero.setupComment1,
+    pushComment: t.hero.setupComment2,
+    configLines: ['  "$config": {', '    "provider": "aws"', '  },'],
+    secretPath: '/localstack/prod/auth-token',
+  }),
+  setupScene({
+    id: 'setup-azure',
+    icon: '/Azure.svg',
+    provider: 'Azure',
+    mapComment: t.hero.setupAzureComment1,
+    pushComment: t.hero.setupAzureComment2,
+    configLines: [
+      '  "$config": {',
+      '    "provider": "azure",',
+      '    "vaultUrl": "https://my-vault.vault.azure.net"',
+      '  },',
     ],
-  },
+    secretPath: 'localstack-prod-auth-token',
+  }),
   sdkScene({
     id: 'nodejs',
     name: t.hero.tabNode,
@@ -593,6 +547,19 @@ const scenes: Scene[] = [
 // Escape `<` so the serialized scenes can never break out of the
 // <script type="application/json"> tag (e.g. a stray "</script>").
 const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
+
+// Tab rows in scene order: the client script pairs the Nth tab with the Nth
+// scene, so every CLI scene must come before the SDK scenes.
+const tabRows = [
+  {
+    label: t.hero.tabGroupCli,
+    scenes: scenes.filter((s) => s.group === 'cli'),
+  },
+  {
+    label: t.hero.tabGroupSdk,
+    scenes: scenes.filter((s) => s.group === 'sdk'),
+  },
+];
 ---
 
 <section class="hero scanlines" id="hero">
@@ -641,6 +608,23 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
     </div>
 
     <div class="hero-terminal">
+      <button
+        type="button"
+        class="hero-term-pause"
+        data-hero-pause
+        data-label-pause={t.hero.terminalPause}
+        data-label-play={t.hero.terminalPlay}
+        aria-label={t.hero.terminalPause}
+        aria-pressed="false"
+        hidden
+      >
+        <svg class="icon-pause" width="12" height="12" viewBox="0 0 12 12" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true">
+          <path d="M2 1h3v10H2z M7 1h3v10H7z"/>
+        </svg>
+        <svg class="icon-play" width="12" height="12" viewBox="0 0 12 12" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true">
+          <path d="M2 1h2v1h2v1h2v2h2v2H8v2H6v1H4v1H2z"/>
+        </svg>
+      </button>
       <TerminalMockup title="envilder" icon>
         <div class="hero-term-screen" data-hero-screen aria-live="off">
           {scenes[0].lines.map((line) =>
@@ -669,22 +653,35 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
         role="group"
         aria-label={t.hero.terminalSceneLabel}
       >
-        {scenes.map((scene, i) => (
-          <button
-            class:list={['hero-term-mode', { active: i === 0 }]}
-            aria-pressed={i === 0 ? 'true' : 'false'}
-            data-hero-mode={scene.id}
-            type="button"
-          >
-            <img
-              src={scene.icon}
-              alt={scene.iconAlt ?? ''}
-              class="hero-term-mode-icon"
-              width="18"
-              height="18"
-            />
-            <span class="hero-term-mode-name">{scene.name}</span>
-          </button>
+        {tabRows.map((row) => (
+          <div class="hero-term-row" role="group" aria-label={row.label}>
+            <span class="hero-term-row-label" aria-hidden="true">
+              {row.label}
+            </span>
+            <div class="hero-term-row-tabs">
+              {row.scenes.map((scene) => {
+                const first = scene.id === scenes[0].id;
+                return (
+                  <button
+                    class:list={['hero-term-mode', { active: first }]}
+                    aria-pressed={first ? 'true' : 'false'}
+                    data-hero-mode={scene.id}
+                    title={scene.desc}
+                    type="button"
+                  >
+                    <img
+                      src={scene.icon}
+                      alt={scene.iconAlt ?? ''}
+                      class="hero-term-mode-icon"
+                      width="18"
+                      height="18"
+                    />
+                    <span class="hero-term-mode-name">{scene.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         ))}
       </div>
     </div>
@@ -733,8 +730,8 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
   }
 
   .hero-title {
-    font-size: clamp(1.2rem, 4vw, 1.8rem);
-    line-height: 1.5;
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    line-height: 1.05;
   }
 
   .hero-accent {
@@ -794,7 +791,43 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
   }
 
   .hero-terminal {
+    position: relative;
     width: 100%;
+  }
+
+  /* Pause/play for the autoplaying demo, overlaid on the terminal title bar */
+  .hero-term-pause {
+    position: absolute;
+    top: 3px;
+    right: var(--space-sm);
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
+    background: none;
+    border: none;
+    color: var(--term-muted);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+  }
+
+  .hero-term-pause:hover {
+    color: var(--term-text);
+  }
+
+  .hero-term-pause[hidden] {
+    display: none;
+  }
+
+  .hero-term-pause .icon-play,
+  .hero-term-pause[aria-pressed='true'] .icon-pause {
+    display: none;
+  }
+
+  .hero-term-pause[aria-pressed='true'] .icon-play {
+    display: block;
   }
 
   .hero-term-screen {
@@ -816,21 +849,42 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
     word-break: break-word;
   }
 
-  /* 12-column grid: the setup/CLI/exec row holds four tabs and the SDK row
-     holds three, each row filling the full width. */
+  /* One row per surface (CLI commands, runtime SDKs). The label column has a
+     fixed width so both rows of tabs start at the same edge, and each row's
+     tabs share the remaining width. */
   .hero-term-modes {
     display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: var(--space-sm);
     margin-top: var(--space-md);
   }
 
-  .hero-term-mode {
-    grid-column: span 3;
+  .hero-term-row {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-sm);
   }
 
-  .hero-term-mode:nth-child(n + 5) {
-    grid-column: span 4;
+  .hero-term-row-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+  }
+
+  .hero-term-row-tabs {
+    display: grid;
+    /* auto-fit keeps each row on one line while the tabs fit, and wraps them
+       when they cannot (narrow screens, 200% text zoom). */
+    grid-template-columns: repeat(auto-fit, minmax(4rem, 1fr));
+    gap: var(--space-sm);
+  }
+
+  /* Four CLI tabs only fit a 375px screen with tighter side padding. */
+  @media (max-width: 479px) {
+    .hero-term-row-tabs .hero-term-mode {
+      padding-inline: var(--space-xs);
+    }
   }
 
   .hero-term-mode {
@@ -1083,6 +1137,13 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
     let runId = 0;
     let current = 0;
     let paused = false;
+    // Hover/focus pauses temporarily; the pause button pauses until the
+    // user resumes it (touch users have no hover to stop the loop).
+    let hovering = false;
+    let userPaused = false;
+    // True while a manually selected scene is shown statically during an
+    // explicit pause, so Resume knows to replay it.
+    let showingStatic = false;
     let holdTimer: ReturnType<typeof setTimeout> | undefined;
     let scrollFrame: number | undefined;
 
@@ -1167,6 +1228,13 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       screen!.appendChild(el);
       keepLatestLineVisible();
       return el;
+    }
+
+    // Holds while paused, then reports whether this run is still current.
+    // Gate every delayed DOM update on this so a pause freezes the frame.
+    async function settle(id: number): Promise<boolean> {
+      await waitWhilePaused();
+      return alive(id);
     }
 
     function renderInstant(scene: Scene) {
@@ -1372,14 +1440,16 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       code.appendChild(cursor);
       view.cmd.textContent = `"${editor.file}" [New]`;
       await sleep(TIMING.editorOpen);
-      if (!alive(id)) return false;
+      if (!(await settle(id))) return false;
 
       setEditorMode(view, true);
       await sleep(between(TIMING.editorModeSwitch));
+      if (!(await settle(id))) return false;
 
       for (const [r, row] of editor.code.entries()) {
         if (r > 0) {
           await sleep(between(TIMING.editorNewline));
+          if (!(await settle(id))) return false;
           code = addEditorLine(view, r + 1);
           code.appendChild(cursor);
         }
@@ -1391,15 +1461,16 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       }
 
       await sleep(between(TIMING.editorModeSwitch));
-      if (!alive(id)) return false;
+      if (!(await settle(id))) return false;
       setEditorMode(view, false);
       await sleep(between(TIMING.editorModeSwitch));
+      if (!(await settle(id))) return false;
 
       view.cmd.appendChild(cursor);
       const save = { text: ':wq', cls: 'tok-plain' };
       if (!(await typeSegment(view.cmd, save, cursor, id))) return false;
       await sleep(between(TIMING.enterAfterCommand));
-      if (!alive(id)) return false;
+      if (!(await settle(id))) return false;
 
       screen!.replaceChildren(...shell);
       keepLatestLineVisible();
@@ -1469,10 +1540,15 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       return true;
     }
 
-    async function play(index: number) {
+    async function play(index: number, manual = false) {
       if (isStale()) return;
       const id = ++runId;
       if (holdTimer) clearTimeout(holdTimer);
+
+      // Auto-rotation waits out any pause before switching the active
+      // button, so the selection never runs ahead of the screen.
+      if (!manual && !reduceMotion && !(await settle(id))) return;
+
       current = index;
       setActiveMode(index);
 
@@ -1480,6 +1556,19 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       if (reduceMotion) {
         renderInstant(scene);
         return;
+      }
+
+      // An explicit pause shows the chosen scene at once instead of leaving
+      // the previous one on screen until Resume.
+      if (manual && userPaused) {
+        showingStatic = true;
+        renderInstant(scene);
+        return;
+      }
+      if (showingStatic) {
+        showingStatic = false;
+        screen!.classList.remove('is-static');
+        screen!.removeAttribute('tabindex');
       }
 
       // Wait for any pause to lift before clearing the screen, so an
@@ -1494,7 +1583,8 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
       cursor.className = 'cursor';
 
       if (await playScene(scene, cursor, id)) {
-        if (!alive(id)) return;
+        // A pause during the last line also holds the closing prompt
+        if (!(await settle(id))) return;
         appendPromptLine(cursor);
         scheduleNext(index);
       }
@@ -1502,25 +1592,50 @@ const scenesJson = JSON.stringify(scenes).replace(/</g, '\\u003c');
 
     modes.forEach((mode, index) => {
       mode.addEventListener('click', () => {
-        play(index);
+        play(index, true);
       });
     });
 
     // Pause only while the user hovers/focuses the terminal itself, so the
     // mode buttons can switch scenes without stalling playback.
     const hoverTarget = screen.closest('.terminal') ?? screen;
+    const syncPaused = () => {
+      paused = hovering || userPaused;
+    };
     hoverTarget.addEventListener('mouseenter', () => {
-      paused = true;
+      hovering = true;
+      syncPaused();
     });
     hoverTarget.addEventListener('mouseleave', () => {
-      paused = false;
+      hovering = false;
+      syncPaused();
     });
     hoverTarget.addEventListener('focusin', () => {
-      paused = true;
+      hovering = true;
+      syncPaused();
     });
     hoverTarget.addEventListener('focusout', () => {
-      paused = false;
+      hovering = false;
+      syncPaused();
     });
+
+    const pauseBtn = wrapper.querySelector<HTMLButtonElement>(
+      '[data-hero-pause]',
+    );
+    if (pauseBtn && !reduceMotion) {
+      pauseBtn.hidden = false;
+      pauseBtn.addEventListener('click', () => {
+        userPaused = !userPaused;
+        syncPaused();
+        // Resuming after a scene was picked while paused replays it
+        if (!userPaused && showingStatic) play(current);
+        pauseBtn.setAttribute('aria-pressed', String(userPaused));
+        const label = userPaused
+          ? pauseBtn.dataset.labelPlay
+          : pauseBtn.dataset.labelPause;
+        if (label) pauseBtn.setAttribute('aria-label', label);
+      });
+    }
 
     wrapper.dataset.heroStarted = 'true';
     play(0);

@@ -816,7 +816,7 @@ envilder exec -- docker compose up`} />
         <CodeBlock lang="bash" code={execUcLocalstackDocker} />
         <p>
           {t.docs.execUcLocalstackExamplesDesc}{' '}
-          <a href="https://github.com/macalbert/envilder-examples" target="_blank" rel="noopener noreferrer"><code>envilder-examples</code></a>
+          <a href="https://github.com/macalbert/envilder-examples/tree/main/cli/aws" target="_blank" rel="noopener noreferrer"><code>envilder-examples</code></a>
         </p>
 
         <h3>{t.docs.execUcTestsTitle}</h3>
@@ -1305,6 +1305,40 @@ jobs:
       - run: npm run deploy`} />
       </section>
 
+      <section id="gha-exec" class="docs-section">
+        <h2>{t.docs.ghaExecTitle}</h2>
+        <p>{t.docs.ghaExecDesc}</p>
+        <CodeBlock lang="yaml" filename=".github/workflows/test.yml" code={`name: Test
+
+on: [push]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/github-envilder
+          aws-region: eu-west-1
+
+      - run: npm ci
+      - name: Run tests with secrets in memory
+        run: npx envilder exec --map=envilder.json -- npm test`} />
+        <p class="note">{t.docs.ghaExecNote}</p>
+        <p><a href={localizedPath(lang, '/docs/cli/exec/')}>{t.docs.ghaExecLink}</a></p>
+      </section>
+
       <section id="gha-why" class="docs-section">
         <h2>{t.docs.ghaWhyTitle}</h2>
         <p>{t.docs.ghaWhyDesc}</p>
@@ -1452,7 +1486,8 @@ jobs:
     filter: grayscale(100%) sepia(60%) saturate(400%) hue-rotate(50deg) brightness(0.9);
   }
 
-  :global([data-theme="light"]) .overview-icon {
+  :global([data-theme="light"]) .overview-icon,
+  :global([data-theme="cream"]) .overview-icon {
     filter: grayscale(100%) sepia(40%) saturate(100%) brightness(0.7) contrast(1.1);
   }
 
@@ -1464,12 +1499,12 @@ jobs:
 
 
   .docs-section h2 {
-    font-size: 0.75rem;
+    font-size: clamp(1.4rem, 2.5vw, 1.75rem);
     margin-bottom: var(--space-lg);
   }
 
   .docs-section h3 {
-    font-size: 0.6rem;
+    font-size: clamp(1.1rem, 1.8vw, 1.25rem);
     color: var(--color-text);
     margin-top: var(--space-2xl);
     margin-bottom: var(--space-md);
@@ -1480,6 +1515,19 @@ jobs:
     color: var(--color-text-muted);
     margin-bottom: var(--space-lg);
     line-height: 1.7;
+  }
+
+  /* Inline links in prose must read as links, even when they wrap <code> */
+  .docs-section p a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .docs-section p a code {
+    color: inherit;
+    border-color: currentColor;
+    text-decoration: inherit;
+    text-underline-offset: 2px;
   }
 
   /* Spacing for code blocks inside docs */
@@ -1592,7 +1640,8 @@ jobs:
     filter: grayscale(100%) sepia(60%) saturate(400%) hue-rotate(50deg) brightness(0.9);
   }
 
-  :global([data-theme="light"]) .callout-icon {
+  :global([data-theme="light"]) .callout-icon,
+  :global([data-theme="cream"]) .callout-icon {
     filter: grayscale(100%) sepia(40%) saturate(100%) brightness(0.7) contrast(1.1);
   }
 
