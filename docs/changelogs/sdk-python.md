@@ -1,3 +1,21 @@
+## [0.5.2] - 2026-10-22
+
+### Security
+
+* Update `certifi` from 2026.2.25 to 2026.10.19 in the SDK lockfile to
+  resolve GHSA-6q48-6c7w-9gw2. `certifi` is a transitive dependency (via
+  `requests` in the Azure clients); the package's declared dependency ranges are
+  unchanged ([#609](https://github.com/macalbert/envilder/pull/609))
+
+### Dependencies
+
+* Bump `pyjwt` from 2.13.0 to 2.15.0 in the SDK lockfile
+  ([#534](https://github.com/macalbert/envilder/pull/534))
+* Bump `urllib3` from 2.7.0 to 2.8.0 in the SDK lockfile
+  ([#535](https://github.com/macalbert/envilder/pull/535))
+
+---
+
 ## [0.5.1] - 2026-09-26
 
 ### Documentation

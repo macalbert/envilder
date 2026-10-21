@@ -5,6 +5,23 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [0.15.1] - 2026-10-22
+
+### Security
+
+* Update development and build dependencies to resolve open advisories:
+  `undici` 8.10.2 → 8.12.3 (via `testcontainers`), `brace-expansion`,
+  `@grpc/grpc-js` and `@vitest/mocker`. The published `envilder` package and
+  its runtime dependencies are unchanged
+  ([#609](https://github.com/macalbert/envilder/pull/609))
+
+### Dependencies
+
+* Bump `testcontainers` and `@testcontainers/localstack` from 12.2.0 to 12.2.1
+* Bump `vitest` and `@vitest/coverage-v8` from 4.1.11 to 4.1.12
+
+---
+
 ## [0.15.0] - 2026-10-16
 
 ### Added

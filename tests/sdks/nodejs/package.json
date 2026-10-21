@@ -11,10 +11,10 @@
     "@aws-sdk/client-ssm": "^3.1149.0",
     "@azure/identity": "^4.13.2",
     "@azure/keyvault-secrets": "^4.11.2",
-    "@testcontainers/localstack": "^12.1.0",
+    "@testcontainers/localstack": "^12.2.1",
     "@types/node": "catalog:",
     "@vitest/coverage-v8": "catalog:",
-    "testcontainers": "^12.1.0",
+    "testcontainers": "^12.2.1",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

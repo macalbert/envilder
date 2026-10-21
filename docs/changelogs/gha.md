@@ -1,3 +1,14 @@
+## [0.15.1] - 2026-10-22
+
+### Security
+
+* Update development and build dependencies to resolve open advisories
+  (`undici`, `brace-expansion`, `@grpc/grpc-js`, `@vitest/mocker`). The
+  Action bundle and its runtime dependencies are unchanged
+  ([#609](https://github.com/macalbert/envilder/pull/609))
+
+---
+
 ## [0.15.0] - 2026-10-16
 
 ### Changed
