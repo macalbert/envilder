@@ -96,6 +96,8 @@ export const en: Translations = {
     localstackAlt: 'LocalStack',
     awsCreditsAlt: 'AWS Open Source Credits Program',
     awsCreditsLabel: 'AWS Open Source Credits',
+    snykAlt: 'Snyk Secure Developer Program',
+    snykLabel: 'Snyk Secure Developer',
   },
   howItWorks: {
     title: 'How it ',

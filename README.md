@@ -463,6 +463,10 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md).
   Envilder is also supported through the
   <a href="https://aws.amazon.com/blogs/opensource/aws-cloud-credits-for-open-source-projects-affirming-our-commitment/">
     AWS Open Source Credits Program
+  </a>
+  and the
+  <a href="https://snyk.io/open-source/">
+    Snyk Secure Developer Program
   </a>.
 </p>
 
