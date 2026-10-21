@@ -90,6 +90,9 @@ export const en: Translations = {
     npmMonthly: 'npm downloads last month',
     pypiMonthly: 'PyPI downloads last month',
     nugetTotal: 'NuGet downloads',
+    openssfBadge: 'OpenSSF Best Practices badge',
+    openssfLevel: 'passing',
+    openssfLabel: 'OpenSSF Best Practices',
   },
   sponsors: {
     title: 'Sponsors',

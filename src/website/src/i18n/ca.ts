@@ -90,6 +90,9 @@ export const ca: Translations = {
     npmMonthly: "descàrregues d'npm l'últim mes",
     pypiMonthly: "descàrregues de PyPI l'últim mes",
     nugetTotal: 'descàrregues de NuGet',
+    openssfBadge: 'Insígnia d’OpenSSF Best Practices',
+    openssfLevel: 'passing',
+    openssfLabel: 'OpenSSF Best Practices',
   },
   sponsors: {
     title: 'Sponsors',

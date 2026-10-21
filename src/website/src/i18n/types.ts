@@ -75,6 +75,9 @@ export interface ProofTranslations {
   npmMonthly: string;
   pypiMonthly: string;
   nugetTotal: string;
+  openssfBadge: string;
+  openssfLevel: string;
+  openssfLabel: string;
 }
 
 export interface FaqItem {

@@ -84,18 +84,36 @@ const proof = [
 
     </div>
 
-    {proof.length > 0 && (
-      <ul class="proof-list" aria-label={t.proof.ariaLabel}>
-        {proof.map((item) => (
-          <li>
-            <a href={item.href} target="_blank" rel="noopener noreferrer" class="proof-item">
-              <strong class="proof-value">{formatCount(item.value, lang)}</strong>
-              <span class="proof-label">{item.label}</span>
-            </a>
-          </li>
-        ))}
-      </ul>
-    )}
+    <ul class="proof-list" aria-label={t.proof.ariaLabel}>
+      {proof.map((item) => (
+        <li>
+          <a href={item.href} target="_blank" rel="noopener noreferrer" class="proof-item">
+            <strong class="proof-value">{formatCount(item.value, lang)}</strong>
+            <span class="proof-label">{item.label}</span>
+          </a>
+        </li>
+      ))}
+      <li>
+        <a
+          href="https://www.bestpractices.dev/projects/15703"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="proof-item"
+        >
+          <img
+            class="proof-icon"
+            src="/openssf-best-practices.svg"
+            alt={t.proof.openssfBadge}
+            width="20"
+            height="20"
+            loading="lazy"
+            decoding="async"
+          />
+          <strong class="proof-value">{t.proof.openssfLevel}</strong>
+          <span class="proof-label">{t.proof.openssfLabel}</span>
+        </a>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -185,6 +203,12 @@ const proof = [
 
   .proof-label {
     font-size: 0.85rem;
+  }
+
+  .proof-icon {
+    align-self: center;
+    width: 20px;
+    height: 20px;
   }
 
   @media (max-width: 640px) {
