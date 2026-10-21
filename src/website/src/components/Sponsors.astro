@@ -41,11 +41,21 @@ const t = useTranslations(lang);
       href="https://aws.amazon.com/blogs/opensource/aws-cloud-credits-for-open-source-projects-affirming-our-commitment/"
       target="_blank"
       rel="noopener noreferrer"
-      class="backer-link aws-credits-link"
+      class="backer-link program-link"
       title={t.sponsors.awsCreditsAlt}
       aria-label={t.sponsors.awsCreditsAlt}
     >
-      <span class="aws-credits-badge">{t.sponsors.awsCreditsLabel}</span>
+      <span class="program-badge">{t.sponsors.awsCreditsLabel}</span>
+    </a>
+    <a
+      href="https://snyk.io/open-source/"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="backer-link program-link"
+      title={t.sponsors.snykAlt}
+      aria-label={t.sponsors.snykAlt}
+    >
+      <span class="program-badge">{t.sponsors.snykLabel}</span>
     </a>
   </div>
 </section>
@@ -86,7 +96,7 @@ const t = useTranslations(lang);
     opacity: 1;
   }
 
-  .aws-credits-badge {
+  .program-badge {
     font-family: var(--font-mono);
     font-size: 0.75rem;
     color: var(--color-text-muted);
@@ -96,7 +106,7 @@ const t = useTranslations(lang);
     white-space: nowrap;
   }
 
-  .aws-credits-link:hover .aws-credits-badge {
+  .program-link:hover .program-badge {
     color: var(--color-text);
     border-color: var(--color-primary);
   }
