@@ -465,14 +465,8 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md).
 </p>
 
 <p align="center">
-  Supported by <a href="https://localstack.cloud">LocalStack</a>.
-</p>
-
-<p align="center">
   Envilder is also supported through the
-  <a href="https://aws.amazon.com/blogs/opensource/aws-cloud-credits-for-open-source-projects-affirming-our-commitment/">
-    AWS Open Source Credits Program
-  </a>.
+  <a href="https://aws.amazon.com/blogs/opensource/aws-cloud-credits-for-open-source-projects-affirming-our-commitment/">AWS Open Source Credits Program</a>.
 </p>
 
 ## 📜 License
