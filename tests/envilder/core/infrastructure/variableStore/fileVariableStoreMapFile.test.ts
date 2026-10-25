@@ -135,6 +135,7 @@ describe('FileVariableStore map file persistence', () => {
       'API_KEY',
       '/envilder/demo/api-key',
       { provider: 'aws' },
+      path,
     );
     const content = contentOf(decision);
 
@@ -143,7 +144,7 @@ describe('FileVariableStore map file persistence', () => {
 
     // Assert
     expect(await readFile(path, 'utf-8')).toBe(
-      '{\n  "$schema": "https://envilder.com/schema/map-file.v1.json",\n  "API_KEY": "/envilder/demo/api-key"\n}\n',
+      '{\n  "API_KEY": "/envilder/demo/api-key"\n}\n',
     );
   });
 
@@ -156,6 +157,7 @@ describe('FileVariableStore map file persistence', () => {
       'API_KEY',
       '/k',
       { provider: 'aws' },
+      path,
     );
     const content = contentOf(decision);
 
@@ -177,6 +179,7 @@ describe('FileVariableStore map file persistence', () => {
       'API_KEY',
       '/k',
       { provider: 'aws' },
+      path,
     );
     const content = contentOf(decision);
 

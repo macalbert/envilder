@@ -80,7 +80,6 @@ describe('PushSingleCommandHandler map file update', () => {
     expect(written).toHaveBeenCalledOnce();
     expect(written.mock.calls[0][0]).toBe(MAP_FILE);
     expect(JSON.parse(written.mock.calls[0][1])).toEqual({
-      $schema: 'https://envilder.com/schema/map-file.v1.json',
       [KEY]: SECRET_PATH,
     });
     expect(written.mock.invocationCallOrder[0]).toBeLessThan(

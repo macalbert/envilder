@@ -103,7 +103,13 @@ export class PushSingleCommandHandler {
     }
 
     const original = await this.variableStore.readMapFileContent(mapFile);
-    const decision = decideMapFileUpdate(original, key, secretPath, target);
+    const decision = decideMapFileUpdate(
+      original,
+      key,
+      secretPath,
+      target,
+      mapFile,
+    );
     switch (decision.kind) {
       case 'create':
         return {

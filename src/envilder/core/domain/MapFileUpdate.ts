@@ -54,12 +54,11 @@ export function decideMapFileUpdate(
   key: string,
   secretPath: string,
   target: MapFileTarget,
+  mapFile: string,
 ): MapFileUpdateDecision {
   if (existingContent === null) {
-    return {
-      kind: 'create',
-      content: serialize(buildNewFile(key, secretPath, target), DEFAULT_LAYOUT),
-    };
+    const file = buildNewFile(key, secretPath, target, mapFile);
+    return { kind: 'create', content: serialize(file, DEFAULT_LAYOUT) };
   }
 
   const parsed = parseObject(existingContent);
@@ -89,12 +88,23 @@ export function decideMapFileUpdate(
   };
 }
 
+/**
+ * File names SchemaStore already associates with the map-file schema
+ * (`envilder.json`, `envilder.*.json`), so editors validate them without a
+ * `$schema` key.
+ */
+const SCHEMA_STORE_FILE_NAME = /^envilder(?:\.[^.]+)*\.json$/;
+
 function buildNewFile(
   key: string,
   secretPath: string,
   target: MapFileTarget,
+  mapFile: string,
 ): Record<string, unknown> {
-  const file: Record<string, unknown> = { $schema: MAP_FILE_SCHEMA_URL };
+  const fileName = mapFile.split(/[\\/]/).pop() ?? mapFile;
+  const file: Record<string, unknown> = SCHEMA_STORE_FILE_NAME.test(fileName)
+    ? {}
+    : { $schema: MAP_FILE_SCHEMA_URL };
   if (target.provider !== DEFAULT_PROVIDER) {
     file.$config = {
       provider: target.provider,

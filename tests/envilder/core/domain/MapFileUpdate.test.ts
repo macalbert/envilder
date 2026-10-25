@@ -13,6 +13,7 @@ const AZURE: MapFileTarget = {
 };
 const KEY = 'API_KEY';
 const SECRET_PATH = '/envilder/demo/api-key';
+const MAP_FILE = 'envilder.json';
 
 describe('resolveMapFileTarget', () => {
   it('Should_DefaultToAws_When_ConfigHasNoProvider', () => {
@@ -54,12 +55,48 @@ describe('resolveMapFileTarget', () => {
 });
 
 describe('decideMapFileUpdate', () => {
-  it('Should_CreateAwsFileWithSchemaOnly_When_FileDoesNotExist', () => {
+  it('Should_CreateAwsFileWithoutSchema_When_DefaultMapFileDoesNotExist', () => {
     // Arrange
     const existing = null;
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
+
+    // Assert
+    expect(actual).toEqual({
+      kind: 'create',
+      content: `${JSON.stringify({ [KEY]: SECRET_PATH }, null, 2)}\n`,
+    });
+  });
+
+  it.each([
+    'envilder.json',
+    'envilder.local.json',
+    'envilder.prod.json',
+    'config/envilder.json',
+    'C:\\repo\\envilder.staging.json',
+  ])('Should_OmitSchema_When_SchemaStoreCoversFileName(%s)', (mapFile) => {
+    // Act
+    const actual = decideMapFileUpdate(null, KEY, SECRET_PATH, AWS, mapFile);
+
+    // Assert
+    expect(JSON.stringify(actual)).not.toContain('$schema');
+  });
+
+  it.each([
+    'config/secrets.json',
+    'envilder-prod.json',
+    'my-envilder.json',
+    'envilder.jsonc',
+  ])('Should_AddSchema_When_SchemaStoreDoesNotCoverFileName(%s)', (mapFile) => {
+    // Act
+    const actual = decideMapFileUpdate(null, KEY, SECRET_PATH, AWS, mapFile);
 
     // Assert
     expect(actual).toEqual({
@@ -68,7 +105,8 @@ describe('decideMapFileUpdate', () => {
         { $schema: MAP_FILE_SCHEMA_URL, [KEY]: SECRET_PATH },
         null,
         2,
-      )}\n`,
+      )}
+`,
     });
   });
 
@@ -77,14 +115,19 @@ describe('decideMapFileUpdate', () => {
     const existing = null;
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AZURE);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AZURE,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toEqual({
       kind: 'create',
       content: `${JSON.stringify(
         {
-          $schema: MAP_FILE_SCHEMA_URL,
           $config: { provider: 'azure', vaultUrl: AZURE.vaultUrl },
           [KEY]: SECRET_PATH,
         },
@@ -99,7 +142,13 @@ describe('decideMapFileUpdate', () => {
     const target = { provider: 'aws', profile: 'dev' } as MapFileTarget;
 
     // Act
-    const actual = decideMapFileUpdate(null, KEY, SECRET_PATH, target);
+    const actual = decideMapFileUpdate(
+      null,
+      KEY,
+      SECRET_PATH,
+      target,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toMatchObject({ kind: 'create' });
@@ -111,7 +160,13 @@ describe('decideMapFileUpdate', () => {
     const existing = `${JSON.stringify({ B_KEY: '/b', A_KEY: '/a' }, null, 2)}\n`;
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toEqual({
@@ -129,7 +184,13 @@ describe('decideMapFileUpdate', () => {
     const existing = '{\n    "B_KEY": "/b"\n}\n';
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toEqual({
@@ -143,7 +204,13 @@ describe('decideMapFileUpdate', () => {
     const existing = '{\n\t"B_KEY": "/b"\n}\n';
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toEqual({
@@ -157,7 +224,13 @@ describe('decideMapFileUpdate', () => {
     const existing = '{\r\n  "B_KEY": "/b"\r\n}\r\n';
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toEqual({
@@ -171,7 +244,13 @@ describe('decideMapFileUpdate', () => {
     const existing = '{\n  "B_KEY": "/b"\n}';
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toEqual({
@@ -185,7 +264,13 @@ describe('decideMapFileUpdate', () => {
     const existing = '{\n  "B_KEY": "/b"\n}\n';
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toMatchObject({ kind: 'append' });
@@ -203,7 +288,13 @@ describe('decideMapFileUpdate', () => {
     const existing = `${JSON.stringify(original, null, 2)}\n`;
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AZURE);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AZURE,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toEqual({
@@ -217,7 +308,13 @@ describe('decideMapFileUpdate', () => {
     const existing = '{}';
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toEqual({
@@ -231,7 +328,13 @@ describe('decideMapFileUpdate', () => {
     const existing = `{"${KEY}":"${SECRET_PATH}"}`;
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toEqual({ kind: 'unchanged' });
@@ -242,7 +345,13 @@ describe('decideMapFileUpdate', () => {
     const existing = `{"${KEY}":"/some/other/path"}`;
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toEqual({ kind: 'conflict' });
@@ -253,7 +362,13 @@ describe('decideMapFileUpdate', () => {
     const existing = `{"${KEY}":123}`;
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toEqual({ kind: 'conflict' });
@@ -264,7 +379,13 @@ describe('decideMapFileUpdate', () => {
     const existing = `{"OTHER_KEY":"${SECRET_PATH}"}`;
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toMatchObject({ kind: 'append' });
@@ -277,7 +398,13 @@ describe('decideMapFileUpdate', () => {
     });
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toEqual({ kind: 'targetMismatch', fileTarget: AZURE });
@@ -288,7 +415,13 @@ describe('decideMapFileUpdate', () => {
     const existing = '{"B_KEY":"/b"}';
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AZURE);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AZURE,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toEqual({ kind: 'targetMismatch', fileTarget: AWS });
@@ -301,7 +434,13 @@ describe('decideMapFileUpdate', () => {
     });
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AZURE);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AZURE,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toMatchObject({ kind: 'targetMismatch' });
@@ -317,7 +456,13 @@ describe('decideMapFileUpdate', () => {
     });
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AZURE);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AZURE,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toMatchObject({ kind: 'append' });
@@ -330,7 +475,13 @@ describe('decideMapFileUpdate', () => {
     });
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toMatchObject({ kind: 'append' });
@@ -344,7 +495,13 @@ describe('decideMapFileUpdate', () => {
     });
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toMatchObject({ kind: 'targetMismatch' });
@@ -355,7 +512,13 @@ describe('decideMapFileUpdate', () => {
     const existing = '{ not json';
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toEqual({ kind: 'invalidJson' });
@@ -366,7 +529,13 @@ describe('decideMapFileUpdate', () => {
     const existing = '["a"]';
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toEqual({ kind: 'invalidJson' });
@@ -377,7 +546,13 @@ describe('decideMapFileUpdate', () => {
     const existing = '{\n  "__proto__": "/p"\n}\n';
 
     // Act
-    const actual = decideMapFileUpdate(existing, KEY, SECRET_PATH, AWS);
+    const actual = decideMapFileUpdate(
+      existing,
+      KEY,
+      SECRET_PATH,
+      AWS,
+      MAP_FILE,
+    );
 
     // Assert
     expect(actual).toEqual({

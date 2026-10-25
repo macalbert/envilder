@@ -353,7 +353,6 @@ describe('Envilder (E2E)', () => {
     expect(
       JSON.parse(readFileSync(join(isolatedDir, 'envilder.json'), 'utf8')),
     ).toEqual({
-      $schema: 'https://envilder.com/schema/map-file.v1.json',
       [key]: singleSsmPath,
     });
   });
@@ -684,7 +683,6 @@ describe('Envilder (E2E)', () => {
       const secret = await azureSecretClient.getSecret('single-azure-map-test');
       expect(secret.value).toBe('single-azure-map-value');
       expect(JSON.parse(readFileSync(mapPath, 'utf8'))).toEqual({
-        $schema: 'https://envilder.com/schema/map-file.v1.json',
         $config: config,
         SINGLE_VAR: 'single-azure-map-test',
       });
