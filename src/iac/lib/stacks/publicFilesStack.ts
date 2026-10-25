@@ -50,7 +50,7 @@ export class PublicFilesStack extends CustomStack {
 			this,
 			"hosted-zone",
 			{
-				zoneName: props.domainName,
+				zoneName: props.domainName.toLowerCase(),
 				hostedZoneId: props.hostedZoneId,
 			},
 		);
@@ -58,7 +58,7 @@ export class PublicFilesStack extends CustomStack {
 		const certificate = Certificate.fromCertificateArn(
 			this,
 			"certificate",
-			`arn:aws:acm:us-east-1:${props.env?.account}:certificate/${props.certificateId}`,
+			`arn:aws:acm:us-east-1:${this.account}:certificate/${props.certificateId}`,
 		);
 
 		const bucket = new Bucket(this, "public-files-bucket", {

@@ -88,6 +88,25 @@ describe("Public files Stack", () => {
 		});
 	});
 
+	test("Should_QualifyRecordsWithLowercaseZone_When_DomainHasUppercase", () => {
+		// Arrange
+		const props = { ...createPublicFilesStackProps(), domainName: "Domain.com" };
+		const sut = new PublicFilesStack(new App(), props);
+
+		// Act
+		const actual = Template.fromStack(sut);
+
+		// Assert
+		actual.hasResourceProperties("AWS::Route53::RecordSet", {
+			Name: "files.domain.com.",
+			Type: "A",
+		});
+		actual.hasResourceProperties("AWS::Route53::RecordSet", {
+			Name: "files.domain.com.",
+			Type: "AAAA",
+		});
+	});
+
 	function createPublicFilesStack(): Stack {
 		return new PublicFilesStack(new App(), createPublicFilesStackProps());
 	}
