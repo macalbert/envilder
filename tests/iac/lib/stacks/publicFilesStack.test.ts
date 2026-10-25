@@ -82,6 +82,10 @@ describe("Public files Stack", () => {
 			Name: "files.domain.com.",
 			Type: "A",
 		});
+		actual.hasResourceProperties("AWS::Route53::RecordSet", {
+			Name: "files.domain.com.",
+			Type: "AAAA",
+		});
 	});
 
 	test("Should_Throw_When_RegionIsNotUsEast1", () => {

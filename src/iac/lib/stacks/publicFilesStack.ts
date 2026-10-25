@@ -13,7 +13,12 @@ import {
 	ViewerProtocolPolicy,
 } from "aws-cdk-lib/aws-cloudfront";
 import { S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
-import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
+import {
+	AaaaRecord,
+	ARecord,
+	HostedZone,
+	RecordTarget,
+} from "aws-cdk-lib/aws-route53";
 import { CloudFrontTarget } from "aws-cdk-lib/aws-route53-targets";
 import {
 	BlockPublicAccess,
@@ -90,10 +95,20 @@ export class PublicFilesStack extends CustomStack {
 			enableLogging: false,
 		});
 
+		const aliasTarget = RecordTarget.fromAlias(
+			new CloudFrontTarget(distribution),
+		);
+
 		new ARecord(this, "public-files-record", {
 			zone: hostedZone,
 			recordName: fullDomainName,
-			target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
+			target: aliasTarget,
+		});
+
+		new AaaaRecord(this, "public-files-record-ipv6", {
+			zone: hostedZone,
+			recordName: fullDomainName,
+			target: aliasTarget,
 		});
 
 		new CfnOutput(this, "PublicFilesBucketName", {
