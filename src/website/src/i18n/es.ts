@@ -936,7 +936,9 @@ export const es: Translations = {
     pushSingleOptValue: 'Valor a almacenar',
     pushSingleOptPath: 'Ruta completa del secreto en tu proveedor en la nube',
     pushSingleOptMap:
-      'Opcional: archivo de mapeo del que leer $config (por defecto: envilder.json si existe; nunca requerido para una subida individual)',
+      'Opcional: archivo de mapeo que se crea o actualiza con la entrada y del que se lee $config (por defecto: envilder.json)',
+    pushSingleOptNoMapUpdate:
+      'Opcional: sube el secreto sin leer, crear ni actualizar ningún archivo de mapeo; el proveedor y el vault solo vienen de los flags',
     pushSingleOptProvider: 'aws (por defecto) o azure',
     pushSingleOptVault: 'URL de Azure Key Vault',
     pushSingleOptProfile: 'Perfil AWS CLI (solo AWS)',

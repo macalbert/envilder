@@ -104,6 +104,8 @@ export class DispatchActionCommandHandler {
       command.key,
       command.value,
       command.secretPath,
+      command.map,
+      command.mapTarget,
     );
 
     await this.pushSingleHandler.handle(pushSingleCommand);

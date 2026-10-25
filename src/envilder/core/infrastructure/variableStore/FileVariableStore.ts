@@ -131,6 +131,46 @@ export class FileVariableStore implements IVariableStore {
     }
   }
 
+  async readMapFileContent(source: string): Promise<string | null> {
+    try {
+      return await fs.readFile(source, 'utf-8');
+    } catch (error) {
+      if (isErrnoCode(error, 'ENOENT')) {
+        return null;
+      }
+      throw new EnvironmentFileError(`Failed to read map file: ${source}`);
+    }
+  }
+
+  async writeMapFileContent(
+    destination: string,
+    content: string,
+  ): Promise<void> {
+    try {
+      await fs.writeFile(destination, content, 'utf-8');
+    } catch (error) {
+      if (isErrnoCode(error, 'ENOENT')) {
+        throw new EnvironmentFileError(
+          `Cannot write map file ${destination}: its directory does not exist`,
+        );
+      }
+      const reason = error instanceof Error ? error.message : String(error);
+      throw new EnvironmentFileError(
+        `Failed to write map file ${destination}: ${reason}`,
+      );
+    }
+  }
+
+  async deleteMapFile(destination: string): Promise<void> {
+    try {
+      await fs.unlink(destination);
+    } catch (error) {
+      if (!isErrnoCode(error, 'ENOENT')) {
+        throw error;
+      }
+    }
+  }
+
   async getEnvironment(source: string): Promise<Record<string, string>> {
     // Null-prototype for the same reason as the parsed mappings: callers
     // assign resolved secrets straight into this map, and a plain object
@@ -527,6 +567,12 @@ export class FileVariableStore implements IVariableStore {
       `Cannot write the environment file without losing or altering ${keys}; nothing was written`,
     );
   }
+}
+
+function isErrnoCode(error: unknown, code: string): boolean {
+  return (
+    error instanceof Error && (error as NodeJS.ErrnoException).code === code
+  );
 }
 
 export async function readMapFileConfig(

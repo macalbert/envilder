@@ -563,6 +563,7 @@ export interface DocsTranslations {
   pushSingleOptValue: string;
   pushSingleOptPath: string;
   pushSingleOptMap: string;
+  pushSingleOptNoMapUpdate: string;
   pushSingleOptProvider: string;
   pushSingleOptVault: string;
   pushSingleOptProfile: string;

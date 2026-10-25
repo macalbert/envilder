@@ -137,6 +137,7 @@ describe('Envilder (E2E)', () => {
     expect(actual.code).toBe(0);
     expect(actual.output).toContain('--map');
     expect(actual.output).toContain('--envfile');
+    expect(actual.output).toContain('--no-map-update');
   });
 
   it('Should_GenerateEnvironmentFile_When_ValidArgumentsAreProvided', async () => {
@@ -325,6 +326,89 @@ describe('Envilder (E2E)', () => {
     expect(actual.code).toBe(0);
     const ssmValue = await GetParameterSsm(singleSsmPath);
     expect(ssmValue).toBe(value);
+  });
+
+  it('Should_CreateEnvilderJson_When_PushSingleRunsWithoutMapFile', async () => {
+    // Arrange
+    const key = 'SINGLE_VARIABLE';
+    const isolatedDir = await mkdtemp(
+      join(tmpdir(), `envilder-e2e-single-map-${runId}-`),
+    );
+    onTestFinished(() => rm(isolatedDir, { recursive: true, force: true }));
+    const params = [
+      '--key',
+      key,
+      '--value',
+      'single-value-test',
+      '--secret-path',
+      singleSsmPath,
+    ];
+
+    // Act
+    const actual = await runCommand(envilder, params, { cwd: isolatedDir });
+
+    // Assert
+    expect(actual.code).toBe(0);
+    expect(actual.output).toContain('Created envilder.json');
+    expect(
+      JSON.parse(readFileSync(join(isolatedDir, 'envilder.json'), 'utf8')),
+    ).toEqual({
+      $schema: 'https://envilder.com/schema/map-file.v1.json',
+      [key]: singleSsmPath,
+    });
+  });
+
+  it('Should_NotCreateMapFile_When_PushSingleUsesNoMapUpdate', async () => {
+    // Arrange
+    const isolatedDir = await mkdtemp(
+      join(tmpdir(), `envilder-e2e-single-no-map-${runId}-`),
+    );
+    onTestFinished(() => rm(isolatedDir, { recursive: true, force: true }));
+    const params = [
+      '--key',
+      'SINGLE_VARIABLE',
+      '--value',
+      'single-value-test',
+      '--secret-path',
+      singleSsmPath,
+      '--no-map-update',
+    ];
+
+    // Act
+    const actual = await runCommand(envilder, params, { cwd: isolatedDir });
+
+    // Assert
+    expect(actual.code).toBe(0);
+    expect(existsSync(join(isolatedDir, 'envilder.json'))).toBe(false);
+    expect(await GetParameterSsm(singleSsmPath)).toBe('single-value-test');
+  });
+
+  it('Should_AppendToExistingMapFile_When_PushSingleTargetsSameProvider', async () => {
+    // Arrange
+    const key = 'SINGLE_VARIABLE';
+    const isolatedDir = await mkdtemp(
+      join(tmpdir(), `envilder-e2e-single-append-${runId}-`),
+    );
+    onTestFinished(() => rm(isolatedDir, { recursive: true, force: true }));
+    const mapPath = join(isolatedDir, 'envilder.json');
+    writeFileSync(mapPath, '{\n    "OTHER_VARIABLE": "/other/path"\n}\n');
+    const params = [
+      '--key',
+      key,
+      '--value',
+      'single-value-test',
+      '--secret-path',
+      singleSsmPath,
+    ];
+
+    // Act
+    const actual = await runCommand(envilder, params, { cwd: isolatedDir });
+
+    // Assert
+    expect(actual.code).toBe(0);
+    expect(readFileSync(mapPath, 'utf8')).toBe(
+      `{\n    "OTHER_VARIABLE": "/other/path",\n    "${key}": "${singleSsmPath}"\n}\n`,
+    );
   });
 
   it('Should_SuccessfullyPushAllVariables_When_AllParametersAreValid', async () => {
@@ -566,6 +650,44 @@ describe('Envilder (E2E)', () => {
       // Assert
       const secret = await azureSecretClient.getSecret('single-azure-test');
       expect(secret.value).toBe('single-azure-value');
+    });
+
+    it('Should_CreateMapFileWithAzureConfig_When_PushSingleHasMapOption', async () => {
+      // Arrange
+      const isolatedDir = await mkdtemp(
+        join(tmpdir(), `envilder-e2e-azure-single-map-${runId}-`),
+      );
+      onTestFinished(() => rm(isolatedDir, { recursive: true, force: true }));
+      const mapPath = join(isolatedDir, 'envilder.json');
+      const config = { provider: 'azure', vaultUrl: azureVaultUrl };
+      const container = Startup.build()
+        .configureServices()
+        .configureInfrastructure(config, {
+          allowedVaultHosts: [azureVaultHost],
+        })
+        .create();
+      const handler = container.get<DispatchActionCommandHandler>(
+        TYPES.DispatchActionCommandHandler,
+      );
+      const command = DispatchActionCommand.fromCliOptions({
+        key: 'SINGLE_VAR',
+        value: 'single-azure-map-value',
+        secretPath: 'single-azure-map-test',
+        map: mapPath,
+        mapTarget: config,
+      });
+
+      // Act
+      await handler.handleCommand(command);
+
+      // Assert
+      const secret = await azureSecretClient.getSecret('single-azure-map-test');
+      expect(secret.value).toBe('single-azure-map-value');
+      expect(JSON.parse(readFileSync(mapPath, 'utf8'))).toEqual({
+        $schema: 'https://envilder.com/schema/map-file.v1.json',
+        $config: config,
+        SINGLE_VAR: 'single-azure-map-test',
+      });
     });
   });
 });

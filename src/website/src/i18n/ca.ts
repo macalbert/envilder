@@ -936,7 +936,9 @@ export const ca: Translations = {
     pushSingleOptValue: 'Valor a emmagatzemar',
     pushSingleOptPath: 'Ruta completa del secret al teu proveïdor al núvol',
     pushSingleOptMap:
-      'Opcional: fitxer de mapeig del qual llegir $config (per defecte: envilder.json si existeix; mai requerit per a una pujada individual)',
+      "Opcional: fitxer de mapeig que es crea o s'actualitza amb l'entrada i del qual es llegeix $config (per defecte: envilder.json)",
+    pushSingleOptNoMapUpdate:
+      'Opcional: puja el secret sense llegir, crear ni actualitzar cap fitxer de mapeig; el proveïdor i el vault només vénen dels flags',
     pushSingleOptProvider: 'aws (per defecte) o azure',
     pushSingleOptVault: "URL d'Azure Key Vault",
     pushSingleOptProfile: 'Perfil AWS CLI (només AWS)',

@@ -1,3 +1,14 @@
+## [0.16.0] - 2026-10-25
+
+### Changed
+
+* **Shared single-secret push handler records the mapping**: The handler the
+  Action bundle shares with the CLI now also writes the map file during a
+  CLI single-secret push. The Action never runs a single-secret push, so its
+  pull flow, inputs and outputs are unchanged
+
+---
+
 ## [0.15.1] - 2026-10-22
 
 ### Security

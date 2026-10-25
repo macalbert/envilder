@@ -140,6 +140,22 @@ It is not a sandbox: your command and everything it starts can read the secrets.
 
 📖 See the [Exec Command Guide](docs/exec-command.md) for exit codes, signals and GitHub Actions masking.
 
+### 5. Or start from a single secret
+
+No mapping file yet? Push one secret and Envilder writes the mapping for you:
+
+```bash
+npx envilder --key=API_KEY --value=s3cret --secret-path=/envilder/demo/api-key
+# Created envilder.json
+
+npx envilder exec -- node app.mjs
+```
+
+The first command pushes the value to AWS SSM and records `"API_KEY": "/envilder/demo/api-key"` in `envilder.json`
+(or in the file you pass with `--map`). The second runs your app with that secret in its environment.
+The value itself is never written to the map file. Use `--no-map-update` to push without touching any map file.
+See the [Push Command Guide](docs/push-command.md#single-variable-push) for the details.
+
 💡 Runnable examples: [envilder-examples](https://github.com/macalbert/envilder-examples) (Testcontainers and Aspire for
 .NET, Python and TypeScript, AWS SSM and Azure Key Vault, plus `envilder exec`).
 

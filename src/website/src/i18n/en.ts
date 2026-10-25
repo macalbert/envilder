@@ -922,7 +922,9 @@ export const en: Translations = {
     pushSingleOptValue: 'Value to store',
     pushSingleOptPath: 'Full secret path in your cloud provider',
     pushSingleOptMap:
-      'Optional: map file to read $config from (default: envilder.json if present; never required for a single push)',
+      'Optional: map file that is created or updated with the mapping and read for $config (default: envilder.json)',
+    pushSingleOptNoMapUpdate:
+      'Optional: push without reading, creating or updating any map file; provider and vault come only from flags',
     pushSingleOptProvider: 'aws (default) or azure',
     pushSingleOptVault: 'Azure Key Vault URL',
     pushSingleOptProfile: 'AWS CLI profile (AWS only)',
