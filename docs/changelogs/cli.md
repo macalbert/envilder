@@ -19,8 +19,8 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   endings and `$config`. If the variable is already mapped to a different path,
   the command fails before pushing. If the map file targets another provider or
   vault, the secret is still pushed and a warning explains that the mapping was
-  not added. If the push fails, the map file is restored. The secret value and
-  the AWS profile are never written
+  not added. If writing the map file or the push fails, the map file is
+  restored. The secret value and the AWS profile are never written
 * **`--no-map-update`**: push a single secret without reading, creating or
   updating any map file
 

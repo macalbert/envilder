@@ -928,7 +928,7 @@ export const es: Translations = {
     pushCommentAzureFlags: '# Azure vía flags CLI',
     pushSingleTitle: 'Subir variable individual',
     pushSingleDesc:
-      'Sube una variable de entorno individual directamente a tu proveedor en la nube sin usar ningún archivo .env.',
+      'Sube una variable de entorno individual directamente a tu proveedor en la nube sin usar ningún archivo .env. Envilder también guarda el mapeo en envilder.json (y lo crea si no existe), para que envilder exec lo pueda resolver enseguida. El valor nunca se escribe en el archivo.',
     pushSingleOptions: 'Opciones',
     pushSingleOptPush:
       'Opcional: --key, --value y --secret-path ya activan el modo push',

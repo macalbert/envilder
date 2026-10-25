@@ -914,7 +914,7 @@ export const en: Translations = {
     pushCommentAzureFlags: '# Azure via CLI flags',
     pushSingleTitle: 'Push single variable',
     pushSingleDesc:
-      'Push a single environment variable directly to your cloud provider without using a .env file.',
+      'Push a single environment variable directly to your cloud provider without using a .env file. Envilder also records the mapping in envilder.json (created if missing), so envilder exec can resolve it right away. The value is never written to the file.',
     pushSingleOptions: 'Options',
     pushSingleOptPush:
       'Optional: --key, --value and --secret-path already activate push mode',

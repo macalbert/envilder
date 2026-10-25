@@ -187,7 +187,8 @@ envilder exec -- node app.mjs
 - **Map file targets another provider or vault:** the secret is still pushed and a warning explains that the
   mapping was not added. The map file is not modified. Use `--map=<file>` to record it elsewhere.
 - **Invalid JSON, or a `--map` whose directory does not exist:** the command fails before pushing.
-- **Failed push:** the map file is restored to its previous content (or deleted if the push created it).
+- **Failed write or failed push:** the map file is restored to its previous content (or removed if this run
+  created it). A failed write stops the command before anything is pushed.
 - The secret value is never written to the map file.
 
 > **Migration note:** Before this change, a single push never touched the file system. It now creates or

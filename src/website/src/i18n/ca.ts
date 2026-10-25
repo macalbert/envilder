@@ -928,7 +928,7 @@ export const ca: Translations = {
     pushCommentAzureFlags: '# Azure via flags CLI',
     pushSingleTitle: 'Pujar variable individual',
     pushSingleDesc:
-      "Puja una variable d'entorn individual directament al teu proveïdor al núvol sense fer servir cap fitxer .env.",
+      "Puja una variable d'entorn individual directament al teu proveïdor al núvol sense fer servir cap fitxer .env. Envilder també desa el mapeig a envilder.json (i el crea si no existeix), perquè envilder exec el pugui resoldre de seguida. El valor no s'escriu mai al fitxer.",
     pushSingleOptions: 'Opcions',
     pushSingleOptPush:
       'Opcional: --key, --value i --secret-path ja activen el mode push',
