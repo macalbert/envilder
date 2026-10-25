@@ -1,7 +1,9 @@
 import { deploy, validateConfig } from "../../../src/iac/bin/main";
 import { AppEnvironment } from "../../../src/iac/lib/core/types";
+import { PublicFilesStack } from "../../../src/iac/lib/stacks/publicFilesStack";
 
 vi.mock("../../../src/iac/lib/stacks/staticWebsiteStack");
+vi.mock("../../../src/iac/lib/stacks/publicFilesStack");
 
 describe("main", () => {
 	beforeEach(() => {
@@ -71,6 +73,32 @@ describe("main", () => {
 
 			// Assert
 			expect(result).toEqual([]);
+		});
+
+		it("Should_CreatePublicFilesStackInUsEast1_When_PublicFilesIsConfigured", () => {
+			// Arrange
+			const config = {
+				...createValidConfig(),
+				stacks: {
+					...createValidConfig().stacks,
+					publicFiles: { name: "Files", subdomain: "files" },
+				},
+			};
+
+			// Act
+			const result = deploy(config);
+
+			// Assert
+			expect(result).toHaveLength(1);
+			expect(PublicFilesStack).toHaveBeenCalledWith(
+				expect.anything(),
+				expect.objectContaining({
+					env: { account: "123456789012", region: "us-east-1" },
+					subdomain: "files",
+					domainName: "example.com",
+					hostedZoneId: "Z123",
+				}),
+			);
 		});
 
 		it("Should_Throw_When_ValidationFails", () => {

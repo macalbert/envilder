@@ -6,6 +6,7 @@ import type { Environment, Stack } from "aws-cdk-lib";
  */
 import { App } from "aws-cdk-lib";
 import { AppEnvironment } from "../lib/core/types";
+import { PublicFilesStack } from "../lib/stacks/publicFilesStack";
 import { StaticWebsiteStack } from "../lib/stacks/staticWebsiteStack";
 
 // ============================================================================
@@ -16,6 +17,11 @@ interface StaticWebsiteConfig {
 	name: string;
 	projectPath: string;
 	subdomain?: string;
+}
+
+interface PublicFilesConfig {
+	name: string;
+	subdomain: string;
 }
 
 interface DeploymentConfig {
@@ -31,6 +37,7 @@ interface DeploymentConfig {
 		frontend: {
 			staticWebsites: readonly StaticWebsiteConfig[];
 		};
+		publicFiles?: PublicFilesConfig;
 	};
 	rootPath?: string;
 }
@@ -56,6 +63,10 @@ const config: DeploymentConfig = {
 					projectPath: "envilder/src/website/dist",
 				},
 			],
+		},
+		publicFiles: {
+			name: "Files",
+			subdomain: "files",
 		},
 	},
 };
@@ -254,6 +265,23 @@ export function deploy(configOverride?: DeploymentConfig): Stack[] {
 			});
 
 			stacks.push(stack);
+		}
+
+		const { publicFiles } = effectiveConfig.stacks;
+		if (publicFiles) {
+			stacks.push(
+				new PublicFilesStack(app, {
+					// CloudFront certificates must live in us-east-1
+					env: { account: envFromCli.account, region: "us-east-1" },
+					name: publicFiles.name,
+					subdomain: publicFiles.subdomain,
+					domainName: effectiveConfig.domain.name,
+					hostedZoneId: effectiveConfig.domain.hostedZoneId,
+					envName: effectiveConfig.environment,
+					githubRepo: effectiveConfig.repoName,
+					stackName: `${effectiveConfig.repoName}-${publicFiles.name}`,
+				}),
+			);
 		}
 
 		return stacks;
