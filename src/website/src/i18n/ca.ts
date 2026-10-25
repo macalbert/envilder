@@ -1106,7 +1106,7 @@ export const ca: Translations = {
       'Projectes de proves xUnit amb Testcontainers i Aspire que resolen un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack i Lowkey Vault) i passen els valors als contenidors, sense cap fitxer .env:',
     sdkDotnetPrereqTitle: 'Prerequisits',
     sdkDotnetPrereqDesc:
-      'El paquet apunta a .NET Standard 2.0, així que funciona amb .NET 6+ i .NET Framework 4.6.1+. Cada proveïdor fa servir la seva cadena de credencials per defecte:',
+      "El paquet apunta a .NET Standard 2.0, així que funciona amb qualsevol versió de .NET amb suport (les proves de l'SDK s'executen a .NET 10, l'LTS actual). Cada proveïdor fa servir la seva cadena de credencials per defecte:",
     sdkDotnetPrereqAws:
       'AWS: la cadena de credencials per defecte d\'AWS (variables d\'entorn, fitxer de credencials compartit, SSO o un rol IAM). Defineix "profile" a $config per fer servir un perfil amb nom.',
     sdkDotnetPrereqAzure:
@@ -1130,7 +1130,7 @@ export const ca: Translations = {
       "L'SDK de .NET envia els noms a Key Vault tal com els escrius. A diferència de la CLI, no converteix una ruta com /myapp/prod/db-password en myapp-prod-db-password, així que escriu el nom final al fitxer.",
     sdkDotnetAspTitle: 'ASP.NET Core amb IConfiguration',
     sdkDotnetAspDesc:
-      'Crida AddEnvilder just després de CreateBuilder. Les claus escrites amb / esdevenen seccions de configuració, així que Stripe/ApiKey es llegeix com Stripe:ApiKey:',
+      "Crida AddEnvilder just després de CreateBuilder. Les claus es llegeixen tal com s'escriuen al fitxer de mapeig, així que fes servir noms de variable d'entorn: el mateix fitxer també funciona amb la CLI i la resta d'SDKs.",
     sdkDotnetAspOutput: "En cridar l'endpoint, la resposta és:",
     sdkDotnetAspNote:
       "Els secrets es resolen una sola vegada, mentre es construeix la configuració, amb una petició per cada entrada del fitxer. Els valors no s'actualitzen mentre l'aplicació s'executa: reinicia-la per recollir un secret rotat. Un secret que no existeix s'omet sense cap error, així que comprova les claus sense les quals l'aplicació no pot arrencar.",

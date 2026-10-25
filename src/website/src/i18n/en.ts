@@ -1091,7 +1091,7 @@ export const en: Translations = {
       'xUnit test projects with Testcontainers and Aspire resolve a map file against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to containers, with no .env file:',
     sdkDotnetPrereqTitle: 'Prerequisites',
     sdkDotnetPrereqDesc:
-      'The package targets .NET Standard 2.0, so it runs on .NET 6+ and .NET Framework 4.6.1+. Each provider uses its own default credential chain:',
+      'The package targets .NET Standard 2.0, so it runs on any in-support .NET release (its tests run on .NET 10, the current LTS). Each provider uses its own default credential chain:',
     sdkDotnetPrereqAws:
       'AWS: the default AWS credential chain (environment variables, shared credentials file, SSO or an IAM role). Set "profile" in $config to use a named profile.',
     sdkDotnetPrereqAzure:
@@ -1115,7 +1115,7 @@ export const en: Translations = {
       'The .NET SDK sends names to Key Vault exactly as written. Unlike the CLI, it does not convert a path such as /myapp/prod/db-password into myapp-prod-db-password, so write the final name in the map.',
     sdkDotnetAspTitle: 'ASP.NET Core with IConfiguration',
     sdkDotnetAspDesc:
-      'Call AddEnvilder right after CreateBuilder. Keys written with / become configuration sections, so Stripe/ApiKey is read as Stripe:ApiKey:',
+      'Call AddEnvilder right after CreateBuilder. Keys are read exactly as written in the map file, so use environment-variable-style names: the same file then also works with the CLI and the other SDKs.',
     sdkDotnetAspOutput: 'Calling the endpoint returns:',
     sdkDotnetAspNote:
       'Secrets are resolved once, while the configuration is built, with one request per entry in the map. Values do not refresh while the app runs: restart it to pick up a rotated secret. A secret that does not exist is skipped without an error, so check the keys your app cannot start without.',

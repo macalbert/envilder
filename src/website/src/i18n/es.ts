@@ -1106,7 +1106,7 @@ export const es: Translations = {
       'Proyectos de pruebas xUnit con Testcontainers y Aspire que resuelven un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack y Lowkey Vault) y pasan los valores a los contenedores, sin ningún archivo .env:',
     sdkDotnetPrereqTitle: 'Requisitos previos',
     sdkDotnetPrereqDesc:
-      'El paquete apunta a .NET Standard 2.0, así que funciona con .NET 6+ y .NET Framework 4.6.1+. Cada proveedor usa su cadena de credenciales por defecto:',
+      'El paquete apunta a .NET Standard 2.0, así que funciona con cualquier versión de .NET con soporte (las pruebas del SDK se ejecutan en .NET 10, la LTS actual). Cada proveedor usa su cadena de credenciales por defecto:',
     sdkDotnetPrereqAws:
       'AWS: la cadena de credenciales por defecto de AWS (variables de entorno, archivo de credenciales compartido, SSO o un rol IAM). Define "profile" en $config para usar un perfil con nombre.',
     sdkDotnetPrereqAzure:
@@ -1130,7 +1130,7 @@ export const es: Translations = {
       'El SDK de .NET envía los nombres a Key Vault tal como los escribes. A diferencia de la CLI, no convierte una ruta como /myapp/prod/db-password en myapp-prod-db-password, así que escribe el nombre final en el archivo.',
     sdkDotnetAspTitle: 'ASP.NET Core con IConfiguration',
     sdkDotnetAspDesc:
-      'Llama a AddEnvilder justo después de CreateBuilder. Las claves escritas con / se convierten en secciones de configuración, así que Stripe/ApiKey se lee como Stripe:ApiKey:',
+      'Llama a AddEnvilder justo después de CreateBuilder. Las claves se leen tal como se escriben en el archivo de mapeo, así que usa nombres de variable de entorno: el mismo archivo funciona también con la CLI y el resto de SDKs.',
     sdkDotnetAspOutput: 'Al llamar al endpoint, la respuesta es:',
     sdkDotnetAspNote:
       'Los secretos se resuelven una sola vez, mientras se construye la configuración, con una petición por cada entrada del archivo. Los valores no se actualizan mientras la aplicación se ejecuta: reiníciala para recoger un secreto rotado. Un secreto que no existe se omite sin error, así que comprueba las claves sin las que tu aplicación no puede arrancar.',

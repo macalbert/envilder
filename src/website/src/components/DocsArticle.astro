@@ -196,8 +196,8 @@ const dotnetAccessPolicy = `az keyvault set-policy \\
 const dotnetMapAws = `{
   "$schema": "https://envilder.com/schema/map-file.v1.json",
   "$config": { "provider": "aws" },
-  "ConnectionStrings/Default": "/myapp/prod/db-connection",
-  "Stripe/ApiKey": "/myapp/prod/stripe-key"
+  "DB_CONNECTION": "/myapp/prod/db-connection",
+  "STRIPE_API_KEY": "/myapp/prod/stripe-key"
 }`;
 
 const dotnetMapAzure = `{
@@ -206,22 +206,22 @@ const dotnetMapAzure = `{
     "provider": "azure",
     "vaultUrl": "https://my-vault.vault.azure.net"
   },
-  "ConnectionStrings/Default": "myapp-prod-db-connection",
-  "Stripe/ApiKey": "myapp-prod-stripe-key"
+  "DB_CONNECTION": "myapp-prod-db-connection",
+  "STRIPE_API_KEY": "myapp-prod-stripe-key"
 }`;
 
 const dotnetAspProgram = `var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddEnvilder("envilder.json");
-builder.Services.Configure<StripeOptions>(
-    builder.Configuration.GetSection("Stripe"));
+builder.Services.Configure<StripeOptions>(options =>
+    options.ApiKey = builder.Configuration["STRIPE_API_KEY"] ?? "");
 
 var app = builder.Build();
 
 app.MapGet("/", (IConfiguration config) => new
 {
-    dbConfigured = config.GetConnectionString("Default") is not null,
-    stripeConfigured = config["Stripe:ApiKey"] is not null,
+    dbConfigured = config["DB_CONNECTION"] is not null,
+    stripeConfigured = config["STRIPE_API_KEY"] is not null,
 });
 
 app.Run();
@@ -246,11 +246,17 @@ const dotnetConsole = `using Envilder;
 try
 {
     var secrets = await Env.ResolveFileAsync("envilder.json");
-    secrets.ValidateSecrets();
 
-    var apiKey = secrets["PAYMENTS_API_KEY"];
+    string[] required = { "PAYMENTS_API_KEY", "PAYMENTS_WEBHOOK_SECRET" };
+    var missing = required.Where(key => !secrets.ContainsKey(key)).ToList();
+    if (missing.Count > 0)
+    {
+        Console.Error.WriteLine($"Missing secrets: {string.Join(", ", missing)}");
+        return 1;
+    }
+
+    secrets.ValidateSecrets(); // rejects empty values
     Console.WriteLine($"Resolved {secrets.Count} secrets");
-    // ... use apiKey
     return 0;
 }
 catch (Exception ex) when (ex is SsoSessionExpiredException
