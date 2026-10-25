@@ -5,10 +5,11 @@ using System.Text.Json;
 /// <summary>
 /// Which strings are usable as environment variable names, per the map-file
 /// naming constraint in ADR-0008: an accepted name must survive a <c>.env</c>
-/// round-trip as itself and nothing else. <c>^[A-Za-z0-9_.-]+$</c> is exactly
-/// the key grammar <c>.env</c> parsers recognize, so anything outside it is
-/// either read back as a different assignment (<c>=</c>, CR, LF, U+2028,
-/// U+2029) or silently lost (a space, <c>#</c>, a tab, a non-Latin letter).
+/// round-trip as itself and nothing else. Anything outside
+/// <c>^[A-Za-z0-9_./-]+$</c> is either read back as a different assignment
+/// (<c>=</c>, CR, LF, U+2028, U+2029) or silently lost (a space, <c>#</c>, a
+/// tab, a non-Latin letter). <c>/</c> stays valid: it is the section separator
+/// map files have always used (<c>Database/Password</c>).
 /// <c>__proto__</c> is inside the allowlist but every JavaScript reader drops
 /// it, so it is rejected as well to keep the contract uniform across the CLI
 /// and every SDK.
@@ -58,14 +59,14 @@ internal static class EnvironmentVariableName
 		}
 
 		return $"Invalid environment variable name {Quote(name)}: names may only "
-			+ "contain letters, digits, underscore, dot and hyphen, so that they can "
-			+ "be read back from a .env file";
+			+ "contain letters, digits, underscore, dot, hyphen and slash, so that "
+			+ "they can be read back from a .env file";
 	}
 
 	private static bool IsReadableNameChar(char c)
 	{
 		return c is (>= 'A' and <= 'Z') or (>= 'a' and <= 'z') or (>= '0' and <= '9')
-			or '_' or '.' or '-';
+			or '_' or '.' or '-' or '/';
 	}
 
 	// The default encoder escapes control characters and every non-ASCII

@@ -4,13 +4,12 @@
 
 * **BREAKING: Map-file variable names follow the shared naming constraint**:
   `MapFileParser.parse` now throws `Error` when a variable name does not match
-  `^[A-Za-z0-9_.-]+$` or is `__proto__`, the constraint in ADR-0008 that
-  the CLI, the GitHub Action and the published JSON Schema already enforce.
+  `^[A-Za-z0-9_./-]+$` or is `__proto__`, the constraint in ADR-0008 that
+  the CLI, the GitHub Action and the published JSON Schema also enforce.
   The same `envilder.json` is now valid, or invalid, on every surface. The
   name is checked even when its value is not a string, and the message quotes
-  the name without echoing the mapped value. Dotted, hyphenated and
-  digit-leading names remain valid; a name such as `Database/Password` must
-  be renamed, for example to `Database__Password`
+  the name without echoing the mapped value. Dotted, hyphenated,
+  digit-leading and `/`-separated names (`Database/Password`) remain valid
   ([#511](https://github.com/macalbert/envilder/issues/511))
 
 ### Security
@@ -23,7 +22,7 @@
 ### Documentation
 
 * **Document accepted map-file keys, values and limits**: The SDK README now
-  lists the accepted key grammar and why it matches dotenv, the secret
+  lists the accepted key grammar and the reasoning behind it, the secret
   reference format per provider, and the limits on secret contents
   (provider sizes, the one value a `.env` file cannot hold, operating-system
   limits and variable expansion by other loaders)

@@ -243,9 +243,9 @@ For Azure, add `vaultUrl`:
 
 Keys follow the same rule as the CLI and the GitHub Action, so one map file works everywhere:
 
-- **Keys** may only contain letters, digits, `_`, `.` and `-` (`^[A-Za-z0-9_.-]+$`); `__proto__`
+- **Keys** may only contain letters, digits, `_`, `.`, `-` and `/` (`^[A-Za-z0-9_./-]+$`); `__proto__`
   is also rejected. `MapFileParser.parse` throws `Error` for any other key, before any secret is fetched.
-  Use `__` for hierarchical names (`Database__Password`), not `/`.
+  `/` is allowed for hierarchical names (`Database/Password`) and returned as-is.
 - **Values** are the secret identifiers in the provider (SSM parameter name or Key Vault secret
   name) and must be JSON strings.
 - **Secret contents** are returned exactly as the provider stores them. `resolveFile` / `resolve` keep them in

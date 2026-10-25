@@ -18,7 +18,7 @@ public class EnvilderConfigurationSectionBindingTests
 	}
 
 	[Fact]
-	public void Should_BindDatabaseSection_When_KeysUseDoubleUnderscoreHierarchy()
+	public void Should_BindDatabaseSection_When_KeysUseSlashHierarchy()
 	{
 		// Arrange
 		_secretProvider
@@ -32,8 +32,8 @@ public class EnvilderConfigurationSectionBindingTests
 			new(),
 			new()
 			{
-				["Database__ConnectionString"] = "/myapp/prod/pg-connection-string",
-				["Database__MaxPoolSize"] = "/myapp/prod/pg-max-pool-size",
+				["Database/ConnectionString"] = "/myapp/prod/pg-connection-string",
+				["Database/MaxPoolSize"] = "/myapp/prod/pg-max-pool-size",
 			});
 		var configuration = CreateConfiguration(mapFile);
 
@@ -50,7 +50,7 @@ public class EnvilderConfigurationSectionBindingTests
 	}
 
 	[Fact]
-	public void Should_BindOpenAiSection_When_KeysUseDoubleUnderscoreHierarchy()
+	public void Should_BindOpenAiSection_When_KeysUseSlashHierarchy()
 	{
 		// Arrange
 		_secretProvider
@@ -64,8 +64,8 @@ public class EnvilderConfigurationSectionBindingTests
 			new(),
 			new()
 			{
-				["OpenAi__ApiKey"] = "/myapp/prod/openai-api-key",
-				["OpenAi__Model"] = "/myapp/prod/openai-model",
+				["OpenAi/ApiKey"] = "/myapp/prod/openai-api-key",
+				["OpenAi/Model"] = "/myapp/prod/openai-model",
 			});
 
 		var configuration = CreateConfiguration(mapFile);
@@ -83,7 +83,7 @@ public class EnvilderConfigurationSectionBindingTests
 	}
 
 	[Fact]
-	public void Should_BindSection_When_MapFileJsonUsesDoubleUnderscoreHierarchy()
+	public void Should_BindSection_When_MapFileJsonUsesSlashHierarchy()
 	{
 		// Arrange
 		_secretProvider
@@ -95,8 +95,8 @@ public class EnvilderConfigurationSectionBindingTests
 
 		var mapFile = new MapFileParser().Parse("""
 			{
-				"Database__ConnectionString": "/myapp/prod/pg-connection-string",
-				"Database__MaxPoolSize": "/myapp/prod/pg-max-pool-size"
+				"Database/ConnectionString": "/myapp/prod/pg-connection-string",
+				"Database/MaxPoolSize": "/myapp/prod/pg-max-pool-size"
 			}
 			""");
 		var configuration = CreateConfiguration(mapFile);

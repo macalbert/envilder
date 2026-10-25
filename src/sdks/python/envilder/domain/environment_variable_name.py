@@ -1,11 +1,11 @@
 """Which strings are usable as environment variable names.
 
 Implements the map-file naming constraint in ADR-0008: an accepted name must
-survive a ``.env`` round-trip as itself and nothing else.
-``^[A-Za-z0-9_.-]+$`` is exactly the key grammar ``.env`` parsers recognize,
-so anything outside it is either read back as a different assignment (``=``,
+survive a ``.env`` round-trip as itself and nothing else. Anything outside
+``^[A-Za-z0-9_./-]+$`` is either read back as a different assignment (``=``,
 CR, LF, U+2028, U+2029) or silently lost (a space, ``#``, a tab, a non-Latin
-letter).
+letter). ``/`` stays valid: it is the hierarchy separator map files have
+always used (``Database/Password``).
 
 ``__proto__`` is inside the allowlist but every JavaScript reader that
 accumulates pairs into a plain object drops it, so it is rejected as well to
@@ -19,7 +19,7 @@ import re
 
 # ``fullmatch`` rather than ``match`` with ``$``: in Python ``$`` also matches
 # before a trailing newline, which would accept ``"SAFE\n"``.
-_READABLE_NAME = re.compile(r"[A-Za-z0-9_.-]+")
+_READABLE_NAME = re.compile(r"[A-Za-z0-9_./-]+")
 
 _UNSUPPORTED_NAMES = frozenset({"__proto__"})
 
@@ -50,8 +50,8 @@ def invalid_environment_variable_name_message(name: str) -> str:
 
     return (
         f"Invalid environment variable name {_quote_name(name)}: names may "
-        "only contain letters, digits, underscore, dot and hyphen, so that "
-        "they can be read back from a .env file"
+        "only contain letters, digits, underscore, dot, hyphen and slash, so "
+        "that they can be read back from a .env file"
     )
 
 

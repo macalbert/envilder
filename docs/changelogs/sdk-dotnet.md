@@ -4,21 +4,15 @@
 
 * **BREAKING: Map-file variable names follow the shared naming constraint**:
   `MapFileParser.Parse` now throws `FormatException` when a variable name
-  does not match `^[A-Za-z0-9_.-]+$` or is `__proto__`, the constraint in
+  does not match `^[A-Za-z0-9_./-]+$` or is `__proto__`, the constraint in
   ADR-0008 that the CLI, the GitHub Action and the published JSON Schema
-  already enforce. The same `envilder.json` is now valid, or invalid, on every
+  also enforce. The same `envilder.json` is now valid, or invalid, on every
   surface. The name is checked even when its value is not a string, and the
   message quotes the name without echoing the mapped value. Dotted,
-  hyphenated and digit-leading names remain valid
+  hyphenated, digit-leading and `/`-separated names remain valid, and `/`
+  keeps building `IConfiguration` sections (`Database/Password` →
+  `Database:Password`)
   ([#511](https://github.com/macalbert/envilder/issues/511))
-
-* **BREAKING: `__` is the configuration section separator**: `IConfiguration`
-  sections are now expressed with `__` (`Database__ConnectionString` →
-  `Database:ConnectionString`), the same convention .NET's
-  environment-variables provider uses. Names with `/` are rejected by the
-  rule above: the CLI would write them to a `.env` line that `dotenv`, Docker
-  Compose and POSIX shells cannot load. `/` is still normalized for a
-  `ParsedMapFile` built in code
 
 ### Security
 
@@ -27,27 +21,15 @@
   `=`, a line break or `U+2028`/`U+2029` that the CLI treats as an injection
   vector ([#511](https://github.com/macalbert/envilder/issues/511))
 
-### Migration
-
-Rename section keys in your map file:
-
-```json
-// Before
-{ "Database/ConnectionString": "/app/prod/db-connection" }
-
-// After
-{ "Database__ConnectionString": "/app/prod/db-connection" }
-```
-
-`config.GetSection("Database")["ConnectionString"]` keeps working unchanged.
-
 ### Documentation
 
 * **Document accepted map-file keys, values and limits**: The SDK README now
-  lists the accepted key grammar and why it matches dotenv, the secret
+  lists the accepted key grammar and the reasoning behind it, the secret
   reference format per provider, and the limits on secret contents
   (provider sizes, the one value a `.env` file cannot hold, operating-system
   limits and variable expansion by other loaders)
+
+---
 
 ## [0.5.2] - 2026-10-16
 

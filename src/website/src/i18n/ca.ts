@@ -770,12 +770,12 @@ export const ca: Translations = {
     mapThRule: 'Regla',
     mapThDetails: 'Detalls',
     mapKeysAllowed: 'Caràcters permesos',
-    mapKeysAllowedDesc: 'Lletres, dígits, guió baix, punt i guió:',
+    mapKeysAllowedDesc: 'Lletres, dígits, guió baix, punt, guió i barra:',
     mapKeysRecommended: 'Recomanat',
     mapKeysRecommendedDesc: 'Un nom POSIX, utilitzable des de qualsevol shell:',
     mapKeysRejected: 'Rebutjat',
     mapKeysRejectedDesc:
-      'Un nom buit, qualsevol altre caràcter (espai, tabulador, #, =, /, :, salts de línia, U+2028/U+2029, lletres accentuades o no llatines) i el nom',
+      'Un nom buit, qualsevol altre caràcter (espai, tabulador, #, =, :, salts de línia, U+2028/U+2029, lletres accentuades o no llatines) i el nom',
     mapKeysReserved: 'Reservat',
     mapKeysReservedDesc:
       'Les claus que comencen per $ són metadades, mai variables:',
@@ -786,10 +786,10 @@ export const ca: Translations = {
       'Un fitxer de mapeig amb una clau invàlida es rebutja sencer, abans d’obtenir cap secret. L’error cita la clau i mai el valor.',
     mapKeysWhyTitle: 'Per què exactament aquest conjunt?',
     mapKeysWhyDesc:
-      'Les claus es converteixen en línies d’un fitxer .env, i aquesta és la gramàtica de claus de dotenv, el parser que fa servir el mateix Envilder. Qualsevol altre caràcter o bé obre una assignació diferent (=, salts de línia, U+2028/U+2029) o bé genera una línia que els consumidors descarten en silenci: una clau com Database/Password la ignora dotenv i la rebutgen Docker Compose i bash. El nom __proto__ el descarta qualsevol lector JavaScript, dotenv inclòs.',
+      'Una clau ha d’arribar a l’aplicació tal qual i res més. Qualsevol altre caràcter o bé obre una assignació diferent en un fitxer .env (=, salts de línia, U+2028/U+2029) o bé genera una línia que tots els lectors descarten en silenci. El nom __proto__ el descarta qualsevol lector JavaScript, dotenv inclòs.',
     mapKeysHierarchyTitle: 'Noms jeràrquics:',
     mapKeysHierarchyDesc:
-      'fes servir __ com a separador (Database__Password). Funciona amb tots els consumidors, i el SDK de .NET el converteix en la secció de configuració Database:Password.',
+      'La / s’accepta a tot arreu (Database/Password). Els SDK i envilder exec passen el nom tal qual, i el SDK de .NET el converteix en la secció de configuració Database:Password. En un fitxer .env, el CLI l’escriu tal qual i avisa, perquè python-dotenv carrega aquesta línia però dotenv per a Node.js, Docker Compose i bash no: si la teva aplicació llegeix el fitxer amb un d’aquests, fes servir envilder exec o un nom amb __ (Database__Password).',
     mapValuesTitle: 'Valors (referències de secrets)',
     mapValuesDesc:
       'Un valor és l’identificador del secret al proveïdor. Ha de ser un string JSON.',

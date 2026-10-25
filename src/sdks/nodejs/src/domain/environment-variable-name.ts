@@ -1,15 +1,16 @@
 /**
  * Which strings are usable as environment variable names, per the map-file
  * naming constraint in ADR-0008: an accepted name must survive a `.env`
- * round-trip as itself and nothing else. `^[A-Za-z0-9_.-]+$` is exactly the
- * key grammar `.env` parsers recognize, so anything outside it is either read
- * back as a different assignment (`=`, CR, LF, U+2028, U+2029) or silently
- * lost (a space, `#`, a tab, a non-Latin letter).
+ * round-trip as itself and nothing else. Anything outside `^[A-Za-z0-9_./-]+$`
+ * is either read back as a different assignment (`=`, CR, LF, U+2028, U+2029)
+ * or silently lost (a space, `#`, a tab, a non-Latin letter). `/` stays
+ * valid: it is the hierarchy separator map files have always used
+ * (`Database/Password`).
  *
  * `__proto__` is inside the allowlist but every reader that accumulates pairs
  * into a plain object drops it, so it is rejected as well.
  */
-const READABLE_NAME = /^[A-Za-z0-9_.-]+$/;
+const READABLE_NAME = /^[A-Za-z0-9_./-]+$/;
 
 const UNSUPPORTED_NAMES = new Set(['__proto__']);
 
@@ -37,8 +38,8 @@ export function invalidEnvironmentVariableNameMessage(name: string): string {
 
   return (
     `Invalid environment variable name ${quoteName(name)}: names may only ` +
-    'contain letters, digits, underscore, dot and hyphen, so that they can ' +
-    'be read back from a .env file'
+    'contain letters, digits, underscore, dot, hyphen and slash, so that ' +
+    'they can be read back from a .env file'
   );
 }
 

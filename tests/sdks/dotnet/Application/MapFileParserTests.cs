@@ -193,7 +193,7 @@ public class MapFileParserTests
 	}
 
 	[Fact]
-	public void Should_AcceptMappings_When_NamesAreDottedHyphenatedOrStartWithDigit()
+	public void Should_AcceptMappings_When_NamesAreDottedHyphenatedSlashedOrStartWithDigit()
 	{
 		// Arrange
 		var expected = new Dictionary<string, string>
@@ -201,6 +201,7 @@ public class MapFileParserTests
 			["APP.NAME"] = "/app/name",
 			["APP-NAME"] = "/app/name-hyphen",
 			["1PASSWORD_TOKEN"] = "/app/token",
+			["Database/Password"] = "/app/db-password",
 			["__proto__x"] = "/app/proto-like",
 		};
 		var json = JsonSerializer.Serialize(expected);

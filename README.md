@@ -249,33 +249,44 @@ runtime SDK, so a map file that is valid in one place is valid everywhere
 
 | Rule | Details |
 | --- | --- |
-| Allowed characters | Letters `A-Z` `a-z`, digits `0-9`, `_`, `.` and `-` (`^[A-Za-z0-9_.-]+$`) |
+| Allowed characters | Letters `A-Z` `a-z`, digits `0-9`, `_`, `.`, `-` and `/` (`^[A-Za-z0-9_./-]+$`) |
 | Recommended | `^[A-Za-z_][A-Za-z0-9_]*$`: a POSIX name, usable from any shell |
-| Rejected | An empty name, any other character (space, tab, `#`, `=`, `/`, `:`, line breaks, `U+2028`/`U+2029`, accented or non-Latin letters) and the name `__proto__` |
+| Rejected | An empty name, any other character (space, tab, `#`, `=`, `:`, line breaks, `U+2028`/`U+2029`, accented or non-Latin letters) and the name `__proto__` |
 | Reserved | Keys starting with `$` (`$schema`, `$config`) are metadata, never variables |
 | Non-string values | A mapping whose value is not a string is skipped, but its key is still validated |
 
 A map file with an invalid key is rejected as a whole, before any secret is fetched. The error
 quotes the key and never the value.
 
-**Why this exact set?** Keys become lines in a `.env` file, and `^[A-Za-z0-9_.-]+$` is the key
-grammar of [`dotenv`](https://github.com/motdotla/dotenv), the parser Envilder itself uses. Any
-other character either opens a different assignment (`=`, line breaks, `U+2028`/`U+2029`: the
-injection fixed in [#511](https://github.com/macalbert/envilder/issues/511)) or produces a line
-that consumers silently drop. For example, a key with `/`:
+**Why this exact set?** A key must reach your application as itself and nothing else. Any other
+character either opens a different assignment in a `.env` file (`=`, line breaks,
+`U+2028`/`U+2029`: the injection fixed in [#511](https://github.com/macalbert/envilder/issues/511))
+or produces a line that every reader silently drops. `__proto__` is inside the character set but
+is dropped by every JavaScript reader that builds a plain object, `dotenv` included.
+
+#### Hierarchical keys with `/`
+
+`/` is accepted everywhere, so a key like `Database/Password` keeps working in every mode:
+
+| Where | What your application gets |
+| --- | --- |
+| Runtime SDKs (`resolve`, `load`) | The name as-is: `Database/Password` |
+| .NET SDK `IConfiguration` | The section `Database:Password`, as with AWS's own SSM configuration provider |
+| `envilder exec` | The name as-is in the child process environment |
+| `.env` file (CLI, GitHub Action) | The line `Database/Password=...`, written as-is, plus a warning |
+
+The warning is there because `.env` readers disagree about `/`:
 
 | Consumer reading `Database/Password=secret` | Result |
 | --- | --- |
+| `python-dotenv` | Loaded |
 | `dotenv` (Node.js) | Line ignored: the variable never loads |
 | Docker Compose `env_file` | Error: `unexpected character "/" in variable name` |
 | `set -a; source .env` (bash) | Error: the variable does not exist |
-| `python-dotenv` | Loaded |
 
-`__proto__` is inside the character set but is dropped by every JavaScript reader that builds a
-plain object, `dotenv` included.
-
-> **Hierarchical names:** use `__` as the separator (`Database__Password`). It survives every
-> consumer above, and the .NET SDK maps it to the `Database:Password` configuration section.
+If your application reads the `.env` file with one of the last three, use `envilder exec`, or
+name the key with `__` (`Database__Password`), which every reader loads and .NET's
+environment-variables provider maps to the same `Database:Password` section.
 
 #### Values (secret references)
 

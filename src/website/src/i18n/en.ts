@@ -760,12 +760,12 @@ export const en: Translations = {
     mapThRule: 'Rule',
     mapThDetails: 'Details',
     mapKeysAllowed: 'Allowed characters',
-    mapKeysAllowedDesc: 'Letters, digits, underscore, dot and hyphen:',
+    mapKeysAllowedDesc: 'Letters, digits, underscore, dot, hyphen and slash:',
     mapKeysRecommended: 'Recommended',
     mapKeysRecommendedDesc: 'A POSIX name, usable from any shell:',
     mapKeysRejected: 'Rejected',
     mapKeysRejectedDesc:
-      'An empty name, any other character (space, tab, #, =, /, :, line breaks, U+2028/U+2029, accented or non-Latin letters) and the name',
+      'An empty name, any other character (space, tab, #, =, :, line breaks, U+2028/U+2029, accented or non-Latin letters) and the name',
     mapKeysReserved: 'Reserved',
     mapKeysReservedDesc: 'Keys starting with $ are metadata, never variables:',
     mapKeysNonString: 'Non-string values',
@@ -775,10 +775,10 @@ export const en: Translations = {
       'A mapping file with an invalid key is rejected as a whole, before any secret is fetched. The error quotes the key and never the value.',
     mapKeysWhyTitle: 'Why this exact set?',
     mapKeysWhyDesc:
-      'Keys become lines in a .env file, and this is the key grammar of dotenv, the parser Envilder itself uses. Any other character either opens a different assignment (=, line breaks, U+2028/U+2029) or produces a line that consumers silently drop: a key such as Database/Password is ignored by dotenv, rejected by Docker Compose and by bash. The name __proto__ is dropped by every JavaScript reader, dotenv included.',
+      'A key must reach your application as itself and nothing else. Any other character either opens a different assignment in a .env file (=, line breaks, U+2028/U+2029) or produces a line that every reader silently drops. The name __proto__ is dropped by every JavaScript reader, dotenv included.',
     mapKeysHierarchyTitle: 'Hierarchical names:',
     mapKeysHierarchyDesc:
-      'use __ as the separator (Database__Password). It works with every consumer, and the .NET SDK maps it to the Database:Password configuration section.',
+      '/ is accepted everywhere (Database/Password). The SDKs and envilder exec pass the name as-is, and the .NET SDK maps it to the Database:Password configuration section. In a .env file the CLI writes it as-is and warns, because python-dotenv loads that line but dotenv for Node.js, Docker Compose and bash do not: if your app reads the file with one of those, use envilder exec or a __ name (Database__Password).',
     mapValuesTitle: 'Values (secret references)',
     mapValuesDesc:
       'A value is the identifier of the secret in the provider. It must be a JSON string.',

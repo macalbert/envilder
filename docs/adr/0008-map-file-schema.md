@@ -57,17 +57,16 @@ The root object contains exactly two categories of keys:
 Variable names SHOULD match `^[a-zA-Z_][a-zA-Z0-9_]*$` (valid POSIX env var
 names). This remains a recommended convention: parsers MUST NOT reject a key
 merely for starting with a digit or for not being idiomatic POSIX. Existing
-files with hyphens or dots in keys remain valid.
+files with hyphens, dots or `/` in keys remain valid.
 
 **Naming constraint:** parsers MUST reject a variable name that does not match
-`^[A-Za-z0-9_.-]+$`, and MUST additionally reject the single name
+`^[A-Za-z0-9_./-]+$`, and MUST additionally reject the single name
 `__proto__` ([#511](https://github.com/macalbert/envilder/issues/511)).
 
 The constraint exists to hold one invariant: **an accepted name must survive a
-`.env` round-trip as itself and nothing else.** `^[A-Za-z0-9_.-]+$` is exactly
-the key grammar `.env` parsers recognize, so it is stated as an allowlist. A
-blocklist cannot hold the invariant — every character outside the allowlist
-fails it, in one of two ways:
+`.env` round-trip as itself and nothing else.** It is stated as an allowlist
+because a blocklist cannot hold the invariant — every character outside the
+allowlist fails it, in one of two ways:
 
 | Outside the allowlist | Failure |
 | --------------------- | ------- |
@@ -77,6 +76,20 @@ fails it, in one of two ways:
 
 An empty or whitespace-only name is rejected by the allowlist as a
 consequence, not as a separate rule.
+
+**`/` is inside the allowlist.** Map files have always used it for hierarchical
+names (`Database/Password`), and the .NET SDK maps it to `IConfiguration`
+sections, as AWS's own SSM configuration provider does. It cannot inject
+anything, and it round-trips wherever the name never passes through a `.env`
+file: the runtime SDKs resolve in memory and `envilder exec` hands the name to
+the child process, which every operating system accepts. In a `.env` file the
+readers disagree: `python-dotenv` loads the line, while `dotenv` for Node.js
+skips it, Docker Compose rejects it and a POSIX shell cannot `source` it. The
+CLI and the Action therefore write the line as-is, read it back with dotenv's
+grammar extended to `/` so updates stay in place, and warn with the names
+affected (never the values), pointing to `envilder exec` or a `__` name.
+Rejecting `/` instead was tried in CLI 0.14.0 and broke map files that had
+worked until then, for a failure that only exists for some `.env` readers.
 
 The constraint applies to variable mappings. `$`-prefixed keys stay reserved
 and ignored under the rule above, so they are never written to a `.env` file.

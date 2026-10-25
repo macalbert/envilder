@@ -1,9 +1,10 @@
 import * as fs from 'node:fs/promises';
-import * as dotenv from 'dotenv';
 import { inject, injectable } from 'inversify';
 import {
   invalidEnvironmentVariableNameMessage,
+  isPortableEnvFileName,
   isValidEnvironmentVariableName,
+  nonPortableEnvFileNamesMessage,
 } from '../../domain/EnvironmentVariableName.js';
 import {
   DependencyMissingError,
@@ -17,6 +18,7 @@ import type {
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
 import { TYPES } from '../../types.js';
+import { parseEnvFile } from './EnvFileParser.js';
 
 /** The delimiters dotenv recognizes for quoting a `.env` value. */
 const ENV_QUOTES = ["'", '"', '`'] as const;
@@ -24,7 +26,9 @@ type EnvQuote = (typeof ENV_QUOTES)[number];
 
 /**
  * Follows dotenv's own `LINE` grammar rather than re-deriving it, split into
- * capture groups, with the two deliberate narrowings noted at the end:
+ * capture groups, with the two deliberate narrowings noted at the end. The key
+ * class also admits `/`, as {@link parseEnvFile} does, so an existing
+ * `Database/Password` line is updated in place instead of duplicated:
  *
  *     /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'
  *       |\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg
@@ -57,7 +61,7 @@ type EnvQuote = (typeof ENV_QUOTES)[number];
  * the value span itself, which is the part that has to agree with dotenv.
  */
 const ASSIGNMENT_PATTERN =
-  /^(\s*(?:export\s+)?)([\w.-]+)(\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]*?)([^\S\r\n]*)((?:#.*)?)(?<!\r)$/gm;
+  /^(\s*(?:export\s+)?)([\w./-]+)(\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]*?)([^\S\r\n]*)((?:#.*)?)(?<!\r)$/gm;
 
 /** The line break that closes a file, kept verbatim instead of normalized. */
 const TRAILING_NEWLINE_PATTERN = /(?:\r\n|[\r\n])$/;
@@ -142,7 +146,7 @@ export class FileVariableStore implements IVariableStore {
       return envVariables;
     }
     const existingEnvContent = await fs.readFile(source, 'utf-8');
-    const parsedEnv = dotenv.parse(existingEnvContent) || {};
+    const parsedEnv = parseEnvFile(existingEnvContent) || {};
     Object.assign(envVariables, parsedEnv);
 
     return envVariables;
@@ -155,6 +159,7 @@ export class FileVariableStore implements IVariableStore {
     for (const key of Object.keys(envVariables)) {
       this.assertValidVariableName(key);
     }
+    this.warnAboutNonPortableNames(Object.keys(envVariables));
 
     const existingContent = await this.readExistingEnvContent(destination);
     const unmanagedValues = this.collectUnmanagedValues(
@@ -173,6 +178,13 @@ export class FileVariableStore implements IVariableStore {
       throw new EnvironmentFileError(
         `Failed to write environment file: ${errorMessage}`,
       );
+    }
+  }
+
+  private warnAboutNonPortableNames(names: string[]): void {
+    const nonPortable = names.filter((name) => !isPortableEnvFileName(name));
+    if (nonPortable.length > 0) {
+      this.logger.warn(nonPortableEnvFileNamesMessage(nonPortable));
     }
   }
 
@@ -315,8 +327,8 @@ export class FileVariableStore implements IVariableStore {
    * No supported syntax reaches this today: the grammar is shared with dotenv
    * precisely so that none can, and every form that once did — duplicates, a
    * colon separator, a value starting on the next physical line — is claimed
-   * and replaced. This is the net for the day the two drift apart, which
-   * declaring `dotenv` as `^17.4.2` leaves open.
+   * and replaced. This is the net for the day the two drift apart, which a
+   * change to either pattern or to {@link parseEnvFile} leaves open.
    */
   private assertNoManagedAssignmentSurvives(
     merged: string,
@@ -327,7 +339,7 @@ export class FileVariableStore implements IVariableStore {
     const remainder = merged.replace(ASSIGNMENT_PATTERN, (assignment) =>
       assignment.replace(/[^\r\n]/g, ' '),
     );
-    const stale = Object.keys(dotenv.parse(remainder))
+    const stale = Object.keys(parseEnvFile(remainder))
       .filter((key) => Object.hasOwn(envVariables, key))
       .map((key) => `"${key}"`);
     if (stale.length === 0) {
@@ -348,7 +360,7 @@ export class FileVariableStore implements IVariableStore {
   /**
    * Serializes a value for a single `.env` assignment. Candidate
    * representations are tried in order of preference and accepted only once
-   * `dotenv.parse` confirms the assignment yields exactly the intended
+   * {@link parseEnvFile} confirms the assignment yields exactly the intended
    * key/value, never by inspection alone. An existing delimiter (from
    * `originalValue`, when updating an existing assignment) is preferred but
    * only kept when it still round-trips for the new value.
@@ -450,7 +462,7 @@ export class FileVariableStore implements IVariableStore {
     candidate: string,
     expected: string,
   ): boolean {
-    const parsed = dotenv.parse(`${key}=${candidate}\n`);
+    const parsed = parseEnvFile(`${key}=${candidate}\n`);
     const parsedKeys = Object.keys(parsed);
     return (
       parsedKeys.length === 1 &&
@@ -482,7 +494,7 @@ export class FileVariableStore implements IVariableStore {
 
   /**
    * The values the file already held for keys this run is not writing. Read
-   * through `dotenv.parse` so duplicate keys collapse the same way a consumer
+   * through {@link parseEnvFile} so duplicate keys collapse the same way a consumer
    * would see them.
    */
   private collectUnmanagedValues(
@@ -493,7 +505,7 @@ export class FileVariableStore implements IVariableStore {
       return {};
     }
     const unmanaged: Record<string, string> = {};
-    for (const [key, value] of Object.entries(dotenv.parse(existingContent))) {
+    for (const [key, value] of Object.entries(parseEnvFile(existingContent))) {
       if (!Object.hasOwn(envVariables, key)) {
         unmanaged[key] = value;
       }
@@ -512,7 +524,7 @@ export class FileVariableStore implements IVariableStore {
     envVariables: Record<string, string>,
     unmanagedValues: Record<string, string>,
   ): void {
-    const parsed = dotenv.parse(content);
+    const parsed = parseEnvFile(content);
     const affectedKeys = new Set([
       ...this.keysThatLostTheirValue(parsed, envVariables),
       ...this.keysThatLostTheirValue(parsed, unmanagedValues),

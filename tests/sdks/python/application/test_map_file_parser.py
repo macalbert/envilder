@@ -255,7 +255,7 @@ class TestMapFileParser:
         with pytest.raises(ValueError, match="(?i)environment variable name"):
             action()
 
-    def Should_AcceptMappings_When_NamesAreDottedHyphenatedOrStartWithDigit(
+    def Should_AcceptMappings_When_NamesAreDottedHyphenatedSlashedOrStartWithDigit(
         self,
     ) -> None:
         # Arrange
@@ -263,6 +263,7 @@ class TestMapFileParser:
             "APP.NAME": "/app/name",
             "APP-NAME": "/app/name-hyphen",
             "1PASSWORD_TOKEN": "/app/token",
+            "Database/Password": "/app/db-password",
             "__proto__x": "/app/proto-like",
         }
         json_content = json.dumps(expected)

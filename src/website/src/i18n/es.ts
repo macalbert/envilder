@@ -771,13 +771,13 @@ export const es: Translations = {
     mapThRule: 'Regla',
     mapThDetails: 'Detalles',
     mapKeysAllowed: 'Caracteres permitidos',
-    mapKeysAllowedDesc: 'Letras, dígitos, guion bajo, punto y guion:',
+    mapKeysAllowedDesc: 'Letras, dígitos, guion bajo, punto, guion y barra:',
     mapKeysRecommended: 'Recomendado',
     mapKeysRecommendedDesc:
       'Un nombre POSIX, utilizable desde cualquier shell:',
     mapKeysRejected: 'Rechazado',
     mapKeysRejectedDesc:
-      'Un nombre vacío, cualquier otro carácter (espacio, tabulador, #, =, /, :, saltos de línea, U+2028/U+2029, letras acentuadas o no latinas) y el nombre',
+      'Un nombre vacío, cualquier otro carácter (espacio, tabulador, #, =, :, saltos de línea, U+2028/U+2029, letras acentuadas o no latinas) y el nombre',
     mapKeysReserved: 'Reservado',
     mapKeysReservedDesc:
       'Las claves que empiezan por $ son metadatos, nunca variables:',
@@ -788,10 +788,10 @@ export const es: Translations = {
       'Un archivo de mapeo con una clave inválida se rechaza entero, antes de obtener ningún secreto. El error cita la clave y nunca el valor.',
     mapKeysWhyTitle: '¿Por qué exactamente este conjunto?',
     mapKeysWhyDesc:
-      'Las claves se convierten en líneas de un archivo .env, y esta es la gramática de claves de dotenv, el parser que usa el propio Envilder. Cualquier otro carácter o bien abre una asignación distinta (=, saltos de línea, U+2028/U+2029) o bien genera una línea que los consumidores descartan en silencio: una clave como Database/Password la ignora dotenv y la rechazan Docker Compose y bash. El nombre __proto__ lo descarta cualquier lector JavaScript, dotenv incluido.',
+      'Una clave debe llegar a la aplicación tal cual y nada más. Cualquier otro carácter o bien abre una asignación distinta en un archivo .env (=, saltos de línea, U+2028/U+2029) o bien genera una línea que todos los lectores descartan en silencio. El nombre __proto__ lo descarta cualquier lector JavaScript, dotenv incluido.',
     mapKeysHierarchyTitle: 'Nombres jerárquicos:',
     mapKeysHierarchyDesc:
-      'usa __ como separador (Database__Password). Funciona con todos los consumidores, y el SDK de .NET lo convierte en la sección de configuración Database:Password.',
+      'La / se acepta en todas partes (Database/Password). Los SDK y envilder exec pasan el nombre tal cual, y el SDK de .NET lo convierte en la sección de configuración Database:Password. En un archivo .env, el CLI lo escribe tal cual y avisa, porque python-dotenv carga esa línea pero dotenv para Node.js, Docker Compose y bash no: si tu aplicación lee el archivo con uno de ellos, usa envilder exec o un nombre con __ (Database__Password).',
     mapValuesTitle: 'Valores (referencias de secretos)',
     mapValuesDesc:
       'Un valor es el identificador del secreto en el proveedor. Debe ser un string JSON.',

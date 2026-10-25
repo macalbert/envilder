@@ -167,9 +167,6 @@ importers:
       cross-spawn:
         specifier: ^7.0.6
         version: 7.0.6
-      dotenv:
-        specifier: ^17.4.2
-        version: 17.4.2
       inversify:
         specifier: ^8.2.3
         version: 8.2.3(reflect-metadata@0.2.2)
@@ -210,6 +207,9 @@ importers:
       ajv-formats:
         specifier: ^3.0.1
         version: 3.0.1(ajv@8.20.0)
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
       esbuild:
         specifier: ^0.28.1
         version: 0.28.2

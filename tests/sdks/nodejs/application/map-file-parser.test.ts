@@ -200,12 +200,13 @@ describe('MapFileParser', () => {
     expect(act).toThrow(/environment variable name/i);
   });
 
-  it('Should_AcceptMappings_When_NamesAreDottedHyphenatedOrStartWithDigit', () => {
+  it('Should_AcceptMappings_When_NamesAreDottedHyphenatedSlashedOrStartWithDigit', () => {
     // Arrange
     const json = JSON.stringify({
       'APP.NAME': '/app/name',
       'APP-NAME': '/app/name-hyphen',
       '1PASSWORD_TOKEN': '/app/token',
+      'Database/Password': '/app/db-password',
       __proto__x: '/app/proto-like',
     });
     const sut = new MapFileParser();
@@ -215,7 +216,13 @@ describe('MapFileParser', () => {
 
     // Assert
     expect([...actual.mappings.keys()].sort()).toEqual(
-      ['1PASSWORD_TOKEN', 'APP-NAME', 'APP.NAME', '__proto__x'].sort(),
+      [
+        '1PASSWORD_TOKEN',
+        'APP-NAME',
+        'APP.NAME',
+        'Database/Password',
+        '__proto__x',
+      ].sort(),
     );
   });
 });
