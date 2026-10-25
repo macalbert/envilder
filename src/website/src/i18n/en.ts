@@ -579,7 +579,7 @@ export const en: Translations = {
         title:
           'Load AWS SSM and Azure Key Vault secrets into .NET IConfiguration',
         description:
-          'Envilder .NET SDK: resolve secrets from AWS Parameter Store or Azure Key Vault at startup into IConfiguration, environment variables or a dictionary.',
+          'Envilder .NET SDK: load AWS SSM or Azure Key Vault secrets into ASP.NET Core IConfiguration or DI, with minimal IAM and RBAC, appsettings precedence and fixes.',
         heading: '.NET SDK',
         intro: 'Load secrets directly into a .NET application at startup.',
         breadcrumb: '.NET SDK',
@@ -1066,7 +1066,7 @@ export const en: Translations = {
     sidebarSdkNodejs: 'Node.js SDK',
     sdkDotnetTitle: '.NET SDK',
     sdkDotnetDesc:
-      'Load secrets directly into your .NET application at startup. One-liner facade, fluent builder, IConfiguration integration, or full programmatic control.',
+      'How do you load AWS SSM Parameter Store or Azure Key Vault secrets into a .NET application without a .env file? Add the Envilder NuGet package and call AddEnvilder on your configuration: the secrets listed in envilder.json are resolved at startup and read like any other configuration key.',
     sdkDotnetInstall: 'Install',
     sdkDotnetOneLiner: 'One-liner: resolve + inject',
     sdkDotnetOneLinerDesc:
@@ -1083,15 +1083,113 @@ export const en: Translations = {
     sdkDotnetValidation: 'Secret validation',
     sdkDotnetValidationDesc:
       'Opt-in validation ensures all resolved secrets have non-empty values:',
-    sdkDotnetQuickStartConfig: 'Via IConfiguration (ASP.NET)',
-    sdkDotnetQuickStartConfigDesc:
-      'Add Envilder as a configuration source in your ASP.NET application:',
     sdkDotnetQuickStartResolve: 'Advanced: full programmatic control',
     sdkDotnetQuickStartResolveDesc:
       'Parse the map file, resolve secrets, and inject them into environment variables:',
     sdkDotnetFullDocs: 'Full documentation →',
     sdkDotnetExamplesDesc:
       'xUnit test projects with Testcontainers and Aspire resolve a map file against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to containers, with no .env file:',
+    sdkDotnetPrereqTitle: 'Prerequisites',
+    sdkDotnetPrereqDesc:
+      'The package targets .NET Standard 2.0, so it runs on any in-support .NET release (its tests run on .NET 10, the current LTS). Each provider uses its own default credential chain:',
+    sdkDotnetPrereqAws:
+      'AWS: the default AWS credential chain (environment variables, shared credentials file, SSO or an IAM role). Set "profile" in $config to use a named profile.',
+    sdkDotnetPrereqAzure:
+      'Azure: DefaultAzureCredential (az login, managed identity or environment variables).',
+    sdkDotnetIamTitle: 'Minimum IAM policy for AWS SSM',
+    sdkDotnetIamDesc:
+      'The SDK only reads parameters, so ssm:GetParameter on your path prefix is enough. Replace the region, account ID and prefix:',
+    sdkDotnetIamKms:
+      'Values are read with decryption. SecureString parameters encrypted with the default aws/ssm key need nothing more; if they use a customer-managed KMS key, also allow kms:Decrypt on that key.',
+    sdkDotnetRbacTitle: 'Minimum RBAC role for Azure Key Vault',
+    sdkDotnetRbacDesc:
+      'Reading secrets only needs the Key Vault Secrets User role. Scope it to the vault, not the subscription:',
+    sdkDotnetRbacNote:
+      'If the vault still uses access policies instead of RBAC, grant only the get secret permission:',
+    sdkDotnetMapTitle: 'The map file',
+    sdkDotnetMapDesc:
+      'The same envilder.json drives the examples below. Keys become configuration keys or environment variable names; values are parameter paths in SSM:',
+    sdkDotnetMapAzureDesc:
+      'For Key Vault, set the provider and the vault URL in $config. Values are Key Vault secret names:',
+    sdkDotnetMapAzureNote:
+      'The .NET SDK sends names to Key Vault exactly as written. Unlike the CLI, it does not convert a path such as /myapp/prod/db-password into myapp-prod-db-password, so write the final name in the map.',
+    sdkDotnetAspTitle: 'ASP.NET Core with IConfiguration',
+    sdkDotnetAspDesc:
+      'Call AddEnvilder right after CreateBuilder. Keys are read exactly as written in the map file, so use environment-variable-style names: the same file then also works with the CLI and the other SDKs.',
+    sdkDotnetAspOutput: 'Calling the endpoint returns:',
+    sdkDotnetAspNote:
+      'Secrets are resolved once, while the configuration is built, with one request per entry in the map. Values do not refresh while the app runs: restart it to pick up a rotated secret. A secret that does not exist is skipped without an error, so check the keys your app cannot start without.',
+    sdkDotnetDiTitle: 'Dependency injection',
+    sdkDotnetDiDesc:
+      'AddEnvilder on IServiceCollection registers an EnvilderClient and the parsed map file as singletons, for code that resolves secrets on demand:',
+    sdkDotnetWorkerTitle: 'Worker or console app without DI',
+    sdkDotnetWorkerDesc:
+      'No host is needed. Resolve the map with Env, validate it and use the dictionary directly:',
+    sdkDotnetWorkerOutput: 'Output when both secrets resolve:',
+    sdkDotnetWorkerHost:
+      'In a Worker Service, call Env.Load before creating the host. The values become process environment variables, which the host configuration already reads, so double underscores work as section separators (Payments__ApiKey is read as Payments:ApiKey).',
+    sdkDotnetPrecTitle: 'Combining with appsettings.{Environment}.json',
+    sdkDotnetPrecDesc:
+      'ASP.NET Core applies configuration sources in order and the last one wins. The default host adds them from lowest to highest priority:',
+    sdkDotnetPrec1: 'appsettings.json',
+    sdkDotnetPrec2: 'appsettings.{Environment}.json',
+    sdkDotnetPrec3: 'User secrets (Development only)',
+    sdkDotnetPrec4: 'Environment variables',
+    sdkDotnetPrec5: 'Command-line arguments',
+    sdkDotnetPrec6:
+      'Envilder, when added after CreateBuilder as in the example above',
+    sdkDotnetPrecEnvilder:
+      'Because AddEnvilder runs after CreateBuilder, its secrets override every default source, including the command line. Keep non-secret defaults in appsettings and let Envilder supply only secrets. A key skipped because its secret does not exist does not erase anything: the appsettings value stays in effect.',
+    sdkDotnetPrecMissing:
+      'To let environment variables win again in a given deployment, add that source after Envilder:',
+    sdkDotnetPerEnvDesc:
+      'To use a different map per environment, build the file name from the environment name:',
+    sdkDotnetExecTitle: 'Without the SDK: envilder exec',
+    sdkDotnetExecDesc:
+      'If the app only needs the values as environment variables, skip the package and let the CLI start it. The secrets are passed to the process, no .env file is written, and the command does not start if a secret cannot be resolved:',
+    sdkDotnetExecKeys:
+      'The .NET environment variable provider turns double underscores into section separators, so a map key such as ConnectionStrings__Default is read as ConnectionStrings:Default with no extra code.',
+    sdkDotnetExecLink: 'envilder exec reference →',
+    sdkDotnetErrTitle: 'Common errors',
+    sdkDotnetErrIntro:
+      'Each message below is the exact text raised by the SDK or returned by the cloud provider.',
+    sdkDotnetErrExpiredTitle: 'ExpiredCredentialsException',
+    sdkDotnetErrExpiredFix:
+      'The security token or SSO session has expired. Refresh the credentials (aws sso login for SSO) and run again. The original AWS exception is in InnerException.',
+    sdkDotnetErrSsoTitle: 'SsoSessionExpiredException',
+    sdkDotnetErrSsoFix:
+      "Run the command in the message. Without a profile in $config the message reads: Your AWS SSO session has expired. Run 'aws sso login' and re-run this command. The ProfileName property holds the profile, or null.",
+    sdkDotnetErrMissingTitle: 'Missing parameter or secret',
+    sdkDotnetErrMissingFix:
+      'A parameter or secret that does not exist is skipped without an error: the key is absent from the dictionary and from IConfiguration. ValidateSecrets throws only when nothing resolved or a value is empty, so also check the keys you depend on (for example with TryGetValue) and verify the path in the map.',
+    sdkDotnetErrDeniedTitle: 'Access denied',
+    sdkDotnetErrDeniedAwsFix:
+      'The identity lacks ssm:GetParameter on that parameter. Compare the Resource ARN, including the region, with the policy above.',
+    sdkDotnetErrDeniedAzureFix:
+      'Assign Key Vault Secrets User on the vault. Role assignments can take a few minutes to propagate.',
+    sdkDotnetErrAzureNameTitle: 'Secret name with slashes on Azure',
+    sdkDotnetErrAzureNameFix:
+      'Key Vault names only allow letters, digits and hyphens, and the SDK does not normalize them. A path-style name such as /myapp/prod/db-password will not match any secret: use myapp-prod-db-password in the map.',
+    sdkDotnetErrConfigTitle: 'Configuration errors',
+    sdkDotnetErrMessageHeader: 'Message',
+    sdkDotnetErrFixHeader: 'Fix',
+    sdkDotnetErrCfgFile:
+      'The path is relative to the working directory, not the project folder. Copy the file to the output directory or pass an absolute path.',
+    sdkDotnetErrCfgVault:
+      'Add "vaultUrl" to $config, or pass it with EnvilderOptions.',
+    sdkDotnetErrCfgProfileAzure:
+      'Remove "profile" from $config: it only applies to AWS.',
+    sdkDotnetErrCfgVaultAws: 'Remove "vaultUrl", or set "provider" to "azure".',
+    sdkDotnetErrCfgProfileMissing:
+      'Check the name in ~/.aws/credentials or ~/.aws/config, or remove "profile" to use the default credential chain.',
+    sdkDotnetBeforeTitle: 'What this replaces',
+    sdkDotnetBeforeDesc:
+      'The usual alternatives are a .env file copied between machines, or a hand-written script that calls the AWS or Azure SDK. The first leaves plaintext secrets on disk; the second is code every service must maintain. Here the versioned envilder.json lists only paths, and the values stay in your vault.',
+    sdkDotnetRelatedTitle: 'Related guides',
+    sdkDotnetRelatedMap: 'Map file reference',
+    sdkDotnetRelatedAws: 'AWS SSM setup',
+    sdkDotnetRelatedAzure: 'Azure Key Vault setup',
+    sdkDotnetRelatedExec: 'envilder exec reference',
     sdkPythonTitle: 'Python SDK',
     sdkPythonDesc:
       'Load secrets directly into your Python application at startup. One-liner setup or fine-grained control with the fluent builder.',

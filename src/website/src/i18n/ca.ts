@@ -578,7 +578,7 @@ export const ca: Translations = {
       'sdk-dotnet': {
         title: "SDK .NET d'Envilder",
         description:
-          "Carrega secrets de fitxers de mapatge d'Envilder en aplicacions .NET.",
+          "SDK .NET d'Envilder: carrega secrets d'AWS SSM o Azure Key Vault a IConfiguration o DI d'ASP.NET Core, amb IAM i RBAC mínims, precedència d'appsettings i errors.",
         heading: 'SDK .NET',
         intro:
           'Carrega secrets directament en una aplicació .NET en iniciar-se.',
@@ -1081,7 +1081,7 @@ export const ca: Translations = {
     sidebarSdkNodejs: 'Node.js SDK',
     sdkDotnetTitle: '.NET SDK',
     sdkDotnetDesc:
-      "Carrega secrets directament a la teva aplicació .NET a l'inici. Façana d'una línia, constructor fluent, integració amb IConfiguration o control programàtic total.",
+      "Com carregues secrets d'AWS SSM Parameter Store o d'Azure Key Vault en una aplicació .NET sense fitxer .env? Afegeix el paquet NuGet d'Envilder i crida AddEnvilder a la teva configuració: els secrets que llista envilder.json es resolen a l'inici i es llegeixen com qualsevol altra clau de configuració.",
     sdkDotnetInstall: 'Instal·lació',
     sdkDotnetOneLiner: 'Una línia: resoldre + injectar',
     sdkDotnetOneLinerDesc:
@@ -1098,15 +1098,114 @@ export const ca: Translations = {
     sdkDotnetValidation: 'Validació de secrets',
     sdkDotnetValidationDesc:
       'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
-    sdkDotnetQuickStartConfig: 'Via IConfiguration (ASP.NET)',
-    sdkDotnetQuickStartConfigDesc:
-      'Afegeix Envilder com a font de configuració a la teva aplicació ASP.NET:',
     sdkDotnetQuickStartResolve: 'Avançat: control programàtic total',
     sdkDotnetQuickStartResolveDesc:
       "Analitza el fitxer de mapeig, resol secrets i injecta'ls a les variables d'entorn:",
     sdkDotnetFullDocs: 'Documentació completa →',
     sdkDotnetExamplesDesc:
       'Projectes de proves xUnit amb Testcontainers i Aspire que resolen un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack i Lowkey Vault) i passen els valors als contenidors, sense cap fitxer .env:',
+    sdkDotnetPrereqTitle: 'Prerequisits',
+    sdkDotnetPrereqDesc:
+      "El paquet apunta a .NET Standard 2.0, així que funciona amb qualsevol versió de .NET amb suport (les proves de l'SDK s'executen a .NET 10, l'LTS actual). Cada proveïdor fa servir la seva cadena de credencials per defecte:",
+    sdkDotnetPrereqAws:
+      'AWS: la cadena de credencials per defecte d\'AWS (variables d\'entorn, fitxer de credencials compartit, SSO o un rol IAM). Defineix "profile" a $config per fer servir un perfil amb nom.',
+    sdkDotnetPrereqAzure:
+      "Azure: DefaultAzureCredential (az login, identitat gestionada o variables d'entorn).",
+    sdkDotnetIamTitle: 'Política IAM mínima per a AWS SSM',
+    sdkDotnetIamDesc:
+      "L'SDK només llegeix paràmetres, així que n'hi ha prou amb ssm:GetParameter sobre el teu prefix de ruta. Substitueix la regió, l'ID de compte i el prefix:",
+    sdkDotnetIamKms:
+      'Els valors es llegeixen amb desxifrat. Els paràmetres SecureString xifrats amb la clau aws/ssm per defecte no necessiten res més; si fan servir una clau KMS gestionada per tu, permet també kms:Decrypt sobre aquesta clau.',
+    sdkDotnetRbacTitle: 'Rol RBAC mínim per a Azure Key Vault',
+    sdkDotnetRbacDesc:
+      "Per llegir secrets només cal el rol Key Vault Secrets User. Assigna'l a l'àmbit del magatzem, no de la subscripció:",
+    sdkDotnetRbacNote:
+      "Si el magatzem encara fa servir polítiques d'accés en lloc de RBAC, concedeix només el permís get de secrets:",
+    sdkDotnetMapTitle: 'El fitxer de mapeig',
+    sdkDotnetMapDesc:
+      "El mateix envilder.json serveix per als exemples següents. Les claus esdevenen claus de configuració o noms de variables d'entorn; els valors són rutes de paràmetres a SSM:",
+    sdkDotnetMapAzureDesc:
+      'Per a Key Vault, defineix el proveïdor i la URL del magatzem a $config. Els valors són noms de secrets de Key Vault:',
+    sdkDotnetMapAzureNote:
+      "L'SDK de .NET envia els noms a Key Vault tal com els escrius. A diferència de la CLI, no converteix una ruta com /myapp/prod/db-password en myapp-prod-db-password, així que escriu el nom final al fitxer.",
+    sdkDotnetAspTitle: 'ASP.NET Core amb IConfiguration',
+    sdkDotnetAspDesc:
+      "Crida AddEnvilder just després de CreateBuilder. Les claus es llegeixen tal com s'escriuen al fitxer de mapeig, així que fes servir noms de variable d'entorn: el mateix fitxer també funciona amb la CLI i la resta d'SDKs.",
+    sdkDotnetAspOutput: "En cridar l'endpoint, la resposta és:",
+    sdkDotnetAspNote:
+      "Els secrets es resolen una sola vegada, mentre es construeix la configuració, amb una petició per cada entrada del fitxer. Els valors no s'actualitzen mentre l'aplicació s'executa: reinicia-la per recollir un secret rotat. Un secret que no existeix s'omet sense cap error, així que comprova les claus sense les quals l'aplicació no pot arrencar.",
+    sdkDotnetDiTitle: 'Injecció de dependències',
+    sdkDotnetDiDesc:
+      'AddEnvilder sobre IServiceCollection registra un EnvilderClient i el fitxer de mapeig analitzat com a singletons, per al codi que resol secrets sota demanda:',
+    sdkDotnetWorkerTitle: 'Worker o aplicació de consola sense DI',
+    sdkDotnetWorkerDesc:
+      "No cal cap host. Resol el fitxer amb Env, valida'l i fes servir el diccionari directament:",
+    sdkDotnetWorkerOutput: 'Sortida quan els dos secrets es resolen:',
+    sdkDotnetWorkerHost:
+      "En un Worker Service, crida Env.Load abans de crear el host. Els valors passen a ser variables d'entorn del procés, que la configuració del host ja llegeix, així que els guions baixos dobles funcionen com a separadors de secció (Payments__ApiKey es llegeix com Payments:ApiKey).",
+    sdkDotnetPrecTitle: 'Combinació amb appsettings.{Environment}.json',
+    sdkDotnetPrecDesc:
+      "ASP.NET Core aplica les fonts de configuració en ordre i guanya l'última. El host per defecte les afegeix de menys a més prioritat:",
+    sdkDotnetPrec1: 'appsettings.json',
+    sdkDotnetPrec2: 'appsettings.{Environment}.json',
+    sdkDotnetPrec3: "Secrets d'usuari (només a Development)",
+    sdkDotnetPrec4: "Variables d'entorn",
+    sdkDotnetPrec5: "Arguments de línia d'ordres",
+    sdkDotnetPrec6:
+      "Envilder, quan s'afegeix després de CreateBuilder com a l'exemple anterior",
+    sdkDotnetPrecEnvilder:
+      "Com que AddEnvilder s'executa després de CreateBuilder, els seus secrets sobreescriuen totes les fonts per defecte, incloent-hi la línia d'ordres. Deixa els valors per defecte no secrets a appsettings i fes que Envilder aporti només secrets. Una clau que s'omet perquè el seu secret no existeix no esborra res: el valor d'appsettings continua vigent.",
+    sdkDotnetPrecMissing:
+      "Perquè les variables d'entorn tornin a guanyar en un desplegament concret, afegeix aquesta font després d'Envilder:",
+    sdkDotnetPerEnvDesc:
+      "Per fer servir un fitxer diferent per entorn, construeix-ne el nom a partir del nom de l'entorn:",
+    sdkDotnetExecTitle: "Sense l'SDK: envilder exec",
+    sdkDotnetExecDesc:
+      "Si l'aplicació només necessita els valors com a variables d'entorn, prescindeix del paquet i deixa que la CLI l'arrenqui. Els secrets es passen al procés, no s'escriu cap fitxer .env i l'ordre no s'inicia si algun secret no es pot resoldre:",
+    sdkDotnetExecKeys:
+      "El proveïdor de variables d'entorn de .NET converteix els guions baixos dobles en separadors de secció, així que una clau com ConnectionStrings__Default es llegeix com ConnectionStrings:Default sense cap codi addicional.",
+    sdkDotnetExecLink: "Referència d'envilder exec →",
+    sdkDotnetErrTitle: 'Errors habituals',
+    sdkDotnetErrIntro:
+      "Cada missatge següent és el text exacte que llança l'SDK o que retorna el proveïdor de núvol.",
+    sdkDotnetErrExpiredTitle: 'ExpiredCredentialsException',
+    sdkDotnetErrExpiredFix:
+      "El token de seguretat o la sessió SSO ha caducat. Renova les credencials (aws sso login si fas servir SSO) i torna a executar. L'excepció original d'AWS és a InnerException.",
+    sdkDotnetErrSsoTitle: 'SsoSessionExpiredException',
+    sdkDotnetErrSsoFix:
+      "Executa l'ordre que indica el missatge. Sense perfil a $config, el missatge és: Your AWS SSO session has expired. Run 'aws sso login' and re-run this command. La propietat ProfileName conté el perfil, o null.",
+    sdkDotnetErrMissingTitle: 'Paràmetre o secret inexistent',
+    sdkDotnetErrMissingFix:
+      "Un paràmetre o secret que no existeix s'omet sense error: la clau no és al diccionari ni a IConfiguration. ValidateSecrets només llança l'excepció quan no s'ha resolt res o hi ha un valor buit, així que comprova també les claus de les quals depens (per exemple amb TryGetValue) i verifica la ruta al fitxer.",
+    sdkDotnetErrDeniedTitle: 'Permís denegat',
+    sdkDotnetErrDeniedAwsFix:
+      "La identitat no té ssm:GetParameter sobre aquest paràmetre. Compara l'ARN de Resource, regió inclosa, amb la política anterior.",
+    sdkDotnetErrDeniedAzureFix:
+      'Assigna Key Vault Secrets User sobre el magatzem. Les assignacions de rol poden trigar uns minuts a propagar-se.',
+    sdkDotnetErrAzureNameTitle: 'Nom de secret amb barres a Azure',
+    sdkDotnetErrAzureNameFix:
+      "Els noms de Key Vault només admeten lletres, dígits i guions, i l'SDK no els normalitza. Un nom en forma de ruta com /myapp/prod/db-password no coincidirà amb cap secret: fes servir myapp-prod-db-password al fitxer.",
+    sdkDotnetErrConfigTitle: 'Errors de configuració',
+    sdkDotnetErrMessageHeader: 'Missatge',
+    sdkDotnetErrFixHeader: 'Solució',
+    sdkDotnetErrCfgFile:
+      'La ruta és relativa al directori de treball, no a la carpeta del projecte. Copia el fitxer al directori de sortida o passa una ruta absoluta.',
+    sdkDotnetErrCfgVault:
+      'Afegeix "vaultUrl" a $config o passa\'l amb EnvilderOptions.',
+    sdkDotnetErrCfgProfileAzure:
+      'Elimina "profile" de $config: només s\'aplica a AWS.',
+    sdkDotnetErrCfgVaultAws:
+      'Elimina "vaultUrl" o defineix "provider" com a "azure".',
+    sdkDotnetErrCfgProfileMissing:
+      'Comprova el nom a ~/.aws/credentials o ~/.aws/config, o elimina "profile" per fer servir la cadena de credencials per defecte.',
+    sdkDotnetBeforeTitle: 'Què substitueix',
+    sdkDotnetBeforeDesc:
+      "Les alternatives habituals són un fitxer .env copiat entre màquines o un script escrit a mà que crida l'SDK d'AWS o d'Azure. El primer deixa secrets en text pla al disc; el segon és codi que cada servei ha de mantenir. Aquí l'envilder.json versionat només llista rutes i els valors es queden al teu magatzem.",
+    sdkDotnetRelatedTitle: 'Guies relacionades',
+    sdkDotnetRelatedMap: 'Referència del fitxer de mapeig',
+    sdkDotnetRelatedAws: "Configuració d'AWS SSM",
+    sdkDotnetRelatedAzure: "Configuració d'Azure Key Vault",
+    sdkDotnetRelatedExec: "Referència d'envilder exec",
     sdkPythonTitle: 'Python SDK',
     sdkPythonDesc:
       "Carrega secrets directament a la teva aplicació Python a l'inici. Configuració en una línia o control detallat amb el constructor fluent.",
