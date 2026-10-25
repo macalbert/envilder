@@ -1,6 +1,8 @@
+import path from "node:path";
 import { deploy, validateConfig } from "../../../src/iac/bin/main";
 import { AppEnvironment } from "../../../src/iac/lib/core/types";
 import { PublicFilesStack } from "../../../src/iac/lib/stacks/publicFilesStack";
+import { StaticWebsiteStack } from "../../../src/iac/lib/stacks/staticWebsiteStack";
 
 vi.mock("../../../src/iac/lib/stacks/staticWebsiteStack");
 vi.mock("../../../src/iac/lib/stacks/publicFilesStack");
@@ -114,6 +116,48 @@ describe("main", () => {
 
 			// Assert
 			expect(action).toThrow("Configuration validation failed");
+		});
+
+		it("Should_ResolveDistFolderFromRepositoryRoot_When_RootPathIsNotProvided", () => {
+			// Arrange
+			const config = createValidConfig();
+			config.stacks.frontend.staticWebsites.push({
+				name: "Website",
+				projectPath: "src/website/dist",
+			});
+			const repositoryRoot = path.resolve(__dirname, "../../..");
+
+			// Act
+			deploy(config);
+
+			// Assert
+			expect(vi.mocked(StaticWebsiteStack)).toHaveBeenCalledWith(
+				expect.anything(),
+				expect.objectContaining({
+					distFolderPath: path.join(repositoryRoot, "src/website/dist"),
+				}),
+			);
+		});
+
+		it("Should_ResolveDistFolderFromRootPath_When_RootPathIsProvided", () => {
+			// Arrange
+			const rootPath = path.resolve("/custom/root");
+			const config = { ...createValidConfig(), rootPath };
+			config.stacks.frontend.staticWebsites.push({
+				name: "Website",
+				projectPath: "src/website/dist",
+			});
+
+			// Act
+			deploy(config);
+
+			// Assert
+			expect(vi.mocked(StaticWebsiteStack)).toHaveBeenCalledWith(
+				expect.anything(),
+				expect.objectContaining({
+					distFolderPath: path.join(rootPath, "src/website/dist"),
+				}),
+			);
 		});
 	});
 });

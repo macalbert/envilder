@@ -179,6 +179,140 @@ az ad app federated-credential create --id {APP_ID} --parameters '{
   "audiences": ["api://AzureADTokenExchange"]
 }'`;
 
+const dotnetIamPolicy = `{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": "ssm:GetParameter",
+    "Resource": "arn:aws:ssm:eu-west-1:123456789012:parameter/myapp/prod/*"
+  }]
+}`;
+
+const dotnetAccessPolicy = `az keyvault set-policy \\
+  --name {VAULT_NAME} \\
+  --object-id {OBJECT_ID} \\
+  --secret-permissions get`;
+
+const dotnetMapAws = `{
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
+  "$config": { "provider": "aws" },
+  "DB_CONNECTION": "/myapp/prod/db-connection",
+  "STRIPE_API_KEY": "/myapp/prod/stripe-key"
+}`;
+
+const dotnetMapAzure = `{
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "DB_CONNECTION": "myapp-prod-db-connection",
+  "STRIPE_API_KEY": "myapp-prod-stripe-key"
+}`;
+
+const dotnetAspProgram = `var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddEnvilder("envilder.json");
+builder.Services.Configure<StripeOptions>(options =>
+    options.ApiKey = builder.Configuration["STRIPE_API_KEY"] ?? "");
+
+var app = builder.Build();
+
+app.MapGet("/", (IConfiguration config) => new
+{
+    dbConfigured = config["DB_CONNECTION"] is not null,
+    stripeConfigured = config["STRIPE_API_KEY"] is not null,
+});
+
+app.Run();
+
+public class StripeOptions
+{
+    public string ApiKey { get; set; } = "";
+}`;
+
+const dotnetDi = `builder.Services.AddEnvilder("envilder.json");
+
+app.MapGet("/count", async (EnvilderClient client, ParsedMapFile map) =>
+    (await client.ResolveSecretsAsync(map)).Count);`;
+
+const dotnetMapWorker = `{
+  "PAYMENTS_API_KEY": "/myapp/prod/payments/api-key",
+  "PAYMENTS_WEBHOOK_SECRET": "/myapp/prod/payments/webhook-secret"
+}`;
+
+const dotnetConsole = `using Envilder;
+
+try
+{
+    var secrets = await Env.ResolveFileAsync("envilder.json");
+
+    string[] required = { "PAYMENTS_API_KEY", "PAYMENTS_WEBHOOK_SECRET" };
+    var missing = required.Where(key => !secrets.ContainsKey(key)).ToList();
+    if (missing.Count > 0)
+    {
+        Console.Error.WriteLine($"Missing secrets: {string.Join(", ", missing)}");
+        return 1;
+    }
+
+    secrets.ValidateSecrets(); // rejects empty values
+    Console.WriteLine($"Resolved {secrets.Count} secrets");
+    return 0;
+}
+catch (Exception ex) when (ex is SsoSessionExpiredException
+                              or ExpiredCredentialsException)
+{
+    Console.Error.WriteLine(ex.Message);
+    return 1;
+}`;
+
+const dotnetWorkerHost = `using Envilder;
+
+Env.Load("envilder.json");
+
+var builder = Host.CreateApplicationBuilder(args);
+builder.Services.AddHostedService<Worker>();
+builder.Build().Run();`;
+
+const dotnetPrecOverride = `builder.Configuration
+    .AddEnvilder("envilder.json")
+    .AddEnvironmentVariables();`;
+
+const dotnetPerEnv = `builder.Configuration.AddEnvilder(
+    $"envilder.{builder.Environment.EnvironmentName}.json");`;
+
+const dotnetErrDeniedAws =
+  'User: arn:aws:sts::123456789012:assumed-role/myapp-prod/session is not authorized to perform: ssm:GetParameter on resource: arn:aws:ssm:eu-west-1:123456789012:parameter/myapp/prod/stripe-key because no identity-based policy allows the ssm:GetParameter action';
+
+const dotnetErrSso =
+  "Your AWS SSO session for profile 'dev' has expired. Run 'aws sso login --profile dev' and re-run this command.";
+
+const dotnetErrMissing = `No secrets were resolved.
+The following secrets have empty or missing values: STRIPE_KEY`;
+
+const dotnetConfigErrors = [
+  {
+    messages: ['Map file not found.', 'Map file not found: envilder.json'],
+    fix: 'ErrCfgFile',
+  },
+  {
+    messages: ['Vault URL must be provided for Azure Key Vault provider.'],
+    fix: 'ErrCfgVault',
+  },
+  {
+    messages: ['AWS profile cannot be used with Azure Key Vault provider.'],
+    fix: 'ErrCfgProfileAzure',
+  },
+  {
+    messages: ['Vault URL cannot be used with AWS SSM provider.'],
+    fix: 'ErrCfgVaultAws',
+  },
+  {
+    messages: ["AWS profile 'dev' was not found in the credential store."],
+    fix: 'ErrCfgProfileMissing',
+  },
+] as const;
+
 const ghaAzureRole = `az role assignment create \\
   --role "Key Vault Secrets User" \\
   --assignee {APP_ID} \\
@@ -613,6 +747,7 @@ envilder --push --provider=azure \\
             <tr><td><code>--value</code></td><td>{t.docs.pushSingleOptValue}</td></tr>
             <tr><td><code>--secret-path</code></td><td>{t.docs.pushSingleOptPath}</td></tr>
             <tr><td><code>--map</code></td><td>{t.docs.pushSingleOptMap}</td></tr>
+            <tr><td><code>--no-map-update</code></td><td>{t.docs.pushSingleOptNoMapUpdate}</td></tr>
             <tr><td><code>--provider</code></td><td>{t.docs.pushSingleOptProvider}</td></tr>
             <tr><td><code>--vault-url</code></td><td>{t.docs.pushSingleOptVault}</td></tr>
             <tr><td><code>--profile</code></td><td>{t.docs.pushSingleOptProfile}</td></tr>
@@ -806,8 +941,33 @@ envilder exec -- docker compose up`} />
           <a class="sdk-badge" href="https://www.nuget.org/packages/Envilder" target="_blank" rel="noopener noreferrer">📦 NuGet {sdkDotnetVersion}</a>
         </div>
 
+        <h3>{t.docs.sdkDotnetPrereqTitle}</h3>
+        <p>{t.docs.sdkDotnetPrereqDesc}</p>
+        <ul class="docs-list">
+          <li>{t.docs.sdkDotnetPrereqAws}</li>
+          <li>{t.docs.sdkDotnetPrereqAzure}</li>
+        </ul>
+
+        <h4>{t.docs.sdkDotnetIamTitle}</h4>
+        <p>{t.docs.sdkDotnetIamDesc}</p>
+        <CodeBlock lang="json" code={dotnetIamPolicy} />
+        <p class="note">{t.docs.sdkDotnetIamKms}</p>
+
+        <h4>{t.docs.sdkDotnetRbacTitle}</h4>
+        <p>{t.docs.sdkDotnetRbacDesc}</p>
+        <CodeBlock lang="bash" code={ghaAzureRole} />
+        <p>{t.docs.sdkDotnetRbacNote}</p>
+        <CodeBlock lang="bash" code={dotnetAccessPolicy} />
+
         <h3>{t.docs.sdkDotnetInstall}</h3>
         <CodeBlock lang="bash" code="dotnet add package Envilder" />
+
+        <h3>{t.docs.sdkDotnetMapTitle}</h3>
+        <p>{t.docs.sdkDotnetMapDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={dotnetMapAws} />
+        <p>{t.docs.sdkDotnetMapAzureDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={dotnetMapAzure} />
+        <p class="note">{t.docs.sdkDotnetMapAzureNote}</p>
 
         <h3>{t.docs.sdkDotnetOneLiner}</h3>
         <p>{t.docs.sdkDotnetOneLinerDesc}</p>
@@ -859,18 +1019,116 @@ Env.Load(env, new Dictionary<string, string?>
 var secrets = Env.ResolveFile("envilder.json");
 secrets.ValidateSecrets(); // throws SecretValidationException if any value is empty`} />
 
-        <h3>{t.docs.sdkDotnetQuickStartConfig}</h3>
-        <p>{t.docs.sdkDotnetQuickStartConfigDesc}</p>
-        <CodeBlock lang="csharp" code={`var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddEnvilder("envilder.json");
-var app = builder.Build();`} />
-
         <h3>{t.docs.sdkDotnetQuickStartResolve}</h3>
         <p>{t.docs.sdkDotnetQuickStartResolveDesc}</p>
         <CodeBlock lang="csharp" code={`using Envilder;
 
 var secrets = await Env.ResolveFileAsync("envilder.json");
 EnvilderClient.InjectIntoEnvironment(secrets);`} />
+      </section>
+
+      <section id="sdk-dotnet-aspnet" class="docs-section">
+        <h2>{t.docs.sdkDotnetAspTitle}</h2>
+        <p>{t.docs.sdkDotnetAspDesc}</p>
+        <CodeBlock lang="csharp" filename="Program.cs" code={dotnetAspProgram} />
+        <p>{t.docs.sdkDotnetAspOutput}</p>
+        <CodeBlock lang="json" code={`{"dbConfigured":true,"stripeConfigured":true}`} />
+        <p class="note">{t.docs.sdkDotnetAspNote}</p>
+
+        <h3>{t.docs.sdkDotnetDiTitle}</h3>
+        <p>{t.docs.sdkDotnetDiDesc}</p>
+        <CodeBlock lang="csharp" code={dotnetDi} />
+      </section>
+
+      <section id="sdk-dotnet-worker" class="docs-section">
+        <h2>{t.docs.sdkDotnetWorkerTitle}</h2>
+        <p>{t.docs.sdkDotnetWorkerDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={dotnetMapWorker} />
+        <CodeBlock lang="csharp" filename="Program.cs" code={dotnetConsole} />
+        <p>{t.docs.sdkDotnetWorkerOutput}</p>
+        <CodeBlock lang="text" code="Resolved 2 secrets" />
+        <p>{t.docs.sdkDotnetWorkerHost}</p>
+        <CodeBlock lang="csharp" filename="Program.cs" code={dotnetWorkerHost} />
+      </section>
+
+      <section id="sdk-dotnet-precedence" class="docs-section">
+        <h2>{t.docs.sdkDotnetPrecTitle}</h2>
+        <p>{t.docs.sdkDotnetPrecDesc}</p>
+        <ol class="docs-list">
+          <li><code>{t.docs.sdkDotnetPrec1}</code></li>
+          <li><code>{t.docs.sdkDotnetPrec2}</code></li>
+          <li>{t.docs.sdkDotnetPrec3}</li>
+          <li>{t.docs.sdkDotnetPrec4}</li>
+          <li>{t.docs.sdkDotnetPrec5}</li>
+          <li>{t.docs.sdkDotnetPrec6}</li>
+        </ol>
+        <p>{t.docs.sdkDotnetPrecEnvilder}</p>
+        <p>{t.docs.sdkDotnetPrecMissing}</p>
+        <CodeBlock lang="csharp" code={dotnetPrecOverride} />
+        <p>{t.docs.sdkDotnetPerEnvDesc}</p>
+        <CodeBlock lang="csharp" code={dotnetPerEnv} />
+      </section>
+
+      <section id="sdk-dotnet-exec" class="docs-section">
+        <h2>{t.docs.sdkDotnetExecTitle}</h2>
+        <p>{t.docs.sdkDotnetExecDesc}</p>
+        <CodeBlock lang="bash" code="envilder exec -- dotnet run" />
+        <p>{t.docs.sdkDotnetExecKeys}</p>
+        <p><a href={localizedPath(lang, '/docs/cli/exec/')}>{t.docs.sdkDotnetExecLink}</a></p>
+      </section>
+
+      <section id="sdk-dotnet-errors" class="docs-section">
+        <h2>{t.docs.sdkDotnetErrTitle}</h2>
+        <p>{t.docs.sdkDotnetErrIntro}</p>
+
+        <h3>{t.docs.sdkDotnetErrExpiredTitle}</h3>
+        <CodeBlock lang="text" code="AWS credentials are expired or invalid. Your security token or SSO session may have expired. Refresh your credentials and retry (for SSO, run: aws sso login)." />
+        <p>{t.docs.sdkDotnetErrExpiredFix}</p>
+
+        <h3>{t.docs.sdkDotnetErrSsoTitle}</h3>
+        <CodeBlock lang="text" code={dotnetErrSso} />
+        <p>{t.docs.sdkDotnetErrSsoFix}</p>
+
+        <h3>{t.docs.sdkDotnetErrMissingTitle}</h3>
+        <CodeBlock lang="text" code={dotnetErrMissing} />
+        <p>{t.docs.sdkDotnetErrMissingFix}</p>
+
+        <h3>{t.docs.sdkDotnetErrDeniedTitle}</h3>
+        <CodeBlock lang="text" code={dotnetErrDeniedAws} />
+        <p>{t.docs.sdkDotnetErrDeniedAwsFix}</p>
+        <CodeBlock lang="text" code="Caller is not authorized to perform action on resource." />
+        <p>{t.docs.sdkDotnetErrDeniedAzureFix}</p>
+
+        <h3>{t.docs.sdkDotnetErrAzureNameTitle}</h3>
+        <p>{t.docs.sdkDotnetErrAzureNameFix}</p>
+
+        <h3>{t.docs.sdkDotnetErrConfigTitle}</h3>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.sdkDotnetErrMessageHeader}</th><th>{t.docs.sdkDotnetErrFixHeader}</th></tr>
+          </thead>
+          <tbody>
+            {dotnetConfigErrors.map((row) => (
+              <tr>
+                <td>{row.messages.map((message) => <div><code>{message}</code></div>)}</td>
+                <td>{t.docs[`sdkDotnet${row.fix}`]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section id="sdk-dotnet-related" class="docs-section">
+        <h2>{t.docs.sdkDotnetBeforeTitle}</h2>
+        <p>{t.docs.sdkDotnetBeforeDesc}</p>
+
+        <h2>{t.docs.sdkDotnetRelatedTitle}</h2>
+        <ul class="docs-list">
+          <li><a href={localizedPath(lang, '/docs/map-file/')}>{t.docs.sdkDotnetRelatedMap}</a></li>
+          <li><a href={localizedPath(lang, '/docs/providers/aws-ssm/')}>{t.docs.sdkDotnetRelatedAws}</a></li>
+          <li><a href={localizedPath(lang, '/docs/providers/azure-key-vault/')}>{t.docs.sdkDotnetRelatedAzure}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/exec/')}>{t.docs.sdkDotnetRelatedExec}</a></li>
+        </ul>
 
         <div class="callout">
           <span class="callout-icon">💡</span>

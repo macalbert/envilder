@@ -61,7 +61,7 @@ const config: DeploymentConfig = {
 			staticWebsites: [
 				{
 					name: "Website",
-					projectPath: "envilder/src/website/dist",
+					projectPath: "src/website/dist",
 				},
 			],
 		},
@@ -79,7 +79,7 @@ const config: DeploymentConfig = {
 // ============================================================================
 
 function getRootPath(rootPath?: string): string {
-	return rootPath ?? path.join(process.cwd(), "../../../");
+	return rootPath ?? path.resolve(__dirname, "../../..");
 }
 
 function resolveFullPath(rootPath: string, relativePath: string): string {

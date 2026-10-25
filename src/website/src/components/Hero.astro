@@ -54,14 +54,20 @@ const outputLine = (text: string, cls = 'output'): Line => ({
 // Mirrors EnvironmentVariable.maskSecretPath: keep the last 3 characters.
 const maskPath = (path: string) => '*'.repeat(path.length - 3) + path.slice(-3);
 
+const demoSecretValue = 'example-not-a-real-secret';
+
+// A single-secret push on an empty directory: the secret goes to the vault
+// and the map file `envilder exec` needs is written next to it.
 const setupScene = (opts: {
   id: string;
   icon: string;
   provider: string;
-  mapComment: string;
   pushComment: string;
+  /** Provider flags typed before the push options (empty for AWS). */
+  providerFlags: Seg[];
   configLines: string[];
   secretPath: string;
+  execSource: string;
 }): Scene => ({
   id: opts.id,
   name: t.hero.tabPush,
@@ -72,7 +78,7 @@ const setupScene = (opts: {
   lines: [
     {
       kind: 'type',
-      segments: [{ text: opts.mapComment, cls: 'comment' }],
+      segments: [{ text: opts.pushComment, cls: 'comment' }],
     },
     {
       kind: 'type',
@@ -81,9 +87,57 @@ const setupScene = (opts: {
         { text: ' ls -a', cls: 'command' },
       ],
     },
+    outputLine('.  ..'),
+    {
+      kind: 'type',
+      segments: [
+        { text: '❯', cls: 'prompt', instant: true },
+        { text: ' npx envilder', cls: 'command' },
+        ...opts.providerFlags,
+        { text: ' --key', cls: 'flag' },
+        { text: '=LOCALSTACK_AUTH_TOKEN', cls: 'command' },
+        { text: ' --value', cls: 'flag' },
+        { text: `=${demoSecretValue}`, cls: 'command' },
+        { text: ' --secret-path', cls: 'flag' },
+        { text: `=${opts.secretPath}`, cls: 'command' },
+      ],
+    },
+    { kind: 'blank' },
+    outputLine('📤 PUSHING SECRET', 'highlight'),
+    outputLine(cliRule, 'highlight'),
     {
       kind: 'output',
-      segments: [{ text: '.  ..  .env  envilder.json', cls: 'output' }],
+      segments: [
+        { text: '  → ', cls: 'output' },
+        { text: 'LOCALSTACK_AUTH_TOKEN', cls: 'command' },
+        { text: ` → ${maskPath(opts.secretPath)}`, cls: 'output' },
+      ],
+    },
+    { kind: 'blank' },
+    {
+      kind: 'output',
+      segments: [
+        { text: '⭐ SECRET PUSHED', cls: 'highlight' },
+        { text: '  —  ', cls: 'output' },
+        { text: 'LOCALSTACK_AUTH_TOKEN', cls: 'command' },
+        {
+          text: `=${maskPath(demoSecretValue)} → ${maskPath(opts.secretPath)}`,
+          cls: 'output',
+        },
+      ],
+    },
+    {
+      kind: 'output',
+      segments: [
+        { text: '✓ ', cls: 'flag' },
+        { text: 'Created ', cls: 'output' },
+        { text: 'envilder.json', cls: 'command' },
+      ],
+    },
+    { kind: 'blank' },
+    {
+      kind: 'type',
+      segments: [{ text: t.hero.setupComment2, cls: 'comment' }],
     },
     {
       kind: 'type',
@@ -93,67 +147,33 @@ const setupScene = (opts: {
         { text: 'envilder.json', cls: 'flag' },
       ],
     },
-    { kind: 'output', segments: [{ text: '{', cls: 'output' }] },
-    ...opts.configLines.map(
-      (text): Line => ({ kind: 'output', segments: [{ text, cls: 'output' }] }),
-    ),
-    {
-      kind: 'output',
-      segments: [
-        {
-          text: `  "LOCALSTACK_AUTH_TOKEN": "${opts.secretPath}"`,
-          cls: 'output',
-        },
-      ],
-    },
-    { kind: 'output', segments: [{ text: '}', cls: 'output' }] },
-    {
-      kind: 'type',
-      segments: [
-        { text: '❯', cls: 'prompt', instant: true },
-        { text: ' cat ', cls: 'command' },
-        { text: '.env', cls: 'flag' },
-      ],
-    },
-    {
-      kind: 'output',
-      segments: [
-        { text: 'LOCALSTACK_AUTH_TOKEN', cls: 'command' },
-        { text: '=example-not-a-real-secret', cls: 'output' },
-      ],
-    },
+    outputLine('{'),
+    ...opts.configLines.map((text) => outputLine(text)),
+    outputLine(`  "LOCALSTACK_AUTH_TOKEN": "${opts.secretPath}"`),
+    outputLine('}'),
     { kind: 'blank' },
     {
       kind: 'type',
-      segments: [{ text: opts.pushComment, cls: 'comment' }],
+      segments: [{ text: t.hero.execComment1, cls: 'comment' }],
     },
     {
       kind: 'type',
       segments: [
         { text: '❯', cls: 'prompt', instant: true },
         { text: ' npx envilder', cls: 'command' },
-        { text: ' --push', cls: 'flag' },
+        { text: ' exec', cls: 'flag' },
+        { text: ' --', cls: 'output' },
+        { text: ' node app.mjs', cls: 'command' },
       ],
     },
     {
       kind: 'output',
       segments: [
-        { text: 'Pushed ', cls: 'output' },
-        { text: 'LOCALSTACK_AUTH_TOKEN', cls: 'command' },
         {
-          text: `=*******************secret → ${maskPath(opts.secretPath)}`,
+          text: `envilder: 1 secret resolved (${opts.execSource}) → `,
           cls: 'output',
         },
-      ],
-    },
-    {
-      kind: 'output',
-      segments: [
-        { text: '⭐ ', cls: 'highlight' },
-        {
-          text: "Successfully pushed environment variables from '.env'",
-          cls: 'output',
-        },
+        { text: 'node …', cls: 'command' },
       ],
     },
   ],
@@ -412,17 +432,23 @@ const scenes: Scene[] = [
     id: 'setup-aws',
     icon: '/AWS.svg',
     provider: 'AWS',
-    mapComment: t.hero.setupComment1,
-    pushComment: t.hero.setupComment2,
-    configLines: ['  "$config": {', '    "provider": "aws"', '  },'],
+    pushComment: t.hero.setupComment1,
+    providerFlags: [],
+    configLines: [],
     secretPath: '/localstack/prod/auth-token',
+    execSource: 'aws, profile=default',
   }),
   setupScene({
     id: 'setup-azure',
     icon: '/Azure.svg',
     provider: 'Azure',
-    mapComment: t.hero.setupAzureComment1,
-    pushComment: t.hero.setupAzureComment2,
+    pushComment: t.hero.setupAzureComment1,
+    providerFlags: [
+      { text: ' --provider', cls: 'flag' },
+      { text: '=azure', cls: 'command' },
+      { text: ' --vault-url', cls: 'flag' },
+      { text: '=https://my-vault.vault.azure.net', cls: 'command' },
+    ],
     configLines: [
       '  "$config": {',
       '    "provider": "azure",',
@@ -430,6 +456,7 @@ const scenes: Scene[] = [
       '  },',
     ],
     secretPath: 'localstack-prod-auth-token',
+    execSource: 'azure, vault=my-vault.vault.azure.net',
   }),
   sdkScene({
     id: 'nodejs',

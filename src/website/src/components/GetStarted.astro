@@ -90,10 +90,10 @@ const t = useTranslations(lang);
             <span class="comment">{t.getStarted.commentCreate}</span>
           </span>
           <span class="line">
-            <span class="prompt">$</span>
-            <span class="command"> echo </span>
-            <span class="output">{`'{"API_KEY": "/app/api-key"}' `}</span>
-            <span class="command"> > envilder.json</span>
+            <span class="prompt">$</span><span class="command"> npx envilder</span><span class="flag"> --key</span><span class="output">=API_KEY</span><span class="flag"> --value</span><span class="output">=s3cret</span><span class="flag"> --secret-path</span><span class="output">=/app/api-key</span>
+          </span>
+          <span class="line">
+            <span class="highlight">✔</span>{' '}<span class="output">Created envilder.json</span>
           </span>
           <span class="line">&nbsp;</span>
           <span class="line">

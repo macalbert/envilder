@@ -3,10 +3,12 @@ import { PushSingleCommand } from '../../../../../src/envilder/core/application/
 import { PushSingleCommandHandler } from '../../../../../src/envilder/core/application/pushSingle/PushSingleCommandHandler';
 import type { ILogger } from '../../../../../src/envilder/core/domain/ports/ILogger';
 import type { ISecretProvider } from '../../../../../src/envilder/core/domain/ports/ISecretProvider';
+import type { IVariableStore } from '../../../../../src/envilder/core/domain/ports/IVariableStore';
 
 describe('PushSingleCommandHandler', () => {
   let mockSecretProvider: ISecretProvider;
   let mockLogger: ILogger;
+  let mockVariableStore: IVariableStore;
 
   beforeEach(() => {
     mockSecretProvider = {
@@ -19,11 +21,25 @@ describe('PushSingleCommandHandler', () => {
       warn: vi.fn(),
       error: vi.fn(),
     };
+
+    mockVariableStore = {
+      getMapping: vi.fn(),
+      getParsedMapping: vi.fn(),
+      getEnvironment: vi.fn(),
+      saveEnvironment: vi.fn(),
+      readMapFileContent: vi.fn(),
+      writeMapFileContent: vi.fn(),
+      restoreMapFile: vi.fn(),
+    };
   });
 
   it('Should_SetSecret_When_PushingSingleVariable', async () => {
     // Arrange
-    const sut = new PushSingleCommandHandler(mockSecretProvider, mockLogger);
+    const sut = new PushSingleCommandHandler(
+      mockSecretProvider,
+      mockLogger,
+      mockVariableStore,
+    );
     const command = PushSingleCommand.create(
       'TEST_VAR',
       'test-value',
@@ -54,7 +70,11 @@ describe('PushSingleCommandHandler', () => {
 
   it('Should_LogRuleSeparator_When_PushingSingleVariable', async () => {
     // Arrange
-    const sut = new PushSingleCommandHandler(mockSecretProvider, mockLogger);
+    const sut = new PushSingleCommandHandler(
+      mockSecretProvider,
+      mockLogger,
+      mockVariableStore,
+    );
     const command = PushSingleCommand.create(
       'TEST_VAR',
       'test-value',
@@ -72,7 +92,11 @@ describe('PushSingleCommandHandler', () => {
 
   it('Should_WrapOutputWithBlankLines_When_PushingSingleVariable', async () => {
     // Arrange
-    const sut = new PushSingleCommandHandler(mockSecretProvider, mockLogger);
+    const sut = new PushSingleCommandHandler(
+      mockSecretProvider,
+      mockLogger,
+      mockVariableStore,
+    );
     const command = PushSingleCommand.create(
       'TEST_VAR',
       'test-value',
@@ -94,7 +118,11 @@ describe('PushSingleCommandHandler', () => {
     mockSecretProvider.setSecret = vi.fn(async (): Promise<void> => {
       throw mockError;
     });
-    const sut = new PushSingleCommandHandler(mockSecretProvider, mockLogger);
+    const sut = new PushSingleCommandHandler(
+      mockSecretProvider,
+      mockLogger,
+      mockVariableStore,
+    );
     const command = PushSingleCommand.create(
       'TEST_VAR',
       'test-value',
