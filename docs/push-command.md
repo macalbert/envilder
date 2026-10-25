@@ -132,12 +132,12 @@ Will push:
 
 Push a single environment variable directly to your cloud provider without using a `.env` file.
 
-> **Provider resolution:** If an `envilder.json` exists in the current directory, its `$config`
-> section (`provider`, `vaultUrl`, `profile`) is read and applied so the single push targets the
-> same provider as the rest of your project. The resolved provider is logged before the push.
-> When no `envilder.json` is present, AWS SSM is used unless you pass `--provider`. CLI flags always
-> override `$config`.
-
+> **Provider resolution:** If the map file (`--map`, or `envilder.json` in the current directory)
+> exists, its `$config` section (`provider`, `vaultUrl`, `profile`) is read and applied so the
+> single push targets the same provider as the rest of your project. The resolved provider is
+> logged before the push. When there is no map file, or with `--no-map-update`, AWS SSM is used
+> unless you pass `--provider`. CLI flags always override `$config`.
+>
 > **Map file update:** A single push also records the mapping in the map file: `--map` if given,
 > otherwise `./envilder.json`. Every run logs what happened to the file (`Created envilder.json`,
 > `Added API_KEY to envilder.json` or `API_KEY already mapped in envilder.json, no changes`).
