@@ -60,7 +60,7 @@ export const es: Translations = {
     tabExec: 'exec',
     tabExecDesc: 'ejecuta tu app, sin .env',
     tabPush: 'push',
-    tabPushDesc: 'sube el .env al vault',
+    tabPushDesc: 'guarda un secreto y escribe envilder.json',
     tabNode: 'Node.js',
     tabNodeDesc: 'en runtime',
     tabPython: 'Python',
@@ -71,10 +71,11 @@ export const es: Translations = {
     terminalComment2: '# 2. Resuelve los secretos a .env',
     execComment1: '# Ejecuta tu app con los secretos en su entorno',
     execComment2: '# Nada escrito en disco',
-    setupComment1: '# 1. Mapea cada variable a una ruta de SSM',
-    setupComment2: '# 2. Sube los valores del .env a SSM Parameter Store',
-    setupAzureComment1: '# 1. Mapea cada variable a un secreto de Key Vault',
-    setupAzureComment2: '# 2. Sube los valores del .env a Azure Key Vault',
+    setupComment1:
+      '# Sube un secreto a SSM. Envilder escribe el archivo de mapeo',
+    setupComment2: '# El mapeo ya está listo. El valor nunca toca el archivo',
+    setupAzureComment1:
+      '# Sube un secreto a Azure Key Vault. Envilder escribe el archivo de mapeo',
     sdkCommentLoad: '# Carga el mismo contrato en runtime',
     terminalSceneLabel: 'Escena de demostración del terminal',
     terminalPause: 'Pausa la demostración',
@@ -110,7 +111,7 @@ export const es: Translations = {
       {
         title: 'Mapea cada variable una vez',
         description:
-          'envilder.json lista los nombres de las variables de entorno y las rutas de los secretos, nunca los valores. Haz commit y revisa los cambios en pull requests como cualquier otro código.',
+          'envilder.json lista los nombres de las variables de entorno y las rutas de los secretos, nunca los valores. Al subir un secreto, Envilder añade su entrada por ti, o puedes escribirlo a mano. Haz commit y revisa los cambios en pull requests como cualquier otro código.',
       },
       {
         title: 'Ejecuta tu app con exec',
@@ -390,18 +391,18 @@ export const es: Translations = {
     prereqAws: 'AWS SSM',
     prereqAzure: 'Azure Key Vault',
     prereqAwsNote:
-      'credenciales AWS con ssm:GetParameter; añade ssm:PutParameter para --push',
+      'credenciales AWS con ssm:GetParameter; añade ssm:PutParameter para subir secretos',
     prereqAzureNote:
-      'credenciales Azure con acceso Get a secretos; añade acceso Set para --push',
+      'credenciales Azure con acceso Get a secretos; añade acceso Set para subir secretos',
     install: 'Instalar',
     quickStart: 'Inicio rápido',
     step1:
-      'Crea un envilder.json que mapee variables de entorno a rutas de secretos',
+      'Sube un secreto con npx envilder --key --value --secret-path: Envilder escribe envilder.json por ti',
     step2:
       'Ejecuta npx envilder exec -- seguido de tu comando de arranque habitual',
     step3: 'Tu app arranca con sus secretos ✔',
     terminalTitle: 'Inicio rápido',
-    commentCreate: '# Crear archivo de mapeo',
+    commentCreate: '# Sube un secreto. Envilder escribe envilder.json',
     commentPull: '# O escribe un archivo .env',
     doneMessage: 'Archivo .env generado.',
     sdkComment3: '# Los secretos ya están en os.environ',
@@ -928,7 +929,7 @@ export const es: Translations = {
     pushCommentAzureFlags: '# Azure vía flags CLI',
     pushSingleTitle: 'Subir variable individual',
     pushSingleDesc:
-      'Sube una variable de entorno individual directamente a tu proveedor en la nube sin usar ningún archivo .env.',
+      'Sube una variable de entorno individual directamente a tu proveedor en la nube sin usar ningún archivo .env. Envilder también guarda el mapeo en envilder.json (y lo crea si no existe), para que envilder exec lo pueda resolver enseguida. El valor nunca se escribe en el archivo.',
     pushSingleOptions: 'Opciones',
     pushSingleOptPush:
       'Opcional: --key, --value y --secret-path ya activan el modo push',
@@ -936,7 +937,9 @@ export const es: Translations = {
     pushSingleOptValue: 'Valor a almacenar',
     pushSingleOptPath: 'Ruta completa del secreto en tu proveedor en la nube',
     pushSingleOptMap:
-      'Opcional: archivo de mapeo del que leer $config (por defecto: envilder.json si existe; nunca requerido para una subida individual)',
+      'Opcional: archivo de mapeo que se crea o actualiza con la entrada y del que se lee $config (por defecto: envilder.json)',
+    pushSingleOptNoMapUpdate:
+      'Opcional: sube el secreto sin leer, crear ni actualizar ningún archivo de mapeo; el proveedor y el vault solo vienen de los flags',
     pushSingleOptProvider: 'aws (por defecto) o azure',
     pushSingleOptVault: 'URL de Azure Key Vault',
     pushSingleOptProfile: 'Perfil AWS CLI (solo AWS)',

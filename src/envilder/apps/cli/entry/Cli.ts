@@ -23,6 +23,7 @@ import {
   InvalidArgumentError,
 } from '../../../core/domain/errors/DomainErrors.js';
 import type { MapFileConfig } from '../../../core/domain/MapFileConfig.js';
+import { resolveMapFileTarget } from '../../../core/domain/MapFileUpdate.js';
 import { OperationMode } from '../../../core/domain/OperationMode.js';
 import type { ILogger } from '../../../core/domain/ports/ILogger.js';
 import { PackageVersionReader } from '../../../core/infrastructure/package/PackageVersionReader.js';
@@ -93,8 +94,9 @@ export async function main() {
   ${pc.magenta('>')} ${pc.bold('Sync .env back to cloud')}  ${pc.dim('(push secrets up)')}
     ${pc.cyan('envilder --push')}  ${pc.dim('# uses envilder.json + .env by default')}
 
-  ${pc.red('>')} ${pc.bold('Push a single secret')}
+  ${pc.red('>')} ${pc.bold('Push a single secret')}  ${pc.dim('(also records it in envilder.json)')}
     ${pc.cyan('envilder --key=API_KEY --value=s3cret --secret-path=/my/path')}
+    ${pc.cyan('envilder --key=API_KEY --value=s3cret --secret-path=/my/path --no-map-update')}  ${pc.dim('# push only')}
 
   ${pc.blue('>')} ${pc.bold('Use Azure Key Vault')}
     ${pc.cyan('envilder --provider=azure --vault-url=https://my-vault.vault.azure.net')}
@@ -117,7 +119,7 @@ export async function main() {
     })
     .option(
       '--map <path>',
-      `Path to the JSON file with environment variable mapping (default: ${DEFAULT_MAP_FILE})`,
+      `Path to the JSON file with environment variable mapping (default: ${DEFAULT_MAP_FILE}); a single-secret push creates or updates it`,
     )
     .option(
       '--envfile <path>',
@@ -148,6 +150,10 @@ export async function main() {
     .option(
       '--ssm-path <path>',
       '[DEPRECATED: use --secret-path] Alias for --secret-path',
+    )
+    .option(
+      '--no-map-update',
+      `Single-secret push only: do not read, create or update the map file (by default the mapping is recorded in ${DEFAULT_MAP_FILE} or --map)`,
     )
     .hook('preAction', (thisCommand, actionCommand) => {
       // Root options placed before a subcommand are rejected by it instead.
@@ -190,26 +196,36 @@ export async function main() {
 
         const mode = DispatchActionCommand.determineOperationMode(options);
         const isPushSingle = mode === OperationMode.PUSH_SINGLE;
-        const resolvedMap = resolveMapFile(options.map, {
-          required: !isPushSingle,
-        });
+        const resolvedMap = isPushSingle
+          ? resolveSingleSecretMapFile(options.map, options.mapUpdate)
+          : resolveMapFile(options.map);
         const resolvedEnvfile = resolveEnvfile(options.envfile);
 
-        const resolvedOptions: CliOptions = {
-          ...options,
-          map: resolvedMap,
-          envfile: resolvedEnvfile,
-        };
-
-        const fileConfig = resolvedMap
-          ? await readMapFileConfig(resolvedMap)
-          : {};
+        // A single-secret push may name a map file that does not exist yet:
+        // it is created once the push options are validated.
+        const mapFileExists =
+          resolvedMap !== undefined &&
+          (!isPushSingle || existsSync(resolvedMap));
+        const fileConfig =
+          resolvedMap !== undefined && mapFileExists
+            ? await readMapFileConfig(resolvedMap)
+            : {};
 
         const config: MapFileConfig = {
           ...fileConfig,
           ...(provider && { provider }),
           ...(vaultUrl && { vaultUrl }),
           ...(options.profile && { profile: options.profile }),
+        };
+
+        const resolvedOptions: CliOptions = {
+          ...options,
+          map: resolvedMap,
+          envfile: resolvedEnvfile,
+          ...(isPushSingle &&
+            resolvedMap !== undefined && {
+              mapTarget: resolveMapFileTarget(config),
+            }),
         };
 
         const infraOptions = buildInfrastructureOptions();
@@ -226,7 +242,7 @@ export async function main() {
             providerName === 'azure' && config.vaultUrl
               ? `, vault=${new URL(config.vaultUrl).origin}`
               : '';
-          const source = resolvedMap
+          const source = mapFileExists
             ? `configuration from ${resolvedMap}`
             : 'configuration';
           logger.info(`Using ${source}: provider=${providerName}${vaultInfo}`);
@@ -529,7 +545,7 @@ async function resolveSecretsAndRun(
   childArgs: string[],
   options: ExecOptions,
 ): Promise<number> {
-  const mapPath = resolveMapFile(options.map) as string;
+  const mapPath = resolveMapFile(options.map);
   const fileConfig = await readMapFileConfig(mapPath);
   const config: MapFileConfig = {
     ...fileConfig,
@@ -641,10 +657,22 @@ function buildInfrastructureOptions(): Record<string, unknown> {
   return infraOptions;
 }
 
-function resolveMapFile(
+/**
+ * The map file a single-secret push records its mapping in: `--map`, or the
+ * default in the current directory, which may not exist yet. `undefined` when
+ * `--no-map-update` turns the map file off.
+ */
+function resolveSingleSecretMapFile(
   mapOption: string | undefined,
-  options: { required: boolean } = { required: true },
+  mapUpdate: boolean | undefined,
 ): string | undefined {
+  if (mapUpdate === false) {
+    return undefined;
+  }
+  return mapOption === undefined ? DEFAULT_MAP_FILE : resolveMapFile(mapOption);
+}
+
+function resolveMapFile(mapOption: string | undefined): string {
   if (mapOption !== undefined) {
     const trimmed = mapOption.trim();
     if (trimmed.length === 0) {
@@ -658,10 +686,6 @@ function resolveMapFile(
   const defaultPath = join(process.cwd(), DEFAULT_MAP_FILE);
   if (existsSync(defaultPath)) {
     return DEFAULT_MAP_FILE;
-  }
-
-  if (!options.required) {
-    return undefined;
   }
 
   throw new InvalidArgumentError(

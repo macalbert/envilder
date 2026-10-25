@@ -1,3 +1,5 @@
+import type { MapFileTarget } from './MapFileUpdate.js';
+
 /**
  * Options for the CLI commands.
  */
@@ -36,4 +38,16 @@ export type CliOptions = {
    * Flag to push local .env file back to the secret store
    */
   push?: boolean;
+
+  /**
+   * False when `--no-map-update` is given: a single-secret push neither reads
+   * nor writes a map file
+   */
+  mapUpdate?: boolean;
+
+  /**
+   * Effective provider target of a single-secret push, compared with the map
+   * file's own target before the mapping is recorded
+   */
+  mapTarget?: MapFileTarget;
 };

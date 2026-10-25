@@ -32,4 +32,22 @@ describe('DispatchActionCommand', () => {
     // Assert
     expect(command.mode).toBe(OperationMode.PULL_SECRETS_TO_ENV);
   });
+
+  it('Should_CarryMapTarget_When_OptionsIncludeIt', () => {
+    // Arrange
+    const options: CliOptions = {
+      key: 'MY_KEY',
+      value: 'secret',
+      secretPath: '/path',
+      map: 'envilder.json',
+      mapTarget: { provider: 'aws' },
+    };
+
+    // Act
+    const command = DispatchActionCommand.fromCliOptions(options);
+
+    // Assert
+    expect(command.mapTarget).toEqual({ provider: 'aws' });
+    expect(command.map).toBe('envilder.json');
+  });
 });

@@ -1,4 +1,5 @@
 import type { CliOptions } from '../../domain/CliOptions.js';
+import type { MapFileTarget } from '../../domain/MapFileUpdate.js';
 import { OperationMode } from '../../domain/OperationMode.js';
 
 export class DispatchActionCommand {
@@ -16,6 +17,8 @@ export class DispatchActionCommand {
     public readonly args: readonly string[] = [],
     /** Exec mode: where secrets come from, shown in the summary line. */
     public readonly sourceLabel?: string,
+    /** Single-secret push: where the secret goes, for the map file update. */
+    public readonly mapTarget?: MapFileTarget,
   ) {}
 
   /**
@@ -52,6 +55,10 @@ export class DispatchActionCommand {
       options.secretPath,
       options.profile,
       mode,
+      undefined,
+      [],
+      undefined,
+      options.mapTarget,
     );
   }
 

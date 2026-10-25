@@ -60,7 +60,7 @@ export const en: Translations = {
     tabExec: 'exec',
     tabExecDesc: 'runs your app, no .env',
     tabPush: 'push',
-    tabPushDesc: 'uploads .env to the vault',
+    tabPushDesc: 'stores a secret and writes envilder.json',
     tabNode: 'Node.js',
     tabNodeDesc: 'at runtime',
     tabPython: 'Python',
@@ -71,10 +71,10 @@ export const en: Translations = {
     terminalComment2: '# 2. Resolve secrets into .env',
     execComment1: '# Run your app with the secrets in its environment',
     execComment2: '# Nothing written to disk',
-    setupComment1: '# 1. Map each variable to an SSM path',
-    setupComment2: '# 2. Push the .env values to SSM Parameter Store',
-    setupAzureComment1: '# 1. Map each variable to a Key Vault secret',
-    setupAzureComment2: '# 2. Push the .env values to Azure Key Vault',
+    setupComment1: '# Push a secret to SSM. Envilder writes the map file',
+    setupComment2: '# The mapping is ready. The value never touches the file',
+    setupAzureComment1:
+      '# Push a secret to Azure Key Vault. Envilder writes the map file',
     sdkCommentLoad: '# Load the same contract at runtime',
     terminalSceneLabel: 'Terminal demo scene',
     terminalPause: 'Pause demo',
@@ -110,7 +110,7 @@ export const en: Translations = {
       {
         title: 'Map each variable once',
         description:
-          'envilder.json lists env var names and their secret paths, never the values. Commit it and review changes in pull requests like any other code.',
+          'envilder.json lists env var names and their secret paths, never the values. Pushing a secret adds its entry for you, or you can write the file by hand. Commit it and review changes in pull requests like any other code.',
       },
       {
         title: 'Run your app with exec',
@@ -387,16 +387,17 @@ export const en: Translations = {
     prereqAws: 'AWS SSM',
     prereqAzure: 'Azure Key Vault',
     prereqAwsNote:
-      'AWS credentials with ssm:GetParameter; add ssm:PutParameter for --push',
+      'AWS credentials with ssm:GetParameter; add ssm:PutParameter to push secrets',
     prereqAzureNote:
-      'Azure credentials with secret Get access; add Set access for --push',
+      'Azure credentials with secret Get access; add Set access to push secrets',
     install: 'Install',
     quickStart: 'Quick start',
-    step1: 'Create an envilder.json mapping env vars to secret paths',
+    step1:
+      'Push a secret with npx envilder --key --value --secret-path: Envilder writes envilder.json for you',
     step2: 'Run npx envilder exec -- followed by your usual start command',
     step3: 'Your app starts with its secrets ✔',
     terminalTitle: 'Quick start',
-    commentCreate: '# Create mapping file',
+    commentCreate: '# Push a secret. Envilder writes envilder.json',
     commentPull: '# Or write a .env file',
     doneMessage: '.env file generated.',
     sdkComment3: '# Secrets are now in os.environ',
@@ -914,7 +915,7 @@ export const en: Translations = {
     pushCommentAzureFlags: '# Azure via CLI flags',
     pushSingleTitle: 'Push single variable',
     pushSingleDesc:
-      'Push a single environment variable directly to your cloud provider without using a .env file.',
+      'Push a single environment variable directly to your cloud provider without using a .env file. Envilder also records the mapping in envilder.json (created if missing), so envilder exec can resolve it right away. The value is never written to the file.',
     pushSingleOptions: 'Options',
     pushSingleOptPush:
       'Optional: --key, --value and --secret-path already activate push mode',
@@ -922,7 +923,9 @@ export const en: Translations = {
     pushSingleOptValue: 'Value to store',
     pushSingleOptPath: 'Full secret path in your cloud provider',
     pushSingleOptMap:
-      'Optional: map file to read $config from (default: envilder.json if present; never required for a single push)',
+      'Optional: map file that is created or updated with the mapping and read for $config (default: envilder.json)',
+    pushSingleOptNoMapUpdate:
+      'Optional: push without reading, creating or updating any map file; provider and vault come only from flags',
     pushSingleOptProvider: 'aws (default) or azure',
     pushSingleOptVault: 'Azure Key Vault URL',
     pushSingleOptProfile: 'AWS CLI profile (AWS only)',
