@@ -34,7 +34,6 @@ envilder --push --envfile=.env.prod --map=envilder.json --profile=prod-account
 
 ```json
 {
-  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "API_KEY": "/myapp/api/key",
   "DB_PASSWORD": "/myapp/db/password"
 }
@@ -46,7 +45,6 @@ Add `$config` to your map file to target Azure Key Vault:
 
 ```json
 {
-  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "$config": {
     "provider": "azure",
     "vaultUrl": "https://my-vault.vault.azure.net"
@@ -105,7 +103,6 @@ And your `envilder.json` file contains:
 
 ```json
 {
-  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "API_KEY": "/myapp/api/key",
   "DB_PASSWORD": "/myapp/db/password"
 }
@@ -177,8 +174,9 @@ envilder --key=API_KEY --value=abc123 --secret-path=/myapp/api/key
 envilder exec -- node app.mjs
 ```
 
-- **New file:** created with `$schema` and the entry. For Azure it also gets
-  `$config` with `provider` and `vaultUrl`. The AWS profile is never written.
+- **New file:** created with the entry. For Azure it also gets `$config` with `provider` and `vaultUrl`.
+  The AWS profile is never written. `$schema` is added only when the file name is not `envilder.json` or
+  `envilder.*.json`: editors that use SchemaStore already validate those names.
 - **Existing file:** the entry is appended at the end. Key order, indentation, line endings and the trailing
   newline are preserved, and `$config` is left untouched. `$schema` is not added to a file that lacks it.
 - **Same variable, same path:** nothing is written.

@@ -27,7 +27,6 @@ The generated `envilder.json` maps the variable to its secret path. It never con
 
 ```json
 {
-  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "API_KEY": "/envilder/demo/api-key"
 }
 ```

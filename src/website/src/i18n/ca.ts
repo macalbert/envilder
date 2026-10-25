@@ -60,7 +60,7 @@ export const ca: Translations = {
     tabExec: 'exec',
     tabExecDesc: 'executa la teva app, sense .env',
     tabPush: 'push',
-    tabPushDesc: 'puja el .env al vault',
+    tabPushDesc: 'desa un secret i escriu envilder.json',
     tabNode: 'Node.js',
     tabNodeDesc: 'en runtime',
     tabPython: 'Python',
@@ -71,10 +71,11 @@ export const ca: Translations = {
     terminalComment2: '# 2. Resol els secrets cap a .env',
     execComment1: '# Executa la teva app amb els secrets al seu entorn',
     execComment2: '# Res escrit al disc',
-    setupComment1: '# 1. Mapeja cada variable a una ruta de SSM',
-    setupComment2: '# 2. Puja els valors del .env a SSM Parameter Store',
-    setupAzureComment1: '# 1. Mapeja cada variable a un secret de Key Vault',
-    setupAzureComment2: '# 2. Puja els valors del .env a Azure Key Vault',
+    setupComment1:
+      '# Puja un secret a SSM. Envilder escriu el fitxer de mapeig',
+    setupComment2: '# El mapeig ja està llest. El valor mai toca el fitxer',
+    setupAzureComment1:
+      '# Puja un secret a Azure Key Vault. Envilder escriu el fitxer de mapeig',
     sdkCommentLoad: '# Carrega el mateix contracte en runtime',
     terminalSceneLabel: 'Escena de demostració del terminal',
     terminalPause: 'Pausa la demostració',
@@ -110,7 +111,7 @@ export const ca: Translations = {
       {
         title: 'Mapeja cada variable un cop',
         description:
-          "envilder.json llista els noms de les variables d'entorn i les rutes dels secrets, mai els valors. Fes-ne commit i revisa'n els canvis en pull requests com qualsevol altre codi.",
+          "envilder.json llista els noms de les variables d'entorn i les rutes dels secrets, mai els valors. Quan puges un secret, Envilder hi afegeix l'entrada per tu, o el pots escriure a mà. Fes-ne commit i revisa'n els canvis en pull requests com qualsevol altre codi.",
       },
       {
         title: 'Executa la teva app amb exec',
@@ -390,18 +391,18 @@ export const ca: Translations = {
     prereqAws: 'AWS SSM',
     prereqAzure: 'Azure Key Vault',
     prereqAwsNote:
-      'credencials AWS amb ssm:GetParameter; afegeix ssm:PutParameter per a --push',
+      'credencials AWS amb ssm:GetParameter; afegeix ssm:PutParameter per pujar secrets',
     prereqAzureNote:
-      'credencials Azure amb accés Get a secrets; afegeix accés Set per a --push',
+      'credencials Azure amb accés Get a secrets; afegeix accés Set per pujar secrets',
     install: 'Instal·lar',
     quickStart: 'Inici ràpid',
     step1:
-      "Crea un envilder.json que mapegi variables d'entorn a rutes de secrets",
+      'Puja un secret amb npx envilder --key --value --secret-path: Envilder escriu envilder.json per tu',
     step2:
       "Executa npx envilder exec -- seguit de l'ordre habitual d'arrencada",
     step3: 'La teva app arrenca amb els seus secrets ✔',
     terminalTitle: 'Inici ràpid',
-    commentCreate: '# Crear fitxer de mapeig',
+    commentCreate: '# Puja un secret. Envilder escriu envilder.json',
     commentPull: '# O escriu un fitxer .env',
     doneMessage: 'Fitxer .env generat.',
     sdkComment3: '# Els secrets ja són a os.environ',

@@ -14,8 +14,9 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   updates `envilder.json` (or the file given with `--map`) with
   `"API_KEY": "<secret-path>"`, so the next `envilder` or `envilder exec` works
   without writing the map file by hand. Every run logs whether the file was
-  created, updated or already up to date. A new file gets `$schema` (and
-  `$config` for Azure); an existing file keeps its key order, indentation, line
+  created, updated or already up to date. A new file gets `$config` for Azure,
+  and `$schema` only when its name is not `envilder.json` or `envilder.*.json`
+  (SchemaStore already covers those); an existing file keeps its key order, indentation, line
   endings and `$config`. If the variable is already mapped to a different path,
   the command fails before pushing. If the map file targets another provider or
   vault, the secret is still pushed and a warning explains that the mapping was
