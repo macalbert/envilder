@@ -161,7 +161,14 @@ export class FileVariableStore implements IVariableStore {
     }
   }
 
-  async deleteMapFile(destination: string): Promise<void> {
+  async restoreMapFile(
+    destination: string,
+    original: string | null,
+  ): Promise<void> {
+    if (original !== null) {
+      await this.writeMapFileContent(destination, original);
+      return;
+    }
     try {
       await fs.unlink(destination);
     } catch (error) {

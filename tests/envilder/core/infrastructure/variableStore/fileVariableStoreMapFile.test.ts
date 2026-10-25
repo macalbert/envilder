@@ -91,27 +91,40 @@ describe('FileVariableStore map file persistence', () => {
     expect(existsSync(join(tempDir, 'missing-dir'))).toBe(false);
   });
 
-  it('Should_RemoveFile_When_DeletingMapFile', async () => {
+  it('Should_RemoveFile_When_RestoringMapFileThatDidNotExist', async () => {
     // Arrange
     const path = join(tempDir, 'envilder.json');
     await writeFile(path, '{}');
 
     // Act
-    await sut.deleteMapFile(path);
+    await sut.restoreMapFile(path, null);
 
     // Assert
     expect(existsSync(path)).toBe(false);
   });
 
-  it('Should_NotThrow_When_DeletingMissingMapFile', async () => {
+  it('Should_NotThrow_When_RestoringMissingMapFileThatDidNotExist', async () => {
     // Arrange
     const path = join(tempDir, 'missing.json');
 
     // Act
-    const action = () => sut.deleteMapFile(path);
+    const action = () => sut.restoreMapFile(path, null);
 
     // Assert
     await expect(action()).resolves.toBeUndefined();
+  });
+
+  it('Should_WriteOriginalContent_When_RestoringMapFileThatExisted', async () => {
+    // Arrange
+    const path = join(tempDir, 'envilder.json');
+    const original = '{\r\n    "OTHER": "/other"\r\n}';
+    await writeFile(path, '{"OTHER": "/other", "API_KEY": "/k"}');
+
+    // Act
+    await sut.restoreMapFile(path, original);
+
+    // Assert
+    expect(await readFile(path, 'utf-8')).toBe(original);
   });
 
   it('Should_PersistCreatedFileExactly_When_DecisionIsCreate', async () => {

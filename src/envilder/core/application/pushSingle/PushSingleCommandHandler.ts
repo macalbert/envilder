@@ -164,14 +164,7 @@ export class PushSingleCommandHandler {
       return;
     }
     try {
-      if (plan.original === null) {
-        await this.variableStore.deleteMapFile(plan.mapFile);
-      } else {
-        await this.variableStore.writeMapFileContent(
-          plan.mapFile,
-          plan.original,
-        );
-      }
+      await this.variableStore.restoreMapFile(plan.mapFile, plan.original);
     } catch {
       this.logger.error(
         `Could not restore ${plan.mapFile}. Remove ${key} from it manually.`,

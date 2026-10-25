@@ -45,7 +45,7 @@ describe('PushSingleCommandHandler map file update', () => {
       saveEnvironment: vi.fn(),
       readMapFileContent: vi.fn(async () => null),
       writeMapFileContent: vi.fn(async (): Promise<void> => {}),
-      deleteMapFile: vi.fn(async (): Promise<void> => {}),
+      restoreMapFile: vi.fn(async (): Promise<void> => {}),
     };
     sut = new PushSingleCommandHandler(
       mockSecretProvider,
@@ -64,7 +64,7 @@ describe('PushSingleCommandHandler map file update', () => {
     // Assert
     expect(mockVariableStore.readMapFileContent).not.toHaveBeenCalled();
     expect(mockVariableStore.writeMapFileContent).not.toHaveBeenCalled();
-    expect(mockVariableStore.deleteMapFile).not.toHaveBeenCalled();
+    expect(mockVariableStore.restoreMapFile).not.toHaveBeenCalled();
     expect(mockSecretProvider.setSecret).toHaveBeenCalledOnce();
   });
 
@@ -219,7 +219,10 @@ describe('PushSingleCommandHandler map file update', () => {
     // Assert
     await expect(action()).rejects.toThrow(writeError);
     expect(mockSecretProvider.setSecret).not.toHaveBeenCalled();
-    expect(mockVariableStore.deleteMapFile).toHaveBeenCalledWith(MAP_FILE);
+    expect(mockVariableStore.restoreMapFile).toHaveBeenCalledWith(
+      MAP_FILE,
+      null,
+    );
   });
 
   it('Should_NotPushAndRestoreOriginal_When_AppendingToMapFileFails', async () => {
@@ -227,9 +230,9 @@ describe('PushSingleCommandHandler map file update', () => {
     const original = '{\n  "OTHER": "/other"\n}\n';
     mockVariableStore.readMapFileContent = vi.fn(async () => original);
     const writeError = new Error('disk full');
-    mockVariableStore.writeMapFileContent = vi
-      .fn(async (): Promise<void> => {})
-      .mockRejectedValueOnce(writeError);
+    mockVariableStore.writeMapFileContent = vi.fn(async () => {
+      throw writeError;
+    });
     const command = commandFor();
 
     // Act
@@ -238,12 +241,14 @@ describe('PushSingleCommandHandler map file update', () => {
     // Assert
     await expect(action()).rejects.toThrow(writeError);
     expect(mockSecretProvider.setSecret).not.toHaveBeenCalled();
-    const written = vi.mocked(mockVariableStore.writeMapFileContent);
-    expect(written).toHaveBeenCalledTimes(2);
-    expect(written.mock.calls[1]).toEqual([MAP_FILE, original]);
+    expect(mockVariableStore.writeMapFileContent).toHaveBeenCalledOnce();
+    expect(mockVariableStore.restoreMapFile).toHaveBeenCalledWith(
+      MAP_FILE,
+      original,
+    );
   });
 
-  it('Should_DeleteCreatedMapFile_When_PushFails', async () => {
+  it('Should_RemoveCreatedMapFile_When_PushFails', async () => {
     // Arrange
     const pushError = new Error('access denied');
     mockSecretProvider.setSecret = vi.fn(async () => {
@@ -256,7 +261,10 @@ describe('PushSingleCommandHandler map file update', () => {
 
     // Assert
     await expect(action()).rejects.toThrow(pushError);
-    expect(mockVariableStore.deleteMapFile).toHaveBeenCalledWith(MAP_FILE);
+    expect(mockVariableStore.restoreMapFile).toHaveBeenCalledWith(
+      MAP_FILE,
+      null,
+    );
   });
 
   it('Should_RestoreOriginalContent_When_PushFailsAfterAppending', async () => {
@@ -274,10 +282,11 @@ describe('PushSingleCommandHandler map file update', () => {
 
     // Assert
     await expect(action()).rejects.toThrow(pushError);
-    const written = vi.mocked(mockVariableStore.writeMapFileContent);
-    expect(written).toHaveBeenCalledTimes(2);
-    expect(written.mock.calls[1]).toEqual([MAP_FILE, original]);
-    expect(mockVariableStore.deleteMapFile).not.toHaveBeenCalled();
+    expect(mockVariableStore.writeMapFileContent).toHaveBeenCalledOnce();
+    expect(mockVariableStore.restoreMapFile).toHaveBeenCalledWith(
+      MAP_FILE,
+      original,
+    );
   });
 
   it('Should_NotRollBack_When_PushFailsAndMappingWasAlreadyPresent', async () => {
@@ -296,7 +305,7 @@ describe('PushSingleCommandHandler map file update', () => {
     // Assert
     await expect(action()).rejects.toThrow('access denied');
     expect(mockVariableStore.writeMapFileContent).not.toHaveBeenCalled();
-    expect(mockVariableStore.deleteMapFile).not.toHaveBeenCalled();
+    expect(mockVariableStore.restoreMapFile).not.toHaveBeenCalled();
   });
 
   it('Should_RethrowPushErrorAndTellToCleanUp_When_RollbackFails', async () => {
@@ -305,7 +314,7 @@ describe('PushSingleCommandHandler map file update', () => {
     mockSecretProvider.setSecret = vi.fn(async () => {
       throw pushError;
     });
-    mockVariableStore.deleteMapFile = vi.fn(async () => {
+    mockVariableStore.restoreMapFile = vi.fn(async () => {
       throw new Error('locked');
     });
     const command = commandFor();

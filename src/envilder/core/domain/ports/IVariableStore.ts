@@ -12,6 +12,9 @@ export interface IVariableStore {
   readMapFileContent(source: string): Promise<string | null>;
   /** Writes map-file text as given; never creates missing directories. */
   writeMapFileContent(destination: string, content: string): Promise<void>;
-  /** Removes a map file; a file that is already gone is not an error. */
-  deleteMapFile(destination: string): Promise<void>;
+  /**
+   * Puts a map file back as it was: writes `original`, or removes the file
+   * when `original` is `null` because it did not exist before.
+   */
+  restoreMapFile(destination: string, original: string | null): Promise<void>;
 }

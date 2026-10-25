@@ -29,7 +29,7 @@ describe('PushSingleCommandHandler', () => {
       saveEnvironment: vi.fn(),
       readMapFileContent: vi.fn(),
       writeMapFileContent: vi.fn(),
-      deleteMapFile: vi.fn(),
+      restoreMapFile: vi.fn(),
     };
   });
 
