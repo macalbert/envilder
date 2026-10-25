@@ -166,7 +166,7 @@ Add `.env` to `.gitignore` and treat it as a secret.
 
 Watch how easy it is to automate your `.env` management in less than 1 minute:
 
-![Watch the video](https://github.com/user-attachments/assets/9f194143-117d-49f3-a6fb-f400040ea514)
+![Watch the video](https://github.com/user-attachments/assets/4f79ce64-ff3f-4389-820e-84dfd3e03e15)
 
 ## 🗺️ Mapping File Format
 
