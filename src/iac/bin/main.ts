@@ -22,6 +22,7 @@ interface StaticWebsiteConfig {
 interface PublicFilesConfig {
 	name: string;
 	subdomain: string;
+	certificateId: string;
 }
 
 interface DeploymentConfig {
@@ -67,6 +68,8 @@ const config: DeploymentConfig = {
 		publicFiles: {
 			name: "Files",
 			subdomain: "files",
+			// *.envilder.com
+			certificateId: "b5de0685-2e52-4ceb-9cb2-d66b164a791e",
 		},
 	},
 };
@@ -271,10 +274,10 @@ export function deploy(configOverride?: DeploymentConfig): Stack[] {
 		if (publicFiles) {
 			stacks.push(
 				new PublicFilesStack(app, {
-					// CloudFront certificates must live in us-east-1
-					env: { account: envFromCli.account, region: "us-east-1" },
+					env: envFromCli,
 					name: publicFiles.name,
 					subdomain: publicFiles.subdomain,
+					certificateId: publicFiles.certificateId,
 					domainName: effectiveConfig.domain.name,
 					hostedZoneId: effectiveConfig.domain.hostedZoneId,
 					envName: effectiveConfig.environment,

@@ -1,8 +1,5 @@
 import { CfnOutput, RemovalPolicy } from "aws-cdk-lib";
-import {
-	Certificate,
-	CertificateValidation,
-} from "aws-cdk-lib/aws-certificatemanager";
+import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 import {
 	AllowedMethods,
 	CachePolicy,
@@ -33,22 +30,18 @@ export interface PublicFilesStackProps extends CustomStackProps {
 	subdomain: string;
 	domainName: string;
 	hostedZoneId: string;
+	/** ACM certificate in us-east-1 covering the subdomain (CloudFront requirement) */
+	certificateId: string;
 }
 
 /**
  * Public, shareable files served from <subdomain>.<domainName>.
  * Objects are uploaded by hand; the stack never deploys or prunes them.
  * Kept close to zero cost: no logging, no versioning, cheapest price class.
- * CloudFront requires its certificate in us-east-1, so this stack must be
- * deployed there.
  */
 export class PublicFilesStack extends CustomStack {
 	constructor(scope: Construct, props: PublicFilesStackProps) {
 		super(scope, props);
-
-		if (props.env?.region && props.env.region !== "us-east-1") {
-			throw new Error("PublicFilesStack must be deployed to us-east-1");
-		}
 
 		const fullDomainName =
 			`${props.subdomain}.${props.domainName}`.toLowerCase();
@@ -62,10 +55,11 @@ export class PublicFilesStack extends CustomStack {
 			},
 		);
 
-		const certificate = new Certificate(this, "certificate", {
-			domainName: fullDomainName,
-			validation: CertificateValidation.fromDns(hostedZone),
-		});
+		const certificate = Certificate.fromCertificateArn(
+			this,
+			"certificate",
+			`arn:aws:acm:us-east-1:${props.env?.account}:certificate/${props.certificateId}`,
+		);
 
 		const bucket = new Bucket(this, "public-files-bucket", {
 			bucketName: fullDomainName,

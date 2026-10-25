@@ -63,13 +63,13 @@ describe("Public files Stack", () => {
 		const actual = Template.fromStack(sut);
 
 		// Assert
-		actual.hasResourceProperties("AWS::CertificateManager::Certificate", {
-			DomainName: "files.domain.com",
-			ValidationMethod: "DNS",
-		});
 		actual.hasResourceProperties("AWS::CloudFront::Distribution", {
 			DistributionConfig: Match.objectLike({
 				Aliases: ["files.domain.com"],
+				ViewerCertificate: Match.objectLike({
+					AcmCertificateArn:
+						"arn:aws:acm:us-east-1:account:certificate/some-guid",
+				}),
 				PriceClass: "PriceClass_100",
 				Logging: Match.absent(),
 				DefaultCacheBehavior: Match.objectLike({
@@ -88,30 +88,18 @@ describe("Public files Stack", () => {
 		});
 	});
 
-	test("Should_Throw_When_RegionIsNotUsEast1", () => {
-		// Arrange
-		const props = createPublicFilesStackProps("eu-west-1");
-
-		// Act
-		const action = () => new PublicFilesStack(new App(), props);
-
-		// Assert
-		expect(action).toThrow("PublicFilesStack must be deployed to us-east-1");
-	});
-
 	function createPublicFilesStack(): Stack {
 		return new PublicFilesStack(new App(), createPublicFilesStackProps());
 	}
 
-	function createPublicFilesStackProps(
-		region = "us-east-1",
-	): PublicFilesStackProps {
+	function createPublicFilesStackProps(): PublicFilesStackProps {
 		return {
-			env: { account: "account", region },
+			env: { account: "account", region: "eu-west-1" },
 			name: "filestest",
 			subdomain: "files",
 			domainName: "domain.com",
 			hostedZoneId: "123456789",
+			certificateId: "some-guid",
 			envName: AppEnvironment.Development,
 			githubRepo: "test-files",
 			stackName: "test-files",

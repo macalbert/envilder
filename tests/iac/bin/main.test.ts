@@ -75,13 +75,17 @@ describe("main", () => {
 			expect(result).toEqual([]);
 		});
 
-		it("Should_CreatePublicFilesStackInUsEast1_When_PublicFilesIsConfigured", () => {
+		it("Should_CreatePublicFilesStack_When_PublicFilesIsConfigured", () => {
 			// Arrange
 			const config = {
 				...createValidConfig(),
 				stacks: {
 					...createValidConfig().stacks,
-					publicFiles: { name: "Files", subdomain: "files" },
+					publicFiles: {
+						name: "Files",
+						subdomain: "files",
+						certificateId: "files-cert",
+					},
 				},
 			};
 
@@ -93,8 +97,8 @@ describe("main", () => {
 			expect(PublicFilesStack).toHaveBeenCalledWith(
 				expect.anything(),
 				expect.objectContaining({
-					env: { account: "123456789012", region: "us-east-1" },
 					subdomain: "files",
+					certificateId: "files-cert",
 					domainName: "example.com",
 					hostedZoneId: "Z123",
 				}),
