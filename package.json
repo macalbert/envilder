@@ -1,6 +1,6 @@
 {
   "name": "envilder",
-  "version": "0.15.1",
+  "version": "0.15.2",
   "packageManager": "pnpm@12.3.4+sha512.961aa41fb077da3a04a441d9f8e15ebc0c96da8ef710b2eb67bf9ee7cb0610eabd48f1fd85f51cffe73846785fa0f87c56a3a872a1d893f8446741b5cce45457",
   "description": "Open-source CLI, GitHub Action, and runtime SDKs for AWS SSM Parameter Store and Azure Key Vault secrets. Run any command with secrets injected (envilder exec), generate .env files, or load them in-process.",
   "homepage": "https://envilder.com",
@@ -113,7 +113,7 @@
     "@commitlint/cli": "^21.2.0",
     "@commitlint/config-conventional": "^21.2.0",
     "@secretlint/secretlint-rule-preset-recommend": "^13.0.2",
-    "@testcontainers/localstack": "^12.0.4",
+    "@testcontainers/localstack": "^12.2.1",
     "@types/cross-spawn": "^6.0.6",
     "@types/node": "catalog:",
     "@vitest/coverage-v8": "catalog:",
@@ -124,7 +124,7 @@
     "glob": "^13.0.6",
     "lefthook": "^2.2.1",
     "secretlint": "^13.0.2",
-    "testcontainers": "^12.0.4",
+    "testcontainers": "^12.2.1",
     "tsx": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

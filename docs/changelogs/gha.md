@@ -1,4 +1,4 @@
-## [0.15.1] - 2026-10-25
+## [0.15.2] - 2026-10-25
 
 ### Fixed
 
@@ -7,6 +7,17 @@
   writes it to the `.env` file as-is and logs a warning with the names
   affected, because `dotenv` for Node.js, Docker Compose and POSIX shells
   skip that line ([#511](https://github.com/macalbert/envilder/issues/511))
+
+---
+
+## [0.15.1] - 2026-10-22
+
+### Security
+
+* Update development and build dependencies to resolve open advisories
+  (`undici`, `brace-expansion`, `@grpc/grpc-js`, `@vitest/mocker`). The
+  Action bundle and its runtime dependencies are unchanged
+  ([#609](https://github.com/macalbert/envilder/pull/609))
 
 ---
 
