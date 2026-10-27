@@ -1,3 +1,16 @@
+## [Unreleased]
+
+### Security
+
+* **Reject `__proto__` in map files in the Action bundle**: The bundle is
+  built from the compiled CLI core, where an own `__proto__` map-file key
+  was dropped before the name check, so the Action accepted the file and
+  silently skipped that mapping. The key is now rejected with the
+  documented message, failing the step
+  ([#511](https://github.com/macalbert/envilder/issues/511))
+
+---
+
 ## [0.16.0] - 2026-10-25
 
 ### Changed

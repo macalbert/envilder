@@ -1,3 +1,21 @@
+## [0.6.0] - 2026-10-27
+
+### Changed
+
+* **BREAKING: Python 3.11 is the minimum supported version**: Python 3.10
+  reached end of life on 2026-10-01 and no longer receives security fixes.
+  Following the SDK dependency policy (ADR-0009: the engine floor is the
+  lowest in-support minor), the package now requires Python 3.11 or later,
+  drops the 3.10 classifier, and CI tests 3.11 and 3.13. Projects still on
+  Python 3.10 keep resolving 0.5.x
+
+### Dependencies
+
+* Drop `tomli` and `exceptiongroup` from the lockfile: they were only
+  installed on Python 3.10
+
+---
+
 ## [0.5.2] - 2026-10-22
 
 ### Security
