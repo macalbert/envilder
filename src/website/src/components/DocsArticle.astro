@@ -443,7 +443,7 @@ const mfAzureExample = `{
     "vaultUrl": "https://my-vault.vault.azure.net"
   },
   "DB_PASSWORD": "my-app-prod-db-password",
-  "STRIPE_API_KEY": "/my-app/prod/stripe_api_key"
+  "STRIPE_API_KEY": "/my-app/prod/stripe-api-key"
 }`;
 
 const mfOverrideExample = `envilder exec -- npm start
@@ -1576,7 +1576,7 @@ jobs:
     "vaultUrl": "https://my-vault.vault.azure.net"
   },
   "DB_PASSWORD": "myapp-prod-db-password",
-  "STRIPE_KEY": "/myapp/prod/stripe_key"
+  "STRIPE_KEY": "/myapp/prod/stripe-key"
 }`} />
         <CodeBlock lang="yaml" filename=".github/workflows/deploy-azure.yml" code={`name: Deploy with Azure Key Vault
 

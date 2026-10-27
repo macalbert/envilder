@@ -1,4 +1,4 @@
-## [Unreleased]
+## [0.17.0] - 2026-10-27
 
 ### Security
 
@@ -8,6 +8,14 @@
   silently skipped that mapping. The key is now rejected with the
   documented message, failing the step
   ([#511](https://github.com/macalbert/envilder/issues/511))
+
+### Changed
+
+* **BREAKING: Azure Key Vault references only translate `/`**: The Action
+  shares the CLI's rule: `/` becomes `-`, ignoring leading slashes, and
+  anything else reaches Key Vault as written, as the SDKs do. A reference
+  with `_` (`/myapp/prod/stripe_key`) is no longer rewritten to
+  `myapp-prod-stripe-key`; use the name the vault holds
 
 ---
 

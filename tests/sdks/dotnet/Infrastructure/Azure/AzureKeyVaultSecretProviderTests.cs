@@ -31,6 +31,26 @@ public class AzureKeyVaultSecretProviderTests
 	}
 
 	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
+	public async Task Should_FetchHyphenatedName_When_ReferenceHasSlashes()
+	{
+		// Arrange
+		var secretClient = Substitute.For<SecretClient>();
+		var secret = SecretModelFactory.KeyVaultSecret(
+			properties: SecretModelFactory.SecretProperties(new Uri("https://vault.azure.net/secrets/myapp-db-password")),
+			value: "fictional-value");
+		var response = Response.FromValue(secret, Substitute.For<Response>());
+		secretClient.GetSecretAsync("myapp-db-password", Arg.Any<string>(), Arg.Any<CancellationToken>())
+			.Returns(response);
+		var sut = new AzureKeyVaultSecretProvider(secretClient);
+
+		// Act
+		var actual = await sut.GetSecretAsync("/myapp/db/password", TestContext.Current.CancellationToken);
+
+		// Assert
+		actual.Should().Be("fictional-value");
+	}
+
+	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
 	public async Task Should_ReturnNull_When_AzureKeyVaultSecretNotFound()
 	{
 		// Arrange
