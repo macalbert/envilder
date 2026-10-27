@@ -21,15 +21,9 @@ export async function resolveRegionWithFallback(
   }
 }
 
-export type AwsProviderOptions = {
-  /** Log the AWS identity on first use (default: true). */
-  identityBanner?: boolean;
-};
-
 export function createAwsSecretProvider(
   config: MapFileConfig,
   logger: ILogger,
-  options: AwsProviderOptions = {},
 ): ISecretProvider {
   const { profile } = config;
   const region = () => resolveRegionWithFallback(profile);
@@ -40,11 +34,5 @@ export function createAwsSecretProvider(
     maxAttempts: 1,
     requestHandler: { requestTimeout: 2000 },
   });
-  return new AwsSsmSecretProvider(
-    ssm,
-    logger,
-    sts,
-    profile,
-    options.identityBanner ?? true,
-  );
+  return new AwsSsmSecretProvider(ssm, logger, sts, profile);
 }
