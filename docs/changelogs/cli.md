@@ -5,7 +5,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
-## [Unreleased]
+## [0.17.0] - 2026-10-27
 
 ### Security
 
@@ -17,6 +17,27 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   ignored and the run exited 0. Map-file keys are now read straight from the
   parsed object, so the key is rejected with the documented message
   ([#511](https://github.com/macalbert/envilder/issues/511))
+
+### Changed
+
+* **BREAKING: Azure Key Vault references only translate `/`**: The CLI
+  rewrote every Azure reference (underscores to hyphens, lowercased, repeated
+  hyphens collapsed, `secret-` prepended to a leading digit), so a valid name
+  such as `Database--Password` or `1password-token` addressed a different
+  secret than the one in the vault and than the SDKs read. Now the only
+  translation is `/` to `-`, ignoring leading slashes
+  (`/myapp/db/password` → `myapp-db-password`), shared with the Node.js,
+  Python and .NET SDKs. Anything else reaches Key Vault as written, and a
+  name it rejects fails with Key Vault's own error. The collision check
+  compares names case-insensitively, as Key Vault does
+
+### Migration
+
+Secrets pushed with an earlier CLI under a reference that holds `_`, `--`,
+a leading digit or a leading or trailing `-` were stored under the rewritten
+name. Point the map file at the name the vault holds (for example
+`myapp-db-password` instead of `/myapp/db_password`), or rename the secret in
+the vault.
 
 ---
 

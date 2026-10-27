@@ -9,6 +9,14 @@
   drops the 3.10 classifier, and CI tests 3.11 and 3.13. Projects still on
   Python 3.10 keep resolving 0.5.x
 
+### Fixed
+
+* **Azure Key Vault references with `/` resolve the same secret as the CLI**:
+  A path-style value such as `/myapp/prod/db-password` was sent to Key Vault
+  as written, so it never matched the secret the CLI pushes under
+  `myapp-prod-db-password`. The SDK now applies the CLI's rule: `/` becomes
+  `-`, ignoring leading slashes, and anything else is sent as written
+
 ### Dependencies
 
 * Drop `tomli` and `exceptiongroup` from the lockfile: they were only

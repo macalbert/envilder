@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 /// <summary>
 /// <see cref="ISecretProvider"/> backed by Azure Key Vault.
 /// Secrets that return HTTP 404 are treated as missing and yield <see langword="null"/>.
+/// Each reference is mapped to its Key Vault name with the same rule the CLI uses.
 /// </summary>
 public class AzureKeyVaultSecretProvider : ISecretProvider
 {
@@ -34,7 +35,7 @@ public class AzureKeyVaultSecretProvider : ISecretProvider
 
 		try
 		{
-			var response = await _secretClient.GetSecretAsync(name, null, cancellationToken);
+			var response = await _secretClient.GetSecretAsync(AzureSecretName.From(name), null, cancellationToken);
 			return response.Value.Value;
 		}
 		catch (RequestFailedException ex) when (ex.Status == 404)
@@ -54,7 +55,7 @@ public class AzureKeyVaultSecretProvider : ISecretProvider
 		try
 		{
 			using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-			var response = _secretClient.GetSecret(name, version: null, cancellationToken: cts.Token);
+			var response = _secretClient.GetSecret(AzureSecretName.From(name), version: null, cancellationToken: cts.Token);
 			return response.Value.Value;
 		}
 		catch (RequestFailedException ex) when (ex.Status == 404)

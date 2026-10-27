@@ -151,6 +151,24 @@ Values are opaque identifiers interpreted by the provider:
 | `hashicorp` | Vault secret path | `secret/data/my-app/db-password` |
 | `file` | Key name in the `.env` source file | `DB_PASSWORD` |
 
+#### Azure Key Vault secret names
+
+**Azure secret names are resolved identically on every surface.** The only
+translation is `/` to `-`, ignoring leading slashes, so a path-style value such
+as `/my-app/prod/db-password` reads `my-app-prod-db-password`. Everything else
+reaches Key Vault as written, and a name it rejects (`_`, `.`, more than 127
+characters, …) fails with Key Vault's own error instead of being rewritten
+into another name. The CLI and the GitHub Action
+(`AzureKeyVaultSecretProvider.ts`) and the Node.js, Python and .NET SDKs
+(`azure-secret-name.ts`, `azure_secret_name.py`, `AzureSecretName.cs`) share
+this rule and its test cases.
+
+The CLI and the GitHub Action also reject a map file in which two different
+values resolve to the same Key Vault name, compared case-insensitively as Key
+Vault does (`/app/db-url` and `app-db-url`): a `--push` would otherwise write
+both values to one secret. The SDKs only read secrets, so they skip this check
+and both variables receive the same value.
+
 ### 6. `file` Provider for Testing
 
 The `file` provider enables testing without cloud infrastructure. It reads an
