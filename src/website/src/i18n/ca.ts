@@ -766,7 +766,7 @@ export const ca: Translations = {
     mapAzureAuth: 'Azure Default Credentials',
     mapRulesTitle: 'Claus i valors: què s’accepta',
     mapRulesIntro:
-      'Cada mapeig té la forma "CLAU": "referència del secret". Aquestes regles són les mateixes al CLI, a la GitHub Action, al JSON Schema i a tots els SDKs, de manera que un fitxer de mapeig vàlid en un lloc és vàlid a tot arreu.',
+      'Cada mapeig té la forma "CLAU": "referència del secret". La regla dels noms de clau és la mateixa al CLI, a la GitHub Action, al JSON Schema i a tots els SDKs, de manera que una clau acceptada en un lloc s’accepta a tot arreu. El JSON Schema és més estricte en dues coses: també marca els valors que no són text i les claus desconegudes que comencen per $, que els parsers ignoren.',
     mapKeysTitle: 'Claus (noms de variables d’entorn)',
     mapThRule: 'Regla',
     mapThDetails: 'Detalls',
@@ -799,7 +799,7 @@ export const ca: Translations = {
     mapValuesAws:
       'Nom del paràmetre, tal qual. Distingeix majúscules; lletres, dígits, _ . - i / per a jerarquies (com a màxim 15 nivells); fins a 1011 caràcters incloent-hi el prefix de l’ARN; no pot començar per aws ni ssm.',
     mapValuesAzure:
-      'Nom del secret: 1-127 caràcters, lletres, dígits i guions, començant per una lletra.',
+      'Nom del secret: 1-127 caràcters, lletres, dígits i guions. El CLI normalitza abans la referència: minúscules, / i _ passen a -, i s’hi afegeix secret- al davant si no comença per una lletra. Els SDKs la fan servir tal com està escrita.',
     mapValuesDocsLink: 'Documentació del proveïdor',
     mapContentsTitle: 'Contingut dels secrets (els valors resolts)',
     mapContentsIntro:
@@ -818,7 +818,7 @@ export const ca: Translations = {
     mapContentsResolveOnly:
       'Les APIs dels SDKs que només resolen (resolve, ResolveFile, IConfiguration) mantenen els valors en memòria i només estan subjectes als límits del proveïdor.',
     mapContentsWriterDesc:
-      'El CLI escriu cada valor de manera que dotenv en llegeixi exactament el string original. Les cometes s’escullen automàticament i es comproven analitzant el resultat abans d’escriure el fitxer:',
+      'El CLI escriu cada valor de manera que dotenv en llegeixi exactament el string original. Les cometes s’escullen automàticament i es comproven analitzant el resultat abans d’escriure el fitxer. La comprovació fa servir la gramàtica de dotenv ampliada a claus amb /, així que per a aquestes claus demostra que el valor es llegeix igual, no que dotenv per a Node.js les carregui (ignora aquestes línies):',
     mapContentsRoundTrip:
       '#, espais al principi i al final, cometes, barres inverses, un \\n literal, salts de línia LF/CRLF reals i Unicode es conserven tots. Si el fitxer ja existeix, cada assignació es substitueix al seu lloc (una multilínia, sencera), i es mantenen els comentaris, l’ordre i els finals de línia.',
     mapContentsUnrepresentableTitle:

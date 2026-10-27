@@ -291,7 +291,7 @@ For Azure, add `vaultUrl`:
 
 ### Keys and values
 
-Keys follow the same rule as the CLI and the GitHub Action, so one map file works everywhere:
+Keys follow the same rule as the CLI and the GitHub Action, so a key accepted by one is accepted by all:
 
 - **Keys** may only contain letters, digits, `_`, `.`, `-` and `/` (`^[A-Za-z0-9_./-]+$`); `__proto__`
   is also rejected. `MapFileParser.Parse` throws `FormatException` for any other key, before any secret is fetched.

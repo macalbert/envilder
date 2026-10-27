@@ -767,7 +767,7 @@ export const es: Translations = {
     mapAzureAuth: 'Azure Default Credentials',
     mapRulesTitle: 'Claves y valores: qué se acepta',
     mapRulesIntro:
-      'Cada mapeo tiene la forma "CLAVE": "referencia del secreto". Estas reglas son las mismas en el CLI, la GitHub Action, el JSON Schema y todos los SDKs, así que un archivo de mapeo válido en un sitio es válido en todas partes.',
+      'Cada mapeo tiene la forma "CLAVE": "referencia del secreto". La regla de los nombres de clave es la misma en el CLI, la GitHub Action, el JSON Schema y todos los SDKs, así que una clave aceptada en un sitio se acepta en todas partes. El JSON Schema es más estricto en dos cosas: también marca los valores que no son texto y las claves desconocidas que empiezan por $, que los parsers ignoran.',
     mapKeysTitle: 'Claves (nombres de variables de entorno)',
     mapThRule: 'Regla',
     mapThDetails: 'Detalles',
@@ -801,7 +801,7 @@ export const es: Translations = {
     mapValuesAws:
       'Nombre del parámetro, tal cual. Distingue mayúsculas; letras, dígitos, _ . - y / para jerarquías (como máximo 15 niveles); hasta 1011 caracteres incluyendo el prefijo del ARN; no puede empezar por aws ni ssm.',
     mapValuesAzure:
-      'Nombre del secreto: 1-127 caracteres, letras, dígitos y guiones, empezando por una letra.',
+      'Nombre del secreto: 1-127 caracteres, letras, dígitos y guiones. El CLI normaliza antes la referencia: minúsculas, / y _ pasan a -, y se antepone secret- si no empieza por una letra. Los SDKs la usan tal como está escrita.',
     mapValuesDocsLink: 'Documentación del proveedor',
     mapContentsTitle: 'Contenido de los secretos (los valores resueltos)',
     mapContentsIntro:
@@ -820,7 +820,7 @@ export const es: Translations = {
     mapContentsResolveOnly:
       'Las APIs de los SDKs que solo resuelven (resolve, ResolveFile, IConfiguration) mantienen los valores en memoria y solo están sujetas a los límites del proveedor.',
     mapContentsWriterDesc:
-      'El CLI escribe cada valor de forma que dotenv lea exactamente el string original. Las comillas se eligen automáticamente y se comprueban analizando el resultado antes de escribir el archivo:',
+      'El CLI escribe cada valor de forma que dotenv lea exactamente el string original. Las comillas se eligen automáticamente y se comprueban analizando el resultado antes de escribir el archivo. La comprobación usa la gramática de dotenv ampliada a claves con /, así que para esas claves demuestra que el valor se lee igual, no que dotenv para Node.js las cargue (ignora esas líneas):',
     mapContentsRoundTrip:
       '#, espacios al principio y al final, comillas, barras invertidas, un \\n literal, saltos de línea LF/CRLF reales y Unicode se conservan todos. Si el archivo ya existe, cada asignación se sustituye en su sitio (una multilínea, entera), y se mantienen los comentarios, el orden y los finales de línea.',
     mapContentsUnrepresentableTitle:

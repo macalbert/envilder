@@ -258,10 +258,11 @@ envilder --provider=azure --vault-url=https://other-vault.vault.azure.net --map=
 
 ### Keys and Values: What Is Accepted
 
-Every mapping has the shape `"<KEY>": "<secret reference>"`. The rules below are the same in the
-CLI, the GitHub Action, the [JSON Schema](https://envilder.com/schema/map-file.v1.json) and every
-runtime SDK, so a map file that is valid in one place is valid everywhere
-([ADR-0008](docs/adr/0008-map-file-schema.md)).
+Every mapping has the shape `"<KEY>": "<secret reference>"`. The key-name rule below is the same
+in the CLI, the GitHub Action, the [JSON Schema](https://envilder.com/schema/map-file.v1.json) and
+every runtime SDK, so a key accepted in one place is accepted everywhere
+([ADR-0008](docs/adr/0008-map-file-schema.md)). The schema is stricter in two other ways: it also
+flags non-string values and unknown `$`-prefixed keys, which the runtime parsers skip.
 
 #### Keys (environment variable names)
 
@@ -313,7 +314,7 @@ A value is the identifier of the secret in the provider. It must be a JSON strin
 | Provider | Identifier format |
 | --- | --- |
 | AWS SSM | Parameter name, used as-is. Case-sensitive; `a-zA-Z0-9_.-` plus `/` for hierarchies (at most 15 levels); up to 1011 characters including the ARN prefix; cannot start with `aws` or `ssm` ([AWS constraints](https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-a-parameter.html#sysman-parameter-name-constraints)) |
-| Azure Key Vault | Secret name: 1-127 characters, letters, digits and `-`, starting with a letter ([Azure naming](https://learn.microsoft.com/azure/key-vault/general/about-keys-secrets-certificates#objects-identifiers-and-versioning)) |
+| Azure Key Vault | Secret name: 1-127 characters, letters, digits and `-` ([Azure naming](https://learn.microsoft.com/azure/key-vault/general/about-keys-secrets-certificates#objects-identifiers-and-versioning)). The CLI normalizes the reference first: lowercase, `/` and `_` become `-`, and `secret-` is prepended when it does not start with a letter. The SDKs use it as written |
 
 #### Secret contents (the resolved values)
 
@@ -331,7 +332,9 @@ and are subject to the provider limits only.
 
 **How the CLI writes `.env` values.** Each value is written so that `dotenv` reads back exactly
 the original string. The quoting is chosen automatically and checked by parsing the result before
-the file is written:
+the file is written. The check uses dotenv's grammar extended to keys with `/`, so for those keys it
+proves the value round-trips, not that Node.js `dotenv` loads them (it skips such lines, as shown
+above):
 
 | Value | Written as |
 | --- | --- |

@@ -756,7 +756,7 @@ export const en: Translations = {
     mapAzureAuth: 'Azure Default Credentials',
     mapRulesTitle: 'Keys and values: what is accepted',
     mapRulesIntro:
-      'Every mapping has the shape "KEY": "secret reference". These rules are the same in the CLI, the GitHub Action, the JSON Schema and every runtime SDK, so a mapping file that is valid in one place is valid everywhere.',
+      'Every mapping has the shape "KEY": "secret reference". The key-name rule is the same in the CLI, the GitHub Action, the JSON Schema and every runtime SDK, so a key accepted in one place is accepted everywhere. The JSON Schema is also stricter in two ways: it flags non-string values and unknown $-prefixed keys, which the runtime parsers skip.',
     mapKeysTitle: 'Keys (environment variable names)',
     mapThRule: 'Rule',
     mapThDetails: 'Details',
@@ -788,7 +788,7 @@ export const en: Translations = {
     mapValuesAws:
       'Parameter name, used as-is. Case-sensitive; letters, digits, _ . - plus / for hierarchies (at most 15 levels); up to 1011 characters including the ARN prefix; cannot start with aws or ssm.',
     mapValuesAzure:
-      'Secret name: 1-127 characters, letters, digits and hyphens, starting with a letter.',
+      'Secret name: 1-127 characters, letters, digits and hyphens. The CLI normalizes the reference first: lowercase, / and _ become -, and secret- is prepended when it does not start with a letter. The SDKs use it as written.',
     mapValuesDocsLink: 'Provider documentation',
     mapContentsTitle: 'Secret contents (the resolved values)',
     mapContentsIntro:
@@ -807,7 +807,7 @@ export const en: Translations = {
     mapContentsResolveOnly:
       "The SDKs' resolve-only APIs (resolve, ResolveFile, IConfiguration) keep values in memory and are subject to the provider limits only.",
     mapContentsWriterDesc:
-      'The CLI writes each value so that dotenv reads back exactly the original string. The quoting is chosen automatically and checked by parsing the result before the file is written:',
+      'The CLI writes each value so that dotenv reads back exactly the original string. The quoting is chosen automatically and checked by parsing the result before the file is written. The check uses dotenv’s grammar extended to keys with /, so for those keys it proves the value round-trips, not that Node.js dotenv loads them (it skips such lines):',
     mapContentsRoundTrip:
       '#, leading and trailing whitespace, quotes, backslashes, a literal \\n, real LF/CRLF line breaks and Unicode all round-trip. When the file already exists, each assignment is replaced in place (a multiline one entirely), and comments, ordering and line endings are preserved.',
     mapContentsUnrepresentableTitle: 'The one value a .env file cannot hold:',
