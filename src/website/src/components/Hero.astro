@@ -1167,6 +1167,7 @@ const tabRows = [
     // Hover/focus pauses temporarily; the pause button pauses until the
     // user resumes it (touch users have no hover to stop the loop).
     let hovering = false;
+    let focused = false;
     let userPaused = false;
     // True while a manually selected scene is shown statically during an
     // explicit pause, so Resume knows to replay it.
@@ -1627,7 +1628,7 @@ const tabRows = [
     // mode buttons can switch scenes without stalling playback.
     const hoverTarget = screen.closest('.terminal') ?? screen;
     const syncPaused = () => {
-      paused = hovering || userPaused;
+      paused = hovering || focused || userPaused;
     };
     hoverTarget.addEventListener('mouseenter', () => {
       hovering = true;
@@ -1637,12 +1638,15 @@ const tabRows = [
       hovering = false;
       syncPaused();
     });
-    hoverTarget.addEventListener('focusin', () => {
-      hovering = true;
+    // Only keyboard focus pauses. A click leaves the focusable terminal body
+    // focused, and the browser re-fires focusin on it whenever the window
+    // regains focus, which would freeze playback with the pointer elsewhere.
+    hoverTarget.addEventListener('focusin', (event) => {
+      focused = (event.target as Element).matches(':focus-visible');
       syncPaused();
     });
     hoverTarget.addEventListener('focusout', () => {
-      hovering = false;
+      focused = false;
       syncPaused();
     });
 
