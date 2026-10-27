@@ -9,6 +9,8 @@ using global::Envilder.Domain.Ports;
 using global::Envilder.Infrastructure.Aws;
 using global::Envilder.Infrastructure.Azure;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// Creates the appropriate <see cref="ISecretProvider"/> implementation
@@ -27,7 +29,8 @@ internal static class SecretProviderFactory
 	/// <param name="options">Optional runtime overrides (e.g. CLI flags).</param>
 	/// <returns>A ready-to-use secret provider.</returns>
 	/// <exception cref="InvalidOperationException">
-	/// Thrown when Azure is selected but no Vault URL is provided.
+	/// Thrown when Azure is selected but no Vault URL is provided, or the Vault URL
+	/// is not <c>https://</c> on an allowed host.
 	/// </exception>
 	public static ISecretProvider Create(MapFileConfig config, EnvilderOptions? options = null)
 	{
@@ -44,7 +47,7 @@ internal static class SecretProviderFactory
 
 		return provider switch
 		{
-			SecretProviderType.Azure => CreateAzureSecretProvider(vaultUrl),
+			SecretProviderType.Azure => CreateAzureSecretProvider(vaultUrl, options?.AllowedVaultHosts),
 			_ => CreateAwsSecretProvider(profile),
 		};
 	}
@@ -69,15 +72,36 @@ internal static class SecretProviderFactory
 		}
 	}
 
-	private static AzureKeyVaultSecretProvider CreateAzureSecretProvider(string? vaultUrl)
+	private static AzureKeyVaultSecretProvider CreateAzureSecretProvider(
+		string? vaultUrl,
+		IEnumerable<string>? extraVaultHosts)
 	{
 		if (string.IsNullOrWhiteSpace(vaultUrl))
 		{
 			throw new InvalidOperationException("Vault URL must be provided for Azure Key Vault provider.");
 		}
 
-		var secretClient = new SecretClient(new Uri(vaultUrl), new DefaultAzureCredential());
+		var allowedHosts = AzureVaultUrlValidator.DefaultVaultHosts
+			.Concat(extraVaultHosts ?? [])
+			.ToList();
+		var vaultUri = AzureVaultUrlValidator.Validate(vaultUrl!, allowedHosts);
+
+		var secretClient = new SecretClient(vaultUri, new DefaultAzureCredential(), CreateSecretClientOptions(vaultUri));
 		return new(secretClient);
+	}
+
+	/// <summary>
+	/// Key Vault's challenge carries the public cloud resource, which never matches
+	/// a custom host, so challenge resource verification only stays on for the
+	/// default hosts.
+	/// </summary>
+	internal static SecretClientOptions CreateSecretClientOptions(Uri vaultUri)
+	{
+		return new SecretClientOptions
+		{
+			DisableChallengeResourceVerification =
+				!AzureVaultUrlValidator.IsAllowedHost(vaultUri.Host, AzureVaultUrlValidator.DefaultVaultHosts),
+		};
 	}
 
 	private static AwsSsmSecretProvider CreateAwsSecretProvider(string? profile)

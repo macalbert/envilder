@@ -63,6 +63,23 @@ Values are sent to Key Vault as written, except that slashes become hyphens: a p
 such as `/myapp/prod/db-password` is read as `myapp-prod-db-password`, the same name the CLI pushes
 it under.
 
+The vault URL must use `https://` and its host must end with `.vault.azure.net`,
+`.vault.azure.cn`, `.vault.usgovcloudapi.net` or `.vault.microsoftazure.de`, the same rule the CLI
+applies. Any other URL throws `InvalidOperationException` before an Azure credential is used, so
+a map file cannot send your credentials to a host you do not control. For a private endpoint on
+another domain, or an emulator, add its host suffix with the builder (or set
+`EnvilderOptions.AllowedVaultHosts` in the options you pass to `AddEnvilder`):
+
+```csharp
+var secrets = Env.FromMapFile("envilder.json")
+    .WithAllowedVaultHosts(".vault.contoso.internal")
+    .Resolve();
+```
+
+The extra hosts are added to the defaults. Only add hosts you control: for them the client also
+turns off Key Vault's challenge resource check, because the challenge names the public cloud
+resource and never matches a custom host.
+
 The code is the same as for AWS. Credentials are resolved with `DefaultAzureCredential`
 (`az login`, managed identity, or environment variables):
 
@@ -240,6 +257,7 @@ var config = new ConfigurationBuilder()
 | `WithProvider(type)` | Override secret provider (AWS/Azure) |
 | `WithProfile(name)` | Override AWS named profile |
 | `WithVaultUrl(url)` | Override Azure Key Vault URL |
+| `WithAllowedVaultHosts(params hosts)` | Trust extra Key Vault host suffixes |
 | `Resolve()` | Resolve secrets, return as dictionary |
 | `ResolveAsync(ct?)` | Async version of `Resolve` |
 | `Inject()` | Resolve + inject into `Environment` |

@@ -204,6 +204,27 @@ describe('Envilder', () => {
       expect(actual.size).toBe(2);
     });
 
+    it('Should_PassAllowedVaultHosts_When_WithAllowedVaultHostsCalled', async () => {
+      // Act
+      await Envilder.fromMapFile('envilder.json')
+        .withAllowedVaultHosts(
+          '.vault.contoso.internal',
+          '.localhost.localstack.cloud',
+        )
+        .resolve();
+
+      // Assert
+      expect(mockCreateProvider).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({
+          allowedVaultHosts: [
+            '.vault.contoso.internal',
+            '.localhost.localstack.cloud',
+          ],
+        }),
+      );
+    });
+
     it('Should_InjectSecrets_When_InjectCalled', async () => {
       // Act
       const actual = await Envilder.fromMapFile('envilder.json').inject();

@@ -186,6 +186,19 @@ public class EnvilderFacadeTests
 	}
 
 	[Fact]
+	public void Should_ReturnSameBuilder_When_WithAllowedVaultHostsCalled()
+	{
+		// Arrange
+		var builder = Env.FromMapFile("/some/path.json");
+
+		// Act
+		var actual = builder.WithAllowedVaultHosts(".vault.contoso.internal");
+
+		// Assert
+		actual.Should().BeSameAs(builder);
+	}
+
+	[Fact]
 	public void Should_SupportFullFluentChain_When_AllOverridesApplied()
 	{
 		// Act

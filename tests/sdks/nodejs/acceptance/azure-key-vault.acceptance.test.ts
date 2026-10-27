@@ -1,5 +1,9 @@
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import type { SecretClient } from '@azure/keyvault-secrets';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { Envilder } from '../../../../src/sdks/nodejs/src/application/envilder.js';
 import { EnvilderClient } from '../../../../src/sdks/nodejs/src/application/envilder-client.js';
 import type { ParsedMapFile } from '../../../../src/sdks/nodejs/src/domain/parsed-map-file.js';
 import { SecretProviderType } from '../../../../src/sdks/nodejs/src/domain/secret-provider-type.js';
@@ -9,15 +13,18 @@ import { LocalStackAzureTestContainer } from '../containers/localstack-azure-con
 let localStackAzure: LocalStackAzureTestContainer;
 let secretClient: SecretClient;
 let provider: AzureKeyVaultSecretProvider;
+let tempDir: string;
 
 describe('Azure Key Vault Acceptance', () => {
   beforeAll(async () => {
     localStackAzure = await new LocalStackAzureTestContainer().start();
     secretClient = localStackAzure.createSecretClient();
     provider = localStackAzure.createProvider();
+    tempDir = await mkdtemp(path.join(tmpdir(), 'envilder-azure-'));
   }, 300_000);
 
   afterAll(async () => {
+    await rm(tempDir, { recursive: true, force: true });
     await localStackAzure.stop();
   });
 
@@ -56,5 +63,29 @@ describe('Azure Key Vault Acceptance', () => {
 
     // Assert
     expect(actual.size).toBe(0);
+  });
+
+  it('Should_ResolveSecretThroughFacade_When_EmulatorHostIsAllowed', async () => {
+    // Arrange
+    await secretClient.setSecret('facade-secret', 'facade-value');
+    const mapPath = path.join(tempDir, 'envilder.json');
+    await writeFile(
+      mapPath,
+      JSON.stringify({
+        $config: { provider: 'azure', vaultUrl: localStackAzure.getVaultUrl() },
+        FACADE_SECRET: 'facade-secret',
+      }),
+    );
+    const sut = Envilder.fromMapFile(mapPath).withAllowedVaultHosts(
+      '.localhost.localstack.cloud',
+    );
+
+    // Act
+    const actual = await sut.resolve();
+
+    // Assert
+    expect(Object.fromEntries(actual)).toEqual({
+      FACADE_SECRET: 'facade-value',
+    });
   });
 });

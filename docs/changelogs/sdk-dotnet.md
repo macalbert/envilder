@@ -1,3 +1,31 @@
+## [1.1.0] - 2026-10-28
+
+### Security
+
+* **Check the Azure Key Vault URL before sending credentials to it**: The SDK
+  now requires `vaultUrl` to use `https://` and a host ending in
+  `.vault.azure.net`, `.vault.azure.cn`, `.vault.usgovcloudapi.net` or
+  `.vault.microsoftazure.de`, the rule the CLI already applies. Any other URL,
+  or one with user information, throws `InvalidOperationException` before a `SecretClient` or
+  `DefaultAzureCredential` is created. Previously a map file could name any
+  host as its vault and the SDK sent ambient Azure tokens to it
+
+### Added
+
+* **Trust extra Key Vault hosts**: `Env.FromMapFile(...).WithAllowedVaultHosts(...)` and
+  `EnvilderOptions.AllowedVaultHosts` (also accepted by `AddEnvilder`) add host suffixes for private
+  endpoints or emulators (for example `.localhost.localstack.cloud`) on top
+  of the defaults. For those hosts Key Vault's challenge resource check is
+  turned off, because the challenge names the public cloud resource
+
+### Changed
+
+* **BREAKING for custom vault hosts**: A `vaultUrl` on a host outside the
+  defaults, or an `http://` one, used to work and now fails. Add the host
+  with the option above
+
+---
+
 ## [1.0.0] - 2026-10-27
 
 ### Changed

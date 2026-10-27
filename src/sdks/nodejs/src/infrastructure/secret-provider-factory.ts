@@ -7,6 +7,11 @@ import type { ISecretProvider } from '../domain/ports/secret-provider.js';
 import { SecretProviderType } from '../domain/secret-provider-type.js';
 import { AwsSsmSecretProvider } from './aws/aws-ssm-secret-provider.js';
 import { AzureKeyVaultSecretProvider } from './azure/azure-key-vault-secret-provider.js';
+import {
+  DEFAULT_VAULT_HOSTS,
+  isAllowedVaultHost,
+  validateAzureVaultUrl,
+} from './azure/azure-vault-url-validator.js';
 
 export function createSecretProvider(
   config: MapFileConfig,
@@ -26,7 +31,7 @@ export function createSecretProvider(
   }
 
   if (isAzure) {
-    return createAzureProvider(vaultUrl);
+    return createAzureProvider(vaultUrl, options?.allowedVaultHosts ?? []);
   }
 
   return createAwsProvider(profile);
@@ -34,13 +39,27 @@ export function createSecretProvider(
 
 function createAzureProvider(
   vaultUrl: string | undefined,
+  extraVaultHosts: readonly string[],
 ): AzureKeyVaultSecretProvider {
   if (!vaultUrl?.trim()) {
     throw new Error('Vault URL must be provided for Azure Key Vault provider');
   }
 
+  const hostname = validateAzureVaultUrl(vaultUrl, [
+    ...DEFAULT_VAULT_HOSTS,
+    ...extraVaultHosts,
+  ]);
+  // Key Vault's challenge carries the public cloud resource, which never
+  // matches a custom host, so verification only stays on for the defaults.
+  const disableChallengeResourceVerification = !isAllowedVaultHost(
+    hostname,
+    DEFAULT_VAULT_HOSTS,
+  );
+
   const credential = new DefaultAzureCredential();
-  const client = new SecretClient(vaultUrl, credential);
+  const client = new SecretClient(vaultUrl, credential, {
+    disableChallengeResourceVerification,
+  });
   return new AzureKeyVaultSecretProvider(client);
 }
 

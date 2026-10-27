@@ -64,6 +64,20 @@ public class EnvilderBuilder
 	}
 
 	/// <summary>
+	/// Trusts extra Azure Key Vault host suffixes, for private endpoints or
+	/// emulators. By default the Vault URL must be <c>https://</c> and its host
+	/// must end with <c>.vault.azure.net</c>, <c>.vault.azure.cn</c>,
+	/// <c>.vault.usgovcloudapi.net</c> or <c>.vault.microsoftazure.de</c>.
+	/// </summary>
+	/// <param name="hosts">Host suffixes such as <c>.localhost.localstack.cloud</c>.</param>
+	/// <returns>This builder for chaining.</returns>
+	public EnvilderBuilder WithAllowedVaultHosts(params string[] hosts)
+	{
+		_options.AllowedVaultHosts = hosts;
+		return this;
+	}
+
+	/// <summary>
 	/// Resolves secrets from the map file using the configured overrides and
 	/// returns them as a dictionary, without injecting into the environment.
 	/// </summary>

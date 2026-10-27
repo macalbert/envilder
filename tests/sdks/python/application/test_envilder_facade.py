@@ -134,6 +134,25 @@ class TestEnvilderOverrides:
         options = call_args[1]["options"]
         assert options.profile == "staging"
 
+    def Should_PassAllowedVaultHosts_When_WithAllowedVaultHostsCalled(
+        self, mock_provider: Mock
+    ) -> None:
+        # Act
+        with patch(
+            "envilder.application.envilder_facade._SecretProviderFactory.create",
+            return_value=mock_provider,
+        ) as factory_mock:
+            Envilder.from_map_file(MAP_FILE).with_allowed_vault_hosts(
+                ".vault.contoso.internal", ".localhost.localstack.cloud"
+            ).resolve()
+
+        # Assert
+        options = factory_mock.call_args[1]["options"]
+        assert options.allowed_vault_hosts == [
+            ".vault.contoso.internal",
+            ".localhost.localstack.cloud",
+        ]
+
 
 class TestEnvilderValidation:
     def Should_RaiseFileNotFoundError_When_FileDoesNotExist(

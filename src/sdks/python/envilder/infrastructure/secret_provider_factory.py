@@ -14,6 +14,11 @@ from envilder.infrastructure.aws.aws_ssm_secret_provider import (
 from envilder.infrastructure.azure.azure_key_vault_secret_provider import (
     AzureKeyVaultSecretProvider,
 )
+from envilder.infrastructure.azure.azure_vault_url_validator import (
+    DEFAULT_VAULT_HOSTS,
+    is_allowed_vault_host,
+    validate_azure_vault_url,
+)
 
 
 class _SecretProviderFactory:
@@ -46,21 +51,36 @@ class _SecretProviderFactory:
 
         match provider:
             case SecretProviderType.AZURE:
-                return _create_azure_provider(vault_url)
+                return _create_azure_provider(
+                    vault_url, opts.allowed_vault_hosts or []
+                )
             case SecretProviderType.AWS | None:
                 return _create_aws_provider(profile)
 
 
 def _create_azure_provider(
     vault_url: str | None,
+    extra_vault_hosts: list[str],
 ) -> AzureKeyVaultSecretProvider:
     if not vault_url or not vault_url.strip():
         raise ValueError(
             "Vault URL must be provided for Azure Key Vault provider."
         )
 
+    allowed_hosts = [*DEFAULT_VAULT_HOSTS, *extra_vault_hosts]
+    hostname = validate_azure_vault_url(vault_url, allowed_hosts)
+    # Key Vault's challenge carries the public cloud resource, which never
+    # matches a custom host, so verification only stays on for the defaults.
+    verify_challenge_resource = is_allowed_vault_host(
+        hostname, DEFAULT_VAULT_HOSTS
+    )
+
     credential = DefaultAzureCredential()
-    secret_client = SecretClient(vault_url=vault_url, credential=credential)
+    secret_client = SecretClient(
+        vault_url=vault_url,
+        credential=credential,
+        verify_challenge_resource=verify_challenge_resource,
+    )
     return AzureKeyVaultSecretProvider(secret_client)
 
 

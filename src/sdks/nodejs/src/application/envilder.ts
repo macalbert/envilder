@@ -38,8 +38,8 @@ export class Envilder {
   /**
    * Returns a fluent builder bound to the given map file.
    *
-   * Chain `.withProvider()`, `.withVaultUrl()`, or `.withProfile()`
-   * before calling `.resolve()` or `.inject()`.
+   * Chain `.withProvider()`, `.withVaultUrl()`, `.withProfile()` or
+   * `.withAllowedVaultHosts()` before calling `.resolve()` or `.inject()`.
    */
   static fromMapFile(filePath: string): Envilder {
     validateFilePath(filePath);
@@ -110,6 +110,24 @@ export class Envilder {
     return this;
   }
 
+  /**
+   * Trust extra Azure Key Vault host suffixes.
+   *
+   * By default the vault URL must be `https://` and its host must end with
+   * `.vault.azure.net`, `.vault.azure.cn`, `.vault.usgovcloudapi.net` or
+   * `.vault.microsoftazure.de`. Use this for private endpoints or emulators:
+   *
+   * ```ts
+   * await Envilder.fromMapFile('envilder.json')
+   *   .withAllowedVaultHosts('.localhost.localstack.cloud')
+   *   .resolve();
+   * ```
+   */
+  withAllowedVaultHosts(...hosts: string[]): Envilder {
+    this.options.allowedVaultHosts = hosts;
+    return this;
+  }
+
   /** Resolve secrets and return them as a Map. */
   async resolve(): Promise<Map<string, string>> {
     const mapFile = await this.parseFile();
@@ -143,7 +161,8 @@ export class Envilder {
     const hasOverrides =
       this.options.provider !== undefined ||
       this.options.vaultUrl !== undefined ||
-      this.options.profile !== undefined;
+      this.options.profile !== undefined ||
+      this.options.allowedVaultHosts !== undefined;
     return hasOverrides ? this.options : undefined;
   }
 }

@@ -88,6 +88,108 @@ public class SecretProviderFactoryTests : IDisposable
 	}
 
 	[Fact]
+	public void Should_RejectVaultUrl_When_SchemeIsNotHttps()
+	{
+		// Arrange
+		var config = new MapFileConfig
+		{
+			Provider = SecretProviderType.Azure,
+			VaultUrl = "http://my-vault.vault.azure.net",
+		};
+
+		// Act
+		var act = () => SecretProviderFactory.Create(config);
+
+		// Assert
+		act.Should().Throw<InvalidOperationException>()
+			.WithMessage("vaultUrl must use https:// protocol.");
+	}
+
+	[Theory]
+	[InlineData("https://attacker.example.com")]
+	[InlineData("https://my-vault.vault.azure.net.attacker.example.com")]
+	[InlineData("https://my-vaultvault.azure.net")]
+	[InlineData("https://kv-test.localhost.localstack.cloud:4566")]
+	public void Should_RejectVaultUrl_When_HostIsNotAllowed(string vaultUrl)
+	{
+		// Arrange
+		var config = new MapFileConfig
+		{
+			Provider = SecretProviderType.Azure,
+			VaultUrl = vaultUrl,
+		};
+
+		// Act
+		var act = () => SecretProviderFactory.Create(config);
+
+		// Assert
+		act.Should().Throw<InvalidOperationException>()
+			.WithMessage("vaultUrl hostname must end with one of:*");
+	}
+
+	[Fact]
+	public void Should_RejectVaultUrl_When_UrlContainsUserInformation()
+	{
+		// Arrange
+		var config = new MapFileConfig
+		{
+			Provider = SecretProviderType.Azure,
+			VaultUrl = "https://attacker.example.com@my-vault.vault.azure.net",
+		};
+
+		// Act
+		var act = () => SecretProviderFactory.Create(config);
+
+		// Assert
+		act.Should().Throw<InvalidOperationException>()
+			.WithMessage("vaultUrl must not contain user information.");
+	}
+
+	[Fact]
+	public void Should_AcceptCustomVaultHost_When_AllowedThroughOptions()
+	{
+		// Arrange
+		var config = new MapFileConfig
+		{
+			Provider = SecretProviderType.Azure,
+			VaultUrl = "https://kv-test.localhost.localstack.cloud:4566",
+		};
+		var options = new EnvilderOptions { AllowedVaultHosts = [".localhost.localstack.cloud"] };
+
+		// Act
+		var actual = SecretProviderFactory.Create(config, options);
+
+		// Assert
+		actual.Should().BeOfType<AzureKeyVaultSecretProvider>();
+	}
+
+	[Fact]
+	public void Should_KeepChallengeResourceVerification_When_VaultHostIsDefault()
+	{
+		// Arrange
+		var vaultUri = new Uri("https://my-vault.vault.microsoftazure.de");
+
+		// Act
+		var actual = SecretProviderFactory.CreateSecretClientOptions(vaultUri);
+
+		// Assert
+		actual.DisableChallengeResourceVerification.Should().BeFalse();
+	}
+
+	[Fact]
+	public void Should_DisableChallengeResourceVerification_When_VaultHostIsCustom()
+	{
+		// Arrange
+		var vaultUri = new Uri("https://kv-test.localhost.localstack.cloud:4566");
+
+		// Act
+		var actual = SecretProviderFactory.CreateSecretClientOptions(vaultUri);
+
+		// Assert
+		actual.DisableChallengeResourceVerification.Should().BeTrue();
+	}
+
+	[Fact]
 	public void Should_ThrowArgumentNullException_When_ConfigIsNull()
 	{
 		// Act

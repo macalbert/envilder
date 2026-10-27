@@ -54,7 +54,8 @@ class Envilder:
         """Return a fluent builder bound to *file_path*.
 
         Chain ``.with_provider()``, ``.with_vault_url()``,
-        or ``.with_profile()`` before calling ``.resolve()``
+        ``.with_profile()`` or ``.with_allowed_vault_hosts()`` before
+        calling ``.resolve()``
         or ``.inject()``.
         """
         return Envilder(file_path)
@@ -212,6 +213,23 @@ class Envilder:
         self._options.profile = profile
         return self
 
+    def with_allowed_vault_hosts(self, *hosts: str) -> Envilder:
+        """Trust extra Azure Key Vault host suffixes.
+
+        By default the vault URL must be ``https://`` and its host must
+        end with ``.vault.azure.net``, ``.vault.azure.cn``,
+        ``.vault.usgovcloudapi.net`` or ``.vault.microsoftazure.de``.
+        Use this for private endpoints or emulators::
+
+            secrets = (
+                Envilder.from_map_file("envilder.json")
+                .with_allowed_vault_hosts(".localhost.localstack.cloud")
+                .resolve()
+            )
+        """
+        self._options.allowed_vault_hosts = list(hosts)
+        return self
+
     def resolve(self) -> dict[str, str]:
         """Resolve secrets and return them as a dict."""
         map_file = self._parse_file()
@@ -238,6 +256,7 @@ class Envilder:
             self._options.provider is not None
             or self._options.vault_url is not None
             or self._options.profile is not None
+            or self._options.allowed_vault_hosts is not None
         )
         return self._options if has_overrides else None
 

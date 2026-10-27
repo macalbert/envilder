@@ -65,6 +65,24 @@ Values are sent to Key Vault as written, except that slashes become hyphens: a p
 such as `/myapp/prod/db-password` is read as `myapp-prod-db-password`, the same name the CLI pushes
 it under.
 
+The vault URL must use `https://` and its host must end with `.vault.azure.net`,
+`.vault.azure.cn`, `.vault.usgovcloudapi.net` or `.vault.microsoftazure.de`, the same rule the CLI
+applies. Any other URL raises `ValueError` before an Azure credential is used, so a map file cannot send
+your credentials to a host you do not control. For a private endpoint on another domain, or an
+emulator, add its host suffix with the builder:
+
+```python
+secrets = (
+    Envilder.from_map_file('envilder.json')
+    .with_allowed_vault_hosts('.vault.contoso.internal')
+    .resolve()
+)
+```
+
+The extra hosts are added to the defaults. Only add hosts you control: for them the client also
+turns off Key Vault's challenge resource check, because the challenge names the public cloud
+resource and never matches a custom host.
+
 The code is the same as for AWS. Credentials are resolved with `DefaultAzureCredential`
 (`az login`, managed identity, or environment variables):
 
@@ -207,6 +225,7 @@ EnvilderClient.inject_into_environment(secrets)
 | `with_provider(type)` | Override secret provider (AWS/Azure) |
 | `with_profile(name)` | Override AWS named profile |
 | `with_vault_url(url)` | Override Azure Key Vault URL |
+| `with_allowed_vault_hosts(*hosts)` | Trust extra Key Vault host suffixes |
 | `resolve()` | Resolve secrets, return as dict |
 | `inject()` | Resolve + inject into `os.environ` |
 
