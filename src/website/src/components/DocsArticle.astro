@@ -111,22 +111,17 @@ const execPackageJson = `{
   }
 }`;
 
-const awsVerifyCmd = `# 1. Create a test parameter
-aws ssm put-parameter --name "/test/hello" --value "world" --type SecureString --overwrite
+const awsVerifyCmd = `# 1. Push a test secret; Envilder also writes test-map.json
+envilder --map=test-map.json --key=HELLO --value=world --secret-path=/test/hello
 
-# 2. Create a minimal map file
-echo '{ "HELLO": "/test/hello" }' > test-map.json
-
-# 3. Pull with Envilder
+# 2. Pull it back with Envilder
 envilder --map=test-map.json --envfile=.env`;
 
-const azureVerifyCmd = `# 1. Create a test secret
-az keyvault secret set --vault-name {VAULT_NAME} --name "test-hello" --value "world"
+const azureVerifyCmd = `# 1. Push a test secret; Envilder also writes test-map.json
+envilder --provider=azure --vault-url=https://{VAULT_NAME}.vault.azure.net \\
+  --map=test-map.json --key=HELLO --value=world --secret-path=test-hello
 
-# 2. Create a minimal map file
-echo '{ "$config": { "provider": "azure", "vaultUrl": "https://{VAULT_NAME}.vault.azure.net" }, "HELLO": "test-hello" }' > test-map.json
-
-# 3. Pull with Envilder
+# 2. Pull it back with Envilder
 envilder --map=test-map.json --envfile=.env`;
 
 const ghaAwsTrustPolicy = `{
@@ -328,21 +323,18 @@ const gsInstallTabs = [
   { label: 'npx', lang: 'bash', code: 'npx envilder --version' },
 ];
 
-const gsAwsSecret = `aws configure
-aws ssm put-parameter --name /my-app/dev/db-password \\
-  --type SecureString --value "local-dev-password"`;
+const gsAwsSecret = `envilder --key=DB_PASSWORD --value=local-dev-password \\
+  --secret-path=/my-app/dev/db-password`;
 
-const gsAzureSecret = `az login
-az keyvault secret set --vault-name my-vault \\
-  --name my-app-dev-db-password --value "local-dev-password"`;
+const gsAzureSecret = `envilder --provider=azure --vault-url=https://my-vault.vault.azure.net \\
+  --key=DB_PASSWORD --value=local-dev-password \\
+  --secret-path=my-app-dev-db-password`;
 
 const gsAwsMap = `{
-  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "DB_PASSWORD": "/my-app/dev/db-password"
 }`;
 
 const gsAzureMap = `{
-  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "$config": {
     "provider": "azure",
     "vaultUrl": "https://my-vault.vault.azure.net"
