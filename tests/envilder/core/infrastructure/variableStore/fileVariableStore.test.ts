@@ -1322,6 +1322,28 @@ describe('FileVariableStore', () => {
         'Failed to read environment file: Permission denied',
       );
     });
+
+    it.each([
+      ['LF blank lines', `A=old${'\n'.repeat(200_000)}B=kept\n`],
+      ['CRLF blank lines', `A=old${'\r\n'.repeat(100_000)}B=kept\r\n`],
+      ['blanks inside a value', `A=old${' '.repeat(200_000)}x\nB=kept\n`],
+    ])(
+      'Should_RewriteInLinearTime_When_FileHoldsLongWhitespaceRuns (%s)',
+      async (_name, existing) => {
+        // Arrange
+        mockInMemoryFiles.set(mockEnvFilePath, existing);
+        const startedAt = performance.now();
+
+        // Act
+        await sut.saveEnvironment(mockEnvFilePath, { A: 'new' });
+
+        // Assert
+        expect({
+          parsed: dotenv.parse(mockInMemoryFiles.get(mockEnvFilePath) ?? ''),
+          fast: performance.now() - startedAt < 1000,
+        }).toEqual({ parsed: { A: 'new', B: 'kept' }, fast: true });
+      },
+    );
   });
 
   describe('loadMapFile', () => {
@@ -1397,6 +1419,25 @@ describe('FileVariableStore', () => {
 
       // Assert
       expect(result).toEqual(expectedVars);
+    });
+
+    it('Should_ParseInLinearTime_When_FileHoldsLongRunsOfBlankLines', async () => {
+      // Arrange
+      const blankLines = '\n'.repeat(200_000);
+      mockInMemoryFiles.set(
+        mockEnvFilePath,
+        `A=1${blankLines}B=2${blankLines}`,
+      );
+      const startedAt = performance.now();
+
+      // Act
+      const result = await sut.getEnvironment(mockEnvFilePath);
+
+      // Assert
+      expect({ result, fast: performance.now() - startedAt < 1000 }).toEqual({
+        result: { A: '1', B: '2' },
+        fast: true,
+      });
     });
 
     it('Should_ReturnEmptyObject_When_EnvFileDoesNotExist', async () => {
