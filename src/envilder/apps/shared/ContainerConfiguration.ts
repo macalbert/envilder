@@ -6,6 +6,10 @@ import { PushEnvToSecretsCommandHandler } from '../../core/application/pushEnvTo
 import { PushSingleCommandHandler } from '../../core/application/pushSingle/PushSingleCommandHandler.js';
 import { InvalidArgumentError } from '../../core/domain/errors/DomainErrors.js';
 import type { MapFileConfig } from '../../core/domain/MapFileConfig.js';
+import {
+  DEFAULT_PROVIDER,
+  unsupportedProviderMessage,
+} from '../../core/domain/ProviderConfiguration.js';
 import type { ILogger } from '../../core/domain/ports/ILogger.js';
 import type { ISecretMasker } from '../../core/domain/ports/ISecretMasker.js';
 import type { ISecretProvider } from '../../core/domain/ports/ISecretProvider.js';
@@ -33,6 +37,10 @@ const providerFactories: Record<string, ProviderFactory> = {
   azure: (config, options) => createAzureSecretProvider(config, options),
 };
 
+/** The providers the CLI and the GitHub Action can resolve secrets from. */
+export const SUPPORTED_PROVIDERS: readonly string[] =
+  Object.keys(providerFactories);
+
 export function configureInfrastructureServices(
   container: Container,
   config: MapFileConfig = {},
@@ -58,7 +66,7 @@ export function configureInfrastructureServices(
       .inSingletonScope();
   }
 
-  const selectedProvider = config.provider?.toLowerCase() || 'aws';
+  const selectedProvider = config.provider?.toLowerCase() || DEFAULT_PROVIDER;
 
   if (config.profile && selectedProvider !== 'aws') {
     logger.warn(
@@ -71,9 +79,7 @@ export function configureInfrastructureServices(
   const factory = providerFactories[selectedProvider];
   if (!factory) {
     throw new InvalidArgumentError(
-      `Unsupported provider: ${config.provider}.` +
-        ` Supported providers:` +
-        ` ${Object.keys(providerFactories).join(', ')}`,
+      unsupportedProviderMessage(`${config.provider}`, SUPPORTED_PROVIDERS),
     );
   }
   const secretProvider = factory(config, options, logger);

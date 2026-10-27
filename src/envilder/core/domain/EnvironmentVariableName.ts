@@ -102,7 +102,11 @@ export function nonPortableEnvFileNamesMessage(names: string[]): string {
   );
 }
 
-function quoteName(name: string): string {
+/**
+ * Quotes an untrusted name for a message, so a name carrying a line
+ * terminator cannot break the message across lines.
+ */
+export function quoteName(name: string): string {
   // JSON.stringify escapes CR, LF and the other control characters, but leaves
   // U+2028/U+2029 literal even though they terminate a line in JavaScript.
   return JSON.stringify(name)

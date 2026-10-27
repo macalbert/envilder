@@ -1,3 +1,15 @@
+## [0.18.0] - 2026-10-28
+
+### Changed
+
+* **Shared provider messages**: The unsupported-provider and missing
+  `vaultUrl` messages the Action bundle shares with the CLI now come from one
+  place, also used by the new CLI-only `envilder validate --offline`. The
+  Action's pull flow, inputs, outputs and messages are unchanged
+  ([#557](https://github.com/macalbert/envilder/issues/557))
+
+---
+
 ## [0.17.1] - 2026-10-27
 
 ### Fixed
