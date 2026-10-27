@@ -5,7 +5,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
-## [0.15.2] - 2026-10-25
+## [0.16.1] - 2026-10-27
 
 ### Fixed
 
@@ -20,6 +20,34 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   `/` lines are updated in place instead of duplicated. `=`, line breaks,
   `U+2028`/`U+2029`, `__proto__` and the other rejected names stay rejected
   ([#511](https://github.com/macalbert/envilder/issues/511))
+
+---
+
+## [0.16.0] - 2026-10-25
+
+### Added
+
+* **Single-secret push records the mapping in the map file**:
+  `envilder --key=API_KEY --value=... --secret-path=...` now also creates or
+  updates `envilder.json` (or the file given with `--map`) with
+  `"API_KEY": "<secret-path>"`, so the next `envilder` or `envilder exec` works
+  without writing the map file by hand. Every run logs whether the file was
+  created, updated or already up to date. A new file gets `$config` for Azure,
+  and `$schema` only when its name is not `envilder.json` or `envilder.*.json`
+  (SchemaStore already covers those); an existing file keeps its key order, indentation, line
+  endings and `$config`. If the variable is already mapped to a different path,
+  the command fails before pushing. If the map file targets another provider or
+  vault, the secret is still pushed and a warning explains that the mapping was
+  not added. If writing the map file or the push fails, the map file is
+  restored. The secret value and the AWS profile are never written
+* **`--no-map-update`**: push a single secret without reading, creating or
+  updating any map file
+
+### Changed
+
+* A single-secret push now writes `envilder.json` in the current directory by
+  default. Use `--no-map-update` to keep the previous behavior. An explicit
+  `--map` that does not exist is created instead of being rejected
 
 ---
 

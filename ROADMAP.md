@@ -29,7 +29,7 @@ Versions refer to each component's own changelog: [CLI](./docs/changelogs/cli.md
 | **`.env` file generation** | CLI v0.1.4 | Core functionality |
 | **AWS SSM Parameter Store** | CLI v0.1.4 | Default provider |
 | **AWS profile support** | CLI v0.3.0 | `--profile` flag |
-| **Push mode** (`--push`) | CLI v0.6.0 | Upload a `.env` file or a single variable (`--key`, `--value`, `--secret-path`) to the provider. Throttling retry and duplicate path checks since v0.7.7. [Guide](./docs/push-command.md) |
+| **Push mode** (`--push`) | CLI v0.6.0 | Upload a `.env` file or a single variable (`--key`, `--value`, `--secret-path`) to the provider. Throttling retry and duplicate path checks since v0.7.7. Since v0.16.0 a single-variable push also records the mapping in the map file (opt out with `--no-map-update`). [Guide](./docs/push-command.md) |
 | **GitHub Action** | Action v0.7.0 | Pull secrets into `.env` files during workflow runs. [Documentation](./github-action/README.md) |
 | **Azure Key Vault** | CLI v0.8.0, Action v0.8.0 | `--provider`, `--vault-url` and the `$config` map-file section. Precedence: flags > `$config` > defaults ([#90](https://github.com/macalbert/envilder/pull/90)) |
 | **Documentation website** | CLI v0.9.1 | [envilder.com](https://envilder.com), in English, Spanish and Catalan. [Setup guide](./docs/requirements-installation.md) |

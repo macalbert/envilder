@@ -484,4 +484,251 @@ describe('Cli', () => {
     expect(loggedMessages).not.toContain('placeholder-signature');
     expect(loggedMessages).not.toContain('fragment');
   });
+
+  describe('single-secret push map file', () => {
+    const pushSingleArgs = [
+      '--key',
+      'API_KEY',
+      '--value',
+      'secret',
+      '--secret-path',
+      '/my/path',
+    ];
+
+    async function mockFileExists(exists: boolean) {
+      const { existsSync } = await import('node:fs');
+      vi.mocked(existsSync).mockReturnValue(exists);
+    }
+
+    async function mockedReadMapFileConfig() {
+      const { readMapFileConfig } = await import(
+        '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore'
+      );
+      return vi.mocked(readMapFileConfig);
+    }
+
+    it('Should_TargetDefaultEnvilderJson_When_PushSingleHasNoMapAndFileDoesNotExist', async () => {
+      // Arrange
+      await mockFileExists(false);
+      const readMapFileConfig = await mockedReadMapFileConfig();
+      process.argv = ['node', 'cli.js', ...pushSingleArgs];
+      const fromCliOptionsSpy = vi.spyOn(
+        DispatchActionCommand,
+        'fromCliOptions',
+      );
+
+      // Act
+      await main();
+
+      // Assert
+      expect(fromCliOptionsSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          map: 'envilder.json',
+          mapTarget: { provider: 'aws' },
+        }),
+      );
+      expect(readMapFileConfig).not.toHaveBeenCalled();
+    });
+
+    it('Should_CreateExplicitMap_When_PushSingleMapDoesNotExist', async () => {
+      // Arrange
+      await mockFileExists(false);
+      const readMapFileConfig = await mockedReadMapFileConfig();
+      process.argv = [
+        'node',
+        'cli.js',
+        '--map',
+        'new-map.json',
+        ...pushSingleArgs,
+      ];
+      const fromCliOptionsSpy = vi.spyOn(
+        DispatchActionCommand,
+        'fromCliOptions',
+      );
+
+      // Act
+      await main();
+
+      // Assert
+      expect(fromCliOptionsSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ map: 'new-map.json' }),
+      );
+      expect(readMapFileConfig).not.toHaveBeenCalled();
+    });
+
+    it('Should_ReadExistingMapConfig_When_PushSingleMapExists', async () => {
+      // Arrange
+      await mockFileExists(true);
+      const readMapFileConfig = await mockedReadMapFileConfig();
+      readMapFileConfig.mockResolvedValue({
+        provider: 'azure',
+        vaultUrl: 'https://test.vault.azure.net',
+      });
+      process.argv = ['node', 'cli.js', ...pushSingleArgs];
+      const fromCliOptionsSpy = vi.spyOn(
+        DispatchActionCommand,
+        'fromCliOptions',
+      );
+
+      // Act
+      await main();
+
+      // Assert
+      expect(readMapFileConfig).toHaveBeenCalledWith('envilder.json');
+      expect(fromCliOptionsSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mapTarget: {
+            provider: 'azure',
+            vaultUrl: 'https://test.vault.azure.net',
+          },
+        }),
+      );
+    });
+
+    it('Should_LetFlagsOverrideMapConfigInTarget_When_PushSingleHasProviderFlags', async () => {
+      // Arrange
+      await mockFileExists(true);
+      const readMapFileConfig = await mockedReadMapFileConfig();
+      readMapFileConfig.mockResolvedValue({ provider: 'aws' });
+      process.argv = [
+        'node',
+        'cli.js',
+        '--provider',
+        'azure',
+        '--vault-url',
+        'https://flag.vault.azure.net',
+        ...pushSingleArgs,
+      ];
+      const fromCliOptionsSpy = vi.spyOn(
+        DispatchActionCommand,
+        'fromCliOptions',
+      );
+
+      // Act
+      await main();
+
+      // Assert
+      expect(fromCliOptionsSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mapTarget: {
+            provider: 'azure',
+            vaultUrl: 'https://flag.vault.azure.net',
+          },
+        }),
+      );
+    });
+
+    it('Should_NotIncludeProfileInTarget_When_PushSingleUsesProfile', async () => {
+      // Arrange
+      await mockFileExists(false);
+      process.argv = [
+        'node',
+        'cli.js',
+        '--profile',
+        testProfile,
+        ...pushSingleArgs,
+      ];
+      const fromCliOptionsSpy = vi.spyOn(
+        DispatchActionCommand,
+        'fromCliOptions',
+      );
+
+      // Act
+      await main();
+
+      // Assert
+      expect(fromCliOptionsSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ mapTarget: { provider: 'aws' } }),
+      );
+    });
+
+    it('Should_IgnoreMapFileEntirely_When_NoMapUpdateIsGiven', async () => {
+      // Arrange
+      await mockFileExists(true);
+      const readMapFileConfig = await mockedReadMapFileConfig();
+      readMapFileConfig.mockResolvedValue({
+        provider: 'azure',
+        vaultUrl: 'https://test.vault.azure.net',
+      });
+      const infraSpy = vi.spyOn(Startup.prototype, 'configureInfrastructure');
+      process.argv = [
+        'node',
+        'cli.js',
+        '--map',
+        'map.json',
+        '--no-map-update',
+        ...pushSingleArgs,
+      ];
+      const fromCliOptionsSpy = vi.spyOn(
+        DispatchActionCommand,
+        'fromCliOptions',
+      );
+
+      // Act
+      await main();
+
+      // Assert
+      expect(readMapFileConfig).not.toHaveBeenCalled();
+      expect(infraSpy).toHaveBeenCalledWith({}, expect.any(Object));
+      expect(fromCliOptionsSpy.mock.calls[0][0].map).toBeUndefined();
+      expect(fromCliOptionsSpy.mock.calls[0][0].mapTarget).toBeUndefined();
+    });
+
+    it('Should_UseFlagsOnly_When_NoMapUpdateAndProviderFlagsAreGiven', async () => {
+      // Arrange
+      await mockFileExists(true);
+      const infraSpy = vi.spyOn(Startup.prototype, 'configureInfrastructure');
+      process.argv = [
+        'node',
+        'cli.js',
+        '--no-map-update',
+        '--provider',
+        'azure',
+        '--vault-url',
+        'https://flag.vault.azure.net',
+        ...pushSingleArgs,
+      ];
+
+      // Act
+      await main();
+
+      // Assert
+      expect(infraSpy).toHaveBeenCalledWith(
+        { provider: 'azure', vaultUrl: 'https://flag.vault.azure.net' },
+        expect.any(Object),
+      );
+    });
+
+    it('Should_StillReadMapFile_When_NoMapUpdateIsGivenOutsideSinglePush', async () => {
+      // Arrange
+      await mockFileExists(true);
+      const readMapFileConfig = await mockedReadMapFileConfig();
+      process.argv = [
+        'node',
+        'cli.js',
+        '--map',
+        'map.json',
+        '--envfile',
+        '.env',
+        '--no-map-update',
+      ];
+
+      // Act
+      await main();
+
+      // Assert
+      expect(readMapFileConfig).toHaveBeenCalledWith('map.json');
+    });
+
+    it('Should_ThrowInvalidArgumentError_When_PushSingleMapIsEmptyString', async () => {
+      // Arrange
+      process.argv = ['node', 'cli.js', '--map', '   ', ...pushSingleArgs];
+
+      // Act
+      const act = () => main();
+
+      // Assert
+      await expect(act).rejects.toBeInstanceOf(InvalidArgumentError);
+    });
+  });
 });

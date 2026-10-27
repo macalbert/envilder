@@ -94,6 +94,56 @@ describe('DispatchActionCommandHandler', () => {
     expect(mockPushSingleHandler.handle).toHaveBeenCalled();
   });
 
+  it('Should_PassMapFileAndTarget_When_PushSingleModeHasThem', async () => {
+    // Arrange
+    const target = {
+      provider: 'azure',
+      vaultUrl: 'https://my-vault.vault.azure.net',
+    };
+    const command = new DispatchActionCommand(
+      'path/to/map.json',
+      undefined,
+      'TEST_KEY',
+      'test-value',
+      '/test/path',
+      undefined,
+      OperationMode.PUSH_SINGLE,
+      undefined,
+      [],
+      undefined,
+      target,
+    );
+
+    // Act
+    await sut.handleCommand(command);
+
+    // Assert
+    expect(mockPushSingleHandler.handle).toHaveBeenCalledWith(
+      expect.objectContaining({ mapFile: 'path/to/map.json', target }),
+    );
+  });
+
+  it('Should_NotPassMapFile_When_PushSingleModeHasNoMap', async () => {
+    // Arrange
+    const command = new DispatchActionCommand(
+      undefined,
+      undefined,
+      'TEST_KEY',
+      'test-value',
+      '/test/path',
+      undefined,
+      OperationMode.PUSH_SINGLE,
+    );
+
+    // Act
+    await sut.handleCommand(command);
+
+    // Assert
+    expect(mockPushSingleHandler.handle).toHaveBeenCalledWith(
+      expect.objectContaining({ mapFile: undefined }),
+    );
+  });
+
   it('Should_ThrowError_When_MapAndEnvfileAreMissingForExportMode', async () => {
     // Arrange
     const command = new DispatchActionCommand(

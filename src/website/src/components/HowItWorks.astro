@@ -140,10 +140,14 @@ const override = await Envilder.fromMapFile('envilder.json')
           <p>
             {t.howItWorks.steps[0].description}
           </p>
+          <CodeBlock lang="bash" filename="terminal" code={`$ envilder --key=API_KEY --value=s3cret --secret-path=/my-app/prod/api-key
+✓ Created envilder.json
+
+$ envilder --key=DB_PASSWORD --value=pa55word --secret-path=/my-app/prod/db-password
+✓ Added DB_PASSWORD to envilder.json`} />
           <CodeBlock lang="json" filename="envilder.json" code={`{
-  "DB_PASSWORD": "/my-app/prod/db-password",
-  "API_KEY":     "/my-app/prod/api-key",
-  "SECRET_TOKEN": "/my-app/prod/secret-token"
+  "API_KEY": "/my-app/prod/api-key",
+  "DB_PASSWORD": "/my-app/prod/db-password"
 }`} />
         </div>
       </div>
@@ -165,7 +169,7 @@ const override = await Envilder.fromMapFile('envilder.json')
             {t.howItWorks.steps[1].description}
           </p>
           <CodeBlock lang="bash" filename="terminal" code={`$ envilder exec -- npm start
-envilder: 3 secrets resolved (aws, profile=default) → npm …
+envilder: 2 secrets resolved (aws, profile=default) → npm …
 
 > my-app@1.0.0 start
 > node server.js

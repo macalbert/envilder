@@ -8,4 +8,13 @@ export interface IVariableStore {
     destination: string,
     envVariables: Record<string, string>,
   ): Promise<void>;
+  /** Raw map-file text, or `null` when the file does not exist. */
+  readMapFileContent(source: string): Promise<string | null>;
+  /** Writes map-file text as given; never creates missing directories. */
+  writeMapFileContent(destination: string, content: string): Promise<void>;
+  /**
+   * Puts a map file back as it was: writes `original`, or removes the file
+   * when `original` is `null` because it did not exist before.
+   */
+  restoreMapFile(destination: string, original: string | null): Promise<void>;
 }

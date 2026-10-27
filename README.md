@@ -33,6 +33,9 @@ them from AWS SSM or Azure Key Vault. The same mapping file works in local dev (
 CI/CD (GitHub Action), and application startup (runtime SDKs).
 
 ```bash
+# Push a secret: it is stored in your cloud and mapped in envilder.json
+npx envilder --key=API_KEY --value=s3cret --secret-path=/my-app/api-key
+
 # Zero-config: uses envilder.json and .env by default
 npx envilder
 
@@ -100,45 +103,61 @@ Or install globally:
 npm install -g envilder
 ```
 
-> **Requirements:** Node.js v22.12+. Configure credentials and read access for either AWS SSM
-> or Azure Key Vault.
+> **Requirements:** Node.js v22.12+. Configure credentials for either AWS SSM or Azure Key Vault,
+> with read access, plus write access to push secrets.
 > See [full requirements](docs/requirements-installation.md).
 
-### 2. Create a mapping file (`envilder.json`)
+### 2. Map your secrets (`envilder.json`)
+
+Push a secret and Envilder writes the mapping for you:
+
+```bash
+npx envilder --key=API_KEY --value=s3cret --secret-path=/my-app/api-key
+# ✓ Created envilder.json
+
+npx envilder --key=DB_PASSWORD --value=pa55word --secret-path=/my-app/db/password
+# ✓ Added DB_PASSWORD to envilder.json
+```
+
+The secrets are stored in AWS SSM, and `envilder.json` now maps each variable to its secret path:
 
 ```json
 {
-  "$schema": "https://envilder.com/schema/map-file.v1.json",
-  "DB_PASSWORD": "/my-app/db/password",
-  "API_KEY": "/my-app/api-key"
+  "API_KEY": "/my-app/api-key",
+  "DB_PASSWORD": "/my-app/db/password"
 }
 ```
 
-### 3. Generate your `.env` file
+The values are never written to the file, so it is safe to commit and review in PRs. If your secrets already exist
+in the cloud, write the same file by hand instead. Use `--map=<file>` to write a different file, or
+`--no-map-update` to push without touching any map file.
+See the [Push Command Guide](docs/push-command.md#single-variable-push) for the details.
 
-```bash
-npx envilder
-```
+> 💡 Using Azure Key Vault? Add `--provider=azure --vault-url=https://my-vault.vault.azure.net` to the first push
+> and Envilder writes the matching `$config`. See [Mapping File Format](#️-mapping-file-format) below.
 
-That's it. With `envilder.json` in your current directory, no flags are needed — `--map` defaults to `envilder.json` and
-`--envfile` defaults to `.env`. Your secrets are pulled from AWS SSM and written to `.env`.
-Add `.env` to `.gitignore`. The mapping file is versioned and reviewable in PRs.
-
-> 💡 Using Azure Key Vault? Add a `$config` section to your mapping file.
-> See [Mapping File Format](#️-mapping-file-format) below.
-
-### 4. Or skip the `.env` file entirely
+### 3. Run your app with the secrets
 
 ```bash
 npx envilder exec -- npm run dev
 ```
 
-`envilder exec` resolves the same mapping and starts your command with the secrets in its environment.
+`envilder exec` resolves the mapping and starts your command with the secrets in its environment.
 Nothing is written to disk. Envilder options go before the command (or before an optional `--`); everything
 after belongs to your command. Exec mode is fail-closed: the command does not start if any secret is missing.
 It is not a sandbox: your command and everything it starts can read the secrets.
 
 📖 See the [Exec Command Guide](docs/exec-command.md) for exit codes, signals and GitHub Actions masking.
+
+### 4. Need a `.env` file? Pull it
+
+```bash
+npx envilder
+```
+
+With `envilder.json` in your current directory, no flags are needed — `--map` defaults to `envilder.json` and
+`--envfile` defaults to `.env`. Your secrets are pulled from AWS SSM and written to `.env`.
+Add `.env` to `.gitignore` and treat it as a secret.
 
 💡 Runnable examples: [envilder-examples](https://github.com/macalbert/envilder-examples) (Testcontainers and Aspire for
 .NET, Python and TypeScript, AWS SSM and Azure Key Vault, plus `envilder exec`).
@@ -147,7 +166,7 @@ It is not a sandbox: your command and everything it starts can read the secrets.
 
 Watch how easy it is to automate your `.env` management in less than 1 minute:
 
-![Watch the video](https://github.com/user-attachments/assets/9f194143-117d-49f3-a6fb-f400040ea514)
+![Watch the video](https://github.com/user-attachments/assets/f62fc9da-58d3-45c4-ad11-31eee4b1901e)
 
 ## 🗺️ Mapping File Format
 
@@ -156,8 +175,10 @@ what secrets your app needs and where they live in your cloud provider. The same
 the CLI, the GitHub Action, and the runtime SDKs. You can optionally include a `$config` section
 to declare which provider and settings to use.
 
-Add `"$schema"` to enable IDE autocomplete, inline documentation, and validation for your map
-files. The schema is published at
+Editors that use [SchemaStore](https://www.schemastore.org/) (VS Code, JetBrains IDEs) give you autocomplete,
+inline documentation and validation for `envilder.json` and `envilder.*.json` files automatically.
+For any other file name, add `"$schema": "https://envilder.com/schema/map-file.v1.json"`; a single-secret push
+adds it for you when the file name needs it. The schema is published at
 [envilder.com/schema/map-file.v1.json](https://envilder.com/schema/map-file.v1.json).
 
 ### Basic Format (AWS SSM, default)
@@ -166,7 +187,6 @@ When no `$config` is present, Envilder defaults to AWS SSM Parameter Store:
 
 ```json
 {
-  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "API_KEY": "/myapp/prod/api-key",
   "DB_PASSWORD": "/myapp/prod/db-password",
   "SECRET_TOKEN": "/myapp/prod/secret-token"
@@ -184,7 +204,6 @@ and uses all other keys as secret mappings:
 
 ```json
 {
-  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "$config": {
     "provider": "aws",
     "profile": "prod-account"
@@ -198,7 +217,6 @@ and uses all other keys as secret mappings:
 
 ```json
 {
-  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "$config": {
     "provider": "azure",
     "vaultUrl": "https://my-vault.vault.azure.net"
