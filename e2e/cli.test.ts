@@ -202,6 +202,24 @@ describe('Envilder (E2E)', () => {
     expect(actual.output).toContain('error');
   });
 
+  it('Should_RejectMapFile_When_KeyShadowsObjectPrototype', async () => {
+    // Arrange: raw JSON so `__proto__` is an own key, as JSON.parse yields it.
+    const protoMapPath = join(tempDir, `envilder-proto-${runId}.json`);
+    const protoEnvPath = join(tempDir, `proto-${runId}.env`);
+    await writeFile(protoMapPath, `{"__proto__":"${ssmPrefix}/Proto"}`);
+    const params = ['--map', protoMapPath, '--envfile', protoEnvPath];
+
+    // Act
+    const actual = await runCommand(envilder, params);
+
+    // Assert
+    expect(actual.code).not.toBe(0);
+    expect(actual.output).toContain(
+      'Unsupported environment variable name "__proto__"',
+    );
+    expect(existsSync(protoEnvPath)).toBe(false);
+  });
+
   it('Should_ShowErrorMessage_When_NoMapFlagAndEnvilderJsonAbsent', async () => {
     // Arrange
     const emptyDir = await mkdtemp(
