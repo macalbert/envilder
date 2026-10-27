@@ -228,7 +228,7 @@ pip install envilder
 
 Requirements:
 
-- Python 3.10+
+- Python 3.11+
 - **AWS provider**: AWS credentials configured via CLI, environment
   variables, or IAM role (`boto3` resolves credentials automatically)
 - **Azure provider**: Azure credentials via `az login`, managed identity,
