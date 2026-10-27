@@ -94,13 +94,14 @@ export class PushEnvToSecretsCommandHandler {
       const existing = pathToValueMap.get(secretPath);
       if (existing) {
         if (existing.value !== envValue) {
-          const existingMasked = new EnvironmentVariable(
+          const existingMasked = EnvironmentVariable.secret(
             existing.sourceKeys[0],
             existing.value,
-            true,
           ).maskedValue;
-          const newMasked = new EnvironmentVariable(envKey, envValue, true)
-            .maskedValue;
+          const newMasked = EnvironmentVariable.secret(
+            envKey,
+            envValue,
+          ).maskedValue;
           throw new Error(
             `Conflicting values for secret path '${EnvironmentVariable.maskSecretPath(secretPath)}': ` +
               `'${existing.sourceKeys[0]}' has value '${existingMasked}' ` +
@@ -148,7 +149,7 @@ export class PushEnvToSecretsCommandHandler {
     value: string,
     sourceKeys: string[],
   ): Promise<void> {
-    const envVariable = new EnvironmentVariable(sourceKeys[0], value, true);
+    const envVariable = EnvironmentVariable.secret(sourceKeys[0], value);
     await this.secretProvider.setSecret(secretPath, value);
 
     const keysDescription =

@@ -55,10 +55,9 @@ export class PushSingleCommandHandler {
         `  ${pc.dim('\u2192 ')}${pc.bold(command.key)}${pc.dim(' \u2192 ')}${pc.dim(maskedPath)}`,
       );
 
-      const envVariable = new EnvironmentVariable(
+      const envVariable = EnvironmentVariable.secret(
         command.key,
         command.value,
-        true,
       );
 
       const plan = await this.planMapFileUpdate(command);

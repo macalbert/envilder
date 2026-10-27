@@ -171,7 +171,7 @@ export class SecretResolver {
       }
 
       this.secretMasker.mask(value);
-      const masked = new EnvironmentVariable(envVar, value, true).maskedValue;
+      const masked = EnvironmentVariable.secret(envVar, value).maskedValue;
 
       return { status: 'resolved', envVar, value, masked };
     } catch (error) {
