@@ -2,10 +2,37 @@
 
 ## Overview
 
-The Envilder GitHub Action allows you to seamlessly pull secrets from AWS Systems Manager (SSM)
-Parameter Store or Azure Key Vault into `.env` files within your GitHub Actions workflows. This
-eliminates the need to manually manage environment variables in CI/CD pipelines and ensures your
-applications always have the latest configuration from your centralized secret store.
+The Envilder GitHub Action loads secrets from AWS Systems Manager (SSM) Parameter Store or Azure
+Key Vault into your GitHub Actions jobs. By default it exports them as environment variables for
+the later steps of the job, without writing a `.env` file. It can also run a single command with
+the secrets, or write a `.env` file when a tool needs one.
+
+## Modes
+
+| Mode | Inputs | Who can read the secrets | Writes a file |
+|------|--------|--------------------------|---------------|
+| Job environment (default) | `map-file` only | Every later step of the job | No |
+| Command | `command` | Only that command and the processes it starts | No |
+| `.env` file | `env-file` | Any step or tool that reads the file | Yes |
+
+- **Job environment.** The action appends the secrets to the runner's `GITHUB_ENV` file, and
+  the runner sets them in the environment of **every step after it in the same job**, including
+  third-party actions. Steps read them as normal variables (`process.env.DB_PASSWORD`,
+  `$DB_PASSWORD`, `${{ env.DB_PASSWORD }}`). Other jobs and Docker containers do not inherit
+  them.
+- **Command.** The action runs the command with `bash` (like a `run:` step) and the secrets in
+  its environment, and ends the step with the command's exit code. The secrets exist **only in
+  that process**: they are not exported, so later steps never see them.
+- **`.env` file.** The previous behavior: the action writes or updates the file. Use it only
+  when a tool needs a file. `env-file` and `command` cannot be combined.
+
+Job environment and command are fail-closed: if any secret is missing or empty, the step fails
+and nothing is exported or passed to the command.
+
+Not writing a `.env` file avoids accidental leaks (artifacts, caches, Docker build contexts,
+commits, files left on self-hosted runners). It does not protect against malicious code running
+in the same job, which can read environment variables as easily as a file. For the smallest
+exposure, use `command`.
 
 ## Prerequisites
 
@@ -79,11 +106,11 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: 🔐 Pull Secrets from AWS SSM
+      - name: 🔐 Load Secrets from AWS SSM
         uses: macalbert/envilder/github-action@v0
         with:
           map-file: config/envilder.json
-          env-file: .env
+          # No env-file: the secrets are environment variables of the later steps
 
       - name: 🍄 Setup Node.js
         uses: actions/setup-node@v6
@@ -135,12 +162,6 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: us-east-1
 
-      - name: 🔐 Pull ${{ inputs.environment }} secrets
-        uses: macalbert/envilder/github-action@v0
-        with:
-          map-file: config/${{ inputs.environment }}/envilder.json
-          env-file: .env
-
       - uses: actions/setup-node@v6
         with:
           node-version: "22.x"
@@ -148,7 +169,12 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - run: pnpm deploy
+
+      - name: 🚀 Deploy with ${{ inputs.environment }} secrets
+        uses: macalbert/envilder/github-action@v0
+        with:
+          map-file: config/${{ inputs.environment }}/envilder.json
+          command: pnpm deploy   # the secrets exist only for this command
 ```
 
 ## Inputs
@@ -156,7 +182,8 @@ jobs:
 | Input | Description | Required | Default |
 |-------|-------------|----------|---------|
 | `map-file` | Path to the JSON file mapping environment variables to secret paths | ✅ Yes | - |
-| `env-file` | Path to the `.env` file to generate | ✅ Yes | - |
+| `env-file` | Path to a `.env` file to write instead of exporting to the job environment | ❌ No | - |
+| `command` | Command to run with the secrets in its environment only (not exported). Cannot be combined with `env-file` | ❌ No | - |
 | `provider` | Cloud provider to use: `aws` or `azure`. Can also be set via `$config.provider` in the map file. | ❌ No |`aws`|
 | `vault-url` | Azure Key Vault URL (overrides `$config.vaultUrl` in map file) | ❌ No | - |
 
@@ -167,7 +194,7 @@ jobs:
 
 | Output | Description |
 |--------|-------------|
-| `env-file-path` | Path to the generated `.env` file (same as input `env-file`) |
+| `env-file-path` | Path to the generated `.env` file (same as input `env-file`; empty without it) |
 
 ## Parameter Mapping File
 

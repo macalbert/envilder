@@ -1,8 +1,15 @@
 import 'reflect-metadata';
 import { execSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { unlink } from 'node:fs/promises';
+import { EOL, tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -177,6 +184,98 @@ describe('GitHub Action (E2E)', () => {
     }
   });
 
+  describe('Without env-file', () => {
+    let workDirectory: string;
+    let githubEnvPath: string;
+
+    beforeEach(() => {
+      workDirectory = mkdtempSync(join(tmpdir(), 'envilder-gha-e2e-'));
+      githubEnvPath = join(workDirectory, 'github_env');
+      writeFileSync(githubEnvPath, '');
+    });
+
+    afterEach(() => {
+      rmSync(workDirectory, { recursive: true, force: true });
+    });
+
+    it('Should_ExportSecretsToJobEnvironment_When_EnvFileIsNotSet', async () => {
+      // Arrange
+      const ssmParams = readMappings(mapFilePath);
+      for (const [key, ssmPath] of Object.entries(ssmParams)) {
+        await SetParameterSsm(ssmPath, `test-value-for-${key}`);
+      }
+
+      // Act
+      const result = runGitHubAction({
+        mapFile: mapFilePath,
+        githubEnv: githubEnvPath,
+      });
+
+      // Assert
+      expect(result.code).toBe(0);
+      expect(existsSync(envFilePath)).toBe(false);
+      const exported = parseGitHubEnvFile(readFileSync(githubEnvPath, 'utf8'));
+      for (const [key, ssmPath] of Object.entries(ssmParams)) {
+        expect(exported[key]).toBe(await GetParameterSsm(ssmPath));
+      }
+    });
+
+    it('Should_RunCommandWithSecretsWithoutExporting_When_CommandIsSet', async () => {
+      // Arrange
+      const ssmParams = readMappings(mapFilePath);
+      for (const [key, ssmPath] of Object.entries(ssmParams)) {
+        await SetParameterSsm(ssmPath, `test-value-for-${key}`);
+      }
+      const [key] = Object.keys(ssmParams);
+      const outputPath = join(workDirectory, 'command-output').replace(
+        /\\/g,
+        '/',
+      );
+
+      // Act
+      const result = runGitHubAction({
+        mapFile: mapFilePath,
+        githubEnv: githubEnvPath,
+        command: `printf '%s' "$${key}" > '${outputPath}'`,
+      });
+
+      // Assert
+      expect(result.code).toBe(0);
+      expect(readFileSync(outputPath, 'utf8')).toBe(`test-value-for-${key}`);
+      expect(readFileSync(githubEnvPath, 'utf8')).toBe('');
+    });
+
+    it('Should_EndWithCommandExitCode_When_CommandFails', async () => {
+      // Arrange
+      const ssmParams = readMappings(mapFilePath);
+      for (const [key, ssmPath] of Object.entries(ssmParams)) {
+        await SetParameterSsm(ssmPath, `test-value-for-${key}`);
+      }
+
+      // Act
+      const result = runGitHubAction({
+        mapFile: mapFilePath,
+        githubEnv: githubEnvPath,
+        command: 'exit 7',
+      });
+
+      // Assert
+      expect(result.code).toBe(7);
+    });
+
+    it('Should_ExportNothing_When_ASecretIsMissing', () => {
+      // Act
+      const result = runGitHubAction({
+        mapFile: mapFilePath,
+        githubEnv: githubEnvPath,
+      });
+
+      // Assert
+      expect(result.code).not.toBe(0);
+      expect(readFileSync(githubEnvPath, 'utf8')).toBe('');
+    });
+  });
+
   it('Should_FailWithError_When_RequiredInputsAreMissing', () => {
     // Act
     const result = runGitHubAction({
@@ -317,7 +416,12 @@ describe('GitHub Action (E2E)', () => {
  * Simulates GitHub Actions environment by running the action entry point
  * with INPUT_* environment variables (same as real GitHub Actions workflow)
  */
-function runGitHubAction(inputs: { mapFile: string; envFile: string }): {
+function runGitHubAction(inputs: {
+  mapFile: string;
+  envFile?: string;
+  command?: string;
+  githubEnv?: string;
+}): {
   code: number;
   output: string;
   error: string;
@@ -332,7 +436,9 @@ function runGitHubAction(inputs: { mapFile: string; envFile: string }): {
         ...process.env,
         // GitHub Actions sets these automatically from action inputs
         INPUT_MAP_FILE: inputs.mapFile,
-        INPUT_ENV_FILE: inputs.envFile,
+        INPUT_ENV_FILE: inputs.envFile ?? '',
+        INPUT_COMMAND: inputs.command ?? '',
+        GITHUB_ENV: inputs.githubEnv ?? '',
         // Point AWS SDK to LocalStack
         AWS_ENDPOINT_URL: localstackEndpoint,
         AWS_REGION: 'us-east-1',
@@ -352,6 +458,28 @@ function runGitHubAction(inputs: { mapFile: string; envFile: string }): {
 }
 
 // Helper functions
+/**
+ * Parses the `NAME<<DELIMITER` blocks the action appends to GITHUB_ENV.
+ */
+function parseGitHubEnvFile(content: string): Record<string, string> {
+  const lines = content.split(EOL);
+  const variables: Record<string, string> = {};
+  for (let index = 0; index < lines.length; index++) {
+    const heredoc = lines[index].indexOf('<<');
+    if (heredoc === -1) {
+      continue;
+    }
+    const name = lines[index].slice(0, heredoc);
+    const delimiter = lines[index].slice(heredoc + 2);
+    const valueLines: string[] = [];
+    for (index++; lines[index] !== delimiter; index++) {
+      valueLines.push(lines[index]);
+    }
+    variables[name] = valueLines.join(EOL);
+  }
+  return variables;
+}
+
 function readMappings(mapPath: string): Record<string, string> {
   const raw = JSON.parse(readFileSync(mapPath, 'utf8'));
   return Object.fromEntries(

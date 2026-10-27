@@ -20,7 +20,7 @@ on:
       - "github-action/action.yml"
       - "src/envilder/apps/gha/**"
       - "tests/envilder/apps/gha/**"
-      - "e2e/github-action.test.ts"
+      - "e2e/gha.test.ts"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
@@ -79,3 +79,35 @@ jobs:
       - name: 🧹 Clean up test file
         if: always()
         run: rm -f .env.test
+
+      - name: 🔐 Test Action - Command (secrets only in this step)
+        uses: ./github-action
+        with:
+          map-file: e2e/sample/envilder.json
+          command: test -n "$TOKEN_SECRET" && echo "✅ The command sees TOKEN_SECRET"
+
+      - name: ✅ Verify the command did not export secrets
+        run: |
+          if [ -n "${TOKEN_SECRET:-}" ]; then
+            echo "❌ TOKEN_SECRET leaked to a later step!"
+            exit 1
+          fi
+          echo "✅ TOKEN_SECRET is not visible after the command step"
+
+      - name: 🔐 Test Action - Export to the job environment
+        uses: ./github-action
+        with:
+          map-file: e2e/sample/envilder.json
+
+      - name: ✅ Verify secrets reached later steps
+        run: |
+          if [ -z "${TOKEN_SECRET:-}" ]; then
+            echo "❌ TOKEN_SECRET was not exported!"
+            exit 1
+          fi
+          echo "✅ TOKEN_SECRET is available: $TOKEN_SECRET"
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "❌ The export left files in the workspace:"
+            git status --porcelain
+            exit 1
+          fi
