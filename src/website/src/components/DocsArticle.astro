@@ -547,11 +547,9 @@ const mfErrors = [
         <h2>{gs.secretTitle}</h2>
         <p>{gs.secretDesc}</p>
         <TabbedCodeBlock tabs={[
-          { label: gs.tabAws, lang: 'bash', code: gsAwsSecret },
-          { label: gs.tabAzure, lang: 'bash', code: gsAzureSecret },
+          { label: gs.tabAws, lang: 'bash', code: gsAwsSecret, note: gs.secretAwsNote },
+          { label: gs.tabAzure, lang: 'bash', code: gsAzureSecret, note: gs.secretAzureNote },
         ]} />
-        <p class="note">{gs.secretAwsNote}</p>
-        <p class="note">{gs.secretAzureNote}</p>
       </section>
 
       <section id="write-map" class="docs-section">
@@ -1859,7 +1857,8 @@ jobs:
     margin-bottom: var(--space-md);
   }
 
-  .docs-section p {
+  .docs-section p,
+  .docs-section :global(.tabbed-code-note) {
     font-size: 0.92rem;
     color: var(--color-text-muted);
     margin-bottom: var(--space-lg);
@@ -2005,7 +2004,8 @@ jobs:
   }
 
   /* -- Note -- */
-  .docs-section p.note {
+  .docs-section p.note,
+  .docs-section :global(.tabbed-code-note) {
     font-size: 0.85rem;
     color: var(--color-text-muted);
     font-style: italic;
