@@ -230,7 +230,10 @@ and uses all other keys as secret mappings:
 > The only translation is for paths: slashes become hyphens and a leading slash is dropped
 > (e.g., `/myapp/db/password` → `myapp-db-password`). Anything else is sent as written, so a name
 > Key Vault rejects (for example one with `_` or `.`) fails with Key Vault's own error. The CLI, the
-> GitHub Action and every SDK apply the same rule, so they all read the same secret.
+> GitHub Action and every SDK apply the same rule, so they all read the same secret. The CLI and the
+> GitHub Action also reject a map file in which two values resolve to the same name, ignoring case
+> (`/app/db-url` and `app-db-url`), so a push cannot write both to one secret; the read-only SDKs
+> skip that check.
 
 ### `$config` Options
 

@@ -161,6 +161,12 @@ into another name. The CLI and the GitHub Action
 (`azure-secret-name.ts`, `azure_secret_name.py`, `AzureSecretName.cs`) share
 this rule and its test cases.
 
+The CLI and the GitHub Action also reject a map file in which two different
+values resolve to the same Key Vault name, compared case-insensitively as Key
+Vault does (`/app/db-url` and `app-db-url`): a `--push` would otherwise write
+both values to one secret. The SDKs only read secrets, so they skip this check
+and both variables receive the same value.
+
 ### 6. `file` Provider for Testing
 
 The `file` provider enables testing without cloud infrastructure. It reads an
