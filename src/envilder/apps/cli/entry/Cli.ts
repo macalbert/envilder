@@ -27,8 +27,10 @@ import { resolveMapFileTarget } from '../../../core/domain/MapFileUpdate.js';
 import { OperationMode } from '../../../core/domain/OperationMode.js';
 import type { ILogger } from '../../../core/domain/ports/ILogger.js';
 import type { ISecretMasker } from '../../../core/domain/ports/ISecretMasker.js';
+import { GitHubActionsLogger } from '../../../core/infrastructure/github/GitHubActionsLogger.js';
 import { GitHubActionsSecretMasker } from '../../../core/infrastructure/github/GitHubActionsSecretMasker.js';
 import { NoOpSecretMasker } from '../../../core/infrastructure/github/NoOpSecretMasker.js';
+import { StderrConsoleLogger } from '../../../core/infrastructure/logger/StderrConsoleLogger.js';
 import { PackageVersionReader } from '../../../core/infrastructure/package/PackageVersionReader.js';
 import { readMapFileConfig } from '../../../core/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../../core/types.js';
@@ -558,7 +560,7 @@ async function resolveSecretsAndRun(
   };
 
   const container = Startup.build()
-    .configureExec(createExecSecretMasker())
+    .configureExec(createExecSecretMasker(), createExecLogger())
     .configureServices()
     .configureInfrastructure(config, buildInfrastructureOptions())
     .create();
@@ -655,6 +657,17 @@ function createExecSecretMasker(): ISecretMasker {
   return process.env.GITHUB_ACTIONS === 'true'
     ? new GitHubActionsSecretMasker({ stream: process.stderr })
     : new NoOpSecretMasker();
+}
+
+/**
+ * Exec logs to stderr, keeping stdout for the child. Under GitHub Actions
+ * each message stays one inert line, so input-derived text cannot issue
+ * workflow commands ahead of the mask registrations.
+ */
+function createExecLogger(): ILogger {
+  return process.env.GITHUB_ACTIONS === 'true'
+    ? new GitHubActionsLogger(new StderrConsoleLogger())
+    : new StderrConsoleLogger();
 }
 
 function buildInfrastructureOptions(): Record<string, unknown> {
