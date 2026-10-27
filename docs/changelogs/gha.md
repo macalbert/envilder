@@ -1,3 +1,15 @@
+## [0.17.1] - 2026-10-27
+
+### Fixed
+
+* **Accept `/` in map-file keys again**: A hierarchical name such as
+  `Database/Password` is valid again, as it was before 0.14.0. The Action
+  writes it to the `.env` file as-is and logs a warning with the names
+  affected, because `dotenv` for Node.js, Docker Compose and POSIX shells
+  skip that line ([#511](https://github.com/macalbert/envilder/issues/511))
+
+---
+
 ## [0.17.0] - 2026-10-27
 
 ### Security

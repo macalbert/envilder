@@ -496,6 +496,23 @@ export interface DocsTranslations {
   // Mapping file
   mapThDefault: string;
   mapThDescription: string;
+  mapContentsTitle: string;
+  mapContentsIntro: string;
+  mapThStage: string;
+  mapThLimit: string;
+  mapContentsProvider: string;
+  mapContentsProviderLimit: string;
+  mapContentsEnvFile: string;
+  mapContentsEnvFileLimit: string;
+  mapContentsProcess: string;
+  mapContentsProcessLimit: string;
+  mapContentsResolveOnly: string;
+  mapContentsWriterDesc: string;
+  mapContentsRoundTrip: string;
+  mapContentsUnrepresentableTitle: string;
+  mapContentsUnrepresentableDesc: string;
+  mapContentsExpansionTitle: string;
+  mapContentsExpansionDesc: string;
   // Pull command
   pullTitle: string;
   pullDesc: string;

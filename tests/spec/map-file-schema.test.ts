@@ -111,6 +111,20 @@ describe('Map File Schema', () => {
     expect(actual).toBe(true);
   });
 
+  it('Should_AcceptMapFile_When_MappingNamesUseSlashHierarchy', () => {
+    // Arrange
+    const mapFile = {
+      'Database/Password': '/app/db-password',
+      'Logging/LogLevel/Default': '/app/log-level',
+    };
+
+    // Act
+    const actual = validate(mapFile);
+
+    // Assert
+    expect(actual).toBe(true);
+  });
+
   it('Should_AcceptMapFile_When_SchemaAndConfigKeysArePresent', () => {
     // Arrange
     const mapFile = {
