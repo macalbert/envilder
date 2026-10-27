@@ -10,20 +10,21 @@ import { InvalidArgumentError } from './errors/DomainErrors.js';
 export class EnvironmentVariable {
   private readonly _name: string;
   private readonly _value: string;
-  private readonly _isSecret: boolean;
 
   /**
    * Creates a new environment variable
    *
    * @param name - The name of the environment variable
    * @param value - The value of the environment variable
-   * @param isSecret - Whether this variable should be treated as sensitive information
    */
-  constructor(name: string, value: string, isSecret: boolean = false) {
+  constructor(name: string, value: string) {
     this.validate(name, value);
     this._name = name;
     this._value = value;
-    this._isSecret = isSecret;
+  }
+
+  static secret(name: string, value: string): EnvironmentVariable {
+    return new SecretEnvironmentVariable(name, value);
   }
 
   /**
@@ -44,18 +45,14 @@ export class EnvironmentVariable {
    * Gets whether this variable is sensitive information
    */
   get isSecret(): boolean {
-    return this._isSecret;
+    return false;
   }
 
   /**
    * Returns a masked representation of the value for logging
    */
   get maskedValue(): string {
-    if (!this._isSecret) {
-      return this._value;
-    }
-
-    return EnvironmentVariable.mask(this._value, 10);
+    return this._value;
   }
 
   /**
@@ -65,7 +62,7 @@ export class EnvironmentVariable {
     return EnvironmentVariable.mask(path, 3);
   }
 
-  private static mask(value: string, minLengthToShowTail: number): string {
+  protected static mask(value: string, minLengthToShowTail: number): string {
     return value.length > minLengthToShowTail
       ? '*'.repeat(value.length - 3) + value.slice(-3)
       : '*'.repeat(value.length);
@@ -86,5 +83,15 @@ export class EnvironmentVariable {
         `Value for environment variable ${name} cannot be null or undefined`,
       );
     }
+  }
+}
+
+class SecretEnvironmentVariable extends EnvironmentVariable {
+  override get isSecret(): boolean {
+    return true;
+  }
+
+  override get maskedValue(): string {
+    return EnvironmentVariable.mask(this.value, 10);
   }
 }

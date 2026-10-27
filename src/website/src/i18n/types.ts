@@ -303,6 +303,7 @@ export interface GettingStartedGuideTranslations {
   installVerify: string;
   secretTitle: string;
   secretDesc: string;
+  secretAwsNote: string;
   secretAzureNote: string;
   mapTitle: string;
   mapDesc: string;

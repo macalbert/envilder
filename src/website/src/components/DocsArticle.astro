@@ -111,23 +111,18 @@ const execPackageJson = `{
   }
 }`;
 
-const awsVerifyCmd = `# 1. Create a test parameter
-aws ssm put-parameter --name "/test/hello" --value "world" --type SecureString --overwrite
+const awsVerifyCmd = `# 1. Push a test secret; Envilder also writes aws-test-map.json
+envilder --provider=aws --map=aws-test-map.json --key=HELLO --value=world --secret-path=/test/hello
 
-# 2. Create a minimal map file
-echo '{ "HELLO": "/test/hello" }' > test-map.json
+# 2. Pull it back with Envilder
+envilder --map=aws-test-map.json --envfile=.env`;
 
-# 3. Pull with Envilder
-envilder --map=test-map.json --envfile=.env`;
+const azureVerifyCmd = `# 1. Push a test secret; Envilder also writes azure-test-map.json
+envilder --provider=azure --vault-url=https://{VAULT_NAME}.vault.azure.net \\
+  --map=azure-test-map.json --key=HELLO --value=world --secret-path=test-hello
 
-const azureVerifyCmd = `# 1. Create a test secret
-az keyvault secret set --vault-name {VAULT_NAME} --name "test-hello" --value "world"
-
-# 2. Create a minimal map file
-echo '{ "$config": { "provider": "azure", "vaultUrl": "https://{VAULT_NAME}.vault.azure.net" }, "HELLO": "test-hello" }' > test-map.json
-
-# 3. Pull with Envilder
-envilder --map=test-map.json --envfile=.env`;
+# 2. Pull it back with Envilder
+envilder --map=azure-test-map.json --envfile=.env`;
 
 const ghaAwsTrustPolicy = `{
   "Version": "2012-10-17",
@@ -328,21 +323,19 @@ const gsInstallTabs = [
   { label: 'npx', lang: 'bash', code: 'npx envilder --version' },
 ];
 
-const gsAwsSecret = `aws configure
-aws ssm put-parameter --name /my-app/dev/db-password \\
-  --type SecureString --value "local-dev-password"`;
+const gsAwsSecret = `envilder --provider=aws --profile=default \\
+  --key=DB_PASSWORD --value=local-dev-password \\
+  --secret-path=/my-app/dev/db-password`;
 
-const gsAzureSecret = `az login
-az keyvault secret set --vault-name my-vault \\
-  --name my-app-dev-db-password --value "local-dev-password"`;
+const gsAzureSecret = `envilder --provider=azure --vault-url=https://my-vault.vault.azure.net \\
+  --key=DB_PASSWORD --value=local-dev-password \\
+  --secret-path=my-app-dev-db-password`;
 
 const gsAwsMap = `{
-  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "DB_PASSWORD": "/my-app/dev/db-password"
 }`;
 
 const gsAzureMap = `{
-  "$schema": "https://envilder.com/schema/map-file.v1.json",
   "$config": {
     "provider": "azure",
     "vaultUrl": "https://my-vault.vault.azure.net"
@@ -554,10 +547,9 @@ const mfErrors = [
         <h2>{gs.secretTitle}</h2>
         <p>{gs.secretDesc}</p>
         <TabbedCodeBlock tabs={[
-          { label: gs.tabAws, lang: 'bash', code: gsAwsSecret },
-          { label: gs.tabAzure, lang: 'bash', code: gsAzureSecret },
+          { label: gs.tabAws, lang: 'bash', code: gsAwsSecret, note: gs.secretAwsNote },
+          { label: gs.tabAzure, lang: 'bash', code: gsAzureSecret, note: gs.secretAzureNote },
         ]} />
-        <p class="note">{gs.secretAzureNote}</p>
       </section>
 
       <section id="write-map" class="docs-section">
@@ -661,7 +653,7 @@ const mfErrors = [
         <p>{t.docs.awsSetupVerifySdk}</p>
         <CodeBlock lang="python" code={`from envilder import Envilder
 
-secrets = Envilder.load("test-map.json")
+secrets = Envilder.load("aws-test-map.json")
 print(secrets["HELLO"])  # world`} />
       </section>
     </>
@@ -711,7 +703,7 @@ print(secrets["HELLO"])  # world`} />
         <p>{t.docs.azureSetupVerifySdk}</p>
         <CodeBlock lang="python" code={`from envilder import Envilder
 
-secrets = Envilder.load("test-map.json")
+secrets = Envilder.load("azure-test-map.json")
 print(secrets["HELLO"])  # world`} />
       </section>
     </>
@@ -1912,7 +1904,8 @@ jobs:
     margin-bottom: var(--space-md);
   }
 
-  .docs-section p {
+  .docs-section p,
+  .docs-section :global(.tabbed-code-note) {
     font-size: 0.92rem;
     color: var(--color-text-muted);
     margin-bottom: var(--space-lg);
@@ -2058,7 +2051,8 @@ jobs:
   }
 
   /* -- Note -- */
-  .docs-section p.note {
+  .docs-section p.note,
+  .docs-section :global(.tabbed-code-note) {
     font-size: 0.85rem;
     color: var(--color-text-muted);
     font-style: italic;

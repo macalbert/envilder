@@ -25,30 +25,15 @@ export class AwsSsmSecretProvider implements ISecretProvider {
   private sts: STS;
   private profile?: string;
   private identityLogged = false;
-  private readonly identityBanner: boolean;
 
-  /**
-   * @param identityBanner - Log the AWS identity on first use. Exec mode turns
-   * it off to keep its output to a single summary line.
-   */
-  constructor(
-    ssm: SSM,
-    logger: ILogger,
-    sts: STS,
-    profile?: string,
-    identityBanner = true,
-  ) {
+  constructor(ssm: SSM, logger: ILogger, sts: STS, profile?: string) {
     this.ssm = ssm;
     this.logger = logger;
     this.sts = sts;
     this.profile = profile;
-    this.identityBanner = identityBanner;
   }
 
   async getSecret(name: string): Promise<string | undefined> {
-    if (this.identityBanner) {
-      await this.logIdentity();
-    }
     try {
       const command = new GetParameterCommand({
         Name: name,
@@ -78,7 +63,6 @@ export class AwsSsmSecretProvider implements ISecretProvider {
   }
 
   async setSecret(name: string, value: string): Promise<void> {
-    await this.logIdentity();
     const command = new PutParameterCommand({
       Name: name,
       Value: value,

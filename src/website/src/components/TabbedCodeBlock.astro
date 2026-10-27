@@ -6,6 +6,8 @@ export interface TabItem {
   lang: string;
   filename?: string;
   code: string;
+  /** Optional note shown below the code, only while this tab is selected. */
+  note?: string;
 }
 
 interface Props {
@@ -44,6 +46,7 @@ const blockId = crypto.randomUUID().slice(0, 8);
         data-panel-index={i}
       >
         <CodeBlock lang={tab.lang} filename={tab.filename} code={tab.code} />
+        {tab.note && <p class="note tabbed-code-note">{tab.note}</p>}
       </div>
     ))}
   </div>

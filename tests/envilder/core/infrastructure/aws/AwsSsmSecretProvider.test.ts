@@ -239,15 +239,26 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
   });
 
   describe('identity logging', () => {
-    it('Should_LogAccountRegionProfile_When_FirstSecretRead', async () => {
+    it('Should_NotLogIdentity_When_SecretRead', async () => {
       // Arrange
       sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts, 'developer');
-      mockRegionFn.mockResolvedValue('us-east-1');
-      mockCredentialsFn.mockResolvedValue({ accountId: '123456789012' });
       mockSendFn.mockResolvedValue({ Parameter: { Value: 'v' } });
 
       // Act
       await sut.getSecret('x');
+
+      // Assert
+      expect(mockLogger.info).not.toHaveBeenCalled();
+    });
+
+    it('Should_LogAccountRegionProfile_When_IdentityLogged', async () => {
+      // Arrange
+      sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts, 'developer');
+      mockRegionFn.mockResolvedValue('us-east-1');
+      mockCredentialsFn.mockResolvedValue({ accountId: '123456789012' });
+
+      // Act
+      await sut.logIdentity();
 
       // Assert
       const logged = stripAnsi(vi.mocked(mockLogger.info).mock.calls[0][0]);
@@ -261,10 +272,9 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts, 'developer');
       mockCredentialsFn.mockResolvedValueOnce({});
       mockStsSendFn.mockResolvedValue({ Account: '999999999999' });
-      mockSendFn.mockResolvedValue({ Parameter: { Value: 'v' } });
 
       // Act
-      await sut.getSecret('x');
+      await sut.logIdentity();
 
       // Assert
       const logged = stripAnsi(vi.mocked(mockLogger.info).mock.calls[0][0]);
@@ -278,10 +288,9 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts, 'developer');
       mockCredentialsFn.mockRejectedValueOnce(new Error('no creds'));
       mockStsSendFn.mockRejectedValue(new Error('sts down'));
-      mockSendFn.mockResolvedValue({ Parameter: { Value: 'v' } });
 
       // Act
-      await sut.getSecret('x');
+      await sut.logIdentity();
 
       // Assert
       const logged = stripAnsi(vi.mocked(mockLogger.info).mock.calls[0][0]);
@@ -290,14 +299,13 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
       );
     });
 
-    it('Should_LogIdentityOnlyOnce_When_MultipleSecretsRead', async () => {
+    it('Should_LogIdentityOnlyOnce_When_CalledTwice', async () => {
       // Arrange
       sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts, 'developer');
-      mockSendFn.mockResolvedValue({ Parameter: { Value: 'v' } });
 
       // Act
-      await sut.getSecret('a');
-      await sut.getSecret('b');
+      await sut.logIdentity();
+      await sut.logIdentity();
 
       // Assert
       expect(mockLogger.info).toHaveBeenCalledTimes(1);
@@ -306,10 +314,9 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
     it('Should_DefaultProfile_When_NoProfileProvided', async () => {
       // Arrange
       sut = new AwsSsmSecretProvider(mockSsm, mockLogger, mockSts);
-      mockSendFn.mockResolvedValue({ Parameter: { Value: 'v' } });
 
       // Act
-      await sut.getSecret('x');
+      await sut.logIdentity();
 
       // Assert
       const logged = stripAnsi(vi.mocked(mockLogger.info).mock.calls[0][0]);

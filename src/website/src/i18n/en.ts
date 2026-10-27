@@ -454,8 +454,8 @@ export const en: Translations = {
       overviewTitle: 'What you will do',
       overviewSteps: [
         'Install the envilder CLI.',
-        'Store one test secret in AWS SSM Parameter Store or Azure Key Vault.',
-        'Map it to a variable name in envilder.json.',
+        'Push one test secret to AWS SSM Parameter Store or Azure Key Vault with envilder, which also writes envilder.json.',
+        'Check the envilder.json it created: it maps a variable name to the secret, never to the value.',
         'Start a small Node.js app with envilder exec and check that it receives the value.',
       ],
       prereqTitle: 'Prerequisites',
@@ -467,22 +467,24 @@ export const en: Translations = {
         'an existing Key Vault, the Azure CLI signed in with az login, and the Key Vault Secrets User role on the vault (or an access policy with Get on secrets). Envilder authenticates with DefaultAzureCredential, so a managed identity or environment credentials work too.',
       prereqAzureLink: 'Azure Key Vault setup',
       prereqWrite:
-        'Step 2 creates a secret, which needs write access (ssm:PutParameter, or Key Vault Secrets Officer). Skip it if the secret already exists.',
+        'Step 2 creates a secret, which needs write access (ssm:PutParameter, or Key Vault Secrets Officer). If the secret already exists, skip it and write envilder.json by hand as shown in step 3.',
       installTitle: '1. Install the CLI',
       installDesc:
         'Install envilder globally. If you prefer not to install it, prefix every command in this guide with npx.',
       installVerify:
         'Check that the command is on your PATH. It prints the version:',
-      secretTitle: '2. Store a test secret',
+      secretTitle: '2. Push a test secret',
       secretDesc:
-        'Choose your provider. The guide uses a single secret: the database password of a development environment.',
+        'Choose your provider. One envilder command stores the secret in the vault and records the mapping in envilder.json, so this step needs neither the AWS CLI nor the Azure CLI. The guide uses a single secret: the database password of a development environment. The value stays in your shell history; for real secrets, push from a .env file with push mode instead.',
+      secretAwsNote:
+        'On AWS, --provider=aws and --profile are optional: aws is the default provider, and without --profile Envilder uses the AWS default credential chain. The profile is a local choice and is not written to envilder.json.',
       secretAzureNote:
         'Key Vault names only allow letters, digits and hyphens. Envilder turns slashes into hyphens and drops a leading slash before calling Azure, so "/my-app/dev/db-password" would resolve the same secret. Anything else is sent as written.',
-      mapTitle: '3. Write envilder.json',
+      mapTitle: '3. Check envilder.json',
       mapDesc:
-        'Create envilder.json in the project root. Each key is the variable name your app reads, and each value is the identifier of the secret in your vault. Without a $config block Envilder uses AWS SSM; Azure needs provider and vaultUrl.',
+        'The push created envilder.json in the current directory, or added the entry if the file already existed. Each key is the variable name your app reads, and each value is the identifier of the secret in your vault. For Azure it also wrote $config with provider and vaultUrl; AWS needs no $config.',
       mapNote:
-        'The file holds secret paths, never values, so commit it with your code. The $schema line is optional and gives editors autocompletion and validation.',
+        'The file holds secret paths, never values, so commit it with your code. Editors validate envilder.json through SchemaStore without a $schema line. To push a secret without touching the map file, add --no-map-update.',
       runTitle: '4. Run your app with envilder exec',
       runDesc:
         'Create a small script that reads the variable, then start it through Envilder. Everything after -- is your command, passed as is, without a shell.',
@@ -837,8 +839,9 @@ export const en: Translations = {
     awsSetupPolicyExample: 'Example IAM policy (scope to your path prefix):',
     awsSetupVerifyTitle: '3. Create a test parameter and verify',
     awsSetupVerifyDesc:
-      'Create a parameter in SSM, then pull it with Envilder to confirm everything works:',
-    awsSetupVerifySuccess: 'If you see ✔ Fetched, your AWS setup is complete.',
+      'Push a test secret with Envilder, which also writes the map file, then pull it back to confirm everything works:',
+    awsSetupVerifySuccess:
+      'If you see ⭐ LEVEL CLEARED, your AWS setup is complete.',
     awsSetupVerifySdk:
       'Or load secrets directly from your app with the Python SDK:',
     // Azure setup
@@ -864,9 +867,9 @@ export const en: Translations = {
       'For pull-only access, Key Vault Secrets User role is sufficient.',
     azureSetupVerifyTitle: '4. Create a test secret and verify',
     azureSetupVerifyDesc:
-      'Create a secret in Key Vault, then pull it with Envilder to confirm everything works:',
+      'Push a test secret with Envilder, which also writes the map file, then pull it back to confirm everything works:',
     azureSetupVerifySuccess:
-      'If you see ✔ Fetched, your Azure setup is complete.',
+      'If you see ⭐ LEVEL CLEARED, your Azure setup is complete.',
     azureSetupVerifySdk:
       'Or load secrets directly from your app with the Python SDK:',
     mapThDefault: 'Default',
