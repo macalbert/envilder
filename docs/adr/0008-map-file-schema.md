@@ -151,6 +151,8 @@ Values are opaque identifiers interpreted by the provider:
 | `hashicorp` | Vault secret path | `secret/data/my-app/db-password` |
 | `file` | Key name in the `.env` source file | `DB_PASSWORD` |
 
+#### Azure Key Vault secret names
+
 **Azure secret names are resolved identically on every surface.** The only
 translation is `/` to `-`, ignoring leading slashes, so a path-style value such
 as `/my-app/prod/db-password` reads `my-app-prod-db-password`. Everything else
