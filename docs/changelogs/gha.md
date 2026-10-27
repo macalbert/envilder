@@ -1,4 +1,16 @@
-## [0.16.1] - 2026-10-27
+## [0.17.1] - 2026-10-27
+
+### Fixed
+
+* **Accept `/` in map-file keys again**: A hierarchical name such as
+  `Database/Password` is valid again, as it was before 0.14.0. The Action
+  writes it to the `.env` file as-is and logs a warning with the names
+  affected, because `dotenv` for Node.js, Docker Compose and POSIX shells
+  skip that line ([#511](https://github.com/macalbert/envilder/issues/511))
+
+---
+
+## [0.17.0] - 2026-10-27
 
 ### Security
 
@@ -9,13 +21,13 @@
   documented message, failing the step
   ([#511](https://github.com/macalbert/envilder/issues/511))
 
-### Fixed
+### Changed
 
-* **Accept `/` in map-file keys again**: A hierarchical name such as
-  `Database/Password` is valid again, as it was before 0.14.0. The Action
-  writes it to the `.env` file as-is and logs a warning with the names
-  affected, because `dotenv` for Node.js, Docker Compose and POSIX shells
-  skip that line ([#511](https://github.com/macalbert/envilder/issues/511))
+* **BREAKING: Azure Key Vault references only translate `/`**: The Action
+  shares the CLI's rule: `/` becomes `-`, ignoring leading slashes, and
+  anything else reaches Key Vault as written, as the SDKs do. A reference
+  with `_` (`/myapp/prod/stripe_key`) is no longer rewritten to
+  `myapp-prod-stripe-key`; use the name the vault holds
 
 ---
 

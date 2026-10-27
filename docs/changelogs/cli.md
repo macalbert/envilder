@@ -5,17 +5,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
-## [0.16.1] - 2026-10-27
-
-### Security
-
-* **Reject `__proto__` in map files in the published build**: The check
-  added in 0.14.0 ran against the TypeScript source, but the compiled
-  output lowers the object-rest copy in map-file parsing to a helper that
-  assigns each key, so an own `__proto__` key was dropped before the name
-  check. A map file with that key was accepted, the mapping was silently
-  ignored and the run exited 0. Map-file keys are now read straight from the
-  parsed object, so the key is rejected with the documented message
+## [0.17.1] - 2026-10-27
 
 ### Fixed
 
@@ -30,6 +20,42 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   `/` lines are updated in place instead of duplicated. `=`, line breaks,
   `U+2028`/`U+2029`, `__proto__` and the other rejected names stay rejected
   ([#511](https://github.com/macalbert/envilder/issues/511))
+
+---
+
+## [0.17.0] - 2026-10-27
+
+### Security
+
+* **Reject `__proto__` in map files in the published build**: The check
+  added in 0.14.0 ran against the TypeScript source, but the compiled
+  output lowers the object-rest copy in map-file parsing to a helper that
+  assigns each key, so an own `__proto__` key was dropped before the name
+  check. A map file with that key was accepted, the mapping was silently
+  ignored and the run exited 0. Map-file keys are now read straight from the
+  parsed object, so the key is rejected with the documented message
+  ([#511](https://github.com/macalbert/envilder/issues/511))
+
+### Changed
+
+* **BREAKING: Azure Key Vault references only translate `/`**: The CLI
+  rewrote every Azure reference (underscores to hyphens, lowercased, repeated
+  hyphens collapsed, `secret-` prepended to a leading digit), so a valid name
+  such as `Database--Password` or `1password-token` addressed a different
+  secret than the one in the vault and than the SDKs read. Now the only
+  translation is `/` to `-`, ignoring leading slashes
+  (`/myapp/db/password` → `myapp-db-password`), shared with the Node.js,
+  Python and .NET SDKs. Anything else reaches Key Vault as written, and a
+  name it rejects fails with Key Vault's own error. The collision check
+  compares names case-insensitively, as Key Vault does
+
+### Migration
+
+Secrets pushed with an earlier CLI under a reference that holds `_`, `--`,
+a leading digit or a leading or trailing `-` were stored under the rewritten
+name. Point the map file at the name the vault holds (for example
+`myapp-db-password` instead of `/myapp/db_password`), or rename the secret in
+the vault.
 
 ---
 
@@ -186,12 +212,6 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   and "Full Documentation" link in the README now carry UTM tags and the
   latter lands on `envilder.com/docs/getting-started/`, so visits from GitHub
   and npm to envilder.com can be measured
-
-* **Document accepted map-file keys, values and limits**: The README and the website map-file page
-  now list the accepted key grammar and why it matches dotenv, the secret
-  reference format per provider, and the limits on secret contents
-  (provider sizes, the one value a `.env` file cannot hold, operating-system
-  limits and variable expansion by other loaders)
 
 ---
 

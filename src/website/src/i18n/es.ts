@@ -482,7 +482,7 @@ export const es: Translations = {
       secretDesc:
         'Elige tu proveedor. La guía usa un único secreto: la contraseña de la base de datos de un entorno de desarrollo.',
       secretAzureNote:
-        'Los nombres de Key Vault solo admiten letras, dígitos y guiones. Envilder pasa el identificador a minúsculas y convierte barras y guiones bajos en guiones antes de llamar a Azure, así que "/my-app/dev/db-password" resolvería el mismo secreto.',
+        'Los nombres de Key Vault solo admiten letras, dígitos y guiones. Envilder convierte las barras en guiones y elimina la barra inicial antes de llamar a Azure, así que "/my-app/dev/db-password" resolvería el mismo secreto. Todo lo demás se envía tal como está escrito.',
       mapTitle: '3. Escribe envilder.json',
       mapDesc:
         'Crea envilder.json en la raíz del proyecto. Cada clave es el nombre de variable que lee tu app y cada valor es el identificador del secreto en tu vault. Sin bloque $config, Envilder usa AWS SSM; Azure necesita provider y vaultUrl.',
@@ -573,12 +573,11 @@ export const es: Translations = {
         'El valor es el nombre del parámetro tal como está guardado en SSM, normalmente una ruta jerárquica. Envilder llama a GetParameter con descifrado, así que funcionan tanto los parámetros String como los SecureString. La región sale de AWS_REGION, después de AWS_DEFAULT_REGION, después del perfil, con us-east-1 como último recurso.',
       azureTitle: 'Azure Key Vault',
       azureDesc:
-        'El valor es el nombre del secreto. Envilder lo normaliza antes de llamar a Key Vault, así que puedes compartir el mismo estilo de rutas con un archivo de AWS:',
+        'El valor es el nombre del secreto. Envilder convierte las barras en guiones antes de llamar a Key Vault, así que puedes compartir el mismo estilo de rutas con un archivo de AWS:',
       azureRules: [
-        'Se eliminan las barras iniciales, las barras y los guiones bajos pasan a ser guiones, el nombre se pasa a minúsculas y los guiones repetidos se reducen a uno: "/my-app/prod/stripe_api_key" lee my-app-prod-stripe-api-key.',
-        'En el valor solo se aceptan letras, dígitos, guiones, guiones bajos y barras; cualquier otro carácter es un error.',
-        'El nombre normalizado debe tener 127 caracteres o menos.',
-        'Dos valores distintos que se normalizan al mismo nombre dentro de un archivo son un error.',
+        'Se eliminan las barras iniciales y el resto de barras pasan a ser guiones: "/my-app/prod/stripe-api-key" lee my-app-prod-stripe-api-key. El CLI, la GitHub Action y todos los SDKs aplican la misma regla.',
+        'Todo lo demás se envía tal como está escrito. Un nombre que Key Vault rechace (por ejemplo con _ o .) falla con el error del propio Key Vault.',
+        'En el CLI y la GitHub Action, dos valores distintos que resuelven al mismo nombre dentro de un archivo son un error.',
         'Envilder siempre lee la versión más reciente del secreto.',
       ],
       priorityTitle: 'Precedencia entre $config y las opciones',
@@ -1142,7 +1141,7 @@ export const es: Translations = {
     ghaAzurePolicyNote:
       'Si el vault usa directivas de acceso en lugar de Azure RBAC, concede get sobre los secretos: az keyvault set-policy --name {VAULT} --spn {APP_ID} --secret-permissions get.',
     ghaAzureMapDesc:
-      'Con $config en el archivo de mapeo, el workflow no necesita los inputs provider ni vault-url. Los nombres de Key Vault solo admiten letras, dígitos y guiones, así que Envilder convierte las rutas: /myapp/prod/stripe_key se lee como myapp-prod-stripe-key (sin la barra inicial, barras y guiones bajos convertidos en guiones, en minúsculas).',
+      'Con $config en el archivo de mapeo, el workflow no necesita los inputs provider ni vault-url. Los nombres de Key Vault solo admiten letras, dígitos y guiones, así que Envilder convierte las rutas: /myapp/prod/stripe-key se lee como myapp-prod-stripe-key (sin la barra inicial, barras convertidas en guiones).',
     ghaAzureInputsNote:
       'Los ID de cliente, tenant y suscripción identifican la aplicación; no son credenciales, así que basta con variables del repositorio. Si se informan, los inputs provider y vault-url sobrescriben el $config del archivo de mapeo.',
     ghaMultiEnvDesc:
@@ -1255,7 +1254,7 @@ export const es: Translations = {
     sdkDotnetMapAzureDesc:
       'Para Key Vault, define el proveedor y la URL del almacén en $config. Los valores son nombres de secretos de Key Vault:',
     sdkDotnetMapAzureNote:
-      'El SDK de .NET envía los nombres a Key Vault tal como los escribes. A diferencia de la CLI, no convierte una ruta como /myapp/prod/db-password en myapp-prod-db-password, así que escribe el nombre final en el archivo.',
+      'El SDK de .NET envía los nombres a Key Vault tal como los escribes, salvo que las barras se convierten en guiones, igual que la CLI: una ruta como /myapp/prod/db-password se lee como myapp-prod-db-password. Cualquier otro carácter que Key Vault rechace (por ejemplo _ o .) falla con su propio error.',
     sdkDotnetAspTitle: 'ASP.NET Core con IConfiguration',
     sdkDotnetAspDesc:
       'Llama a AddEnvilder justo después de CreateBuilder. Las claves se leen tal como se escriben en el archivo de mapeo, así que usa nombres de variable de entorno: el mismo archivo funciona también con la CLI y el resto de SDKs.',
@@ -1310,9 +1309,9 @@ export const es: Translations = {
       'La identidad no tiene ssm:GetParameter sobre ese parámetro. Compara el ARN de Resource, región incluida, con la política anterior.',
     sdkDotnetErrDeniedAzureFix:
       'Asigna Key Vault Secrets User sobre el almacén. Las asignaciones de rol pueden tardar unos minutos en propagarse.',
-    sdkDotnetErrAzureNameTitle: 'Nombre de secreto con barras en Azure',
+    sdkDotnetErrAzureNameTitle: 'Secreto no encontrado en Azure',
     sdkDotnetErrAzureNameFix:
-      'Los nombres de Key Vault solo admiten letras, dígitos y guiones, y el SDK no los normaliza. Un nombre en forma de ruta como /myapp/prod/db-password no coincidirá con ningún secreto: usa myapp-prod-db-password en el archivo.',
+      'El SDK envía cada valor tal cual, salvo que las barras se convierten en guiones: un nombre en forma de ruta como /myapp/prod/db-password se lee como myapp-prod-db-password, igual que en el CLI. Si el secreto sigue sin aparecer, comprueba que el vault tenga un secreto con ese nombre; los nombres que solo difieren en mayúsculas son el mismo secreto.',
     sdkDotnetErrConfigTitle: 'Errores de configuración',
     sdkDotnetErrMessageHeader: 'Mensaje',
     sdkDotnetErrFixHeader: 'Solución',

@@ -481,7 +481,7 @@ export const ca: Translations = {
       secretDesc:
         "Tria el teu proveïdor. La guia fa servir un sol secret: la contrasenya de la base de dades d'un entorn de desenvolupament.",
       secretAzureNote:
-        'Els noms de Key Vault només admeten lletres, dígits i guions. Envilder passa l\'identificador a minúscules i converteix barres i guions baixos en guions abans de cridar Azure, així que "/my-app/dev/db-password" resoldria el mateix secret.',
+        'Els noms de Key Vault només admeten lletres, dígits i guions. Envilder converteix les barres en guions i elimina la barra inicial abans de cridar Azure, així que "/my-app/dev/db-password" resoldria el mateix secret. Tota la resta s\'envia tal com està escrit.',
       mapTitle: "3. Escriu l'envilder.json",
       mapDesc:
         "Crea l'envilder.json a l'arrel del projecte. Cada clau és el nom de variable que llegeix la teva app i cada valor és l'identificador del secret al teu vault. Sense bloc $config, Envilder fa servir AWS SSM; Azure necessita provider i vaultUrl.",
@@ -572,12 +572,11 @@ export const ca: Translations = {
         "El valor és el nom del paràmetre tal com està desat a SSM, normalment un camí jeràrquic. Envilder crida GetParameter amb desxifratge, així que funcionen tant els paràmetres String com els SecureString. La regió surt d'AWS_REGION, després d'AWS_DEFAULT_REGION, després del perfil, amb us-east-1 com a últim recurs.",
       azureTitle: 'Azure Key Vault',
       azureDesc:
-        "El valor és el nom del secret. Envilder el normalitza abans de cridar Key Vault, així que pots compartir el mateix estil de camins amb un fitxer d'AWS:",
+        "El valor és el nom del secret. Envilder converteix les barres en guions abans de cridar Key Vault, així que pots compartir el mateix estil de camins amb un fitxer d'AWS:",
       azureRules: [
-        'S\'eliminen les barres inicials, les barres i els guions baixos passen a ser guions, el nom es passa a minúscules i els guions repetits es redueixen a un: "/my-app/prod/stripe_api_key" llegeix my-app-prod-stripe-api-key.',
-        "Al valor només s'accepten lletres, dígits, guions, guions baixos i barres; qualsevol altre caràcter és un error.",
-        'El nom normalitzat ha de tenir 127 caràcters o menys.',
-        'Dos valors diferents que es normalitzen al mateix nom dins un fitxer són un error.',
+        'S\'eliminen les barres inicials i la resta de barres passen a ser guions: "/my-app/prod/stripe-api-key" llegeix my-app-prod-stripe-api-key. El CLI, la GitHub Action i tots els SDKs apliquen la mateixa regla.',
+        "Tota la resta s'envia tal com està escrit. Un nom que Key Vault rebutgi (per exemple amb _ o .) falla amb l'error del mateix Key Vault.",
+        'Al CLI i a la GitHub Action, dos valors diferents que resolen al mateix nom dins un fitxer són un error.',
         'Envilder sempre llegeix la versió més recent del secret.',
       ],
       priorityTitle: 'Precedència entre $config i les opcions',
@@ -1141,7 +1140,7 @@ export const ca: Translations = {
     ghaAzurePolicyNote:
       "Si el vault fa servir polítiques d'accés en lloc d'Azure RBAC, concedeix get sobre els secrets: az keyvault set-policy --name {VAULT} --spn {APP_ID} --secret-permissions get.",
     ghaAzureMapDesc:
-      'Amb $config al fitxer de mapeig, el workflow no necessita els inputs provider ni vault-url. Els noms de Key Vault només admeten lletres, dígits i guions, així que Envilder converteix les rutes: /myapp/prod/stripe_key es llegeix com a myapp-prod-stripe-key (sense la barra inicial, barres i guions baixos convertits en guions, en minúscules).',
+      'Amb $config al fitxer de mapeig, el workflow no necessita els inputs provider ni vault-url. Els noms de Key Vault només admeten lletres, dígits i guions, així que Envilder converteix les rutes: /myapp/prod/stripe-key es llegeix com a myapp-prod-stripe-key (sense la barra inicial, barres convertides en guions).',
     ghaAzureInputsNote:
       "Els ID de client, tenant i subscripció identifiquen l'aplicació; no són credencials, així que n'hi ha prou amb variables del repositori. Si s'informen, els inputs provider i vault-url sobreescriuen el $config del fitxer de mapeig.",
     ghaMultiEnvDesc:
@@ -1254,7 +1253,7 @@ export const ca: Translations = {
     sdkDotnetMapAzureDesc:
       'Per a Key Vault, defineix el proveïdor i la URL del magatzem a $config. Els valors són noms de secrets de Key Vault:',
     sdkDotnetMapAzureNote:
-      "L'SDK de .NET envia els noms a Key Vault tal com els escrius. A diferència de la CLI, no converteix una ruta com /myapp/prod/db-password en myapp-prod-db-password, així que escriu el nom final al fitxer.",
+      "L'SDK de .NET envia els noms a Key Vault tal com els escrius, excepte que les barres es converteixen en guions, igual que la CLI: una ruta com /myapp/prod/db-password es llegeix com myapp-prod-db-password. Qualsevol altre caràcter que Key Vault rebutgi (per exemple _ o .) falla amb el seu propi error.",
     sdkDotnetAspTitle: 'ASP.NET Core amb IConfiguration',
     sdkDotnetAspDesc:
       "Crida AddEnvilder just després de CreateBuilder. Les claus es llegeixen tal com s'escriuen al fitxer de mapeig, així que fes servir noms de variable d'entorn: el mateix fitxer també funciona amb la CLI i la resta d'SDKs.",
@@ -1309,9 +1308,9 @@ export const ca: Translations = {
       "La identitat no té ssm:GetParameter sobre aquest paràmetre. Compara l'ARN de Resource, regió inclosa, amb la política anterior.",
     sdkDotnetErrDeniedAzureFix:
       'Assigna Key Vault Secrets User sobre el magatzem. Les assignacions de rol poden trigar uns minuts a propagar-se.',
-    sdkDotnetErrAzureNameTitle: 'Nom de secret amb barres a Azure',
+    sdkDotnetErrAzureNameTitle: 'Secret no trobat a Azure',
     sdkDotnetErrAzureNameFix:
-      "Els noms de Key Vault només admeten lletres, dígits i guions, i l'SDK no els normalitza. Un nom en forma de ruta com /myapp/prod/db-password no coincidirà amb cap secret: fes servir myapp-prod-db-password al fitxer.",
+      "L'SDK envia cada valor tal qual, excepte que les barres es converteixen en guions: un nom en forma de ruta com /myapp/prod/db-password es llegeix com myapp-prod-db-password, igual que al CLI. Si el secret continua sense aparèixer, comprova que el vault tingui un secret amb aquest nom; els noms que només difereixen en majúscules són el mateix secret.",
     sdkDotnetErrConfigTitle: 'Errors de configuració',
     sdkDotnetErrMessageHeader: 'Missatge',
     sdkDotnetErrFixHeader: 'Solució',

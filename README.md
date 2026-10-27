@@ -200,7 +200,7 @@ Values are SSM parameter paths (e.g., `/myapp/prod/api-key`).
 Add a `$config` key to declare the provider and its settings. Envilder reads `$config` for configuration
 and uses all other keys as secret mappings:
 
-**AWS SSM with profile:**
+#### AWS SSM with profile
 
 ```json
 {
@@ -213,7 +213,7 @@ and uses all other keys as secret mappings:
 }
 ```
 
-**Azure Key Vault:**
+#### Azure Key Vault
 
 ```json
 {
@@ -226,9 +226,15 @@ and uses all other keys as secret mappings:
 }
 ```
 
-> **Azure naming:** Key Vault secret names only allow alphanumeric characters and hyphens.
-> Envilder automatically normalizes names: slashes and underscores become hyphens
-> (e.g., `/myapp/db/password` → `myapp-db-password`).
+**Secret names.** Key Vault secret names only allow alphanumeric characters and hyphens. The only
+translation is for paths: slashes become hyphens and a leading slash is dropped (e.g.,
+`/myapp/db/password` → `myapp-db-password`). Anything else is sent as written, so a name Key Vault
+rejects (for example one with `_` or `.`) fails with Key Vault's own error. The CLI, the GitHub
+Action and every SDK apply the same rule, so they all read the same secret.
+
+**Name collisions.** The CLI and the GitHub Action also reject a map file in which two values
+resolve to the same name, ignoring case (`/app/db-url` and `app-db-url`), so a push cannot write
+both to one secret. The SDKs only read secrets, so they skip that check.
 
 ### `$config` Options
 
@@ -314,7 +320,7 @@ A value is the identifier of the secret in the provider. It must be a JSON strin
 | Provider | Identifier format |
 | --- | --- |
 | AWS SSM | Parameter name, used as-is. Case-sensitive; `a-zA-Z0-9_.-` plus `/` for hierarchies (at most 15 levels); up to 1011 characters including the ARN prefix; cannot start with `aws` or `ssm` ([AWS constraints](https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-a-parameter.html#sysman-parameter-name-constraints)) |
-| Azure Key Vault | Secret name: 1-127 characters, letters, digits and `-` ([Azure naming](https://learn.microsoft.com/azure/key-vault/general/about-keys-secrets-certificates#objects-identifiers-and-versioning)). The CLI normalizes the reference first: lowercase, `/` and `_` become `-`, and `secret-` is prepended when it does not start with a letter. The SDKs use it as written |
+| Azure Key Vault | Secret name: 1-127 characters, letters, digits and `-` ([Azure naming](https://learn.microsoft.com/azure/key-vault/general/about-keys-secrets-certificates#objects-identifiers-and-versioning)). Slashes become hyphens and a leading slash is dropped (`/myapp/db/password` → `myapp-db-password`); anything else is sent as written, the same in the CLI, the GitHub Action and every SDK (see [Azure Key Vault](#azure-key-vault)) |
 
 #### Secret contents (the resolved values)
 

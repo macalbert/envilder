@@ -477,7 +477,7 @@ export const en: Translations = {
       secretDesc:
         'Choose your provider. The guide uses a single secret: the database password of a development environment.',
       secretAzureNote:
-        'Key Vault names only allow letters, digits and hyphens. Envilder lowercases the identifier and turns slashes and underscores into hyphens before calling Azure, so "/my-app/dev/db-password" would resolve the same secret.',
+        'Key Vault names only allow letters, digits and hyphens. Envilder turns slashes into hyphens and drops a leading slash before calling Azure, so "/my-app/dev/db-password" would resolve the same secret. Anything else is sent as written.',
       mapTitle: '3. Write envilder.json',
       mapDesc:
         'Create envilder.json in the project root. Each key is the variable name your app reads, and each value is the identifier of the secret in your vault. Without a $config block Envilder uses AWS SSM; Azure needs provider and vaultUrl.',
@@ -568,12 +568,11 @@ export const en: Translations = {
         'The value is the parameter name exactly as stored in SSM, usually a hierarchical path. Envilder calls GetParameter with decryption, so String and SecureString parameters both work. The region comes from AWS_REGION, then AWS_DEFAULT_REGION, then the profile, with us-east-1 as the last fallback.',
       azureTitle: 'Azure Key Vault',
       azureDesc:
-        'The value is the secret name. Envilder normalizes it before calling Key Vault, so the same path style can be shared with an AWS file:',
+        'The value is the secret name. Envilder turns slashes into hyphens before calling Key Vault, so the same path style can be shared with an AWS file:',
       azureRules: [
-        'Leading slashes are removed, slashes and underscores become hyphens, the name is lowercased and repeated hyphens collapse to one: "/my-app/prod/stripe_api_key" reads my-app-prod-stripe-api-key.',
-        'Only letters, digits, hyphens, underscores and slashes are accepted in the value; anything else is an error.',
-        'The normalized name must be 127 characters or fewer.',
-        'Two different values that normalize to the same name in one file are an error.',
+        'Leading slashes are removed and the other slashes become hyphens: "/my-app/prod/stripe-api-key" reads my-app-prod-stripe-api-key. The CLI, the GitHub Action and every SDK apply the same rule.',
+        "Everything else is sent as written. A name Key Vault rejects (for example one with _ or .) fails with Key Vault's own error.",
+        'In the CLI and the GitHub Action, two different values that resolve to the same name in one file are an error.',
         'Envilder always reads the latest version of the secret.',
       ],
       priorityTitle: 'Precedence between $config and flags',
@@ -1127,7 +1126,7 @@ export const en: Translations = {
     ghaAzurePolicyNote:
       'If the vault uses access policies instead of Azure RBAC, grant get on secrets: az keyvault set-policy --name {VAULT} --spn {APP_ID} --secret-permissions get.',
     ghaAzureMapDesc:
-      "With $config in the map file, the workflow doesn't need the provider or vault-url inputs. Key Vault names only allow letters, digits and hyphens, so Envilder converts paths: /myapp/prod/stripe_key is read as myapp-prod-stripe-key (leading slash removed, slashes and underscores turned into hyphens, lowercased).",
+      "With $config in the map file, the workflow doesn't need the provider or vault-url inputs. Key Vault names only allow letters, digits and hyphens, so Envilder converts paths: /myapp/prod/stripe-key is read as myapp-prod-stripe-key (leading slash removed, slashes turned into hyphens).",
     ghaAzureInputsNote:
       'The client, tenant and subscription IDs identify the app; they are not credentials, so repository variables are enough. When set, the provider and vault-url inputs override $config in the map file.',
     ghaMultiEnvDesc:
@@ -1239,7 +1238,7 @@ export const en: Translations = {
     sdkDotnetMapAzureDesc:
       'For Key Vault, set the provider and the vault URL in $config. Values are Key Vault secret names:',
     sdkDotnetMapAzureNote:
-      'The .NET SDK sends names to Key Vault exactly as written. Unlike the CLI, it does not convert a path such as /myapp/prod/db-password into myapp-prod-db-password, so write the final name in the map.',
+      'The .NET SDK sends names to Key Vault as written, except that slashes become hyphens, like the CLI: a path such as /myapp/prod/db-password is read as myapp-prod-db-password. Any other character Key Vault rejects (for example _ or .) fails with its own error.',
     sdkDotnetAspTitle: 'ASP.NET Core with IConfiguration',
     sdkDotnetAspDesc:
       'Call AddEnvilder right after CreateBuilder. Keys are read exactly as written in the map file, so use environment-variable-style names: the same file then also works with the CLI and the other SDKs.',
@@ -1294,9 +1293,9 @@ export const en: Translations = {
       'The identity lacks ssm:GetParameter on that parameter. Compare the Resource ARN, including the region, with the policy above.',
     sdkDotnetErrDeniedAzureFix:
       'Assign Key Vault Secrets User on the vault. Role assignments can take a few minutes to propagate.',
-    sdkDotnetErrAzureNameTitle: 'Secret name with slashes on Azure',
+    sdkDotnetErrAzureNameTitle: 'Secret not found on Azure',
     sdkDotnetErrAzureNameFix:
-      'Key Vault names only allow letters, digits and hyphens, and the SDK does not normalize them. A path-style name such as /myapp/prod/db-password will not match any secret: use myapp-prod-db-password in the map.',
+      'The SDK sends each value as written, except that slashes become hyphens: a path-style name such as /myapp/prod/db-password is read as myapp-prod-db-password, like the CLI does. If the secret is still not found, check that the vault holds a secret with that name; names that differ only in case are the same secret.',
     sdkDotnetErrConfigTitle: 'Configuration errors',
     sdkDotnetErrMessageHeader: 'Message',
     sdkDotnetErrFixHeader: 'Fix',

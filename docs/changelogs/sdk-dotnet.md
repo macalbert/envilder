@@ -1,4 +1,4 @@
-## [1.0.0] - 2026-09-28
+## [1.0.0] - 2026-10-27
 
 ### Changed
 
@@ -28,6 +28,18 @@
   reference format per provider, and the limits on secret contents
   (provider sizes, the one value a `.env` file cannot hold, operating-system
   limits and variable expansion by other loaders)
+
+---
+
+## [0.5.3] - 2026-10-27
+
+### Fixed
+
+* **Azure Key Vault references with `/` resolve the same secret as the CLI**:
+  A path-style value such as `/myapp/prod/db-password` was sent to Key Vault
+  as written, so it never matched the secret the CLI pushes under
+  `myapp-prod-db-password`. The SDK now applies the CLI's rule: `/` becomes
+  `-`, ignoring leading slashes, and anything else is sent as written
 
 ---
 
