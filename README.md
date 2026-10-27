@@ -227,10 +227,10 @@ and uses all other keys as secret mappings:
 ```
 
 > **Azure naming:** Key Vault secret names only allow alphanumeric characters and hyphens.
-> A name Key Vault accepts is used as written (`Database--Password`, `1password-token`). Any other
-> name is normalized: the leading slash is removed, slashes and underscores become hyphens and the
-> name is lowercased (e.g., `/myapp/db/password` → `myapp-db-password`). The CLI, the GitHub Action
-> and every SDK apply the same rule, so they all read the same secret.
+> The only translation is for paths: slashes become hyphens and a leading slash is dropped
+> (e.g., `/myapp/db/password` → `myapp-db-password`). Anything else is sent as written, so a name
+> Key Vault rejects (for example one with `_` or `.`) fails with Key Vault's own error. The CLI, the
+> GitHub Action and every SDK apply the same rule, so they all read the same secret.
 
 ### `$config` Options
 

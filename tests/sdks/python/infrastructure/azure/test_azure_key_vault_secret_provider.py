@@ -25,7 +25,7 @@ class TestAzureKeyVaultSecretProvider:
         assert actual == "azure-secret-value"
         secret_client.get_secret.assert_called_once_with("test-secret")
 
-    def Should_FetchNormalizedName_When_ReferenceIsInvalidForAzure(
+    def Should_FetchHyphenatedName_When_ReferenceHasSlashes(
         self,
     ) -> None:
         # Arrange
@@ -36,13 +36,13 @@ class TestAzureKeyVaultSecretProvider:
         sut = AzureKeyVaultSecretProvider(secret_client)
 
         # Act
-        actual = sut.get_secret("/myapp/db_password")
+        actual = sut.get_secret("/myapp/db/password")
 
         # Assert
         assert actual == "fictional-value"
         secret_client.get_secret.assert_called_once_with("myapp-db-password")
 
-    def Should_FetchNameAsWritten_When_ReferenceIsValidForAzure(
+    def Should_FetchNameAsWritten_When_ReferenceHasNoSlash(
         self,
     ) -> None:
         # Arrange

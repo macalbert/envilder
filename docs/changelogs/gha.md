@@ -1,11 +1,12 @@
-## [0.16.1] - 2026-10-27
+## [0.17.0] - 2026-10-27
 
-### Fixed
+### Changed
 
-* **Azure Key Vault names that are already valid are used as written**: The
-  Action reads `Database--Password` or `1password-token` as written instead
-  of rewriting them to a different secret, the same as the SDKs. Path-style
-  values such as `/myapp/db_password` are normalized as before
+* **BREAKING: Azure Key Vault references only translate `/`**: The Action
+  shares the CLI's rule: `/` becomes `-`, ignoring leading slashes, and
+  anything else reaches Key Vault as written, as the SDKs do. A reference
+  with `_` (`/myapp/prod/stripe_key`) is no longer rewritten to
+  `myapp-prod-stripe-key`; use the name the vault holds
 
 ---
 

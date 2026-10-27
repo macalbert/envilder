@@ -750,7 +750,7 @@ export const es: Translations = {
       'Para Azure Key Vault, establece provider a "azure" y proporciona el vaultUrl:',
     mapAzureWarningTitle: 'Convención de nombres Azure:',
     mapAzureWarningDesc:
-      'Los nombres de secretos de Key Vault solo permiten caracteres alfanuméricos y guiones. Un nombre que Key Vault acepta se usa tal como está escrito (Database--Password, 1password-token). Cualquier otro nombre se normaliza: barras y guiones bajos se convierten en guiones y el nombre pasa a minúsculas (ej., /myapp/db/password → myapp-db-password). El CLI, la GitHub Action y todos los SDKs aplican la misma regla.',
+      'Los nombres de secretos de Key Vault solo permiten caracteres alfanuméricos y guiones. La única traducción es para las rutas: las barras se convierten en guiones y la barra inicial se elimina (ej., /myapp/db/password → myapp-db-password). Todo lo demás se envía tal como está escrito, así que un nombre que Key Vault rechaza falla con su propio error. El CLI, la GitHub Action y todos los SDKs aplican la misma regla.',
     mapDifferencesTitle: 'Diferencias clave por proveedor',
     mapThEmpty: '',
     mapThAwsSsm: 'AWS SSM',
@@ -1009,7 +1009,7 @@ export const es: Translations = {
     ghaAzurePolicyNote:
       'Si el vault usa directivas de acceso en lugar de Azure RBAC, concede get sobre los secretos: az keyvault set-policy --name {VAULT} --spn {APP_ID} --secret-permissions get.',
     ghaAzureMapDesc:
-      'Con $config en el archivo de mapeo, el workflow no necesita los inputs provider ni vault-url. Los nombres de Key Vault solo admiten letras, dígitos y guiones, así que Envilder convierte las rutas: /myapp/prod/stripe_key se lee como myapp-prod-stripe-key (sin la barra inicial, barras y guiones bajos convertidos en guiones, en minúsculas).',
+      'Con $config en el archivo de mapeo, el workflow no necesita los inputs provider ni vault-url. Los nombres de Key Vault solo admiten letras, dígitos y guiones, así que Envilder convierte las rutas: /myapp/prod/stripe-key se lee como myapp-prod-stripe-key (sin la barra inicial, barras convertidas en guiones).',
     ghaAzureInputsNote:
       'Los ID de cliente, tenant y suscripción identifican la aplicación; no son credenciales, así que basta con variables del repositorio. Si se informan, los inputs provider y vault-url sobrescriben el $config del archivo de mapeo.',
     ghaMultiEnvDesc:
@@ -1187,7 +1187,7 @@ export const es: Translations = {
       'Asigna Key Vault Secrets User sobre el almacén. Las asignaciones de rol pueden tardar unos minutos en propagarse.',
     sdkDotnetErrAzureNameTitle: 'Secreto no encontrado en Azure',
     sdkDotnetErrAzureNameFix:
-      'El SDK traduce cada valor igual que el CLI: un nombre que Key Vault acepta se usa tal cual, y un nombre en forma de ruta como /myapp/prod/db-password se lee como myapp-prod-db-password. Si el secreto sigue sin aparecer, comprueba que el vault tenga un secreto con ese nombre; los nombres que solo difieren en mayúsculas son el mismo secreto.',
+      'El SDK envía cada valor tal cual, salvo que las barras se convierten en guiones: un nombre en forma de ruta como /myapp/prod/db-password se lee como myapp-prod-db-password, igual que en el CLI. Si el secreto sigue sin aparecer, comprueba que el vault tenga un secreto con ese nombre; los nombres que solo difieren en mayúsculas son el mismo secreto.',
     sdkDotnetErrConfigTitle: 'Errores de configuración',
     sdkDotnetErrMessageHeader: 'Mensaje',
     sdkDotnetErrFixHeader: 'Solución',

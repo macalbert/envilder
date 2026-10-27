@@ -61,9 +61,9 @@ Set the provider in the map file's `$config`; values are Key Vault secret names:
 }
 ```
 
-Values Key Vault accepts as they are (letters, digits and `-`) are used as written. A path-style
-value such as `/myapp/prod/db_password` is read as `myapp-prod-db-password`, the same name the CLI
-pushes it under.
+Values are sent to Key Vault as written, except that slashes become hyphens: a path-style value
+such as `/myapp/prod/db-password` is read as `myapp-prod-db-password`, the same name the CLI pushes
+it under.
 
 The code is the same as for AWS. Credentials are resolved with `DefaultAzureCredential`
 (`az login`, managed identity, or environment variables):

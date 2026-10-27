@@ -749,7 +749,7 @@ export const ca: Translations = {
       'Per Azure Key Vault, estableix provider a "azure" i proporciona el vaultUrl:',
     mapAzureWarningTitle: 'Convenció de noms Azure:',
     mapAzureWarningDesc:
-      'Els noms de secrets de Key Vault només permeten caràcters alfanumèrics i guions. Un nom que Key Vault accepta es fa servir tal com està escrit (Database--Password, 1password-token). Qualsevol altre nom es normalitza: barres i guions baixos es converteixen en guions i el nom passa a minúscules (p. ex., /myapp/db/password → myapp-db-password). El CLI, la GitHub Action i tots els SDKs apliquen la mateixa regla.',
+      'Els noms de secrets de Key Vault només permeten caràcters alfanumèrics i guions. L’única traducció és per a les rutes: les barres es converteixen en guions i la barra inicial s’elimina (p. ex., /myapp/db/password → myapp-db-password). Tota la resta s’envia tal com està escrit, així que un nom que Key Vault rebutja falla amb el seu propi error. El CLI, la GitHub Action i tots els SDKs apliquen la mateixa regla.',
     mapDifferencesTitle: 'Diferències clau per proveïdor',
     mapThEmpty: '',
     mapThAwsSsm: 'AWS SSM',
@@ -1009,7 +1009,7 @@ export const ca: Translations = {
     ghaAzurePolicyNote:
       "Si el vault fa servir polítiques d'accés en lloc d'Azure RBAC, concedeix get sobre els secrets: az keyvault set-policy --name {VAULT} --spn {APP_ID} --secret-permissions get.",
     ghaAzureMapDesc:
-      'Amb $config al fitxer de mapeig, el workflow no necessita els inputs provider ni vault-url. Els noms de Key Vault només admeten lletres, dígits i guions, així que Envilder converteix les rutes: /myapp/prod/stripe_key es llegeix com a myapp-prod-stripe-key (sense la barra inicial, barres i guions baixos convertits en guions, en minúscules).',
+      'Amb $config al fitxer de mapeig, el workflow no necessita els inputs provider ni vault-url. Els noms de Key Vault només admeten lletres, dígits i guions, així que Envilder converteix les rutes: /myapp/prod/stripe-key es llegeix com a myapp-prod-stripe-key (sense la barra inicial, barres convertides en guions).',
     ghaAzureInputsNote:
       "Els ID de client, tenant i subscripció identifiquen l'aplicació; no són credencials, així que n'hi ha prou amb variables del repositori. Si s'informen, els inputs provider i vault-url sobreescriuen el $config del fitxer de mapeig.",
     ghaMultiEnvDesc:
@@ -1187,7 +1187,7 @@ export const ca: Translations = {
       'Assigna Key Vault Secrets User sobre el magatzem. Les assignacions de rol poden trigar uns minuts a propagar-se.',
     sdkDotnetErrAzureNameTitle: 'Secret no trobat a Azure',
     sdkDotnetErrAzureNameFix:
-      "L'SDK tradueix cada valor igual que el CLI: un nom que Key Vault accepta es fa servir tal qual, i un nom en forma de ruta com /myapp/prod/db-password es llegeix com myapp-prod-db-password. Si el secret continua sense aparèixer, comprova que el vault tingui un secret amb aquest nom; els noms que només difereixen en majúscules són el mateix secret.",
+      "L'SDK envia cada valor tal qual, excepte que les barres es converteixen en guions: un nom en forma de ruta com /myapp/prod/db-password es llegeix com myapp-prod-db-password, igual que al CLI. Si el secret continua sense aparèixer, comprova que el vault tingui un secret amb aquest nom; els noms que només difereixen en majúscules són el mateix secret.",
     sdkDotnetErrConfigTitle: 'Errors de configuració',
     sdkDotnetErrMessageHeader: 'Missatge',
     sdkDotnetErrFixHeader: 'Solució',

@@ -117,28 +117,6 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
       expect(mockGetSecretFn).toHaveBeenCalledWith('my-app-db-password');
     });
 
-    it('Should_NormalizeSecretName_When_NameContainsUnderscores', async () => {
-      // Arrange
-      mockGetSecretFn.mockResolvedValueOnce({ value: 'value' });
-
-      // Act
-      await sut.getSecret('my_secret_name');
-
-      // Assert
-      expect(mockGetSecretFn).toHaveBeenCalledWith('my-secret-name');
-    });
-
-    it('Should_PrefixWithSecret_When_NormalizedNameStartsWithNumber', async () => {
-      // Arrange
-      mockGetSecretFn.mockResolvedValueOnce({ value: 'value' });
-
-      // Act
-      await sut.getSecret('/123/test');
-
-      // Assert
-      expect(mockGetSecretFn).toHaveBeenCalledWith('secret-123-test');
-    });
-
     it('Should_ReturnUndefined_When_AzureSDKReturnsNull', async () => {
       // Arrange
       mockGetSecretFn.mockResolvedValueOnce(null);
@@ -176,18 +154,34 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
     });
   });
 
-  describe('normalizeSecretName', () => {
-    // Names Azure already accepts reach it untouched, as they do through the
-    // SDKs, so every surface reads the same secret.
+  describe('toAzureSecretName', () => {
+    // The same cases are pinned in the Node.js, Python and .NET SDK tests:
+    // every surface must send Key Vault the same secret name.
     it.each([
       'MY-SECRET-NAME',
       'Database--Password',
       '1password-token',
-      '-edge-hyphens-',
-      'a'.repeat(127),
+      'my_secret_name',
+      'db.url',
+    ])('Should_PassNameAsWritten_When_NameHasNoSlash (%s)', async (name) => {
+      // Arrange
+      mockGetSecretFn.mockResolvedValueOnce({ value: 'value' });
+
+      // Act
+      await sut.getSecret(name);
+
+      // Assert
+      expect(mockGetSecretFn).toHaveBeenCalledWith(name);
+    });
+
+    it.each([
+      ['/myapp/db/password', 'myapp-db-password'],
+      ['myapp/db_password', 'myapp-db_password'],
+      ['/MyApp/Db', 'MyApp-Db'],
+      ['//a//b', 'a--b'],
     ])(
-      'Should_KeepNameAsWritten_When_NameIsValidForAzure (%s)',
-      async (name) => {
+      'Should_TurnSlashesIntoHyphens_When_NameHasSlashes (%s)',
+      async (name, expected) => {
         // Arrange
         mockGetSecretFn.mockResolvedValueOnce({ value: 'value' });
 
@@ -195,30 +189,35 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
         await sut.getSecret(name);
 
         // Assert
-        expect(mockGetSecretFn).toHaveBeenCalledWith(name);
+        expect(mockGetSecretFn).toHaveBeenCalledWith(expected);
       },
     );
 
-    it('Should_LowercaseName_When_NameNeedsNormalization', async () => {
+    it('Should_PropagateKeyVaultError_When_KeyVaultRejectsName', async () => {
       // Arrange
-      mockGetSecretFn.mockResolvedValueOnce({ value: 'value' });
+      mockGetSecretFn.mockRejectedValueOnce(
+        Object.assign(new Error('The request URI contains an invalid name'), {
+          statusCode: 400,
+        }),
+      );
 
       // Act
-      await sut.getSecret('/MY/SECRET_NAME');
+      const action = sut.getSecret('db.url');
 
       // Assert
-      expect(mockGetSecretFn).toHaveBeenCalledWith('my-secret-name');
+      await expect(action).rejects.toThrow(SecretOperationError);
+      await expect(action).rejects.toThrow(/invalid name/);
     });
   });
 
   describe('collision detection', () => {
-    it('Should_ThrowSecretOperationError_When_DifferentNamesNormalizeToSameKey', async () => {
+    it('Should_ThrowSecretOperationError_When_DifferentNamesResolveToSameName', async () => {
       // Arrange
       mockGetSecretFn.mockResolvedValueOnce({ value: 'value1' });
       await sut.getSecret('/app/db-url');
 
       // Act
-      const action = sut.getSecret('/app/db_url');
+      const action = sut.getSecret('app-db-url');
 
       // Assert
       await expect(action).rejects.toThrow(SecretOperationError);
@@ -238,7 +237,7 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
       await expect(action).rejects.toThrow(/Secret name collision/);
     });
 
-    it('Should_ThrowSecretOperationError_When_ValidNameMatchesNormalizedNameIgnoringCase', async () => {
+    it('Should_ThrowSecretOperationError_When_NamesResolveToSameNameIgnoringCase', async () => {
       // Arrange
       mockGetSecretFn.mockResolvedValueOnce({ value: 'value1' });
       await sut.getSecret('APP-DB');
@@ -263,13 +262,13 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
       await expect(action).resolves.toBe('value');
     });
 
-    it('Should_DetectCollisionOnSetSecret_When_DifferentNamesNormalizeSame', async () => {
+    it('Should_DetectCollisionOnSetSecret_When_DifferentNamesResolveToSameName', async () => {
       // Arrange
       mockSetSecretFn.mockResolvedValueOnce({});
       await sut.setSecret('/app/db-url', 'value1');
 
       // Act
-      const action = sut.setSecret('/app/db_url', 'value2');
+      const action = sut.setSecret('app-db-url', 'value2');
 
       // Assert
       await expect(action).rejects.toThrow(SecretOperationError);
@@ -287,53 +286,6 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
 
       // Assert
       await expect(action).rejects.toThrow(InvalidArgumentError);
-    });
-
-    it('Should_ThrowInvalidArgumentError_When_SecretNameContainsOnlyInvalidChars', async () => {
-      // Arrange
-      // (sut is already created in beforeEach)
-
-      // Act
-      const action = sut.getSecret('@#$%^&');
-
-      // Assert
-      await expect(action).rejects.toThrow(InvalidArgumentError);
-    });
-
-    it('Should_ThrowInvalidArgumentError_When_NormalizedNameExceeds127Chars', async () => {
-      // Arrange
-      const longName = `a${'-bcd'.repeat(50)}`;
-
-      // Act
-      const action = sut.getSecret(longName);
-
-      // Assert
-      await expect(action).rejects.toThrow(InvalidArgumentError);
-      await expect(action).rejects.toThrow(/exceeds the 127-character limit/);
-    });
-
-    it('Should_AcceptName_When_NameContainsSlashesAndUnderscores', async () => {
-      // Arrange
-      mockGetSecretFn.mockResolvedValueOnce({ value: 'db-connection-string' });
-
-      // Act
-      const actual = await sut.getSecret('/my/app_config/db_url');
-
-      // Assert
-      expect(mockGetSecretFn).toHaveBeenCalledWith('my-app-config-db-url');
-      expect(actual).toBe('db-connection-string');
-    });
-
-    it('Should_ThrowInvalidArgumentError_When_SecretNameContainsUnexpectedSpecialChars', async () => {
-      // Arrange
-      const name = '/my/app/db@url!';
-
-      // Act
-      const action = sut.getSecret(name);
-
-      // Assert
-      await expect(action).rejects.toThrow(InvalidArgumentError);
-      await expect(action).rejects.toThrow(/characters not allowed/);
     });
   });
 });

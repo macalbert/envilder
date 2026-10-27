@@ -31,7 +31,7 @@ public class AzureKeyVaultSecretProviderTests
 	}
 
 	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
-	public async Task Should_FetchNormalizedName_When_ReferenceIsInvalidForAzure()
+	public async Task Should_FetchHyphenatedName_When_ReferenceHasSlashes()
 	{
 		// Arrange
 		var secretClient = Substitute.For<SecretClient>();
@@ -44,7 +44,7 @@ public class AzureKeyVaultSecretProviderTests
 		var sut = new AzureKeyVaultSecretProvider(secretClient);
 
 		// Act
-		var actual = await sut.GetSecretAsync("/myapp/db_password", TestContext.Current.CancellationToken);
+		var actual = await sut.GetSecretAsync("/myapp/db/password", TestContext.Current.CancellationToken);
 
 		// Assert
 		actual.Should().Be("fictional-value");

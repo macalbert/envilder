@@ -739,7 +739,7 @@ export const en: Translations = {
       'For Azure Key Vault, set provider to "azure" and provide the vaultUrl:',
     mapAzureWarningTitle: 'Azure naming convention:',
     mapAzureWarningDesc:
-      'Key Vault secret names only allow alphanumeric characters and hyphens. A name Key Vault accepts is used as written (Database--Password, 1password-token). Any other name is normalized: slashes and underscores become hyphens and the name is lowercased (e.g., /myapp/db/password → myapp-db-password). The CLI, the GitHub Action and every SDK apply the same rule.',
+      'Key Vault secret names only allow alphanumeric characters and hyphens. The only translation is for paths: slashes become hyphens and a leading slash is dropped (e.g., /myapp/db/password → myapp-db-password). Anything else is sent as written, so a name Key Vault rejects fails with its own error. The CLI, the GitHub Action and every SDK apply the same rule.',
     mapDifferencesTitle: 'Key differences by provider',
     mapThEmpty: '',
     mapThAwsSsm: 'AWS SSM',
@@ -995,7 +995,7 @@ export const en: Translations = {
     ghaAzurePolicyNote:
       'If the vault uses access policies instead of Azure RBAC, grant get on secrets: az keyvault set-policy --name {VAULT} --spn {APP_ID} --secret-permissions get.',
     ghaAzureMapDesc:
-      "With $config in the map file, the workflow doesn't need the provider or vault-url inputs. Key Vault names only allow letters, digits and hyphens, so Envilder converts paths: /myapp/prod/stripe_key is read as myapp-prod-stripe-key (leading slash removed, slashes and underscores turned into hyphens, lowercased).",
+      "With $config in the map file, the workflow doesn't need the provider or vault-url inputs. Key Vault names only allow letters, digits and hyphens, so Envilder converts paths: /myapp/prod/stripe-key is read as myapp-prod-stripe-key (leading slash removed, slashes turned into hyphens).",
     ghaAzureInputsNote:
       'The client, tenant and subscription IDs identify the app; they are not credentials, so repository variables are enough. When set, the provider and vault-url inputs override $config in the map file.',
     ghaMultiEnvDesc:
@@ -1172,7 +1172,7 @@ export const en: Translations = {
       'Assign Key Vault Secrets User on the vault. Role assignments can take a few minutes to propagate.',
     sdkDotnetErrAzureNameTitle: 'Secret not found on Azure',
     sdkDotnetErrAzureNameFix:
-      'The SDK maps each value like the CLI: a name Key Vault accepts is used as written, and a path-style name such as /myapp/prod/db-password is read as myapp-prod-db-password. If the secret is still not found, check that the vault holds a secret with that name; names that differ only in case are the same secret.',
+      'The SDK sends each value as written, except that slashes become hyphens: a path-style name such as /myapp/prod/db-password is read as myapp-prod-db-password, like the CLI does. If the secret is still not found, check that the vault holds a secret with that name; names that differ only in case are the same secret.',
     sdkDotnetErrConfigTitle: 'Configuration errors',
     sdkDotnetErrMessageHeader: 'Message',
     sdkDotnetErrFixHeader: 'Fix',

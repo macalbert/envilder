@@ -5,7 +5,7 @@ from envilder.infrastructure.azure.azure_secret_name import (
 
 
 # The same cases are pinned in the CLI, Node.js and .NET tests: every surface
-# must resolve a map-file reference to the same Key Vault secret.
+# must send Key Vault the same secret name.
 class TestToAzureSecretName:
     @pytest.mark.parametrize(
         "name",
@@ -13,13 +13,11 @@ class TestToAzureSecretName:
             "MY-SECRET-NAME",
             "Database--Password",
             "1password-token",
-            "-edge-hyphens-",
-            "a" * 127,
+            "my_secret_name",
+            "db.url",
         ],
     )
-    def Should_KeepNameAsWritten_When_NameIsValidForAzure(
-        self, name: str
-    ) -> None:
+    def Should_PassNameAsWritten_When_NameHasNoSlash(self, name: str) -> None:
         # Act
         actual = to_azure_secret_name(name)
 
@@ -29,14 +27,13 @@ class TestToAzureSecretName:
     @pytest.mark.parametrize(
         ("name", "expected"),
         [
-            ("/myapp/db_password", "myapp-db-password"),
-            ("/MY/SECRET_NAME", "my-secret-name"),
-            ("db__url", "db-url"),
-            ("/123/test", "secret-123-test"),
-            ("/", "secret"),
+            ("/myapp/db/password", "myapp-db-password"),
+            ("myapp/db_password", "myapp-db_password"),
+            ("/MyApp/Db", "MyApp-Db"),
+            ("//a//b", "a--b"),
         ],
     )
-    def Should_NormalizeLikeTheCli_When_NameIsInvalidForAzure(
+    def Should_TurnSlashesIntoHyphens_When_NameHasSlashes(
         self, name: str, expected: str
     ) -> None:
         # Act
@@ -44,27 +41,3 @@ class TestToAzureSecretName:
 
         # Assert
         assert actual == expected
-
-    @pytest.mark.parametrize("name", ["db.url", "db url", "db:url"])
-    def Should_Raise_When_NameHasCharactersAzureCannotHold(
-        self, name: str
-    ) -> None:
-        # Act
-        def action() -> str:
-            return to_azure_secret_name(name)
-
-        # Assert
-        with pytest.raises(ValueError, match="not allowed by Azure Key Vault"):
-            action()
-
-    def Should_Raise_When_NormalizedNameExceedsLimit(self) -> None:
-        # Arrange
-        name = "a" * 127 + "_x"
-
-        # Act
-        def action() -> str:
-            return to_azure_secret_name(name)
-
-        # Assert
-        with pytest.raises(ValueError, match="127-character limit"):
-            action()

@@ -31,7 +31,6 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
         throw new Error('Secret name cannot be null or empty');
       }
     }
-    // Before any request, so an invalid reference fails the whole call.
     const secretNames = names.map(toAzureSecretName);
 
     const entries = await Promise.all(
