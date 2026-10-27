@@ -481,6 +481,8 @@ export const es: Translations = {
       secretTitle: '2. Sube un secreto de prueba',
       secretDesc:
         'Elige tu proveedor. Un solo comando de envilder guarda el secreto en el vault y registra la asociación en envilder.json, así que este paso no necesita ni la AWS CLI ni la Azure CLI. La guía usa un único secreto: la contraseña de la base de datos de un entorno de desarrollo. El valor queda en el historial de la terminal; para secretos reales, haz el push desde un archivo .env con el modo push.',
+      secretAwsNote:
+        'En AWS, --provider=aws y --profile son opcionales: aws es el proveedor por defecto y, sin --profile, Envilder usa la cadena de credenciales por defecto de AWS. El perfil es una elección local y no se escribe en envilder.json.',
       secretAzureNote:
         'Los nombres de Key Vault solo admiten letras, dígitos y guiones. Envilder pasa el identificador a minúsculas y convierte barras y guiones bajos en guiones antes de llamar a Azure, así que "/my-app/dev/db-password" resolvería el mismo secreto.',
       mapTitle: '3. Revisa envilder.json',

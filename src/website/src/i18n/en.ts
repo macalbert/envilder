@@ -476,6 +476,8 @@ export const en: Translations = {
       secretTitle: '2. Push a test secret',
       secretDesc:
         'Choose your provider. One envilder command stores the secret in the vault and records the mapping in envilder.json, so this step needs neither the AWS CLI nor the Azure CLI. The guide uses a single secret: the database password of a development environment. The value stays in your shell history; for real secrets, push from a .env file with push mode instead.',
+      secretAwsNote:
+        'On AWS, --provider=aws and --profile are optional: aws is the default provider, and without --profile Envilder uses the AWS default credential chain. The profile is a local choice and is not written to envilder.json.',
       secretAzureNote:
         'Key Vault names only allow letters, digits and hyphens. Envilder lowercases the identifier and turns slashes and underscores into hyphens before calling Azure, so "/my-app/dev/db-password" would resolve the same secret.',
       mapTitle: '3. Check envilder.json',

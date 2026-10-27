@@ -480,6 +480,8 @@ export const ca: Translations = {
       secretTitle: '2. Puja un secret de prova',
       secretDesc:
         "Tria el teu proveïdor. Una sola ordre d'envilder desa el secret al vault i registra l'associació a l'envilder.json, així que aquest pas no necessita ni l'AWS CLI ni l'Azure CLI. La guia fa servir un sol secret: la contrasenya de la base de dades d'un entorn de desenvolupament. El valor queda a l'historial de la terminal; per a secrets reals, fes el push des d'un fitxer .env amb el mode push.",
+      secretAwsNote:
+        "A AWS, --provider=aws i --profile són opcionals: aws és el proveïdor per defecte i, sense --profile, Envilder fa servir la cadena de credencials per defecte d'AWS. El perfil és una elecció local i no s'escriu a l'envilder.json.",
       secretAzureNote:
         'Els noms de Key Vault només admeten lletres, dígits i guions. Envilder passa l\'identificador a minúscules i converteix barres i guions baixos en guions abans de cridar Azure, així que "/my-app/dev/db-password" resoldria el mateix secret.',
       mapTitle: "3. Revisa l'envilder.json",

@@ -323,7 +323,8 @@ const gsInstallTabs = [
   { label: 'npx', lang: 'bash', code: 'npx envilder --version' },
 ];
 
-const gsAwsSecret = `envilder --key=DB_PASSWORD --value=local-dev-password \\
+const gsAwsSecret = `envilder --provider=aws --profile=default \\
+  --key=DB_PASSWORD --value=local-dev-password \\
   --secret-path=/my-app/dev/db-password`;
 
 const gsAzureSecret = `envilder --provider=azure --vault-url=https://my-vault.vault.azure.net \\
@@ -549,6 +550,7 @@ const mfErrors = [
           { label: gs.tabAws, lang: 'bash', code: gsAwsSecret },
           { label: gs.tabAzure, lang: 'bash', code: gsAzureSecret },
         ]} />
+        <p class="note">{gs.secretAwsNote}</p>
         <p class="note">{gs.secretAzureNote}</p>
       </section>
 
