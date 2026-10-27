@@ -22,6 +22,45 @@ describe('AzureKeyVaultSecretProvider', () => {
     expect(actual.size).toBe(2);
   });
 
+  it('Should_FetchNormalizedName_When_ReferenceIsInvalidForAzure', async () => {
+    // Arrange
+    const mockGetSecret = vi.fn().mockResolvedValue({ value: 'fictional' });
+    const mockClient = {
+      getSecret: mockGetSecret,
+    } as unknown as SecretClient;
+    const sut = new AzureKeyVaultSecretProvider(mockClient);
+
+    // Act
+    const actual = await sut.getSecrets([
+      '/myapp/db_password',
+      'Database--Password',
+    ]);
+
+    // Assert
+    expect(mockGetSecret).toHaveBeenCalledWith('myapp-db-password');
+    expect(mockGetSecret).toHaveBeenCalledWith('Database--Password');
+    expect([...actual.keys()]).toEqual([
+      '/myapp/db_password',
+      'Database--Password',
+    ]);
+  });
+
+  it('Should_ThrowBeforeFetching_When_AnyReferenceHasInvalidCharacters', async () => {
+    // Arrange
+    const mockGetSecret = vi.fn();
+    const mockClient = {
+      getSecret: mockGetSecret,
+    } as unknown as SecretClient;
+    const sut = new AzureKeyVaultSecretProvider(mockClient);
+
+    // Act
+    const action = sut.getSecrets(['db-url', 'db.url']);
+
+    // Assert
+    await expect(action).rejects.toThrow(/not allowed by Azure Key Vault/);
+    expect(mockGetSecret).not.toHaveBeenCalled();
+  });
+
   it('Should_OmitMissing_When_SecretNotFound', async () => {
     // Arrange
     const mockGetSecret = vi

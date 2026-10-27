@@ -750,7 +750,7 @@ export const es: Translations = {
       'Para Azure Key Vault, establece provider a "azure" y proporciona el vaultUrl:',
     mapAzureWarningTitle: 'Convención de nombres Azure:',
     mapAzureWarningDesc:
-      'Los nombres de secretos de Key Vault solo permiten caracteres alfanuméricos y guiones. Envilder normaliza automáticamente los nombres: barras y guiones bajos se convierten en guiones (ej., /myapp/db/password → myapp-db-password).',
+      'Los nombres de secretos de Key Vault solo permiten caracteres alfanuméricos y guiones. Un nombre que Key Vault acepta se usa tal como está escrito (Database--Password, 1password-token). Cualquier otro nombre se normaliza: barras y guiones bajos se convierten en guiones y el nombre pasa a minúsculas (ej., /myapp/db/password → myapp-db-password). El CLI, la GitHub Action y todos los SDKs aplican la misma regla.',
     mapDifferencesTitle: 'Diferencias clave por proveedor',
     mapThEmpty: '',
     mapThAwsSsm: 'AWS SSM',
@@ -1185,9 +1185,9 @@ export const es: Translations = {
       'La identidad no tiene ssm:GetParameter sobre ese parámetro. Compara el ARN de Resource, región incluida, con la política anterior.',
     sdkDotnetErrDeniedAzureFix:
       'Asigna Key Vault Secrets User sobre el almacén. Las asignaciones de rol pueden tardar unos minutos en propagarse.',
-    sdkDotnetErrAzureNameTitle: 'Nombre de secreto con barras en Azure',
+    sdkDotnetErrAzureNameTitle: 'Secreto no encontrado en Azure',
     sdkDotnetErrAzureNameFix:
-      'Los nombres de Key Vault solo admiten letras, dígitos y guiones, y el SDK no los normaliza. Un nombre en forma de ruta como /myapp/prod/db-password no coincidirá con ningún secreto: usa myapp-prod-db-password en el archivo.',
+      'El SDK traduce cada valor igual que el CLI: un nombre que Key Vault acepta se usa tal cual, y un nombre en forma de ruta como /myapp/prod/db-password se lee como myapp-prod-db-password. Si el secreto sigue sin aparecer, comprueba que el vault tenga un secreto con ese nombre; los nombres que solo difieren en mayúsculas son el mismo secreto.',
     sdkDotnetErrConfigTitle: 'Errores de configuración',
     sdkDotnetErrMessageHeader: 'Mensaje',
     sdkDotnetErrFixHeader: 'Solución',

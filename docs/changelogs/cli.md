@@ -5,6 +5,24 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [0.16.1] - 2026-10-27
+
+### Fixed
+
+* **Azure Key Vault names that are already valid are used as written**: A
+  value such as `Database--Password` or `1password-token` was rewritten to
+  `database-password` or `secret-1password-token`, so it addressed a
+  different secret than the one in the vault and than the SDKs read. Only a
+  value Key Vault would reject (one holding `/` or `_`, or too long) is
+  normalized now, with the same rules as before, so secrets pushed under a
+  path-style value such as `/myapp/db_password` keep resolving. The rule is
+  shared with the Node.js, Python and .NET SDKs. If you pushed a value made
+  only of letters, digits and `-` that contains `--`, starts with a digit or
+  starts or ends with `-`, it was stored under the rewritten name: rename the
+  secret in the vault or point the map file at that name
+
+---
+
 ## [0.16.0] - 2026-10-25
 
 ### Added

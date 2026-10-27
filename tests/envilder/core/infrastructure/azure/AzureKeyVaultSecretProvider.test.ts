@@ -128,12 +128,12 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
       expect(mockGetSecretFn).toHaveBeenCalledWith('my-secret-name');
     });
 
-    it('Should_PrefixWithSecret_When_NameStartsWithNumber', async () => {
+    it('Should_PrefixWithSecret_When_NormalizedNameStartsWithNumber', async () => {
       // Arrange
       mockGetSecretFn.mockResolvedValueOnce({ value: 'value' });
 
       // Act
-      await sut.getSecret('123-test');
+      await sut.getSecret('/123/test');
 
       // Assert
       expect(mockGetSecretFn).toHaveBeenCalledWith('secret-123-test');
@@ -177,12 +177,34 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
   });
 
   describe('normalizeSecretName', () => {
-    it('Should_LowercaseName_When_NameContainsUppercase', async () => {
+    // Names Azure already accepts reach it untouched, as they do through the
+    // SDKs, so every surface reads the same secret.
+    it.each([
+      'MY-SECRET-NAME',
+      'Database--Password',
+      '1password-token',
+      '-edge-hyphens-',
+      'a'.repeat(127),
+    ])(
+      'Should_KeepNameAsWritten_When_NameIsValidForAzure (%s)',
+      async (name) => {
+        // Arrange
+        mockGetSecretFn.mockResolvedValueOnce({ value: 'value' });
+
+        // Act
+        await sut.getSecret(name);
+
+        // Assert
+        expect(mockGetSecretFn).toHaveBeenCalledWith(name);
+      },
+    );
+
+    it('Should_LowercaseName_When_NameNeedsNormalization', async () => {
       // Arrange
       mockGetSecretFn.mockResolvedValueOnce({ value: 'value' });
 
       // Act
-      await sut.getSecret('MY-SECRET-NAME');
+      await sut.getSecret('/MY/SECRET_NAME');
 
       // Assert
       expect(mockGetSecretFn).toHaveBeenCalledWith('my-secret-name');
@@ -207,6 +229,19 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
       // Arrange
       mockGetSecretFn.mockResolvedValueOnce({ value: 'value1' });
       await sut.getSecret('/APP/DB');
+
+      // Act
+      const action = sut.getSecret('/app/db');
+
+      // Assert
+      await expect(action).rejects.toThrow(SecretOperationError);
+      await expect(action).rejects.toThrow(/Secret name collision/);
+    });
+
+    it('Should_ThrowSecretOperationError_When_ValidNameMatchesNormalizedNameIgnoringCase', async () => {
+      // Arrange
+      mockGetSecretFn.mockResolvedValueOnce({ value: 'value1' });
+      await sut.getSecret('APP-DB');
 
       // Act
       const action = sut.getSecret('/app/db');

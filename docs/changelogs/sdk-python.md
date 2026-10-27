@@ -1,3 +1,17 @@
+## [0.5.3] - 2026-10-27
+
+### Fixed
+
+* **Azure Key Vault references resolve the same secret as the CLI**: A
+  path-style value such as `/myapp/prod/db_password` was sent to Key Vault as
+  written, so it never matched the secret the CLI pushes under
+  `myapp-prod-db-password`. The SDK now applies the CLI's rule: a value Key
+  Vault accepts (letters, digits and `-`) is used as written, and any other
+  value is normalized (slashes and underscores to `-`, lowercased). A value
+  with characters Key Vault cannot hold fails before any request
+
+---
+
 ## [0.5.2] - 2026-10-22
 
 ### Security

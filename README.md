@@ -227,8 +227,10 @@ and uses all other keys as secret mappings:
 ```
 
 > **Azure naming:** Key Vault secret names only allow alphanumeric characters and hyphens.
-> Envilder automatically normalizes names: slashes and underscores become hyphens
-> (e.g., `/myapp/db/password` → `myapp-db-password`).
+> A name Key Vault accepts is used as written (`Database--Password`, `1password-token`). Any other
+> name is normalized: the leading slash is removed, slashes and underscores become hyphens and the
+> name is lowercased (e.g., `/myapp/db/password` → `myapp-db-password`). The CLI, the GitHub Action
+> and every SDK apply the same rule, so they all read the same secret.
 
 ### `$config` Options
 

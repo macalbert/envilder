@@ -739,7 +739,7 @@ export const en: Translations = {
       'For Azure Key Vault, set provider to "azure" and provide the vaultUrl:',
     mapAzureWarningTitle: 'Azure naming convention:',
     mapAzureWarningDesc:
-      'Key Vault secret names only allow alphanumeric characters and hyphens. Envilder automatically normalizes names: slashes and underscores become hyphens (e.g., /myapp/db/password → myapp-db-password).',
+      'Key Vault secret names only allow alphanumeric characters and hyphens. A name Key Vault accepts is used as written (Database--Password, 1password-token). Any other name is normalized: slashes and underscores become hyphens and the name is lowercased (e.g., /myapp/db/password → myapp-db-password). The CLI, the GitHub Action and every SDK apply the same rule.',
     mapDifferencesTitle: 'Key differences by provider',
     mapThEmpty: '',
     mapThAwsSsm: 'AWS SSM',
@@ -1170,9 +1170,9 @@ export const en: Translations = {
       'The identity lacks ssm:GetParameter on that parameter. Compare the Resource ARN, including the region, with the policy above.',
     sdkDotnetErrDeniedAzureFix:
       'Assign Key Vault Secrets User on the vault. Role assignments can take a few minutes to propagate.',
-    sdkDotnetErrAzureNameTitle: 'Secret name with slashes on Azure',
+    sdkDotnetErrAzureNameTitle: 'Secret not found on Azure',
     sdkDotnetErrAzureNameFix:
-      'Key Vault names only allow letters, digits and hyphens, and the SDK does not normalize them. A path-style name such as /myapp/prod/db-password will not match any secret: use myapp-prod-db-password in the map.',
+      'The SDK maps each value like the CLI: a name Key Vault accepts is used as written, and a path-style name such as /myapp/prod/db-password is read as myapp-prod-db-password. If the secret is still not found, check that the vault holds a secret with that name; names that differ only in case are the same secret.',
     sdkDotnetErrConfigTitle: 'Configuration errors',
     sdkDotnetErrMessageHeader: 'Message',
     sdkDotnetErrFixHeader: 'Fix',

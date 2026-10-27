@@ -8,6 +8,12 @@ import {
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import { describeError } from '../describeError.js';
 
+/**
+ * A name Azure Key Vault accepts as it is: 1-127 letters, digits and hyphens.
+ * @see https://learn.microsoft.com/azure/key-vault/general/about-keys-secrets-certificates#objects-identifiers-and-versioning
+ */
+const AZURE_SECRET_NAME = /^[0-9A-Za-z-]{1,127}$/;
+
 @injectable()
 export class AzureKeyVaultSecretProvider implements ISecretProvider {
   private client: SecretClient;
@@ -69,7 +75,10 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
         `Invalid secret name '${originalName}': normalized name '${normalized}' exceeds the 127-character limit for Azure Key Vault.`,
       );
     }
-    const existing = this.normalizedNameRegistry.get(normalized);
+    // Key Vault names are case-insensitive, so two references that differ
+    // only by case still address the same secret.
+    const registryKey = normalized.toLowerCase();
+    const existing = this.normalizedNameRegistry.get(registryKey);
     if (existing !== undefined && existing !== originalName) {
       throw new SecretOperationError(
         `Secret name collision: '${originalName}' and '${existing}' ` +
@@ -78,12 +87,23 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
           'when targeting Azure.',
       );
     }
-    this.normalizedNameRegistry.set(normalized, originalName);
+    this.normalizedNameRegistry.set(registryKey, originalName);
     return normalized;
   }
 
-  // Azure Key Vault secret names: 1-127 chars, alphanumeric + hyphens, start with letter
+  /**
+   * A name Azure already accepts is used as written, so the CLI and every SDK
+   * address the same secret: `Database--Password` and `1password-token` stay
+   * as they are. Only a name Azure would reject (one holding `/` or `_`, or
+   * longer than 127 characters) is rewritten, with the rules secrets pushed by
+   * earlier versions were stored under: `/myapp/db_password` becomes
+   * `myapp-db-password`.
+   */
   private normalizeSecretName(name: string): string {
+    if (AZURE_SECRET_NAME.test(name)) {
+      return name;
+    }
+
     // Remove leading slashes
     let normalized = name.replace(/^\/+/, '');
 

@@ -749,7 +749,7 @@ export const ca: Translations = {
       'Per Azure Key Vault, estableix provider a "azure" i proporciona el vaultUrl:',
     mapAzureWarningTitle: 'Convenció de noms Azure:',
     mapAzureWarningDesc:
-      'Els noms de secrets de Key Vault només permeten caràcters alfanumèrics i guions. Envilder normalitza automàticament els noms: barres i guions baixos es converteixen en guions (p. ex., /myapp/db/password → myapp-db-password).',
+      'Els noms de secrets de Key Vault només permeten caràcters alfanumèrics i guions. Un nom que Key Vault accepta es fa servir tal com està escrit (Database--Password, 1password-token). Qualsevol altre nom es normalitza: barres i guions baixos es converteixen en guions i el nom passa a minúscules (p. ex., /myapp/db/password → myapp-db-password). El CLI, la GitHub Action i tots els SDKs apliquen la mateixa regla.',
     mapDifferencesTitle: 'Diferències clau per proveïdor',
     mapThEmpty: '',
     mapThAwsSsm: 'AWS SSM',
@@ -1185,9 +1185,9 @@ export const ca: Translations = {
       "La identitat no té ssm:GetParameter sobre aquest paràmetre. Compara l'ARN de Resource, regió inclosa, amb la política anterior.",
     sdkDotnetErrDeniedAzureFix:
       'Assigna Key Vault Secrets User sobre el magatzem. Les assignacions de rol poden trigar uns minuts a propagar-se.',
-    sdkDotnetErrAzureNameTitle: 'Nom de secret amb barres a Azure',
+    sdkDotnetErrAzureNameTitle: 'Secret no trobat a Azure',
     sdkDotnetErrAzureNameFix:
-      "Els noms de Key Vault només admeten lletres, dígits i guions, i l'SDK no els normalitza. Un nom en forma de ruta com /myapp/prod/db-password no coincidirà amb cap secret: fes servir myapp-prod-db-password al fitxer.",
+      "L'SDK tradueix cada valor igual que el CLI: un nom que Key Vault accepta es fa servir tal qual, i un nom en forma de ruta com /myapp/prod/db-password es llegeix com myapp-prod-db-password. Si el secret continua sense aparèixer, comprova que el vault tingui un secret amb aquest nom; els noms que només difereixen en majúscules són el mateix secret.",
     sdkDotnetErrConfigTitle: 'Errors de configuració',
     sdkDotnetErrMessageHeader: 'Missatge',
     sdkDotnetErrFixHeader: 'Solució',

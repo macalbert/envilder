@@ -151,6 +151,21 @@ Values are opaque identifiers interpreted by the provider:
 | `hashicorp` | Vault secret path | `secret/data/my-app/db-password` |
 | `file` | Key name in the `.env` source file | `DB_PASSWORD` |
 
+**Azure secret names are resolved identically on every surface.** A value that
+is already a valid Key Vault name (`^[0-9A-Za-z-]{1,127}$`) is used as
+written, so `Database--Password` and `1password-token` reach the vault
+unchanged. Any other value is normalized: leading `/` removed, `/` and `_`
+turned into `-`, lowercased, repeated `-` collapsed, edge `-` trimmed, and
+`secret-` prepended when the result does not start with a letter
+(`/my-app/prod/db_password` → `my-app-prod-db-password`). Characters outside
+letters, digits, `-`, `_` and `/` are rejected, as is a normalized name longer
+than 127 characters. The CLI and the GitHub Action
+(`AzureKeyVaultSecretProvider.ts`) and the Node.js, Python and .NET SDKs
+(`azure-secret-name.ts`, `azure_secret_name.py`, `AzureSecretName.cs`) share
+this rule and its test cases. Normalizing only invalid names keeps every
+secret the CLI pushed under a path-style value reachable, while a name Azure
+accepts is never rewritten into a different secret.
+
 ### 6. `file` Provider for Testing
 
 The `file` provider enables testing without cloud infrastructure. It reads an

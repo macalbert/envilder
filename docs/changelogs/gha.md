@@ -1,3 +1,14 @@
+## [0.16.1] - 2026-10-27
+
+### Fixed
+
+* **Azure Key Vault names that are already valid are used as written**: The
+  Action reads `Database--Password` or `1password-token` as written instead
+  of rewriting them to a different secret, the same as the SDKs. Path-style
+  values such as `/myapp/db_password` are normalized as before
+
+---
+
 ## [0.16.0] - 2026-10-25
 
 ### Changed
