@@ -17,13 +17,13 @@ describe('EnvironmentVariable', () => {
     expect(sut.isSecret).toBe(false);
   });
 
-  it('Should_MarkAsSecret_When_IsSecretFlagIsTrue', () => {
+  it('Should_MarkAsSecret_When_CreatedUsingSecretFactory', () => {
     // Arrange
     const name = 'SECRET_VAR';
     const value = 'super-secret-value';
 
     // Act
-    const sut = new EnvironmentVariable(name, value, true);
+    const sut = EnvironmentVariable.secret(name, value);
 
     // Assert
     expect(sut.isSecret).toBe(true);
@@ -32,12 +32,8 @@ describe('EnvironmentVariable', () => {
 
   it('Should_MaskSecretValuesProperly_When_ValueIsSensitive', () => {
     // Arrange
-    const shortSecret = new EnvironmentVariable('SHORT', '1234', true);
-    const longSecret = new EnvironmentVariable(
-      'LONG',
-      '1234567890abcdef',
-      true,
-    );
+    const shortSecret = EnvironmentVariable.secret('SHORT', '1234');
+    const longSecret = EnvironmentVariable.secret('LONG', '1234567890abcdef');
 
     // Act
     const shortMasked = shortSecret.maskedValue;

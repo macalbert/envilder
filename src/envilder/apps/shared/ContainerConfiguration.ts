@@ -10,10 +10,7 @@ import type { ILogger } from '../../core/domain/ports/ILogger.js';
 import type { ISecretMasker } from '../../core/domain/ports/ISecretMasker.js';
 import type { ISecretProvider } from '../../core/domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../core/domain/ports/IVariableStore.js';
-import {
-  type AwsProviderOptions,
-  createAwsSecretProvider,
-} from '../../core/infrastructure/aws/AwsSecretProviderFactory.js';
+import { createAwsSecretProvider } from '../../core/infrastructure/aws/AwsSecretProviderFactory.js';
 import {
   type AzureProviderOptions,
   createAzureSecretProvider,
@@ -23,7 +20,7 @@ import { ConsoleLogger } from '../../core/infrastructure/logger/ConsoleLogger.js
 import { FileVariableStore } from '../../core/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../core/types.js';
 
-export type InfrastructureOptions = AzureProviderOptions & AwsProviderOptions;
+export type InfrastructureOptions = AzureProviderOptions;
 
 type ProviderFactory = (
   config: MapFileConfig,
@@ -32,10 +29,7 @@ type ProviderFactory = (
 ) => ISecretProvider;
 
 const providerFactories: Record<string, ProviderFactory> = {
-  aws: (config, options, logger) =>
-    createAwsSecretProvider(config, logger, {
-      identityBanner: options.identityBanner,
-    }),
+  aws: (config, _options, logger) => createAwsSecretProvider(config, logger),
   azure: (config, options) => createAzureSecretProvider(config, options),
 };
 
