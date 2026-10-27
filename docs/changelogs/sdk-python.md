@@ -1,4 +1,13 @@
-## [0.5.3] - 2026-10-27
+## [0.6.0] - 2026-10-27
+
+### Changed
+
+* **BREAKING: Python 3.11 is the minimum supported version**: Python 3.10
+  reached end of life on 2026-10-01 and no longer receives security fixes.
+  Following the SDK dependency policy (ADR-0009: the engine floor is the
+  lowest in-support minor), the package now requires Python 3.11 or later,
+  drops the 3.10 classifier, and CI tests 3.11 and 3.13. Projects still on
+  Python 3.10 keep resolving 0.5.x
 
 ### Fixed
 
@@ -7,6 +16,11 @@
   as written, so it never matched the secret the CLI pushes under
   `myapp-prod-db-password`. The SDK now applies the CLI's rule: `/` becomes
   `-`, ignoring leading slashes, and anything else is sent as written
+
+### Dependencies
+
+* Drop `tomli` and `exceptiongroup` from the lockfile: they were only
+  installed on Python 3.10
 
 ---
 
