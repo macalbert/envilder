@@ -448,6 +448,188 @@ export const en: Translations = {
     categorySdkNodejs: 'Node.js',
   },
   docs: {
+    gettingStartedGuide: {
+      tabAws: 'AWS SSM',
+      tabAzure: 'Azure Key Vault',
+      overviewTitle: 'What you will do',
+      overviewSteps: [
+        'Install the envilder CLI.',
+        'Store one test secret in AWS SSM Parameter Store or Azure Key Vault.',
+        'Map it to a variable name in envilder.json.',
+        'Start a small Node.js app with envilder exec and check that it receives the value.',
+      ],
+      prereqTitle: 'Prerequisites',
+      prereqNode: 'Node.js 22.12 or later.',
+      prereqAws:
+        'the AWS CLI with working credentials (aws configure, or aws sso login for SSO profiles) and an identity allowed to call ssm:GetParameter on the parameters you map. If a SecureString parameter is encrypted with a customer-managed KMS key, the identity also needs kms:Decrypt on that key.',
+      prereqAwsLink: 'AWS SSM setup',
+      prereqAzure:
+        'an existing Key Vault, the Azure CLI signed in with az login, and the Key Vault Secrets User role on the vault (or an access policy with Get on secrets). Envilder authenticates with DefaultAzureCredential, so a managed identity or environment credentials work too.',
+      prereqAzureLink: 'Azure Key Vault setup',
+      prereqWrite:
+        'Step 2 creates a secret, which needs write access (ssm:PutParameter, or Key Vault Secrets Officer). Skip it if the secret already exists.',
+      installTitle: '1. Install the CLI',
+      installDesc:
+        'Install envilder globally. If you prefer not to install it, prefix every command in this guide with npx.',
+      installVerify:
+        'Check that the command is on your PATH. It prints the version:',
+      secretTitle: '2. Store a test secret',
+      secretDesc:
+        'Choose your provider. The guide uses a single secret: the database password of a development environment.',
+      secretAzureNote:
+        'Key Vault names only allow letters, digits and hyphens. Envilder lowercases the identifier and turns slashes and underscores into hyphens before calling Azure, so "/my-app/dev/db-password" would resolve the same secret.',
+      mapTitle: '3. Write envilder.json',
+      mapDesc:
+        'Create envilder.json in the project root. Each key is the variable name your app reads, and each value is the identifier of the secret in your vault. Without a $config block Envilder uses AWS SSM; Azure needs provider and vaultUrl.',
+      mapNote:
+        'The file holds secret paths, never values, so commit it with your code. The $schema line is optional and gives editors autocompletion and validation.',
+      runTitle: '4. Run your app with envilder exec',
+      runDesc:
+        'Create a small script that reads the variable, then start it through Envilder. Everything after -- is your command, passed as is, without a shell.',
+      runOutput:
+        'Expected output. The first line is Envilder on stderr; the second is your app on stdout:',
+      runExplain:
+        'Envilder resolves every mapped secret, then starts the command with those values added to its environment. Nothing is written to disk. If any secret is missing, empty or unreadable, the command does not start and envilder exits with code 125; otherwise it exits with the code of your command.',
+      runScriptDesc:
+        'To make this the normal way to start the project, put it in a package.json script and keep running npm run dev:',
+      pullTitle: 'Alternative: write a .env file',
+      pullDesc:
+        'Some tools only read a file, such as a Docker Compose env_file or an IDE run configuration. For those, pull the secrets into a .env file instead. Without flags, envilder reads envilder.json and writes .env in the current directory:',
+      pullOutput: 'Expected output with AWS, followed by the file it writes:',
+      pullWarn:
+        'The .env file contains the real secret values: add it to .gitignore and delete it when you no longer need it. Unlike exec, pull skips a secret that does not exist with a warning and still writes the others.',
+      errorsTitle: 'Common first-run errors',
+      errorsIntro:
+        'Each block shows the text envilder prints. With exec, every one of these exits with code 125 and your command never starts.',
+      errNoMapTitle: 'No map file found',
+      errNoMapFix:
+        'envilder looks for envilder.json in the current directory. Run it from the project root, or pass --map=path/to/envilder.json.',
+      errCredsTitle: 'No AWS credentials',
+      errCredsFix:
+        'The AWS SDK found no credentials. Run aws configure, or aws sso login for an SSO profile. To use a named profile, pass --profile=name or set "profile" in $config.',
+      errDeniedTitle: 'Access denied by AWS',
+      errDeniedFix:
+        'The credentials work but the identity cannot read that parameter. Allow ssm:GetParameter on the parameter ARN, plus kms:Decrypt when the parameter uses a customer-managed key.',
+      errNotFoundTitle: 'Secret not found',
+      errNotFoundFix:
+        'The identifier or the region is wrong. For AWS, Envilder takes the region from AWS_REGION, then AWS_DEFAULT_REGION, then the profile, and falls back to us-east-1. Compare with aws ssm get-parameter --name /my-app/dev/db-password using the same profile. For Azure, check the secret name in the vault.',
+      errVaultTitle: 'Azure without a vault URL',
+      errVaultFix:
+        'Add "vaultUrl": "https://<vault-name>.vault.azure.net" to $config, or pass --vault-url.',
+      errOrderTitle: 'Options placed before exec',
+      errOrderFix:
+        'Options written before exec are rejected rather than ignored. Move them after exec, as the message shows.',
+      errEnvfileTitle: '--envfile used with exec',
+      errEnvfileFix:
+        'exec never writes a file. Remove --envfile, or use pull (envilder --envfile=.env) when you need the file.',
+      nextTitle: 'Next steps',
+      nextMap:
+        'Map file reference: $config, profiles, validation rules and multi-environment layouts',
+      nextExec: 'envilder exec: exit codes, signals and CI usage',
+      nextPull: 'Pull mode: all options for generating .env files',
+    },
+    mapFileReference: {
+      prereqTitle: 'Prerequisites',
+      prereqDesc:
+        'This page describes the map file as read by the envilder CLI (0.16) and the GitHub Action. The runtime SDKs read the same file. If you have not resolved a secret yet, start with the getting started guide.',
+      structureTitle: 'Structure',
+      structureDesc:
+        'A map file is one JSON object. Keys that start with $ are reserved; every other key declares an environment variable, and its value is the identifier of the secret that fills it.',
+      thKey: 'Key',
+      thMeaning: 'Meaning',
+      keySchema:
+        'Optional URL of the JSON Schema. Editors use it for autocompletion and validation; envilder ignores it.',
+      keyConfig:
+        'Optional object that selects the provider and its settings. See the fields below.',
+      keyOtherDollar:
+        'Any other key starting with $ is skipped by envilder. The schema rejects it, so do not use it for metadata.',
+      keyVariable:
+        'Variable name (key) and secret identifier (string value). The value is opaque: its format depends on the provider.',
+      configTitle: '$config fields',
+      configDesc:
+        'Every field is optional. A file without $config uses AWS SSM with the default AWS credential chain.',
+      thField: 'Field',
+      thValues: 'Values',
+      thDefault: 'Default',
+      thBehaviour: 'Behaviour',
+      fieldProvider:
+        'Secret backend. Matched case-insensitively. Any value other than aws or azure stops the run.',
+      valueProfileName: 'AWS CLI profile name',
+      defaultProfile: 'AWS default chain',
+      fieldProfile:
+        'Named profile from ~/.aws/config or ~/.aws/credentials. AWS only: with azure it is ignored and a warning is printed.',
+      fieldVaultUrl:
+        'Key Vault URL. Required for azure. Must use https:// and a Key Vault host (.vault.azure.net, .vault.azure.cn, .vault.usgovcloudapi.net or .vault.microsoftazure.de). Ignored by aws.',
+      configSdkNote:
+        'The runtime SDKs read the same fields but can reject combinations the CLI only warns about, such as profile with azure. Each SDK page lists its own errors.',
+      providersTitle: 'Secret identifiers by provider',
+      awsTitle: 'AWS SSM Parameter Store',
+      awsDesc:
+        'The value is the parameter name exactly as stored in SSM, usually a hierarchical path. Envilder calls GetParameter with decryption, so String and SecureString parameters both work. The region comes from AWS_REGION, then AWS_DEFAULT_REGION, then the profile, with us-east-1 as the last fallback.',
+      azureTitle: 'Azure Key Vault',
+      azureDesc:
+        'The value is the secret name. Envilder normalizes it before calling Key Vault, so the same path style can be shared with an AWS file:',
+      azureRules: [
+        'Leading slashes are removed, slashes and underscores become hyphens, the name is lowercased and repeated hyphens collapse to one: "/my-app/prod/stripe_api_key" reads my-app-prod-stripe-api-key.',
+        'Only letters, digits, hyphens, underscores and slashes are accepted in the value; anything else is an error.',
+        'The normalized name must be 127 characters or fewer.',
+        'Two different values that normalize to the same name in one file are an error.',
+        'Envilder always reads the latest version of the secret.',
+      ],
+      priorityTitle: 'Precedence between $config and flags',
+      priorityDesc:
+        'Each setting is resolved on its own, from the first source that defines it:',
+      priority1:
+        'CLI flags (--provider, --vault-url, --profile) or GitHub Action inputs',
+      priority2: '$config in the map file',
+      priority3: 'Defaults: provider aws, default AWS credential chain',
+      priorityExplain:
+        'A flag replaces only the field it names; the other $config fields still apply. The same rules hold for pull, push and exec. When --map is omitted, envilder uses envilder.json in the current directory; pull and push also default --envfile to .env.',
+      priorityGhaNote:
+        'The GitHub Action accepts provider and vault-url inputs but has no profile input: in CI, credentials come from the workflow (for example OIDC), not from a named profile.',
+      validationTitle: 'Validation rules',
+      validationDesc:
+        'envilder checks the file before it contacts any provider, so an invalid file never resolves part of its secrets:',
+      validationRules: [
+        'The file must be valid JSON. Comments and trailing commas are not allowed.',
+        'Variable names must match ^[A-Za-z0-9_.-]+$: letters, digits, underscore, dot and hyphen. These are the names a .env file can store and read back unchanged. Spaces, =, #, accented letters and line breaks are rejected.',
+        'An empty name is rejected.',
+        '__proto__ cannot be used as a variable name: the schema rejects it and envilder never resolves it, because .env parsers cannot read it back.',
+        'The name rule applies to every key, even when the value is not a string. A key with a non-string value (number, object, null) is then skipped, not resolved.',
+        'With exec on Windows, two names that differ only by case are rejected, because Windows treats them as one variable.',
+        'The schema recommends POSIX names (^[a-zA-Z_][a-zA-Z0-9_]*$). Dotted and hyphenated names are accepted, but some shells and tools cannot read them as variables.',
+      ],
+      multiEnvTitle: 'Multi-environment example',
+      multiEnvDesc:
+        'Keep one file per environment with the same keys, so the application code never changes. Only the paths and the profile differ:',
+      multiEnvRun:
+        'Choose the file with --map. Locally, run the app with the development file; for a production artifact, write a .env from the production file:',
+      multiEnvGha:
+        'In a workflow, point the action at the file for that environment:',
+      multiEnvNaming:
+        'Names that match envilder.json or envilder.*.json are recognized by SchemaStore, so most editors validate them even without the $schema line.',
+      errorsTitle: 'Common errors',
+      thMessage: 'Message',
+      thFix: 'Fix',
+      errInvalidNameFix:
+        'Rename the key so it only uses letters, digits, underscore, dot and hyphen.',
+      errInvalidJsonFix:
+        'Fix the JSON syntax: a trailing comma, a comment or a missing quote is the usual cause.',
+      errProviderFix: 'Use aws or azure in $config.provider or --provider.',
+      errVaultMissingFix:
+        'Set $config.vaultUrl, or pass --vault-url, when the provider is azure.',
+      errVaultHttpsFix: 'Use the https:// URL shown in the vault overview.',
+      errVaultHostFix:
+        'Use the vault URI from Azure, for example https://my-vault.vault.azure.net, not a custom domain.',
+      errProfileAzureFix:
+        'A warning, not an error. Remove profile from $config, or drop --profile, when using azure.',
+      errCaseFix:
+        'Rename one of the keys; exec on Windows refuses names that differ only by case.',
+      relatedTitle: 'Related guides',
+      relatedStart: 'Get started: from a secret to a running app',
+      relatedExec: 'envilder exec reference',
+      relatedAzure: 'Azure Key Vault setup',
+    },
     title: 'Envilder docs: AWS SSM and Azure Key Vault secrets',
     description:
       'Learn how to resolve environment variables from AWS SSM Parameter Store and Azure Key Vault with the Envilder CLI, GitHub Action, and runtime SDKs.',
@@ -471,17 +653,17 @@ export const en: Translations = {
       },
       'getting-started': {
         title:
-          'Get started with Envilder: install and prerequisites for AWS SSM and Azure Key Vault',
+          'Get started: AWS SSM or Azure Key Vault to a running app in 5 minutes',
         description:
-          'Install the Envilder CLI, check the prerequisites for AWS SSM or Azure Key Vault, and learn how the JSON map links variables to secret paths.',
-        heading: 'Get started',
+          'Install the Envilder CLI, map secrets in envilder.json and run your app with envilder exec: values from AWS SSM or Azure Key Vault, no .env on disk.',
+        heading: 'Get started in 5 minutes',
         intro:
-          'Install Envilder, configure a provider, and resolve secrets from a versioned map file.',
+          'How do you get a secret from AWS SSM Parameter Store or Azure Key Vault into a running app? Install the Envilder CLI, map the secret to a variable name in envilder.json, and start your app with envilder exec, which hands the value to the process without writing a .env file. The whole setup takes about five minutes once your cloud credentials work.',
         breadcrumb: 'Get started',
         navLabel: 'Get started',
         cardTitle: 'Get started with Envilder',
         cardSummary:
-          'Install the CLI, review prerequisites, and understand the mapping model.',
+          'Install the CLI, map one secret and run your app with envilder exec, for AWS SSM or Azure Key Vault.',
       },
       'aws-ssm': {
         title: 'Use Envilder with AWS SSM Parameter Store',
@@ -513,15 +695,15 @@ export const en: Translations = {
         title:
           'envilder.json reference: map environment variables to cloud secrets',
         description:
-          'Full reference for the Envilder mapping file: $config, providers, profiles, vault URL, multi-environment layouts and config precedence.',
-        heading: 'Map file',
+          'Reference for envilder.json: $config, providers, profiles, vault URL, flag precedence, variable name validation rules and a multi-environment example.',
+        heading: 'Map file reference',
         intro:
-          'Define environment variable mappings and provider settings in envilder.json.',
+          'What can envilder.json contain, and how does Envilder read it? It is one JSON object that maps environment variable names to secret identifiers, with an optional $config block for the provider, profile and vault URL. CLI flags override $config field by field, and an invalid name or provider stops the run before any secret is read.',
         breadcrumb: 'Map file',
         navLabel: 'Map file',
         cardTitle: 'Map file reference',
         cardSummary:
-          'Map variables to secret paths and configure the selected provider.',
+          'Every map file field, provider rules, flag precedence and name validation.',
       },
       'cli-pull': {
         title: 'Pull mode: generate a .env from AWS SSM or Azure Key Vault',
@@ -638,26 +820,6 @@ export const en: Translations = {
     sidebarGhaAzure: 'Azure example',
     sidebarGhaMultiEnv: 'Multi-environment',
     sidebarGhaInputs: 'Inputs & outputs',
-    overviewTitle: 'What is Envilder?',
-    overviewDesc:
-      'Envilder is a model-driven configuration resolution system. You define a JSON mapping between variable names and cloud secret paths, and Envilder resolves them consistently: via the CLI for local dev, the GitHub Action for CI/CD, or runtime SDKs for application startup. It works with AWS SSM Parameter Store and Azure Key Vault.',
-    overviewProblem:
-      'Without Envilder, teams fragment secret management across tools and stages. Local dev uses .env files, CI/CD reads from vault integrations, production has its own method. This leads to configuration drift, leaked credentials, and slow onboarding.',
-    overviewSolution:
-      'With Envilder, one mapping model is the single source of truth. Secrets are resolved from your cloud vault on demand: same contract, same behavior, whether you run the CLI locally, the GitHub Action in CI, or an SDK at app startup.',
-    reqTitle: 'Requirements',
-    reqNode: 'Node.js v22.12+',
-    reqAws: 'AWS CLI',
-    reqAzure: 'Azure CLI',
-    reqAwsNote: 'for AWS SSM',
-    reqAzureNote: 'for Azure Key Vault',
-    reqDownload: 'Download',
-    reqInstallGuide: 'Install guide',
-    installTitle: 'Installation',
-    installNext: 'Next, choose how the secrets reach your app:',
-    installNextPull: 'CLI pull: generate a .env file',
-    installNextExec:
-      'CLI exec: run your command with the secrets in memory, no .env file',
     // AWS setup
     awsSetupTitle: 'AWS setup',
     awsSetupIntro:
@@ -707,65 +869,8 @@ export const en: Translations = {
       'If you see ✔ Fetched, your Azure setup is complete.',
     azureSetupVerifySdk:
       'Or load secrets directly from your app with the Python SDK:',
-    mapTitle: 'Mapping file',
-    mapIntro:
-      "The mapping file (envilder.json) is the core of Envilder. It's a JSON file that maps environment variable names (keys) to secret paths (values) in your cloud provider.",
-    mapCalloutStructure: 'Structure:',
-    mapCalloutKey: 'Each key becomes an env var name in your .env file.',
-    mapCalloutValue:
-      'Each value is the path where the secret lives in your cloud provider.',
-    mapBasicTitle: 'Basic format (AWS SSM, default)',
-    mapBasicDesc:
-      'When no $config section is present, Envilder defaults to AWS SSM Parameter Store. Values must be valid SSM parameter paths (typically starting with /):',
-    mapBasicGenerates: 'This generates:',
-    mapConfigTitle: 'The $config section',
-    mapConfigDesc:
-      'Add a $config key to your mapping file to declare which cloud provider to use and its settings. Envilder reads $config for configuration, and treats all other keys as secret mappings.',
-    mapConfigOptionsTitle: '$config options',
-    mapThKey: 'Key',
-    mapThType: 'Type',
     mapThDefault: 'Default',
     mapThDescription: 'Description',
-    mapProviderDesc: 'Cloud provider to use',
-    mapVaultUrlDesc: 'Azure Key Vault URL (required when provider is "azure")',
-    mapProfileDesc: 'AWS CLI profile for multi-account setups (AWS only)',
-    mapAwsProfileTitle: 'AWS SSM with profile',
-    mapAwsProfileDesc:
-      'To use a specific AWS CLI profile (useful for multi-account setups), add profile to $config:',
-    mapAwsProfileExplain:
-      'This tells Envilder to use the prod-account profile from your ~/.aws/credentials file instead of the default profile.',
-    mapAzureTitle: 'Azure Key Vault',
-    mapAzureDesc:
-      'For Azure Key Vault, set provider to "azure" and provide the vaultUrl:',
-    mapAzureWarningTitle: 'Azure naming convention:',
-    mapAzureWarningDesc:
-      'Key Vault secret names only allow alphanumeric characters and hyphens. Envilder automatically normalizes names: slashes and underscores become hyphens (e.g., /myapp/db/password → myapp-db-password).',
-    mapDifferencesTitle: 'Key differences by provider',
-    mapThEmpty: '',
-    mapThAwsSsm: 'AWS SSM',
-    mapThAzureKv: 'Azure Key Vault',
-    mapSecretPathFormat: 'Secret path format',
-    mapAwsPathFormat: 'Parameter paths with slashes',
-    mapAzurePathFormat: 'Hyphenated names',
-    mapRequiredConfig: 'Required $config',
-    mapAwsRequiredConfig: 'None (AWS is the default)',
-    mapAzureRequiredConfig: 'provider + vaultUrl',
-    mapOptionalConfig: 'Optional $config',
-    mapAuthentication: 'Authentication',
-    mapAwsAuth: 'AWS CLI credentials',
-    mapAzureAuth: 'Azure Default Credentials',
-    mapMultiEnvTitle: 'Multiple environments',
-    mapMultiEnvDesc:
-      'A common pattern is having one mapping file per environment. The structure is the same, only the secret paths change:',
-    mapMultiEnvThenPull: 'Then pull the right one:',
-    mapOverrideTitle: 'Overriding $config with CLI flags',
-    mapOverrideDesc:
-      'CLI flags always take priority over $config values. This lets you set defaults in the file and override per invocation:',
-    mapOverrideComment1: '# Uses $config from the map file as-is',
-    mapOverrideComment2: '# Overrides provider and vault URL, ignoring $config',
-    mapOverrideComment3: '# Overrides just the AWS profile',
-    mapPriorityNote:
-      'Priority order: CLI flags / GHA inputs → $config in map file → defaults (AWS).',
     pullTitle: 'Pull command',
     pullDesc:
       'Download secrets from your cloud provider and generate a local .env file.',
@@ -1054,14 +1159,6 @@ export const en: Translations = {
       'Azure Key Vault setup: RBAC or access policies and a quick check',
     ghaRelatedMap: 'Map file reference: $config, providers and secret paths',
     ghaRelatedRepo: 'Action source code and README on GitHub',
-    configPriorityTitle: 'Configuration priority',
-    configPriorityDesc:
-      'When multiple configuration sources are present, Envilder resolves them in this order (highest wins):',
-    configPriority1: 'CLI flags / GHA inputs',
-    configPriority2: '$config in map file',
-    configPriority3: 'Defaults (AWS)',
-    configPriorityExplain:
-      'This means --provider=azure on the CLI will override "provider": "aws" in $config.',
     // SDKs
     sidebarSdks: 'SDKs',
     sidebarSdkDotnet: '.NET SDK',
