@@ -111,18 +111,18 @@ const execPackageJson = `{
   }
 }`;
 
-const awsVerifyCmd = `# 1. Push a test secret; Envilder also writes test-map.json
-envilder --map=test-map.json --key=HELLO --value=world --secret-path=/test/hello
+const awsVerifyCmd = `# 1. Push a test secret; Envilder also writes aws-test-map.json
+envilder --provider=aws --map=aws-test-map.json --key=HELLO --value=world --secret-path=/test/hello
 
 # 2. Pull it back with Envilder
-envilder --map=test-map.json --envfile=.env`;
+envilder --map=aws-test-map.json --envfile=.env`;
 
-const azureVerifyCmd = `# 1. Push a test secret; Envilder also writes test-map.json
+const azureVerifyCmd = `# 1. Push a test secret; Envilder also writes azure-test-map.json
 envilder --provider=azure --vault-url=https://{VAULT_NAME}.vault.azure.net \\
-  --map=test-map.json --key=HELLO --value=world --secret-path=test-hello
+  --map=azure-test-map.json --key=HELLO --value=world --secret-path=test-hello
 
 # 2. Pull it back with Envilder
-envilder --map=test-map.json --envfile=.env`;
+envilder --map=azure-test-map.json --envfile=.env`;
 
 const ghaAwsTrustPolicy = `{
   "Version": "2012-10-17",
@@ -653,7 +653,7 @@ const mfErrors = [
         <p>{t.docs.awsSetupVerifySdk}</p>
         <CodeBlock lang="python" code={`from envilder import Envilder
 
-secrets = Envilder.load("test-map.json")
+secrets = Envilder.load("aws-test-map.json")
 print(secrets["HELLO"])  # world`} />
       </section>
     </>
@@ -703,7 +703,7 @@ print(secrets["HELLO"])  # world`} />
         <p>{t.docs.azureSetupVerifySdk}</p>
         <CodeBlock lang="python" code={`from envilder import Envilder
 
-secrets = Envilder.load("test-map.json")
+secrets = Envilder.load("azure-test-map.json")
 print(secrets["HELLO"])  # world`} />
       </section>
     </>
