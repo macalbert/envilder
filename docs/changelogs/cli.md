@@ -7,6 +7,16 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ## [0.16.1] - 2026-10-27
 
+### Security
+
+* **Reject `__proto__` in map files in the published build**: The check
+  added in 0.14.0 ran against the TypeScript source, but the compiled
+  output lowers the object-rest copy in map-file parsing to a helper that
+  assigns each key, so an own `__proto__` key was dropped before the name
+  check. A map file with that key was accepted, the mapping was silently
+  ignored and the run exited 0. Map-file keys are now read straight from the
+  parsed object, so the key is rejected with the documented message
+
 ### Fixed
 
 * **Accept `/` in map-file keys again**: Since 0.14.0 a hierarchical name

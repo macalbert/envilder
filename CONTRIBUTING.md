@@ -14,7 +14,7 @@ public issue.
 | **pnpm** | 11+ | Monorepo package manager |
 | **Docker** | Latest | Acceptance tests (TestContainers) |
 | **.NET** | 10+ | .NET SDK |
-| **Python** | 3.10+ | Python SDK |
+| **Python** | 3.11+ | Python SDK |
 | **uv** | Latest | Python dependency management |
 
 ## Getting Started

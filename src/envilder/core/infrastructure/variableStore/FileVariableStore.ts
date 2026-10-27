@@ -84,14 +84,18 @@ export class FileVariableStore implements IVariableStore {
 
   async getParsedMapping(source: string): Promise<ParsedMapFile> {
     const raw = await this.readJsonFile(source);
-    const { $config, ...rest } = raw;
+    const $config = raw.$config;
     const config: MapFileConfig =
       $config && typeof $config === 'object' ? $config : {};
     // Null-prototype: map-file keys are untrusted, and a plain object literal
     // would route `__proto__` through the Object.prototype setter, silently
     // dropping that mapping instead of storing it as data.
     const mappings: Record<string, string> = Object.create(null);
-    for (const [key, value] of Object.entries(rest)) {
+    // Iterate the parsed object itself rather than an object-rest copy: below
+    // ES2018 tsc lowers `...rest` to a helper that copies by plain assignment,
+    // so an own `__proto__` key would hit the same setter and vanish before
+    // the name check below ever saw it.
+    for (const [key, value] of Object.entries(raw)) {
       if (key.startsWith('$')) {
         continue;
       }
