@@ -599,7 +599,8 @@ export const es: Translations = {
         'envilder comprueba el archivo antes de contactar con ningún proveedor, así que un archivo no válido nunca resuelve solo una parte de sus secretos:',
       validationRules: [
         'El archivo debe ser JSON válido. No se permiten comentarios ni comas finales.',
-        'Los nombres de variable deben cumplir ^[A-Za-z0-9_.-]+$: letras, dígitos, guion bajo, punto y guion. Son los nombres que un archivo .env puede guardar y volver a leer sin cambios. Se rechazan espacios, =, #, letras acentuadas y saltos de línea.',
+        'Los nombres de variable deben cumplir ^[A-Za-z0-9_./-]+$: letras, dígitos, guion bajo, punto, guion y barra. Son los nombres que un archivo .env puede guardar y volver a leer sin cambios. Se rechazan espacios, =, #, letras acentuadas y saltos de línea.',
+        'Un nombre con / (Database/Password) funciona en todas partes: los SDKs y exec lo pasan tal cual, y el SDK de .NET lo convierte en una sección de configuración. Al escribir un archivo .env, el CLI lo mantiene y avisa, porque python-dotenv carga esa línea pero dotenv para Node.js, Docker Compose y bash no; usa exec o un nombre con __ (Database__Password) si tu aplicación lee el archivo con uno de ellos.',
         'Se rechaza un nombre vacío.',
         '__proto__ no se puede usar como nombre de variable: el schema lo rechaza y envilder nunca lo resuelve, porque los parsers de .env no pueden volver a leerlo.',
         'La regla de nombres se aplica a todas las claves, aunque el valor no sea un string. Una clave con un valor que no es string (número, objeto, null) se omite y no se resuelve.',
@@ -619,7 +620,7 @@ export const es: Translations = {
       thMessage: 'Mensaje',
       thFix: 'Solución',
       errInvalidNameFix:
-        'Renombra la clave para que solo use letras, dígitos, guion bajo, punto y guion.',
+        'Renombra la clave para que solo use letras, dígitos, guion bajo, punto, guion y barra.',
       errInvalidJsonFix:
         'Corrige la sintaxis JSON: una coma final, un comentario o unas comillas que faltan suelen ser la causa.',
       errProviderFix: 'Usa aws o azure en $config.provider o en --provider.',
@@ -884,6 +885,33 @@ export const es: Translations = {
       'O carga secretos directamente desde tu app con el Python SDK:',
     mapThDefault: 'Por defecto',
     mapThDescription: 'Descripción',
+    mapContentsTitle: 'Contenido de los secretos (los valores resueltos)',
+    mapContentsIntro:
+      'Envilder nunca reescribe el valor de un secreto: lo que devuelve el proveedor es lo que recibe tu aplicación. Los límites dependen de dónde se guarda el valor:',
+    mapThStage: 'Etapa',
+    mapThLimit: 'Límite',
+    mapContentsProvider: 'Proveedor',
+    mapContentsProviderLimit:
+      'AWS SSM: 4 KB (estándar) u 8 KB (nivel avanzado). Azure Key Vault: 25 KB.',
+    mapContentsEnvFile: 'Archivo .env (CLI, GitHub Action)',
+    mapContentsEnvFileLimit:
+      'Cualquier valor que dotenv pueda representar. Consulta la excepción más abajo.',
+    mapContentsProcess: 'Entorno del proceso',
+    mapContentsProcessLimit:
+      'El sistema operativo no puede guardar NUL (U+0000) en una variable, y Windows limita cada variable a 32.767 caracteres.',
+    mapContentsResolveOnly:
+      'Las APIs de los SDKs que solo resuelven (resolve, ResolveFile, IConfiguration) mantienen los valores en memoria y solo están sujetas a los límites del proveedor.',
+    mapContentsWriterDesc:
+      'El CLI escribe cada valor de forma que dotenv lea exactamente el string original. Las comillas se eligen automáticamente y se comprueban analizando el resultado antes de escribir el archivo. La comprobación usa la gramática de dotenv ampliada a claves con /, así que para esas claves demuestra que el valor se lee igual, no que dotenv para Node.js las cargue (ignora esas líneas):',
+    mapContentsRoundTrip:
+      '#, espacios al principio y al final, comillas, barras invertidas, un \\n literal, saltos de línea LF/CRLF reales y Unicode se conservan todos. Si el archivo ya existe, cada asignación se sustituye en su sitio (una multilínea, entera), y se mantienen los comentarios, el orden y los finales de línea.',
+    mapContentsUnrepresentableTitle:
+      'El único valor que un .env no puede contener:',
+    mapContentsUnrepresentableDesc:
+      'un valor que contiene los tres tipos de comillas (\', " y `) junto con un salto de línea, espacios al principio o al final, o un #. El CLI se detiene con un error que indica la variable y deja el archivo .env intacto. Guarda ese valor codificado (por ejemplo en base64) o léelo con un SDK.',
+    mapContentsExpansionTitle: 'Expansión de variables:',
+    mapContentsExpansionDesc:
+      'Envilder escribe referencias como $HOME literalmente y dotenv no las expande, pero otros cargadores sí. Docker Compose, por ejemplo, expande un KEY=$HOME sin comillas al leer el archivo. Tenlo en cuenta cuando un secreto contenga $.',
     pullTitle: 'Comando pull',
     pullDesc:
       'Descarga secretos de tu proveedor en la nube y genera un archivo .env local.',

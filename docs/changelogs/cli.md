@@ -5,6 +5,24 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [0.17.1] - 2026-10-27
+
+### Fixed
+
+* **Accept `/` in map-file keys again**: Since 0.14.0 a hierarchical name
+  such as `Database/Password` was rejected, which broke map files that had
+  worked until then and that the SDKs still accept. `/` is valid again in
+  every command and in the published JSON Schema. `envilder exec` passes the
+  name as-is to the child process. A `.env` file gets the line as-is and the
+  run prints a warning with the names (never the values): `python-dotenv`
+  loads that line, but `dotenv` for Node.js, Docker Compose and a POSIX shell
+  do not, so the warning points to `envilder exec` or a `__` name. Existing
+  `/` lines are updated in place instead of duplicated. `=`, line breaks,
+  `U+2028`/`U+2029`, `__proto__` and the other rejected names stay rejected
+  ([#511](https://github.com/macalbert/envilder/issues/511))
+
+---
+
 ## [0.17.0] - 2026-10-27
 
 ### Security

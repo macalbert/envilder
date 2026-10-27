@@ -242,6 +242,77 @@ describe('FileVariableStore', () => {
       );
     });
 
+    it('Should_WriteNameAsIs_When_NameUsesSlashHierarchy', async () => {
+      // Arrange
+      const envVariables = {
+        'Database/Password': 'fictional-value-1',
+        PLAIN_NAME: 'fictional-value-2',
+      };
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, envVariables);
+
+      // Assert
+      const actual = await sut.getEnvironment(mockEnvFilePath);
+      expect(mockInMemoryFiles.get(mockEnvFilePath)).toBe(
+        'Database/Password=fictional-value-1\nPLAIN_NAME=fictional-value-2\n',
+      );
+      expect(actual).toEqual(envVariables);
+    });
+
+    it('Should_UpdateAssignmentInPlace_When_ExistingFileHasSlashName', async () => {
+      // Arrange
+      mockInMemoryFiles.set(
+        mockEnvFilePath,
+        'Database/Password=old-fictional-value\nOTHER=kept\n',
+      );
+
+      // Act
+      await sut.saveEnvironment(mockEnvFilePath, {
+        'Database/Password': 'new-fictional-value',
+      });
+
+      // Assert
+      expect(mockInMemoryFiles.get(mockEnvFilePath)).toBe(
+        'Database/Password=new-fictional-value\nOTHER=kept\n',
+      );
+    });
+
+    it('Should_WarnWithNamesOnly_When_NameContainsSlash', async () => {
+      // Arrange
+      const logger = new ConsoleLogger();
+      const warn = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+      const store = new FileVariableStore(logger);
+
+      // Act
+      await store.saveEnvironment(mockEnvFilePath, {
+        'Database/Password': 'fictional-value-1',
+        PLAIN_NAME: 'fictional-value-2',
+      });
+
+      // Assert
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn.mock.calls[0][0]).toContain('"Database/Password"');
+      expect(warn.mock.calls[0][0]).not.toContain('PLAIN_NAME');
+      expect(warn.mock.calls[0][0]).not.toContain('fictional-value');
+    });
+
+    it('Should_NotWarn_When_EveryNameIsPortable', async () => {
+      // Arrange
+      const logger = new ConsoleLogger();
+      const warn = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+      const store = new FileVariableStore(logger);
+
+      // Act
+      await store.saveEnvironment(mockEnvFilePath, {
+        PLAIN_NAME: 'fictional-value-1',
+        'APP.NAME': 'fictional-value-2',
+      });
+
+      // Assert
+      expect(warn).not.toHaveBeenCalled();
+    });
+
     // Characterization test recording *why* U+2028/U+2029 are rejected: they
     // are not newlines to the writer, so the file holds a single line, but
     // dotenv's line regex is multiline and JavaScript counts them as line
@@ -1405,6 +1476,18 @@ describe('FileVariableStore', () => {
         expect(fs.writeFile).not.toHaveBeenCalled();
       },
     );
+
+    it('Should_AcceptMappingKey_When_NameUsesSlashHierarchy', async () => {
+      // Arrange
+      const mapData = { 'Database/Password': '/app/db-password' };
+      mockInMemoryFiles.set(mockMapPath, JSON.stringify(mapData));
+
+      // Act
+      const actual = await sut.getMapping(mockMapPath);
+
+      // Assert
+      expect({ ...actual }).toEqual(mapData);
+    });
 
     it('Should_RejectMappingKey_When_NameIsEmpty', async () => {
       // Arrange

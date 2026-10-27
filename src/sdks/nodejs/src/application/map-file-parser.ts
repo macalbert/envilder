@@ -1,3 +1,7 @@
+import {
+  invalidEnvironmentVariableNameMessage,
+  isValidEnvironmentVariableName,
+} from '../domain/environment-variable-name.js';
 import type { MapFileConfig } from '../domain/map-file-config.js';
 import type { ParsedMapFile } from '../domain/parsed-map-file.js';
 import { SecretProviderType } from '../domain/secret-provider-type.js';
@@ -30,6 +34,12 @@ export class MapFileParser {
           config = this.parseConfig(value);
         }
         continue;
+      }
+
+      // Before the non-string filter, so the name rule covers every mapping
+      // key the file declares, matching the CLI and the published schema.
+      if (!isValidEnvironmentVariableName(key)) {
+        throw new Error(invalidEnvironmentVariableNameMessage(key));
       }
 
       if (typeof value === 'string') {

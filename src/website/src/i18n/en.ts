@@ -593,7 +593,8 @@ export const en: Translations = {
         'envilder checks the file before it contacts any provider, so an invalid file never resolves part of its secrets:',
       validationRules: [
         'The file must be valid JSON. Comments and trailing commas are not allowed.',
-        'Variable names must match ^[A-Za-z0-9_.-]+$: letters, digits, underscore, dot and hyphen. These are the names a .env file can store and read back unchanged. Spaces, =, #, accented letters and line breaks are rejected.',
+        'Variable names must match ^[A-Za-z0-9_./-]+$: letters, digits, underscore, dot, hyphen and slash. Spaces, =, #, accented letters and line breaks are rejected, because they would inject or lose a line in a .env file.',
+        'A name with / (Database/Password) works everywhere: the SDKs and exec pass it as written, and the .NET SDK maps it to a configuration section. When writing a .env file the CLI keeps it and warns, because python-dotenv loads that line but dotenv for Node.js, Docker Compose and bash do not; use exec or a __ name (Database__Password) if your app reads the file with one of those.',
         'An empty name is rejected.',
         '__proto__ cannot be used as a variable name: the schema rejects it and envilder never resolves it, because .env parsers cannot read it back.',
         'The name rule applies to every key, even when the value is not a string. A key with a non-string value (number, object, null) is then skipped, not resolved.',
@@ -613,7 +614,7 @@ export const en: Translations = {
       thMessage: 'Message',
       thFix: 'Fix',
       errInvalidNameFix:
-        'Rename the key so it only uses letters, digits, underscore, dot and hyphen.',
+        'Rename the key so it only uses letters, digits, underscore, dot, hyphen and slash.',
       errInvalidJsonFix:
         'Fix the JSON syntax: a trailing comma, a comment or a missing quote is the usual cause.',
       errProviderFix: 'Use aws or azure in $config.provider or --provider.',
@@ -873,6 +874,32 @@ export const en: Translations = {
       'Or load secrets directly from your app with the Python SDK:',
     mapThDefault: 'Default',
     mapThDescription: 'Description',
+    mapContentsTitle: 'Secret contents (the resolved values)',
+    mapContentsIntro:
+      'Envilder never rewrites a secret value: what the provider returns is what your application gets. The limits come from where the value is stored:',
+    mapThStage: 'Stage',
+    mapThLimit: 'Limit',
+    mapContentsProvider: 'Provider',
+    mapContentsProviderLimit:
+      'AWS SSM: 4 KB (standard) or 8 KB (advanced tier). Azure Key Vault: 25 KB.',
+    mapContentsEnvFile: '.env file (CLI, GitHub Action)',
+    mapContentsEnvFileLimit:
+      'Every value dotenv can represent. See the exception below.',
+    mapContentsProcess: 'Process environment',
+    mapContentsProcessLimit:
+      'The operating system cannot store NUL (U+0000) in a variable, and Windows limits a variable to 32,767 characters.',
+    mapContentsResolveOnly:
+      "The SDKs' resolve-only APIs (resolve, ResolveFile, IConfiguration) keep values in memory and are subject to the provider limits only.",
+    mapContentsWriterDesc:
+      'The CLI writes each value so that dotenv reads back exactly the original string. The quoting is chosen automatically and checked by parsing the result before the file is written. The check uses dotenv’s grammar extended to keys with /, so for those keys it proves the value round-trips, not that Node.js dotenv loads them (it skips such lines):',
+    mapContentsRoundTrip:
+      '#, leading and trailing whitespace, quotes, backslashes, a literal \\n, real LF/CRLF line breaks and Unicode all round-trip. When the file already exists, each assignment is replaced in place (a multiline one entirely), and comments, ordering and line endings are preserved.',
+    mapContentsUnrepresentableTitle: 'The one value a .env file cannot hold:',
+    mapContentsUnrepresentableDesc:
+      'a value containing all three quote characters (\', " and `) together with a line break, leading or trailing whitespace, or a #. The CLI stops with an error that names the variable and leaves the .env file unchanged. Store such a value encoded (for example base64) or read it with an SDK.',
+    mapContentsExpansionTitle: 'Variable expansion:',
+    mapContentsExpansionDesc:
+      'Envilder writes references such as $HOME literally and dotenv does not expand them, but other loaders do. Docker Compose, for instance, expands an unquoted KEY=$HOME when it reads the file. Keep this in mind when a secret contains $.',
     pullTitle: 'Pull command',
     pullDesc:
       'Download secrets from your cloud provider and generate a local .env file.',

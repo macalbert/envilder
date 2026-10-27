@@ -9,11 +9,11 @@
  * round-trip as itself and nothing else.**
  *
  * That is expressed as an allowlist rather than a list of banned characters,
- * because a blocklist cannot hold the invariant. `.env` readers recognize a
- * key as `[A-Za-z0-9_.-]+`; anything outside that either makes the line
- * unparseable, so the variable is written and then silently lost (a space,
- * `#`, a tab, an accented or non-Latin letter, NUL, vertical tab), or is read
- * back as a *different* assignment, which is the injection in issue #511:
+ * because a blocklist cannot hold the invariant. Anything outside
+ * `[A-Za-z0-9_./-]+` either makes the line unparseable, so the variable is
+ * written and then silently lost (a space, `#`, a tab, an accented or
+ * non-Latin letter, NUL, vertical tab), or is read back as a *different*
+ * assignment, which is the injection in issue #511:
  *
  * - `=` opens a second assignment on the same line.
  * - CR and LF open a second line.
@@ -22,10 +22,21 @@
  *   `^` matches after them, so a name embedding one is read back as a
  *   separate assignment.
  *
- * Dotted and hyphenated names (historically accepted, non-POSIX) stay valid:
- * they are inside the allowlist and do round-trip.
+ * Dotted and hyphenated names (historically accepted, non-POSIX) stay valid.
+ * So does `/`, which map files have always used for hierarchical names
+ * (`Database/Password`): it cannot inject anything, and envilder writes and
+ * reads it back as itself. Some readers still skip such a line, which
+ * {@link isPortableEnvFileName} reports.
  */
-const READABLE_NAME = /^[A-Za-z0-9_.-]+$/;
+const READABLE_NAME = /^[A-Za-z0-9_./-]+$/;
+
+/**
+ * The key grammar every common `.env` reader shares. A name outside it but
+ * inside {@link READABLE_NAME} (one holding `/`) round-trips through envilder
+ * and `python-dotenv`, while `dotenv` for Node.js skips the line and a POSIX
+ * shell cannot `source` it.
+ */
+const PORTABLE_ENV_FILE_NAME = /^[A-Za-z0-9_.-]+$/;
 
 /**
  * `__proto__` is the one name inside the allowlist that still breaks the
@@ -44,6 +55,11 @@ export function isValidEnvironmentVariableName(name: string): boolean {
     READABLE_NAME.test(name) &&
     !UNSUPPORTED_NAMES.has(name)
   );
+}
+
+/** Whether every common `.env` reader loads a line with this valid name. */
+export function isPortableEnvFileName(name: string): boolean {
+  return PORTABLE_ENV_FILE_NAME.test(name);
 }
 
 /**
@@ -67,8 +83,22 @@ export function invalidEnvironmentVariableNameMessage(name: string): string {
 
   return (
     `Invalid environment variable name ${quoteName(name)}: names may only ` +
-    'contain letters, digits, underscore, dot and hyphen, so that they can ' +
-    'be read back from a .env file'
+    'contain letters, digits, underscore, dot, hyphen and slash, so that ' +
+    'they can be read back from a .env file'
+  );
+}
+
+/**
+ * Builds the warning for names a `.env` file holds but not every reader
+ * loads. Names only, quoted for the same reason as the rejection message.
+ */
+export function nonPortableEnvFileNamesMessage(names: string[]): string {
+  const quoted = names.map(quoteName).join(', ');
+  return (
+    `${quoted} contain "/": envilder writes and reads them back, but dotenv ` +
+    'for Node.js skips those lines and a POSIX shell cannot source them. ' +
+    'If your app reads the .env file with one of those, use "envilder exec" ' +
+    'or rename them with "__" (Database__Password)'
   );
 }
 

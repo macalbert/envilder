@@ -56,7 +56,7 @@ report a vulnerability, see [SECURITY.md](./SECURITY.md).
 |-------|--------|------------|
 | Secret values | Leak through console or CI logs | Values are never logged; paths are masked; `::add-mask::` in GitHub Actions |
 | Secret values | Leak through a generated `.env` file committed or shared by mistake | Documentation in [SECURITY.md](./SECURITY.md) (`.gitignore`, file permissions); Secretlint in this repository |
-| `.env` file integrity | A crafted variable name injects extra assignments | Allowlist `^[A-Za-z0-9_.-]+$` and rejection of `__proto__` (`EnvironmentVariableName.ts`) |
+| `.env` file integrity | A crafted variable name injects extra assignments | Allowlist `^[A-Za-z0-9_./-]+$` and rejection of `__proto__` (`EnvironmentVariableName.ts`) |
 | Child process | Shell injection through `envilder exec` arguments | The command is spawned with `shell: false` (`CrossSpawnProcessRunner.ts`) |
 | Cloud credentials | Over-privileged roles used by Envilder | Least-privilege IAM and RBAC guidance in [SECURITY.md](./SECURITY.md); OIDC recommended for CI |
 | Published packages | Tampered package on a registry | Builds run only in GitHub Actions; npm provenance and PyPI attestations link each package to its source commit and workflow |

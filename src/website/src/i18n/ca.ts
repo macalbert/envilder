@@ -598,7 +598,8 @@ export const ca: Translations = {
         'envilder comprova el fitxer abans de contactar cap proveïdor, de manera que un fitxer no vàlid mai resol només una part dels seus secrets:',
       validationRules: [
         "El fitxer ha de ser JSON vàlid. No s'hi permeten comentaris ni comes finals.",
-        'Els noms de variable han de complir ^[A-Za-z0-9_.-]+$: lletres, dígits, guió baix, punt i guió. Són els noms que un fitxer .env pot desar i tornar a llegir sense canvis. Es rebutgen espais, =, #, lletres accentuades i salts de línia.',
+        'Els noms de variable han de complir ^[A-Za-z0-9_./-]+$: lletres, dígits, guió baix, punt, guió i barra. Són els noms que un fitxer .env pot desar i tornar a llegir sense canvis. Es rebutgen espais, =, #, lletres accentuades i salts de línia.',
+        'Un nom amb / (Database/Password) funciona a tot arreu: els SDKs i exec el passen tal qual, i el SDK de .NET el converteix en una secció de configuració. En escriure un fitxer .env, el CLI el manté i avisa, perquè python-dotenv carrega aquesta línia però dotenv per a Node.js, Docker Compose i bash no; fes servir exec o un nom amb __ (Database__Password) si la teva aplicació llegeix el fitxer amb un d’aquests.',
         'Es rebutja un nom buit.',
         "__proto__ no es pot fer servir com a nom de variable: l'schema el rebutja i envilder mai el resol, perquè els parsers de .env no el poden tornar a llegir.",
         "La regla de noms s'aplica a totes les claus, encara que el valor no sigui un string. Una clau amb un valor que no és string (número, objecte, null) s'omet i no es resol.",
@@ -617,7 +618,7 @@ export const ca: Translations = {
       thMessage: 'Missatge',
       thFix: 'Solució',
       errInvalidNameFix:
-        'Canvia el nom de la clau perquè només faci servir lletres, dígits, guió baix, punt i guió.',
+        'Canvia el nom de la clau perquè només faci servir lletres, dígits, guió baix, punt, guió i barra.',
       errInvalidJsonFix:
         'Corregeix la sintaxi JSON: una coma final, un comentari o unes cometes que falten solen ser la causa.',
       errProviderFix:
@@ -882,6 +883,33 @@ export const ca: Translations = {
       'O carrega secrets directament des de la teva app amb el Python SDK:',
     mapThDefault: 'Per defecte',
     mapThDescription: 'Descripció',
+    mapContentsTitle: 'Contingut dels secrets (els valors resolts)',
+    mapContentsIntro:
+      'Envilder no reescriu mai el valor d’un secret: el que retorna el proveïdor és el que rep la teva aplicació. Els límits depenen d’on es desa el valor:',
+    mapThStage: 'Etapa',
+    mapThLimit: 'Límit',
+    mapContentsProvider: 'Proveïdor',
+    mapContentsProviderLimit:
+      'AWS SSM: 4 KB (estàndard) o 8 KB (nivell avançat). Azure Key Vault: 25 KB.',
+    mapContentsEnvFile: 'Fitxer .env (CLI, GitHub Action)',
+    mapContentsEnvFileLimit:
+      'Qualsevol valor que dotenv pugui representar. Consulta l’excepció més avall.',
+    mapContentsProcess: 'Entorn del procés',
+    mapContentsProcessLimit:
+      'El sistema operatiu no pot desar NUL (U+0000) en una variable, i Windows limita cada variable a 32.767 caràcters.',
+    mapContentsResolveOnly:
+      'Les APIs dels SDKs que només resolen (resolve, ResolveFile, IConfiguration) mantenen els valors en memòria i només estan subjectes als límits del proveïdor.',
+    mapContentsWriterDesc:
+      'El CLI escriu cada valor de manera que dotenv en llegeixi exactament el string original. Les cometes s’escullen automàticament i es comproven analitzant el resultat abans d’escriure el fitxer. La comprovació fa servir la gramàtica de dotenv ampliada a claus amb /, així que per a aquestes claus demostra que el valor es llegeix igual, no que dotenv per a Node.js les carregui (ignora aquestes línies):',
+    mapContentsRoundTrip:
+      '#, espais al principi i al final, cometes, barres inverses, un \\n literal, salts de línia LF/CRLF reals i Unicode es conserven tots. Si el fitxer ja existeix, cada assignació es substitueix al seu lloc (una multilínia, sencera), i es mantenen els comentaris, l’ordre i els finals de línia.',
+    mapContentsUnrepresentableTitle:
+      'L’únic valor que un .env no pot contenir:',
+    mapContentsUnrepresentableDesc:
+      'un valor que conté els tres tipus de cometes (\', " i `) juntament amb un salt de línia, espais al principi o al final, o un #. El CLI s’atura amb un error que indica la variable i deixa el fitxer .env intacte. Desa aquest valor codificat (per exemple en base64) o llegeix-lo amb un SDK.',
+    mapContentsExpansionTitle: 'Expansió de variables:',
+    mapContentsExpansionDesc:
+      'Envilder escriu referències com $HOME literalment i dotenv no les expandeix, però altres carregadors sí. Docker Compose, per exemple, expandeix un KEY=$HOME sense cometes quan llegeix el fitxer. Tingues-ho en compte quan un secret contingui $.',
     pullTitle: 'Comanda pull',
     pullDesc:
       'Descarrega secrets del teu proveïdor al núvol i genera un fitxer .env local.',

@@ -476,7 +476,7 @@ const mfMultiEnvGha = `- uses: macalbert/envilder/github-action@v0
 const mfErrors = [
   {
     message:
-      'Invalid environment variable name "MY VAR": names may only contain letters, digits, underscore, dot and hyphen, so that they can be read back from a .env file',
+      'Invalid environment variable name "MY VAR": names may only contain letters, digits, underscore, dot, hyphen and slash, so that they can be read back from a .env file',
     fix: 'errInvalidNameFix',
   },
   {
@@ -796,6 +796,53 @@ print(secrets["HELLO"])  # world`} />
         <ul class="docs-list">
           {mf.validationRules.map((rule) => <li>{rule}</li>)}
         </ul>
+      </section>
+
+      <section id="secret-contents" class="docs-section">
+        <h2>{t.docs.mapContentsTitle}</h2>
+        <p>{t.docs.mapContentsIntro}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.mapThStage}</th><th>{t.docs.mapThLimit}</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>{t.docs.mapContentsProvider}</strong></td>
+              <td>{t.docs.mapContentsProviderLimit}</td>
+            </tr>
+            <tr>
+              <td><strong>{t.docs.mapContentsEnvFile}</strong></td>
+              <td>{t.docs.mapContentsEnvFileLimit}</td>
+            </tr>
+            <tr>
+              <td><strong>{t.docs.mapContentsProcess}</strong></td>
+              <td>{t.docs.mapContentsProcessLimit}</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>{t.docs.mapContentsResolveOnly}</p>
+
+        <p>{t.docs.mapContentsWriterDesc}</p>
+        <CodeBlock lang="dotenv" filename=".env" code={`PLAIN=plain
+QUOTES=she said "hi"
+HASH='alpha#beta'
+PADDED='  padded  '
+MULTILINE="first\\nsecond"`} />
+        <p>{t.docs.mapContentsRoundTrip}</p>
+
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>
+            <strong>{t.docs.mapContentsUnrepresentableTitle}</strong> {t.docs.mapContentsUnrepresentableDesc}
+          </div>
+        </div>
+
+        <div class="callout">
+          <span class="callout-icon">💲</span>
+          <div>
+            <strong>{t.docs.mapContentsExpansionTitle}</strong> {t.docs.mapContentsExpansionDesc}
+          </div>
+        </div>
       </section>
 
       <section id="multi-environment" class="docs-section">
