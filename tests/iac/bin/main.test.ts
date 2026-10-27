@@ -1,9 +1,11 @@
 import path from "node:path";
 import { deploy, validateConfig } from "../../../src/iac/bin/main";
 import { AppEnvironment } from "../../../src/iac/lib/core/types";
+import { PublicFilesStack } from "../../../src/iac/lib/stacks/publicFilesStack";
 import { StaticWebsiteStack } from "../../../src/iac/lib/stacks/staticWebsiteStack";
 
 vi.mock("../../../src/iac/lib/stacks/staticWebsiteStack");
+vi.mock("../../../src/iac/lib/stacks/publicFilesStack");
 
 describe("main", () => {
 	beforeEach(() => {
@@ -73,6 +75,36 @@ describe("main", () => {
 
 			// Assert
 			expect(result).toEqual([]);
+		});
+
+		it("Should_CreatePublicFilesStack_When_PublicFilesIsConfigured", () => {
+			// Arrange
+			const config = {
+				...createValidConfig(),
+				stacks: {
+					...createValidConfig().stacks,
+					publicFiles: {
+						name: "Files",
+						subdomain: "files",
+						certificateId: "files-cert",
+					},
+				},
+			};
+
+			// Act
+			const result = deploy(config);
+
+			// Assert
+			expect(result).toHaveLength(1);
+			expect(PublicFilesStack).toHaveBeenCalledWith(
+				expect.anything(),
+				expect.objectContaining({
+					subdomain: "files",
+					certificateId: "files-cert",
+					domainName: "example.com",
+					hostedZoneId: "Z123",
+				}),
+			);
 		});
 
 		it("Should_Throw_When_ValidationFails", () => {

@@ -5,6 +5,60 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [0.17.1] - 2026-10-27
+
+### Fixed
+
+* **Accept `/` in map-file keys again**: Since 0.14.0 a hierarchical name
+  such as `Database/Password` was rejected, which broke map files that had
+  worked until then and that the SDKs still accept. `/` is valid again in
+  every command and in the published JSON Schema. `envilder exec` passes the
+  name as-is to the child process. A `.env` file gets the line as-is and the
+  run prints a warning with the names (never the values): `python-dotenv`
+  loads that line, but `dotenv` for Node.js, Docker Compose and a POSIX shell
+  do not, so the warning points to `envilder exec` or a `__` name. Existing
+  `/` lines are updated in place instead of duplicated. `=`, line breaks,
+  `U+2028`/`U+2029`, `__proto__` and the other rejected names stay rejected
+  ([#511](https://github.com/macalbert/envilder/issues/511))
+
+---
+
+## [0.17.0] - 2026-10-27
+
+### Security
+
+* **Reject `__proto__` in map files in the published build**: The check
+  added in 0.14.0 ran against the TypeScript source, but the compiled
+  output lowers the object-rest copy in map-file parsing to a helper that
+  assigns each key, so an own `__proto__` key was dropped before the name
+  check. A map file with that key was accepted, the mapping was silently
+  ignored and the run exited 0. Map-file keys are now read straight from the
+  parsed object, so the key is rejected with the documented message
+  ([#511](https://github.com/macalbert/envilder/issues/511))
+
+### Changed
+
+* **BREAKING: Azure Key Vault references only translate `/`**: The CLI
+  rewrote every Azure reference (underscores to hyphens, lowercased, repeated
+  hyphens collapsed, `secret-` prepended to a leading digit), so a valid name
+  such as `Database--Password` or `1password-token` addressed a different
+  secret than the one in the vault and than the SDKs read. Now the only
+  translation is `/` to `-`, ignoring leading slashes
+  (`/myapp/db/password` → `myapp-db-password`), shared with the Node.js,
+  Python and .NET SDKs. Anything else reaches Key Vault as written, and a
+  name it rejects fails with Key Vault's own error. The collision check
+  compares names case-insensitively, as Key Vault does
+
+### Migration
+
+Secrets pushed with an earlier CLI under a reference that holds `_`, `--`,
+a leading digit or a leading or trailing `-` were stored under the rewritten
+name. Point the map file at the name the vault holds (for example
+`myapp-db-password` instead of `/myapp/db_password`), or rename the secret in
+the vault.
+
+---
+
 ## [0.16.0] - 2026-10-25
 
 ### Added

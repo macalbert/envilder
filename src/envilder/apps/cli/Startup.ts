@@ -5,8 +5,6 @@ import type { ILogger } from '../../core/domain/ports/ILogger.js';
 import type { IProcessContext } from '../../core/domain/ports/IProcessContext.js';
 import type { IProcessRunner } from '../../core/domain/ports/IProcessRunner.js';
 import type { ISecretMasker } from '../../core/domain/ports/ISecretMasker.js';
-import { GitHubActionsSecretMasker } from '../../core/infrastructure/github/GitHubActionsSecretMasker.js';
-import { NoOpSecretMasker } from '../../core/infrastructure/github/NoOpSecretMasker.js';
 import { StderrConsoleLogger } from '../../core/infrastructure/logger/StderrConsoleLogger.js';
 import { CrossSpawnProcessRunner } from '../../core/infrastructure/process/CrossSpawnProcessRunner.js';
 import { NodeProcessContext } from '../../core/infrastructure/process/NodeProcessContext.js';
@@ -35,24 +33,18 @@ export class Startup {
 
   /**
    * Wires the services specific to `envilder exec`: its handler, a logger that keeps
-   * stdout free for the child, the process runner, and the GitHub Actions
-   * secret masker when running inside a workflow. Call it before
-   * `configureInfrastructure`, which only binds the defaults left unbound.
+   * stdout free for the child, the process runner, and the given secret
+   * masker. Call it before `configureInfrastructure`, which only binds the
+   * defaults left unbound.
    */
-  configureExec(options: { githubActions: boolean }): this {
+  configureExec(secretMasker: ISecretMasker): this {
     this.container
       .bind<ILogger>(TYPES.ILogger)
       .to(StderrConsoleLogger)
       .inSingletonScope();
-    // Exec writes mask registrations to stderr: the runner reads workflow
-    // commands from both streams, and stdout belongs to the child.
     this.container
       .bind<ISecretMasker>(TYPES.ISecretMasker)
-      .toConstantValue(
-        options.githubActions
-          ? new GitHubActionsSecretMasker({ stream: process.stderr })
-          : new NoOpSecretMasker(),
-      );
+      .toConstantValue(secretMasker);
     this.container
       .bind<IProcessRunner>(TYPES.IProcessRunner)
       .to(CrossSpawnProcessRunner)

@@ -6,6 +6,7 @@ import type { Environment, Stack } from "aws-cdk-lib";
  */
 import { App } from "aws-cdk-lib";
 import { AppEnvironment } from "../lib/core/types";
+import { PublicFilesStack } from "../lib/stacks/publicFilesStack";
 import { StaticWebsiteStack } from "../lib/stacks/staticWebsiteStack";
 
 // ============================================================================
@@ -16,6 +17,12 @@ interface StaticWebsiteConfig {
 	name: string;
 	projectPath: string;
 	subdomain?: string;
+}
+
+interface PublicFilesConfig {
+	name: string;
+	subdomain: string;
+	certificateId: string;
 }
 
 interface DeploymentConfig {
@@ -31,6 +38,7 @@ interface DeploymentConfig {
 		frontend: {
 			staticWebsites: readonly StaticWebsiteConfig[];
 		};
+		publicFiles?: PublicFilesConfig;
 	};
 	rootPath?: string;
 }
@@ -56,6 +64,12 @@ const config: DeploymentConfig = {
 					projectPath: "src/website/dist",
 				},
 			],
+		},
+		publicFiles: {
+			name: "Files",
+			subdomain: "files",
+			// *.envilder.com
+			certificateId: "b5de0685-2e52-4ceb-9cb2-d66b164a791e",
 		},
 	},
 };
@@ -254,6 +268,23 @@ export function deploy(configOverride?: DeploymentConfig): Stack[] {
 			});
 
 			stacks.push(stack);
+		}
+
+		const { publicFiles } = effectiveConfig.stacks;
+		if (publicFiles) {
+			stacks.push(
+				new PublicFilesStack(app, {
+					env: envFromCli,
+					name: publicFiles.name,
+					subdomain: publicFiles.subdomain,
+					certificateId: publicFiles.certificateId,
+					domainName: effectiveConfig.domain.name,
+					hostedZoneId: effectiveConfig.domain.hostedZoneId,
+					envName: effectiveConfig.environment,
+					githubRepo: effectiveConfig.repoName,
+					stackName: `${effectiveConfig.repoName}-${publicFiles.name}`,
+				}),
+			);
 		}
 
 		return stacks;

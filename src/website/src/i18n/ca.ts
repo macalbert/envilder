@@ -453,6 +453,191 @@ export const ca: Translations = {
     categorySdkNodejs: 'Node.js',
   },
   docs: {
+    gettingStartedGuide: {
+      tabAws: 'AWS SSM',
+      tabAzure: 'Azure Key Vault',
+      overviewTitle: 'Què faràs',
+      overviewSteps: [
+        "Instal·lar la CLI d'envilder.",
+        "Pujar un secret de prova a AWS SSM Parameter Store o a Azure Key Vault amb envilder, que també escriu l'envilder.json.",
+        "Revisar l'envilder.json que ha creat: associa un nom de variable al secret, mai al valor.",
+        'Arrencar una petita app de Node.js amb envilder exec i comprovar que rep el valor.',
+      ],
+      prereqTitle: 'Requisits previs',
+      prereqNode: 'Node.js 22.12 o posterior.',
+      prereqAws:
+        "l'AWS CLI amb credencials que funcionin (aws configure, o aws sso login per a perfils SSO) i una identitat amb permís per cridar ssm:GetParameter sobre els paràmetres que mapegis. Si un paràmetre SecureString està xifrat amb una clau KMS gestionada pel client, la identitat també necessita kms:Decrypt sobre aquesta clau.",
+      prereqAwsLink: "Configuració d'AWS SSM",
+      prereqAzure:
+        "un Key Vault existent, l'Azure CLI amb la sessió iniciada amb az login i el rol Key Vault Secrets User sobre el vault (o una política d'accés amb Get sobre secrets). Envilder s'autentica amb DefaultAzureCredential, de manera que una identitat administrada o credencials en variables d'entorn també funcionen.",
+      prereqAzureLink: "Configuració d'Azure Key Vault",
+      prereqWrite:
+        "El pas 2 crea un secret, cosa que requereix permís d'escriptura (ssm:PutParameter, o Key Vault Secrets Officer). Si el secret ja existeix, salta'l i escriu l'envilder.json a mà tal com es mostra al pas 3.",
+      installTitle: '1. Instal·la la CLI',
+      installDesc:
+        "Instal·la envilder de manera global. Si prefereixes no instal·lar-lo, posa npx davant de cada ordre d'aquesta guia.",
+      installVerify: "Comprova que l'ordre és al PATH. Mostra la versió:",
+      secretTitle: '2. Puja un secret de prova',
+      secretDesc:
+        "Tria el teu proveïdor. Una sola ordre d'envilder desa el secret al vault i registra l'associació a l'envilder.json, així que aquest pas no necessita ni l'AWS CLI ni l'Azure CLI. La guia fa servir un sol secret: la contrasenya de la base de dades d'un entorn de desenvolupament. El valor queda a l'historial de la terminal; per a secrets reals, fes el push des d'un fitxer .env amb el mode push.",
+      secretAwsNote:
+        "A AWS, --provider=aws i --profile són opcionals: aws és el proveïdor per defecte i, sense --profile, Envilder fa servir la cadena de credencials per defecte d'AWS. El perfil és una elecció local i no s'escriu a l'envilder.json.",
+      secretAzureNote:
+        'Els noms de Key Vault només admeten lletres, dígits i guions. Envilder converteix les barres en guions i elimina la barra inicial abans de cridar Azure, així que "/my-app/dev/db-password" resoldria el mateix secret. Tota la resta s\'envia tal com està escrit.',
+      mapTitle: "3. Revisa l'envilder.json",
+      mapDesc:
+        "El push ha creat l'envilder.json al directori actual, o hi ha afegit l'entrada si el fitxer ja existia. Cada clau és el nom de variable que llegeix la teva app i cada valor és l'identificador del secret al teu vault. Per a Azure també hi ha escrit $config amb provider i vaultUrl; AWS no necessita $config.",
+      mapNote:
+        "El fitxer conté camins de secrets, mai valors, així que desa'l al repositori amb el codi. Els editors validen l'envilder.json a través de SchemaStore sense línia $schema. Per pujar un secret sense tocar el fitxer de mapatge, afegeix --no-map-update.",
+      runTitle: '4. Executa la teva app amb envilder exec',
+      runDesc:
+        "Crea un petit script que llegeixi la variable i arrenca'l a través d'Envilder. Tot el que va després de -- és la teva ordre, que es passa tal qual, sense shell.",
+      runOutput:
+        'Sortida esperada. La primera línia és Envilder a stderr; la segona, la teva app a stdout:',
+      runExplain:
+        "Envilder resol tots els secrets mapejats i després arrenca l'ordre amb aquests valors afegits al seu entorn. No escriu res al disc. Si algun secret falta, és buit o no es pot llegir, l'ordre no arrenca i envilder acaba amb el codi 125; si no, acaba amb el codi de la teva ordre.",
+      runScriptDesc:
+        "Perquè aquesta sigui la manera habitual d'arrencar el projecte, posa-ho en un script del package.json i continua fent servir npm run dev:",
+      pullTitle: 'Alternativa: escriure un fitxer .env',
+      pullDesc:
+        "Algunes eines només llegeixen un fitxer, com l'env_file de Docker Compose o una configuració d'execució de l'IDE. En aquests casos, baixa els secrets a un fitxer .env. Sense opcions, envilder llegeix l'envilder.json i escriu .env al directori actual:",
+      pullOutput: 'Sortida esperada amb AWS, seguida del fitxer que escriu:',
+      pullWarn:
+        "El fitxer .env conté els valors reals dels secrets: afegeix-lo al .gitignore i esborra'l quan ja no el necessitis. A diferència d'exec, pull omet amb un avís un secret que no existeix i escriu igualment els altres.",
+      errorsTitle: 'Errors habituals en la primera execució',
+      errorsIntro:
+        'Cada bloc mostra el text que imprimeix envilder. Amb exec, tots acaben amb el codi 125 i la teva ordre no arriba a arrencar.',
+      errNoMapTitle: 'No es troba el fitxer de mapatge',
+      errNoMapFix:
+        "envilder busca l'envilder.json al directori actual. Executa'l des de l'arrel del projecte o passa --map=camí/a/envilder.json.",
+      errCredsTitle: "Sense credencials d'AWS",
+      errCredsFix:
+        'L\'SDK d\'AWS no ha trobat credencials. Executa aws configure, o aws sso login per a un perfil SSO. Per fer servir un perfil amb nom, passa --profile=nom o defineix "profile" a $config.',
+      errDeniedTitle: 'Accés denegat per AWS',
+      errDeniedFix:
+        "Les credencials funcionen, però la identitat no pot llegir aquest paràmetre. Permet ssm:GetParameter sobre l'ARN del paràmetre, i kms:Decrypt si el paràmetre fa servir una clau gestionada pel client.",
+      errNotFoundTitle: 'Secret no trobat',
+      errNotFoundFix:
+        "L'identificador o la regió no són correctes. A AWS, Envilder pren la regió d'AWS_REGION, després d'AWS_DEFAULT_REGION, després del perfil, i com a últim recurs fa servir us-east-1. Compara-ho amb aws ssm get-parameter --name /my-app/dev/db-password amb el mateix perfil. A Azure, revisa el nom del secret al vault.",
+      errVaultTitle: 'Azure sense URL del vault',
+      errVaultFix:
+        'Afegeix "vaultUrl": "https://<nom-del-vault>.vault.azure.net" a $config, o passa --vault-url.',
+      errOrderTitle: "Opcions abans d'exec",
+      errOrderFix:
+        "Les opcions escrites abans d'exec es rebutgen en lloc d'ignorar-se. Mou-les darrere d'exec, com indica el missatge.",
+      errEnvfileTitle: '--envfile amb exec',
+      errEnvfileFix:
+        'exec mai escriu cap fitxer. Treu --envfile, o fes servir pull (envilder --envfile=.env) quan necessitis el fitxer.',
+      nextTitle: 'Següents passos',
+      nextMap:
+        'Referència del fitxer de mapatge: $config, perfils, regles de validació i diversos entorns',
+      nextExec: 'envilder exec: codis de sortida, senyals i ús a CI',
+      nextPull: 'Mode pull: totes les opcions per generar fitxers .env',
+    },
+    mapFileReference: {
+      prereqTitle: 'Requisits previs',
+      prereqDesc:
+        "Aquesta pàgina descriu el fitxer de mapatge tal com el llegeixen la CLI d'envilder (0.16) i la GitHub Action. Els SDK de runtime llegeixen el mateix fitxer. Si encara no has resolt cap secret, comença per la guia d'inici.",
+      structureTitle: 'Estructura',
+      structureDesc:
+        "Un fitxer de mapatge és un únic objecte JSON. Les claus que comencen per $ estan reservades; qualsevol altra clau declara una variable d'entorn i el seu valor és l'identificador del secret que l'omple.",
+      thKey: 'Clau',
+      thMeaning: 'Significat',
+      keySchema:
+        'URL opcional del JSON Schema. Els editors la fan servir per autocompletar i validar; envilder la ignora.',
+      keyConfig:
+        'Objecte opcional que selecciona el proveïdor i la seva configuració. Consulta els camps més avall.',
+      keyOtherDollar:
+        "envilder omet qualsevol altra clau que comenci per $. L'schema la rebutja, així que no la facis servir per a metadades.",
+      keyVariable:
+        'Nom de variable (clau) i identificador del secret (valor de tipus string). El valor és opac: el seu format depèn del proveïdor.',
+      configTitle: 'Camps de $config',
+      configDesc:
+        "Tots els camps són opcionals. Un fitxer sense $config fa servir AWS SSM amb la cadena de credencials per defecte d'AWS.",
+      thField: 'Camp',
+      thValues: 'Valors',
+      thDefault: 'Per defecte',
+      thBehaviour: 'Comportament',
+      fieldProvider:
+        "Backend de secrets. No distingeix majúscules de minúscules. Qualsevol valor diferent d'aws o azure atura l'execució.",
+      valueProfileName: "Nom de perfil de l'AWS CLI",
+      defaultProfile: "Cadena per defecte d'AWS",
+      fieldProfile:
+        "Perfil amb nom de ~/.aws/config o ~/.aws/credentials. Només AWS: amb azure s'ignora i es mostra un avís.",
+      fieldVaultUrl:
+        'URL del Key Vault. Obligatòria per a azure. Ha de fer servir https:// i un host de Key Vault (.vault.azure.net, .vault.azure.cn, .vault.usgovcloudapi.net o .vault.microsoftazure.de). aws la ignora.',
+      configSdkNote:
+        "Els SDK de runtime llegeixen els mateixos camps, però poden rebutjar combinacions de les quals la CLI només avisa, com profile amb azure. Cada pàgina d'SDK llista els seus propis errors.",
+      providersTitle: 'Identificadors de secrets per proveïdor',
+      awsTitle: 'AWS SSM Parameter Store',
+      awsDesc:
+        "El valor és el nom del paràmetre tal com està desat a SSM, normalment un camí jeràrquic. Envilder crida GetParameter amb desxifratge, així que funcionen tant els paràmetres String com els SecureString. La regió surt d'AWS_REGION, després d'AWS_DEFAULT_REGION, després del perfil, amb us-east-1 com a últim recurs.",
+      azureTitle: 'Azure Key Vault',
+      azureDesc:
+        "El valor és el nom del secret. Envilder converteix les barres en guions abans de cridar Key Vault, així que pots compartir el mateix estil de camins amb un fitxer d'AWS:",
+      azureRules: [
+        'S\'eliminen les barres inicials i la resta de barres passen a ser guions: "/my-app/prod/stripe-api-key" llegeix my-app-prod-stripe-api-key. El CLI, la GitHub Action i tots els SDKs apliquen la mateixa regla.',
+        "Tota la resta s'envia tal com està escrit. Un nom que Key Vault rebutgi (per exemple amb _ o .) falla amb l'error del mateix Key Vault.",
+        'Al CLI i a la GitHub Action, dos valors diferents que resolen al mateix nom dins un fitxer són un error.',
+        'Envilder sempre llegeix la versió més recent del secret.',
+      ],
+      priorityTitle: 'Precedència entre $config i les opcions',
+      priorityDesc:
+        'Cada paràmetre es resol per separat, a partir de la primera font que el defineix:',
+      priority1:
+        'Opcions de la CLI (--provider, --vault-url, --profile) o inputs de la GitHub Action',
+      priority2: '$config al fitxer de mapatge',
+      priority3:
+        "Valors per defecte: provider aws, cadena de credencials per defecte d'AWS",
+      priorityExplain:
+        "Una opció només substitueix el camp que anomena; la resta de camps de $config continuen aplicant-se. Les mateixes regles valen per a pull, push i exec. Si s'omet --map, envilder fa servir l'envilder.json del directori actual; pull i push també fan servir .env com a valor per defecte de --envfile.",
+      priorityGhaNote:
+        "La GitHub Action accepta els inputs provider i vault-url, però no té input de perfil: a CI les credencials venen del workflow (per exemple, OIDC), no d'un perfil amb nom.",
+      validationTitle: 'Regles de validació',
+      validationDesc:
+        'envilder comprova el fitxer abans de contactar cap proveïdor, de manera que un fitxer no vàlid mai resol només una part dels seus secrets:',
+      validationRules: [
+        "El fitxer ha de ser JSON vàlid. No s'hi permeten comentaris ni comes finals.",
+        'Els noms de variable han de complir ^[A-Za-z0-9_./-]+$: lletres, dígits, guió baix, punt, guió i barra. Són els noms que un fitxer .env pot desar i tornar a llegir sense canvis. Es rebutgen espais, =, #, lletres accentuades i salts de línia.',
+        'Un nom amb / (Database/Password) funciona a tot arreu: els SDKs i exec el passen tal qual, i el SDK de .NET el converteix en una secció de configuració. En escriure un fitxer .env, el CLI el manté i avisa, perquè python-dotenv carrega aquesta línia però dotenv per a Node.js, Docker Compose i bash no; fes servir exec o un nom amb __ (Database__Password) si la teva aplicació llegeix el fitxer amb un d’aquests.',
+        'Es rebutja un nom buit.',
+        "__proto__ no es pot fer servir com a nom de variable: l'schema el rebutja i envilder mai el resol, perquè els parsers de .env no el poden tornar a llegir.",
+        "La regla de noms s'aplica a totes les claus, encara que el valor no sigui un string. Una clau amb un valor que no és string (número, objecte, null) s'omet i no es resol.",
+        'Amb exec a Windows es rebutgen dos noms que només es diferencien en majúscules i minúscules, perquè Windows els tracta com una única variable.',
+        "L'schema recomana noms POSIX (^[a-zA-Z_][a-zA-Z0-9_]*$). Els noms amb punts i guions s'accepten, però algunes shells i eines no els poden llegir com a variables.",
+      ],
+      multiEnvTitle: 'Exemple amb diversos entorns',
+      multiEnvDesc:
+        "Mantén un fitxer per entorn amb les mateixes claus, així el codi de l'aplicació no canvia mai. Només canvien els camins i el perfil:",
+      multiEnvRun:
+        "Tria el fitxer amb --map. En local, executa l'app amb el fitxer de desenvolupament; per a un artefacte de producció, genera un .env a partir del fitxer de producció:",
+      multiEnvGha: "En un workflow, apunta l'action al fitxer d'aquell entorn:",
+      multiEnvNaming:
+        "SchemaStore reconeix els noms envilder.json i envilder.*.json, així que la majoria d'editors els validen fins i tot sense la línia $schema.",
+      errorsTitle: 'Errors habituals',
+      thMessage: 'Missatge',
+      thFix: 'Solució',
+      errInvalidNameFix:
+        'Canvia el nom de la clau perquè només faci servir lletres, dígits, guió baix, punt, guió i barra.',
+      errInvalidJsonFix:
+        'Corregeix la sintaxi JSON: una coma final, un comentari o unes cometes que falten solen ser la causa.',
+      errProviderFix:
+        'Fes servir aws o azure a $config.provider o a --provider.',
+      errVaultMissingFix:
+        'Defineix $config.vaultUrl, o passa --vault-url, quan el proveïdor sigui azure.',
+      errVaultHttpsFix:
+        'Fes servir la URL https:// que apareix a la visió general del vault.',
+      errVaultHostFix:
+        "Fes servir l'URI del vault que dona Azure, per exemple https://my-vault.vault.azure.net, no un domini propi.",
+      errProfileAzureFix:
+        'És un avís, no un error. Treu profile de $config, o no passis --profile, quan facis servir azure.',
+      errCaseFix:
+        "Canvia el nom d'una de les claus; exec a Windows rebutja noms que només es diferencien en majúscules i minúscules.",
+      relatedTitle: 'Guies relacionades',
+      relatedStart: "Primers passos: d'un secret a una app en marxa",
+      relatedExec: "Referència d'envilder exec",
+      relatedAzure: "Configuració d'Azure Key Vault",
+    },
     title: 'Docs Envilder: secrets amb AWS SSM i Azure Key Vault',
     description:
       "Aprèn a resoldre variables d'entorn des d'AWS SSM Parameter Store i Azure Key Vault amb la CLI, GitHub Action i SDKs de runtime d'Envilder.",
@@ -475,17 +660,18 @@ export const ca: Translations = {
           'Troba guies de configuració, proveïdors, CLI, GitHub Action i SDKs.',
       },
       'getting-started': {
-        title: 'Comença amb Envilder',
+        title:
+          "Comença: d'AWS SSM o Azure Key Vault a una app en marxa en 5 minuts",
         description:
-          'Instal·la Envilder i coneix els requisits per resoldre secrets des del teu proveïdor al núvol.',
-        heading: 'Comença',
+          "Instal·la la CLI d'Envilder, mapeja secrets a envilder.json i executa la teva app amb envilder exec: valors d'AWS SSM o Azure Key Vault, sense .env al disc.",
+        heading: 'Comença en 5 minuts',
         intro:
-          "Instal·la Envilder, configura un proveïdor i resol secrets des d'un fitxer de mapatge versionat.",
+          "Com fas arribar un secret d'AWS SSM Parameter Store o Azure Key Vault a una app en marxa? Instal·la la CLI d'Envilder, associa el secret a un nom de variable a l'envilder.json i arrenca l'app amb envilder exec, que passa el valor al procés sense escriure cap fitxer .env. Tot plegat porta uns cinc minuts quan les teves credencials del núvol ja funcionen.",
         breadcrumb: 'Comença',
         navLabel: 'Comença',
         cardTitle: 'Comença amb Envilder',
         cardSummary:
-          'Instal·la la CLI, revisa els requisits i entén el model de mapatge.',
+          'Instal·la la CLI, mapeja un secret i executa la teva app amb envilder exec, per a AWS SSM o Azure Key Vault.',
       },
       'aws-ssm': {
         title: 'Utilitza Envilder amb AWS SSM Parameter Store',
@@ -514,17 +700,18 @@ export const ca: Translations = {
           "Configura l'autenticació Azure i els permisos de Key Vault.",
       },
       'map-file': {
-        title: "Referència del fitxer de mapatge d'Envilder",
+        title:
+          "Referència d'envilder.json: variables d'entorn i secrets al núvol",
         description:
-          "Defineix mapatges d'Envilder i la configuració del proveïdor a envilder.json.",
-        heading: 'Fitxer de mapatge',
+          "Referència d'envilder.json: $config, proveïdors, perfils, URL del vault, precedència de les opcions, validació de noms i exemple amb diversos entorns.",
+        heading: 'Referència del fitxer de mapatge',
         intro:
-          "Defineix els mapatges de variables d'entorn i la configuració del proveïdor a envilder.json.",
+          "Què pot contenir l'envilder.json i com el llegeix Envilder? És un únic objecte JSON que associa noms de variables d'entorn a identificadors de secrets, amb un bloc $config opcional per al proveïdor, el perfil i la URL del vault. Les opcions de la CLI substitueixen $config camp a camp, i un nom o un proveïdor no vàlid atura l'execució abans de llegir cap secret.",
         breadcrumb: 'Fitxer de mapatge',
         navLabel: 'Fitxer de mapatge',
         cardTitle: 'Referència del fitxer de mapatge',
         cardSummary:
-          'Mapeja variables a rutes de secrets i configura el proveïdor seleccionat.',
+          'Tots els camps del fitxer, regles per proveïdor, precedència de les opcions i validació de noms.',
       },
       'cli-pull': {
         title: "Descarrega secrets amb la CLI d'Envilder",
@@ -640,26 +827,6 @@ export const ca: Translations = {
     sidebarGhaAzure: 'Exemple Azure',
     sidebarGhaMultiEnv: 'Multi-entorn',
     sidebarGhaInputs: 'Inputs i outputs',
-    overviewTitle: 'Què és Envilder?',
-    overviewDesc:
-      "Envilder és un sistema de resolució de configuració basat en un model. Defineixes un mapeig JSON entre noms de variables i rutes de secrets al núvol, i Envilder els resol de forma consistent: via la CLI per a desenvolupament local, la GitHub Action per a CI/CD o els SDKs de runtime per a l'inici de l'aplicació. Funciona amb AWS SSM Parameter Store i Azure Key Vault.",
-    overviewProblem:
-      "Sense Envilder, els equips fragmenten la gestió de secrets entre eines i etapes. L'entorn local utilitza fitxers .env, CI/CD llegeix d'integracions amb vaults, producció té el seu propi mètode. Això provoca desfasament de configuració, credencials filtrades i incorporacions lentes.",
-    overviewSolution:
-      "Amb Envilder, un model de mapeig és la font única de veritat. Els secrets es resolen des del teu vault al núvol sota demanda: mateix contracte, mateix comportament, ja sigui executant la CLI localment, la GitHub Action en CI o un SDK a l'inici de l'app.",
-    reqTitle: 'Requisits',
-    reqNode: 'Node.js v22.12+',
-    reqAws: 'AWS CLI',
-    reqAzure: 'Azure CLI',
-    reqAwsNote: 'per AWS SSM',
-    reqAzureNote: 'per Azure Key Vault',
-    reqDownload: 'Descarregar',
-    reqInstallGuide: "Guia d'instal·lació",
-    installTitle: 'Instal·lació',
-    installNext: 'I ara, tria com arriben els secrets a la teva aplicació:',
-    installNextPull: 'CLI pull: genera un fitxer .env',
-    installNextExec:
-      'CLI exec: executa la teva comanda amb els secrets en memòria, sense .env',
     // AWS setup
     awsSetupTitle: 'Configuració AWS',
     awsSetupIntro:
@@ -680,9 +847,9 @@ export const ca: Translations = {
       'Exemple de política IAM (limita al teu prefix de ruta):',
     awsSetupVerifyTitle: '3. Crea un paràmetre de prova i verifica',
     awsSetupVerifyDesc:
-      'Crea un paràmetre a SSM i després fes pull amb Envilder per confirmar que tot funciona:',
+      'Puja un secret de prova amb Envilder, que també escriu el fitxer de mapatge, i després fes pull per confirmar que tot funciona:',
     awsSetupVerifySuccess:
-      'Si veus ✔ Fetched, la configuració AWS està completa.',
+      'Si veus ⭐ LEVEL CLEARED, la configuració AWS està completa.',
     awsSetupVerifySdk:
       'O carrega secrets directament des de la teva app amb el Python SDK:',
     // Azure setup
@@ -709,74 +876,40 @@ export const ca: Translations = {
       'Per accés només de lectura, el rol Key Vault Secrets User és suficient.',
     azureSetupVerifyTitle: '4. Crea un secret de prova i verifica',
     azureSetupVerifyDesc:
-      'Crea un secret a Key Vault i després fes pull amb Envilder per confirmar que tot funciona:',
+      'Puja un secret de prova amb Envilder, que també escriu el fitxer de mapatge, i després fes pull per confirmar que tot funciona:',
     azureSetupVerifySuccess:
-      'Si veus ✔ Fetched, la configuració Azure està completa.',
+      'Si veus ⭐ LEVEL CLEARED, la configuració Azure està completa.',
     azureSetupVerifySdk:
       'O carrega secrets directament des de la teva app amb el Python SDK:',
-    mapTitle: 'Fitxer de mapeig',
-    mapIntro:
-      "El fitxer de mapeig (envilder.json) és el nucli d'Envilder. És un fitxer JSON que mapeja noms de variables d'entorn (claus) a rutes de secrets (valors) al teu proveïdor al núvol.",
-    mapCalloutStructure: 'Estructura:',
-    mapCalloutKey:
-      "Cada clau es converteix en un nom de variable d'entorn al teu fitxer .env.",
-    mapCalloutValue:
-      'Cada valor és la ruta on viu el secret al teu proveïdor al núvol.',
-    mapBasicTitle: 'Format bàsic (AWS SSM, per defecte)',
-    mapBasicDesc:
-      'Quan no hi ha secció $config, Envilder utilitza AWS SSM Parameter Store per defecte. Els valors han de ser rutes de paràmetres SSM vàlides (normalment començant amb /):',
-    mapBasicGenerates: 'Això genera:',
-    mapConfigTitle: 'La secció $config',
-    mapConfigDesc:
-      'Afegeix una clau $config al teu fitxer de mapeig per declarar quin proveïdor al núvol utilitzar i la seva configuració. Envilder llegeix $config per la configuració i tracta totes les altres claus com a mapeigs de secrets.',
-    mapConfigOptionsTitle: 'Opcions de $config',
-    mapThKey: 'Clau',
-    mapThType: 'Tipus',
     mapThDefault: 'Per defecte',
     mapThDescription: 'Descripció',
-    mapProviderDesc: 'Proveïdor al núvol a utilitzar',
-    mapVaultUrlDesc:
-      'URL d\'Azure Key Vault (requerit quan el proveïdor és "azure")',
-    mapProfileDesc:
-      'Perfil AWS CLI per a configuracions multi-compte (només AWS)',
-    mapAwsProfileTitle: 'AWS SSM amb perfil',
-    mapAwsProfileDesc:
-      'Per utilitzar un perfil AWS CLI específic (útil per a configuracions multi-compte), afegeix profile a $config:',
-    mapAwsProfileExplain:
-      'Això indica a Envilder que utilitzi el perfil prod-account del teu fitxer ~/.aws/credentials en lloc del perfil per defecte.',
-    mapAzureTitle: 'Azure Key Vault',
-    mapAzureDesc:
-      'Per Azure Key Vault, estableix provider a "azure" i proporciona el vaultUrl:',
-    mapAzureWarningTitle: 'Convenció de noms Azure:',
-    mapAzureWarningDesc:
-      'Els noms de secrets de Key Vault només permeten caràcters alfanumèrics i guions. Envilder normalitza automàticament els noms: barres i guions baixos es converteixen en guions (p. ex., /myapp/db/password → myapp-db-password).',
-    mapDifferencesTitle: 'Diferències clau per proveïdor',
-    mapThEmpty: '',
-    mapThAwsSsm: 'AWS SSM',
-    mapThAzureKv: 'Azure Key Vault',
-    mapSecretPathFormat: 'Format de ruta de secret',
-    mapAwsPathFormat: 'Rutes de paràmetres amb barres',
-    mapAzurePathFormat: 'Noms amb guions',
-    mapRequiredConfig: '$config requerit',
-    mapAwsRequiredConfig: 'Cap (AWS és per defecte)',
-    mapAzureRequiredConfig: 'provider + vaultUrl',
-    mapOptionalConfig: '$config opcional',
-    mapAuthentication: 'Autenticació',
-    mapAwsAuth: 'Credencials AWS CLI',
-    mapAzureAuth: 'Azure Default Credentials',
-    mapMultiEnvTitle: 'Múltiples entorns',
-    mapMultiEnvDesc:
-      "Un patró comú és tenir un fitxer de mapeig per entorn. L'estructura és la mateixa, només canvien les rutes dels secrets:",
-    mapMultiEnvThenPull: 'Després obté el correcte:',
-    mapOverrideTitle: 'Sobreescriure $config amb flags CLI',
-    mapOverrideDesc:
-      "Els flags CLI sempre tenen prioritat sobre els valors de $config. Això et permet establir valors per defecte al fitxer i sobreescriure'ls per invocació:",
-    mapOverrideComment1: '# Utilitza $config del fitxer de mapeig tal qual',
-    mapOverrideComment2:
-      '# Sobreescriu proveïdor i URL del vault, ignorant $config',
-    mapOverrideComment3: '# Sobreescriu només el perfil AWS',
-    mapPriorityNote:
-      'Ordre de prioritat: flags CLI / inputs GHA → $config al fitxer de mapeig → per defecte (AWS).',
+    mapContentsTitle: 'Contingut dels secrets (els valors resolts)',
+    mapContentsIntro:
+      'Envilder no reescriu mai el valor d’un secret: el que retorna el proveïdor és el que rep la teva aplicació. Els límits depenen d’on es desa el valor:',
+    mapThStage: 'Etapa',
+    mapThLimit: 'Límit',
+    mapContentsProvider: 'Proveïdor',
+    mapContentsProviderLimit:
+      'AWS SSM: 4 KB (estàndard) o 8 KB (nivell avançat). Azure Key Vault: 25 KB.',
+    mapContentsEnvFile: 'Fitxer .env (CLI, GitHub Action)',
+    mapContentsEnvFileLimit:
+      'Qualsevol valor que dotenv pugui representar. Consulta l’excepció més avall.',
+    mapContentsProcess: 'Entorn del procés',
+    mapContentsProcessLimit:
+      'El sistema operatiu no pot desar NUL (U+0000) en una variable, i Windows limita cada variable a 32.767 caràcters.',
+    mapContentsResolveOnly:
+      'Les APIs dels SDKs que només resolen (resolve, ResolveFile, IConfiguration) mantenen els valors en memòria i només estan subjectes als límits del proveïdor.',
+    mapContentsWriterDesc:
+      'El CLI escriu cada valor de manera que dotenv en llegeixi exactament el string original. Les cometes s’escullen automàticament i es comproven analitzant el resultat abans d’escriure el fitxer. La comprovació fa servir la gramàtica de dotenv ampliada a claus amb /, així que per a aquestes claus demostra que el valor es llegeix igual, no que dotenv per a Node.js les carregui (ignora aquestes línies):',
+    mapContentsRoundTrip:
+      '#, espais al principi i al final, cometes, barres inverses, un \\n literal, salts de línia LF/CRLF reals i Unicode es conserven tots. Si el fitxer ja existeix, cada assignació es substitueix al seu lloc (una multilínia, sencera), i es mantenen els comentaris, l’ordre i els finals de línia.',
+    mapContentsUnrepresentableTitle:
+      'L’únic valor que un .env no pot contenir:',
+    mapContentsUnrepresentableDesc:
+      'un valor que conté els tres tipus de cometes (\', " i `) juntament amb un salt de línia, espais al principi o al final, o un #. El CLI s’atura amb un error que indica la variable i deixa el fitxer .env intacte. Desa aquest valor codificat (per exemple en base64) o llegeix-lo amb un SDK.',
+    mapContentsExpansionTitle: 'Expansió de variables:',
+    mapContentsExpansionDesc:
+      'Envilder escriu referències com $HOME literalment i dotenv no les expandeix, però altres carregadors sí. Docker Compose, per exemple, expandeix un KEY=$HOME sense cometes quan llegeix el fitxer. Tingues-ho en compte quan un secret contingui $.',
     pullTitle: 'Comanda pull',
     pullDesc:
       'Descarrega secrets del teu proveïdor al núvol i genera un fitxer .env local.',
@@ -1009,7 +1142,7 @@ export const ca: Translations = {
     ghaAzurePolicyNote:
       "Si el vault fa servir polítiques d'accés en lloc d'Azure RBAC, concedeix get sobre els secrets: az keyvault set-policy --name {VAULT} --spn {APP_ID} --secret-permissions get.",
     ghaAzureMapDesc:
-      'Amb $config al fitxer de mapeig, el workflow no necessita els inputs provider ni vault-url. Els noms de Key Vault només admeten lletres, dígits i guions, així que Envilder converteix les rutes: /myapp/prod/stripe_key es llegeix com a myapp-prod-stripe-key (sense la barra inicial, barres i guions baixos convertits en guions, en minúscules).',
+      'Amb $config al fitxer de mapeig, el workflow no necessita els inputs provider ni vault-url. Els noms de Key Vault només admeten lletres, dígits i guions, així que Envilder converteix les rutes: /myapp/prod/stripe-key es llegeix com a myapp-prod-stripe-key (sense la barra inicial, barres convertides en guions).',
     ghaAzureInputsNote:
       "Els ID de client, tenant i subscripció identifiquen l'aplicació; no són credencials, així que n'hi ha prou amb variables del repositori. Si s'informen, els inputs provider i vault-url sobreescriuen el $config del fitxer de mapeig.",
     ghaMultiEnvDesc:
@@ -1069,14 +1202,6 @@ export const ca: Translations = {
     ghaRelatedMap:
       'Referència del fitxer de mapeig: $config, proveïdors i rutes de secrets',
     ghaRelatedRepo: "Codi font i README de l'Action a GitHub",
-    configPriorityTitle: 'Prioritat de configuració',
-    configPriorityDesc:
-      'Quan hi ha múltiples fonts de configuració, Envilder les resol en aquest ordre (el més alt guanya):',
-    configPriority1: 'Flags CLI / inputs GHA',
-    configPriority2: '$config al fitxer de mapeig',
-    configPriority3: 'Per defecte (AWS)',
-    configPriorityExplain:
-      'Això vol dir que --provider=azure a la CLI sobreescriurà "provider": "aws" a $config.',
     // SDKs
     sidebarSdks: 'SDKs',
     sidebarSdkDotnet: '.NET SDK',
@@ -1130,7 +1255,7 @@ export const ca: Translations = {
     sdkDotnetMapAzureDesc:
       'Per a Key Vault, defineix el proveïdor i la URL del magatzem a $config. Els valors són noms de secrets de Key Vault:',
     sdkDotnetMapAzureNote:
-      "L'SDK de .NET envia els noms a Key Vault tal com els escrius. A diferència de la CLI, no converteix una ruta com /myapp/prod/db-password en myapp-prod-db-password, així que escriu el nom final al fitxer.",
+      "L'SDK de .NET envia els noms a Key Vault tal com els escrius, excepte que les barres es converteixen en guions, igual que la CLI: una ruta com /myapp/prod/db-password es llegeix com myapp-prod-db-password. Qualsevol altre caràcter que Key Vault rebutgi (per exemple _ o .) falla amb el seu propi error.",
     sdkDotnetAspTitle: 'ASP.NET Core amb IConfiguration',
     sdkDotnetAspDesc:
       "Crida AddEnvilder just després de CreateBuilder. Les claus es llegeixen tal com s'escriuen al fitxer de mapeig, així que fes servir noms de variable d'entorn: el mateix fitxer també funciona amb la CLI i la resta d'SDKs.",
@@ -1185,9 +1310,9 @@ export const ca: Translations = {
       "La identitat no té ssm:GetParameter sobre aquest paràmetre. Compara l'ARN de Resource, regió inclosa, amb la política anterior.",
     sdkDotnetErrDeniedAzureFix:
       'Assigna Key Vault Secrets User sobre el magatzem. Les assignacions de rol poden trigar uns minuts a propagar-se.',
-    sdkDotnetErrAzureNameTitle: 'Nom de secret amb barres a Azure',
+    sdkDotnetErrAzureNameTitle: 'Secret no trobat a Azure',
     sdkDotnetErrAzureNameFix:
-      "Els noms de Key Vault només admeten lletres, dígits i guions, i l'SDK no els normalitza. Un nom en forma de ruta com /myapp/prod/db-password no coincidirà amb cap secret: fes servir myapp-prod-db-password al fitxer.",
+      "L'SDK envia cada valor tal qual, excepte que les barres es converteixen en guions: un nom en forma de ruta com /myapp/prod/db-password es llegeix com myapp-prod-db-password, igual que al CLI. Si el secret continua sense aparèixer, comprova que el vault tingui un secret amb aquest nom; els noms que només difereixen en majúscules són el mateix secret.",
     sdkDotnetErrConfigTitle: 'Errors de configuració',
     sdkDotnetErrMessageHeader: 'Missatge',
     sdkDotnetErrFixHeader: 'Solució',

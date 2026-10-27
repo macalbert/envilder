@@ -82,6 +82,33 @@ public class EnvilderConfigurationSectionBindingTests
 		actual.Model.Should().Be("gpt-4o");
 	}
 
+	[Fact]
+	public void Should_BindSection_When_MapFileJsonUsesSlashHierarchy()
+	{
+		// Arrange
+		_secretProvider
+			.GetSecret("/myapp/prod/pg-connection-string")
+			.Returns("Host=db.example.com");
+		_secretProvider
+			.GetSecret("/myapp/prod/pg-max-pool-size")
+			.Returns("50");
+
+		var mapFile = new MapFileParser().Parse("""
+			{
+				"Database/ConnectionString": "/myapp/prod/pg-connection-string",
+				"Database/MaxPoolSize": "/myapp/prod/pg-max-pool-size"
+			}
+			""");
+		var configuration = CreateConfiguration(mapFile);
+
+		// Act
+		var actual = configuration.GetSection(DatabaseConfig.SectionName);
+
+		// Assert
+		actual["ConnectionString"].Should().Be("Host=db.example.com");
+		actual["MaxPoolSize"].Should().Be("50");
+	}
+
 	private IConfigurationRoot CreateConfiguration(ParsedMapFile mapFile)
 	{
 		var client = new EnvilderClient(_secretProvider);

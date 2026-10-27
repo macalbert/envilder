@@ -42,76 +42,38 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
     await this.client.setSecret(secretName, value);
   }
 
-  /**
-   * Validates that the secret name meets Azure Key Vault naming constraints.
-   * @see https://learn.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#objects-identifiers-and-versioning
-   */
-  private validateSecretName(name: string): void {
-    if (name.trim().length === 0) {
+  private resolveSecretName(originalName: string): string {
+    if (originalName.trim().length === 0) {
       throw new InvalidArgumentError(
         'Invalid secret name: name cannot be empty or whitespace-only.',
       );
     }
-    if (/[^a-zA-Z0-9\-_/]/.test(name)) {
-      throw new InvalidArgumentError(
-        `Invalid secret name '${name}': contains characters not allowed` +
-          ' by Azure Key Vault. Only alphanumeric characters,' +
-          ' hyphens, slashes, and underscores are accepted.',
-      );
-    }
-  }
-
-  private resolveSecretName(originalName: string): string {
-    this.validateSecretName(originalName);
-    const normalized = this.normalizeSecretName(originalName);
-    if (normalized.length > 127) {
-      throw new InvalidArgumentError(
-        `Invalid secret name '${originalName}': normalized name '${normalized}' exceeds the 127-character limit for Azure Key Vault.`,
-      );
-    }
-    const existing = this.normalizedNameRegistry.get(normalized);
+    const normalized = toAzureSecretName(originalName);
+    // Key Vault names are case-insensitive, so two references that differ
+    // only by case still address the same secret.
+    const registryKey = normalized.toLowerCase();
+    const existing = this.normalizedNameRegistry.get(registryKey);
     if (existing !== undefined && existing !== originalName) {
       throw new SecretOperationError(
         `Secret name collision: '${originalName}' and '${existing}' ` +
-          `both normalize to '${normalized}'. Use distinct ` +
-          'Key Vault-compatible names in your map file ' +
+          `both resolve to '${normalized}'. Use distinct ` +
+          'Key Vault secret names in your map file ' +
           'when targeting Azure.',
       );
     }
-    this.normalizedNameRegistry.set(normalized, originalName);
+    this.normalizedNameRegistry.set(registryKey, originalName);
     return normalized;
   }
+}
 
-  // Azure Key Vault secret names: 1-127 chars, alphanumeric + hyphens, start with letter
-  private normalizeSecretName(name: string): string {
-    // Remove leading slashes
-    let normalized = name.replace(/^\/+/, '');
-
-    // Replace slashes and underscores with hyphens
-    normalized = normalized.replace(/[/_]/g, '-');
-
-    // Lowercase to match Azure Key Vault case-insensitivity
-    normalized = normalized.toLowerCase();
-
-    // Remove invalid characters
-    normalized = normalized.replace(/[^a-zA-Z0-9-]/g, '');
-
-    // Remove consecutive hyphens
-    normalized = normalized.replace(/-+/g, '-');
-
-    // Remove leading/trailing hyphens
-    normalized = normalized.replace(/^-+|-+$/g, '');
-
-    // Ensure starts with a letter
-    if (normalized.length > 0 && !/^[a-zA-Z]/.test(normalized)) {
-      normalized = `secret-${normalized}`;
-    }
-
-    // Default name if empty
-    if (normalized.length === 0) {
-      normalized = 'secret';
-    }
-
-    return normalized;
-  }
+/**
+ * The only translation between a map-file reference and a Key Vault secret
+ * name, shared with every SDK: `/` becomes `-`, ignoring leading slashes, so
+ * a path-style reference such as `/myapp/db/password` reads
+ * `myapp-db-password`. Anything else reaches Key Vault as written, and a
+ * name it does not accept fails with Key Vault's own error.
+ * @see https://learn.microsoft.com/azure/key-vault/general/about-keys-secrets-certificates#objects-identifiers-and-versioning
+ */
+export function toAzureSecretName(name: string): string {
+  return name.replace(/^\/+/, '').replace(/\//g, '-');
 }

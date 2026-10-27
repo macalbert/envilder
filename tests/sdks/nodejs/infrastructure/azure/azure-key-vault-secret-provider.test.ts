@@ -22,6 +22,29 @@ describe('AzureKeyVaultSecretProvider', () => {
     expect(actual.size).toBe(2);
   });
 
+  it('Should_FetchHyphenatedName_When_ReferenceHasSlashes', async () => {
+    // Arrange
+    const mockGetSecret = vi.fn().mockResolvedValue({ value: 'fictional' });
+    const mockClient = {
+      getSecret: mockGetSecret,
+    } as unknown as SecretClient;
+    const sut = new AzureKeyVaultSecretProvider(mockClient);
+
+    // Act
+    const actual = await sut.getSecrets([
+      '/myapp/db/password',
+      'Database--Password',
+    ]);
+
+    // Assert
+    expect(mockGetSecret).toHaveBeenCalledWith('myapp-db-password');
+    expect(mockGetSecret).toHaveBeenCalledWith('Database--Password');
+    expect([...actual.keys()]).toEqual([
+      '/myapp/db/password',
+      'Database--Password',
+    ]);
+  });
+
   it('Should_OmitMissing_When_SecretNotFound', async () => {
     // Arrange
     const mockGetSecret = vi

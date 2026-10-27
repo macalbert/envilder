@@ -58,6 +58,10 @@ Set the provider in the map file's `$config`; values are Key Vault secret names:
 }
 ```
 
+Values are sent to Key Vault as written, except that slashes become hyphens: a path-style value
+such as `/myapp/prod/db-password` is read as `myapp-prod-db-password`, the same name the CLI pushes
+it under.
+
 The code is the same as for AWS. Credentials are resolved with `DefaultAzureCredential`
 (`az login`, managed identity, or environment variables):
 
@@ -238,6 +242,22 @@ For Azure, add `vaultUrl`:
   "API_KEY": "myapp-prod-api-key"
 }
 ```
+
+### Keys and values
+
+Keys follow the same rule as the CLI and the GitHub Action, so a key accepted by one is accepted by all:
+
+- **Keys** may only contain letters, digits, `_`, `.`, `-` and `/` (`^[A-Za-z0-9_./-]+$`); `__proto__`
+  is also rejected. `MapFileParser.parse` throws `Error` for any other key, before any secret is fetched.
+  `/` is allowed for hierarchical names (`Database/Password`) and returned as-is.
+- **Values** are the secret identifiers in the provider (SSM parameter name or Key Vault secret
+  name) and must be JSON strings.
+- **Secret contents** are returned exactly as the provider stores them. `resolveFile` / `resolve` keep them in
+  memory; `load` / `inject` write them to the process environment, where the operating system cannot
+  store `NUL` (`U+0000`) and Windows limits a variable to 32,767 characters.
+
+See [Keys and Values: What Is Accepted](https://github.com/macalbert/envilder#keys-and-values-what-is-accepted)
+for the full reference and the reasoning behind the rules.
 
 See the [root README](https://github.com/macalbert/envilder#%EF%B8%8F-mapping-file-format) for the full map file reference.
 

@@ -4,11 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "envilder"
-version = "0.5.2"
+version = "1.0.0"
 description = "Securely load environment variables from AWS SSM Parameter Store or Azure Key Vault."
 readme = "README.md"
 license = { text = "MIT" }
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [{ name = "macalbert" }]
 keywords = ["secrets", "environment", "aws", "ssm", "azure", "keyvault", "envilder"]
 classifiers = [
@@ -16,7 +16,6 @@ classifiers = [
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -58,14 +57,14 @@ dev = [
 
 [tool.black]
 line-length = 79
-target-version = ["py310"]
+target-version = ["py311"]
 
 [tool.isort]
 profile = "black"
 line_length = 79
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 strict = true
 warn_return_any = true
 warn_unused_configs = true

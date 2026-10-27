@@ -4,8 +4,10 @@ import CodeBlock from './CodeBlock.astro';
 export interface TabItem {
   label: string;
   lang: string;
-  filename: string;
+  filename?: string;
   code: string;
+  /** Optional note shown below the code, only while this tab is selected. */
+  note?: string;
 }
 
 interface Props {
@@ -44,6 +46,7 @@ const blockId = crypto.randomUUID().slice(0, 8);
         data-panel-index={i}
       >
         <CodeBlock lang={tab.lang} filename={tab.filename} code={tab.code} />
+        {tab.note && <p class="note tabbed-code-note">{tab.note}</p>}
       </div>
     ))}
   </div>
@@ -59,6 +62,9 @@ const blockId = crypto.randomUUID().slice(0, 8);
     gap: 0;
     border-bottom: 2px solid var(--color-border);
     overflow-x: auto;
+    /* Tabs are offset 2px (top: 2px) over the bottom border; without this
+       the offset counts as vertical overflow and shows a scrollbar. */
+    overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
   }
 

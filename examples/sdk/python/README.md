@@ -12,7 +12,7 @@ no setup required.
 
 ## Prerequisites
 
-- Python 3.10+
+- Python 3.11+
 - [uv](https://docs.astral.sh/uv/)
 - AWS credentials configured (`~/.aws/credentials`, env vars, or IAM role)
 - SSM parameters matching the paths in [`envilder.json`](../../../envilder.json)

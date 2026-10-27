@@ -1,11 +1,14 @@
 import type { SecretClient } from '@azure/keyvault-secrets';
 import type { ISecretProvider } from '../../domain/ports/secret-provider.js';
+import { toAzureSecretName } from './azure-secret-name.js';
 
 /**
  * {@link ISecretProvider} backed by Azure Key Vault.
  *
  * Secrets are fetched in parallel. Secrets that return HTTP 404
  * are treated as missing and silently omitted from the result.
+ * Each reference is mapped to its Key Vault name with
+ * {@link toAzureSecretName}, the same rule the CLI uses.
  */
 export class AzureKeyVaultSecretProvider implements ISecretProvider {
   private readonly secretClient: SecretClient;
@@ -28,10 +31,11 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
         throw new Error('Secret name cannot be null or empty');
       }
     }
+    const secretNames = names.map(toAzureSecretName);
 
     const entries = await Promise.all(
-      names.map(async (name) => {
-        const value = await this.fetchSecret(name);
+      names.map(async (name, index) => {
+        const value = await this.fetchSecret(secretNames[index]);
         return [name, value] as const;
       }),
     );
