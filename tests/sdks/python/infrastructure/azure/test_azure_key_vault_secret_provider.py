@@ -25,6 +25,39 @@ class TestAzureKeyVaultSecretProvider:
         assert actual == "azure-secret-value"
         secret_client.get_secret.assert_called_once_with("test-secret")
 
+    def Should_FetchHyphenatedName_When_ReferenceHasSlashes(
+        self,
+    ) -> None:
+        # Arrange
+        secret_client = Mock()
+        mock_response = Mock()
+        mock_response.value = "fictional-value"
+        secret_client.get_secret.return_value = mock_response
+        sut = AzureKeyVaultSecretProvider(secret_client)
+
+        # Act
+        actual = sut.get_secret("/myapp/db/password")
+
+        # Assert
+        assert actual == "fictional-value"
+        secret_client.get_secret.assert_called_once_with("myapp-db-password")
+
+    def Should_FetchNameAsWritten_When_ReferenceHasNoSlash(
+        self,
+    ) -> None:
+        # Arrange
+        secret_client = Mock()
+        mock_response = Mock()
+        mock_response.value = "fictional-value"
+        secret_client.get_secret.return_value = mock_response
+        sut = AzureKeyVaultSecretProvider(secret_client)
+
+        # Act
+        sut.get_secret("Database--Password")
+
+        # Assert
+        secret_client.get_secret.assert_called_once_with("Database--Password")
+
     def Should_ReturnNone_When_AzureKeyVaultSecretNotFound(
         self,
     ) -> None:
