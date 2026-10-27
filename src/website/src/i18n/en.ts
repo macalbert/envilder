@@ -1115,7 +1115,7 @@ export const en: Translations = {
     sdkDotnetMapAzureDesc:
       'For Key Vault, set the provider and the vault URL in $config. Values are Key Vault secret names:',
     sdkDotnetMapAzureNote:
-      'The .NET SDK sends names to Key Vault exactly as written. Unlike the CLI, it does not convert a path such as /myapp/prod/db-password into myapp-prod-db-password, so write the final name in the map.',
+      'The .NET SDK sends names to Key Vault as written, except that slashes become hyphens, like the CLI: a path such as /myapp/prod/db-password is read as myapp-prod-db-password. Any other character Key Vault rejects (for example _ or .) fails with its own error.',
     sdkDotnetAspTitle: 'ASP.NET Core with IConfiguration',
     sdkDotnetAspDesc:
       'Call AddEnvilder right after CreateBuilder. Keys are read exactly as written in the map file, so use environment-variable-style names: the same file then also works with the CLI and the other SDKs.',

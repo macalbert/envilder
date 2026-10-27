@@ -1130,7 +1130,7 @@ export const ca: Translations = {
     sdkDotnetMapAzureDesc:
       'Per a Key Vault, defineix el proveïdor i la URL del magatzem a $config. Els valors són noms de secrets de Key Vault:',
     sdkDotnetMapAzureNote:
-      "L'SDK de .NET envia els noms a Key Vault tal com els escrius. A diferència de la CLI, no converteix una ruta com /myapp/prod/db-password en myapp-prod-db-password, així que escriu el nom final al fitxer.",
+      "L'SDK de .NET envia els noms a Key Vault tal com els escrius, excepte que les barres es converteixen en guions, igual que la CLI: una ruta com /myapp/prod/db-password es llegeix com myapp-prod-db-password. Qualsevol altre caràcter que Key Vault rebutgi (per exemple _ o .) falla amb el seu propi error.",
     sdkDotnetAspTitle: 'ASP.NET Core amb IConfiguration',
     sdkDotnetAspDesc:
       "Crida AddEnvilder just després de CreateBuilder. Les claus es llegeixen tal com s'escriuen al fitxer de mapeig, així que fes servir noms de variable d'entorn: el mateix fitxer també funciona amb la CLI i la resta d'SDKs.",
