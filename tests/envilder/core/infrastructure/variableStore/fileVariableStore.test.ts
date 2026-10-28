@@ -1323,25 +1323,41 @@ describe('FileVariableStore', () => {
       );
     });
 
+    // The blank runs sit between comments, not right after an assignment, whose
+    // trailing blanks would swallow the run before it could be rescanned. The
+    // result is compared as text: dotenv itself is quadratic on these files.
     it.each([
-      ['LF blank lines', `A=old${'\n'.repeat(200_000)}B=kept\n`],
-      ['CRLF blank lines', `A=old${'\r\n'.repeat(100_000)}B=kept\r\n`],
-      ['blanks inside a value', `A=old${' '.repeat(200_000)}x\nB=kept\n`],
+      [
+        'LF blank lines',
+        `# a${'\n'.repeat(200_000)}# b\nA=old\nB=kept\n`,
+        `# a${'\n'.repeat(200_000)}# b\nA=new\nB=kept\n`,
+      ],
+      [
+        'CRLF blank lines',
+        `# a${'\r\n'.repeat(100_000)}# b\r\nA=old\r\nB=kept\r\n`,
+        `# a${'\r\n'.repeat(100_000)}# b\r\nA=new\r\nB=kept\r\n`,
+      ],
+      [
+        'blanks inside a value',
+        `A=old${' '.repeat(200_000)}x\nB=kept\n`,
+        'A=new\nB=kept\n',
+      ],
     ])(
       'Should_RewriteInLinearTime_When_FileHoldsLongWhitespaceRuns (%s)',
-      async (_name, existing) => {
+      async (_name, existing, expected) => {
         // Arrange
         mockInMemoryFiles.set(mockEnvFilePath, existing);
         const startedAt = performance.now();
 
         // Act
         await sut.saveEnvironment(mockEnvFilePath, { A: 'new' });
+        const elapsed = performance.now() - startedAt;
 
         // Assert
         expect({
-          parsed: dotenv.parse(mockInMemoryFiles.get(mockEnvFilePath) ?? ''),
-          fast: performance.now() - startedAt < 1000,
-        }).toEqual({ parsed: { A: 'new', B: 'kept' }, fast: true });
+          content: mockInMemoryFiles.get(mockEnvFilePath),
+          fast: elapsed < 1000,
+        }).toEqual({ content: expected, fast: true });
       },
     );
   });
@@ -1423,10 +1439,12 @@ describe('FileVariableStore', () => {
 
     it('Should_ParseInLinearTime_When_FileHoldsLongRunsOfBlankLines', async () => {
       // Arrange
+      // Between comments, not right after an assignment: an assignment's
+      // trailing blanks would swallow the run before it could be rescanned.
       const blankLines = '\n'.repeat(200_000);
       mockInMemoryFiles.set(
         mockEnvFilePath,
-        `A=1${blankLines}B=2${blankLines}`,
+        `# top${blankLines}# middle\nA=1\n# after A${blankLines}B=2\n`,
       );
       const startedAt = performance.now();
 
