@@ -1206,6 +1206,11 @@ export const en: Translations = {
     sdkDotnetFluent: 'Fluent builder with overrides',
     sdkDotnetFluentDesc:
       'Override provider settings programmatically using the fluent API:',
+    sdkVaultHostsTitle: 'Custom Key Vault hosts',
+    sdkVaultHostsDesc:
+      'The SDKs only send Azure credentials to an https:// vault URL on a Key Vault host: .vault.azure.net, .vault.azure.cn, .vault.usgovcloudapi.net or .vault.microsoftazure.de, the same rule the CLI applies. Any other vaultUrl fails before a credential is used, so a map file cannot send your credentials to a host you do not control. For a private endpoint on another domain, or an emulator such as LocalStack, add its host suffix with the builder. The extra hosts are added to the defaults.',
+    sdkVaultHostsNote:
+      "Only add hosts you control. For those hosts the SDK also turns off the Key Vault client's challenge resource check, because the challenge names the public cloud resource and never matches a custom host.",
     sdkDotnetEnvLoading: 'Environment-based loading',
     sdkDotnetEnvLoadingDesc:
       'Route secret loading based on your current environment. Each environment maps to its own secrets file:',

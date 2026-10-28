@@ -1220,6 +1220,11 @@ export const ca: Translations = {
     sdkDotnetFluent: 'Constructor fluent amb sobreescriptures',
     sdkDotnetFluentDesc:
       "Sobreescriu la configuració del proveïdor de manera programàtica amb l'API fluent:",
+    sdkVaultHostsTitle: 'Hosts de Key Vault personalitzats',
+    sdkVaultHostsDesc:
+      "Els SDK només envien credencials d'Azure a una URL de vault https:// en un host de Key Vault: .vault.azure.net, .vault.azure.cn, .vault.usgovcloudapi.net o .vault.microsoftazure.de, la mateixa regla que aplica la CLI. Qualsevol altra vaultUrl falla abans de fer servir cap credencial, de manera que un fitxer de mapeig no pot enviar les teves credencials a un host que no controles. Per a un endpoint privat en un altre domini, o un emulador com LocalStack, afegeix el sufix del host amb el builder. Els hosts addicionals se sumen als predeterminats.",
+    sdkVaultHostsNote:
+      "Afegeix només hosts que controlis. Per a aquests hosts, l'SDK també desactiva la comprovació del recurs del challenge del client de Key Vault, perquè el challenge indica el recurs del núvol públic i mai coincideix amb un host personalitzat.",
     sdkDotnetEnvLoading: 'Càrrega basada en entorn',
     sdkDotnetEnvLoadingDesc:
       'Encamina la càrrega de secrets segons el teu entorn actual. Cada entorn mapeja al seu fitxer de secrets:',

@@ -740,6 +740,9 @@ export interface DocsTranslations {
   sdkDotnetResolveDesc: string;
   sdkDotnetFluent: string;
   sdkDotnetFluentDesc: string;
+  sdkVaultHostsTitle: string;
+  sdkVaultHostsDesc: string;
+  sdkVaultHostsNote: string;
   sdkDotnetEnvLoading: string;
   sdkDotnetEnvLoadingDesc: string;
   sdkDotnetValidation: string;

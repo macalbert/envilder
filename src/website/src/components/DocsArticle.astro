@@ -1245,6 +1245,15 @@ Env.FromMapFile("envilder.json")
     .WithProfile("staging")
     .Inject();`} />
 
+        <h3>{t.docs.sdkVaultHostsTitle}</h3>
+        <p>{t.docs.sdkVaultHostsDesc}</p>
+        <CodeBlock lang="csharp" code={`using Envilder;
+
+var secrets = Env.FromMapFile("envilder.json")
+    .WithAllowedVaultHosts(".vault.contoso.internal")
+    .Resolve();`} />
+        <p class="note">{t.docs.sdkVaultHostsNote}</p>
+
         <h3>{t.docs.sdkDotnetEnvLoading}</h3>
         <p>{t.docs.sdkDotnetEnvLoadingDesc}</p>
         <CodeBlock lang="csharp" code={`using Envilder;
@@ -1435,6 +1444,17 @@ secrets = (
     .resolve()
 )`} />
 
+        <h3>{t.docs.sdkVaultHostsTitle}</h3>
+        <p>{t.docs.sdkVaultHostsDesc}</p>
+        <CodeBlock lang="python" code={`from envilder import Envilder
+
+secrets = (
+    Envilder.from_map_file('envilder.json')
+    .with_allowed_vault_hosts('.vault.contoso.internal')
+    .resolve()
+)`} />
+        <p class="note">{t.docs.sdkVaultHostsNote}</p>
+
         <h3>{t.docs.sdkPythonValidation}</h3>
         <p>{t.docs.sdkPythonValidationDesc}</p>
         <CodeBlock lang="python" code={`from envilder import Envilder, validate_secrets
@@ -1496,6 +1516,15 @@ const secrets = await Envilder.fromMapFile('envilder.json')
 await Envilder.fromMapFile('envilder.json')
   .withProfile('staging')
   .inject();`} />
+
+        <h3>{t.docs.sdkVaultHostsTitle}</h3>
+        <p>{t.docs.sdkVaultHostsDesc}</p>
+        <CodeBlock lang="typescript" code={`import { Envilder } from '@envilder/sdk';
+
+const secrets = await Envilder.fromMapFile('envilder.json')
+  .withAllowedVaultHosts('.vault.contoso.internal')
+  .resolve();`} />
+        <p class="note">{t.docs.sdkVaultHostsNote}</p>
 
         <h3>{t.docs.sdkNodejsEnvLoading}</h3>
         <p>{t.docs.sdkNodejsEnvLoadingDesc}</p>

@@ -1221,6 +1221,11 @@ export const es: Translations = {
     sdkDotnetFluent: 'Constructor fluido con sobreescrituras',
     sdkDotnetFluentDesc:
       'Sobreescribe la configuración del proveedor de forma programática con la API fluida:',
+    sdkVaultHostsTitle: 'Hosts de Key Vault personalizados',
+    sdkVaultHostsDesc:
+      'Los SDK solo envían credenciales de Azure a una URL de vault https:// en un host de Key Vault: .vault.azure.net, .vault.azure.cn, .vault.usgovcloudapi.net o .vault.microsoftazure.de, la misma regla que aplica la CLI. Cualquier otra vaultUrl falla antes de usar ninguna credencial, así que un archivo de mapeo no puede enviar tus credenciales a un host que no controlas. Para un endpoint privado en otro dominio, o un emulador como LocalStack, añade el sufijo del host con el builder. Los hosts adicionales se suman a los predeterminados.',
+    sdkVaultHostsNote:
+      'Añade solo hosts que controles. Para esos hosts, el SDK también desactiva la comprobación del recurso del challenge del cliente de Key Vault, porque el challenge indica el recurso de la nube pública y nunca coincide con un host personalizado.',
     sdkDotnetEnvLoading: 'Carga basada en entorno',
     sdkDotnetEnvLoadingDesc:
       'Enruta la carga de secretos según tu entorno actual. Cada entorno mapea a su archivo de secretos:',
