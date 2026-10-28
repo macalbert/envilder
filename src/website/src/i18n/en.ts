@@ -1171,7 +1171,7 @@ export const en: Translations = {
       'This is a warning, not a failure: the step still succeeds, with fewer secrets in the summary than in the map. In a new .env file the variable is left out. If the file already existed (committed, cached or written by an earlier step), its old value is kept, so delete the file before the action when a stale value must not survive. Check the name, the region and, on Azure, the converted name. If a missing value must stop the deploy, check for it in a later step.',
     ghaErrVaultUrlTitle: 'Azure vault URL missing',
     ghaErrVaultUrlFix:
-      'Set the vault-url input or $config.vaultUrl in the map file. It must be an https URL ending in .vault.azure.net, or the equivalent domain of a sovereign cloud.',
+      'Set the vault-url input or $config.vaultUrl in the map file. Use the vault URI shown in the Azure portal, for example https://my-vault.vault.azure.net.',
     ghaErrAzureDeniedTitle: 'Access denied on Azure Key Vault',
     ghaErrAzureDeniedFix:
       "azure/login worked but the identity has no data-plane role on the vault. Assign Key Vault Secrets User on the vault and wait a few minutes, since role assignments take time to propagate. Vaults that use access policies report instead that the identity doesn't have secrets get permission.",

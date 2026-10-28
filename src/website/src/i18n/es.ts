@@ -1184,7 +1184,7 @@ export const es: Translations = {
       'Es un aviso, no un error: el paso termina bien, con menos secretos en el resumen que en el mapeo. En un archivo .env nuevo la variable queda fuera. Si el archivo ya existía (en el repositorio, en caché o escrito por un paso anterior), se conserva el valor antiguo, así que borra el archivo antes de la Action cuando un valor obsoleto no deba sobrevivir. Revisa el nombre, la región y, en Azure, el nombre convertido. Si un valor que falta debe detener el despliegue, compruébalo en un paso posterior.',
     ghaErrVaultUrlTitle: 'Falta la URL del vault de Azure',
     ghaErrVaultUrlFix:
-      'Informa el input vault-url o $config.vaultUrl en el archivo de mapeo. Debe ser una URL https que termine en .vault.azure.net, o el dominio equivalente de una nube soberana.',
+      'Informa el input vault-url o $config.vaultUrl en el archivo de mapeo. Usa el URI del vault que muestra el portal de Azure, por ejemplo https://my-vault.vault.azure.net.',
     ghaErrAzureDeniedTitle: 'Acceso denegado en Azure Key Vault',
     ghaErrAzureDeniedFix:
       'azure/login ha funcionado pero la identidad no tiene ningún rol de plano de datos sobre el vault. Asigna Key Vault Secrets User sobre el vault y espera unos minutos, porque las asignaciones de rol tardan en propagarse. Los vaults con directivas de acceso indican en cambio que la identidad no tiene el permiso get de secretos.',

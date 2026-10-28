@@ -1183,7 +1183,7 @@ export const ca: Translations = {
       "És un avís, no un error: el pas acaba bé, amb menys secrets al resum que al mapeig. En un fitxer .env nou la variable queda fora. Si el fitxer ja existia (al repositori, a la memòria cau o escrit per un pas anterior), es conserva el valor antic, així que esborra el fitxer abans de l'Action quan un valor obsolet no hagi de sobreviure. Revisa el nom, la regió i, a Azure, el nom convertit. Si un valor que falta ha d'aturar el desplegament, comprova'l en un pas posterior.",
     ghaErrVaultUrlTitle: "Falta l'URL del vault d'Azure",
     ghaErrVaultUrlFix:
-      "Informa l'input vault-url o $config.vaultUrl al fitxer de mapeig. Ha de ser una URL https acabada en .vault.azure.net, o el domini equivalent d'un núvol sobirà.",
+      "Informa l'input vault-url o $config.vaultUrl al fitxer de mapeig. Fes servir l'URI del vault que mostra el portal d'Azure, per exemple https://my-vault.vault.azure.net.",
     ghaErrAzureDeniedTitle: 'Accés denegat a Azure Key Vault',
     ghaErrAzureDeniedFix:
       "azure/login ha funcionat però la identitat no té cap rol de pla de dades sobre el vault. Assigna Key Vault Secrets User sobre el vault i espera uns minuts, perquè les assignacions de rol triguen a propagar-se. Els vaults amb polítiques d'accés diuen en canvi que la identitat no té el permís get de secrets.",

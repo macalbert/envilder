@@ -8,10 +8,11 @@
 
 ### Security
 
-* **Accepted risk: credentials follow the vault URL in the map file**: The
-  Azure credential the workflow provides is sent to whatever host
-  `$config.vaultUrl` names. The map file lives in the same repository as the
-  workflow, so review changes to it like any other code change
+* **Accepted risk: credentials follow the vault URL**: The Azure credential
+  the workflow provides is sent to whatever host the `vault-url` input or
+  `$config.vaultUrl` names, and the input overrides the map file. Both live
+  in the same repository as the workflow, so review changes to the map file
+  and to workflow files like any other code change
 
 ---
 
