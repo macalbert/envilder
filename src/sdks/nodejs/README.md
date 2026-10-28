@@ -70,6 +70,8 @@ emulator, add its host suffix with the builder:
 
 ```typescript
 const secrets = await Envilder.fromMapFile('envilder.json')
+  .withProvider(SecretProviderType.Azure)
+  .withVaultUrl('https://my-vault.vault.contoso.internal')
   .withAllowedVaultHosts('.vault.contoso.internal')
   .resolve();
 ```

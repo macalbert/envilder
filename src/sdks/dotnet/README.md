@@ -72,6 +72,8 @@ another domain, or an emulator, add its host suffix with the builder (or set
 
 ```csharp
 var secrets = Env.FromMapFile("envilder.json")
+    .WithProvider(SecretProviderType.Azure)
+    .WithVaultUrl("https://my-vault.vault.contoso.internal")
     .WithAllowedVaultHosts(".vault.contoso.internal")
     .Resolve();
 ```

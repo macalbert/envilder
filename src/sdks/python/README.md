@@ -74,6 +74,8 @@ emulator, add its host suffix with the builder:
 ```python
 secrets = (
     Envilder.from_map_file('envilder.json')
+    .with_provider(SecretProviderType.AZURE)
+    .with_vault_url('https://my-vault.vault.contoso.internal')
     .with_allowed_vault_hosts('.vault.contoso.internal')
     .resolve()
 )
