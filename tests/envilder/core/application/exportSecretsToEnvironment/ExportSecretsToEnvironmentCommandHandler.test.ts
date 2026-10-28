@@ -113,6 +113,34 @@ describe('ExportSecretsToEnvironmentCommandHandler', () => {
     expect(logged).not.toContain(API_KEY_VALUE);
   });
 
+  it('Should_FlushMasksBeforeExporting_When_SecretsResolve', async () => {
+    // Arrange
+    const command = ExportSecretsToEnvironmentCommand.create(MAP_PATH);
+
+    // Act
+    await sut.handle(command);
+
+    // Assert
+    expect(mockSecretMasker.flush).toHaveBeenCalledTimes(1);
+    expect(mockSecretMasker.flush.mock.invocationCallOrder[0]).toBeLessThan(
+      mockExporter.export.mock.invocationCallOrder[0],
+    );
+  });
+
+  it('Should_ExportNothing_When_MaskRegistrationFails', async () => {
+    // Arrange
+    const writeError = new Error('EPIPE');
+    mockSecretMasker.flush.mockRejectedValue(writeError);
+    const command = ExportSecretsToEnvironmentCommand.create(MAP_PATH);
+
+    // Act
+    const actual = await sut.handle(command).catch((error: unknown) => error);
+
+    // Assert
+    expect(actual).toBe(writeError);
+    expect(mockExporter.export).not.toHaveBeenCalled();
+  });
+
   it('Should_ExportNothing_When_ASecretIsMissing', async () => {
     // Arrange
     secrets[API_KEY_PATH] = undefined;

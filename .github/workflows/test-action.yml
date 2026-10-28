@@ -19,6 +19,9 @@ on:
       - ".github/workflows/test-action.yml"
       - "github-action/action.yml"
       - "src/envilder/apps/gha/**"
+      - "src/envilder/apps/shared/**"
+      - "src/envilder/core/**"
+      - "scripts/build-github-action.mjs"
       - "tests/envilder/apps/gha/**"
       - "e2e/gha.test.ts"
 
@@ -105,7 +108,7 @@ jobs:
             echo "❌ TOKEN_SECRET was not exported!"
             exit 1
           fi
-          echo "✅ TOKEN_SECRET is available: $TOKEN_SECRET"
+          echo "✅ TOKEN_SECRET is available"
           if [ -n "$(git status --porcelain)" ]; then
             echo "❌ The export left files in the workspace:"
             git status --porcelain

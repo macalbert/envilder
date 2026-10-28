@@ -17,9 +17,10 @@ the secrets, or write a `.env` file when a tool needs one.
 
 - **Job environment.** The action appends the secrets to the runner's `GITHUB_ENV` file, and
   the runner sets them in the environment of **every step after it in the same job**, including
-  third-party actions. Steps read them as normal variables (`process.env.DB_PASSWORD`,
-  `$DB_PASSWORD`, `${{ env.DB_PASSWORD }}`). Other jobs and Docker containers do not inherit
-  them.
+  third-party actions, Docker container actions and steps running in a job `container:`. Steps
+  read them as normal variables (`process.env.DB_PASSWORD`, `$DB_PASSWORD`,
+  `${{ env.DB_PASSWORD }}`). Other jobs do not get them, and neither does a container you start
+  yourself with `docker run` unless you pass them (`docker run -e DB_PASSWORD ...`).
 - **Command.** The action runs the command with `bash` (like a `run:` step) and the secrets in
   its environment, and ends the step with the command's exit code. The secrets exist **only in
   that process**: they are not exported, so later steps never see them.
@@ -29,10 +30,11 @@ the secrets, or write a `.env` file when a tool needs one.
 Job environment and command are fail-closed: if any secret is missing or empty, the step fails
 and nothing is exported or passed to the command.
 
-Not writing a `.env` file avoids accidental leaks (artifacts, caches, Docker build contexts,
-commits, files left on self-hosted runners). It does not protect against malicious code running
-in the same job, which can read environment variables as easily as a file. For the smallest
-exposure, use `command`.
+Because the action writes no `.env` file, there is no secrets file to leak by accident through
+artifacts, caches, Docker build contexts, commits or files left on self-hosted runners. Later
+tools can still write the variables to files, and it does not protect against malicious code
+running in the same job, which can read environment variables as easily as a file. For the
+smallest exposure, use `command`.
 
 ## Prerequisites
 

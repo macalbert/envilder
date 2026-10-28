@@ -131,13 +131,16 @@ the workflow file.
 
 How it works: the action appends the secrets to the runner's `GITHUB_ENV`
 file, and the runner injects them into the environment of each later step.
-Nothing is written to the workspace, so the secrets cannot end up in an
-uploaded artifact, a cache, a Docker build context, or a commit by accident.
+The action itself writes no `.env` file to the workspace, so there is no
+secrets file for an artifact, a cache, a Docker build context or a commit to
+pick up. Later tools can still write the variables to files that end up in one
+of those, so treat build and test outputs as you would without Envilder.
 
 Scope: **the whole job**, from the next step on. That includes third-party
-actions used later in the job. Other jobs do not get them: each job that needs
-secrets runs the action again. Docker containers do not inherit them either:
-pass them explicitly, for example `docker run -e DB_PASSWORD ...`.
+actions used later in the job, Docker container actions, and steps running in a
+job `container:`. Other jobs do not get them: each job that needs secrets runs
+the action again. A container you start yourself with `docker run` does not
+inherit them: pass them explicitly, for example `docker run -e DB_PASSWORD ...`.
 
 ### 🚀 Command: secrets only for one process
 

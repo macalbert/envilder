@@ -15,7 +15,7 @@ import type { ExportSecretsToEnvironmentCommand } from './ExportSecretsToEnviron
  * job), without writing a `.env` file.
  *
  * Fail-closed like exec mode: nothing is exported when a secret is missing,
- * empty or unreadable.
+ * empty or unreadable, or when a value could not be registered for masking.
  */
 @injectable()
 export class ExportSecretsToEnvironmentCommandHandler {
@@ -28,7 +28,7 @@ export class ExportSecretsToEnvironmentCommandHandler {
     variableStore: IVariableStore,
     @inject(TYPES.ILogger) private readonly logger: ILogger,
     @inject(TYPES.ISecretMasker)
-    secretMasker: ISecretMasker,
+    private readonly secretMasker: ISecretMasker,
     @inject(TYPES.IProcessContext)
     processContext: IProcessContext,
     @inject(TYPES.IEnvironmentExporter)
@@ -45,6 +45,9 @@ export class ExportSecretsToEnvironmentCommandHandler {
 
   async handle(command: ExportSecretsToEnvironmentCommand): Promise<void> {
     const secrets = await this.requiredSecrets.resolve(command.mapPath);
+    // Later steps print whatever they like: export only once every value is
+    // registered for masking, and nothing when a registration failed.
+    await this.secretMasker.flush();
     await this.environmentExporter.export(secrets);
     this.logger.info(
       ExportSecretsToEnvironmentCommandHandler.buildSummary(
