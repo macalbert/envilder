@@ -703,8 +703,11 @@ const execGhaWorkflow = `permissions:
   contents: read
 
 steps:
-  - uses: actions/checkout@v5
-  - uses: aws-actions/configure-aws-credentials@v5
+  - uses: actions/checkout@v7
+  - uses: actions/setup-node@v7
+    with:
+      node-version: "22.x"
+  - uses: aws-actions/configure-aws-credentials@v6
     with:
       role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole
       aws-region: us-east-1
