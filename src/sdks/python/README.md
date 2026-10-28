@@ -72,6 +72,8 @@ your credentials to a host you do not control. For a private endpoint on another
 emulator, add its host suffix with the builder:
 
 ```python
+from envilder import Envilder, SecretProviderType
+
 secrets = (
     Envilder.from_map_file('envilder.json')
     .with_provider(SecretProviderType.AZURE)

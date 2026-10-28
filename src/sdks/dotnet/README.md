@@ -71,6 +71,8 @@ another domain, or an emulator, add its host suffix with the builder (or set
 `EnvilderOptions.AllowedVaultHosts` in the options you pass to `AddEnvilder`):
 
 ```csharp
+using Envilder;
+
 var secrets = Env.FromMapFile("envilder.json")
     .WithProvider(SecretProviderType.Azure)
     .WithVaultUrl("https://my-vault.vault.contoso.internal")

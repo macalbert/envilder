@@ -69,6 +69,8 @@ your credentials to a host you do not control. For a private endpoint on another
 emulator, add its host suffix with the builder:
 
 ```typescript
+import { Envilder, SecretProviderType } from '@envilder/sdk';
+
 const secrets = await Envilder.fromMapFile('envilder.json')
   .withProvider(SecretProviderType.Azure)
   .withVaultUrl('https://my-vault.vault.contoso.internal')
