@@ -45,7 +45,7 @@ after `validate`; options written before it are rejected.
    and, when the parser gives one, the line and column. The text around the
    error is never quoted, because it can be a secret pasted into the file.
 2. **The document matches the map file schema**
-   ([`spec/map-file.v1.json`](../spec/map-file.v1.json)):
+   ([`map-file.v1.json`](https://envilder.com/schema/map-file.v1.json)):
    - the root is a JSON object;
    - `$schema` is an absolute URI, and no other key starts with `$` besides
      `$schema` and `$config`;
