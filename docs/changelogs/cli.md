@@ -5,6 +5,30 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [0.18.0] - 2026-10-28
+
+### Changed
+
+* **Azure Key Vault URLs are no longer checked by host**: The CLI rejected a
+  `vaultUrl` that did not use `https://` or whose host did not end in an
+  Azure Key Vault domain, and read `ENVILDER_ALLOWED_VAULT_HOSTS` to widen
+  that list. The check and the variable are gone: the URL goes to the Azure
+  Key Vault client as written, with the client's default challenge resource
+  verification, as in the Node.js, Python and .NET SDKs. A malformed or
+  `http://` URL now fails with the Azure client's own error
+
+### Security
+
+* **Accepted risk: credentials follow the vault URL in the map file**:
+  `DefaultAzureCredential` requests a Key Vault token for whatever host
+  `vaultUrl` names, so a map file that points at another host sends that
+  token there. The map file is versioned with the code it configures, and
+  whoever can change it can already change the application, so a host
+  allowlist adds configuration without a matching security gain. Review
+  changes to `$config.vaultUrl` and `--vault-url` like any other code change
+
+---
+
 ## [0.17.1] - 2026-10-27
 
 ### Fixed

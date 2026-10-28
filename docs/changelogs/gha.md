@@ -1,3 +1,20 @@
+## [0.18.0] - 2026-10-28
+
+### Changed
+
+* **Azure Key Vault URLs are no longer checked by host**: The Action shares
+  the CLI's change: `vaultUrl` goes to the Azure Key Vault client as written,
+  without the `https://` and Azure-domain checks, as in the SDKs
+
+### Security
+
+* **Accepted risk: credentials follow the vault URL in the map file**: The
+  Azure credential the workflow provides is sent to whatever host
+  `$config.vaultUrl` names. The map file lives in the same repository as the
+  workflow, so review changes to it like any other code change
+
+---
+
 ## [0.17.1] - 2026-10-27
 
 ### Fixed

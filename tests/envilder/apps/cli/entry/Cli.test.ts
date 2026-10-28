@@ -237,40 +237,6 @@ describe('Cli', () => {
     },
   );
 
-  it('Should_PassAllowedVaultHosts_When_EnvVarIsSet', async () => {
-    // Arrange
-    process.env.ENVILDER_ALLOWED_VAULT_HOSTS = 'localhost,custom.host';
-    const infraSpy = vi.spyOn(Startup.prototype, 'configureInfrastructure');
-    process.argv = ['node', 'cli.js', '--map', 'map.json', '--envfile', '.env'];
-
-    // Act
-    await main();
-
-    // Assert
-    expect(infraSpy).toHaveBeenCalledWith(
-      expect.any(Object),
-      expect.objectContaining({
-        allowedVaultHosts: ['localhost', 'custom.host'],
-        disableChallengeResourceVerification: true,
-      }),
-    );
-    delete process.env.ENVILDER_ALLOWED_VAULT_HOSTS;
-  });
-
-  it('Should_NotPassInfraOptions_When_EnvVarIsNotSet', async () => {
-    // Arrange
-    delete process.env.ENVILDER_ALLOWED_VAULT_HOSTS;
-    const infraSpy = vi.spyOn(Startup.prototype, 'configureInfrastructure');
-    process.argv = ['node', 'cli.js', '--map', 'map.json', '--envfile', '.env'];
-
-    // Act
-    await main();
-
-    // Assert
-    expect(infraSpy).toHaveBeenCalled();
-    expect(infraSpy).toHaveBeenCalledWith(expect.any(Object), {});
-  });
-
   it('Should_UseDefaultMapFile_When_MapOptionIsOmittedAndEnvilderJsonExists', async () => {
     // Arrange
     const { existsSync } = await import('node:fs');
@@ -403,7 +369,6 @@ describe('Cli', () => {
         provider: 'azure',
         vaultUrl: 'https://test.vault.azure.net',
       }),
-      expect.any(Object),
     );
   });
 
@@ -669,7 +634,7 @@ describe('Cli', () => {
 
       // Assert
       expect(readMapFileConfig).not.toHaveBeenCalled();
-      expect(infraSpy).toHaveBeenCalledWith({}, expect.any(Object));
+      expect(infraSpy).toHaveBeenCalledWith({});
       expect(fromCliOptionsSpy.mock.calls[0][0].map).toBeUndefined();
       expect(fromCliOptionsSpy.mock.calls[0][0].mapTarget).toBeUndefined();
     });
@@ -693,10 +658,10 @@ describe('Cli', () => {
       await main();
 
       // Assert
-      expect(infraSpy).toHaveBeenCalledWith(
-        { provider: 'azure', vaultUrl: 'https://flag.vault.azure.net' },
-        expect.any(Object),
-      );
+      expect(infraSpy).toHaveBeenCalledWith({
+        provider: 'azure',
+        vaultUrl: 'https://flag.vault.azure.net',
+      });
     });
 
     it('Should_StillReadMapFile_When_NoMapUpdateIsGivenOutsideSinglePush', async () => {

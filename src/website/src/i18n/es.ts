@@ -566,7 +566,7 @@ export const es: Translations = {
       fieldProfile:
         'Perfil con nombre de ~/.aws/config o ~/.aws/credentials. Solo AWS: con azure se ignora y se muestra un aviso.',
       fieldVaultUrl:
-        'URL del Key Vault. Obligatoria para azure. Debe usar https:// y un host de Key Vault (.vault.azure.net, .vault.azure.cn, .vault.usgovcloudapi.net o .vault.microsoftazure.de). aws la ignora.',
+        'URL del Key Vault, por ejemplo https://my-vault.vault.azure.net. Obligatoria para azure. aws la ignora.',
       configSdkNote:
         'Los SDK de runtime leen los mismos campos, pero pueden rechazar combinaciones que la CLI solo avisa, como profile con azure. Cada página de SDK lista sus propios errores.',
       providersTitle: 'Identificadores de secretos por proveedor',
@@ -626,10 +626,6 @@ export const es: Translations = {
       errProviderFix: 'Usa aws o azure en $config.provider o en --provider.',
       errVaultMissingFix:
         'Define $config.vaultUrl, o pasa --vault-url, cuando el proveedor sea azure.',
-      errVaultHttpsFix:
-        'Usa la URL https:// que aparece en la vista general del vault.',
-      errVaultHostFix:
-        'Usa el URI del vault que da Azure, por ejemplo https://my-vault.vault.azure.net, no un dominio propio.',
       errProfileAzureFix:
         'Es un aviso, no un error. Quita profile de $config, o no pases --profile, cuando uses azure.',
       errCaseFix:

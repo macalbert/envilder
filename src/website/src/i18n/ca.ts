@@ -565,7 +565,7 @@ export const ca: Translations = {
       fieldProfile:
         "Perfil amb nom de ~/.aws/config o ~/.aws/credentials. Només AWS: amb azure s'ignora i es mostra un avís.",
       fieldVaultUrl:
-        'URL del Key Vault. Obligatòria per a azure. Ha de fer servir https:// i un host de Key Vault (.vault.azure.net, .vault.azure.cn, .vault.usgovcloudapi.net o .vault.microsoftazure.de). aws la ignora.',
+        'URL del Key Vault, per exemple https://my-vault.vault.azure.net. Obligatòria per a azure. aws la ignora.',
       configSdkNote:
         "Els SDK de runtime llegeixen els mateixos camps, però poden rebutjar combinacions de les quals la CLI només avisa, com profile amb azure. Cada pàgina d'SDK llista els seus propis errors.",
       providersTitle: 'Identificadors de secrets per proveïdor',
@@ -625,10 +625,6 @@ export const ca: Translations = {
         'Fes servir aws o azure a $config.provider o a --provider.',
       errVaultMissingFix:
         'Defineix $config.vaultUrl, o passa --vault-url, quan el proveïdor sigui azure.',
-      errVaultHttpsFix:
-        'Fes servir la URL https:// que apareix a la visió general del vault.',
-      errVaultHostFix:
-        "Fes servir l'URI del vault que dona Azure, per exemple https://my-vault.vault.azure.net, no un domini propi.",
       errProfileAzureFix:
         'És un avís, no un error. Treu profile de $config, o no passis --profile, quan facis servir azure.',
       errCaseFix:

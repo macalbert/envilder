@@ -12,7 +12,6 @@ import { TYPES } from '../../core/types.js';
 import {
   configureApplicationServices,
   configureInfrastructureServices,
-  type InfrastructureOptions,
 } from '../shared/ContainerConfiguration.js';
 
 export class Startup {
@@ -60,11 +59,8 @@ export class Startup {
     return this;
   }
 
-  configureInfrastructure(
-    config?: MapFileConfig,
-    options?: InfrastructureOptions,
-  ): this {
-    configureInfrastructureServices(this.container, config, options);
+  configureInfrastructure(config?: MapFileConfig): this {
+    configureInfrastructureServices(this.container, config);
     return this;
   }
 

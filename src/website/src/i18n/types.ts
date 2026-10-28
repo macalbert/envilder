@@ -390,8 +390,6 @@ export interface MapFileReferenceTranslations {
   errInvalidJsonFix: string;
   errProviderFix: string;
   errVaultMissingFix: string;
-  errVaultHttpsFix: string;
-  errVaultHostFix: string;
   errProfileAzureFix: string;
   errCaseFix: string;
   relatedTitle: string;

@@ -11,32 +11,25 @@ import type { ISecretMasker } from '../../core/domain/ports/ISecretMasker.js';
 import type { ISecretProvider } from '../../core/domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../core/domain/ports/IVariableStore.js';
 import { createAwsSecretProvider } from '../../core/infrastructure/aws/AwsSecretProviderFactory.js';
-import {
-  type AzureProviderOptions,
-  createAzureSecretProvider,
-} from '../../core/infrastructure/azure/AzureSecretProviderFactory.js';
+import { createAzureSecretProvider } from '../../core/infrastructure/azure/AzureSecretProviderFactory.js';
 import { NoOpSecretMasker } from '../../core/infrastructure/github/NoOpSecretMasker.js';
 import { ConsoleLogger } from '../../core/infrastructure/logger/ConsoleLogger.js';
 import { FileVariableStore } from '../../core/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../core/types.js';
 
-export type InfrastructureOptions = AzureProviderOptions;
-
 type ProviderFactory = (
   config: MapFileConfig,
-  options: InfrastructureOptions,
   logger: ILogger,
 ) => ISecretProvider;
 
 const providerFactories: Record<string, ProviderFactory> = {
-  aws: (config, _options, logger) => createAwsSecretProvider(config, logger),
-  azure: (config, options) => createAzureSecretProvider(config, options),
+  aws: (config, logger) => createAwsSecretProvider(config, logger),
+  azure: (config) => createAzureSecretProvider(config),
 };
 
 export function configureInfrastructureServices(
   container: Container,
   config: MapFileConfig = {},
-  options: InfrastructureOptions = {},
 ): void {
   if (!container.isBound(TYPES.ILogger)) {
     container.bind<ILogger>(TYPES.ILogger).to(ConsoleLogger).inSingletonScope();
@@ -76,7 +69,7 @@ export function configureInfrastructureServices(
         ` ${Object.keys(providerFactories).join(', ')}`,
     );
   }
-  const secretProvider = factory(config, options, logger);
+  const secretProvider = factory(config, logger);
 
   container
     .bind<ISecretProvider>(TYPES.ISecretProvider)

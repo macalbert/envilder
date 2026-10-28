@@ -231,11 +231,9 @@ export async function main() {
             }),
         };
 
-        const infraOptions = buildInfrastructureOptions();
-
         serviceProvider = Startup.build()
           .configureServices()
-          .configureInfrastructure(config, infraOptions)
+          .configureInfrastructure(config)
           .create();
 
         if (isPushSingle) {
@@ -560,7 +558,7 @@ async function resolveSecretsAndRun(
   const container = Startup.build()
     .configureExec(createExecSecretMasker())
     .configureServices()
-    .configureInfrastructure(config, buildInfrastructureOptions())
+    .configureInfrastructure(config)
     .create();
   const dispatcher = container.get<DispatchActionCommandHandler>(
     TYPES.DispatchActionCommandHandler,
@@ -655,16 +653,6 @@ function createExecSecretMasker(): ISecretMasker {
   return process.env.GITHUB_ACTIONS === 'true'
     ? new GitHubActionsSecretMasker({ stream: process.stderr })
     : new NoOpSecretMasker();
-}
-
-function buildInfrastructureOptions(): Record<string, unknown> {
-  const infraOptions: Record<string, unknown> = {};
-  const extraHosts = process.env.ENVILDER_ALLOWED_VAULT_HOSTS;
-  if (extraHosts) {
-    infraOptions.allowedVaultHosts = extraHosts.split(',').map((h) => h.trim());
-    infraOptions.disableChallengeResourceVerification = true;
-  }
-  return infraOptions;
 }
 
 /**
