@@ -30,7 +30,8 @@ function toInertLine(message: string): string {
       .replace(/\n/g, '\\n')
       // Legacy `##[command]` syntax is recognized anywhere in a line.
       .replace(/##\[/g, '#\\#[')
-      // `::command::` is recognized at the start, after leading whitespace.
-      .replace(/^(\s*)::/, '$1\\::')
+      // `::command::` is recognized at the start, after whitespace as .NET
+      // TrimStart sees it, which also includes NEL (U+0085).
+      .replace(/^([\s\u0085]*)::/, '$1\\::')
   );
 }

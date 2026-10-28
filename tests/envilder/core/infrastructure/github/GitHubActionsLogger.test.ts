@@ -10,6 +10,11 @@ function createInnerLogger(): ILogger {
   };
 }
 
+/** Mirrors .NET `TrimStart()`, which also strips U+0085 (NEL). */
+function trimStartLikeRunner(line: string): string {
+  return line.replace(/^[\s\u0085]+/, '');
+}
+
 describe('GitHubActionsLogger', () => {
   it.each(['info', 'warn', 'error'] as const)(
     'Should_DelegateUnchanged_When_%sMessageIsPlainText',
@@ -44,21 +49,23 @@ describe('GitHubActionsLogger', () => {
     },
   );
 
-  it.each(['::stop-commands::token', '   ::warning::forged'])(
-    'Should_NotStartWithWorkflowCommand_When_MessageIs_%s',
-    (message) => {
-      // Arrange
-      const inner = createInnerLogger();
-      const sut = new GitHubActionsLogger(inner);
+  it.each([
+    '::stop-commands::token',
+    '   ::warning::forged',
+    // .NET's TrimStart, which the runner uses, also strips NEL.
+    '\u0085::stop-commands::token',
+  ])('Should_NotStartWithWorkflowCommand_When_MessageIs_%s', (message) => {
+    // Arrange
+    const inner = createInnerLogger();
+    const sut = new GitHubActionsLogger(inner);
 
-      // Act
-      sut.error(message);
+    // Act
+    sut.error(message);
 
-      // Assert
-      const [actual] = vi.mocked(inner.error).mock.calls[0];
-      expect(actual.trimStart().startsWith('::')).toBe(false);
-    },
-  );
+    // Assert
+    const [actual] = vi.mocked(inner.error).mock.calls[0];
+    expect(trimStartLikeRunner(actual).startsWith('::')).toBe(false);
+  });
 
   it('Should_NeutralizeLegacyWorkflowCommand_When_MessageContainsIt', () => {
     // Arrange
