@@ -21,6 +21,8 @@ describe('parseEnvFile', () => {
     ['line separator in key', `SAFE${LINE_SEPARATOR}INJECTED=1`],
     ['__proto__', '__proto__=1\nA=2'],
     ['unparseable lines', 'LOST NAME=1\nA=2\nnot an assignment'],
+    ['blank and indented lines', '\n\nA=1\n \t\n\r\n  export B=2\n\n\tC=3\n'],
+    ['line separators as blanks', `${LINE_SEPARATOR}${LINE_SEPARATOR}A=1`],
   ])('Should_MatchDotenv_When_KeysHaveNoSlash (%s)', (_name, content) => {
     // Act
     const actual = parseEnvFile(content);
