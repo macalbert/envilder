@@ -646,6 +646,315 @@ export const en: Translations = {
       relatedExec: 'envilder exec reference',
       relatedAzure: 'Azure Key Vault setup',
     },
+    pullReference: {
+      tabAws: 'AWS SSM',
+      tabAzure: 'Azure Key Vault',
+      prereqTitle: 'Prerequisites',
+      prereqItems: [
+        'The envilder CLI. This page describes version 0.17.',
+        'A map file, envilder.json by default, that maps each variable to a secret identifier.',
+        'Read access to every mapped secret: ssm:GetParameter on AWS (plus kms:Decrypt when a parameter uses a customer-managed key), or the Get secret permission on Azure Key Vault, for example through the Key Vault Secrets User role.',
+        'Credentials the provider SDK can find: an AWS profile, SSO session or environment variables, or an Azure sign-in such as az login or a managed identity.',
+      ],
+      synopsisTitle: 'Synopsis',
+      synopsisDesc:
+        'Pull is the default mode: there is no pull subcommand. Run envilder with no options to read envilder.json and write .env in the current directory. Adding --push, or --key, --value and --secret-path, switches to push mode, and envilder exec is a separate subcommand.',
+      optionsTitle: 'Options',
+      thOption: 'Option',
+      thDefault: 'Default',
+      thDescription: 'Description',
+      optMapDefault: 'envilder.json in the current directory',
+      optMap:
+        'Map file to read. The run stops if the file is missing or the value is empty.',
+      optEnvfile:
+        'File to write. Created when it does not exist, updated in place when it does. Its directory must already exist.',
+      optProviderDefault: '$config.provider, then aws',
+      optProvider:
+        'aws or azure, in any case. Any other value stops the run before a secret is read.',
+      optVault:
+        'Key Vault URL. Required with azure. It must use https:// and a Key Vault host.',
+      optProfileDefault:
+        '$config.profile, then the default AWS credential chain',
+      optProfile:
+        'Named AWS profile. With azure it is ignored and a warning is printed.',
+      optionsNote:
+        "An option that takes a path or a name never accepts a value that starts with -. In envilder --map --envfile=.env, --map has no value, so the run stops with error: option '--map <path>' argument missing instead of reading --envfile=.env as a path. envilder --help lists every option.",
+      configTitle: 'How $config and flags combine',
+      configDesc:
+        'Each setting comes from the first source that defines it: the flag, then $config in the map file, then the default. A flag replaces only the field it names, so the other $config fields still apply. Take this production map file:',
+      configRun:
+        'The first command uses the settings in the file. The second overrides one field and keeps the rest:',
+      configAwsNote:
+        'The second command reads the same parameters with the ci-readonly profile. The provider still comes from $config.',
+      configAzureNote:
+        'The second command reads the same secret names from another vault. The provider still comes from $config.',
+      configLink: 'Full precedence rules in the map file reference',
+      exampleTitle: 'Example: update an existing .env',
+      exampleDesc:
+        'The map file declares four variables. In the vault, SENTRY_DSN does not exist and FEATURE_FLAG is empty. The project already has a .env file:',
+      exampleRun:
+        'Run envilder from the project root. Expected output with AWS:',
+      exampleOutputNote:
+        'With Azure the AWS identity line is not printed; the rest is the same. Values are masked: one longer than 10 characters shows its last 3, a shorter one is hidden entirely, and paths show their last 3 characters. The skipped lines are warnings on stderr; the rest goes to stdout.',
+      exampleResult: 'The .env file afterwards:',
+      envTitle: 'How an existing .env is updated',
+      envRules: [
+        'A mapped variable that is already in the file is replaced in place: same line, same inline comment, and the same quotes when they still hold the new value.',
+        'A line that already holds the right value is not rewritten, so a run with nothing new leaves the file byte for byte identical.',
+        'Lines the map file does not declare (LOG_LEVEL above), comments, blank lines, order and line endings are kept.',
+        'Variables that are not in the file yet are appended at the end. A new file ends with a line break.',
+        'A skipped secret keeps the value the file already had (SENTRY_DSN above). Envilder never removes a line.',
+        'Before writing, Envilder reads the result back the way dotenv does. If any value would be lost or changed, it writes nothing and stops with an error that names the variables, never their values.',
+      ],
+      envNote:
+        'Quoting, multiline values and the one value a .env file cannot hold are covered in',
+      envNoteLink: 'what a secret can contain',
+      envWarn:
+        'The .env file contains the real secret values. Add it to .gitignore and delete it when you no longer need it, or use envilder exec to avoid the file altogether.',
+      missingTitle: 'Missing, empty and failing secrets',
+      missingDesc:
+        'A secret that does not exist (ParameterNotFound in AWS SSM, 404 in Key Vault) or whose value is empty is skipped with a warning. The other secrets are still written, the summary counts only the resolved ones (2/4 above) and the exit code is 0.',
+      failDesc:
+        'Any other failure, such as access denied, missing credentials or a network error, stops the run. Envilder lists each affected variable with its masked path and the reason, leaves the .env file untouched and exits with 1:',
+      ssoDesc:
+        "When an AWS SSO session has expired and both stdin and stdout are a terminal, Envilder asks Run 'aws sso login --profile dev' now? [y/N]. If you accept and the login succeeds, it retries once. In CI, or if you decline, it prints the command to run and exits with 1. If a missing secret must also stop the run, use envilder exec: it never starts a command with an incomplete set of secrets.",
+      errorsTitle: 'Common errors',
+      thMessage: 'Message',
+      thFix: 'Fix',
+      errNoMapFix:
+        'Run envilder from the directory that holds envilder.json, or pass --map=path/to/file.json.',
+      errReadMapFix:
+        'The file given with --map does not exist or cannot be read. Relative paths start at the current directory.',
+      errJsonFix:
+        'Fix the JSON syntax of the map file. A trailing comma or a comment is the usual cause.',
+      errCredsFix:
+        'The AWS SDK found no credentials. Run aws configure or aws sso login, or pass --profile with a configured profile.',
+      errDeniedFix:
+        'The credentials work but cannot read that parameter. Allow ssm:GetParameter on its ARN, plus kms:Decrypt for a customer-managed key.',
+      errVaultFix:
+        'Add "vaultUrl": "https://<vault-name>.vault.azure.net" to $config, or pass --vault-url.',
+      errSsoFix:
+        'Run aws sso login --profile dev, then run envilder again. In a terminal Envilder offers to run the login for you.',
+      errRepresentFix:
+        'The value cannot be written to a .env file without changing it, and nothing was written. Read that secret with envilder exec or an SDK, or store it encoded (for example base64).',
+      relatedTitle: 'Related pages',
+      relatedMap:
+        'Map file reference: $config fields, validation rules and flag precedence',
+      relatedExec:
+        'envilder exec: run a command with the same secrets and no .env file',
+      relatedPush: 'Push mode: upload a .env file or a single secret',
+    },
+    pushReference: {
+      tabAws: 'AWS SSM',
+      tabAzure: 'Azure Key Vault',
+      prereqTitle: 'Prerequisites',
+      prereqItems: [
+        'The envilder CLI. This page describes version 0.17; single-secret push records the mapping since 0.16.',
+        'Write access to the target: ssm:PutParameter on AWS, or the Set secret permission on Azure Key Vault, for example through the Key Vault Secrets Officer role.',
+        'For --push, a map file and a .env file with the values. A single-secret push needs neither: it creates the map file when it is missing.',
+      ],
+      synopsisTitle: 'Synopsis',
+      synopsisDesc:
+        'Push has two forms. --push uploads values from a .env file. --key, --value and --secret-path together upload one secret; --push is optional with them. There is no push subcommand. --ssm-path is a deprecated alias of --secret-path and prints a warning.',
+      thOption: 'Option',
+      thDefault: 'Default',
+      thDescription: 'Description',
+      envTitle: 'Push a .env file',
+      envDesc:
+        'For each variable the map file declares, Envilder reads its value from the .env file and writes it to the mapped path. Variables in the .env file that the map file does not declare are ignored.',
+      optPush: 'Selects push mode. Required for this form.',
+      optEnvfile: 'File to read the values from.',
+      optMap: 'Map file that lists the variables to push and their paths.',
+      optShared:
+        'Same as in pull mode: each flag overrides one $config field, and the default provider is aws.',
+      envExample:
+        'With this map file and .env file, envilder --push writes two secrets and ignores LOG_LEVEL. Expected output with AWS (Azure prints the same lines without the identity line):',
+      envRules: [
+        'A mapped variable that is missing from the .env file is skipped with a warning. A missing .env file is not an error either: every variable is skipped and the run exits with 0.',
+        'Several variables can map to the same path only when they hold the same value. Otherwise Envilder stops before writing anything.',
+        'Secrets are written in parallel. Throttling errors are retried up to 5 times with backoff. Any other error stops the run with exit code 1, and secrets already written stay written.',
+      ],
+      singleTitle: 'Push a single secret',
+      singleDesc:
+        'Pass the variable name, the value and the secret path. Envilder writes the secret and records "NAME": "<path>" in the map file, so the next envilder or envilder exec resolves it. The value is never written to the map file.',
+      optKey: 'Variable name, recorded as the key in the map file.',
+      optValue: 'Value to store. It must not be empty.',
+      optSecretPath:
+        'Parameter name in AWS SSM, or the secret reference for Key Vault. Recorded as written.',
+      optMapSingle:
+        'Map file that records the mapping and provides $config. Created when missing; its directory must exist.',
+      optNoMapUpdate:
+        'Push without reading, creating or updating a map file. Provider and vault then come only from flags.',
+      singleExample:
+        'In a directory without a map file, push one secret. The command, its expected output and the map file it creates:',
+      singleAwsNote:
+        'aws is the default provider, so no $config is written. A --profile flag is never written either: the profile is a local credential choice.',
+      singleAzureNote:
+        'For Azure the new file records $config with provider and vaultUrl, so later runs need no flags. In the vault, the secret is named my-app-dev-api-key.',
+      mapRulesTitle: 'How the map file is updated',
+      mapRules: [
+        'No file: Envilder creates it. A file named envilder.json or envilder.*.json gets no $schema line, because editors already recognise it through SchemaStore; any other name gets one.',
+        'The variable is not in the file: the entry is appended, keeping the indentation and line endings of the file (✓ Added API_KEY to envilder.json).',
+        'The variable already maps to the same path: the file is not touched (✓ API_KEY already mapped in envilder.json, no changes).',
+        'The variable maps to another path: nothing is pushed and Envilder exits with 1.',
+        'The file targets another provider or vault than the push: the secret is pushed, the file is left as it is and a warning names both targets.',
+        'The map file is written before the secret. If the push fails, Envilder restores the previous file, or deletes the one it created, so the file never lists a secret that was not pushed.',
+      ],
+      historyTitle: '--value ends up in your shell history.',
+      historyDesc:
+        'It is a command-line argument: the shell saves it, and it is visible in the process list while the command runs. Use it for test values. For real secrets, push from a .env file with --push and delete the file afterwards.',
+      storeTitle: 'How values are stored',
+      storeAws:
+        'Every value is written with PutParameter as a SecureString, with overwrite enabled: a new parameter is created and an existing one gets a new version. Envilder passes no KMS key, so SSM uses the default key of the account.',
+      storeAzure:
+        "Every value is written with Set Secret, which creates the secret or adds a new version. The secret name is the path with its leading slashes removed and the other slashes turned into hyphens: /my-app/dev/api-key becomes my-app-dev-api-key. Nothing else changes, so a name Key Vault does not accept, for example one with _ or ., fails with Key Vault's own error. Two references that resolve to the same name in one run are an error.",
+      errorsTitle: 'Common errors',
+      thMessage: 'Message',
+      thFix: 'Fix',
+      errPartialFix:
+        'Pass all three options with a non-empty value, or use --push to upload a .env file.',
+      errConflictFix:
+        'Use the path the map file already records, edit the map file by hand, or add --no-map-update.',
+      errTargetFix:
+        'A warning: the secret was pushed but not recorded. Pass --map with a map file for that target, or align --provider and --vault-url with the file.',
+      errValuesFix:
+        'Give both variables the same value in the .env file, or map them to different paths. Nothing was pushed.',
+      errMissingVarFix:
+        'A warning: add the variable to the .env file, or pass --envfile with the right file.',
+      errMapDirFix:
+        'Create the directory, or pass a --map path inside an existing one. Nothing was pushed.',
+      errCollisionFix:
+        'Use one reference per Key Vault secret in the map file.',
+      errDeniedFix:
+        'The credentials work but cannot write that parameter. Allow ssm:PutParameter on its ARN.',
+      errVaultFix:
+        'With --no-map-update no map file is read: pass --provider=azure together with --vault-url.',
+      relatedTitle: 'Related pages',
+      relatedMap: 'Map file reference: $config fields and validation rules',
+      relatedPull: 'Pull mode: write the pushed secrets to a .env file',
+      relatedAzure:
+        'Azure Key Vault setup: roles and access policies for reading and writing secrets',
+    },
+    execReference: {
+      tabAws: 'AWS SSM',
+      tabAzure: 'Azure Key Vault',
+      prereqTitle: 'Prerequisites',
+      prereqItems: [
+        'The envilder CLI. This page describes version 0.17.',
+        'A map file and read access to every mapped secret, exactly as for pull mode.',
+        'The command to run, on your PATH or given with its path.',
+      ],
+      synopsisTitle: 'Synopsis',
+      separatorTitle: 'Where your command starts: the -- rule',
+      separatorDesc:
+        'Envilder options come first. Your command starts at the first argument that is not an Envilder option, or right after --. Everything after that is passed to it verbatim, even if it looks like an Envilder option. You only need -- when the command itself starts with -.',
+      sepComment1: '# Everything belongs to npm',
+      sepComment2: "# --map is Envilder's, the rest is npm's",
+      sepComment3: '# --map=x belongs to npm: it comes after the command',
+      sepComment4: '# Same as above, with an explicit separator',
+      optionsTitle: 'Options',
+      thOption: 'Option',
+      thDescription: 'Description',
+      thMessage: 'Message',
+      optMap: 'Path to the map file (default: envilder.json)',
+      optProfile: 'AWS CLI profile. Overrides $config.profile',
+      optProvider: 'aws or azure. Overrides $config.provider',
+      optVault: 'Azure Key Vault URL. Overrides $config.vaultUrl',
+      optionsOrderDesc:
+        'Envilder options go after exec, never before it. An option written before exec is rejected with exit code 125, and Envilder shows the corrected command:',
+      rejectedDesc:
+        'Exec mode never reads or writes a .env file and never pushes, so these options are rejected with exit code 125 before any provider call. An unknown option before your command is also an error, so a typo such as --mapp never reaches your command.',
+      exampleTitle: 'Example',
+      exampleDesc:
+        'The map file declares DB_PASSWORD and API_TOKEN, and the shell already exports a DB_PASSWORD of its own. Start the app through Envilder:',
+      outputDesc:
+        'All Envilder output goes to stderr, so stdout belongs to your command: envilder exec -- node print.js > out.json writes only its output. The summary names your command by program name only, because arguments can carry secrets. With a profile it reads (aws, profile=dev).',
+      exitTitle: 'Exit codes',
+      exitDesc:
+        "Exit codes follow GNU env and docker run, so you can tell an Envilder failure apart from your command's own exit code:",
+      thCode: 'Code',
+      thMeaning: 'Meaning',
+      exitChild: 'Your command exited with code n',
+      exitSignal:
+        'Your command was killed by signal n (for example, 137 for SIGKILL)',
+      exit125:
+        'Envilder failed before starting the command: bad options, missing command, no map file, unresolved secrets or expired credentials',
+      exit126:
+        'The command exists but the operating system refused to run it (for example, Permission denied)',
+      exit127: 'The command was not found',
+      exitNote: 'Pull and push modes exit with 1 on failure.',
+      failTitle: 'Fail-closed resolution',
+      failDesc:
+        'If any secret is missing, empty or unreadable (for example, access denied), the command does not start: Envilder lists the affected variables with masked paths and exits with 125. Pull mode, by contrast, skips a missing secret. Output when one secret does not exist and another is empty:',
+      failRules: [
+        'A secret value that contains a NUL byte is rejected, because an environment variable cannot hold one.',
+        'On Windows, a map file that declares two names differing only by case (API_KEY and api_key) is rejected before any provider call, because Windows treats them as one variable. On Linux and macOS both are kept.',
+        'A map file with no variables is not an error: Envilder prints Map file declares no variables. and starts the command with the inherited environment.',
+        'Values are resolved once, before the command starts. A later change in the vault does not reach a running command.',
+      ],
+      envTitle: 'Environment',
+      envDesc:
+        'Your command inherits the full environment of the shell that runs Envilder, plus every variable in the map file. The map file wins: when an inherited variable has the same name as a mapped one, your command sees the value from the provider, and Envilder prints the names (never the values) on stderr:',
+      envWindows:
+        'On Windows names are compared without case: an inherited Path and a mapped PATH are the same variable, the mapped value wins and the command gets a single entry. Values are passed byte for byte, with no quoting, escaping or expansion.',
+      noShellDesc:
+        "No shell is involved: arguments reach your command as a list. Your own shell still parses the line first, so an unquoted $DB_PASSWORD expands to your shell's value, not the secret, and an unquoted && runs outside envilder exec. For shell features, start a shell explicitly:",
+      ssoTitle: 'Expired AWS SSO sessions',
+      ssoDesc:
+        'When the AWS SSO session has expired and stdin and stderr are a terminal, Envilder offers to run aws sso login, then retries only the secret resolution: your command starts at most once. If you decline, the login fails or there is no terminal (in CI, for example), the exit code is 125. An error after the command has started is never retried.',
+      signalsTitle: 'Signals',
+      signalsDesc:
+        'stdin, stdout and stderr are inherited and the TTY is preserved, so REPLs and prompts work. Ctrl+C in a terminal reaches your command directly. SIGTERM and SIGHUP (from docker stop or Kubernetes, for example) are forwarded, and Envilder waits for the command to exit with no timeout of its own. Only the direct child receives them: a launcher such as npm must stop its own children.',
+      ciTitle: 'CI and GitHub Actions',
+      ciDesc:
+        'In CI, give the job cloud credentials first (for example with OIDC), then run the CLI in a run step. Only that step sees the secrets. The Envilder GitHub Action offers the same behavior through its command input.',
+      ghaDesc:
+        'When GITHUB_ACTIONS=true, Envilder registers every resolved value with GitHub log masking (::add-mask::) on stderr before your command starts, so values it prints are masked in the job log.',
+      ghaNote:
+        'Do not redirect the stderr of envilder exec away from the step log (2>/dev/null, for example): the runner reads the masks from it.',
+      scriptsTitle: 'package.json scripts',
+      scriptsDesc:
+        'Put exec in your scripts so everyone starts the project the same way with npm run dev. Add envilder as a dev dependency (npm install --save-dev envilder) so the script finds it in node_modules/.bin:',
+      usesTitle: 'Other common uses',
+      usesDesc:
+        'Any tool that reads its configuration from the environment works the same way. Each line below runs with the secrets of envilder.json:',
+      usesComment1:
+        '# Containers: -e NAME without a value copies it from the environment',
+      usesComment2: '# Integration tests that read tokens from the environment',
+      usesComment3: '# Migrations and one-off scripts that need DATABASE_URL',
+      usesComment4:
+        '# Terraform reads TF_VAR_<name> as the input variable <name>',
+      usesComment5: '# Several commands with the same secrets',
+      usesNote:
+        "Docker Compose reads variable references in compose.yaml from its environment, so no .env file is needed; Docker keeps a container's environment in its metadata until the container is removed. Mark Terraform variables that hold secrets as sensitive.",
+      sandboxTitle: 'Not a sandbox.',
+      sandboxDesc:
+        'Exec mode leaves an existing .env file untouched: delete it yourself when you move from pull. Your command and every process it starts can read the secrets, including any tool or AI agent that runs env through it. Only run commands you trust.',
+      examplesDesc:
+        'Start LocalStack with its auth token resolved from AWS SSM, or walk through push, pull and exec with npx envilder:',
+      errorsTitle: 'Common errors',
+      thFix: 'Fix',
+      errMissingFix: 'Add the command after exec, or after --.',
+      errUnknownFix:
+        'Fix the option name. Everything before your command must be an Envilder option; put your own flags after the command.',
+      errNoMapFix:
+        'Run envilder from the directory that holds envilder.json, or pass --map after exec.',
+      errNotFoundFix:
+        'Exit code 127. Check the program name and your PATH. On Windows, cmd.exe first prints its own "is not recognized" line.',
+      errPermissionFix:
+        'Exit code 126. Make the file executable (chmod +x run.sh) or run it through its interpreter (sh ./run.sh).',
+      errCaseFix: 'Windows only. Rename one of the two variables.',
+      errNulFix:
+        'Remove the NUL byte from the secret, or read it in-process with an SDK.',
+      relatedTitle: 'Related pages',
+      relatedStart:
+        'Getting started: push a secret and run an app with envilder exec',
+      relatedMap: 'Map file reference: $config fields and validation rules',
+      relatedPull:
+        'Pull mode: write the same secrets to a .env file when a tool needs one',
+      guideLink:
+        'Full exec guide on GitHub: Windows details and every error message',
+    },
     title: 'Envilder docs: AWS SSM and Azure Key Vault secrets',
     description:
       'Learn how to resolve environment variables from AWS SSM Parameter Store and Azure Key Vault with the Envilder CLI, GitHub Action, and runtime SDKs.',
@@ -722,12 +1031,13 @@ export const en: Translations = {
           'Every map file field, provider rules, flag precedence and name validation.',
       },
       'cli-pull': {
-        title: 'Pull mode: generate a .env from AWS SSM or Azure Key Vault',
+        title:
+          'Pull mode: write AWS SSM or Azure Key Vault secrets to a .env file',
         description:
-          'Reference for pull mode: generate a local .env from the secrets in your map file, with AWS profiles and AWS SSM or Azure Key Vault providers.',
-        heading: 'CLI pull',
+          'Pull mode reference: flags and defaults, $config precedence, expected output, how missing secrets and an existing .env are handled, common errors.',
+        heading: 'Pull mode reference',
         intro:
-          'Download secrets from your provider and write them to a local .env file.',
+          'What does envilder do when you run it without --push or exec? It reads envilder.json, fetches every mapped secret from AWS SSM Parameter Store or Azure Key Vault and writes the values to .env. An existing file is updated in place, keys the map file does not declare stay as they are, and a secret that does not exist is skipped with a warning.',
         breadcrumb: 'CLI pull',
         navLabel: 'CLI pull',
         cardTitle: 'CLI pull command',
@@ -735,12 +1045,13 @@ export const en: Translations = {
           'Generate a .env file from secrets defined in your map file.',
       },
       'cli-push': {
-        title: 'Push mode: upload .env values to AWS SSM or Azure Key Vault',
+        title:
+          'Push mode: upload .env values or one secret to AWS SSM or Key Vault',
         description:
-          'Reference for push mode (--push): upload a local .env or a single variable to Parameter Store or Key Vault, using the same JSON mapping.',
-        heading: 'CLI push',
+          'Push mode reference: upload a .env file or one secret with --key, how envilder.json is updated, SecureString and Key Vault naming, common errors.',
+        heading: 'Push mode reference',
         intro:
-          'Upload environment variables from a .env file or push one secret directly.',
+          'How do you store secrets in AWS SSM Parameter Store or Azure Key Vault with Envilder? envilder --push uploads the .env value of every variable your map file declares, and --key, --value and --secret-path upload one secret without a .env file. A single-secret push also records the mapping in envilder.json, so envilder and envilder exec can read it right away.',
         breadcrumb: 'CLI push',
         navLabel: 'CLI push',
         cardTitle: 'CLI push command',
@@ -749,12 +1060,12 @@ export const en: Translations = {
       },
       'cli-exec': {
         title:
-          'Exec mode: run a command with AWS SSM or Azure Key Vault secrets',
+          'envilder exec: run a command with AWS SSM or Azure Key Vault secrets',
         description:
-          'Reference for envilder exec: resolve AWS SSM or Azure Key Vault secrets in memory and start your command with them, without writing a .env file.',
-        heading: 'CLI exec',
+          'envilder exec reference: the -- separator, rejected options, exit code 125, environment and Windows rules, SSO recovery, signals and CI usage.',
+        heading: 'envilder exec reference',
         intro:
-          'Run a command with your secrets in its environment, without writing a .env file.',
+          "How do you run a command with secrets from AWS SSM or Azure Key Vault without writing a .env file? envilder exec resolves every secret in your map file and starts the command with those values added to its environment. If any secret cannot be resolved the command never starts and Envilder exits with 125; otherwise it exits with the command's own code.",
         breadcrumb: 'CLI exec',
         navLabel: 'CLI exec',
         cardTitle: 'CLI exec command',
@@ -914,169 +1225,7 @@ export const en: Translations = {
     mapContentsExpansionTitle: 'Variable expansion:',
     mapContentsExpansionDesc:
       'Envilder writes references such as $HOME literally and dotenv does not expand them, but other loaders do. Docker Compose, for instance, expands an unquoted KEY=$HOME when it reads the file. Keep this in mind when a secret contains $.',
-    pullTitle: 'Pull command',
-    pullDesc:
-      'Download secrets from your cloud provider and generate a local .env file.',
-    pullOptions: 'Options',
-    pullExamples: 'Examples',
-    pullOutput: 'Output',
-    optionHeader: 'Option',
-    pullOptMap: 'Path to JSON mapping file',
-    pullOptEnv: 'Path to write .env',
-    pullOptProvider: 'aws (default) or azure',
-    pullOptVault: 'Azure Key Vault URL',
-    pullOptProfile: 'AWS CLI profile to use',
-    pullCommentDefault: '# Default (AWS SSM)',
-    pullCommentProfile: '# With AWS profile',
-    pullCommentAzureConfig: '# Azure via $config in map file',
-    pullCommentAzureFlags: '# Azure via CLI flags',
-    pullOutputTitle: 'Output',
-    pullExecTitle: "Don't want a .env file?",
-    pullExecDesc:
-      'Use envilder exec: it resolves the same map file and starts your command with the secrets in its environment, without writing anything to disk.',
-    pullExecGuideLink: 'Read the CLI exec guide',
-    execTitle: 'Exec command',
-    execDesc:
-      'envilder exec resolves every secret in your map file and starts a command with those values in its environment. Nothing is written to disk: there is no .env file to gitignore, keep in sync or clean up. The map file and its $config work exactly as in pull mode.',
-    execUsageTitle: 'Usage',
-    execSeparatorTitle: 'Where your command starts: the -- rule',
-    execSeparatorDesc:
-      'Envilder options come first. Your command starts at the first argument that is not an Envilder option, or right after -- when present. Everything from there on is passed to your command verbatim, even if it looks like an Envilder option. The -- is optional; you only need it when the command itself starts with -.',
-    execSepComment1: '# Everything belongs to npm',
-    execSepComment2: "# --map is Envilder's, the rest is npm's",
-    execSepComment3: '# --map=x belongs to npm: it comes after the command',
-    execSepComment4: '# Same as above, with an explicit separator',
-    execOptions: 'Options',
-    execOptMap: 'Path to the map file (default: envilder.json)',
-    execOptProfile: 'AWS CLI profile. Overrides $config.profile',
-    execOptProvider: 'aws or azure. Overrides $config.provider',
-    execOptVault: 'Azure Key Vault URL. Overrides $config.vaultUrl',
-    execOptionsOrderDesc:
-      'Envilder options go after exec, never before it. An option written before exec is rejected with exit code 125, and Envilder shows the corrected command:',
-    execRejectedDesc:
-      'Exec mode never reads or writes a .env file and never pushes secrets, so --envfile, --push, --key, --value and --secret-path are rejected with exit code 125 before any provider call. An unknown option before your command is also an error, so a typo such as --mapp never reaches your command by accident.',
-    execExamples: 'Examples',
-    execCommentNpx:
-      '# Start your dev server with the secrets from envilder.json',
-    execCommentMap: '# Use a specific map file',
-    execCommentAzure: '# Azure Key Vault via CLI flags',
-    execCommentDocker:
-      '# Docker Compose can interpolate the secrets in compose.yaml',
-    execPackageJsonDesc: 'Or wire it into your package.json scripts:',
-    execOutputTitle: 'Output',
-    execOutputDesc:
-      "Your command owns stdout. All Envilder output goes to stderr, so envilder exec -- node print.js > out.json writes only your command's output to out.json. On success Envilder prints a single summary line that names your command by program name only, because arguments can carry secrets:",
-    execUseCasesTitle: 'Common use cases',
-    execUseCasesDesc:
-      "In every case the values exist only in the environment of your command and the processes it starts, Envilder never creates a .env file, and your command's exit code becomes Envilder's exit code. What your command does with the values is up to it: Docker, for example, keeps a container's environment in its on-disk metadata (visible with docker inspect) until the container is removed.",
-    execUcLocalstackTitle: 'Start LocalStack with its auth token',
-    execUcLocalstackDesc:
-      'When you need it: LocalStack needs LOCALSTACK_AUTH_TOKEN and you do not want the token in a .env file or in your shell history.',
-    execUcLocalstackComposeDesc:
-      'With Docker Compose, reference the variable in compose.yaml. Compose takes its value from the environment it runs in, so no .env file is needed:',
-    execUcLocalstackDockerDesc:
-      'With plain Docker, -e NAME without a value copies the variable from the environment of the docker client, so the token never appears on the command line:',
-    execUcLocalstackExamplesDesc:
-      'The same setup with Testcontainers (TypeScript, Python, .NET) and Aspire is in',
-    execUcTestsTitle: 'Integration tests that start containers',
-    execUcTestsDesc:
-      'When you need it: your tests start containers (for example, with Testcontainers) and read a token or credentials from the environment (process.env, os.environ, Environment.GetEnvironmentVariable) to pass them in.',
-    execUcTestsNote:
-      'A failing test run keeps its exit code, so CI still fails. If a secret cannot be resolved, the tests do not start and the exit code is 125.',
-    execUcMigrationsTitle: 'Database migrations and one-off scripts',
-    execUcMigrationsDesc:
-      'When you need it: a migration tool or a script needs DATABASE_URL once, and you do not want the connection string on disk. Use --map to run the same command against another environment.',
-    execUcTerraformTitle: 'Terraform and other IaC tools',
-    execUcTerraformDesc:
-      'When you need it: a Terraform input variable holds a secret. Terraform reads TF_VAR_<name> environment variables as values for the input variable <name>.',
-    execUcTerraformNote:
-      'Declare the variable with sensitive = true so Terraform hides it in plan output. Terraform still stores values it writes into resources in its state, so protect the state as usual.',
-    execUcDevTitle: 'Local dev server through package scripts',
-    execUcDevDesc:
-      'When you need it: everyone on the team should start the app with the same secrets by running npm run dev.',
-    execUcDevNote:
-      'Add envilder as a dev dependency (npm install --save-dev envilder) so the script finds it in node_modules/.bin.',
-    execUcGhaTitle: 'A step in GitHub Actions',
-    execUcGhaDesc:
-      'When you need it: one step of a workflow needs the secrets, and only that step. Configure AWS credentials with OIDC, then run your command through npx envilder exec:',
-    execUcGhaNote:
-      'Resolved values are registered with GitHub log masking before your command starts, and the next steps do not see them.',
-    execUcChainTitle: 'Several commands with the same secrets',
-    execUcChainDesc:
-      'When you need it: you want to chain commands or keep working in a shell that has the secrets.',
-    execUcChainNote:
-      'Quote the whole sh -c script in single quotes so your own shell does not run && outside envilder exec. The exec before the last command replaces the shell with it, so signals forwarded by Envilder reach npm start directly. In the interactive shell every command you run sees the secrets; type exit to leave it.',
-    execBehaviorTitle: 'Behavior',
-    execExitTitle: 'Exit codes',
-    execExitDesc:
-      "Exit codes follow GNU env and docker run, so you can tell an Envilder failure apart from your command's own exit code:",
-    execThCode: 'Code',
-    execThMeaning: 'Meaning',
-    execThMessage: 'Message',
-    execExitChild: 'Your command exited with code n',
-    execExitSignal:
-      'Your command was killed by signal n (for example, 137 for SIGKILL)',
-    execExit125:
-      'Envilder failed before starting the command: bad options, missing command, no map file, unresolved secrets or expired credentials',
-    execExit126:
-      'The command exists but the operating system refused to run it (for example, Permission denied)',
-    execExit127: 'The command was not found',
-    execExitNote: 'Pull and push modes keep exiting with 1 on failure.',
-    execFailClosedTitle: 'Fail-closed',
-    execFailClosedDesc:
-      'Pull mode warns and skips a missing secret. Exec mode never starts your command with an incomplete set of secrets: if any secret is missing, empty or cannot be read (for example, access denied), the command is not started, Envilder lists the affected variables with their masked paths and exits with 125. Values are resolved once, when the command starts.',
-    execEnvTitle: 'Environment',
-    execEnvDesc:
-      'Your command inherits the full environment of the shell that runs Envilder, plus every variable in the map file. The map file wins: when an inherited variable has the same name as a mapped one, your command sees the value from the provider, and Envilder prints the names (never the values) on stderr:',
-    execNoShellDesc:
-      "Envilder does not start an extra shell: arguments are passed to your command as a list. Your own shell still parses the command line first, so quote what it should not interpret: '$DB_URL' or '&&' in single quotes reach your command literally, while an unquoted $DB_URL expands to your shell's value (not the resolved secret) and an unquoted && runs a second command outside envilder exec. If you need shell features with the secrets, start a shell explicitly:",
-    execGhaTitle: 'GitHub Actions masking',
-    execGhaDesc:
-      'When GITHUB_ACTIONS=true, Envilder registers every resolved value with GitHub log masking (::add-mask::), so values your command prints are masked in the job log. Every registration is written to stderr before your command starts; if one cannot be written, the command does not start (exit code 125). The Envilder GitHub Action offers the same behavior through its command input.',
-    execGhaNote:
-      'Do not redirect the stderr of envilder exec away from the step log (for example, with 2> file or 2>/dev/null): that is where the runner reads the masks from. The runner reads stdout and stderr through separate pipes, so a value your command prints immediately can, in rare cases, reach the log before its mask is processed.',
-    execSignalsTitle: 'Signals',
-    execSignalsDesc:
-      'stdin, stdout and stderr are inherited and the TTY is preserved, so REPLs, shells and prompts work as usual. Ctrl+C in a terminal reaches your command directly. SIGTERM and SIGHUP (for example, from docker stop or Kubernetes) are forwarded to your command, and Envilder waits for it to exit, with no timeout of its own, before returning its exit code. Signals go to the direct child only: a launcher such as npm is responsible for stopping its own children.',
-    execSandboxTitle: 'Not a sandbox.',
-    execSandboxDesc:
-      'Exec mode never creates a .env file, and it leaves any existing one untouched: if you are moving from pull, delete your old .env yourself. It does not isolate the process. Your command and every process it starts can read the secrets in their environment, including any tool or AI coding agent that runs env or printenv through it. On Linux, other processes running as the same user can read /proc/<pid>/environ. Only run commands you trust with the secrets you map.',
-    execGuideLink:
-      'Full exec command guide on GitHub: Windows details, SSO recovery and every error message',
     examplesTitle: 'Runnable examples.',
-    execExamplesDesc:
-      'Start LocalStack with envilder exec docker run, with the auth token resolved from AWS SSM without a .env file (Docker keeps it in the container metadata until the container is removed), or walk through push, pull and exec with npx envilder:',
-    pushTitle: 'Push command',
-    pushDesc:
-      'Upload environment variables from a local .env file to your cloud provider using a mapping file.',
-    pushOptions: 'Options',
-    pushExamples: 'Examples',
-    pushOptPush: 'Enable push mode (required)',
-    pushOptEnv: 'Path to your local .env file (default: .env)',
-    pushOptMap: 'Path to parameter mapping JSON (default: envilder.json)',
-    pushOptProvider: 'aws (default) or azure',
-    pushOptVault: 'Azure Key Vault URL',
-    pushOptProfile: 'AWS CLI profile (AWS only)',
-    pushCommentAws: '# Push to AWS SSM (defaults to envilder.json and .env)',
-    pushCommentProfile: '# With AWS profile',
-    pushCommentAzureConfig: '# Azure via $config in map file',
-    pushCommentAzureFlags: '# Azure via CLI flags',
-    pushSingleTitle: 'Push single variable',
-    pushSingleDesc:
-      'Push a single environment variable directly to your cloud provider without using a .env file. Envilder also records the mapping in envilder.json (created if missing), so envilder exec can resolve it right away. The value is never written to the file.',
-    pushSingleOptions: 'Options',
-    pushSingleOptPush:
-      'Optional: --key, --value and --secret-path already activate push mode',
-    pushSingleOptKey: 'Environment variable name',
-    pushSingleOptValue: 'Value to store',
-    pushSingleOptPath: 'Full secret path in your cloud provider',
-    pushSingleOptMap:
-      'Optional: map file that is created or updated with the mapping and read for $config (default: envilder.json)',
-    pushSingleOptNoMapUpdate:
-      'Optional: push without reading, creating or updating any map file; provider and vault come only from flags',
-    pushSingleOptProvider: 'aws (default) or azure',
-    pushSingleOptVault: 'Azure Key Vault URL',
-    pushSingleOptProfile: 'AWS CLI profile (AWS only)',
     ghaSetupTitle: 'How the action works',
     ghaSetupDesc:
       'The action is a composite step: it installs Node.js 22, reads the map file, fetches each secret with the cloud credentials the job already has and masks every value in the log. By default it then exports the secrets to the environment of every later step of the job; with command or env-file it runs one command or writes a .env file instead. It does not sign in to AWS or Azure itself, so an earlier step (aws-actions/configure-aws-credentials or azure/login) must do that. Use the published macalbert/envilder/github-action@v0 tag; no build step is needed.',
