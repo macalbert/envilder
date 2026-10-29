@@ -4,7 +4,7 @@
 
 - Scope: Envilder is a mapping and resolution layer, not a secret manager, hosted SaaS, proxy, or control plane. The cloud provider remains the source of truth; Envilder has no hosted secret store or proxy.
 - CLI: runs a command with mapped values in its environment without writing any file (`envilder exec -- <command>`, fail-closed: the command does not start if a secret is missing, empty or unreadable), pulls mapped values to a `.env` file for tools that need one, and supports intentional controlled push.
-- GitHub Action: pulls mapped values to `.env` in CI/CD.
+- GitHub Action: exports mapped values to the later steps of a CI/CD job (no `.env` written by default); can also run one command with them or write a `.env` file.
 - Runtime SDKs: .NET, Python, and Node.js resolve values in-process and can return them or inject process environment variables. The .NET SDK also integrates with configuration and dependency injection APIs.
 - Best fit: small teams, projects, or straightforward applications already using SSM or Key Vault that want a version-controlled, PR-reviewable mapping without a separate hosted service. Container and Kubernetes workloads can use runtime SDKs with provider-native identity, but this is application-side resolution, not a native Kubernetes Secret sync, operator, or controller.
 - It is not the primary fit when the required backend is unsupported, a hosted or full secret-management control plane is needed, or native Kubernetes secret synchronization is required.
