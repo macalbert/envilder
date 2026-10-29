@@ -26,7 +26,7 @@ type EnvQuote = (typeof ENV_QUOTES)[number];
 
 /**
  * Follows dotenv's own `LINE` grammar rather than re-deriving it, split into
- * capture groups, with the two deliberate narrowings noted at the end. The key
+ * capture groups, with the deliberate narrowings noted at the end. The key
  * class also admits `/`, as {@link parseEnvFile} does, so an existing
  * `Database/Password` line is updated in place instead of duplicated:
  *
@@ -59,9 +59,18 @@ type EnvQuote = (typeof ENV_QUOTES)[number];
  * unquoted run is lazy, so the blanks before an inline comment land in the
  * padding we re-emit instead of inside the value we replace. Neither narrows
  * the value span itself, which is the part that has to agree with dotenv.
+ *
+ * Two more rewrites keep the matching linear without changing what it claims.
+ * The leading blanks stop at a line break, so a span begins on its key's own
+ * line: dotenv's `\s*` there lets every blank line start an attempt that scans
+ * the whole run after it, which turns a file of blank lines quadratic. Nothing
+ * is lost, because the attempt that begins on the key's line captures the same
+ * key and value. And the unquoted run only stops after a non-blank character,
+ * since the earliest place a run of blanks can end a value is always where the
+ * run begins; a lazy step inside the run would rescan the rest of it each time.
  */
 const ASSIGNMENT_PATTERN =
-  /^(\s*(?:export\s+)?)([\w./-]+)(\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]*?)([^\S\r\n]*)((?:#.*)?)(?<!\r)$/gm;
+  /^([^\S\n\r\u2028\u2029]*(?:export\s+)?)([\w./-]+)(\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|(?:[^\S\r\n]*[^#\s])*?)([^\S\r\n]*)((?:#.*)?)(?<!\r)$/gm;
 
 /** The line break that closes a file, kept verbatim instead of normalized. */
 const TRAILING_NEWLINE_PATTERN = /(?:\r\n|[\r\n])$/;
@@ -338,11 +347,10 @@ export class FileVariableStore implements IVariableStore {
    * The break that separates two assignments, which is the only kind that is
    * structural. Blanking the claimed spans leaves exactly those: a break
    * carried inside a value is part of a span and disappears with it, while a
-   * break that precedes a span is kept, because the prefix reaches back over
-   * blank lines and over the break that ended the line before. The terminator
-   * that closes the file is structural by the same argument and wins when the
-   * file has one; scanning the raw text for any CRLF is the last resort, and
-   * only a guess.
+   * break that precedes a span is kept, because a span starts on its key's own
+   * line and never holds the break before it. The terminator that closes the
+   * file is structural by the same argument and wins when the file has one;
+   * scanning the raw text for any CRLF is the last resort, and only a guess.
    */
   private detectStructuralNewline(
     body: string,
@@ -351,14 +359,10 @@ export class FileVariableStore implements IVariableStore {
     if (trailingNewline !== '') {
       return trailingNewline;
     }
+    // Everything a span holds, line breaks included, is payload and goes.
     const betweenSpans = body.replace(
       ASSIGNMENT_PATTERN,
-      (assignment: string, prefix: string) =>
-        // The breaks a span holds in its prefix are the ones that separate it
-        // from what came before, so they survive the blanking; everything else
-        // it holds, line breaks included, is payload and goes.
-        prefix.replace(/[^\r\n]/g, ' ') +
-        ' '.repeat(assignment.length - prefix.length),
+      (assignment: string) => ' '.repeat(assignment.length),
     );
     return (
       /\r\n|[\r\n]/.exec(betweenSpans)?.[0] ??

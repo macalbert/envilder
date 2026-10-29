@@ -1,3 +1,15 @@
+## [0.17.2] - 2026-10-28
+
+### Fixed
+
+* **Read and update large `.env` files in linear time**: The Action reads
+  the existing `.env` file before writing pulled secrets into it. Long runs
+  of blank lines made that take quadratic time, about 100 s for a 200 KB
+  file, and a long run of spaces inside a value slowed the rewrite the same
+  way. Both now take milliseconds, with the same result as before
+
+---
+
 ## [0.17.1] - 2026-10-27
 
 ### Fixed
