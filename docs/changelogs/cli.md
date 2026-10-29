@@ -5,7 +5,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
-## [0.18.0] - 2026-10-28
+## [0.18.0] - 2026-10-29
 
 ### Added
 
@@ -22,6 +22,20 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   available yet, so `validate` without `--offline` is rejected
   ([#557](https://github.com/macalbert/envilder/issues/557)).
   [Guide](../validate-command.md)
+
+---
+
+## [0.17.2] - 2026-10-28
+
+### Fixed
+
+* **Read and update large `.env` files in linear time**: Reading an
+  existing `.env` file before merging pulled secrets, and rewriting it
+  afterwards, took quadratic time on long runs of blank lines, so a 200 KB
+  file of blank lines took about 100 s. A single line with a long run of
+  spaces inside a value had the same problem when the file was rewritten.
+  Both now take milliseconds, and every file reads and updates exactly as
+  before
 
 ---
 
