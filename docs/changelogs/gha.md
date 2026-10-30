@@ -1,4 +1,4 @@
-## [0.18.0] - 2026-10-28
+## [0.19.0] - 2026-10-30
 
 ### Changed
 
@@ -13,6 +13,18 @@
   `$config.vaultUrl` names, and the input overrides the map file. Both live
   in the same repository as the workflow, so review changes to the map file
   and to workflow files like any other code change
+
+---
+
+## [0.18.0] - 2026-10-29
+
+### Changed
+
+* **Shared provider messages**: The unsupported-provider and missing
+  `vaultUrl` messages the Action bundle shares with the CLI now come from one
+  place, also used by the new CLI-only `envilder validate --offline`. The
+  Action's pull flow, inputs, outputs and messages are unchanged
+  ([#557](https://github.com/macalbert/envilder/issues/557))
 
 ---
 
