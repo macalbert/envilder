@@ -135,7 +135,6 @@ describe('Cli exec', () => {
     secrets = { [DB_URL_PATH]: DB_URL_VALUE, [API_KEY_PATH]: API_KEY_VALUE };
     process.exitCode = undefined;
     vi.stubEnv('GITHUB_ACTIONS', undefined);
-    vi.stubEnv('ENVILDER_ALLOWED_VAULT_HOSTS', undefined);
     vi.stubEnv('API_KEY', undefined);
     vi.stubEnv('DB_URL', undefined);
 
@@ -289,7 +288,6 @@ describe('Cli exec', () => {
       // Assert
       expect(infraSpy).toHaveBeenCalledWith(
         expect.objectContaining({ profile: 'dev' }),
-        expect.any(Object),
       );
       expect(runSpy).toHaveBeenCalledTimes(1);
     });
@@ -313,7 +311,6 @@ describe('Cli exec', () => {
           provider: 'azure',
           vaultUrl: 'https://my-vault.vault.azure.net',
         }),
-        expect.any(Object),
       );
       expect(runRequest().command).toBe('dotnet');
     });
