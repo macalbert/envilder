@@ -17,6 +17,7 @@ export const APPLICATION = {
   ExportSecretsToEnvironmentCommandHandler: Symbol.for(
     'ExportSecretsToEnvironmentCommandHandler',
   ),
+  ValidateMapFileCommandHandler: Symbol.for('ValidateMapFileCommandHandler'),
 };
 
 export const INFRASTRUCTURE = {
