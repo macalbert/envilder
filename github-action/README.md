@@ -525,6 +525,12 @@ The default mode only works inside a GitHub Actions job. Outside one (for
 example a local runner emulator without `GITHUB_ENV`), set `env-file` or
 `command`.
 
+### Error: "NODE_OPTIONS cannot be exported to the job environment"
+
+GitHub Actions ignores `NODE_OPTIONS` in `GITHUB_ENV`, so the default mode
+refuses it instead of reporting a variable later steps would never get. Use
+`command` or `env-file` for a map file that declares it.
+
 ### Generated `.env` file is empty
 
 - Check that `envilder.json` exists and has valid JSON syntax

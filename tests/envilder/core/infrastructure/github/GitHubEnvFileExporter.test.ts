@@ -111,6 +111,25 @@ describe('GitHubEnvFileExporter', () => {
     expect(actual).toEqual({ API_KEY: 'fake-key' });
   });
 
+  it('Should_ExportNothing_When_ANameIsBlockedByTheRunner', async () => {
+    // Arrange
+    const sut = new GitHubEnvFileExporter({ filePath });
+
+    // Act
+    const actual = await sut
+      .export({
+        API_KEY: 'fake-key',
+        node_options: '--max-old-space-size=4096',
+      })
+      .catch((error: unknown) => error);
+
+    // Assert
+    expect(actual).toBeInstanceOf(InvalidArgumentError);
+    expect((actual as Error).message).toContain('node_options');
+    expect((actual as Error).message).not.toContain('max-old-space-size');
+    expect(await readFile(filePath, 'utf8')).toBe('');
+  });
+
   it('Should_ThrowInvalidArgumentError_When_GitHubEnvIsNotSet', async () => {
     // Arrange
     delete process.env.GITHUB_ENV;

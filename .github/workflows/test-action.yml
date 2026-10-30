@@ -109,6 +109,11 @@ jobs:
             exit 1
           fi
           echo "✅ TOKEN_SECRET is available"
+          # .env is gitignored, so git status below would not report it
+          if [ -f .env ]; then
+            echo "❌ The export left .env in the workspace!"
+            exit 1
+          fi
           if [ -n "$(git status --porcelain)" ]; then
             echo "❌ The export left files in the workspace:"
             git status --porcelain

@@ -4,6 +4,9 @@ import { EOL } from 'node:os';
 import { InvalidArgumentError } from '../../domain/errors/DomainErrors.js';
 import type { IEnvironmentExporter } from '../../domain/ports/IEnvironmentExporter.js';
 
+/** Names the GitHub runner refuses to set from `GITHUB_ENV`. */
+const RUNNER_BLOCKED_NAMES = new Set(['NODE_OPTIONS']);
+
 /**
  * Exports variables to the later steps of a GitHub Actions job by appending
  * them to the file named by `GITHUB_ENV`, which the runner reads when the
@@ -25,6 +28,17 @@ export class GitHubEnvFileExporter implements IEnvironmentExporter {
     if (!filePath) {
       throw new InvalidArgumentError(
         'GITHUB_ENV is not set: exporting secrets to the job environment only works inside a GitHub Actions job. Set env-file to write a .env file instead.',
+      );
+    }
+
+    // The runner skips these names with a warning but applies the rest, so
+    // the step would report a variable later steps never get.
+    const blocked = Object.keys(variables).filter((name) =>
+      RUNNER_BLOCKED_NAMES.has(name.toUpperCase()),
+    );
+    if (blocked.length > 0) {
+      throw new InvalidArgumentError(
+        `${blocked.join(', ')} cannot be exported to the job environment: GitHub Actions ignores it in GITHUB_ENV. Use the command or env-file input instead.`,
       );
     }
 
