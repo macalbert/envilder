@@ -13,6 +13,12 @@ import {
 import { main } from '../../../../../src/envilder/apps/cli/entry/Cli';
 import { SilentExitError } from '../../../../../src/envilder/apps/cli/errors/SilentExitError';
 import { Startup } from '../../../../../src/envilder/apps/cli/Startup';
+import {
+  ExpiredCredentialsError,
+  SsoSessionExpiredError,
+} from '../../../../../src/envilder/core/domain/errors/DomainErrors';
+import type { ISecretProvider } from '../../../../../src/envilder/core/domain/ports/ISecretProvider';
+import type { SecretExistence } from '../../../../../src/envilder/core/domain/SecretExistence';
 import { createAwsSecretProvider } from '../../../../../src/envilder/core/infrastructure/aws/AwsSecretProviderFactory';
 import { createAzureSecretProvider } from '../../../../../src/envilder/core/infrastructure/azure/AzureSecretProviderFactory';
 
@@ -70,6 +76,32 @@ describe('Cli validate', () => {
 
   function givenArgs(...args: string[]): void {
     process.argv = ['node', 'envilder', ...args];
+  }
+
+  function givenAwsProvider(
+    existence: Record<string, SecretExistence>,
+  ): ISecretProvider {
+    const provider: ISecretProvider = {
+      getSecret: vi.fn().mockResolvedValue(SECRET_LOOKING_VALUE),
+      setSecret: vi.fn(),
+      checkSecretsExist: vi
+        .fn()
+        .mockResolvedValue(new Map(Object.entries(existence))),
+    };
+    vi.mocked(createAwsSecretProvider).mockReturnValue(provider);
+    return provider;
+  }
+
+  function givenAwsProviderFailing(error: Error): void {
+    vi.mocked(createAwsSecretProvider).mockReturnValue({
+      getSecret: vi.fn(),
+      setSecret: vi.fn(),
+      checkSecretsExist: vi.fn().mockRejectedValue(error),
+    });
+  }
+
+  function allOutput(): string {
+    return `${outputOf(logSpy)}\n${outputOf(errorSpy)}`;
   }
 
   it('Should_ExitZero_When_MapFileMatchesSchema', async () => {
@@ -252,9 +284,40 @@ describe('Cli validate', () => {
     await expect(action).rejects.toThrow('No map file found');
   });
 
-  it('Should_RejectValidate_When_OfflineIsNotSet', async () => {
+  it('Should_ReportExists_When_AllRemoteKeysExist', async () => {
     // Arrange
-    const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+    const mapPath = await givenMapFile({
+      DB_URL: '/app/db-url',
+      API_KEY: '/app/api-key',
+    });
+    givenAwsProvider({
+      '/app/db-url': { status: 'exists' },
+      '/app/api-key': { status: 'exists' },
+    });
+    givenArgs('validate', '--map', mapPath);
+
+    // Act
+    await main();
+
+    // Assert
+    const output = outputOf(logSpy);
+    expect(output).toMatch(/✓ DB_URL\s+\/app\/db-url\s+exists/);
+    expect(output).toMatch(/✓ API_KEY\s+\/app\/api-key\s+exists/);
+    expect(output).toContain('✓ All 2 secrets exist');
+  });
+
+  it('Should_ReportEachMissingKey_When_RemoteKeysDoNotExist', async () => {
+    // Arrange
+    const mapPath = await givenMapFile({
+      DB_URL: '/app/db-url',
+      API_KEY: '/app/api-key',
+      TOKEN: '/app/token',
+    });
+    givenAwsProvider({
+      '/app/db-url': { status: 'missing' },
+      '/app/api-key': { status: 'exists' },
+      '/app/token': { status: 'missing' },
+    });
     givenArgs('validate', '--map', mapPath);
 
     // Act
@@ -262,7 +325,143 @@ describe('Cli validate', () => {
 
     // Assert
     await expect(action).rejects.toEqual(new SilentExitError(1));
-    expect(outputOf(errorSpy)).toContain('envilder validate --offline');
+    expect(outputOf(logSpy)).toMatch(/✗ DB_URL\s+\/app\/db-url\s+missing/);
+    expect(outputOf(logSpy)).toMatch(/✗ TOKEN\s+\/app\/token\s+missing/);
+    expect(outputOf(errorSpy)).toContain('✗ Validation failed: 2 missing');
+  });
+
+  it('Should_ReportAccessDenied_When_IdentityCannotReadKey', async () => {
+    // Arrange
+    const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+    givenAwsProvider({
+      '/app/db-url': {
+        status: 'access_denied',
+        reason: 'not authorized to perform: ssm:GetParameters',
+      },
+    });
+    givenArgs('validate', '--map', mapPath);
+
+    // Act
+    const action = main();
+
+    // Assert
+    await expect(action).rejects.toEqual(new SilentExitError(1));
+    expect(outputOf(logSpy)).toMatch(
+      /✗ DB_URL\s+\/app\/db-url\s+access denied \(not authorized/,
+    );
+    expect(outputOf(errorSpy)).toContain(
+      '✗ Validation failed: 1 access denied',
+    );
+    expect(outputOf(errorSpy)).not.toContain('missing');
+  });
+
+  it('Should_ReportProviderError_When_ProviderIsUnreachable', async () => {
+    // Arrange
+    const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+    givenAwsProvider({
+      '/app/db-url': { status: 'provider_error', reason: 'ECONNREFUSED' },
+    });
+    givenArgs('validate', '--map', mapPath);
+
+    // Act
+    const action = main();
+
+    // Assert
+    await expect(action).rejects.toEqual(new SilentExitError(1));
+    expect(outputOf(errorSpy)).toContain(
+      '✗ Validation failed: 1 provider error',
+    );
+  });
+
+  it('Should_ShowCredentialError_When_CredentialsAreExpired', async () => {
+    // Arrange
+    const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+    givenAwsProviderFailing(new ExpiredCredentialsError());
+    givenArgs('validate', '--map', mapPath);
+
+    // Act
+    const action = main();
+
+    // Assert
+    await expect(action).rejects.toBeInstanceOf(ExpiredCredentialsError);
+  });
+
+  it('Should_ShowSsoLoginError_When_SsoSessionExpiredWithoutTty', async () => {
+    // Arrange
+    const mapPath = await givenMapFile({
+      $config: { profile: 'dev' },
+      DB_URL: '/app/db-url',
+    });
+    givenAwsProviderFailing(new SsoSessionExpiredError('dev'));
+    givenArgs('validate', '--map', mapPath);
+
+    // Act
+    const action = main();
+
+    // Assert
+    await expect(action).rejects.toBeInstanceOf(SsoSessionExpiredError);
+  });
+
+  it('Should_NotCallProvider_When_MapFileIsInvalid', async () => {
+    // Arrange
+    const configureInfrastructure = vi.spyOn(
+      Startup.prototype,
+      'configureInfrastructure',
+    );
+    const mapPath = await givenMapFile({
+      $config: { provider: 'gcloud' },
+      DB_URL: '/app/db-url',
+    });
+    givenArgs('validate', '--map', mapPath);
+
+    // Act
+    const action = main();
+
+    // Assert
+    await expect(action).rejects.toEqual(new SilentExitError(1));
+    expect(outputOf(errorSpy)).toContain('✗ Map file invalid');
+    expect(configureInfrastructure).not.toHaveBeenCalled();
+    expect(createAwsSecretProvider).not.toHaveBeenCalled();
+    expect(createAzureSecretProvider).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['succeeds', { status: 'exists' }],
+    ['fails', { status: 'missing' }],
+  ] as const)(
+    'Should_NeverPrintSecretValues_When_ValidationSucceedsOrFails (%s)',
+    async (_, existence) => {
+      // Arrange
+      const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+      const provider = givenAwsProvider({ '/app/db-url': existence });
+      givenArgs('validate', '--map', mapPath);
+
+      // Act
+      await main().catch(() => undefined);
+
+      // Assert
+      expect(provider.getSecret).not.toHaveBeenCalled();
+      expect(allOutput()).not.toContain(SECRET_LOOKING_VALUE);
+    },
+  );
+
+  it('Should_PreferFlagsOverConfig_When_CheckingRemoteKeys', async () => {
+    // Arrange
+    const mapPath = await givenMapFile({
+      $config: { provider: 'azure', vaultUrl: VAULT_URL },
+      DB_URL: '/app/db-url',
+    });
+    givenAwsProvider({ '/app/db-url': { status: 'exists' } });
+    givenArgs('validate', '--map', mapPath, '--provider', 'aws');
+
+    // Act
+    const action = main();
+
+    // Assert
+    await expect(action).rejects.toEqual(new SilentExitError(1));
+    expect(outputOf(errorSpy)).toContain(
+      '$config.vaultUrl is only supported with the azure provider',
+    );
     expect(createAwsSecretProvider).not.toHaveBeenCalled();
   });
 

@@ -13,6 +13,8 @@ import {
 } from '../../../core/application/execWithSecrets/CommandLineFormatter.js';
 import { ValidateMapFileCommand } from '../../../core/application/validateMapFile/ValidateMapFileCommand.js';
 import type { ValidateMapFileCommandHandler } from '../../../core/application/validateMapFile/ValidateMapFileCommandHandler.js';
+import { ValidateRemoteKeysCommand } from '../../../core/application/validateRemoteKeys/ValidateRemoteKeysCommand.js';
+import type { ValidateRemoteKeysCommandHandler } from '../../../core/application/validateRemoteKeys/ValidateRemoteKeysCommandHandler.js';
 import type { CliOptions } from '../../../core/domain/CliOptions.js';
 import {
   EXEC_COMMAND_NOT_EXECUTABLE,
@@ -29,6 +31,11 @@ import { resolveMapFileTarget } from '../../../core/domain/MapFileUpdate.js';
 import { OperationMode } from '../../../core/domain/OperationMode.js';
 import type { ILogger } from '../../../core/domain/ports/ILogger.js';
 import type { ISecretMasker } from '../../../core/domain/ports/ISecretMasker.js';
+import {
+  describeSecretExistenceStatus,
+  type RemoteKeyCheck,
+  summarizeFailures,
+} from '../../../core/domain/SecretExistence.js';
 import { GitHubActionsLogger } from '../../../core/infrastructure/github/GitHubActionsLogger.js';
 import { GitHubActionsSecretMasker } from '../../../core/infrastructure/github/GitHubActionsSecretMasker.js';
 import { NoOpSecretMasker } from '../../../core/infrastructure/github/NoOpSecretMasker.js';
@@ -120,8 +127,8 @@ export async function main() {
   ${pc.yellow('>')} ${pc.bold('Run a command with secrets')}  ${pc.dim('(nothing written to disk)')}
     ${pc.cyan('envilder exec -- npm run dev')}  ${pc.dim('# see: envilder exec --help')}
 
-  ${pc.green('>')} ${pc.bold('Check the map file')}  ${pc.dim('(no secret is read)')}
-    ${pc.cyan('envilder validate --offline')}  ${pc.dim('# see: envilder validate --help')}
+  ${pc.green('>')} ${pc.bold('Check the map file and its secrets')}  ${pc.dim('(no value is read)')}
+    ${pc.cyan('envilder validate')}  ${pc.dim('# see: envilder validate --help')}
 `;
 
   program
@@ -435,14 +442,16 @@ function registerValidateCommand(program: Command): void {
     .description(
       'Check that the map file is valid JSON, matches the map file schema, ' +
         'and resolves to a coherent provider configuration (flags take ' +
-        'precedence over $config). Every problem is reported with the key ' +
-        'that causes it. Secret values are never printed.\n\n' +
+        'precedence over $config), then check that every secret it declares ' +
+        'exists in the provider with the current credentials. Every problem ' +
+        'is reported with the key that causes it. Secret values are never ' +
+        'read or printed.\n\n' +
         'With --offline nothing but the map file is read: no provider is ' +
         'called and no credentials are needed.',
     )
     .option(
       '--offline',
-      'Validate the map file locally without calling the provider (required for now)',
+      'Validate the map file locally without calling the provider',
     )
     .option(
       '--map <path>',
@@ -462,18 +471,11 @@ function registerValidateCommand(program: Command): void {
       rejectRootOptionsBeforeValidate(
         (validateCommand.parent?.opts() ?? {}) as ExecOptions,
       );
-      if (!options.offline) {
-        console.error(
-          pc.red(
-            'error: envilder validate only supports --offline for now: ' +
-              'checking that each secret exists in the provider is not ' +
-              'available yet. Run "envilder validate --offline" to check the ' +
-              'map file without calling the provider.',
-          ),
-        );
-        throw new SilentExitError(1);
+      if (options.offline) {
+        await runOfflineValidation(options);
+        return;
       }
-      await runOfflineValidation(options);
+      await runRemoteValidation(options);
     });
 
   validate.configureOutput({
@@ -485,13 +487,15 @@ function registerValidateCommand(program: Command): void {
 
 const VALIDATE_HELP = `
 Examples:
+  envilder validate
+  envilder validate --map=config/envilder.json --profile=dev
+  envilder validate --provider=azure --vault-url=https://my-vault.vault.azure.net
   envilder validate --offline
-  envilder validate --offline --map=config/envilder.json
-  envilder validate --offline --provider=azure --vault-url=https://my-vault.vault.azure.net
 
 Exit codes:
-  0  the map file is valid
-  1  the map file or the options are not valid
+  0  the map file is valid and every declared secret exists
+  1  the map file or the options are not valid, a secret is missing or
+     cannot be checked, or the credentials are missing or expired
 
 See docs/validate-command.md.`;
 
@@ -516,6 +520,23 @@ function rejectRootOptionsBeforeValidate(rootOptions: ExecOptions): void {
 }
 
 async function runOfflineValidation(options: ValidateOptions): Promise<void> {
+  await validateMapFileOffline(options);
+  console.log(
+    pc.dim(
+      '  Remote validation skipped (--offline): no provider was called, so ' +
+        'the secrets were not checked.',
+    ),
+  );
+}
+
+/**
+ * Checks the map file without calling any provider. Prints the result and
+ * returns the map file path when it is valid; reports every violation and
+ * exits with 1 otherwise.
+ */
+async function validateMapFileOffline(
+  options: ValidateOptions,
+): Promise<string> {
   const mapPath = resolveMapFile(options.map);
   const container = Startup.build().configureOfflineValidation().create();
   const handler = container.get<ValidateMapFileCommandHandler>(
@@ -544,12 +565,72 @@ async function runOfflineValidation(options: ValidateOptions): Promise<void> {
   }
 
   console.log(pc.green(`✓ Map file valid: ${mapPath}`));
-  console.log(
-    pc.dim(
-      '  Remote validation skipped (--offline): no provider was called, so ' +
-        'the secrets were not checked.',
-    ),
+  return mapPath;
+}
+
+/**
+ * Validates the map file offline first, so an invalid file never reaches the
+ * provider, then checks that every declared secret exists. Lists each
+ * variable with its path and status; values are never read.
+ */
+async function runRemoteValidation(options: ValidateOptions): Promise<void> {
+  const mapPath = await validateMapFileOffline(options);
+  const fileConfig = await readMapFileConfig(mapPath);
+  const config: MapFileConfig = {
+    ...fileConfig,
+    ...(options.provider && { provider: options.provider }),
+    ...(options.vaultUrl && { vaultUrl: options.vaultUrl }),
+    ...(options.profile && { profile: options.profile }),
+  };
+
+  const container = Startup.build()
+    .configureRemoteValidation()
+    .configureInfrastructure(config)
+    .create();
+  const handler = container.get<ValidateRemoteKeysCommandHandler>(
+    TYPES.ValidateRemoteKeysCommandHandler,
   );
+
+  let checks: RemoteKeyCheck[] = [];
+  await executeWithSsoRecovery(async () => {
+    checks = await handler.handle(ValidateRemoteKeysCommand.create(mapPath));
+  });
+
+  printRemoteKeyChecks(checks, describeSecretSource(config));
+  const failures = summarizeFailures(checks);
+  if (failures !== '') {
+    console.error(pc.red(`✗ Validation failed: ${failures}`));
+    throw new SilentExitError(1);
+  }
+}
+
+function printRemoteKeyChecks(
+  checks: readonly RemoteKeyCheck[],
+  source: string,
+): void {
+  const count = checks.length === 1 ? '1 secret' : `${checks.length} secrets`;
+  console.log(pc.bold(`Checking ${count} in ${source}`));
+  const variableWidth = Math.max(0, ...checks.map((c) => c.variable.length));
+  const pathWidth = Math.max(0, ...checks.map((c) => c.path.length));
+  for (const check of checks) {
+    const exists = check.status === 'exists';
+    const status = describeSecretExistenceStatus(check.status);
+    const reason =
+      check.reason === undefined ? '' : pc.dim(` (${check.reason})`);
+    console.log(
+      `  ${exists ? pc.green('✓') : pc.red('✗')} ` +
+        `${pc.bold(check.variable.padEnd(variableWidth))}  ` +
+        `${pc.dim(check.path.padEnd(pathWidth))}  ` +
+        `${exists ? pc.green(status) : pc.red(status)}${reason}`,
+    );
+  }
+  if (summarizeFailures(checks) === '') {
+    console.log(
+      pc.green(
+        checks.length === 1 ? '✓ 1 secret exists' : `✓ All ${count} exist`,
+      ),
+    );
+  }
 }
 
 const EXEC_HELP = `

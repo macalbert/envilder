@@ -14,6 +14,9 @@ export const APPLICATION = {
   DispatchActionCommandHandler: Symbol.for('DispatchActionCommandHandler'),
   ExecWithSecretsCommandHandler: Symbol.for('ExecWithSecretsCommandHandler'),
   ValidateMapFileCommandHandler: Symbol.for('ValidateMapFileCommandHandler'),
+  ValidateRemoteKeysCommandHandler: Symbol.for(
+    'ValidateRemoteKeysCommandHandler',
+  ),
 };
 
 export const INFRASTRUCTURE = {

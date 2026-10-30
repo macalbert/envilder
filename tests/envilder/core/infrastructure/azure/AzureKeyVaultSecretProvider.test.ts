@@ -25,15 +25,18 @@ const NON_EXISTENT_SECRET = 'non-existent-secret';
 describe('AzureKeyVaultSecretProvider (unit tests)', () => {
   let mockGetSecretFn: ReturnType<typeof vi.fn>;
   let mockSetSecretFn: ReturnType<typeof vi.fn>;
+  let mockListPropertiesFn: ReturnType<typeof vi.fn>;
   let mockClient: SecretClient;
   let sut: AzureKeyVaultSecretProvider;
 
   beforeEach(() => {
     mockGetSecretFn = vi.fn();
     mockSetSecretFn = vi.fn();
+    mockListPropertiesFn = vi.fn();
     mockClient = {
       getSecret: mockGetSecretFn,
       setSecret: mockSetSecretFn,
+      listPropertiesOfSecrets: mockListPropertiesFn,
     } as unknown as SecretClient;
     sut = new AzureKeyVaultSecretProvider(mockClient);
   });
@@ -290,6 +293,148 @@ describe('AzureKeyVaultSecretProvider (unit tests)', () => {
   });
 });
 
+describe('AzureKeyVaultSecretProvider.checkSecretsExist (unit tests)', () => {
+  let mockGetSecretFn: ReturnType<typeof vi.fn>;
+  let mockListPropertiesFn: ReturnType<typeof vi.fn>;
+  let sut: AzureKeyVaultSecretProvider;
+
+  beforeEach(() => {
+    mockGetSecretFn = vi.fn();
+    mockListPropertiesFn = vi.fn();
+    sut = new AzureKeyVaultSecretProvider({
+      getSecret: mockGetSecretFn,
+      listPropertiesOfSecrets: mockListPropertiesFn,
+    } as unknown as SecretClient);
+  });
+
+  function givenVaultSecrets(
+    secrets: Array<{ name: string; enabled?: boolean }>,
+  ): void {
+    mockListPropertiesFn.mockImplementation(async function* () {
+      yield* secrets;
+    });
+  }
+
+  function givenListFails(error: unknown): void {
+    mockListPropertiesFn.mockImplementation(async function* () {
+      yield* [];
+      throw error;
+    });
+  }
+
+  it('Should_ReportExistsAndMissing_When_CheckingSecretsExist', async () => {
+    // Arrange
+    givenVaultSecrets([{ name: 'app-db-url', enabled: true }]);
+
+    // Act
+    const actual = await sut.checkSecretsExist(['/app/db-url', '/app/api-key']);
+
+    // Assert
+    expect(Object.fromEntries(actual)).toEqual({
+      '/app/db-url': { status: 'exists' },
+      '/app/api-key': { status: 'missing' },
+    });
+  });
+
+  it('Should_MatchNamesIgnoringCase_When_VaultNameDiffersInCase', async () => {
+    // Arrange
+    givenVaultSecrets([{ name: 'App-Db-Url' }]);
+
+    // Act
+    const actual = await sut.checkSecretsExist(['app-db-url']);
+
+    // Assert
+    expect(actual.get('app-db-url')).toEqual({ status: 'exists' });
+  });
+
+  it('Should_ReportMissing_When_SecretIsDisabled', async () => {
+    // Arrange
+    givenVaultSecrets([{ name: 'app-db-url', enabled: false }]);
+
+    // Act
+    const actual = await sut.checkSecretsExist(['app-db-url']);
+
+    // Assert
+    expect(actual.get('app-db-url')).toEqual({ status: 'missing' });
+  });
+
+  it('Should_NotReadSecretValues_When_CheckingSecretsExist', async () => {
+    // Arrange
+    givenVaultSecrets([{ name: 'app-db-url' }]);
+
+    // Act
+    await sut.checkSecretsExist(['app-db-url']);
+
+    // Assert
+    expect(mockGetSecretFn).not.toHaveBeenCalled();
+  });
+
+  it('Should_ReportAccessDenied_When_IdentityCannotListSecrets', async () => {
+    // Arrange
+    givenListFails(
+      Object.assign(
+        new Error('The user does not have secrets list permission'),
+        {
+          statusCode: 403,
+        },
+      ),
+    );
+
+    // Act
+    const actual = await sut.checkSecretsExist(['/app/db-url', '/app/api-key']);
+
+    // Assert
+    expect([...actual.values()].map((existence) => existence.status)).toEqual([
+      'access_denied',
+      'access_denied',
+    ]);
+  });
+
+  it('Should_ReportAuthenticationFailed_When_NoCredentialIsAvailable', async () => {
+    // Arrange
+    givenListFails(
+      Object.assign(
+        new Error('DefaultAzureCredential failed to retrieve a token'),
+        {
+          name: 'CredentialUnavailableError',
+        },
+      ),
+    );
+
+    // Act
+    const actual = await sut.checkSecretsExist(['app-db-url']);
+
+    // Assert
+    expect(actual.get('app-db-url')?.status).toBe('authentication_failed');
+  });
+
+  it('Should_ReportProviderError_When_VaultIsUnreachable', async () => {
+    // Arrange
+    givenListFails(new Error('getaddrinfo ENOTFOUND my-vault.vault.azure.net'));
+
+    // Act
+    const actual = await sut.checkSecretsExist(['app-db-url']);
+
+    // Assert
+    expect(actual.get('app-db-url')).toEqual({
+      status: 'provider_error',
+      reason: 'getaddrinfo ENOTFOUND my-vault.vault.azure.net',
+    });
+  });
+
+  it('Should_ReportProviderError_When_TwoNamesCollide', async () => {
+    // Arrange
+    givenVaultSecrets([{ name: 'app-db-url' }]);
+
+    // Act
+    const actual = await sut.checkSecretsExist(['/app/db-url', 'app/db/url']);
+
+    // Assert
+    expect(actual.get('/app/db-url')).toEqual({ status: 'exists' });
+    expect(actual.get('app/db/url')?.status).toBe('provider_error');
+  });
+});
+
 // Integration tests with LocalStack for Azure — requires Docker
 describe('AzureKeyVaultSecretProvider (integration with LocalStack)', () => {
   let localStackAzure: LocalStackAzureContainer;
@@ -327,6 +472,23 @@ describe('AzureKeyVaultSecretProvider (integration with LocalStack)', () => {
 
     // Assert
     expect(actual).toBeUndefined();
+  });
+
+  it('Should_ReportExistsAndMissing_When_CheckingSecretsExist', async () => {
+    // Arrange
+    const sut = new AzureKeyVaultSecretProvider(secretClient);
+
+    // Act
+    const actual = await sut.checkSecretsExist([
+      SECRET_NAME,
+      NON_EXISTENT_SECRET,
+    ]);
+
+    // Assert
+    expect(Object.fromEntries(actual)).toEqual({
+      [SECRET_NAME]: { status: 'exists' },
+      [NON_EXISTENT_SECRET]: { status: 'missing' },
+    });
   });
 
   it('Should_StoreSecretValue_When_SetSecretIsCalled', async () => {
