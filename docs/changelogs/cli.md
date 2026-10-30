@@ -5,6 +5,26 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [0.18.0] - 2026-10-29
+
+### Added
+
+* **`envilder validate --offline`**: a new subcommand that checks the map file
+  without calling any provider and without credentials. It reports invalid
+  JSON with the file path, every schema violation with the key that causes it
+  (unknown `$config` field, unsupported provider, non-string mapping, invalid
+  variable name, reserved `$` key), and an incoherent provider configuration
+  (`profile` with Azure, `vaultUrl` with AWS, Azure without `vaultUrl`), from
+  the map file or from `--provider`, `--profile` and `--vault-url`, which take
+  precedence over `$config` as on a pull. It prints `✓ Map file valid` and
+  exits `0` when the file is usable, and exits `1` otherwise. Secret values
+  are never printed. Checking that each secret exists in the provider is not
+  available yet, so `validate` without `--offline` is rejected
+  ([#557](https://github.com/macalbert/envilder/issues/557)).
+  [Guide](../validate-command.md)
+
+---
+
 ## [0.17.2] - 2026-10-28
 
 ### Fixed
