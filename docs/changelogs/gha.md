@@ -22,6 +22,11 @@
 
 ### Changed
 
+* **Secret existence check in the provider adapters**: The AWS SSM and Azure
+  Key Vault adapters bundled with the Action can now check whether secrets
+  exist without reading them, for the CLI's `envilder validate`. The Action
+  does not use it, and its behavior is unchanged
+  ([#558](https://github.com/macalbert/envilder/issues/558))
 * **Azure Key Vault URLs are no longer checked by host**: The Action shares
   the CLI's change: `vaultUrl` goes to the Azure Key Vault client as written,
   without the `https://` and Azure-domain checks, as in the SDKs

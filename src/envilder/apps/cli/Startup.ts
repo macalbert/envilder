@@ -1,6 +1,7 @@
 import { Container } from 'inversify';
 import { ExecWithSecretsCommandHandler } from '../../core/application/execWithSecrets/ExecWithSecretsCommandHandler.js';
 import { ValidateMapFileCommandHandler } from '../../core/application/validateMapFile/ValidateMapFileCommandHandler.js';
+import { ValidateRemoteKeysCommandHandler } from '../../core/application/validateRemoteKeys/ValidateRemoteKeysCommandHandler.js';
 import type { MapFileConfig } from '../../core/domain/MapFileConfig.js';
 import type { ILogger } from '../../core/domain/ports/ILogger.js';
 import type { IProcessContext } from '../../core/domain/ports/IProcessContext.js';
@@ -80,6 +81,21 @@ export class Startup {
     this.container
       .bind<ValidateMapFileCommandHandler>(TYPES.ValidateMapFileCommandHandler)
       .to(ValidateMapFileCommandHandler)
+      .inTransientScope();
+    return this;
+  }
+
+  /**
+   * Wires the remote part of `envilder validate`, which checks that each
+   * declared secret exists. Call `configureInfrastructure` afterwards to bind
+   * the secret provider, the logger and the variable store.
+   */
+  configureRemoteValidation(): this {
+    this.container
+      .bind<ValidateRemoteKeysCommandHandler>(
+        TYPES.ValidateRemoteKeysCommandHandler,
+      )
+      .to(ValidateRemoteKeysCommandHandler)
       .inTransientScope();
     return this;
   }

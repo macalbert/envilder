@@ -18,6 +18,9 @@ export const APPLICATION = {
     'ExportSecretsToEnvironmentCommandHandler',
   ),
   ValidateMapFileCommandHandler: Symbol.for('ValidateMapFileCommandHandler'),
+  ValidateRemoteKeysCommandHandler: Symbol.for(
+    'ValidateRemoteKeysCommandHandler',
+  ),
 };
 
 export const INFRASTRUCTURE = {

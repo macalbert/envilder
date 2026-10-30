@@ -7,6 +7,26 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ## [0.19.0] - 2026-10-30
 
+### Added
+
+* **`envilder validate` checks that every declared secret exists**: without
+  `--offline`, `validate` now asks the provider whether each secret path in
+  the map file exists, without reading any value, and lists every variable
+  with its path and status: `exists`, `missing`, `access denied` (never
+  reported as `missing`), `authentication failed` or `provider error`. A path
+  shared by several variables is checked once. It ends with
+  `✓ All N secrets exist` and exit code `0`, or with a summary such as
+  `✗ Validation failed: 2 missing, 1 access denied` and exit code `1`. An
+  invalid map file fails with the offline result and no provider is called.
+  Expired credentials and SSO sessions show the same message as a pull,
+  including the `aws sso login` recovery on a terminal. AWS SSM is checked
+  with `GetParameters` in batches of ten and `WithDecryption: false`, which
+  needs `ssm:GetParameters`; Azure Key Vault lists the vault's secret
+  metadata once, which needs the `List` secret permission (access policies)
+  or `secrets/readMetadata` (Azure RBAC, included in Key Vault Secrets User)
+  ([#558](https://github.com/macalbert/envilder/issues/558)).
+  [Guide](../validate-command.md)
+
 ### Changed
 
 * **Azure Key Vault URLs are no longer checked by host**: The CLI rejected a
