@@ -566,7 +566,7 @@ export const es: Translations = {
       fieldProfile:
         'Perfil con nombre de ~/.aws/config o ~/.aws/credentials. Solo AWS: con azure se ignora y se muestra un aviso.',
       fieldVaultUrl:
-        'URL del Key Vault. Obligatoria para azure. Debe usar https:// y un host de Key Vault (.vault.azure.net, .vault.azure.cn, .vault.usgovcloudapi.net o .vault.microsoftazure.de). aws la ignora.',
+        'URL del Key Vault, por ejemplo https://my-vault.vault.azure.net. Obligatoria para azure. aws la ignora.',
       configSdkNote:
         'Los SDK de runtime leen los mismos campos, pero pueden rechazar combinaciones que la CLI solo avisa, como profile con azure. Cada página de SDK lista sus propios errores.',
       providersTitle: 'Identificadores de secretos por proveedor',
@@ -626,10 +626,6 @@ export const es: Translations = {
       errProviderFix: 'Usa aws o azure en $config.provider o en --provider.',
       errVaultMissingFix:
         'Define $config.vaultUrl, o pasa --vault-url, cuando el proveedor sea azure.',
-      errVaultHttpsFix:
-        'Usa la URL https:// que aparece en la vista general del vault.',
-      errVaultHostFix:
-        'Usa el URI del vault que da Azure, por ejemplo https://my-vault.vault.azure.net, no un dominio propio.',
       errProfileAzureFix:
         'Es un aviso, no un error. Quita profile de $config, o no pases --profile, cuando uses azure.',
       errCaseFix:
@@ -665,7 +661,7 @@ export const es: Translations = {
       optProvider:
         'aws o azure, en mayúsculas o minúsculas. Cualquier otro valor detiene la ejecución antes de leer ningún secreto.',
       optVault:
-        'URL de Key Vault. Obligatoria con azure. Debe usar https:// y un host de Key Vault.',
+        'URL de Key Vault, por ejemplo https://my-vault.vault.azure.net. Obligatoria con azure.',
       optProfileDefault:
         '$config.profile y, si no, la cadena de credenciales por defecto de AWS',
       optProfile:
@@ -1341,7 +1337,7 @@ export const es: Translations = {
       'Es un aviso, no un error: el paso termina bien, con menos secretos en el resumen que en el mapeo. En un archivo .env nuevo la variable queda fuera. Si el archivo ya existía (en el repositorio, en caché o escrito por un paso anterior), se conserva el valor antiguo, así que borra el archivo antes de la Action cuando un valor obsoleto no deba sobrevivir. Revisa el nombre, la región y, en Azure, el nombre convertido. Si un valor que falta debe detener el despliegue, compruébalo en un paso posterior.',
     ghaErrVaultUrlTitle: 'Falta la URL del vault de Azure',
     ghaErrVaultUrlFix:
-      'Informa el input vault-url o $config.vaultUrl en el archivo de mapeo. Debe ser una URL https que termine en .vault.azure.net, o el dominio equivalente de una nube soberana.',
+      'Informa el input vault-url o $config.vaultUrl en el archivo de mapeo. Usa el URI del vault que muestra el portal de Azure, por ejemplo https://my-vault.vault.azure.net.',
     ghaErrAzureDeniedTitle: 'Acceso denegado en Azure Key Vault',
     ghaErrAzureDeniedFix:
       'azure/login ha funcionado pero la identidad no tiene ningún rol de plano de datos sobre el vault. Asigna Key Vault Secrets User sobre el vault y espera unos minutos, porque las asignaciones de rol tardan en propagarse. Los vaults con directivas de acceso indican en cambio que la identidad no tiene el permiso get de secretos.',

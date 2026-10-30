@@ -1,3 +1,26 @@
+## [0.19.0] - 2026-10-30
+
+### Changed
+
+* **Secret existence check in the provider adapters**: The AWS SSM and Azure
+  Key Vault adapters bundled with the Action can now check whether secrets
+  exist without reading them, for the CLI's `envilder validate`. The Action
+  does not use it, and its behavior is unchanged
+  ([#558](https://github.com/macalbert/envilder/issues/558))
+* **Azure Key Vault URLs are no longer checked by host**: The Action shares
+  the CLI's change: `vaultUrl` goes to the Azure Key Vault client as written,
+  without the `https://` and Azure-domain checks, as in the SDKs
+
+### Security
+
+* **Accepted risk: credentials follow the vault URL**: The Azure credential
+  the workflow provides is sent to whatever host the `vault-url` input or
+  `$config.vaultUrl` names, and the input overrides the map file. Both live
+  in the same repository as the workflow, so review changes to the map file
+  and to workflow files like any other code change
+
+---
+
 ## [0.18.0] - 2026-10-29
 
 ### Changed
@@ -7,11 +30,6 @@
   place, also used by the new CLI-only `envilder validate --offline`. The
   Action's pull flow, inputs, outputs and messages are unchanged
   ([#557](https://github.com/macalbert/envilder/issues/557))
-* **Secret existence check in the provider adapters**: The AWS SSM and Azure
-  Key Vault adapters bundled with the Action can now check whether secrets
-  exist without reading them, for the CLI's `envilder validate`. The Action
-  does not use it, and its behavior is unchanged
-  ([#558](https://github.com/macalbert/envilder/issues/558))
 
 ---
 

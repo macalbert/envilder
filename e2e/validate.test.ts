@@ -179,10 +179,6 @@ describe('envilder validate (E2E)', () => {
       localStackAzure = await new LocalStackAzureContainer().start();
       vaultUrl = localStackAzure.getVaultUrl();
       secretClient = localStackAzure.createSecretClient();
-      vi.stubEnv(
-        'ENVILDER_ALLOWED_VAULT_HOSTS',
-        localStackAzure.getVaultHost(),
-      );
       await secretClient.setSecret('validate-db-url', secretValue);
     }, 240_000);
 

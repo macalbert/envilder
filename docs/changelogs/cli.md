@@ -5,7 +5,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
-## [0.18.0] - 2026-10-29
+## [0.19.0] - 2026-10-30
 
 ### Added
 
@@ -26,6 +26,33 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   or `secrets/readMetadata` (Azure RBAC, included in Key Vault Secrets User)
   ([#558](https://github.com/macalbert/envilder/issues/558)).
   [Guide](../validate-command.md)
+
+### Changed
+
+* **Azure Key Vault URLs are no longer checked by host**: The CLI rejected a
+  `vaultUrl` that did not use `https://` or whose host did not end in an
+  Azure Key Vault domain, and read `ENVILDER_ALLOWED_VAULT_HOSTS` to widen
+  that list. The check and the variable are gone: the URL goes to the Azure
+  Key Vault client as written, with the client's default challenge resource
+  verification, as in the Node.js, Python and .NET SDKs. A malformed or
+  `http://` URL now fails with the Azure client's own error
+
+### Security
+
+* **Accepted risk: credentials follow the vault URL in the map file**:
+  `DefaultAzureCredential` requests a Key Vault token for whatever host
+  `vaultUrl` names, so a map file that points at another host sends that
+  token there. The map file is versioned with the code it configures, and
+  whoever can change it can already change the application, so a host
+  allowlist adds configuration without a matching security gain. Review
+  changes to `$config.vaultUrl` and `--vault-url` like any other code change
+
+---
+
+## [0.18.0] - 2026-10-29
+
+### Added
+
 * **`envilder validate --offline`**: a new subcommand that checks the map file
   without calling any provider and without credentials. It reports invalid
   JSON with the file path, every schema violation with the key that causes it
@@ -35,7 +62,8 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   the map file or from `--provider`, `--profile` and `--vault-url`, which take
   precedence over `$config` as on a pull. It prints `✓ Map file valid` and
   exits `0` when the file is usable, and exits `1` otherwise. Secret values
-  are never printed
+  are never printed. Checking that each secret exists in the provider is not
+  available yet, so `validate` without `--offline` is rejected
   ([#557](https://github.com/macalbert/envilder/issues/557)).
   [Guide](../validate-command.md)
 

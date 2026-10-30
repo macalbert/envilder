@@ -145,10 +145,6 @@ export class LocalStackAzureContainer {
     return this.vaultUrl;
   }
 
-  getVaultHost(): string {
-    return new URL(this.vaultUrl).hostname;
-  }
-
   /**
    * Creates a client that authenticates like production code does, through
    * `DefaultAzureCredential` and the local managed identity token endpoint.

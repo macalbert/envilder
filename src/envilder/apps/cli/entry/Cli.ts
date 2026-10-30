@@ -252,20 +252,17 @@ export async function main() {
             }),
         };
 
-        const infraOptions = buildInfrastructureOptions();
-
         serviceProvider = Startup.build()
           .configureServices()
-          .configureInfrastructure(config, infraOptions)
+          .configureInfrastructure(config)
           .create();
 
         if (isPushSingle) {
           const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
           const providerName = config.provider?.toLowerCase() || 'aws';
-          const vaultInfo =
-            providerName === 'azure' && config.vaultUrl
-              ? `, vault=${new URL(config.vaultUrl).origin}`
-              : '';
+          const origin =
+            providerName === 'azure' ? vaultOrigin(config.vaultUrl) : undefined;
+          const vaultInfo = origin ? `, vault=${origin}` : '';
           const source = mapFileExists
             ? `configuration from ${resolvedMap}`
             : 'configuration';
@@ -586,7 +583,7 @@ async function runRemoteValidation(options: ValidateOptions): Promise<void> {
 
   const container = Startup.build()
     .configureRemoteValidation()
-    .configureInfrastructure(config, buildInfrastructureOptions())
+    .configureInfrastructure(config)
     .create();
   const handler = container.get<ValidateRemoteKeysCommandHandler>(
     TYPES.ValidateRemoteKeysCommandHandler,
@@ -781,7 +778,7 @@ async function resolveSecretsAndRun(
   const container = Startup.build()
     .configureExec(createExecSecretMasker())
     .configureServices()
-    .configureInfrastructure(config, buildInfrastructureOptions())
+    .configureInfrastructure(config)
     .create();
   const dispatcher = container.get<DispatchActionCommandHandler>(
     TYPES.DispatchActionCommandHandler,
@@ -878,14 +875,19 @@ function createExecSecretMasker(): ISecretMasker {
     : new NoOpSecretMasker();
 }
 
-function buildInfrastructureOptions(): Record<string, unknown> {
-  const infraOptions: Record<string, unknown> = {};
-  const extraHosts = process.env.ENVILDER_ALLOWED_VAULT_HOSTS;
-  if (extraHosts) {
-    infraOptions.allowedVaultHosts = extraHosts.split(',').map((h) => h.trim());
-    infraOptions.disableChallengeResourceVerification = true;
+/**
+ * The vault origin to log, never the full URL, which can carry credentials.
+ * `undefined` when the URL does not parse: the Azure client reports that.
+ */
+function vaultOrigin(vaultUrl: string | undefined): string | undefined {
+  if (!vaultUrl) {
+    return undefined;
   }
-  return infraOptions;
+  try {
+    return new URL(vaultUrl).origin;
+  } catch {
+    return undefined;
+  }
 }
 
 /**
