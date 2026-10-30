@@ -405,6 +405,40 @@ describe('Cli', () => {
       'Using configuration from map.json: provider=aws',
     );
   });
+  it('Should_LogProviderWithoutVault_When_PushSingleVaultUrlIsMalformed', async () => {
+    // Arrange
+    const { readMapFileConfig } = await import(
+      '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore'
+    );
+    vi.mocked(readMapFileConfig).mockResolvedValue({
+      provider: 'azure',
+      vaultUrl: 'not-a-url',
+    });
+    const loggerSpy = vi
+      .spyOn(ConsoleLogger.prototype, 'info')
+      .mockImplementation(vi.fn());
+    process.argv = [
+      'node',
+      'cli.js',
+      '--map',
+      'map.json',
+      '--key',
+      'API_KEY',
+      '--value',
+      'secret',
+      '--secret-path',
+      '/my/path',
+    ];
+
+    // Act
+    await main();
+
+    // Assert
+    expect(loggerSpy).toHaveBeenCalledWith(
+      'Using configuration from map.json: provider=azure',
+    );
+  });
+
   it('Should_LogOnlyVaultOrigin_When_PushSingleUsesAzureConfig', async () => {
     // Arrange
     const vaultUrl =

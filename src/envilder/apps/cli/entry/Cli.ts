@@ -239,10 +239,9 @@ export async function main() {
         if (isPushSingle) {
           const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
           const providerName = config.provider?.toLowerCase() || 'aws';
-          const vaultInfo =
-            providerName === 'azure' && config.vaultUrl
-              ? `, vault=${new URL(config.vaultUrl).origin}`
-              : '';
+          const origin =
+            providerName === 'azure' ? vaultOrigin(config.vaultUrl) : undefined;
+          const vaultInfo = origin ? `, vault=${origin}` : '';
           const source = mapFileExists
             ? `configuration from ${resolvedMap}`
             : 'configuration';
@@ -653,6 +652,21 @@ function createExecSecretMasker(): ISecretMasker {
   return process.env.GITHUB_ACTIONS === 'true'
     ? new GitHubActionsSecretMasker({ stream: process.stderr })
     : new NoOpSecretMasker();
+}
+
+/**
+ * The vault origin to log, never the full URL, which can carry credentials.
+ * `undefined` when the URL does not parse: the Azure client reports that.
+ */
+function vaultOrigin(vaultUrl: string | undefined): string | undefined {
+  if (!vaultUrl) {
+    return undefined;
+  }
+  try {
+    return new URL(vaultUrl).origin;
+  } catch {
+    return undefined;
+  }
 }
 
 /**

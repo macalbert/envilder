@@ -661,7 +661,7 @@ export const es: Translations = {
       optProvider:
         'aws o azure, en mayúsculas o minúsculas. Cualquier otro valor detiene la ejecución antes de leer ningún secreto.',
       optVault:
-        'URL de Key Vault. Obligatoria con azure. Debe usar https:// y un host de Key Vault.',
+        'URL de Key Vault, por ejemplo https://my-vault.vault.azure.net. Obligatoria con azure.',
       optProfileDefault:
         '$config.profile y, si no, la cadena de credenciales por defecto de AWS',
       optProfile:
