@@ -14,7 +14,6 @@ import { TYPES } from '../../core/types.js';
 import {
   configureApplicationServices,
   configureInfrastructureServices,
-  type InfrastructureOptions,
 } from '../shared/ContainerConfiguration.js';
 
 export class Startup {
@@ -48,10 +47,7 @@ export class Startup {
     return this;
   }
 
-  configureInfrastructure(
-    config?: MapFileConfig,
-    options?: InfrastructureOptions,
-  ): this {
+  configureInfrastructure(config?: MapFileConfig): this {
     if (!this.container.isBound(TYPES.ISecretMasker)) {
       this.container
         .bind<ISecretMasker>(TYPES.ISecretMasker)
@@ -75,7 +71,7 @@ export class Startup {
         .to(NodeProcessContext)
         .inSingletonScope();
     }
-    configureInfrastructureServices(this.container, config, options);
+    configureInfrastructureServices(this.container, config);
     return this;
   }
 

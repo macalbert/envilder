@@ -329,7 +329,6 @@ describe('GitHub Action (E2E)', () => {
   describe('Azure Key Vault', { timeout: AZURE_TEST_TIMEOUT_MS }, () => {
     let localStackAzure: LocalStackAzureContainer;
     let azureVaultUrl: string;
-    let azureVaultHost: string;
     let azureSecretClient: SecretClient;
     const azureMapFilePath = join(
       rootDir,
@@ -347,7 +346,6 @@ describe('GitHub Action (E2E)', () => {
     beforeAll(async () => {
       localStackAzure = await new LocalStackAzureContainer().start();
       azureVaultUrl = localStackAzure.getVaultUrl();
-      azureVaultHost = localStackAzure.getVaultHost();
       azureSecretClient = localStackAzure.createSecretClient();
 
       // Write dynamic map file with container's vault URL
@@ -388,12 +386,10 @@ describe('GitHub Action (E2E)', () => {
       await azureSecretClient.setSecret('test-secret', 'azure-gha-value');
       const config = { provider: 'azure', vaultUrl: azureVaultUrl };
 
-      // Act — invoke production code directly, passing test vault host
+      // Act — invoke production code directly
       const container = Startup.build()
         .configureServices()
-        .configureInfrastructure(config, {
-          allowedVaultHosts: [azureVaultHost],
-        })
+        .configureInfrastructure(config)
         .create();
       const handler = container.get<DispatchActionCommandHandler>(
         TYPES.DispatchActionCommandHandler,

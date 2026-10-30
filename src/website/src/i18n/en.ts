@@ -575,7 +575,7 @@ export const en: Translations = {
       fieldProfile:
         'Named profile from ~/.aws/config or ~/.aws/credentials. AWS only: with azure it is ignored and a warning is printed.',
       fieldVaultUrl:
-        'Key Vault URL. Required for azure. Must use https:// and a Key Vault host (.vault.azure.net, .vault.azure.cn, .vault.usgovcloudapi.net or .vault.microsoftazure.de). Ignored by aws.',
+        'Key Vault URL, for example https://my-vault.vault.azure.net. Required for azure. Ignored by aws.',
       configSdkNote:
         'The runtime SDKs read the same fields but can reject combinations the CLI only warns about, such as profile with azure. Each SDK page lists its own errors.',
       providersTitle: 'Secret identifiers by provider',
@@ -634,9 +634,6 @@ export const en: Translations = {
       errProviderFix: 'Use aws or azure in $config.provider or --provider.',
       errVaultMissingFix:
         'Set $config.vaultUrl, or pass --vault-url, when the provider is azure.',
-      errVaultHttpsFix: 'Use the https:// URL shown in the vault overview.',
-      errVaultHostFix:
-        'Use the vault URI from Azure, for example https://my-vault.vault.azure.net, not a custom domain.',
       errProfileAzureFix:
         'A warning, not an error. Remove profile from $config, or drop --profile, when using azure.',
       errCaseFix:
@@ -672,7 +669,7 @@ export const en: Translations = {
       optProvider:
         'aws or azure, in any case. Any other value stops the run before a secret is read.',
       optVault:
-        'Key Vault URL. Required with azure. It must use https:// and a Key Vault host.',
+        'Key Vault URL, for example https://my-vault.vault.azure.net. Required with azure.',
       optProfileDefault:
         '$config.profile, then the default AWS credential chain',
       optProfile:
@@ -1361,7 +1358,7 @@ export const en: Translations = {
       'This is a warning, not a failure: the step still succeeds, with fewer secrets in the summary than in the map. In a new .env file the variable is left out. If the file already existed (committed, cached or written by an earlier step), its old value is kept, so delete the file before the action when a stale value must not survive. Check the name, the region and, on Azure, the converted name. If a missing value must stop the deploy, check for it in a later step.',
     ghaErrVaultUrlTitle: 'Azure vault URL missing',
     ghaErrVaultUrlFix:
-      'Set the vault-url input or $config.vaultUrl in the map file. It must be an https URL ending in .vault.azure.net, or the equivalent domain of a sovereign cloud.',
+      'Set the vault-url input or $config.vaultUrl in the map file. Use the vault URI shown in the Azure portal, for example https://my-vault.vault.azure.net.',
     ghaErrAzureDeniedTitle: 'Access denied on Azure Key Vault',
     ghaErrAzureDeniedFix:
       "azure/login worked but the identity has no data-plane role on the vault. Assign Key Vault Secrets User on the vault and wait a few minutes, since role assignments take time to propagate. Vaults that use access policies report instead that the identity doesn't have secrets get permission.",
