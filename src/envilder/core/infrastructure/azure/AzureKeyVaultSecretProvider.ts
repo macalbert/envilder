@@ -6,6 +6,7 @@ import {
   SecretOperationError,
 } from '../../domain/errors/DomainErrors.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
+import type { SecretExistence } from '../../domain/SecretExistence.js';
 import { describeError } from '../describeError.js';
 
 @injectable()
@@ -42,6 +43,61 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
     await this.client.setSecret(secretName, value);
   }
 
+  /**
+   * Lists the vault's secret names once, which reads metadata only, and
+   * matches every name against it the way Key Vault does, ignoring case. A
+   * disabled secret cannot be read, so it counts as missing. Needs the `List`
+   * secret permission (access policies) or
+   * `Microsoft.KeyVault/vaults/secrets/readMetadata/action` (Azure RBAC,
+   * included in Key Vault Secrets User).
+   */
+  async checkSecretsExist(
+    names: readonly string[],
+  ): Promise<ReadonlyMap<string, SecretExistence>> {
+    const results = new Map<string, SecretExistence>();
+    const secretNames = new Map<string, string>();
+    for (const name of new Set(names)) {
+      try {
+        secretNames.set(name, this.resolveSecretName(name).toLowerCase());
+      } catch (error) {
+        results.set(name, {
+          status: 'provider_error',
+          reason: describeError(error),
+        });
+      }
+    }
+    if (secretNames.size === 0) {
+      return results;
+    }
+
+    let enabled: Set<string>;
+    try {
+      enabled = await this.listEnabledSecretNames();
+    } catch (error) {
+      const existence = toExistence(error);
+      for (const name of secretNames.keys()) {
+        results.set(name, existence);
+      }
+      return results;
+    }
+    for (const [name, secretName] of secretNames) {
+      results.set(name, {
+        status: enabled.has(secretName) ? 'exists' : 'missing',
+      });
+    }
+    return results;
+  }
+
+  private async listEnabledSecretNames(): Promise<Set<string>> {
+    const enabled = new Set<string>();
+    for await (const properties of this.client.listPropertiesOfSecrets()) {
+      if (properties.enabled !== false) {
+        enabled.add(properties.name.toLowerCase());
+      }
+    }
+    return enabled;
+  }
+
   private resolveSecretName(originalName: string): string {
     if (originalName.trim().length === 0) {
       throw new InvalidArgumentError(
@@ -64,6 +120,32 @@ export class AzureKeyVaultSecretProvider implements ISecretProvider {
     this.normalizedNameRegistry.set(registryKey, originalName);
     return normalized;
   }
+}
+
+const AUTHENTICATION_ERROR_NAMES = new Set([
+  'CredentialUnavailableError',
+  'AuthenticationError',
+  'AuthenticationRequiredError',
+  'AggregateAuthenticationError',
+]);
+
+function toExistence(error: unknown): SecretExistence {
+  const reason = describeError(error);
+  const statusCode =
+    typeof error === 'object' && error !== null && 'statusCode' in error
+      ? error.statusCode
+      : undefined;
+  const name =
+    typeof error === 'object' && error !== null && 'name' in error
+      ? String(error.name)
+      : '';
+  if (statusCode === 403) {
+    return { status: 'access_denied', reason };
+  }
+  if (statusCode === 401 || AUTHENTICATION_ERROR_NAMES.has(name)) {
+    return { status: 'authentication_failed', reason };
+  }
+  return { status: 'provider_error', reason };
 }
 
 /**

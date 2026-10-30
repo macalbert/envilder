@@ -9,6 +9,23 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ### Added
 
+* **`envilder validate` checks that every declared secret exists**: without
+  `--offline`, `validate` now asks the provider whether each secret path in
+  the map file exists, without reading any value, and lists every variable
+  with its path and status: `exists`, `missing`, `access denied` (never
+  reported as `missing`), `authentication failed` or `provider error`. A path
+  shared by several variables is checked once. It ends with
+  `✓ All N secrets exist` and exit code `0`, or with a summary such as
+  `✗ Validation failed: 2 missing, 1 access denied` and exit code `1`. An
+  invalid map file fails with the offline result and no provider is called.
+  Expired credentials and SSO sessions show the same message as a pull,
+  including the `aws sso login` recovery on a terminal. AWS SSM is checked
+  with `GetParameters` in batches of ten and `WithDecryption: false`, which
+  needs `ssm:GetParameters`; Azure Key Vault lists the vault's secret
+  metadata once, which needs the `List` secret permission (access policies)
+  or `secrets/readMetadata` (Azure RBAC, included in Key Vault Secrets User)
+  ([#558](https://github.com/macalbert/envilder/issues/558)).
+  [Guide](../validate-command.md)
 * **`envilder validate --offline`**: a new subcommand that checks the map file
   without calling any provider and without credentials. It reports invalid
   JSON with the file path, every schema violation with the key that causes it
@@ -18,8 +35,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   the map file or from `--provider`, `--profile` and `--vault-url`, which take
   precedence over `$config` as on a pull. It prints `✓ Map file valid` and
   exits `0` when the file is usable, and exits `1` otherwise. Secret values
-  are never printed. Checking that each secret exists in the provider is not
-  available yet, so `validate` without `--offline` is rejected
+  are never printed
   ([#557](https://github.com/macalbert/envilder/issues/557)).
   [Guide](../validate-command.md)
 

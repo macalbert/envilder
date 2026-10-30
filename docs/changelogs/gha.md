@@ -7,6 +7,11 @@
   place, also used by the new CLI-only `envilder validate --offline`. The
   Action's pull flow, inputs, outputs and messages are unchanged
   ([#557](https://github.com/macalbert/envilder/issues/557))
+* **Secret existence check in the provider adapters**: The AWS SSM and Azure
+  Key Vault adapters bundled with the Action can now check whether secrets
+  exist without reading them, for the CLI's `envilder validate`. The Action
+  does not use it, and its behavior is unchanged
+  ([#558](https://github.com/macalbert/envilder/issues/558))
 
 ---
 
