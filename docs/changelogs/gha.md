@@ -6,8 +6,10 @@
   the Action exports every secret to `GITHUB_ENV`, so every later step of the
   job gets them as environment variables and no `.env` file is written. The
   step fails, and nothing is exported, when any secret is missing or empty,
-  or when the map file declares `NODE_OPTIONS`, which the runner ignores in
-  `GITHUB_ENV`
+  or when the map file declares a name the runner does not let `GITHUB_ENV`
+  set: `NODE_OPTIONS` or a default variable such as `GITHUB_SHA` or
+  `RUNNER_OS`. Names are compared case-insensitively, so `node_options` is
+  refused too
 * **`command` input**: Runs a command with `bash` (like a `run:` step) with
   the secrets in its environment only, and ends the step with the command's
   exit code. The secrets are not exported, so later steps never see them.

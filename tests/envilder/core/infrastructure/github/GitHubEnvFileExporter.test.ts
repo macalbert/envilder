@@ -130,6 +130,33 @@ describe('GitHubEnvFileExporter', () => {
     expect(await readFile(filePath, 'utf8')).toBe('');
   });
 
+  it('Should_ExportNothing_When_ANameIsADefaultRunnerVariable', async () => {
+    // Arrange
+    const sut = new GitHubEnvFileExporter({ filePath });
+
+    // Act
+    const actual = await sut
+      .export({ API_KEY: 'fake-key', GITHUB_SHA: 'fake-sha', RUNNER_OS: 'x' })
+      .catch((error: unknown) => error);
+
+    // Assert
+    expect(actual).toBeInstanceOf(InvalidArgumentError);
+    expect((actual as Error).message).toContain('GITHUB_SHA, RUNNER_OS');
+    expect(await readFile(filePath, 'utf8')).toBe('');
+  });
+
+  it('Should_ExportCustomName_When_ItOnlySharesTheGitHubPrefix', async () => {
+    // Arrange
+    const sut = new GitHubEnvFileExporter({ filePath });
+
+    // Act
+    await sut.export({ GITHUB_APP_PRIVATE_KEY: 'fake-key' });
+
+    // Assert
+    const actual = parseGitHubEnvFile(await readFile(filePath, 'utf8'));
+    expect(actual).toEqual({ GITHUB_APP_PRIVATE_KEY: 'fake-key' });
+  });
+
   it('Should_ThrowInvalidArgumentError_When_GitHubEnvIsNotSet', async () => {
     // Arrange
     delete process.env.GITHUB_ENV;

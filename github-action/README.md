@@ -525,11 +525,14 @@ The default mode only works inside a GitHub Actions job. Outside one (for
 example a local runner emulator without `GITHUB_ENV`), set `env-file` or
 `command`.
 
-### Error: "NODE_OPTIONS cannot be exported to the job environment"
+### Error: "... cannot be exported to the job environment"
 
-GitHub Actions ignores `NODE_OPTIONS` in `GITHUB_ENV`, so the default mode
-refuses it instead of reporting a variable later steps would never get. Use
-`command` or `env-file` for a map file that declares it.
+GitHub Actions does not let `GITHUB_ENV` set `NODE_OPTIONS` or its
+[default variables](https://docs.github.com/en/actions/reference/workflows-and-actions/variables)
+(`GITHUB_SHA`, `RUNNER_OS` and the rest of the documented `GITHUB_*` and
+`RUNNER_*` names). The default mode refuses those names, in any letter case,
+instead of reporting a variable later steps would never get. Rename the
+variable in the map file, or use `command` or `env-file`.
 
 ### Generated `.env` file is empty
 
