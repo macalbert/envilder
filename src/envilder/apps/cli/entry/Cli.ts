@@ -835,20 +835,31 @@ async function dispatchExec(
   return exitCode;
 }
 
+/**
+ * Writes through the exec logger, which may fail before the container
+ * exists (reading the map file), so input-derived text in the message is
+ * escaped like any other exec output under GitHub Actions.
+ */
 function reportExecFailure(error: unknown): number {
   if (error instanceof SilentExitError) {
     // SSO recovery was declined or failed and already explained why.
     return EXEC_ENVILDER_FAILURE;
   }
+  const logger = createExecLogger();
+  const logLines = (text: string) => {
+    for (const line of text.split('\n')) {
+      logger.error(line);
+    }
+  };
   if (error instanceof CommandNotFoundError) {
-    console.error(pc.red(error.message));
+    logLines(pc.red(error.message));
     return EXEC_COMMAND_NOT_FOUND;
   }
   if (error instanceof CommandNotExecutableError) {
-    console.error(pc.red(error.message));
+    logLines(pc.red(error.message));
     return EXEC_COMMAND_NOT_EXECUTABLE;
   }
-  console.error(presentError(error));
+  logLines(presentError(error));
   return EXEC_ENVILDER_FAILURE;
 }
 
