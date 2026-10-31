@@ -76,8 +76,36 @@ const SECTION_EMOJI = {
   tests: '🧪',
 };
 
-const BLOCK_START = /^\s*(?:[*-] |\d+\. |#{1,6} |```|---|\||>)/;
-const FENCE = /^\s*```/;
+const BLOCK_START = /^\s*(?:[*-] |\d+\. |#{1,6} |```|~~~|---|\||>)/;
+const FENCE_OPEN = /^\s*(`{3,}|~{3,})/;
+const FENCE_CLOSE = /^\s*(`{3,}|~{3,})\s*$/;
+
+/**
+ * Tracks fenced code blocks as CommonMark does: a fence closes only with the
+ * opener's character, repeated at least as many times, and nothing after it.
+ */
+function createFenceTracker() {
+  let opener;
+  return (line) => {
+    if (!opener) {
+      const open = line.match(FENCE_OPEN);
+      if (open) {
+        opener = open[1];
+        return true;
+      }
+      return false;
+    }
+    const close = line.match(FENCE_CLOSE);
+    if (
+      close &&
+      close[1][0] === opener[0] &&
+      close[1].length >= opener.length
+    ) {
+      opener = undefined;
+    }
+    return true;
+  };
+}
 
 function getComponent(name) {
   const component = COMPONENTS[name];
@@ -134,17 +162,12 @@ function parseReleaseComment(section) {
 
 function unwrapLines(markdown) {
   const out = [];
-  let inFence = false;
+  const isCode = createFenceTracker();
   let previousJoinable = false;
   for (const line of markdown.split('\n')) {
-    if (FENCE.test(line)) {
-      inFence = !inFence;
+    if (isCode(line)) {
       out.push(line);
       previousJoinable = false;
-      continue;
-    }
-    if (inFence) {
-      out.push(line);
       continue;
     }
     if (line.trim() === '') {
@@ -164,15 +187,11 @@ function unwrapLines(markdown) {
 
 function formatSections(markdown, tag) {
   const linkBase = `${REPOSITORY_URL}/blob/${tag}/docs/changelogs/`;
-  let inFence = false;
+  const isCode = createFenceTracker();
   return markdown
     .split('\n')
     .map((line) => {
-      if (FENCE.test(line)) {
-        inFence = !inFence;
-        return line;
-      }
-      if (inFence) {
+      if (isCode(line)) {
         return line;
       }
       const subheading = line.match(/^### (.+)$/);
@@ -244,29 +263,75 @@ export function renderReleaseNotes({
 }
 
 function parseVersion(text) {
-  const match = text.match(/^(\d+)\.(\d+)\.(\d+)$/);
-  return match ? match.slice(1).map(Number) : undefined;
+  const match = text.match(
+    /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/,
+  );
+  if (!match) {
+    return undefined;
+  }
+  return {
+    core: match.slice(1, 4).map(Number),
+    prerelease: match[4]?.split('.') ?? [],
+  };
 }
 
+function compareIdentifiers(left, right) {
+  const leftNumeric = /^\d+$/.test(left);
+  const rightNumeric = /^\d+$/.test(right);
+  if (leftNumeric && rightNumeric) {
+    return Number(left) - Number(right);
+  }
+  if (leftNumeric !== rightNumeric) {
+    return leftNumeric ? -1 : 1;
+  }
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+/** Orders versions by semver precedence: a prerelease sorts below its release. */
 function compareVersions(left, right) {
   for (let i = 0; i < 3; i++) {
-    if (left[i] !== right[i]) {
-      return left[i] - right[i];
+    if (left.core[i] !== right.core[i]) {
+      return left.core[i] - right.core[i];
+    }
+  }
+  if (left.prerelease.length === 0 || right.prerelease.length === 0) {
+    return right.prerelease.length - left.prerelease.length;
+  }
+  const length = Math.max(left.prerelease.length, right.prerelease.length);
+  for (let i = 0; i < length; i++) {
+    if (left.prerelease[i] === undefined) {
+      return -1;
+    }
+    if (right.prerelease[i] === undefined) {
+      return 1;
+    }
+    const order = compareIdentifiers(left.prerelease[i], right.prerelease[i]);
+    if (order !== 0) {
+      return order;
     }
   }
   return 0;
 }
 
-/** Returns the highest `MAJOR.MINOR.PATCH` tag of the component below `version`. */
+/**
+ * Returns the highest tag of the component below `version`. A stable release
+ * compares against the previous stable release, skipping prereleases.
+ */
 export function findPreviousTag(tags, componentName, version) {
   const { tagPrefix } = getComponent(componentName);
   const current = parseVersion(version);
+  if (!current) {
+    throw new Error(`"${version}" is not a semantic version`);
+  }
+  const isStable = current.prerelease.length === 0;
   return tags
     .filter((tag) => tag.startsWith(tagPrefix))
     .map((tag) => ({ tag, version: parseVersion(tag.slice(tagPrefix.length)) }))
     .filter(
       (candidate) =>
-        candidate.version && compareVersions(candidate.version, current) < 0,
+        candidate.version &&
+        (!isStable || candidate.version.prerelease.length === 0) &&
+        compareVersions(candidate.version, current) < 0,
     )
     .sort((a, b) => compareVersions(b.version, a.version))
     .at(0)?.tag;

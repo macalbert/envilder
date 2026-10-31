@@ -203,6 +203,25 @@ describe('renderReleaseNotes', () => {
     );
   });
 
+  it('Should_KeepTildeFencedCodeIntact_When_SectionUsesTildeFence', () => {
+    // Arrange
+    const input = {
+      component: 'cli',
+      version: '0.18.0',
+      changelog: `${changelog}\n~~~bash\nenvilder validate\n  --offline\n\`\`\`\n  --map=a.json\n~~~\n`,
+      previousTag: 'v0.17.2',
+      pullRequests,
+    };
+
+    // Act
+    const actual = renderReleaseNotes(input);
+
+    // Assert
+    expect(actual.body).toContain(
+      '~~~bash\nenvilder validate\n  --offline\n```\n  --map=a.json\n~~~',
+    );
+  });
+
   it('Should_Throw_When_ChangelogHasNoSectionForVersion', () => {
     // Arrange
     const input = {
@@ -250,5 +269,38 @@ describe('findPreviousTag', () => {
 
     // Assert
     expect(actual).toBe('sdk-nodejs/v0.4.10');
+  });
+
+  it('Should_SkipPrereleaseTags_When_VersionIsStable', () => {
+    // Arrange
+    const tags = ['v0.19.0', 'v0.19.1-0', 'v0.19.1-1'];
+
+    // Act
+    const actual = findPreviousTag(tags, 'cli', '0.19.1');
+
+    // Assert
+    expect(actual).toBe('v0.19.0');
+  });
+
+  it('Should_ReturnPreviousPrerelease_When_VersionIsPrerelease', () => {
+    // Arrange
+    const tags = ['v0.19.0', 'v0.19.1-0', 'v0.19.1-1', 'v0.19.1-10'];
+
+    // Act
+    const actual = findPreviousTag(tags, 'cli', '0.19.1-2');
+
+    // Assert
+    expect(actual).toBe('v0.19.1-1');
+  });
+
+  it('Should_ReturnPreviousStableTag_When_FirstPrereleaseOfVersion', () => {
+    // Arrange
+    const tags = ['v0.18.0', 'v0.19.0'];
+
+    // Act
+    const actual = findPreviousTag(tags, 'cli', '0.19.1-0');
+
+    // Assert
+    expect(actual).toBe('v0.19.0');
   });
 });
