@@ -1311,6 +1311,28 @@ describe('Cli exec', () => {
       expect(runSpy).toHaveBeenCalledTimes(1);
     });
 
+    it('Should_NotEmitWorkflowCommand_When_ExecFailureMessageCarriesOneInGitHubActions', async () => {
+      // Arrange
+      vi.stubEnv('GITHUB_ACTIONS', 'true');
+      const { readMapFileConfig } = await import(
+        '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore'
+      );
+      vi.mocked(readMapFileConfig).mockRejectedValue(
+        new Error('Cannot read cfg.json\n::stop-commands::token'),
+      );
+
+      // Act
+      const actual = await runCli(['exec', '--map=cfg.json', 'npm', 'test']);
+
+      // Assert
+      expect(actual).not.toBe(0);
+      expect(stderr()).toContain('stop-commands');
+      const commandLines = stderr()
+        .split('\n')
+        .filter((line) => line.trimStart().startsWith('::'));
+      expect(commandLines).toEqual([]);
+    });
+
     it('Should_NotEmitMaskCommands_When_NotRunningInGitHubActions', async () => {
       // Act
       await runCli(['exec', '--', 'npm', 'test']);

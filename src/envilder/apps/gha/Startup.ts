@@ -3,11 +3,14 @@ import { ExecWithSecretsCommandHandler } from '../../core/application/execWithSe
 import { ExportSecretsToEnvironmentCommandHandler } from '../../core/application/exportSecretsToEnvironment/ExportSecretsToEnvironmentCommandHandler.js';
 import type { MapFileConfig } from '../../core/domain/MapFileConfig.js';
 import type { IEnvironmentExporter } from '../../core/domain/ports/IEnvironmentExporter.js';
+import type { ILogger } from '../../core/domain/ports/ILogger.js';
 import type { IProcessContext } from '../../core/domain/ports/IProcessContext.js';
 import type { IProcessRunner } from '../../core/domain/ports/IProcessRunner.js';
 import type { ISecretMasker } from '../../core/domain/ports/ISecretMasker.js';
+import { GitHubActionsLogger } from '../../core/infrastructure/github/GitHubActionsLogger.js';
 import { GitHubActionsSecretMasker } from '../../core/infrastructure/github/GitHubActionsSecretMasker.js';
 import { GitHubEnvFileExporter } from '../../core/infrastructure/github/GitHubEnvFileExporter.js';
+import { ConsoleLogger } from '../../core/infrastructure/logger/ConsoleLogger.js';
 import { CrossSpawnProcessRunner } from '../../core/infrastructure/process/CrossSpawnProcessRunner.js';
 import { NodeProcessContext } from '../../core/infrastructure/process/NodeProcessContext.js';
 import { TYPES } from '../../core/types.js';
@@ -48,6 +51,11 @@ export class Startup {
   }
 
   configureInfrastructure(config?: MapFileConfig): this {
+    if (!this.container.isBound(TYPES.ILogger)) {
+      this.container
+        .bind<ILogger>(TYPES.ILogger)
+        .toConstantValue(new GitHubActionsLogger(new ConsoleLogger()));
+    }
     if (!this.container.isBound(TYPES.ISecretMasker)) {
       this.container
         .bind<ISecretMasker>(TYPES.ISecretMasker)

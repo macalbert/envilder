@@ -5,6 +5,7 @@ import type { DispatchActionCommandHandler } from '../../../core/application/dis
 import { InvalidArgumentError } from '../../../core/domain/errors/DomainErrors.js';
 import type { MapFileConfig } from '../../../core/domain/MapFileConfig.js';
 import type { ILogger } from '../../../core/domain/ports/ILogger.js';
+import { GitHubActionsLogger } from '../../../core/infrastructure/github/GitHubActionsLogger.js';
 import { ConsoleLogger } from '../../../core/infrastructure/logger/ConsoleLogger.js';
 import { readMapFileConfig } from '../../../core/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../../core/types.js';
@@ -90,7 +91,7 @@ export async function main(): Promise<number> {
   const inputs = readInputs();
 
   let serviceProvider: Container;
-  let logger: ILogger = new ConsoleLogger();
+  let logger: ILogger = new GitHubActionsLogger(new ConsoleLogger());
 
   try {
     const fileConfig = inputs.mapFile
