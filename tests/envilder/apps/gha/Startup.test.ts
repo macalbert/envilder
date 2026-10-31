@@ -7,6 +7,7 @@ import type { ISecretMasker } from '../../../../src/envilder/core/domain/ports/I
 import type { ISecretProvider } from '../../../../src/envilder/core/domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../../../src/envilder/core/domain/ports/IVariableStore.js';
 import { AzureKeyVaultSecretProvider } from '../../../../src/envilder/core/infrastructure/azure/AzureKeyVaultSecretProvider.js';
+import { GitHubActionsLogger } from '../../../../src/envilder/core/infrastructure/github/GitHubActionsLogger.js';
 import { GitHubActionsSecretMasker } from '../../../../src/envilder/core/infrastructure/github/GitHubActionsSecretMasker.js';
 import { TYPES } from '../../../../src/envilder/core/types.js';
 
@@ -30,7 +31,9 @@ describe('Startup', () => {
         TYPES.DispatchActionCommandHandler,
       ),
     ).not.toThrow();
-    expect(() => container.get<ILogger>(TYPES.ILogger)).not.toThrow();
+    expect(container.get<ILogger>(TYPES.ILogger)).toBeInstanceOf(
+      GitHubActionsLogger,
+    );
     expect(() =>
       container.get<ISecretProvider>(TYPES.ISecretProvider),
     ).not.toThrow();

@@ -9,7 +9,6 @@ import type { IProcessRunner } from '../../core/domain/ports/IProcessRunner.js';
 import type { ISecretMasker } from '../../core/domain/ports/ISecretMasker.js';
 import type { IVariableStore } from '../../core/domain/ports/IVariableStore.js';
 import { ConsoleLogger } from '../../core/infrastructure/logger/ConsoleLogger.js';
-import { StderrConsoleLogger } from '../../core/infrastructure/logger/StderrConsoleLogger.js';
 import { CrossSpawnProcessRunner } from '../../core/infrastructure/process/CrossSpawnProcessRunner.js';
 import { NodeProcessContext } from '../../core/infrastructure/process/NodeProcessContext.js';
 import { FileVariableStore } from '../../core/infrastructure/variableStore/FileVariableStore.js';
@@ -36,16 +35,13 @@ export class Startup {
   }
 
   /**
-   * Wires the services specific to `envilder exec`: its handler, a logger that keeps
-   * stdout free for the child, the process runner, and the given secret
-   * masker. Call it before `configureInfrastructure`, which only binds the
-   * defaults left unbound.
+   * Wires the services specific to `envilder exec`: its handler, the process
+   * runner, and the given logger and secret masker. The logger must keep
+   * stdout free for the child. Call it before `configureInfrastructure`,
+   * which only binds the defaults left unbound.
    */
-  configureExec(secretMasker: ISecretMasker): this {
-    this.container
-      .bind<ILogger>(TYPES.ILogger)
-      .to(StderrConsoleLogger)
-      .inSingletonScope();
+  configureExec(secretMasker: ISecretMasker, logger: ILogger): this {
+    this.container.bind<ILogger>(TYPES.ILogger).toConstantValue(logger);
     this.container
       .bind<ISecretMasker>(TYPES.ISecretMasker)
       .toConstantValue(secretMasker);
