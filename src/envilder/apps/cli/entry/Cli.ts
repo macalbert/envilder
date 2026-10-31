@@ -11,6 +11,10 @@ import {
   formatArgument,
   formatProgram,
 } from '../../../core/application/execWithSecrets/CommandLineFormatter.js';
+import { ValidateMapFileCommand } from '../../../core/application/validateMapFile/ValidateMapFileCommand.js';
+import type { ValidateMapFileCommandHandler } from '../../../core/application/validateMapFile/ValidateMapFileCommandHandler.js';
+import { ValidateRemoteKeysCommand } from '../../../core/application/validateRemoteKeys/ValidateRemoteKeysCommand.js';
+import type { ValidateRemoteKeysCommandHandler } from '../../../core/application/validateRemoteKeys/ValidateRemoteKeysCommandHandler.js';
 import type { CliOptions } from '../../../core/domain/CliOptions.js';
 import {
   EXEC_COMMAND_NOT_EXECUTABLE,
@@ -27,11 +31,17 @@ import { resolveMapFileTarget } from '../../../core/domain/MapFileUpdate.js';
 import { OperationMode } from '../../../core/domain/OperationMode.js';
 import type { ILogger } from '../../../core/domain/ports/ILogger.js';
 import type { ISecretMasker } from '../../../core/domain/ports/ISecretMasker.js';
+import {
+  describeSecretExistenceStatus,
+  type RemoteKeyCheck,
+  summarizeFailures,
+} from '../../../core/domain/SecretExistence.js';
 import { GitHubActionsSecretMasker } from '../../../core/infrastructure/github/GitHubActionsSecretMasker.js';
 import { NoOpSecretMasker } from '../../../core/infrastructure/github/NoOpSecretMasker.js';
 import { PackageVersionReader } from '../../../core/infrastructure/package/PackageVersionReader.js';
 import { readMapFileConfig } from '../../../core/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../../core/types.js';
+import { SUPPORTED_PROVIDERS } from '../../shared/ContainerConfiguration.js';
 import { presentError } from '../errors/CliErrorPresenter.js';
 import {
   type KnownOption,
@@ -49,6 +59,14 @@ import { Startup } from '../Startup.js';
 const DEFAULT_MAP_FILE = 'envilder.json';
 const DEFAULT_ENV_FILE = '.env';
 const EXEC_USAGE = 'envilder exec [options] [--] <command> [args...]';
+
+type ValidateOptions = {
+  offline?: boolean;
+  map?: string;
+  profile?: string;
+  provider?: string;
+  vaultUrl?: string;
+};
 
 type ExecOptions = {
   map?: string;
@@ -106,6 +124,9 @@ export async function main() {
 
   ${pc.yellow('>')} ${pc.bold('Run a command with secrets')}  ${pc.dim('(nothing written to disk)')}
     ${pc.cyan('envilder exec -- npm run dev')}  ${pc.dim('# see: envilder exec --help')}
+
+  ${pc.green('>')} ${pc.bold('Check the map file and its secrets')}  ${pc.dim('(no value is read)')}
+    ${pc.cyan('envilder validate')}  ${pc.dim('# see: envilder validate --help')}
 `;
 
   program
@@ -231,20 +252,17 @@ export async function main() {
             }),
         };
 
-        const infraOptions = buildInfrastructureOptions();
-
         serviceProvider = Startup.build()
           .configureServices()
-          .configureInfrastructure(config, infraOptions)
+          .configureInfrastructure(config)
           .create();
 
         if (isPushSingle) {
           const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
           const providerName = config.provider?.toLowerCase() || 'aws';
-          const vaultInfo =
-            providerName === 'azure' && config.vaultUrl
-              ? `, vault=${new URL(config.vaultUrl).origin}`
-              : '';
+          const origin =
+            providerName === 'azure' ? vaultOrigin(config.vaultUrl) : undefined;
+          const vaultInfo = origin ? `, vault=${origin}` : '';
           const source = mapFileExists
             ? `configuration from ${resolvedMap}`
             : 'configuration';
@@ -256,6 +274,7 @@ export async function main() {
     );
 
   registerExecCommand(program);
+  registerValidateCommand(program);
   rejectDashValues(program, 1);
 
   try {
@@ -268,7 +287,8 @@ export async function main() {
     }
     // Only the exec subcommand overrides Commander's exit, so a parse error
     // reaching this point belongs to exec and uses its exit code. Commander
-    // has already printed the message.
+    // has already printed the message. `validate` fails with 1, which
+    // Commander's own exit already uses.
     if (error instanceof CommanderError) {
       if (error.exitCode === 0) {
         return;
@@ -411,6 +431,204 @@ function registerExecCommand(program: Command): void {
       write(redactParseError(message, knownOptionsOf(exec))),
   });
   rejectDashValues(exec, EXEC_ENVILDER_FAILURE);
+}
+
+function registerValidateCommand(program: Command): void {
+  const validate = program
+    .command('validate')
+    .summary('Check the map file before pulling, pushing or running a command')
+    .description(
+      'Check that the map file is valid JSON, matches the map file schema, ' +
+        'and resolves to a coherent provider configuration (flags take ' +
+        'precedence over $config), then check that every secret it declares ' +
+        'exists in the provider with the current credentials. Every problem ' +
+        'is reported with the key that causes it. Secret values are never ' +
+        'read or printed.\n\n' +
+        'With --offline nothing but the map file is read: no provider is ' +
+        'called and no credentials are needed.',
+    )
+    .option(
+      '--offline',
+      'Validate the map file locally without calling the provider',
+    )
+    .option(
+      '--map <path>',
+      `Path to the JSON file with environment variable mapping (default: ${DEFAULT_MAP_FILE})`,
+    )
+    .option('--profile <name>', 'AWS CLI profile to use (optional)')
+    .option(
+      '--provider <name>',
+      'Cloud provider to use: aws or azure (default: aws)',
+    )
+    .option(
+      '--vault-url <url>',
+      'Azure Key Vault URL (overrides $config.vaultUrl in map file)',
+    )
+    .addHelpText('after', VALIDATE_HELP)
+    .action(async (options: ValidateOptions, validateCommand: Command) => {
+      rejectRootOptionsBeforeValidate(
+        (validateCommand.parent?.opts() ?? {}) as ExecOptions,
+      );
+      if (options.offline) {
+        await runOfflineValidation(options);
+        return;
+      }
+      await runRemoteValidation(options);
+    });
+
+  validate.configureOutput({
+    outputError: (message, write) =>
+      write(redactParseError(message, knownOptionsOf(validate))),
+  });
+  rejectDashValues(validate, 1);
+}
+
+const VALIDATE_HELP = `
+Examples:
+  envilder validate
+  envilder validate --map=config/envilder.json --profile=dev
+  envilder validate --provider=azure --vault-url=https://my-vault.vault.azure.net
+  envilder validate --offline
+
+Exit codes:
+  0  the map file is valid and every declared secret exists
+  1  the map file or the options are not valid, a secret is missing or
+     cannot be checked, or the credentials are missing or expired
+
+See docs/validate-command.md.`;
+
+/**
+ * Root options written before `validate` are parsed by the root command and
+ * never reach it. Reject them by name instead of validating something else
+ * than what was asked; values are not echoed, since `--value` can be a secret.
+ */
+function rejectRootOptionsBeforeValidate(rootOptions: ExecOptions): void {
+  const misplaced = [
+    ...EXEC_COMPATIBLE_ROOT_OPTIONS,
+    ...EXEC_INCOMPATIBLE_ROOT_OPTIONS,
+  ].filter(([name]) => rootOptions[name] !== undefined);
+  if (misplaced.length === 0) {
+    return;
+  }
+  const flags = misplaced.map(([, flag]) => flag).join(', ');
+  console.error(
+    pc.red(`error: Put envilder options after "validate" (found ${flags}).`),
+  );
+  throw new SilentExitError(1);
+}
+
+async function runOfflineValidation(options: ValidateOptions): Promise<void> {
+  await validateMapFileOffline(options);
+  console.log(
+    pc.dim(
+      '  Remote validation skipped (--offline): no provider was called, so ' +
+        'the secrets were not checked.',
+    ),
+  );
+}
+
+/**
+ * Checks the map file without calling any provider. Prints the result and
+ * returns the map file path when it is valid; reports every violation and
+ * exits with 1 otherwise.
+ */
+async function validateMapFileOffline(
+  options: ValidateOptions,
+): Promise<string> {
+  const mapPath = resolveMapFile(options.map);
+  const container = Startup.build().configureOfflineValidation().create();
+  const handler = container.get<ValidateMapFileCommandHandler>(
+    TYPES.ValidateMapFileCommandHandler,
+  );
+  const violations = await handler.handle(
+    ValidateMapFileCommand.create(
+      mapPath,
+      {
+        provider: options.provider,
+        profile: options.profile,
+        vaultUrl: options.vaultUrl,
+      },
+      SUPPORTED_PROVIDERS,
+    ),
+  );
+
+  if (violations.length > 0) {
+    const count =
+      violations.length === 1 ? '1 problem' : `${violations.length} problems`;
+    console.error(pc.red(`✗ Map file invalid: ${mapPath} (${count})`));
+    for (const violation of violations) {
+      console.error(`  ${pc.red('•')} ${violation.message}`);
+    }
+    throw new SilentExitError(1);
+  }
+
+  console.log(pc.green(`✓ Map file valid: ${mapPath}`));
+  return mapPath;
+}
+
+/**
+ * Validates the map file offline first, so an invalid file never reaches the
+ * provider, then checks that every declared secret exists. Lists each
+ * variable with its path and status; values are never read.
+ */
+async function runRemoteValidation(options: ValidateOptions): Promise<void> {
+  const mapPath = await validateMapFileOffline(options);
+  const fileConfig = await readMapFileConfig(mapPath);
+  const config: MapFileConfig = {
+    ...fileConfig,
+    ...(options.provider && { provider: options.provider }),
+    ...(options.vaultUrl && { vaultUrl: options.vaultUrl }),
+    ...(options.profile && { profile: options.profile }),
+  };
+
+  const container = Startup.build()
+    .configureRemoteValidation()
+    .configureInfrastructure(config)
+    .create();
+  const handler = container.get<ValidateRemoteKeysCommandHandler>(
+    TYPES.ValidateRemoteKeysCommandHandler,
+  );
+
+  let checks: RemoteKeyCheck[] = [];
+  await executeWithSsoRecovery(async () => {
+    checks = await handler.handle(ValidateRemoteKeysCommand.create(mapPath));
+  });
+
+  printRemoteKeyChecks(checks, describeSecretSource(config));
+  const failures = summarizeFailures(checks);
+  if (failures !== '') {
+    console.error(pc.red(`✗ Validation failed: ${failures}`));
+    throw new SilentExitError(1);
+  }
+}
+
+function printRemoteKeyChecks(
+  checks: readonly RemoteKeyCheck[],
+  source: string,
+): void {
+  const count = checks.length === 1 ? '1 secret' : `${checks.length} secrets`;
+  console.log(pc.bold(`Checking ${count} in ${source}`));
+  const variableWidth = Math.max(0, ...checks.map((c) => c.variable.length));
+  const pathWidth = Math.max(0, ...checks.map((c) => c.path.length));
+  for (const check of checks) {
+    const exists = check.status === 'exists';
+    const status = describeSecretExistenceStatus(check.status);
+    const reason =
+      check.reason === undefined ? '' : pc.dim(` (${check.reason})`);
+    console.log(
+      `  ${exists ? pc.green('✓') : pc.red('✗')} ` +
+        `${pc.bold(check.variable.padEnd(variableWidth))}  ` +
+        `${pc.dim(check.path.padEnd(pathWidth))}  ` +
+        `${exists ? pc.green(status) : pc.red(status)}${reason}`,
+    );
+  }
+  if (summarizeFailures(checks) === '') {
+    console.log(
+      pc.green(
+        checks.length === 1 ? '✓ 1 secret exists' : `✓ All ${count} exist`,
+      ),
+    );
+  }
 }
 
 const EXEC_HELP = `
@@ -560,7 +778,7 @@ async function resolveSecretsAndRun(
   const container = Startup.build()
     .configureExec(createExecSecretMasker())
     .configureServices()
-    .configureInfrastructure(config, buildInfrastructureOptions())
+    .configureInfrastructure(config)
     .create();
   const dispatcher = container.get<DispatchActionCommandHandler>(
     TYPES.DispatchActionCommandHandler,
@@ -657,14 +875,19 @@ function createExecSecretMasker(): ISecretMasker {
     : new NoOpSecretMasker();
 }
 
-function buildInfrastructureOptions(): Record<string, unknown> {
-  const infraOptions: Record<string, unknown> = {};
-  const extraHosts = process.env.ENVILDER_ALLOWED_VAULT_HOSTS;
-  if (extraHosts) {
-    infraOptions.allowedVaultHosts = extraHosts.split(',').map((h) => h.trim());
-    infraOptions.disableChallengeResourceVerification = true;
+/**
+ * The vault origin to log, never the full URL, which can carry credentials.
+ * `undefined` when the URL does not parse: the Azure client reports that.
+ */
+function vaultOrigin(vaultUrl: string | undefined): string | undefined {
+  if (!vaultUrl) {
+    return undefined;
   }
-  return infraOptions;
+  try {
+    return new URL(vaultUrl).origin;
+  } catch {
+    return undefined;
+  }
 }
 
 /**

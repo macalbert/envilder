@@ -1,18 +1,22 @@
 import { Container } from 'inversify';
 import { ExecWithSecretsCommandHandler } from '../../core/application/execWithSecrets/ExecWithSecretsCommandHandler.js';
+import { ValidateMapFileCommandHandler } from '../../core/application/validateMapFile/ValidateMapFileCommandHandler.js';
+import { ValidateRemoteKeysCommandHandler } from '../../core/application/validateRemoteKeys/ValidateRemoteKeysCommandHandler.js';
 import type { MapFileConfig } from '../../core/domain/MapFileConfig.js';
 import type { ILogger } from '../../core/domain/ports/ILogger.js';
 import type { IProcessContext } from '../../core/domain/ports/IProcessContext.js';
 import type { IProcessRunner } from '../../core/domain/ports/IProcessRunner.js';
 import type { ISecretMasker } from '../../core/domain/ports/ISecretMasker.js';
+import type { IVariableStore } from '../../core/domain/ports/IVariableStore.js';
+import { ConsoleLogger } from '../../core/infrastructure/logger/ConsoleLogger.js';
 import { StderrConsoleLogger } from '../../core/infrastructure/logger/StderrConsoleLogger.js';
 import { CrossSpawnProcessRunner } from '../../core/infrastructure/process/CrossSpawnProcessRunner.js';
 import { NodeProcessContext } from '../../core/infrastructure/process/NodeProcessContext.js';
+import { FileVariableStore } from '../../core/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../core/types.js';
 import {
   configureApplicationServices,
   configureInfrastructureServices,
-  type InfrastructureOptions,
 } from '../shared/ContainerConfiguration.js';
 
 export class Startup {
@@ -60,11 +64,44 @@ export class Startup {
     return this;
   }
 
-  configureInfrastructure(
-    config?: MapFileConfig,
-    options?: InfrastructureOptions,
-  ): this {
-    configureInfrastructureServices(this.container, config, options);
+  /**
+   * Wires `envilder validate --offline`: the map file is read and checked
+   * locally, so no secret provider is bound. Use it instead of
+   * `configureServices` and `configureInfrastructure`.
+   */
+  configureOfflineValidation(): this {
+    this.container
+      .bind<ILogger>(TYPES.ILogger)
+      .to(ConsoleLogger)
+      .inSingletonScope();
+    this.container
+      .bind<IVariableStore>(TYPES.IVariableStore)
+      .to(FileVariableStore)
+      .inSingletonScope();
+    this.container
+      .bind<ValidateMapFileCommandHandler>(TYPES.ValidateMapFileCommandHandler)
+      .to(ValidateMapFileCommandHandler)
+      .inTransientScope();
+    return this;
+  }
+
+  /**
+   * Wires the remote part of `envilder validate`, which checks that each
+   * declared secret exists. Call `configureInfrastructure` afterwards to bind
+   * the secret provider, the logger and the variable store.
+   */
+  configureRemoteValidation(): this {
+    this.container
+      .bind<ValidateRemoteKeysCommandHandler>(
+        TYPES.ValidateRemoteKeysCommandHandler,
+      )
+      .to(ValidateRemoteKeysCommandHandler)
+      .inTransientScope();
+    return this;
+  }
+
+  configureInfrastructure(config?: MapFileConfig): this {
+    configureInfrastructureServices(this.container, config);
     return this;
   }
 

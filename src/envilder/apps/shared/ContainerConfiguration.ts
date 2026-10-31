@@ -6,37 +6,38 @@ import { PushEnvToSecretsCommandHandler } from '../../core/application/pushEnvTo
 import { PushSingleCommandHandler } from '../../core/application/pushSingle/PushSingleCommandHandler.js';
 import { InvalidArgumentError } from '../../core/domain/errors/DomainErrors.js';
 import type { MapFileConfig } from '../../core/domain/MapFileConfig.js';
+import {
+  DEFAULT_PROVIDER,
+  unsupportedProviderMessage,
+} from '../../core/domain/ProviderConfiguration.js';
 import type { ILogger } from '../../core/domain/ports/ILogger.js';
 import type { ISecretMasker } from '../../core/domain/ports/ISecretMasker.js';
 import type { ISecretProvider } from '../../core/domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../core/domain/ports/IVariableStore.js';
 import { createAwsSecretProvider } from '../../core/infrastructure/aws/AwsSecretProviderFactory.js';
-import {
-  type AzureProviderOptions,
-  createAzureSecretProvider,
-} from '../../core/infrastructure/azure/AzureSecretProviderFactory.js';
+import { createAzureSecretProvider } from '../../core/infrastructure/azure/AzureSecretProviderFactory.js';
 import { NoOpSecretMasker } from '../../core/infrastructure/github/NoOpSecretMasker.js';
 import { ConsoleLogger } from '../../core/infrastructure/logger/ConsoleLogger.js';
 import { FileVariableStore } from '../../core/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../core/types.js';
 
-export type InfrastructureOptions = AzureProviderOptions;
-
 type ProviderFactory = (
   config: MapFileConfig,
-  options: InfrastructureOptions,
   logger: ILogger,
 ) => ISecretProvider;
 
 const providerFactories: Record<string, ProviderFactory> = {
-  aws: (config, _options, logger) => createAwsSecretProvider(config, logger),
-  azure: (config, options) => createAzureSecretProvider(config, options),
+  aws: (config, logger) => createAwsSecretProvider(config, logger),
+  azure: (config) => createAzureSecretProvider(config),
 };
+
+/** The providers the CLI and the GitHub Action can resolve secrets from. */
+export const SUPPORTED_PROVIDERS: readonly string[] =
+  Object.keys(providerFactories);
 
 export function configureInfrastructureServices(
   container: Container,
   config: MapFileConfig = {},
-  options: InfrastructureOptions = {},
 ): void {
   if (!container.isBound(TYPES.ILogger)) {
     container.bind<ILogger>(TYPES.ILogger).to(ConsoleLogger).inSingletonScope();
@@ -58,7 +59,7 @@ export function configureInfrastructureServices(
       .inSingletonScope();
   }
 
-  const selectedProvider = config.provider?.toLowerCase() || 'aws';
+  const selectedProvider = config.provider?.toLowerCase() || DEFAULT_PROVIDER;
 
   if (config.profile && selectedProvider !== 'aws') {
     logger.warn(
@@ -71,12 +72,10 @@ export function configureInfrastructureServices(
   const factory = providerFactories[selectedProvider];
   if (!factory) {
     throw new InvalidArgumentError(
-      `Unsupported provider: ${config.provider}.` +
-        ` Supported providers:` +
-        ` ${Object.keys(providerFactories).join(', ')}`,
+      unsupportedProviderMessage(`${config.provider}`, SUPPORTED_PROVIDERS),
     );
   }
-  const secretProvider = factory(config, options, logger);
+  const secretProvider = factory(config, logger);
 
   container
     .bind<ISecretProvider>(TYPES.ISecretProvider)

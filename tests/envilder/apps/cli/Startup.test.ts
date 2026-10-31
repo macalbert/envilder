@@ -172,65 +172,20 @@ describe('Startup', () => {
         expect(action).toThrow('Unsupported provider: gcp');
       });
 
-      it('Should_ThrowError_When_AzureVaultUrlIsNotHttps', () => {
+      it('Should_ConfigureAzureProvider_When_VaultUrlHostIsNotAzureKeyVault', () => {
         // Arrange
         const config = {
           provider: 'azure',
-          vaultUrl: 'http://test-vault.vault.azure.net',
+          vaultUrl: 'https://vault.example.com',
         };
 
         // Act
-        const action = () =>
-          startup.configureServices().configureInfrastructure(config);
+        const sut = startup.configureServices().configureInfrastructure(config);
+        const container = sut.create();
+        const actual = container.get<ISecretProvider>(TYPES.ISecretProvider);
 
         // Assert
-        expect(action).toThrow('vaultUrl must use https:// protocol');
-      });
-
-      it('Should_ThrowError_When_AzureVaultUrlIsInvalidFormat', () => {
-        // Arrange
-        const config = {
-          provider: 'azure',
-          vaultUrl: 'not-a-valid-url',
-        };
-
-        // Act
-        const action = () =>
-          startup.configureServices().configureInfrastructure(config);
-
-        // Assert
-        expect(action).toThrow('vaultUrl must be a valid URL');
-      });
-
-      it('Should_ThrowError_When_AzureVaultUrlHostIsNotAzure', () => {
-        // Arrange
-        const config = {
-          provider: 'azure',
-          vaultUrl: 'https://evil-server.example.com',
-        };
-
-        // Act
-        const action = () =>
-          startup.configureServices().configureInfrastructure(config);
-
-        // Assert
-        expect(action).toThrow('vaultUrl hostname must end with one of');
-      });
-
-      it('Should_ThrowError_When_VaultUrlHostnameSpoofsSuffixWithoutDotBoundary', () => {
-        // Arrange
-        const config = {
-          provider: 'azure',
-          vaultUrl: 'https://evilocalhost:8443',
-        };
-        // Act
-        const action = () =>
-          startup.configureServices().configureInfrastructure(config, {
-            allowedVaultHosts: ['localhost'],
-          });
-
-        // Assert
-        expect(action).toThrow('vaultUrl hostname must end with one of');
+        expect(actual).toBeDefined();
       });
     });
   });
