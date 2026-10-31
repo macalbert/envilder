@@ -59,6 +59,8 @@ Use these categories matching existing style:
 - Never add to a section whose version is already tagged: the release was
   built from the changelog at that tag, so the entry would describe code
   that did not ship. Open a new version section instead
+  (`changelog-check.yml` enforces this; label the PR `changelog-correction`
+  to fix an already released section on purpose)
 
 ```markdown
 ## [1.2.0]: 2026-05-01

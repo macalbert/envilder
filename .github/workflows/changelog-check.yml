@@ -1,0 +1,42 @@
+name: 📜 Changelog Check
+
+permissions:
+  contents: read
+
+# Fails when a PR adds entries to a changelog section whose version is
+# already tagged: the release notes are built from the changelog at the tag,
+# so those entries would describe code that did not ship. Label the PR
+# `changelog-correction` to skip it when fixing an already released section.
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+      - labeled
+      - unlabeled
+    paths:
+      - "docs/changelogs/**"
+      - "scripts/check-released-changelogs.mjs"
+      - ".github/workflows/changelog-check.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  released-sections:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'changelog-correction') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 🧱 Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: 📜 Check tagged changelog sections are unchanged
+        run: node scripts/check-released-changelogs.mjs --base=$(git merge-base origin/${{ github.base_ref }} HEAD)

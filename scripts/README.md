@@ -46,6 +46,22 @@ be authenticated (`GH_TOKEN` in CI). The optional title and summary come from
 a `<!-- release ... -->` comment in the changelog section (see the
 `doc-maintenance` skill).
 
+## `check-released-changelogs.mjs`
+
+Fails when a change adds lines to a changelog section whose version is already
+tagged (for example `## [0.19.0]` when `v0.19.0` exists). Release notes are
+built from the changelog at the tag, so such entries would describe code that
+did not ship: they belong in a new version section. The
+`changelog-check.yml` workflow runs it on PRs that touch `docs/changelogs/`,
+against the merge base with `main`.
+
+```bash
+node scripts/check-released-changelogs.mjs --base=origin/main
+```
+
+To correct an already released section on purpose, label the PR
+`changelog-correction` and the check is skipped.
+
 ## Publishing Workflows
 
 ### GitHub Action Publishing (`.github/workflows/publish-action.yml`)
