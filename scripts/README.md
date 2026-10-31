@@ -26,6 +26,26 @@ pnpm exec tsx scripts/pack-and-install.ts
 
 You can also run this command directly if you prefer.
 
+## `release-notes.mjs`
+
+Builds the title and body of a GitHub release from the version's section in
+`docs/changelogs/`, so the release always matches the changelog at the
+released commit. The publish workflows (`publish-npm.yml`,
+`publish-npm-sdk.yml`, `publish-nuget.yml`, `publish-pypi.yml`) run it before
+publishing, so a version without a changelog section fails before anything is
+released.
+
+```bash
+node scripts/release-notes.mjs --component=cli --version=0.19.0 --out=release-notes.md
+```
+
+`--component` is `cli`, `sdk-nodejs`, `sdk-dotnet` or `sdk-python`. The
+previous tag is the highest `MAJOR.MINOR.PATCH` tag of the same component, and
+the PR list comes from GitHub's generated release notes, so the `gh` CLI must
+be authenticated (`GH_TOKEN` in CI). The optional title and summary come from
+a `<!-- release ... -->` comment in the changelog section (see the
+`doc-maintenance` skill).
+
 ## Publishing Workflows
 
 ### GitHub Action Publishing (`.github/workflows/publish-action.yml`)

@@ -67,6 +67,13 @@ jobs:
             echo "version_changed=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: 📝 Prepare release notes
+        if: steps.version-check.outputs.version_changed == 'true'
+        id: release-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/release-notes.mjs --component=cli --version=${{ steps.version-check.outputs.current_version }} --out=${{ runner.temp }}/release-notes.md
+
       - name: 💉 Configure AWS credentials
         if: steps.version-check.outputs.version_changed == 'true'
         uses: aws-actions/configure-aws-credentials@v6.3.0
@@ -109,8 +116,8 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: "v${{ steps.version-check.outputs.current_version }}"
-          name: "🍄 Envilder level up v${{ steps.version-check.outputs.current_version }}"
-          generateReleaseNotes: true
+          name: ${{ steps.release-notes.outputs.title }}
+          bodyFile: ${{ runner.temp }}/release-notes.md
           token: ${{ secrets.GITHUB_TOKEN }}
           makeLatest: legacy
           replacesArtifacts: true

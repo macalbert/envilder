@@ -56,6 +56,9 @@ Use these categories matching existing style:
 - Start with action verb (Add, Fix, Update, Remove)
 - Reference issue/PR numbers when available
 - Group under the current release section or create a new one when requested
+- Never add to a section whose version is already tagged: the release was
+  built from the changelog at that tag, so the entry would describe code
+  that did not ship. Open a new version section instead
 
 ```markdown
 ## [1.2.0]: 2026-05-01
@@ -68,6 +71,33 @@ Use these categories matching existing style:
 
 - Fix Azure Key Vault timeout on large secret batches (#52)
 ```
+
+### Release notes
+
+The publish workflows build each GitHub release from the version's changelog
+section with `scripts/release-notes.mjs`: subsections become emoji headings,
+wrapped lines are joined, relative links point at the tag, and the upgrade
+commands, docs link, PR list and compare link are appended.
+
+To give the release a subtitle and an opening summary, add an optional
+`release` comment right under the version heading. The website strips HTML
+comments, so it only shows on GitHub:
+
+```markdown
+## [0.19.0] - 2026-10-30
+
+<!-- release
+title: any Azure Key Vault host
+summary: Azure Key Vault URLs now go to the Azure client as written, in the
+CLI and the GitHub Action, as they already did in the SDKs.
+-->
+
+### Changed
+```
+
+`title` becomes `🍄 Envilder level up v0.19.0: any Azure Key Vault host`;
+`summary` (which may wrap) becomes the first paragraph. Without the comment,
+the release uses the plain title and starts with the first subsection.
 
 ## Workflow
 
