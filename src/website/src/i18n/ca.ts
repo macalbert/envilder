@@ -126,7 +126,7 @@ export const ca: Translations = {
       {
         title: 'Necessites un fitxer? Fes servir pull',
         description:
-          "Algunes eines i passos de CI esperen un fitxer .env. pull n'escriu un a partir del mateix mapeig, i la GitHub Action ho fa als teus workflows. Tracta el fitxer generat com un secret.",
+          "Algunes eines esperen un fitxer .env, i pull n'escriu un a partir del mateix mapeig. Tracta'l com un secret. A GitHub Actions normalment no cal cap fitxer: l'Action exporta els secrets als passos posteriors del job.",
       },
     ],
     sdkTabPython: 'Python',
@@ -216,7 +216,7 @@ export const ca: Translations = {
       },
       {
         q: 'Ho puc fer servir a CI/CD?',
-        a: 'Sí. La GitHub Action obté els secrets mapejats en un fitxer .env dins del workflow, i la CLI (exec o pull) funciona a qualsevol runner de CI amb credencials del núvol.',
+        a: 'Sí. La GitHub Action exporta els secrets mapejats als passos posteriors del job, executa una ordre amb ells o escriu un fitxer .env quan una eina el necessita. La CLI (exec o pull) funciona a qualsevol runner de CI amb credencials del núvol.',
       },
       {
         q: 'Quins magatzems de secrets suporta?',
@@ -245,11 +245,25 @@ export const ca: Translations = {
     thDescription: 'Descripció',
     inputMapDesc:
       "Ruta al fitxer JSON que mapeja variables d'entorn a rutes de secrets",
-    inputEnvDesc: 'Ruta al fitxer .env a generar',
+    inputEnvDesc:
+      'Opcional. Ruta a un fitxer .env per escriure, per a eines que necessiten un fitxer',
     inputProviderDesc: 'Proveïdor al núvol: aws o azure (per defecte: aws)',
     inputVaultDesc: "URL d'Azure Key Vault",
+    inputCommandDesc:
+      "Opcional. Ordre que s'executa amb els secrets només al seu entorn. No es pot combinar amb env-file",
+    modesTitle: 'Tres maneres de fer servir els secrets',
+    modeJobTitle: 'Entorn del job (per defecte)',
+    modeJobDesc:
+      "Només amb map-file, cada secret es converteix en una variable d'entorn per a tots els passos posteriors del job. No s'escriu cap fitxer.",
+    modeCommandTitle: 'command',
+    modeCommandDesc:
+      "L'Action executa aquesta única ordre amb els secrets al seu entorn. Els passos posteriors no els veuen mai.",
+    modeEnvFileTitle: 'env-file',
+    modeEnvFileDesc:
+      "Escriu un fitxer .env. Fes-lo servir només quan una eina no pot llegir els secrets de cap altra manera que d'un fitxer.",
     output: 'Output:',
-    outputDesc: 'Ruta al fitxer .env generat',
+    outputDesc:
+      'Ruta al fitxer .env generat (buida si no es defineix env-file)',
     yes: 'Sí',
     no: 'No',
   },
@@ -899,7 +913,7 @@ export const ca: Translations = {
         "stdin, stdout i stderr s'hereten i el TTY es conserva, així que els REPL i les preguntes interactives funcionen. Ctrl+C en un terminal arriba directament a la comanda. SIGTERM i SIGHUP (de docker stop o Kubernetes, per exemple) es reenvien, i Envilder espera que la comanda acabi sense cap temps límit propi. Només els rep el fill directe: un llançador com npm ha d'aturar els seus propis fills.",
       ciTitle: 'CI i GitHub Actions',
       ciDesc:
-        "A la CI, dona primer credencials del núvol al job (per exemple amb OIDC) i després executa la CLI en un pas run. Només aquest pas veu els secrets. L'Action d'Envilder no ofereix el mode exec.",
+        "A la CI, dona primer credencials del núvol al job (per exemple amb OIDC) i després executa la CLI en un pas run. Només aquest pas veu els secrets. L'Action d'Envilder ofereix el mateix comportament amb el seu input command.",
       ghaDesc:
         "Quan GITHUB_ACTIONS=true, Envilder registra cada valor resolt amb l'emmascarament de logs de GitHub (::add-mask::) a stderr abans d'iniciar la comanda, així que els valors que imprimeixi surten emmascarats al log del job.",
       ghaNote:
@@ -1067,10 +1081,10 @@ export const ca: Translations = {
       'github-action': {
         title: "Carrega secrets d'AWS SSM i Azure Key Vault a GitHub Actions",
         description:
-          "Carrega secrets d'AWS SSM Parameter Store o Azure Key Vault a un fitxer .env a GitHub Actions amb OIDC: permisos IAM i RBAC mínims, workflows complets i errors de credencials.",
+          "Carrega secrets d'AWS SSM Parameter Store o Azure Key Vault als jobs de GitHub Actions amb OIDC, sense fitxer .env: permisos IAM i RBAC mínims, workflows complets i errors de credencials.",
         heading: "Carrega secrets d'AWS SSM i Azure Key Vault a GitHub Actions",
         intro:
-          "Com fas servir secrets d'AWS SSM Parameter Store o Azure Key Vault en un job de GitHub Actions sense copiar-los a GitHub Secrets? Autentica el job amb OIDC i deixa que l'Action d'Envilder llegeixi el teu envilder.json versionat i escrigui un fitxer .env per als passos següents.",
+          "Com fas servir secrets d'AWS SSM Parameter Store o Azure Key Vault en un job de GitHub Actions sense copiar-los a GitHub Secrets? Autentica el job amb OIDC i deixa que l'Action d'Envilder llegeixi el teu envilder.json versionat i exporti els secrets als passos següents.",
         breadcrumb: 'GitHub Action',
         navLabel: 'GitHub Action',
         cardTitle: 'Guia de GitHub Action',
@@ -1226,7 +1240,7 @@ export const ca: Translations = {
     examplesTitle: 'Exemples executables.',
     ghaSetupTitle: "Com funciona l'Action",
     ghaSetupDesc:
-      "L'Action és un pas compost: instal·la Node.js 22, llegeix el fitxer de mapeig, obté cada secret amb les credencials de núvol que ja té el job, emmascara cada valor al log i escriu el fitxer .env. No inicia sessió a AWS ni a Azure per si mateixa, així que ho ha de fer un pas anterior (aws-actions/configure-aws-credentials o azure/login). Utilitza l'etiqueta publicada macalbert/envilder/github-action@v0; no cal cap pas de compilació.",
+      "L'Action és un pas compost: instal·la Node.js 22, llegeix el fitxer de mapeig, obté cada secret amb les credencials de núvol que ja té el job i emmascara cada valor al log. Per defecte, després exporta els secrets a l'entorn de tots els passos posteriors del job; amb command o env-file, en canvi, executa una ordre o escriu un fitxer .env. No inicia sessió a AWS ni a Azure per si mateixa, així que ho ha de fer un pas anterior (aws-actions/configure-aws-credentials o azure/login). Utilitza l'etiqueta publicada macalbert/envilder/github-action@v0; no cal cap pas de compilació.",
     ghaPrerequisites: 'Prerequisits',
     ghaPrereqAws:
       "AWS: un rol IAM que GitHub pugui assumir, fet servir a través d'aws-actions/configure-aws-credentials.",
@@ -1236,11 +1250,11 @@ export const ca: Translations = {
     ghaPullOnly: 'La GitHub Action només suporta el mode pull (sense push).',
     ghaBasicTitle: 'AWS SSM Parameter Store amb OIDC',
     ghaMultiEnvTitle: 'Workflow multi-entorn',
-    ghaExecTitle: 'Executar una ordre sense escriure cap fitxer .env',
+    ghaExecTitle: 'Executar una ordre amb els secrets',
     ghaExecDesc:
-      "L'acció sempre escriu un fitxer .env. Si prefereixes que els secrets no toquin el disc del runner, no facis servir l'acció i executa envilder exec en un pas run, després del mateix pas de credencials. Les opcions d'Envilder van abans de --, i la teva ordre, després. Envilder emmascara tots els valors resolts al log del job, i l'ordre no arrenca si falta algun secret.",
+      "Amb l'input command, l'Action executa aquesta ordre amb bash, des de l'arrel del repositori, amb els secrets al seu entorn, i acaba el pas amb el codi de sortida de l'ordre. Els secrets no s'exporten, així que els passos posteriors, incloses les actions de tercers, no els veuen mai. Fes-lo servir quan només un pas necessita els secrets i vols la mínima exposició.",
     ghaExecNote:
-      "La CLI necessita Node.js 22.12 o posterior, així que configura'l amb actions/setup-node abans del pas. No redirigeixis l'stderr d'envilder exec fora del log del pas: és d'allà d'on GitHub llegeix les màscares.",
+      "També pots executar la CLI tu mateix amb npx envilder exec --map=envilder.json -- <ordre> en un pas run. Necessita Node.js 22.12 o posterior (actions/setup-node), i el seu stderr s'ha de quedar al log del pas, perquè és d'allà d'on GitHub llegeix les màscares.",
     ghaExecLink: "Llegeix la guia completa d'exec →",
     ghaAzureTitle: 'Azure Key Vault amb OIDC',
     ghaInputsTitle: "Inputs i outputs de l'Action",
@@ -1249,16 +1263,40 @@ export const ca: Translations = {
     ghaInputRequired: 'Requerit',
     ghaInputDefault: 'Per defecte',
     ghaInputDesc: 'Descripció',
-    ghaOutputEnvPath: 'Ruta al fitxer .env generat',
+    ghaOutputEnvPath:
+      'Ruta al fitxer .env generat (buida si no es defineix env-file)',
     ghaThInput: 'Input',
     ghaThRequired: 'Requerit',
     ghaThOutput: 'Output',
     ghaYes: 'Sí',
     ghaNo: 'No',
     ghaInputMap: 'Ruta al fitxer JSON de mapeig',
-    ghaInputEnv: 'Ruta al fitxer .env a generar',
+    ghaInputEnv:
+      "Opcional. Ruta a un fitxer .env per escriure, per a eines que necessiten un fitxer. Sense env-file ni command, els secrets van a l'entorn del job",
     ghaInputProvider: 'aws o azure',
     ghaInputVault: "URL d'Azure Key Vault",
+    ghaInputCommand:
+      "Opcional. Ordre que s'executa (amb bash) amb els secrets només al seu entorn. No es pot combinar amb env-file",
+    ghaModesTitle: 'Triar un mode',
+    ghaModesDesc:
+      "L'Action té tres modes, i els inputs que defineixes en trien un. El mode per defecte només necessita map-file:",
+    ghaModesThMode: 'Mode',
+    ghaModesThSelect: 'Com es tria',
+    ghaModesThScope: 'Qui pot llegir els secrets',
+    ghaModesThFile: 'Escriu un fitxer',
+    ghaModeJob: 'Entorn del job (per defecte)',
+    ghaModeJobSelect: 'Només map-file',
+    ghaModeJobScope: 'Tots els passos posteriors del job',
+    ghaModeCommand: 'Ordre',
+    ghaModeCommandScope: 'Només aquesta ordre i els processos que inicia',
+    ghaModeEnvFile: 'Fitxer .env',
+    ghaModeEnvFileScope: 'Qualsevol pas o eina que llegeixi el fitxer',
+    ghaModesJobNote:
+      "En el mode per defecte, l'Action afegeix els secrets al fitxer GITHUB_ENV del runner, i el runner els posa a l'entorn de cada pas que s'executa després dins del mateix job, incloses les actions de tercers, les actions de contenidor Docker i els passos que s'executen dins d'un container del job. Els passos els llegeixen com qualsevol altra variable: process.env.DB_PASSWORD, os.environ[\"DB_PASSWORD\"] o $DB_PASSWORD. Els altres jobs no els reben, així que cada job que necessita secrets torna a executar l'Action. Un contenidor que inicies tu mateix amb docker run no els hereta: passa'ls explícitament, per exemple amb docker run -e DB_PASSWORD.",
+    ghaModesEnvFileNote:
+      "Fes servir env-file només quan una eina no pot llegir els secrets de cap altra manera que d'un fitxer, per exemple docker compose --env-file. Millor una ruta dins de runner.temp, perquè el fitxer quedi fora de l'espai de treball del repositori. env-file i command no es poden combinar.",
+    ghaModesSafetyNote:
+      "No escriure cap fitxer .env elimina la via més habitual per on es filtren secrets a CI: un fitxer que acaba a upload-artifact, a una memòria cau, a un COPY . . d'un Dockerfile o a un git add -A. Les eines posteriors encara poden escriure les variables en fitxers, així que tracta els resultats de build i de tests com ho faries sense Envilder. Tampoc protegeix contra codi maliciós dins del job, que pot llegir les variables d'entorn tan fàcilment com un fitxer. Tots els modes emmascaren els valors al log. Els modes d'entorn del job i d'ordre fallen de manera segura: si falta algun secret o és buit, el pas falla i no s'exporta ni s'inicia res.",
     ghaPrereqCheckout:
       "actions/checkout abans de l'Action, perquè el fitxer de mapeig existeixi al runner.",
     ghaPrereqPermissions:
@@ -1278,9 +1316,9 @@ export const ca: Translations = {
       "El fitxer de mapeig és el mateix que fas servir amb la CLI: cada variable d'entorn apunta al nom d'un paràmetre.",
     ghaOutputTitle: 'Sortida esperada',
     ghaOutputDesc:
-      "El log del pas mostra la identitat d'AWS que s'utilitza, cada variable resolta amb el valor emmascarat i un resum:",
+      "El log del pas mostra el mode, la identitat d'AWS que s'utilitza, cada variable resolta amb el valor emmascarat i un resum:",
     ghaOutputMaskNote:
-      "Cada valor es registra també amb l'ordre add-mask de GitHub, de manera que un pas posterior que l'imprimeixi mostra ***. El fitxer .env es queda al runner; no el pugis com a artefacte.",
+      "Cada valor es registra també amb l'ordre add-mask de GitHub, de manera que un pas posterior que l'imprimeixi mostra ***. Si fas servir env-file, el fitxer .env es queda al runner; no el pugis com a artefacte.",
     ghaAzureFedTitle: '1. Crea una credencial federada',
     ghaAzureFedDesc:
       "Crea un registre d'aplicació i el seu service principal, i afegeix-hi una credencial federada que confiï en els tokens d'un repositori i una branca. No es crea cap secret de client. El subjecte fa servir el mateix format que el sub d'AWS, inclosa la variant immutable quan el teu repositori l'emet.",

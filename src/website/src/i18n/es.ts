@@ -126,7 +126,7 @@ export const es: Translations = {
       {
         title: '¿Necesitas un archivo? Usa pull',
         description:
-          'Algunas herramientas y pasos de CI esperan un archivo .env. pull escribe uno a partir del mismo mapeo, y la GitHub Action lo hace en tus workflows. Trata el archivo generado como un secreto.',
+          'Algunas herramientas esperan un archivo .env, y pull escribe uno a partir del mismo mapeo. Trátalo como un secreto. En GitHub Actions normalmente no hace falta ningún archivo: la Action exporta los secretos a los pasos posteriores del job.',
       },
     ],
     sdkTabPython: 'Python',
@@ -216,7 +216,7 @@ export const es: Translations = {
       },
       {
         q: '¿Puedo usarlo en CI/CD?',
-        a: 'Sí. La GitHub Action obtiene los secretos mapeados en un archivo .env dentro del workflow, y la CLI (exec o pull) funciona en cualquier runner de CI con credenciales de la nube.',
+        a: 'Sí. La GitHub Action exporta los secretos mapeados a los pasos posteriores del job, ejecuta un comando con ellos o escribe un archivo .env cuando una herramienta lo necesita. La CLI (exec o pull) funciona en cualquier runner de CI con credenciales de la nube.',
       },
       {
         q: '¿Qué almacenes de secretos soporta?',
@@ -245,11 +245,25 @@ export const es: Translations = {
     thDescription: 'Descripción',
     inputMapDesc:
       'Ruta al archivo JSON que mapea variables de entorno a rutas de secretos',
-    inputEnvDesc: 'Ruta al archivo .env a generar',
+    inputEnvDesc:
+      'Opcional. Ruta a un archivo .env que escribir, para herramientas que necesitan un archivo',
     inputProviderDesc: 'Proveedor en la nube: aws o azure (por defecto: aws)',
     inputVaultDesc: 'URL de Azure Key Vault',
+    inputCommandDesc:
+      'Opcional. Comando que se ejecuta con los secretos solo en su entorno. No se puede combinar con env-file',
+    modesTitle: 'Tres formas de usar los secretos',
+    modeJobTitle: 'Entorno del job (por defecto)',
+    modeJobDesc:
+      'Solo con map-file, cada secreto se convierte en una variable de entorno para todos los pasos posteriores del job. No se escribe ningún archivo.',
+    modeCommandTitle: 'command',
+    modeCommandDesc:
+      'La Action ejecuta ese único comando con los secretos en su entorno. Los pasos posteriores nunca los ven.',
+    modeEnvFileTitle: 'env-file',
+    modeEnvFileDesc:
+      'Escribe un archivo .env. Úsalo solo cuando una herramienta no puede leer los secretos de otra forma que de un archivo.',
     output: 'Output:',
-    outputDesc: 'Ruta al archivo .env generado',
+    outputDesc:
+      'Ruta al archivo .env generado (vacía si no se define env-file)',
     yes: 'Sí',
     no: 'No',
   },
@@ -899,7 +913,7 @@ export const es: Translations = {
         'stdin, stdout y stderr se heredan y el TTY se conserva, así que los REPL y las preguntas interactivas funcionan. Ctrl+C en un terminal llega directamente al comando. SIGTERM y SIGHUP (de docker stop o Kubernetes, por ejemplo) se reenvían, y Envilder espera a que el comando termine sin ningún tiempo límite propio. Solo los recibe el hijo directo: un lanzador como npm debe detener a sus propios hijos.',
       ciTitle: 'CI y GitHub Actions',
       ciDesc:
-        'En CI, da primero credenciales de la nube al job (por ejemplo con OIDC) y después ejecuta la CLI en un paso run. Solo ese paso ve los secretos. La Action de Envilder no ofrece el modo exec.',
+        'En CI, da primero credenciales de la nube al job (por ejemplo con OIDC) y después ejecuta la CLI en un paso run. Solo ese paso ve los secretos. La Action de Envilder ofrece el mismo comportamiento con su input command.',
       ghaDesc:
         'Cuando GITHUB_ACTIONS=true, Envilder registra cada valor resuelto con el enmascarado de logs de GitHub (::add-mask::) en stderr antes de arrancar el comando, así que los valores que imprima salen enmascarados en el log del job.',
       ghaNote:
@@ -1068,11 +1082,11 @@ export const es: Translations = {
       'github-action': {
         title: 'Carga secretos de AWS SSM y Azure Key Vault en GitHub Actions',
         description:
-          'Carga secretos de AWS SSM Parameter Store o Azure Key Vault en un archivo .env en GitHub Actions con OIDC: permisos IAM y RBAC mínimos, workflows completos y errores de credenciales.',
+          'Carga secretos de AWS SSM Parameter Store o Azure Key Vault en los jobs de GitHub Actions con OIDC, sin archivo .env: permisos IAM y RBAC mínimos, workflows completos y errores de credenciales.',
         heading:
           'Carga secretos de AWS SSM y Azure Key Vault en GitHub Actions',
         intro:
-          '¿Cómo usas secretos de AWS SSM Parameter Store o Azure Key Vault en un job de GitHub Actions sin copiarlos a GitHub Secrets? Autentica el job con OIDC y deja que la Action de Envilder lea tu envilder.json versionado y escriba un archivo .env para los pasos siguientes.',
+          '¿Cómo usas secretos de AWS SSM Parameter Store o Azure Key Vault en un job de GitHub Actions sin copiarlos a GitHub Secrets? Autentica el job con OIDC y deja que la Action de Envilder lea tu envilder.json versionado y exporte los secretos a los pasos siguientes.',
         breadcrumb: 'GitHub Action',
         navLabel: 'GitHub Action',
         cardTitle: 'Guía de GitHub Action',
@@ -1228,7 +1242,7 @@ export const es: Translations = {
     examplesTitle: 'Ejemplos ejecutables.',
     ghaSetupTitle: 'Cómo funciona la Action',
     ghaSetupDesc:
-      'La Action es un paso compuesto: instala Node.js 22, lee el archivo de mapeo, obtiene cada secreto con las credenciales de nube que ya tiene el job, enmascara cada valor en el log y escribe el archivo .env. No inicia sesión en AWS ni en Azure por sí misma, así que debe hacerlo un paso anterior (aws-actions/configure-aws-credentials o azure/login). Usa la etiqueta publicada macalbert/envilder/github-action@v0; no hace falta ningún paso de compilación.',
+      'La Action es un paso compuesto: instala Node.js 22, lee el archivo de mapeo, obtiene cada secreto con las credenciales de nube que ya tiene el job y enmascara cada valor en el log. Por defecto, después exporta los secretos al entorno de todos los pasos posteriores del job; con command o env-file, en cambio, ejecuta un comando o escribe un archivo .env. No inicia sesión en AWS ni en Azure por sí misma, así que debe hacerlo un paso anterior (aws-actions/configure-aws-credentials o azure/login). Usa la etiqueta publicada macalbert/envilder/github-action@v0; no hace falta ningún paso de compilación.',
     ghaPrerequisites: 'Prerrequisitos',
     ghaPrereqAws:
       'AWS: un rol IAM que GitHub pueda asumir, usado a través de aws-actions/configure-aws-credentials.',
@@ -1238,11 +1252,11 @@ export const es: Translations = {
     ghaPullOnly: 'La GitHub Action solo soporta el modo pull (sin push).',
     ghaBasicTitle: 'AWS SSM Parameter Store con OIDC',
     ghaMultiEnvTitle: 'Workflow multi-entorno',
-    ghaExecTitle: 'Ejecutar un comando sin escribir un archivo .env',
+    ghaExecTitle: 'Ejecutar un comando con los secretos',
     ghaExecDesc:
-      'La acción siempre escribe un archivo .env. Si prefieres que los secretos no toquen el disco del runner, no uses la acción y ejecuta envilder exec en un paso run, después del mismo paso de credenciales. Las opciones de Envilder van antes de --, y tu comando, después. Envilder enmascara todos los valores resueltos en el log del job, y el comando no arranca si falta algún secreto.',
+      'Con el input command, la Action ejecuta ese comando con bash, desde la raíz del repositorio, con los secretos en su entorno, y termina el paso con el código de salida del comando. Los secretos no se exportan, así que los pasos posteriores, incluidas las actions de terceros, nunca los ven. Úsalo cuando solo un paso necesita los secretos y quieres la mínima exposición.',
     ghaExecNote:
-      'La CLI necesita Node.js 22.12 o posterior, así que configúralo con actions/setup-node antes del paso. No redirijas el stderr de envilder exec fuera del log del paso: es de ahí de donde GitHub lee las máscaras.',
+      'También puedes ejecutar la CLI tú mismo con npx envilder exec --map=envilder.json -- <comando> en un paso run. Necesita Node.js 22.12 o posterior (actions/setup-node), y su stderr debe quedarse en el log del paso, porque es de ahí de donde GitHub lee las máscaras.',
     ghaExecLink: 'Lee la guía completa de exec →',
     ghaAzureTitle: 'Azure Key Vault con OIDC',
     ghaInputsTitle: 'Inputs y outputs de la Action',
@@ -1251,16 +1265,40 @@ export const es: Translations = {
     ghaInputRequired: 'Requerido',
     ghaInputDefault: 'Por defecto',
     ghaInputDesc: 'Descripción',
-    ghaOutputEnvPath: 'Ruta al archivo .env generado',
+    ghaOutputEnvPath:
+      'Ruta al archivo .env generado (vacía si no se define env-file)',
     ghaThInput: 'Input',
     ghaThRequired: 'Requerido',
     ghaThOutput: 'Output',
     ghaYes: 'Sí',
     ghaNo: 'No',
     ghaInputMap: 'Ruta al archivo JSON de mapeo',
-    ghaInputEnv: 'Ruta al archivo .env a generar',
+    ghaInputEnv:
+      'Opcional. Ruta a un archivo .env que escribir, para herramientas que necesitan un archivo. Sin env-file ni command, los secretos van al entorno del job',
     ghaInputProvider: 'aws o azure',
     ghaInputVault: 'URL de Azure Key Vault',
+    ghaInputCommand:
+      'Opcional. Comando que se ejecuta (con bash) con los secretos solo en su entorno. No se puede combinar con env-file',
+    ghaModesTitle: 'Elegir un modo',
+    ghaModesDesc:
+      'La Action tiene tres modos, y los inputs que defines eligen uno. El modo por defecto solo necesita map-file:',
+    ghaModesThMode: 'Modo',
+    ghaModesThSelect: 'Cómo se elige',
+    ghaModesThScope: 'Quién puede leer los secretos',
+    ghaModesThFile: 'Escribe un archivo',
+    ghaModeJob: 'Entorno del job (por defecto)',
+    ghaModeJobSelect: 'Solo map-file',
+    ghaModeJobScope: 'Todos los pasos posteriores del job',
+    ghaModeCommand: 'Comando',
+    ghaModeCommandScope: 'Solo ese comando y los procesos que inicia',
+    ghaModeEnvFile: 'Archivo .env',
+    ghaModeEnvFileScope: 'Cualquier paso o herramienta que lea el archivo',
+    ghaModesJobNote:
+      'En el modo por defecto, la Action añade los secretos al archivo GITHUB_ENV del runner, y el runner los pone en el entorno de cada paso que se ejecuta después dentro del mismo job, incluidas las actions de terceros, las actions de contenedor Docker y los pasos que se ejecutan dentro de un container del job. Los pasos los leen como cualquier otra variable: process.env.DB_PASSWORD, os.environ["DB_PASSWORD"] o $DB_PASSWORD. Los demás jobs no los reciben, así que cada job que necesita secretos vuelve a ejecutar la Action. Un contenedor que inicias tú mismo con docker run no los hereda: pásalos explícitamente, por ejemplo con docker run -e DB_PASSWORD.',
+    ghaModesEnvFileNote:
+      'Usa env-file solo cuando una herramienta no puede leer los secretos de otra forma que de un archivo, por ejemplo docker compose --env-file. Mejor una ruta dentro de runner.temp, para que el archivo quede fuera del espacio de trabajo del repositorio. env-file y command no se pueden combinar.',
+    ghaModesSafetyNote:
+      'No escribir ningún archivo .env elimina la vía más habitual por la que se filtran secretos en CI: un archivo que acaba en upload-artifact, en una caché, en un COPY . . de un Dockerfile o en un git add -A. Las herramientas posteriores todavía pueden escribir las variables en archivos, así que trata los resultados de build y de tests como lo harías sin Envilder. Tampoco protege contra código malicioso dentro del job, que puede leer las variables de entorno tan fácilmente como un archivo. Todos los modos enmascaran los valores en el log. Los modos de entorno del job y de comando fallan de forma segura: si falta algún secreto o está vacío, el paso falla y no se exporta ni se inicia nada.',
     ghaPrereqCheckout:
       'actions/checkout antes de la Action, para que el archivo de mapeo exista en el runner.',
     ghaPrereqPermissions:
@@ -1280,9 +1318,9 @@ export const es: Translations = {
       'El archivo de mapeo es el mismo que usas con la CLI: cada variable de entorno apunta al nombre de un parámetro.',
     ghaOutputTitle: 'Salida esperada',
     ghaOutputDesc:
-      'El log del paso muestra la identidad de AWS en uso, cada variable resuelta con el valor enmascarado y un resumen:',
+      'El log del paso muestra el modo, la identidad de AWS en uso, cada variable resuelta con el valor enmascarado y un resumen:',
     ghaOutputMaskNote:
-      'Cada valor se registra también con el comando add-mask de GitHub, de modo que un paso posterior que lo imprima muestra ***. El archivo .env se queda en el runner; no lo subas como artefacto.',
+      'Cada valor se registra también con el comando add-mask de GitHub, de modo que un paso posterior que lo imprima muestra ***. Si usas env-file, el archivo .env se queda en el runner; no lo subas como artefacto.',
     ghaAzureFedTitle: '1. Crea una credencial federada',
     ghaAzureFedDesc:
       'Crea un registro de aplicación y su service principal, y añade una credencial federada que confíe en los tokens de un repositorio y una rama. No se crea ningún secreto de cliente. El sujeto usa el mismo formato que el sub de AWS, incluida la variante inmutable cuando tu repositorio la emite.',

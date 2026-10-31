@@ -5,6 +5,7 @@ import { DispatchActionCommand } from '../../../../../src/envilder/core/applicat
 import { DispatchActionCommandHandler } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
 import type { CliOptions } from '../../../../../src/envilder/core/domain/CliOptions';
 import { SecretsFetchError } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
+import { OperationMode } from '../../../../../src/envilder/core/domain/OperationMode';
 import * as FileVariableStore from '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore';
 
 vi.mock(
@@ -40,7 +41,13 @@ describe('GitHubAction', () => {
   beforeEach(() => {
     mocks = patchWithMocks();
     originalEnv = { ...process.env };
+    delete process.env.INPUT_COMMAND;
   });
+
+  function dispatchedCommand(): DispatchActionCommand {
+    return mocks.mockCommandHandler.handleCommand.mock
+      .calls[0][0] as DispatchActionCommand;
+  }
 
   afterEach(() => {
     process.env = originalEnv;
@@ -96,16 +103,85 @@ describe('GitHubAction', () => {
     await expect(action()).rejects.toThrow('Missing required inputs');
   });
 
-  it('Should_ExitWithError_When_EnvFileIsMissing', async () => {
+  it('Should_ExportToJobEnvironment_When_NeitherEnvFileNorCommandIsSet', async () => {
     // Arrange
     process.env.INPUT_MAP_FILE = 'test-map.json';
     delete process.env.INPUT_ENV_FILE;
 
     // Act
+    const exitCode = await main();
+
+    // Assert
+    expect(exitCode).toBe(0);
+    expect(dispatchedCommand().mode).toBe(OperationMode.EXPORT_TO_ENVIRONMENT);
+    expect(dispatchedCommand().map).toBe('test-map.json');
+  });
+
+  it('Should_RunCommandWithBashLikeRunSteps_When_CommandIsSet', async () => {
+    // Arrange
+    process.env.INPUT_MAP_FILE = 'test-map.json';
+    delete process.env.INPUT_ENV_FILE;
+    process.env.INPUT_COMMAND = './deploy.sh --prod';
+
+    // Act
+    await main();
+
+    // Assert
+    const command = dispatchedCommand();
+    expect(command.mode).toBe(OperationMode.EXEC);
+    expect(command.command).toBe('bash');
+    expect(command.args).toEqual([
+      '--noprofile',
+      '--norc',
+      '-eo',
+      'pipefail',
+      '-c',
+      './deploy.sh --prod',
+    ]);
+  });
+
+  it('Should_ReturnCommandExitCode_When_CommandIsSet', async () => {
+    // Arrange
+    process.env.INPUT_MAP_FILE = 'test-map.json';
+    delete process.env.INPUT_ENV_FILE;
+    process.env.INPUT_COMMAND = 'exit 3';
+    mocks.mockCommandHandler.handleCommand.mockResolvedValue(3);
+
+    // Act
+    const exitCode = await main();
+
+    // Assert
+    expect(exitCode).toBe(3);
+  });
+
+  it('Should_ExitWithError_When_EnvFileAndCommandAreBothSet', async () => {
+    // Arrange
+    process.env.INPUT_MAP_FILE = 'test-map.json';
+    process.env.INPUT_ENV_FILE = 'test.env';
+    process.env.INPUT_COMMAND = 'pnpm test';
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    // Act
     const action = () => main();
 
     // Assert
-    await expect(action()).rejects.toThrow('Missing required inputs');
+    await expect(action()).rejects.toThrow(
+      'Use either env-file or command, not both.',
+    );
+    expect(mocks.mockCommandHandler.handleCommand).not.toHaveBeenCalled();
+  });
+
+  it('Should_IgnoreBlankCommand_When_CommandInputIsWhitespace', async () => {
+    // Arrange
+    process.env.INPUT_MAP_FILE = 'test-map.json';
+    delete process.env.INPUT_ENV_FILE;
+    process.env.INPUT_COMMAND = '   ';
+
+    // Act
+    await main();
+
+    // Assert
+    expect(dispatchedCommand().mode).toBe(OperationMode.EXPORT_TO_ENVIRONMENT);
   });
 
   it('Should_LogFailureListAndThrow_When_SecretsFetchErrorIsThrown', async () => {
@@ -148,7 +224,7 @@ describe('GitHubAction', () => {
     expect(loggedLines).not.toContain('Mario');
   });
 
-  it('Should_AlwaysUsePullMode_When_ActionIsInvoked', async () => {
+  it('Should_UsePullMode_When_EnvFileIsSet', async () => {
     // Arrange
     process.env.INPUT_MAP_FILE = 'test-map.json';
     process.env.INPUT_ENV_FILE = 'test.env';
@@ -165,7 +241,11 @@ describe('GitHubAction', () => {
     await main();
 
     // Assert
-    expect(capturedOptions?.push).toBe(false);
+    expect(capturedOptions).toMatchObject({
+      map: 'test-map.json',
+      envfile: 'test.env',
+      push: false,
+    });
   });
 
   it('Should_ReadProviderFromEnvironment_When_ProviderInputIsSet', async () => {

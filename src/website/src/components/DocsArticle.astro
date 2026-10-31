@@ -73,9 +73,9 @@ const ghaAwsReadPolicy = `{
   }]
 }`;
 
-const ghaExpectedOutput = `🔑 Envilder GitHub Action - Starting secret pull...
+const ghaExpectedOutput = `🔑 Envilder GitHub Action - Starting...
 📋 Map file: envilder.json
-📄 Env file: .env
+🧠 Mode: job environment (secrets in every later step)
 
 ☁ AWS identity · account=123456789012 · region=eu-west-1 · profile=default
 
@@ -84,9 +84,8 @@ ${'━'.repeat(60)}
   ✓ DB_PASSWORD         → *****************x9Q
   ✓ STRIPE_KEY          → *****************************4Rt
 
-⭐ LEVEL CLEARED  —  2/2 secrets loaded · .env written
-
-✅ Secrets pulled successfully!`;
+envilder: 2 secrets exported to the job environment (DB_PASSWORD, STRIPE_KEY)
+✅ Secrets loaded successfully!`;
 
 const ghaAzureFederated = `az ad app create --display-name github-envilder
 az ad sp create --id {APP_ID}
@@ -1872,6 +1871,30 @@ validateSecrets(secrets); // throws SecretValidationError if any value is empty`
         <p class="note">{t.docs.ghaPullOnly}</p>
       </section>
 
+      <section id="gha-modes" class="docs-section">
+        <h2>{t.docs.ghaModesTitle}</h2>
+        <p>{t.docs.ghaModesDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.ghaModesThMode}</th><th>{t.docs.ghaModesThSelect}</th><th>{t.docs.ghaModesThScope}</th><th>{t.docs.ghaModesThFile}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>{t.docs.ghaModeJob}</td><td>{t.docs.ghaModeJobSelect}</td><td>{t.docs.ghaModeJobScope}</td><td>{t.docs.ghaNo}</td></tr>
+            <tr><td>{t.docs.ghaModeCommand}</td><td><code>command</code></td><td>{t.docs.ghaModeCommandScope}</td><td>{t.docs.ghaNo}</td></tr>
+            <tr><td>{t.docs.ghaModeEnvFile}</td><td><code>env-file</code></td><td>{t.docs.ghaModeEnvFileScope}</td><td>{t.docs.ghaYes}</td></tr>
+          </tbody>
+        </table>
+        <p>{t.docs.ghaModesJobNote}</p>
+        <p>{t.docs.ghaModesEnvFileNote}</p>
+        <CodeBlock lang="yaml" filename=".github/workflows/compose.yml" code={`- uses: macalbert/envilder/github-action@v0
+  with:
+    map-file: envilder.json
+    env-file: \${{ runner.temp }}/envilder.env
+
+- run: docker compose --env-file "\${{ runner.temp }}/envilder.env" up -d`} />
+        <p class="note">{t.docs.ghaModesSafetyNote}</p>
+      </section>
+
       <section id="gha-aws" class="docs-section">
         <h2>{t.docs.ghaBasicTitle}</h2>
 
@@ -1917,7 +1940,6 @@ jobs:
         uses: macalbert/envilder/github-action@v0
         with:
           map-file: envilder.json
-          env-file: .env
 
       - run: npm ci
       - run: npm run deploy`} />
@@ -1977,7 +1999,6 @@ jobs:
         uses: macalbert/envilder/github-action@v0
         with:
           map-file: envilder.json
-          env-file: .env
 
       - run: npm ci
       - run: npm run deploy`} />
@@ -2018,7 +2039,6 @@ jobs:
         uses: macalbert/envilder/github-action@v0
         with:
           map-file: config/\${{ inputs.environment }}/envilder.json
-          env-file: .env
 
       - run: npm ci
       - run: npm run deploy`} />
@@ -2027,33 +2047,19 @@ jobs:
       <section id="gha-exec" class="docs-section">
         <h2>{t.docs.ghaExecTitle}</h2>
         <p>{t.docs.ghaExecDesc}</p>
-        <CodeBlock lang="yaml" filename=".github/workflows/test.yml" code={`name: Test
+        <CodeBlock lang="yaml" filename=".github/workflows/deploy.yml" code={`- name: Configure AWS Credentials
+  uses: aws-actions/configure-aws-credentials@v6
+  with:
+    role-to-assume: arn:aws:iam::123456789012:role/github-envilder
+    aws-region: eu-west-1
 
-on: [push]
+- name: Deploy with secrets
+  uses: macalbert/envilder/github-action@v0
+  with:
+    map-file: envilder.json
+    command: ./deploy.sh --prod
 
-permissions:
-  id-token: write
-  contents: read
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 22
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          role-to-assume: arn:aws:iam::123456789012:role/github-envilder
-          aws-region: eu-west-1
-
-      - run: npm ci
-      - name: Run tests with secrets in memory
-        run: npx envilder exec --map=envilder.json -- npm test`} />
+- run: echo "$DB_PASSWORD"   # empty: the secrets stayed in the deploy step`} />
         <p class="note">{t.docs.ghaExecNote}</p>
         <p><a href={localizedPath(lang, '/docs/cli/exec/')}>{t.docs.ghaExecLink}</a></p>
       </section>
@@ -2124,7 +2130,8 @@ jobs:
           </thead>
           <tbody>
             <tr><td><code>map-file</code></td><td>{t.docs.ghaYes}</td><td>-</td><td>{t.docs.ghaInputMap}</td></tr>
-            <tr><td><code>env-file</code></td><td>{t.docs.ghaYes}</td><td>-</td><td>{t.docs.ghaInputEnv}</td></tr>
+            <tr><td><code>env-file</code></td><td>{t.docs.ghaNo}</td><td>-</td><td>{t.docs.ghaInputEnv}</td></tr>
+            <tr><td><code>command</code></td><td>{t.docs.ghaNo}</td><td>-</td><td>{t.docs.ghaInputCommand}</td></tr>
             <tr><td><code>provider</code></td><td>{t.docs.ghaNo}</td><td><code>aws</code></td><td>{t.docs.ghaInputProvider}</td></tr>
             <tr><td><code>vault-url</code></td><td>{t.docs.ghaNo}</td><td>-</td><td>{t.docs.ghaInputVault}</td></tr>
           </tbody>

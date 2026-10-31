@@ -45,6 +45,22 @@ export class DispatchActionCommand {
     );
   }
 
+  /**
+   * Builds the command that exports the secrets of the map file to the
+   * environment of the processes started afterwards, without a `.env` file.
+   */
+  static forExport(map: string): DispatchActionCommand {
+    return new DispatchActionCommand(
+      map,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      OperationMode.EXPORT_TO_ENVIRONMENT,
+    );
+  }
+
   static fromCliOptions(options: CliOptions): DispatchActionCommand {
     const mode = DispatchActionCommand.determineOperationMode(options);
     return new DispatchActionCommand(
