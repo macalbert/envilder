@@ -184,8 +184,14 @@ previous versions. Use it only when a tool can only read a file, for example
 
 Not writing a `.env` file removes the most common way secrets leak from CI:
 a file nobody remembers, picked up by `upload-artifact`, a cache, `COPY . .`
-in a Dockerfile, or `git add -A`. On self-hosted runners it also avoids a file
-that survives into the next job.
+in a Dockerfile, or `git add -A`.
+
+The default mode is not file-free, though: it writes the secrets to the
+runner's per-step `GITHUB_ENV` file in the runner's temporary directory,
+outside the workspace, which the runner reads to set them in later steps and
+empties at the end of the job. Treat the runner's temporary
+files as sensitive, especially on self-hosted runners, where a failed cleanup
+can leave them behind. `command` writes no file at all.
 
 It does **not** protect against malicious code running in the job: a
 compromised dependency or action can read environment variables as easily as a
@@ -194,6 +200,7 @@ file. What changes is the exposure:
 | | `.env` file | Job environment | Command |
 |---|---|---|---|
 | File in the workspace | Yes | No | No |
+| File on the runner | Yes | `GITHUB_ENV`, in the runner's temporary directory | No |
 | Who can read the secrets | The whole job, and the disk | The whole job | One process |
 
 All modes register every value with GitHub log masking. Job environment and

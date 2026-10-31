@@ -30,11 +30,15 @@ the secrets, or write a `.env` file when a tool needs one.
 Job environment and command are fail-closed: if any secret is missing or empty, the step fails
 and nothing is exported or passed to the command.
 
-Because the action writes no `.env` file, there is no secrets file to leak by accident through
-artifacts, caches, Docker build contexts, commits or files left on self-hosted runners. Later
-tools can still write the variables to files, and it does not protect against malicious code
-running in the same job, which can read environment variables as easily as a file. For the
-smallest exposure, use `command`.
+Because the action writes no `.env` file to the workspace, there is no workspace file for
+artifacts, caches, Docker build contexts or commits to pick up by accident. The default mode
+still writes the secrets to the runner's per-step `GITHUB_ENV` file in the runner's temporary
+directory, outside the workspace, which the runner reads to set them in later steps and empties
+at the end of the job. Treat the runner's
+temporary files as sensitive, especially on self-hosted runners, where a failed cleanup can
+leave them behind; `command` writes no file at all. Later tools can still write the variables
+to files, and it does not protect against malicious code running in the same job, which can
+read environment variables as easily as a file. For the smallest exposure, use `command`.
 
 ## Prerequisites
 
