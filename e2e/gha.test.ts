@@ -469,6 +469,9 @@ function parseGitHubEnvFile(content: string): Record<string, string> {
     const delimiter = lines[index].slice(heredoc + 2);
     const valueLines: string[] = [];
     for (index++; lines[index] !== delimiter; index++) {
+      if (index >= lines.length) {
+        throw new Error(`Unterminated GITHUB_ENV block for ${name}`);
+      }
       valueLines.push(lines[index]);
     }
     variables[name] = valueLines.join(EOL);

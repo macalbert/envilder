@@ -254,7 +254,7 @@ export const es: Translations = {
     modesTitle: 'Tres formas de usar los secretos',
     modeJobTitle: 'Entorno del job (por defecto)',
     modeJobDesc:
-      'Solo con map-file, cada secreto se convierte en una variable de entorno para todos los pasos posteriores del job. No se escribe ningún archivo.',
+      'Solo con map-file, cada secreto se convierte en una variable de entorno para todos los pasos posteriores del job. No se escribe ningún archivo .env; el runner guarda los valores en su archivo GITHUB_ENV, en su directorio temporal, hasta que termina el job.',
     modeCommandTitle: 'command',
     modeCommandDesc:
       'La Action ejecuta ese único comando con los secretos en su entorno. Los pasos posteriores nunca los ven.',
@@ -1372,7 +1372,7 @@ export const es: Translations = {
       'La sesión del rol terminó antes de que se ejecutara el paso (una hora por defecto). Ejecuta Envilder justo después del paso de credenciales, o aumenta role-duration-seconds junto con la duración máxima de sesión del rol.',
     ghaErrNotFoundTitle: 'Parámetro o secreto inexistente',
     ghaErrNotFoundFix:
-      'Es un aviso, no un error: el paso termina bien, con menos secretos en el resumen que en el mapeo. En un archivo .env nuevo la variable queda fuera. Si el archivo ya existía (en el repositorio, en caché o escrito por un paso anterior), se conserva el valor antiguo, así que borra el archivo antes de la Action cuando un valor obsoleto no deba sobrevivir. Revisa el nombre, la región y, en Azure, el nombre convertido. Si un valor que falta debe detener el despliegue, compruébalo en un paso posterior.',
+      'Revisa el nombre, la región y, en Azure, el nombre convertido. En el modo por defecto y con command, un secreto que falta o está vacío hace fallar el paso: no se exporta nada y el comando no se inicia. Con env-file es un aviso, no un error: el paso termina bien, con menos secretos en el resumen que en el mapeo. En un archivo .env nuevo la variable queda fuera. Si el archivo ya existía (en el repositorio, en caché o escrito por un paso anterior), se conserva el valor antiguo, así que borra el archivo antes de la Action cuando un valor obsoleto no deba sobrevivir. Si un valor que falta debe detener el despliegue, usa el modo por defecto o command en lugar de env-file.',
     ghaErrVaultUrlTitle: 'Falta la URL del vault de Azure',
     ghaErrVaultUrlFix:
       'Informa el input vault-url o $config.vaultUrl en el archivo de mapeo. Usa el URI del vault que muestra el portal de Azure, por ejemplo https://my-vault.vault.azure.net.',

@@ -254,7 +254,7 @@ export const ca: Translations = {
     modesTitle: 'Tres maneres de fer servir els secrets',
     modeJobTitle: 'Entorn del job (per defecte)',
     modeJobDesc:
-      "Només amb map-file, cada secret es converteix en una variable d'entorn per a tots els passos posteriors del job. No s'escriu cap fitxer.",
+      "Només amb map-file, cada secret es converteix en una variable d'entorn per a tots els passos posteriors del job. No s'escriu cap fitxer .env; el runner guarda els valors al seu fitxer GITHUB_ENV, al seu directori temporal, fins que acaba el job.",
     modeCommandTitle: 'command',
     modeCommandDesc:
       "L'Action executa aquesta única ordre amb els secrets al seu entorn. Els passos posteriors no els veuen mai.",
@@ -1370,7 +1370,7 @@ export const ca: Translations = {
       "La sessió del rol ha acabat abans que s'executés el pas (una hora per defecte). Executa Envilder just després del pas de credencials, o augmenta role-duration-seconds juntament amb la durada màxima de sessió del rol.",
     ghaErrNotFoundTitle: 'Paràmetre o secret inexistent',
     ghaErrNotFoundFix:
-      "És un avís, no un error: el pas acaba bé, amb menys secrets al resum que al mapeig. En un fitxer .env nou la variable queda fora. Si el fitxer ja existia (al repositori, a la memòria cau o escrit per un pas anterior), es conserva el valor antic, així que esborra el fitxer abans de l'Action quan un valor obsolet no hagi de sobreviure. Revisa el nom, la regió i, a Azure, el nom convertit. Si un valor que falta ha d'aturar el desplegament, comprova'l en un pas posterior.",
+      "Revisa el nom, la regió i, a Azure, el nom convertit. En el mode per defecte i amb command, un secret que falta o és buit fa fallar el pas: no s'exporta res i la comanda no s'inicia. Amb env-file és un avís, no un error: el pas acaba bé, amb menys secrets al resum que al mapeig. En un fitxer .env nou la variable queda fora. Si el fitxer ja existia (al repositori, a la memòria cau o escrit per un pas anterior), es conserva el valor antic, així que esborra el fitxer abans de l'Action quan un valor obsolet no hagi de sobreviure. Si un valor que falta ha d'aturar el desplegament, fes servir el mode per defecte o command en lloc d'env-file.",
     ghaErrVaultUrlTitle: "Falta l'URL del vault d'Azure",
     ghaErrVaultUrlFix:
       "Informa l'input vault-url o $config.vaultUrl al fitxer de mapeig. Fes servir l'URI del vault que mostra el portal d'Azure, per exemple https://my-vault.vault.azure.net.",

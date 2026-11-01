@@ -252,7 +252,7 @@ export const en: Translations = {
     modesTitle: 'Three ways to use the secrets',
     modeJobTitle: 'Job environment (default)',
     modeJobDesc:
-      'With only map-file, every secret becomes an environment variable for every later step of the job. No file is written.',
+      'With only map-file, every secret becomes an environment variable for every later step of the job. No .env file is written; the runner keeps the values in its GITHUB_ENV file, in its temporary directory, until the job ends.',
     modeCommandTitle: 'command',
     modeCommandDesc:
       'The action runs that one command with the secrets in its environment. Later steps never see them.',
@@ -1355,7 +1355,7 @@ export const en: Translations = {
       "The role session ended before the step ran (one hour by default). Run Envilder right after the credentials step, or raise role-duration-seconds together with the role's maximum session duration.",
     ghaErrNotFoundTitle: 'Parameter or secret not found',
     ghaErrNotFoundFix:
-      'This is a warning, not a failure: the step still succeeds, with fewer secrets in the summary than in the map. In a new .env file the variable is left out. If the file already existed (committed, cached or written by an earlier step), its old value is kept, so delete the file before the action when a stale value must not survive. Check the name, the region and, on Azure, the converted name. If a missing value must stop the deploy, check for it in a later step.',
+      'Check the name, the region and, on Azure, the converted name. In the default mode and with command, a missing or empty secret fails the step: nothing is exported and the command does not start. With env-file it is a warning, not a failure: the step still succeeds, with fewer secrets in the summary than in the map. In a new .env file the variable is left out. If the file already existed (committed, cached or written by an earlier step), its old value is kept, so delete the file before the action when a stale value must not survive. If a missing value must stop the deploy, use the default mode or command instead of env-file.',
     ghaErrVaultUrlTitle: 'Azure vault URL missing',
     ghaErrVaultUrlFix:
       'Set the vault-url input or $config.vaultUrl in the map file. Use the vault URI shown in the Azure portal, for example https://my-vault.vault.azure.net.',
