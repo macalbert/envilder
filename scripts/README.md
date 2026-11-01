@@ -42,9 +42,11 @@ node scripts/release-notes.mjs --component=cli --version=0.19.0 --out=release-no
 `--component` is `cli`, `sdk-nodejs`, `sdk-dotnet` or `sdk-python`. The
 previous tag is the highest `MAJOR.MINOR.PATCH` tag of the same component, and
 the PR list comes from GitHub's generated release notes, so the `gh` CLI must
-be authenticated (`GH_TOKEN` in CI). The optional title and summary come from
-a `<!-- release ... -->` comment in the changelog section (see the
-`doc-maintenance` skill).
+be authenticated (`GH_TOKEN` in CI). `--dry-run` replaces `--out`: it prints
+the rendered notes without calling GitHub (the PR list stays empty) or writing
+any output, and `changelog-check.yml` uses it on PRs. The optional title and
+summary come from a `<!-- release ... -->` comment in the changelog section
+(see the `doc-maintenance` skill).
 
 ## `check-released-changelogs.mjs`
 

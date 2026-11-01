@@ -7,6 +7,9 @@ permissions:
 # already tagged: the release notes are built from the changelog at the tag,
 # so those entries would describe code that did not ship. Label the PR
 # `changelog-correction` to skip it when fixing an already released section.
+# The second job renders the latest section of each changed changelog the same
+# way the publish workflows will, so a broken section fails here and not after
+# the merge.
 on:
   pull_request:
     branches:
@@ -21,6 +24,7 @@ on:
     paths:
       - "docs/changelogs/**"
       - "scripts/check-released-changelogs.mjs"
+      - "scripts/release-notes.mjs"
       - ".github/workflows/changelog-check.yml"
 
 concurrency:
@@ -42,3 +46,37 @@ jobs:
         env:
           BASE_REF: ${{ github.base_ref }}
         run: node scripts/check-released-changelogs.mjs --base="$(git merge-base "origin/$BASE_REF" HEAD)"
+
+  render-release-notes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component: cli
+            file: cli.md
+          - component: sdk-nodejs
+            file: sdk-nodejs.md
+          - component: sdk-dotnet
+            file: sdk-dotnet.md
+          - component: sdk-python
+            file: sdk-python.md
+    steps:
+      - name: 🧱 Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: 📝 Render the latest release notes (dry run)
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          FILE: docs/changelogs/${{ matrix.file }}
+          COMPONENT: ${{ matrix.component }}
+        run: |
+          if git diff --quiet "origin/$BASE_REF"...HEAD -- "$FILE"; then
+            echo "$FILE is unchanged, nothing to render"
+            exit 0
+          fi
+          version=$(grep -m1 -oP '^## \[\K[^\]]+' "$FILE")
+          node scripts/release-notes.mjs --component="$COMPONENT" --version="$version" --dry-run

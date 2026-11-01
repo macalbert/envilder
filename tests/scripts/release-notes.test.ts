@@ -1,3 +1,8 @@
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
   findPreviousTag,
@@ -359,5 +364,54 @@ describe('findPreviousTag', () => {
 
     // Assert
     expect(actual).toBe('v0.19.0');
+  });
+});
+
+describe('release-notes CLI --dry-run', () => {
+  const script = fileURLToPath(
+    new URL('../../scripts/release-notes.mjs', import.meta.url),
+  );
+  const latestCliVersion = readFileSync(
+    fileURLToPath(new URL('../../docs/changelogs/cli.md', import.meta.url)),
+    'utf-8',
+  ).match(/^## \[([^\]]+)\]/m)?.[1] as string;
+
+  it('Should_RenderWithoutCallingGitHubOrWritingOutputs_When_DryRun', () => {
+    // Arrange
+    const outputFile = join(mkdtempSync(join(tmpdir(), 'notes-')), 'output');
+    writeFileSync(outputFile, '');
+    const env = {
+      ...process.env,
+      GITHUB_OUTPUT: outputFile,
+      GH_HOST: 'unreachable.invalid',
+      GH_TOKEN: 'invalid',
+    };
+
+    // Act
+    const actual = execFileSync(
+      process.execPath,
+      [script, '--component=cli', `--version=${latestCliVersion}`, '--dry-run'],
+      { encoding: 'utf-8', env },
+    );
+
+    // Assert
+    expect(actual).toContain('## 📦 Upgrade');
+    expect(readFileSync(outputFile, 'utf-8')).toBe('');
+  });
+
+  it('Should_Fail_When_DryRunVersionHasNoChangelogSection', () => {
+    // Arrange
+    const run = () =>
+      execFileSync(
+        process.execPath,
+        [script, '--component=cli', '--version=999.0.0', '--dry-run'],
+        { encoding: 'utf-8', stdio: 'pipe' },
+      );
+
+    // Act
+    const act = run;
+
+    // Assert
+    expect(act).toThrow('No "## [999.0.0]" section');
   });
 });

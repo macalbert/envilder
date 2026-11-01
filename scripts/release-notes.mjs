@@ -353,14 +353,18 @@ export function findPreviousTag(tags, componentName, version) {
 function parseArgs(argv) {
   const args = {};
   for (const arg of argv) {
+    if (arg === '--dry-run') {
+      args.dryRun = true;
+      continue;
+    }
     const match = arg.match(/^--([a-z]+)=(.*)$/);
     if (match) {
       args[match[1]] = match[2];
     }
   }
-  if (!args.component || !args.version || !args.out) {
+  if (!args.component || !args.version || !(args.out || args.dryRun)) {
     throw new Error(
-      'Usage: node scripts/release-notes.mjs --component=<cli|sdk-nodejs|sdk-dotnet|sdk-python> --version=<x.y.z> --out=<file>',
+      'Usage: node scripts/release-notes.mjs --component=<cli|sdk-nodejs|sdk-dotnet|sdk-python> --version=<x.y.z> (--out=<file> | --dry-run)',
     );
   }
   return args;
@@ -392,6 +396,7 @@ function main() {
     component: componentName,
     version,
     out,
+    dryRun,
   } = parseArgs(process.argv.slice(2));
   const component = getComponent(componentName);
   const changelog = readFileSync(
@@ -402,10 +407,9 @@ function main() {
     .split('\n')
     .filter(Boolean);
   const previousTag = findPreviousTag(tags, componentName, version);
-  const pullRequests = listPullRequests(
-    `${component.tagPrefix}${version}`,
-    previousTag,
-  );
+  const pullRequests = dryRun
+    ? []
+    : listPullRequests(`${component.tagPrefix}${version}`, previousTag);
   const { title, body } = renderReleaseNotes({
     component: componentName,
     version,
@@ -414,9 +418,11 @@ function main() {
     pullRequests,
   });
 
-  writeFileSync(out, body);
-  if (process.env.GITHUB_OUTPUT) {
-    appendFileSync(process.env.GITHUB_OUTPUT, `title=${title}\n`);
+  if (!dryRun) {
+    writeFileSync(out, body);
+    if (process.env.GITHUB_OUTPUT) {
+      appendFileSync(process.env.GITHUB_OUTPUT, `title=${title}\n`);
+    }
   }
   console.log(`${title}\n\n${body}`);
 }
