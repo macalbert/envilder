@@ -125,6 +125,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: "sdk-nodejs/v${{ steps.version-check.outputs.current_version }}"
+          commit: ${{ github.sha }}
           name: ${{ steps.release-notes.outputs.title }}
           bodyFile: ${{ runner.temp }}/release-notes.md
           token: ${{ secrets.GITHUB_TOKEN }}
