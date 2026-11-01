@@ -5,7 +5,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
-## [0.19.0] - 2026-10-30
+## [0.20.0] - 2026-11-01
 
 ### Added
 
@@ -26,6 +26,10 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   or `secrets/readMetadata` (Azure RBAC, included in Key Vault Secrets User)
   ([#558](https://github.com/macalbert/envilder/issues/558)).
   [Guide](../validate-command.md)
+
+---
+
+## [0.19.0] - 2026-10-30
 
 ### Changed
 
