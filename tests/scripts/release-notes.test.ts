@@ -203,6 +203,25 @@ describe('renderReleaseNotes', () => {
     );
   });
 
+  it('Should_NotCloseFence_When_FenceLikeLineIsIndentedFourOrMoreSpaces', () => {
+    // Arrange
+    const input = {
+      component: 'cli',
+      version: '0.18.0',
+      changelog: `${changelog}\n~~~md\nenvilder validate\n    ~~~\nfirst\nsecond\n~~~\n`,
+      previousTag: 'v0.17.2',
+      pullRequests,
+    };
+
+    // Act
+    const actual = renderReleaseNotes(input);
+
+    // Assert
+    expect(actual.body).toContain(
+      '~~~md\nenvilder validate\n    ~~~\nfirst\nsecond\n~~~',
+    );
+  });
+
   it('Should_KeepTildeFencedCodeIntact_When_SectionUsesTildeFence', () => {
     // Arrange
     const input = {

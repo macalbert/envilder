@@ -77,12 +77,14 @@ const SECTION_EMOJI = {
 };
 
 const BLOCK_START = /^\s*(?:[*-] |\d+\. |#{1,6} |```|~~~|---|\||>)/;
-const FENCE_OPEN = /^\s*(`{3,}|~{3,})/;
-const FENCE_CLOSE = /^\s*(`{3,}|~{3,})\s*$/;
+const FENCE_OPEN = /^( *)(`{3,}|~{3,})/;
+const FENCE_CLOSE = /^( *)(`{3,}|~{3,})\s*$/;
 
 /**
  * Tracks fenced code blocks as CommonMark does: a fence closes only with the
- * opener's character, repeated at least as many times, and nothing after it.
+ * opener's character, repeated at least as many times, nothing after it, and
+ * at most three spaces more indented than the opener. The opener itself may
+ * be indented, since changelog fences sit inside list items.
  */
 function createFenceTracker() {
   let opener;
@@ -90,7 +92,7 @@ function createFenceTracker() {
     if (!opener) {
       const open = line.match(FENCE_OPEN);
       if (open) {
-        opener = open[1];
+        opener = { indent: open[1].length, marker: open[2] };
         return true;
       }
       return false;
@@ -98,8 +100,9 @@ function createFenceTracker() {
     const close = line.match(FENCE_CLOSE);
     if (
       close &&
-      close[1][0] === opener[0] &&
-      close[1].length >= opener.length
+      close[2][0] === opener.marker[0] &&
+      close[2].length >= opener.marker.length &&
+      close[1].length < opener.indent + 4
     ) {
       opener = undefined;
     }

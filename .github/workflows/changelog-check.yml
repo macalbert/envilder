@@ -39,4 +39,6 @@ jobs:
           fetch-depth: 0
 
       - name: 📜 Check tagged changelog sections are unchanged
-        run: node scripts/check-released-changelogs.mjs --base=$(git merge-base origin/${{ github.base_ref }} HEAD)
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: node scripts/check-released-changelogs.mjs --base="$(git merge-base "origin/$BASE_REF" HEAD)"
