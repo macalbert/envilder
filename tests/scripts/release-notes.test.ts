@@ -241,6 +241,44 @@ describe('renderReleaseNotes', () => {
     );
   });
 
+  it('Should_KeepTabIndentedFence_When_ListItemIndentsFenceWithTab', () => {
+    // Arrange
+    const input = {
+      component: 'cli',
+      version: '0.18.0',
+      changelog: `${changelog}\n* Example:\n\n\t~~~sh\n\tfirst\n\tsecond\n\t~~~\n`,
+      previousTag: 'v0.17.2',
+      pullRequests,
+    };
+
+    // Act
+    const actual = renderReleaseNotes(input);
+
+    // Assert
+    expect(actual.body).toContain('\t~~~sh\n\tfirst\n\tsecond\n\t~~~');
+  });
+
+  it('Should_KeepEntriesAfterFence_When_FenceContainsSectionHeading', () => {
+    // Arrange
+    const input = {
+      component: 'cli',
+      version: '0.19.0',
+      changelog: changelog.replace(
+        '```bash\nenvilder validate',
+        '```md\n## Example\n```\n\n```bash\nenvilder validate',
+      ),
+      previousTag: 'v0.18.0',
+      pullRequests,
+    };
+
+    // Act
+    const actual = renderReleaseNotes(input);
+
+    // Assert
+    expect(actual.body).toContain('## Example');
+    expect(actual.body).toContain('Accepted risk');
+  });
+
   it('Should_Throw_When_ChangelogHasNoSectionForVersion', () => {
     // Arrange
     const input = {

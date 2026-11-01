@@ -77,8 +77,17 @@ const SECTION_EMOJI = {
 };
 
 const BLOCK_START = /^\s*(?:[*-] |\d+\. |#{1,6} |```|~~~|---|\||>)/;
-const FENCE_OPEN = /^( *)(`{3,}|~{3,})/;
-const FENCE_CLOSE = /^( *)(`{3,}|~{3,})\s*$/;
+const FENCE_OPEN = /^([ \t]*)(`{3,}|~{3,})/;
+const FENCE_CLOSE = /^([ \t]*)(`{3,}|~{3,})\s*$/;
+
+/** Width of leading whitespace, with tabs advancing to the next multiple of 4. */
+function indentWidth(whitespace) {
+  let width = 0;
+  for (const char of whitespace) {
+    width += char === '\t' ? 4 - (width % 4) : 1;
+  }
+  return width;
+}
 
 /**
  * Tracks fenced code blocks as CommonMark does: a fence closes only with the
@@ -92,7 +101,7 @@ function createFenceTracker() {
     if (!opener) {
       const open = line.match(FENCE_OPEN);
       if (open) {
-        opener = { indent: open[1].length, marker: open[2] };
+        opener = { indent: indentWidth(open[1]), marker: open[2] };
         return true;
       }
       return false;
@@ -102,7 +111,7 @@ function createFenceTracker() {
       close &&
       close[2][0] === opener.marker[0] &&
       close[2].length >= opener.marker.length &&
-      close[1].length < opener.indent + 4
+      indentWidth(close[1]) < opener.indent + 4
     ) {
       opener = undefined;
     }
@@ -132,7 +141,8 @@ function extractSection(changelog, version) {
     throw new Error(`No "## [${version}]" section in the changelog`);
   }
   const rest = lines.slice(start + 1);
-  const end = rest.findIndex((line) => /^## /.test(line));
+  const isCode = createFenceTracker();
+  const end = rest.findIndex((line) => !isCode(line) && /^## /.test(line));
   const section = end === -1 ? rest : rest.slice(0, end);
   return section
     .join('\n')
