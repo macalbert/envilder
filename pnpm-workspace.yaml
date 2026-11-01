@@ -26,6 +26,7 @@ catalog:
   constructs: ^10.8.1
 
 overrides:
+  "@azure/msal-node": "^7.1.2"
   "@grpc/grpc-js@1": "^1.14.5"
   "brace-expansion@2": "^2.1.7"
   "brace-expansion@5": "^5.0.12"
