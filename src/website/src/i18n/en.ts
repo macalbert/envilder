@@ -1268,7 +1268,7 @@ export const en: Translations = {
     ghaModesThMode: 'Mode',
     ghaModesThSelect: 'How to select it',
     ghaModesThScope: 'Who can read the secrets',
-    ghaModesThFile: 'Writes a file',
+    ghaModesThFile: 'Files written',
     ghaModeJob: 'Job environment (default)',
     ghaModeJobSelect: 'Only map-file',
     ghaModeJobScope: 'Every later step of the job',
@@ -1276,6 +1276,10 @@ export const en: Translations = {
     ghaModeCommandScope: 'Only that command and the processes it starts',
     ghaModeEnvFile: '.env file',
     ghaModeEnvFileScope: 'Any step or tool that reads the file',
+    ghaModeJobFiles:
+      "The runner's GITHUB_ENV file, in its temporary directory (no .env)",
+    ghaModeCommandFiles: 'None',
+    ghaModeEnvFileFiles: 'The .env file',
     ghaModesJobNote:
       'In the default mode the action appends the secrets to the GITHUB_ENV file of the runner, and the runner sets them in the environment of every step that runs after it in the same job, including third-party actions, Docker container actions and steps that run in a job container. Steps read them like any other variable: process.env.DB_PASSWORD, os.environ["DB_PASSWORD"] or $DB_PASSWORD. Other jobs do not get them, so each job that needs secrets runs the action again. A container you start yourself with docker run does not inherit them: pass them explicitly, for example with docker run -e DB_PASSWORD.',
     ghaModesEnvFileNote:

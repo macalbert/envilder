@@ -105,11 +105,11 @@ The published `macalbert/envilder/github-action@v0` tag contains the prebuilt ac
 
 The action has three modes. Pick one with the inputs you set:
 
-| Mode | How to select it | Who can read the secrets | Writes a file |
+| Mode | How to select it | Who can read the secrets | Files written |
 |------|------------------|--------------------------|---------------|
-| 🧠 **Job environment** (default) | Only `map-file` | Every **later step of the job** | ❌ No |
-| 🚀 **Command** | `command` | Only **that command** and the processes it starts | ❌ No |
-| 📄 **`.env` file** | `env-file` | Any step or tool that reads the file | ✅ Yes |
+| 🧠 **Job environment** (default) | Only `map-file` | Every **later step of the job** | The runner's `GITHUB_ENV` file, in its temporary directory (no `.env`) |
+| 🚀 **Command** | `command` | Only **that command** and the processes it starts | None |
+| 📄 **`.env` file** | `env-file` | Any step or tool that reads the file | The `.env` file |
 
 ### 🧠 Job environment (default, recommended)
 

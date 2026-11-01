@@ -1283,7 +1283,7 @@ export const ca: Translations = {
     ghaModesThMode: 'Mode',
     ghaModesThSelect: 'Com es tria',
     ghaModesThScope: 'Qui pot llegir els secrets',
-    ghaModesThFile: 'Escriu un fitxer',
+    ghaModesThFile: 'Fitxers escrits',
     ghaModeJob: 'Entorn del job (per defecte)',
     ghaModeJobSelect: 'Només map-file',
     ghaModeJobScope: 'Tots els passos posteriors del job',
@@ -1291,6 +1291,10 @@ export const ca: Translations = {
     ghaModeCommandScope: 'Només aquesta ordre i els processos que inicia',
     ghaModeEnvFile: 'Fitxer .env',
     ghaModeEnvFileScope: 'Qualsevol pas o eina que llegeixi el fitxer',
+    ghaModeJobFiles:
+      'El fitxer GITHUB_ENV del runner, al seu directori temporal (cap .env)',
+    ghaModeCommandFiles: 'Cap',
+    ghaModeEnvFileFiles: 'El fitxer .env',
     ghaModesJobNote:
       "En el mode per defecte, l'Action afegeix els secrets al fitxer GITHUB_ENV del runner, i el runner els posa a l'entorn de cada pas que s'executa després dins del mateix job, incloses les actions de tercers, les actions de contenidor Docker i els passos que s'executen dins d'un container del job. Els passos els llegeixen com qualsevol altra variable: process.env.DB_PASSWORD, os.environ[\"DB_PASSWORD\"] o $DB_PASSWORD. Els altres jobs no els reben, així que cada job que necessita secrets torna a executar l'Action. Un contenidor que inicies tu mateix amb docker run no els hereta: passa'ls explícitament, per exemple amb docker run -e DB_PASSWORD.",
     ghaModesEnvFileNote:

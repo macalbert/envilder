@@ -756,6 +756,9 @@ export interface DocsTranslations {
   ghaModeCommandScope: string;
   ghaModeEnvFile: string;
   ghaModeEnvFileScope: string;
+  ghaModeJobFiles: string;
+  ghaModeCommandFiles: string;
+  ghaModeEnvFileFiles: string;
   ghaModesJobNote: string;
   ghaModesEnvFileNote: string;
   ghaModesSafetyNote: string;
