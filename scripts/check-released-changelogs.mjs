@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
+import { createFenceTracker } from './release-notes.mjs';
 
 const CHANGELOGS = [
   { file: 'docs/changelogs/cli.md', tagPrefix: 'v' },
@@ -13,12 +14,14 @@ const CHANGELOGS = [
 function splitSections(changelog) {
   const sections = new Map();
   let lines;
+  const isFenced = createFenceTracker();
   for (const line of changelog.replace(/\r\n/g, '\n').split('\n')) {
-    const heading = line.match(/^## \[([^\]]+)\]/);
+    const fenced = isFenced(line);
+    const heading = !fenced && line.match(/^## \[([^\]]+)\]/);
     if (heading) {
       lines = [];
       sections.set(heading[1], lines);
-    } else if (/^## /.test(line)) {
+    } else if (!fenced && /^## /.test(line)) {
       lines = undefined;
     } else if (lines && line.trim() !== '' && line.trim() !== '---') {
       lines.push(line.trim());
@@ -45,8 +48,15 @@ export function findAdditionsToReleasedSections({
     if (!released.has(`${tagPrefix}${version}`)) {
       continue;
     }
-    const before = new Set(baseSections.get(version) ?? []);
-    const added = lines.filter((line) => !before.has(line));
+    const remaining = new Map();
+    for (const line of baseSections.get(version) ?? []) {
+      remaining.set(line, (remaining.get(line) ?? 0) + 1);
+    }
+    const added = lines.filter((line) => {
+      const count = remaining.get(line) ?? 0;
+      remaining.set(line, count - 1);
+      return count <= 0;
+    });
     if (added.length > 0) {
       findings.push({ version, lines: added });
     }

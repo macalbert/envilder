@@ -47,6 +47,50 @@ describe('findAdditionsToReleasedSections', () => {
     ]);
   });
 
+  it('Should_ReportAddedLines_When_FenceContainsSectionHeading', () => {
+    // Arrange
+    const fenced = base.replace(
+      '### Added\n',
+      '### Added\n\n```md\n## Example\n```\n',
+    );
+    const head = fenced.replace(
+      '* **Removed later**\n',
+      '* **Removed later**\n* **New entry**\n',
+    );
+
+    // Act
+    const actual = findAdditionsToReleasedSections({
+      base: fenced,
+      head,
+      tags: ['v0.18.0'],
+      tagPrefix: 'v',
+    });
+
+    // Assert
+    expect(actual).toEqual([{ version: '0.18.0', lines: ['* **New entry**'] }]);
+  });
+
+  it('Should_ReportDuplicateLine_When_TaggedSectionRepeatsExistingEntry', () => {
+    // Arrange
+    const head = base.replace(
+      '* **Removed later**\n',
+      '* **Removed later**\n* **Removed later**\n',
+    );
+
+    // Act
+    const actual = findAdditionsToReleasedSections({
+      base,
+      head,
+      tags: ['v0.18.0'],
+      tagPrefix: 'v',
+    });
+
+    // Assert
+    expect(actual).toEqual([
+      { version: '0.18.0', lines: ['* **Removed later**'] },
+    ]);
+  });
+
   it('Should_IgnoreSection_When_VersionIsNotTagged', () => {
     // Arrange
     const head = base.replace(

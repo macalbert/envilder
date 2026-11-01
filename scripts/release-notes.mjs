@@ -95,7 +95,7 @@ function indentWidth(whitespace) {
  * at most three spaces more indented than the opener. The opener itself may
  * be indented, since changelog fences sit inside list items.
  */
-function createFenceTracker() {
+export function createFenceTracker() {
   let opener;
   return (line) => {
     if (!opener) {
