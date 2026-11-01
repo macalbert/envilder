@@ -22,7 +22,7 @@
 
 ---
 
-## [0.19.0] - 2026-10-30
+## [0.20.0] - 2026-11-01
 
 ### Changed
 
@@ -31,6 +31,13 @@
   exist without reading them, for the CLI's `envilder validate`. The Action
   does not use it, and its behavior is unchanged
   ([#558](https://github.com/macalbert/envilder/issues/558))
+
+---
+
+## [0.19.0] - 2026-10-30
+
+### Changed
+
 * **Azure Key Vault URLs are no longer checked by host**: The Action shares
   the CLI's change: `vaultUrl` goes to the Azure Key Vault client as written,
   without the `https://` and Azure-domain checks, as in the SDKs
