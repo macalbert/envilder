@@ -55,6 +55,14 @@ jobs:
             echo "version_changed=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: 📝 Prepare release notes
+        if: steps.version-check.outputs.version_changed == 'true'
+        id: release-notes
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/release-notes.mjs --component=sdk-python --version=${{ steps.version-check.outputs.current_version }} --out=${{ runner.temp }}/release-notes.md
+
       - name: 🪙 Collect Coins (Configure AWS credentials)
         if: steps.version-check.outputs.version_changed == 'true'
         uses: aws-actions/configure-aws-credentials@v6.3.0
@@ -100,6 +108,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: "sdk-python/v${{ steps.version-check.outputs.current_version }}"
-          name: "🐍 Envilder Python SDK v${{ steps.version-check.outputs.current_version }}"
-          generateReleaseNotes: true
+          commit: ${{ github.sha }}
+          name: ${{ steps.release-notes.outputs.title }}
+          bodyFile: ${{ runner.temp }}/release-notes.md
           token: ${{ secrets.GITHUB_TOKEN }}
