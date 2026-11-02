@@ -7,9 +7,9 @@ permissions:
 # already tagged: the release notes are built from the changelog at the tag,
 # so those entries would describe code that did not ship. Label the PR
 # `changelog-correction` to skip it when fixing an already released section.
-# The second job renders the latest section of each changed changelog the same
-# way the publish workflows will, so a broken section fails here and not after
-# the merge.
+# The second job renders the release notes of each component's manifest version
+# the same way the publish workflows will, so a missing or broken section fails
+# here and not after the merge.
 on:
   pull_request:
     branches:
@@ -25,6 +25,10 @@ on:
       - "docs/changelogs/**"
       - "scripts/check-released-changelogs.mjs"
       - "scripts/release-notes.mjs"
+      - "package.json"
+      - "src/sdks/nodejs/package.json"
+      - "src/sdks/dotnet/Envilder.csproj"
+      - "src/sdks/python/pyproject.toml"
       - ".github/workflows/changelog-check.yml"
 
 concurrency:
@@ -41,6 +45,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: 📜 Check tagged changelog sections are unchanged
         env:
@@ -53,30 +58,25 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - component: cli
-            file: cli.md
-          - component: sdk-nodejs
-            file: sdk-nodejs.md
-          - component: sdk-dotnet
-            file: sdk-dotnet.md
-          - component: sdk-python
-            file: sdk-python.md
+        component:
+          - cli
+          - sdk-nodejs
+          - sdk-dotnet
+          - sdk-python
     steps:
       - name: 🧱 Checkout repository
         uses: actions/checkout@v7
         with:
-          fetch-depth: 0
+          persist-credentials: false
 
-      - name: 📝 Render the latest release notes (dry run)
+      - name: 📝 Render the release notes of the manifest version (dry run)
         env:
-          BASE_REF: ${{ github.base_ref }}
-          FILE: docs/changelogs/${{ matrix.file }}
           COMPONENT: ${{ matrix.component }}
         run: |
-          if git diff --quiet "origin/$BASE_REF"...HEAD -- "$FILE"; then
-            echo "$FILE is unchanged, nothing to render"
-            exit 0
-          fi
-          version=$(grep -m1 -oP '^## \[\K[^\]]+' "$FILE")
+          case "$COMPONENT" in
+            cli) version=$(node -p "require('./package.json').version") ;;
+            sdk-nodejs) version=$(node -p "require('./src/sdks/nodejs/package.json').version") ;;
+            sdk-dotnet) version=$(grep -oP '<Version>K[^<]+' src/sdks/dotnet/Envilder.csproj) ;;
+            sdk-python) version=$(python3 -c "import tomllib; print(tomllib.load(open('src/sdks/python/pyproject.toml','rb'))['project']['version'])") ;;
+          esac
           node scripts/release-notes.mjs --component="$COMPONENT" --version="$version" --dry-run
