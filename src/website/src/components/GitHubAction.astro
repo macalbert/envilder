@@ -35,8 +35,7 @@ const t = useTranslations(lang);
 - name: 🔐 Pull Secrets from AWS SSM
   uses: macalbert/envilder/github-action@v0
   with:
-    map-file: envilder.json
-    env-file: .env`}
+    map-file: envilder.json`}
         />
       </div>
 
@@ -57,11 +56,28 @@ const t = useTranslations(lang);
   uses: macalbert/envilder/github-action@v0
   with:
     map-file: envilder.json
-    env-file: .env
     provider: azure
     vault-url: \${{ secrets.AZURE_KEY_VAULT_URL }}`}
         />
       </div>
+    </div>
+
+    <div class="gha-modes">
+      <h3>{t.gha.modesTitle}</h3>
+      <ul class="gha-modes-list">
+        <li>
+          <strong>{t.gha.modeJobTitle}</strong>
+          <p>{t.gha.modeJobDesc}</p>
+        </li>
+        <li>
+          <strong>{t.gha.modeCommandTitle}</strong>
+          <p>{t.gha.modeCommandDesc}</p>
+        </li>
+        <li>
+          <strong>{t.gha.modeEnvFileTitle}</strong>
+          <p>{t.gha.modeEnvFileDesc}</p>
+        </li>
+      </ul>
     </div>
 
     <div class="gha-inputs">
@@ -83,8 +99,13 @@ const t = useTranslations(lang);
             </tr>
             <tr>
               <td><code>env-file</code></td>
-              <td><span class="badge badge-primary">{t.gha.yes}</span></td>
+              <td>{t.gha.no}</td>
               <td>{t.gha.inputEnvDesc}</td>
+            </tr>
+            <tr>
+              <td><code>command</code></td>
+              <td>{t.gha.no}</td>
+              <td>{t.gha.inputCommandDesc}</td>
             </tr>
             <tr>
               <td><code>provider</code></td>
@@ -129,6 +150,51 @@ const t = useTranslations(lang);
   .gha-block {
     min-width: 0;
     overflow: hidden;
+  }
+
+  .gha-modes {
+    margin-top: var(--space-2xl);
+  }
+
+  .gha-modes h3 {
+    font-size: clamp(1.1rem, 1.8vw, 1.25rem);
+    margin-bottom: var(--space-lg);
+    text-align: center;
+  }
+
+  .gha-modes-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  @media (min-width: 1024px) {
+    .gha-modes-list {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .gha-modes-list li {
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .gha-modes-list strong {
+    display: block;
+    margin-bottom: var(--space-xs);
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+
+  .gha-modes-list p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
   }
 
   .gha-inputs {

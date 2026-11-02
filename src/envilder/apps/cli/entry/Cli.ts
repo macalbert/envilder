@@ -36,8 +36,10 @@ import {
   type RemoteKeyCheck,
   summarizeFailures,
 } from '../../../core/domain/SecretExistence.js';
+import { GitHubActionsLogger } from '../../../core/infrastructure/github/GitHubActionsLogger.js';
 import { GitHubActionsSecretMasker } from '../../../core/infrastructure/github/GitHubActionsSecretMasker.js';
 import { NoOpSecretMasker } from '../../../core/infrastructure/github/NoOpSecretMasker.js';
+import { StderrConsoleLogger } from '../../../core/infrastructure/logger/StderrConsoleLogger.js';
 import { PackageVersionReader } from '../../../core/infrastructure/package/PackageVersionReader.js';
 import { readMapFileConfig } from '../../../core/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../../core/types.js';
@@ -776,7 +778,7 @@ async function resolveSecretsAndRun(
   };
 
   const container = Startup.build()
-    .configureExec(createExecSecretMasker())
+    .configureExec(createExecSecretMasker(), createExecLogger())
     .configureServices()
     .configureInfrastructure(config)
     .create();
@@ -833,20 +835,31 @@ async function dispatchExec(
   return exitCode;
 }
 
+/**
+ * Writes through the exec logger, which may fail before the container
+ * exists (reading the map file), so input-derived text in the message is
+ * escaped like any other exec output under GitHub Actions.
+ */
 function reportExecFailure(error: unknown): number {
   if (error instanceof SilentExitError) {
     // SSO recovery was declined or failed and already explained why.
     return EXEC_ENVILDER_FAILURE;
   }
+  const logger = createExecLogger();
+  const logLines = (text: string) => {
+    for (const line of text.split('\n')) {
+      logger.error(line);
+    }
+  };
   if (error instanceof CommandNotFoundError) {
-    console.error(pc.red(error.message));
+    logLines(pc.red(error.message));
     return EXEC_COMMAND_NOT_FOUND;
   }
   if (error instanceof CommandNotExecutableError) {
-    console.error(pc.red(error.message));
+    logLines(pc.red(error.message));
     return EXEC_COMMAND_NOT_EXECUTABLE;
   }
-  console.error(presentError(error));
+  logLines(presentError(error));
   return EXEC_ENVILDER_FAILURE;
 }
 
@@ -873,6 +886,17 @@ function createExecSecretMasker(): ISecretMasker {
   return process.env.GITHUB_ACTIONS === 'true'
     ? new GitHubActionsSecretMasker({ stream: process.stderr })
     : new NoOpSecretMasker();
+}
+
+/**
+ * Exec logs to stderr, keeping stdout for the child. Under GitHub Actions
+ * each message stays one inert line, so input-derived text cannot issue
+ * workflow commands ahead of the mask registrations.
+ */
+function createExecLogger(): ILogger {
+  return process.env.GITHUB_ACTIONS === 'true'
+    ? new GitHubActionsLogger(new StderrConsoleLogger())
+    : new StderrConsoleLogger();
 }
 
 /**

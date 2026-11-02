@@ -2,11 +2,14 @@ import 'reflect-metadata';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Startup } from '../../../../src/envilder/apps/gha/Startup.js';
 import type { DispatchActionCommandHandler } from '../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler.js';
+import { ExecWithSecretsCommandHandler } from '../../../../src/envilder/core/application/execWithSecrets/ExecWithSecretsCommandHandler.js';
+import { ExportSecretsToEnvironmentCommandHandler } from '../../../../src/envilder/core/application/exportSecretsToEnvironment/ExportSecretsToEnvironmentCommandHandler.js';
 import type { ILogger } from '../../../../src/envilder/core/domain/ports/ILogger.js';
 import type { ISecretMasker } from '../../../../src/envilder/core/domain/ports/ISecretMasker.js';
 import type { ISecretProvider } from '../../../../src/envilder/core/domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../../../src/envilder/core/domain/ports/IVariableStore.js';
 import { AzureKeyVaultSecretProvider } from '../../../../src/envilder/core/infrastructure/azure/AzureKeyVaultSecretProvider.js';
+import { GitHubActionsLogger } from '../../../../src/envilder/core/infrastructure/github/GitHubActionsLogger.js';
 import { GitHubActionsSecretMasker } from '../../../../src/envilder/core/infrastructure/github/GitHubActionsSecretMasker.js';
 import { TYPES } from '../../../../src/envilder/core/types.js';
 
@@ -30,7 +33,9 @@ describe('Startup', () => {
         TYPES.DispatchActionCommandHandler,
       ),
     ).not.toThrow();
-    expect(() => container.get<ILogger>(TYPES.ILogger)).not.toThrow();
+    expect(container.get<ILogger>(TYPES.ILogger)).toBeInstanceOf(
+      GitHubActionsLogger,
+    );
     expect(() =>
       container.get<ISecretProvider>(TYPES.ISecretProvider),
     ).not.toThrow();
@@ -39,6 +44,22 @@ describe('Startup', () => {
     ).not.toThrow();
     expect(container.get<ISecretMasker>(TYPES.ISecretMasker)).toBeInstanceOf(
       GitHubActionsSecretMasker,
+    );
+  });
+
+  it('Should_ResolveExportAndExecHandlers_When_Configured', () => {
+    // Arrange
+    const sut = startup.configureServices().configureInfrastructure();
+
+    // Act
+    const container = sut.create();
+
+    // Assert
+    expect(
+      container.get(TYPES.ExportSecretsToEnvironmentCommandHandler),
+    ).toBeInstanceOf(ExportSecretsToEnvironmentCommandHandler);
+    expect(container.get(TYPES.ExecWithSecretsCommandHandler)).toBeInstanceOf(
+      ExecWithSecretsCommandHandler,
     );
   });
 

@@ -4,8 +4,10 @@ import { OperationMode } from '../../domain/OperationMode.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import { TYPES } from '../../types.js';
 import { ExecWithSecretsCommand } from '../execWithSecrets/ExecWithSecretsCommand.js';
-// Type-only: the GitHub Action bundle must not pull in exec mode.
+// Type-only: each entry point binds only the handlers it uses.
 import type { ExecWithSecretsCommandHandler } from '../execWithSecrets/ExecWithSecretsCommandHandler.js';
+import { ExportSecretsToEnvironmentCommand } from '../exportSecretsToEnvironment/ExportSecretsToEnvironmentCommand.js';
+import type { ExportSecretsToEnvironmentCommandHandler } from '../exportSecretsToEnvironment/ExportSecretsToEnvironmentCommandHandler.js';
 import { PullSecretsToEnvCommand } from '../pullSecretsToEnv/PullSecretsToEnvCommand.js';
 import type { PullSecretsToEnvCommandHandler } from '../pullSecretsToEnv/PullSecretsToEnvCommandHandler.js';
 import { PushEnvToSecretsCommand } from '../pushEnvToSecrets/PushEnvToSecretsCommand.js';
@@ -25,10 +27,14 @@ export class DispatchActionCommandHandler {
     private readonly pushSingleHandler: PushSingleCommandHandler,
     @inject(TYPES.ISecretProvider)
     private readonly secretProvider: ISecretProvider,
-    // Bound only by the CLI exec startup; absent in the GitHub Action.
+    // Bound by the CLI exec startup and the GitHub Action.
     @inject(TYPES.ExecWithSecretsCommandHandler)
     @optional()
     private readonly execHandler?: ExecWithSecretsCommandHandler,
+    // Bound only by the GitHub Action.
+    @inject(TYPES.ExportSecretsToEnvironmentCommandHandler)
+    @optional()
+    private readonly exportHandler?: ExportSecretsToEnvironmentCommandHandler,
   ) {}
 
   /**
@@ -58,6 +64,9 @@ export class DispatchActionCommandHandler {
       case OperationMode.PULL_SECRETS_TO_ENV:
         await this.handlePull(command);
         break;
+      case OperationMode.EXPORT_TO_ENVIRONMENT:
+        await this.handleExport(command);
+        break;
       default:
         throw new InvalidArgumentError(
           `Unsupported operation mode: ${command.mode}`,
@@ -68,6 +77,11 @@ export class DispatchActionCommandHandler {
   private validateRequiredArguments(command: DispatchActionCommand): void {
     if (command.mode === OperationMode.PUSH_SINGLE) {
       this.validatePushSingleOptions(command);
+      return;
+    }
+
+    if (command.mode === OperationMode.EXPORT_TO_ENVIRONMENT) {
+      this.validateExportOptions(command);
       return;
     }
 
@@ -129,6 +143,27 @@ export class DispatchActionCommandHandler {
     );
 
     await this.pullHandler.handle(pullSecretsToEnvCommand);
+  }
+
+  private async handleExport(command: DispatchActionCommand): Promise<void> {
+    this.validateExportOptions(command);
+    if (this.exportHandler === undefined) {
+      throw new InvalidArgumentError(
+        'exporting to the environment is not available in this entry point',
+      );
+    }
+
+    await this.exportHandler.handle(
+      ExportSecretsToEnvironmentCommand.create(command.map),
+    );
+  }
+
+  private validateExportOptions(
+    command: DispatchActionCommand,
+  ): asserts command is DispatchActionCommand & { map: string } {
+    if (!command.map) {
+      throw new InvalidArgumentError('Missing required argument: a map file');
+    }
   }
 
   private validatePushSingleOptions(

@@ -5,6 +5,7 @@ export const DOMAIN = {
   IVariableStore: Symbol.for('IVariableStore'),
   IProcessRunner: Symbol.for('IProcessRunner'),
   IProcessContext: Symbol.for('IProcessContext'),
+  IEnvironmentExporter: Symbol.for('IEnvironmentExporter'),
 };
 
 export const APPLICATION = {
@@ -13,6 +14,9 @@ export const APPLICATION = {
   PushSingleCommandHandler: Symbol.for('PushSingleCommandHandler'),
   DispatchActionCommandHandler: Symbol.for('DispatchActionCommandHandler'),
   ExecWithSecretsCommandHandler: Symbol.for('ExecWithSecretsCommandHandler'),
+  ExportSecretsToEnvironmentCommandHandler: Symbol.for(
+    'ExportSecretsToEnvironmentCommandHandler',
+  ),
   ValidateMapFileCommandHandler: Symbol.for('ValidateMapFileCommandHandler'),
   ValidateRemoteKeysCommandHandler: Symbol.for(
     'ValidateRemoteKeysCommandHandler',

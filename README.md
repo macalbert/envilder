@@ -471,12 +471,18 @@ prebuilt action, so consumers do not need an Envilder build step.
     role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
     aws-region: us-east-1
 
-- name: Pull secrets from AWS SSM
+- name: Load secrets from AWS SSM
   uses: macalbert/envilder/github-action@v0
   with:
     map-file: envilder.json
-    env-file: .env
+
+- run: pnpm test   # the secrets are environment variables here
 ```
+
+Without `env-file`, the secrets are exported to **every later step of the job** and no
+`.env` file is written. To limit them to **a single process**, set `command` instead
+(for example `command: ./deploy.sh`): later steps never see them. Set `env-file` only when
+a tool needs a file.
 
 **Azure Key Vault:**
 
@@ -488,11 +494,10 @@ prebuilt action, so consumers do not need an Envilder build step.
     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-- name: Pull secrets from Azure Key Vault
+- name: Load secrets from Azure Key Vault
   uses: macalbert/envilder/github-action@v0
   with:
     map-file: envilder.json
-    env-file: .env
     provider: azure
     vault-url: ${{ secrets.AZURE_KEY_VAULT_URL }}
 ```

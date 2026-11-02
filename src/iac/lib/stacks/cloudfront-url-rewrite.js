@@ -82,6 +82,9 @@ function handler(event) {
 	}
 
 	function redirect(path) {
+		// Browsers read a leading "//" (or "/\") as another host, so collapse
+		// leading slashes and backslashes to keep the redirect on this origin.
+		path = path.replace(/^[/\\]+/, "/");
 		return {
 			statusCode: 301,
 			statusDescription: "Moved Permanently",
