@@ -76,7 +76,7 @@ jobs:
           case "$COMPONENT" in
             cli) version=$(node -p "require('./package.json').version") ;;
             sdk-nodejs) version=$(node -p "require('./src/sdks/nodejs/package.json').version") ;;
-            sdk-dotnet) version=$(grep -oP '<Version>K[^<]+' src/sdks/dotnet/Envilder.csproj) ;;
+            sdk-dotnet) version=$(grep -oP '<Version>\K[^<]+' src/sdks/dotnet/Envilder.csproj) ;;
             sdk-python) version=$(python3 -c "import tomllib; print(tomllib.load(open('src/sdks/python/pyproject.toml','rb'))['project']['version'])") ;;
           esac
           node scripts/release-notes.mjs --component="$COMPONENT" --version="$version" --dry-run
