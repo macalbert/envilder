@@ -18,14 +18,14 @@ pnpm install
 
 ## Available Commands
 
-| Command | Description |
-| ------------- | ---------------------------------------- |
-| `pnpm build` | Compile TypeScript |
-| `pnpm watch` | Watch for changes and compile |
-| `cdk deploy` | Deploy stacks to AWS |
-| `cdk diff` | Preview changes against deployed state |
-| `cdk synth` | Generate CloudFormation templates |
-| `cdk destroy` | Remove deployed stacks |
+| Command       | Description                            |
+| ------------- | -------------------------------------- |
+| `pnpm build`  | Compile TypeScript                     |
+| `pnpm watch`  | Watch for changes and compile          |
+| `cdk deploy`  | Deploy stacks to AWS                   |
+| `cdk diff`    | Preview changes against deployed state |
+| `cdk synth`   | Generate CloudFormation templates      |
+| `cdk destroy` | Remove deployed stacks                 |
 
 ## Project Structure
 

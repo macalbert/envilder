@@ -23,17 +23,17 @@ exclude:
 # Anchored to code-review research: defect detection degrades past ~200 lines,
 # and ~400 lines is the practical ceiling for one effective review.
 lines:
-  XS: 0      # 0–9
-  S: 10      # 10–49
-  M: 50      # 50–199
-  L: 200     # 200–399
-  XL: 400    # 400+
+  XS: 0 # 0–9
+  S: 10 # 10–49
+  M: 50 # 50–199
+  L: 200 # 200–399
+  XL: 400 # 400+
 
 # File spread. If the file-count bucket is higher than the line bucket, the
 # size is bumped up one level. Value = lower bound (XS = 0–1 file).
 files:
-  XS: 0      # 0–1
-  S: 2       # 2–4
-  M: 5       # 5–9
-  L: 10      # 10–24
-  XL: 25     # 25+
+  XS: 0 # 0–1
+  S: 2 # 2–4
+  M: 5 # 5–9
+  L: 10 # 10–24
+  XL: 25 # 25+

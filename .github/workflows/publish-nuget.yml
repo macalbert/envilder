@@ -2,7 +2,7 @@ name: 📦 Publish NuGet Package
 
 on:
   workflow_dispatch:
-  
+
   push:
     branches:
       - main
@@ -40,7 +40,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
-          
+
       - name: 👑 Detect version bump
         id: version-check
         run: |

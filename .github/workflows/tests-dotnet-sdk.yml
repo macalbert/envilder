@@ -9,7 +9,7 @@ on:
 
   pull_request:
     branches:
-      - '*'
+      - "*"
     types:
       - opened
       - reopened
@@ -68,7 +68,7 @@ jobs:
       - name: 🛠️ Setup .NET
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '10.x'
+          dotnet-version: "10.x"
 
       - uses: actions/cache@v6
         with:
@@ -85,7 +85,7 @@ jobs:
 
       - name: ♻️ Restore dependencies
         run: dotnet restore Envilder.sln -v q --nologo
-          
+
       - name: 🌟 Format check
         run: dotnet format Envilder.sln --verify-no-changes --verbosity normal
 

@@ -33,7 +33,13 @@ services:
       LOCALSTACK_HOST: localhost.localstack.cloud:4567
     healthcheck:
       # The Azure image ships without curl.
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4567/_localstack/health')"]
+      test:
+        [
+          "CMD",
+          "python3",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:4567/_localstack/health')",
+        ]
       interval: 5s
       timeout: 3s
       retries: 10
