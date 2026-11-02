@@ -67,6 +67,7 @@ jobs:
       - name: 🧱 Checkout repository
         uses: actions/checkout@v7
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: 📝 Render the release notes of the manifest version (dry run)
