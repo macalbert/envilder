@@ -6,13 +6,12 @@ using AwesomeAssertions;
 // A profile created by `aws login` carries a `login_session` key. The AWS SDK
 // resolves it through the AWSSDK.Signin assembly, which it loads by name. If
 // the package is not shipped, users see "Assembly AWSSDK.Signin could not be
-// found or loaded" instead of a credential error. The profile here has no
-// cached session, so resolution is expected to fail, but never because the
-// assembly is missing.
+// found or loaded" instead of a credential error. The SDK checks for the
+// assembly when it builds the credentials, so building them from a login
+// profile is enough to catch a missing package.
 public class AwsLoginProfileCredentialsTests : IDisposable
 {
 	private const string ProfileName = "login-profile";
-	private const string MissingAssemblyMarker = "could not be found or loaded";
 
 	private readonly string _configFile = Path.Combine(Path.GetTempPath(), $"envilder-aws-config-{Guid.NewGuid():N}");
 
@@ -33,27 +32,18 @@ public class AwsLoginProfileCredentialsTests : IDisposable
 		GC.SuppressFinalize(this);
 	}
 
-	[Fact(Timeout = CancellationTokenForTest.DefaultTimeout)]
-	public async Task Should_NotFailOnMissingSigninAssembly_When_ProfileUsesAwsLogin()
+	[Fact]
+	public void Should_BuildCredentials_When_ProfileUsesAwsLogin()
 	{
 		// Arrange
 		var chain = new SharedCredentialsFile(_configFile);
 		var resolved = chain.TryGetProfile(ProfileName, out var profile);
 
 		// Act
-		Exception? actual = null;
-		try
-		{
-			var credentials = AWSCredentialsFactory.GetAWSCredentials(profile, chain);
-			await credentials.GetCredentialsAsync().WaitAsync(TestContext.Current.CancellationToken);
-		}
-		catch (Exception ex)
-		{
-			actual = ex;
-		}
+		var act = () => AWSCredentialsFactory.GetAWSCredentials(profile, chain);
 
 		// Assert
 		resolved.Should().BeTrue();
-		(actual?.ToString() ?? string.Empty).Should().NotContain(MissingAssemblyMarker);
+		act.Should().NotThrow();
 	}
 }
