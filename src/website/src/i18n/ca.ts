@@ -1564,6 +1564,11 @@ export const ca: Translations = {
     sdkNodejsValidation: 'Validació de secrets',
     sdkNodejsValidationDesc:
       'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
+    sdkContractValidation: 'Validació del contracte del fitxer de mapatge',
+    sdkContractValidationDesc:
+      'Comprova, sense carregar res ni llegir cap valor, que el fitxer de mapatge és vàlid i que cada secret declarat existeix amb les credencials actuals: la mateixa comprovació que envilder validate. Els errors es retornen al resultat, mai es llancen. Cada clau informa exists, missing, access_denied, authentication_failed o provider_error:',
+    sdkContractValidationLoadDesc:
+      "Per fer fallar la càrrega, activa la validació del contracte al builder. La comprovació s'executa una vegada abans de resoldre i l'error anomena les claus que fallen, mai els seus valors. Està desactivada per defecte, així que una càrrega normal no fa cap crida extra al proveïdor. A diferència de la validació de secrets, que revisa els valors resolts, revisa el fitxer de mapatge i les claus abans de resoldre:",
     sdkNodejsFullDocs: 'Documentació completa →',
     sdkNodejsExamplesDesc:
       "Un projecte Vitest amb Testcontainers i un AppHost d'Aspire en TypeScript que resolen un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack i Lowkey Vault) i passen els valors als contenidors, sense cap fitxer .env:",

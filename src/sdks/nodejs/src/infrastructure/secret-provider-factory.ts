@@ -3,6 +3,7 @@ import { DefaultAzureCredential } from '@azure/identity';
 import { SecretClient } from '@azure/keyvault-secrets';
 import type { EnvilderOptions } from '../domain/envilder-options.js';
 import type { MapFileConfig } from '../domain/map-file-config.js';
+import type { ISecretExistenceChecker } from '../domain/ports/secret-existence-checker.js';
 import type { ISecretProvider } from '../domain/ports/secret-provider.js';
 import { SecretProviderType } from '../domain/secret-provider-type.js';
 import { AwsSsmSecretProvider } from './aws/aws-ssm-secret-provider.js';
@@ -11,7 +12,7 @@ import { AzureKeyVaultSecretProvider } from './azure/azure-key-vault-secret-prov
 export function createSecretProvider(
   config: MapFileConfig,
   options?: EnvilderOptions,
-): ISecretProvider {
+): ISecretProvider & ISecretExistenceChecker {
   const provider = options?.provider ?? config.provider;
   const profile = normalize(options?.profile ?? config.profile);
   const vaultUrl = normalize(options?.vaultUrl ?? config.vaultUrl);

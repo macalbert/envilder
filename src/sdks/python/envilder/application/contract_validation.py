@@ -1,0 +1,91 @@
+from __future__ import annotations
+
+from envilder.domain.contract_validation_result import (
+    ContractValidationResult,
+    KeyCheck,
+    MapFileError,
+    SecretExistence,
+    SecretExistenceStatus,
+)
+from envilder.domain.parsed_map_file import ParsedMapFile
+from envilder.domain.ports.secret_existence_checker import (
+    _SecretExistenceChecker,
+)
+from envilder.domain.secret_provider_type import SecretProviderType
+
+_NO_RESULT_REASON = "The provider returned no result for this secret."
+
+
+class ContractValidationError(Exception):
+    """Raised by a load with contract validation enabled.
+
+    The map file is invalid or a declared secret cannot be confirmed. The
+    message names the failing keys and paths, never a secret value.
+
+    Attributes:
+        result: The full outcome of the check that failed.
+    """
+
+    def __init__(self, result: ContractValidationResult) -> None:
+        self.result = result
+        super().__init__(_build_message(result))
+
+
+def invalid_map_file_result(
+    map_file_errors: list[MapFileError],
+) -> ContractValidationResult:
+    """The result for a map file that failed validation: no provider call."""
+    return ContractValidationResult(
+        is_valid=False, map_file_errors=tuple(map_file_errors), keys=()
+    )
+
+
+def check_remote_keys(
+    map_file: ParsedMapFile,
+    checker: _SecretExistenceChecker,
+    provider: SecretProviderType,
+) -> ContractValidationResult:
+    """Check that every secret path of a valid map file exists.
+
+    No value is read. A path shared by several variables is checked once.
+    Returns one check per variable, in map-file order.
+    """
+    mappings = list(map_file.mappings.items())
+    existence: dict[str, SecretExistence] = {}
+    if mappings:
+        distinct = list(dict.fromkeys(path for _, path in mappings))
+        existence = dict(checker.check_secrets_exist(distinct))
+
+    keys: list[KeyCheck] = []
+    for variable, path in mappings:
+        outcome = existence.get(path) or SecretExistence(
+            SecretExistenceStatus.PROVIDER_ERROR, _NO_RESULT_REASON
+        )
+        keys.append(
+            KeyCheck(
+                variable=variable,
+                path=path,
+                provider=provider,
+                status=outcome.status,
+                reason=outcome.reason,
+            )
+        )
+    return ContractValidationResult(
+        is_valid=all(k.status is SecretExistenceStatus.EXISTS for k in keys),
+        map_file_errors=(),
+        keys=tuple(keys),
+    )
+
+
+def _build_message(result: ContractValidationResult) -> str:
+    if result.map_file_errors:
+        details = "; ".join(
+            f"{error.key}: {error.message}" for error in result.map_file_errors
+        )
+        return f"Map file contract validation failed: {details}"
+    details = ", ".join(
+        f"{key.variable} ({key.path}): {key.status.value}"
+        for key in result.keys
+        if key.status is not SecretExistenceStatus.EXISTS
+    )
+    return f"Map file contract validation failed: {details}"

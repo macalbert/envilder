@@ -190,6 +190,22 @@ The offline step needs no cloud credentials, so it can run on every pull
 request, including from forks. The second step needs the same credentials as
 a pull, plus the permissions listed above.
 
+## From the SDKs
+
+The .NET, Python and Node.js SDKs run the same map file and key existence
+check from application code, with the same statuses, without the env file
+comparison:
+
+| SDK | Check, returns a result | Fail the load when it does not pass |
+|---|---|---|
+| Node.js | `await Envilder.fromMapFile(path).validateContract()` | `.withContractValidation()` |
+| Python | `Envilder.from_map_file(path).validate_contract()` | `.with_contract_validation()` |
+| .NET | `await Env.FromMapFile(path).ValidateContractAsync(ct)` | `.WithContractValidation()` |
+
+Details in the [Node.js](../src/sdks/nodejs/README.md),
+[Python](../src/sdks/python/README.md) and
+[.NET](../src/sdks/dotnet/README.md) SDK READMEs.
+
 ## What validate does not do
 
 - It does not read, compare or print secret values.

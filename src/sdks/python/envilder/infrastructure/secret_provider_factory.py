@@ -6,7 +6,9 @@ from azure.keyvault.secrets import SecretClient
 
 from envilder.domain.envilder_options import EnvilderOptions
 from envilder.domain.map_file_config import MapFileConfig
-from envilder.domain.ports.secret_provider import ISecretProvider
+from envilder.domain.ports.secret_existence_checker import (
+    _CheckableSecretProvider,
+)
 from envilder.domain.secret_provider_type import SecretProviderType
 from envilder.infrastructure.aws.aws_ssm_secret_provider import (
     AwsSsmSecretProvider,
@@ -21,7 +23,7 @@ class _SecretProviderFactory:
     def create(
         config: MapFileConfig,
         options: EnvilderOptions | None = None,
-    ) -> ISecretProvider:
+    ) -> _CheckableSecretProvider:
         if config is None:
             raise ValueError("config cannot be None")
 

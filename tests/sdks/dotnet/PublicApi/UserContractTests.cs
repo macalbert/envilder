@@ -199,4 +199,54 @@ public class UserContractTests
 		// Assert
 		act.Should().NotBeNull();
 	}
+
+	[Fact]
+	public void Should_CompileWithSingleUsing_When_UserValidatesTheContractExplicitly()
+	{
+		// Arrange
+		var mapFilePath = "envilder.json";
+
+		// Act
+		var act = async () =>
+		{
+			var result = await Env.FromMapFile(mapFilePath)
+				.ValidateContractAsync(TestContext.Current.CancellationToken);
+			var errors = result.MapFileErrors;
+			var keys = result.Keys;
+			return (result.IsValid, errors, keys);
+		};
+
+		// Assert
+		act.Should().NotBeNull();
+	}
+
+	[Fact]
+	public void Should_CompileWithSingleUsing_When_UserEnablesContractValidationOnLoad()
+	{
+		// Arrange
+		var mapFilePath = "envilder.json";
+
+		// Act
+		var act = () => Env.FromMapFile(mapFilePath)
+			.WithContractValidation()
+			.Inject();
+
+		// Assert
+		act.Should().NotBeNull();
+	}
+
+	[Fact]
+	public void Should_CompileWithSingleUsing_When_UserHandlesContractValidationFailure()
+	{
+		// Arrange
+		var result = new ContractValidationResult(
+			[],
+			[new KeyCheck("DB_URL", "/app/db", SecretProviderType.Aws, SecretExistenceStatus.AccessDenied, "denied")]);
+
+		// Act
+		var actual = new ContractValidationException(result);
+
+		// Assert
+		actual.Result.Keys[0].Status.Should().Be(SecretExistenceStatus.AccessDenied);
+	}
 }

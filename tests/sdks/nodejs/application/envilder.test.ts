@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { ContractValidationError } from '../../../../src/sdks/nodejs/src/application/contract-validation.js';
 import { Envilder } from '../../../../src/sdks/nodejs/src/application/envilder.js';
 import { SecretProviderType } from '../../../../src/sdks/nodejs/src/domain/secret-provider-type.js';
 
@@ -39,6 +40,9 @@ const mockProvider = {
       }
     }
     return result;
+  }),
+  checkSecretsExist: vi.fn(async (names: readonly string[]) => {
+    return new Map(names.map((name) => [name, { status: 'exists' as const }]));
   }),
 };
 
@@ -232,6 +236,210 @@ describe('Envilder', () => {
 
       // Assert
       expect(act).toThrow('file path cannot be empty');
+    });
+  });
+
+  describe('validateContract', () => {
+    it('Should_ReportEveryKeyAsExisting_When_AllSecretsExist', async () => {
+      // Act
+      const actual =
+        await Envilder.fromMapFile('envilder.json').validateContract();
+
+      // Assert
+      expect(actual).toEqual({
+        isValid: true,
+        mapFileErrors: [],
+        keys: [
+          {
+            variable: 'DB_URL',
+            path: '/app/db-url',
+            provider: SecretProviderType.Aws,
+            status: 'exists',
+          },
+          {
+            variable: 'API_KEY',
+            path: '/app/api-key',
+            provider: SecretProviderType.Aws,
+            status: 'exists',
+          },
+        ],
+      });
+      expect(mockProvider.getSecrets).not.toHaveBeenCalled();
+    });
+
+    it('Should_ReportMissingKeyWithoutThrowing_When_SecretDoesNotExist', async () => {
+      // Arrange
+      mockProvider.checkSecretsExist.mockResolvedValueOnce(
+        new Map([
+          ['/app/db-url', { status: 'exists' as const }],
+          ['/app/api-key', { status: 'missing' as const }],
+        ]),
+      );
+
+      // Act
+      const actual =
+        await Envilder.fromMapFile('envilder.json').validateContract();
+
+      // Assert
+      expect(actual.isValid).toBe(false);
+      expect(actual.keys[1]).toEqual({
+        variable: 'API_KEY',
+        path: '/app/api-key',
+        provider: SecretProviderType.Aws,
+        status: 'missing',
+      });
+    });
+
+    it('Should_ReportAccessDenied_When_IdentityCannotReadKey', async () => {
+      // Arrange
+      mockProvider.checkSecretsExist.mockResolvedValueOnce(
+        new Map([
+          ['/app/db-url', { status: 'access_denied' as const, reason: 'no' }],
+          ['/app/api-key', { status: 'exists' as const }],
+        ]),
+      );
+
+      // Act
+      const actual =
+        await Envilder.fromMapFile('envilder.json').validateContract();
+
+      // Assert
+      expect(actual.isValid).toBe(false);
+      expect(actual.keys[0].status).toBe('access_denied');
+    });
+
+    it('Should_ReportProviderError_When_ProviderFails', async () => {
+      // Arrange
+      mockProvider.checkSecretsExist.mockResolvedValueOnce(
+        new Map([
+          ['/app/db-url', { status: 'provider_error' as const, reason: 'x' }],
+          ['/app/api-key', { status: 'provider_error' as const, reason: 'x' }],
+        ]),
+      );
+
+      // Act
+      const actual =
+        await Envilder.fromMapFile('envilder.json').validateContract();
+
+      // Assert
+      expect(actual.isValid).toBe(false);
+      expect(actual.keys.map((key) => key.status)).toEqual([
+        'provider_error',
+        'provider_error',
+      ]);
+    });
+
+    it('Should_ReportMapFileErrorsWithoutProviderCall_When_MapFileIsInvalid', async () => {
+      // Arrange
+      mockReadFile.mockResolvedValueOnce(
+        JSON.stringify({ $config: { provider: 'azure' }, DB_URL: 42 }),
+      );
+
+      // Act
+      const actual =
+        await Envilder.fromMapFile('envilder.json').validateContract();
+
+      // Assert
+      expect(actual.isValid).toBe(false);
+      expect(actual.keys).toEqual([]);
+      expect(actual.mapFileErrors.map((error) => error.key)).toEqual([
+        'DB_URL',
+        '$config.vaultUrl',
+      ]);
+      expect(mockCreateProvider).not.toHaveBeenCalled();
+    });
+
+    it('Should_ReportEffectiveProvider_When_ProviderIsOverridden', async () => {
+      // Arrange
+      mockReadFile.mockResolvedValueOnce(JSON.stringify({ KEY: 'key' }));
+
+      // Act
+      const actual = await Envilder.fromMapFile('envilder.json')
+        .withProvider(SecretProviderType.Azure)
+        .withVaultUrl('https://kv.vault.azure.net')
+        .validateContract();
+
+      // Assert
+      expect(actual.keys[0].provider).toBe(SecretProviderType.Azure);
+    });
+
+    it('Should_Throw_When_MapFileDoesNotExist', async () => {
+      // Arrange
+      mockReadFile.mockRejectedValueOnce(
+        Object.assign(new Error('not found'), { code: 'ENOENT' }),
+      );
+
+      // Act
+      const act = Envilder.fromMapFile('missing.json').validateContract();
+
+      // Assert
+      await expect(act).rejects.toThrow('Map file not found: missing.json');
+    });
+  });
+
+  describe('withContractValidation', () => {
+    it('Should_NotCheckContract_When_ContractValidationIsNotEnabled', async () => {
+      // Act
+      await Envilder.fromMapFile('envilder.json').resolve();
+
+      // Assert
+      expect(mockProvider.checkSecretsExist).not.toHaveBeenCalled();
+    });
+
+    it('Should_CheckOnceAndResolve_When_ContractHolds', async () => {
+      // Act
+      const actual = await Envilder.fromMapFile('envilder.json')
+        .withContractValidation()
+        .inject();
+
+      // Assert
+      expect(actual.get('DB_URL')).toBe('postgres://localhost');
+      expect(process.env.API_KEY).toBe('sk-123');
+      expect(mockProvider.checkSecretsExist).toHaveBeenCalledTimes(1);
+      expect(mockCreateProvider).toHaveBeenCalledTimes(1);
+    });
+
+    it('Should_ThrowNamingKeysWithoutValues_When_KeyIsMissing', async () => {
+      // Arrange
+      mockProvider.checkSecretsExist.mockResolvedValueOnce(
+        new Map([
+          ['/app/db-url', { status: 'exists' as const }],
+          ['/app/api-key', { status: 'missing' as const }],
+        ]),
+      );
+
+      // Act
+      const actual = await Envilder.fromMapFile('envilder.json')
+        .withContractValidation()
+        .inject()
+        .catch((error: unknown) => error);
+
+      // Assert
+      expect(actual).toBeInstanceOf(ContractValidationError);
+      const error = actual as ContractValidationError;
+      expect(error.message).toBe(
+        'Map file contract validation failed: API_KEY (/app/api-key): missing',
+      );
+      expect(error.message).not.toContain('postgres://localhost');
+      expect(error.result.isValid).toBe(false);
+      expect(mockProvider.getSecrets).not.toHaveBeenCalled();
+      expect(process.env.DB_URL).toBeUndefined();
+    });
+
+    it('Should_ThrowWithoutProviderCall_When_MapFileIsInvalid', async () => {
+      // Arrange
+      mockReadFile.mockResolvedValueOnce(JSON.stringify({ $other: 'x' }));
+
+      // Act
+      const act = Envilder.fromMapFile('envilder.json')
+        .withContractValidation()
+        .resolve();
+
+      // Assert
+      await expect(act).rejects.toThrow(
+        'Map file contract validation failed: $other: $other is reserved',
+      );
+      expect(mockCreateProvider).not.toHaveBeenCalled();
     });
   });
 });

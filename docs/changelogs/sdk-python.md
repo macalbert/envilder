@@ -1,3 +1,26 @@
+## [1.1.0] - 2026-11-02
+
+### Added
+
+* **Map file contract validation**: `Envilder.from_map_file(path).validate_contract()`
+  checks, without reading any secret value, that the map file matches the
+  published schema (same rules and messages as `envilder validate --offline`),
+  that the provider configuration is coherent, and that every declared secret
+  exists. It returns a `ContractValidationResult` with `is_valid`,
+  `map_file_errors` and one `KeyCheck` per variable, each with a
+  `SecretExistenceStatus` (`exists`, `missing`, `access_denied`,
+  `authentication_failed`, `provider_error`). Expected failures are reported
+  in the result, never raised, and an invalid map file calls no provider.
+  Needs `ssm:GetParameters` on AWS, and the `List` secret permission or
+  `secrets/readMetadata` RBAC (included in Key Vault Secrets User) on Azure
+  ([#533](https://github.com/macalbert/envilder/issues/533))
+* **Opt-in contract validation on load**: `.with_contract_validation()` runs
+  the check once before `resolve()` or `inject()`, reuses the same provider for
+  the resolution, and raises `ContractValidationError` (with the outcome in
+  `.result`) when it fails. The message names the failing keys and paths,
+  never a value. Off by default: a load makes no extra provider call
+  ([#533](https://github.com/macalbert/envilder/issues/533))
+
 ## [1.0.0] - 2026-10-27
 
 ### Changed

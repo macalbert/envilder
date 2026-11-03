@@ -167,6 +167,56 @@ secrets.ValidateSecrets(); // throws SecretValidationException if any value is e
 - Throws `SecretValidationException` listing the keys whose values are null, empty, or whitespace
 - Passes silently when all values are present
 
+### Contract validation
+
+Check that the map file is valid and that every secret it declares exists in the provider, without reading any value:
+
+```csharp
+using Envilder;
+
+var result = await Env.FromMapFile("envilder.json").ValidateContractAsync(cancellationToken);
+
+if (!result.IsValid)
+{
+    foreach (var error in result.MapFileErrors)
+    {
+        Console.WriteLine($"{error.Key}: {error.Message}");
+    }
+
+    foreach (var key in result.Keys.Where(k => k.Status != SecretExistenceStatus.Exists))
+    {
+        Console.WriteLine($"{key.Variable} ({key.Path}): {key.Status} {key.Reason}");
+    }
+}
+```
+
+To fail a load when the contract does not hold, opt in with `WithContractValidation()`. The check runs once before `Resolve`, `ResolveAsync`, `Inject` and `InjectAsync`, reuses the provider the load resolves with, and throws `ContractValidationException` (its `Result` carries the full outcome). It is off by default: without it a load makes no extra provider call.
+
+```csharp
+await Env.FromMapFile("envilder.json").WithContractValidation().InjectAsync();
+```
+
+`ValidateContractAsync` does not throw for expected failures. A map file that does not exist still throws `FileNotFoundException`, and cancellation propagates as `OperationCanceledException`. When the map file is invalid, no provider is created or called and `Keys` is empty.
+
+Each variable gets one status:
+
+| Status | Meaning |
+|--------|---------|
+| `Exists` | The secret is there and the identity can see it |
+| `Missing` | The provider answered that there is no such secret (a disabled Azure secret counts as missing) |
+| `AccessDenied` | The identity is not allowed to check the secret, so whether it exists is unknown. Never reported as `Missing` |
+| `AuthenticationFailed` | The provider rejected the credentials, or none could be found (for example an expired SSO session) |
+| `ProviderError` | Anything else, for example an unreachable provider. `Reason` has the provider's message |
+
+The exception message names the failing variables and paths, for example `Map file contract validation failed: DB_URL (/app/db): missing, API_KEY (/app/key): access_denied`. It never includes a secret value.
+
+Required permissions:
+
+- **AWS SSM**: `ssm:GetParameters` on the mapped parameters. Parameters are requested in batches of 10 without decryption, so no `kms:Decrypt` is needed for this check.
+- **Azure Key Vault**: the `List` secret permission (access policies) or `Microsoft.KeyVault/vaults/secrets/readMetadata/action` (Azure RBAC, included in the Key Vault Secrets User role). Only secret metadata is listed.
+
+This differs from `ValidateSecrets()`: contract validation checks the map file and that each secret exists, before loading and without reading values. `ValidateSecrets()` runs after a load and checks that the resolved values are not empty.
+
 ### Via IConfiguration (ASP.NET)
 
 ```csharp
@@ -244,6 +294,8 @@ var config = new ConfigurationBuilder()
 | `ResolveAsync(ct?)` | Async version of `Resolve` |
 | `Inject()` | Resolve + inject into `Environment` |
 | `InjectAsync(ct?)` | Async version of `Inject` |
+| `ValidateContractAsync(ct?)` | Check the map file and that every secret exists, without reading values |
+| `WithContractValidation()` | Run the contract check before every load and throw `ContractValidationException` on failure |
 
 ### Validation (`SecretValidationExtensions`)
 
