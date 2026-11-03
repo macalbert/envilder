@@ -1,5 +1,6 @@
 namespace Envilder.Tests.Infrastructure.Aws;
 
+using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
 using AwesomeAssertions;
 
@@ -44,6 +45,6 @@ public class AwsLoginProfileCredentialsTests : IDisposable
 
 		// Assert
 		resolved.Should().BeTrue();
-		act.Should().NotThrow();
+		act.Should().NotThrow().Which.Should().BeOfType<LoginAWSCredentials>();
 	}
 }
