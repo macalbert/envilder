@@ -28,6 +28,11 @@ updates:
       update-types:
       - minor
       - patch
+  # Pinned in pnpm-workspace.yaml: 2.5.15 crashes the language server and
+  # 2.6.x formats YAML and Markdown (breaking front matter) and crashes on
+  # Windows ARM64. Bump it by hand once those are fixed upstream.
+  ignore:
+  - dependency-name: "@biomejs/biome"
   labels:
   - "npm"
   - "dependencies"
