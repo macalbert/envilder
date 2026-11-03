@@ -21,6 +21,22 @@
 
 ---
 
+## [1.0.1] - 2026-11-03
+
+### Fixed
+
+* **Profiles created by `aws login` resolve credentials**: The SDK did not
+  ship `AWSSDK.Signin`, so a profile with a `login_session` failed with
+  `Assembly AWSSDK.Signin could not be found` even though the AWS CLI worked
+  with the same session. The package is now referenced, and tests fail the
+  build if it is missing or if a login profile cannot be built. The
+  transitive `BouncyCastle.Cryptography` that `AWSSDK.Signin` brings in is
+  raised to 2.7.0, which is the first version without the advisories Snyk
+  reports against 2.6.2
+  ([#652](https://github.com/macalbert/envilder/issues/652))
+
+---
+
 ## [1.0.0] - 2026-10-27
 
 ### Changed

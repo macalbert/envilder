@@ -214,6 +214,39 @@ public class SecretProviderFactoryTests : IDisposable
 			.Subject.Should().BeOfType<AwsSsmSecretProvider>();
 	}
 
+	// A profile created by `aws login` carries a `login_session` key. The AWS SDK
+	// loads AWSSDK.Signin by name when it builds those credentials, so a missing
+	// package surfaces as "Assembly AWSSDK.Signin could not be found or loaded".
+	[Fact]
+	public void Should_SelectAwsProvider_When_ProfileUsesAwsLogin()
+	{
+		// Arrange
+		_tempDirToDelete = Path.Combine(Path.GetTempPath(), $"envilder-test-{Guid.NewGuid()}");
+		Directory.CreateDirectory(_tempDirToDelete);
+		var credentialsFile = Path.Combine(_tempDirToDelete, "credentials");
+		File.WriteAllText(
+			credentialsFile,
+			"""
+			[login-profile]
+			login_session = arn:aws:iam::123456789012:user/envilder-test
+			region = us-east-1
+			""");
+
+		OverrideEnvironmentVariable("AWS_DEFAULT_REGION", null);
+		OverrideEnvironmentVariable("AWS_REGION", null);
+		OverrideEnvironmentVariable("AWS_PROFILE", null);
+		OverrideEnvironmentVariable("AWS_CONFIG_FILE", Path.Combine(_tempDirToDelete, "config"));
+		OverrideEnvironmentVariable("AWS_SHARED_CREDENTIALS_FILE", credentialsFile);
+		var config = new MapFileConfig { Profile = "login-profile" };
+
+		// Act
+		var act = () => SecretProviderFactory.Create(config);
+
+		// Assert
+		act.Should().NotThrow()
+			.Subject.Should().BeOfType<AwsSsmSecretProvider>();
+	}
+
 	private void OverrideEnvironmentVariable(string name, string? value)
 	{
 		_savedEnvVars.Add((name, Environment.GetEnvironmentVariable(name)));
