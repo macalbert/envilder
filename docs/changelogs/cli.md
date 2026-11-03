@@ -41,6 +41,12 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   ([#560](https://github.com/macalbert/envilder/issues/560)).
   [Guide](../validate-command.md#json-output)
 
+### Changed
+
+* **`envilder validate` text output**: a blank line now separates the
+  secrets block from the AWS identity banner above it, and the
+  `✓ All N secrets exist` summary from the list of secrets.
+
 ---
 
 ## [0.20.0] - 2026-11-01

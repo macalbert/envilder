@@ -307,6 +307,32 @@ describe('Cli validate', () => {
     expect(output).toContain('✓ All 2 secrets exist');
   });
 
+  it('Should_PrintBlankLineBeforeSecretsBlock_When_CheckingRemoteKeys', async () => {
+    // Arrange
+    const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+    givenAwsProvider({ '/app/db-url': { status: 'exists' } });
+    givenArgs('validate', '--map', mapPath);
+
+    // Act
+    await main();
+
+    // Assert
+    expect(outputOf(logSpy)).toContain('\n\nChecking 1 secret in aws');
+  });
+
+  it('Should_PrintBlankLineBeforeSummary_When_AllRemoteKeysExist', async () => {
+    // Arrange
+    const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+    givenAwsProvider({ '/app/db-url': { status: 'exists' } });
+    givenArgs('validate', '--map', mapPath);
+
+    // Act
+    await main();
+
+    // Assert
+    expect(outputOf(logSpy)).toMatch(/exists\n\n✓ 1 secret exists$/);
+  });
+
   it('Should_ReportEachMissingKey_When_RemoteKeysDoNotExist', async () => {
     // Arrange
     const mapPath = await givenMapFile({

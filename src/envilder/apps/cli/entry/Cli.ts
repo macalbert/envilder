@@ -989,7 +989,8 @@ function printRemoteKeyChecks(
   source: string,
 ): void {
   const count = checks.length === 1 ? '1 secret' : `${checks.length} secrets`;
-  console.log(pc.bold(`Checking ${count} in ${source}`));
+  // A blank line separates the block from the AWS identity banner above it.
+  console.log(`\n${pc.bold(`Checking ${count} in ${source}`)}`);
   const variableWidth = Math.max(0, ...checks.map((c) => c.variable.length));
   const pathWidth = Math.max(0, ...checks.map((c) => c.path.length));
   for (const check of checks) {
@@ -1006,9 +1007,9 @@ function printRemoteKeyChecks(
   }
   if (summarizeFailures(checks) === '') {
     console.log(
-      pc.green(
+      `\n${pc.green(
         checks.length === 1 ? '✓ 1 secret exists' : `✓ All ${count} exist`,
-      ),
+      )}`,
     );
   }
 }

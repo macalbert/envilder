@@ -187,10 +187,14 @@ Every secret exists (exit code `0`):
 
 ```text
 ✓ Map file valid: envilder.json
+
+☁ AWS identity · account=123456789012 · region=eu-west-1 · profile=dev
+
 Checking 3 secrets in aws, profile=dev
   ✓ DB_URL        /myapp/db-url   exists
   ✓ DATABASE_URL  /myapp/db-url   exists
   ✓ API_KEY       /myapp/api-key  exists
+
 ✓ All 3 secrets exist
 ```
 
@@ -199,6 +203,7 @@ to stderr):
 
 ```text
 ✓ Map file valid: envilder.json
+
 Checking 3 secrets in aws, profile=dev
   ✓ DB_URL   /myapp/db-url   exists
   ✗ API_KEY  /myapp/api-key  missing
@@ -220,6 +225,7 @@ With `--envfile=.env --compare-values` (exit code `1`):
 Checking env file .env
   ✗ TOKEN  missing from .env
   ⚠ DEBUG  not declared in map file
+
 Checking 3 secrets in aws, profile=dev
   ✓ DB_URL   /myapp/db-url   exists
   ✓ API_KEY  /myapp/api-key  exists
