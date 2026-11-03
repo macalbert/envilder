@@ -938,6 +938,9 @@ export interface DocsTranslations {
   sdkNodejsEnvLoadingDesc: string;
   sdkNodejsValidation: string;
   sdkNodejsValidationDesc: string;
+  sdkContractValidation: string;
+  sdkContractValidationDesc: string;
+  sdkContractValidationLoadDesc: string;
   sdkNodejsFullDocs: string;
   sdkNodejsExamplesDesc: string;
   // Pager

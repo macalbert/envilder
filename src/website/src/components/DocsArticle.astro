@@ -1589,6 +1589,28 @@ Env.Load(env, new Dictionary<string, string?>
 var secrets = Env.ResolveFile("envilder.json");
 secrets.ValidateSecrets(); // throws SecretValidationException if any value is empty`} />
 
+        <h3>{t.docs.sdkContractValidation}</h3>
+        <p>{t.docs.sdkContractValidationDesc}</p>
+        <CodeBlock lang="csharp" code={`using Envilder;
+
+var result = await Env.FromMapFile("envilder.json").ValidateContractAsync();
+if (!result.IsValid)
+{
+    foreach (var error in result.MapFileErrors)
+    {
+        Console.WriteLine($"{error.Key}: {error.Message}");
+    }
+
+    foreach (var key in result.Keys.Where(k => k.Status != SecretExistenceStatus.Exists))
+    {
+        Console.WriteLine($"{key.Variable} ({key.Path}): {key.Status}");
+    }
+}`} />
+        <p>{t.docs.sdkContractValidationLoadDesc}</p>
+        <CodeBlock lang="csharp" code={`var secrets = await Env.FromMapFile("envilder.json")
+    .WithContractValidation()
+    .InjectAsync(); // throws ContractValidationException`} />
+
         <h3>{t.docs.sdkDotnetQuickStartResolve}</h3>
         <p>{t.docs.sdkDotnetQuickStartResolveDesc}</p>
         <CodeBlock lang="csharp" code={`using Envilder;
@@ -1766,6 +1788,21 @@ secrets = (
 secrets = Envilder.resolve_file('envilder.json')
 validate_secrets(secrets)  # raises SecretValidationError if any value is empty`} />
 
+        <h3>{t.docs.sdkContractValidation}</h3>
+        <p>{t.docs.sdkContractValidationDesc}</p>
+        <CodeBlock lang="python" code={`from envilder import Envilder, SecretExistenceStatus
+
+result = Envilder.from_map_file('envilder.json').validate_contract()
+if not result.is_valid:
+    for error in result.map_file_errors:
+        print(f'{error.key}: {error.message}')
+    for key in result.keys:
+        if key.status != SecretExistenceStatus.EXISTS:
+            print(f'{key.variable} ({key.path}): {key.status.value}')`} />
+        <p>{t.docs.sdkContractValidationLoadDesc}</p>
+        <CodeBlock lang="python" code={`Envilder.from_map_file('envilder.json').with_contract_validation().inject()
+# raises ContractValidationError`} />
+
         <div class="callout">
           <span class="callout-icon">💡</span>
           <div>
@@ -1839,6 +1876,24 @@ await Envilder.load(env, {
 
 const secrets = await Envilder.resolveFile('envilder.json');
 validateSecrets(secrets); // throws SecretValidationError if any value is empty`} />
+
+        <h3>{t.docs.sdkContractValidation}</h3>
+        <p>{t.docs.sdkContractValidationDesc}</p>
+        <CodeBlock lang="typescript" code={`import { Envilder } from '@envilder/sdk';
+
+const result = await Envilder.fromMapFile('envilder.json').validateContract();
+if (!result.isValid) {
+  for (const error of result.mapFileErrors) {
+    console.log(\`\${error.key}: \${error.message}\`);
+  }
+  for (const key of result.keys.filter((k) => k.status !== 'exists')) {
+    console.log(\`\${key.variable} (\${key.path}): \${key.status}\`);
+  }
+}`} />
+        <p>{t.docs.sdkContractValidationLoadDesc}</p>
+        <CodeBlock lang="typescript" code={`await Envilder.fromMapFile('envilder.json')
+  .withContractValidation()
+  .inject(); // throws ContractValidationError`} />
 
         <div class="callout">
           <span class="callout-icon">💡</span>

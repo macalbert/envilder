@@ -165,6 +165,72 @@ except SecretValidationError as e:
     print(f"Missing: {', '.join(e.missing_keys)}")
 ```
 
+### Map file contract validation
+
+`validate_contract()` checks that a map file can be used without reading any
+secret value: the map file matches the published schema (the same rules and
+messages as `envilder validate --offline`), the provider configuration it
+resolves to is coherent, and every declared secret exists. Builder overrides
+(`with_provider()`, `with_profile()`, `with_vault_url()`) take precedence over
+`$config`, as they do on a load.
+
+```python
+from envilder import Envilder
+
+result = Envilder.from_map_file('envilder.json').validate_contract()
+
+if not result.is_valid:
+    for error in result.map_file_errors:
+        print(f"{error.key}: {error.message}")
+    for key in result.keys:
+        print(f"{key.variable} ({key.path}): {key.status.value}")
+```
+
+Expected failures are reported in the result, not raised. When the map file is
+invalid, `keys` is empty and no provider is created or called. A missing map
+file still raises `FileNotFoundError`, as a load does.
+
+To fail a load when the contract does not hold, opt in with
+`with_contract_validation()`. The check runs once before resolving, reuses the
+same provider for the resolution, and raises `ContractValidationError` (with
+the full outcome in `.result`). It is off by default: without it a load makes
+no extra provider call.
+
+```python
+from envilder import ContractValidationError, Envilder
+
+try:
+    Envilder.from_map_file('envilder.json').with_contract_validation().inject()
+except ContractValidationError as e:
+    print(e)  # Map file contract validation failed: DB_URL (/app/db): missing
+    print(e.result.keys)
+```
+
+The message names the failing keys and paths, never a secret value.
+
+Each `KeyCheck` carries one status (`SecretExistenceStatus`):
+
+| Status | Meaning |
+|--------|---------|
+| `exists` | The secret is there and the identity can see it |
+| `missing` | The provider answered that there is no such secret (a disabled Azure secret counts as missing) |
+| `access_denied` | The identity may not check the secret, so whether it exists is unknown. Never reported as `missing` |
+| `authentication_failed` | The provider rejected the credentials, or none were available (an expired AWS session includes the `aws sso login` remediation as `reason`) |
+| `provider_error` | Anything else, for example an unreachable provider |
+
+Required permissions (existence is checked without reading values):
+
+- **AWS SSM**: `ssm:GetParameters` on the parameters. Values are requested
+  without decryption and never read, so `kms:Decrypt` is not needed.
+- **Azure Key Vault**: the `List` secret permission (access policies) or
+  `Microsoft.KeyVault/vaults/secrets/readMetadata/action` (Azure RBAC, included
+  in the Key Vault Secrets User role). Names are matched case-insensitively.
+
+This differs from `validate_secrets()`: `validate_secrets()` runs after
+resolution and checks that the resolved values are non-empty, while contract
+validation runs before any value is read and checks that the map file is valid
+and every declared secret exists.
+
 ### Advanced usage
 
 Implement the `ISecretProvider` protocol to plug in a custom backend
@@ -209,12 +275,15 @@ EnvilderClient.inject_into_environment(secrets)
 | `with_vault_url(url)` | Override Azure Key Vault URL |
 | `resolve()` | Resolve secrets, return as dict |
 | `inject()` | Resolve + inject into `os.environ` |
+| `validate_contract()` | Check the map file and that every declared secret exists, returns `ContractValidationResult` |
+| `with_contract_validation()` | Run the check before `resolve()`/`inject()`, raising `ContractValidationError` on failure |
 
 ### Validation
 
 | Function | Description |
 |----------|-------------|
 | `validate_secrets(dict)` | Raises `SecretValidationError` if any value is empty or dict is empty |
+| `Envilder.from_map_file(path).validate_contract()` | Returns a `ContractValidationResult` (`is_valid`, `map_file_errors`, `keys`) |
 
 ## Map File Format
 

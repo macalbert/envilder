@@ -71,7 +71,7 @@ internal static class EnvironmentVariableName
 
 	// The default encoder escapes control characters and every non-ASCII
 	// character, U+2028/U+2029 included.
-	private static string Quote(string name)
+	public static string Quote(string name)
 	{
 		return JsonSerializer.Serialize(name);
 	}

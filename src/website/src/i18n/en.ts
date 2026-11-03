@@ -1548,6 +1548,11 @@ export const en: Translations = {
     sdkNodejsValidation: 'Secret validation',
     sdkNodejsValidationDesc:
       'Opt-in validation ensures all resolved secrets have non-empty values:',
+    sdkContractValidation: 'Map file contract validation',
+    sdkContractValidationDesc:
+      'Check, without loading anything or reading any value, that the map file is valid and that every declared secret exists with the current credentials: the same check as envilder validate. Expected validation failures are returned in the result instead of thrown; a missing map file still throws. Each key reports exists, missing, access_denied, authentication_failed or provider_error:',
+    sdkContractValidationLoadDesc:
+      'To fail the load instead, enable contract validation on the builder. The check runs once before resolving and the error names the failing keys, never their values. It is off by default, so a normal load makes no extra provider call. Unlike secret validation, which checks resolved values, it checks the map file and the keys before resolving:',
     sdkNodejsFullDocs: 'Full documentation →',
     sdkNodejsExamplesDesc:
       'A Vitest project with Testcontainers and an Aspire TypeScript AppHost resolve a map file against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to containers, with no .env file:',

@@ -156,6 +156,63 @@ try {
 }
 ```
 
+### Map file contract validation
+
+Check, before loading anything, that the map file is valid and that every
+declared secret exists with the current credentials. No secret value is read
+or returned. This is the same check as `envilder validate` in the CLI.
+
+```typescript
+import { Envilder } from '@envilder/sdk';
+
+const result = await Envilder.fromMapFile('envilder.json').validateContract();
+
+if (!result.isValid) {
+  for (const error of result.mapFileErrors) {
+    console.error(`${error.key}: ${error.message}`);
+  }
+  for (const key of result.keys.filter((k) => k.status !== 'exists')) {
+    console.error(`${key.variable} (${key.provider} ${key.path}): ${key.status}`);
+  }
+}
+```
+
+`validateContract()` never throws for expected failures; they are reported in
+the result:
+
+- `mapFileErrors`: the map file does not match the
+  [published schema](https://envilder.com/schema/map-file.v1.json) or its
+  provider configuration cannot work (for example `vaultUrl` with AWS). When
+  there are any, no provider is called and `keys` is empty.
+- `keys`: one entry per variable with its `path`, `provider` and `status`:
+  `exists`, `missing`, `access_denied` (the identity cannot check the secret,
+  never reported as `missing`), `authentication_failed` or `provider_error`.
+  `reason` explains the last three when the provider gave one.
+
+To fail a load when the contract does not hold, opt in on the builder. The
+check runs once before resolving and throws `ContractValidationError`, whose
+message names the failing keys and paths (never their values) and whose
+`result` holds the full outcome:
+
+```typescript
+await Envilder.fromMapFile('envilder.json')
+  .withContractValidation()
+  .inject(); // throws ContractValidationError if a key is missing
+```
+
+Without `withContractValidation()`, a load makes no extra provider call and
+needs no extra permission. The check needs `ssm:GetParameters` on AWS (it
+uses `GetParameters` in batches of ten with `WithDecryption: false`) and, on
+Azure Key Vault, the `List` secret permission (access policies) or
+`Microsoft.KeyVault/vaults/secrets/readMetadata/action` (Azure RBAC, included
+in Key Vault Secrets User), because it lists secret metadata instead of
+reading values.
+
+Contract validation and `validateSecrets()` answer different questions:
+contract validation checks that the map file is valid and each declared secret
+exists, before resolving; `validateSecrets()` checks that the values already
+resolved are not empty.
+
 ### Advanced usage
 
 Implement the `ISecretProvider` interface to plug in a custom backend
@@ -204,6 +261,8 @@ EnvilderClient.injectIntoEnvironment(secrets);
 | `withProvider(type)` | Override secret provider (AWS/Azure) |
 | `withProfile(name)` | Override AWS named profile |
 | `withVaultUrl(url)` | Override Azure Key Vault URL |
+| `withContractValidation()` | Check the map file contract once before resolving; fail with `ContractValidationError` |
+| `validateContract()` | Check the map file contract and return a `ContractValidationResult`, without loading |
 | `resolve()` | Resolve secrets, return as `Map` |
 | `inject()` | Resolve + inject into `process.env` |
 

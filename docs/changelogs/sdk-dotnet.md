@@ -1,3 +1,26 @@
+## [1.1.0] - 2026-11-02
+
+### Added
+
+* **Map file contract validation**: `EnvilderBuilder.ValidateContractAsync`
+  checks that the map file matches the published schema and the provider
+  configuration it resolves to, and that every declared secret exists, without
+  reading any value. The result reports each variable as `Exists`, `Missing`,
+  `AccessDenied`, `AuthenticationFailed` or `ProviderError`; an identity that
+  cannot check a secret is never reported as missing. AWS SSM needs
+  `ssm:GetParameters` (parameters are requested without decryption); Azure Key
+  Vault needs the `List` secret permission or `secrets/readMetadata` RBAC, and
+  a disabled secret counts as missing
+  ([#533](https://github.com/macalbert/envilder/issues/533))
+* **Opt-in contract validation on load**: `WithContractValidation()` runs the
+  same check once before `Resolve`, `ResolveAsync`, `Inject` and `InjectAsync`
+  and throws `ContractValidationException` when it fails. The message names the
+  failing variables and paths, never a value. Off by default, so a load makes
+  no extra provider call
+  ([#533](https://github.com/macalbert/envilder/issues/533))
+
+---
+
 ## [1.0.1] - 2026-11-03
 
 ### Fixed

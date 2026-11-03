@@ -111,4 +111,123 @@ describe('AwsSsmSecretProvider', () => {
     // Assert
     await expect(act).rejects.toThrow('AccessDenied');
   });
+
+  describe('checkSecretsExist', () => {
+    function awsError(name: string, message = `${name} raised`): Error {
+      return Object.assign(new Error(message), { name });
+    }
+
+    it('Should_ReportExistsAndMissingWithoutDecryption_When_CheckingNames', async () => {
+      // Arrange
+      const mockSend = vi.fn().mockResolvedValue({
+        Parameters: [{ Name: '/app/db', Value: 'must-not-be-read' }],
+        InvalidParameters: ['/app/missing'],
+      });
+      const sut = new AwsSsmSecretProvider(asSsmClient(mockSend));
+
+      // Act
+      const actual = await sut.checkSecretsExist(['/app/db', '/app/missing']);
+
+      // Assert
+      expect(actual).toEqual(
+        new Map([
+          ['/app/db', { status: 'exists' }],
+          ['/app/missing', { status: 'missing' }],
+        ]),
+      );
+      expect(mockSend.mock.calls[0][0].input).toEqual({
+        Names: ['/app/db', '/app/missing'],
+        WithDecryption: false,
+      });
+      expect(JSON.stringify([...actual])).not.toContain('must-not-be-read');
+    });
+
+    it('Should_BatchByTen_When_CheckingMoreThanTenDistinctNames', async () => {
+      // Arrange
+      const names = Array.from({ length: 12 }, (_, i) => `/app/key-${i}`);
+      const mockSend = vi.fn().mockResolvedValue({ InvalidParameters: [] });
+      const sut = new AwsSsmSecretProvider(asSsmClient(mockSend));
+
+      // Act
+      const actual = await sut.checkSecretsExist([...names, '/app/key-0']);
+
+      // Assert
+      expect(mockSend).toHaveBeenCalledTimes(2);
+      expect(mockSend.mock.calls[0][0].input.Names).toHaveLength(10);
+      expect(mockSend.mock.calls[1][0].input.Names).toHaveLength(2);
+      expect(actual.size).toBe(12);
+    });
+
+    it('Should_CheckEachNameAlone_When_BatchIsDeniedForOneName', async () => {
+      // Arrange
+      const mockSend = vi.fn().mockImplementation(async (command) => {
+        if (command.input.Names.includes('/app/denied')) {
+          throw awsError('AccessDeniedException');
+        }
+        return { InvalidParameters: [] };
+      });
+      const sut = new AwsSsmSecretProvider(asSsmClient(mockSend));
+
+      // Act
+      const actual = await sut.checkSecretsExist(['/app/db', '/app/denied']);
+
+      // Assert
+      expect(actual.get('/app/db')).toEqual({ status: 'exists' });
+      expect(actual.get('/app/denied')).toEqual({
+        status: 'access_denied',
+        reason: 'AccessDeniedException raised',
+      });
+      expect(mockSend).toHaveBeenCalledTimes(3);
+    });
+
+    it.each([
+      ['UnrecognizedClientException', 'authentication_failed'],
+      ['CredentialsProviderError', 'authentication_failed'],
+      ['InvalidSignatureException', 'authentication_failed'],
+      ['ThrottlingException', 'provider_error'],
+    ])(
+      'Should_MapErrorToStatus_When_ProviderThrows%s',
+      async (name, status) => {
+        // Arrange
+        const mockSend = vi.fn().mockRejectedValue(awsError(name));
+        const sut = new AwsSsmSecretProvider(asSsmClient(mockSend));
+
+        // Act
+        const actual = await sut.checkSecretsExist(['/app/a', '/app/b']);
+
+        // Assert
+        expect(actual.get('/app/a')?.status).toBe(status);
+        expect(actual.get('/app/b')?.status).toBe(status);
+      },
+    );
+
+    it('Should_ReportAuthenticationFailedWithRemediation_When_SsoSessionExpired', async () => {
+      // Arrange
+      const mockSend = vi
+        .fn()
+        .mockRejectedValue(awsError('TokenProviderError', 'expired'));
+      const sut = new AwsSsmSecretProvider(asSsmClient(mockSend), 'dev');
+
+      // Act
+      const actual = await sut.checkSecretsExist(['/app/a']);
+
+      // Assert
+      expect(actual.get('/app/a')?.status).toBe('authentication_failed');
+      expect(actual.get('/app/a')?.reason).toContain(
+        'aws sso login --profile dev',
+      );
+    });
+
+    it('Should_ReportAuthenticationFailed_When_TokenExpired', async () => {
+      // Arrange
+      const mockSend = vi.fn().mockRejectedValue(awsError('ExpiredToken'));
+      const sut = new AwsSsmSecretProvider(asSsmClient(mockSend));
+
+      // Act
+      const actual = await sut.checkSecretsExist(['/app/a']);
+
+      // Assert
+      expect(actual.get('/app/a')?.status).toBe('authentication_failed');
+    });
+  });
 });
