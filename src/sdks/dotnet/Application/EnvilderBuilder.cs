@@ -196,8 +196,17 @@ public class EnvilderBuilder
 		}
 
 		var mapFile = new MapFileParser().Parse(json);
-		var provider = _createProvider(mapFile.Config, _options);
 		var providerType = _options.Provider ?? mapFile.Config.Provider ?? SecretProviderType.Aws;
+		ISecretProvider provider;
+		try
+		{
+			provider = _createProvider(mapFile.Config, _options);
+		}
+		catch (AwsProfileNotFoundException ex)
+		{
+			return new(ContractValidation.ProfileNotFound(mapFile, providerType, ex.Message), null, null);
+		}
+
 		var result = provider is ISecretExistenceChecker checker
 			? await ContractValidation
 				.CheckRemoteKeysAsync(mapFile, checker, providerType, cancellationToken)

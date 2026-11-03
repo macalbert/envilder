@@ -284,18 +284,35 @@ public class AwsSsmExistenceCheckTests
 	}
 
 	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
-	public async Task Should_PropagateCancellation_When_CallIsCanceled()
+	public async Task Should_PropagateCancellation_When_CallerCancels()
 	{
 		// Arrange
+		using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+		cts.Cancel();
 		_ssmClient.GetParametersAsync(Arg.Any<GetParametersRequest>(), Arg.Any<CancellationToken>())
-			.ThrowsAsync(new OperationCanceledException());
+			.ThrowsAsync(new OperationCanceledException(cts.Token));
 		var sut = CreateSut();
 
 		// Act
-		var act = () => sut.CheckSecretsExistAsync(["/app/db"], TestContext.Current.CancellationToken);
+		var act = () => sut.CheckSecretsExistAsync(["/app/db"], cts.Token);
 
 		// Assert
 		await act.Should().ThrowAsync<OperationCanceledException>();
+	}
+
+	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
+	public async Task Should_ReportProviderError_When_ClientTimesOut()
+	{
+		// Arrange
+		_ssmClient.GetParametersAsync(Arg.Any<GetParametersRequest>(), Arg.Any<CancellationToken>())
+			.ThrowsAsync(new TaskCanceledException("The request timed out."));
+		var sut = CreateSut();
+
+		// Act
+		var actual = await sut.CheckSecretsExistAsync(["/app/db"], TestContext.Current.CancellationToken);
+
+		// Assert
+		actual["/app/db"].Status.Should().Be(SecretExistenceStatus.ProviderError);
 	}
 
 	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]

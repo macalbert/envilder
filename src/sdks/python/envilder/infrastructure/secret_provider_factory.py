@@ -18,6 +18,14 @@ from envilder.infrastructure.azure.azure_key_vault_secret_provider import (
 )
 
 
+class _AwsProfileError(ValueError):
+    """The AWS session cannot be created with the named profile.
+
+    Still a ``ValueError`` for callers of a load; contract validation reports
+    it as an authentication failure instead.
+    """
+
+
 class _SecretProviderFactory:
     @staticmethod
     def create(
@@ -80,6 +88,6 @@ def _create_aws_session(profile: str | None) -> boto3.Session:
     try:
         return boto3.Session(profile_name=profile)
     except Exception as e:
-        raise ValueError(
+        raise _AwsProfileError(
             f"Failed to create AWS session with profile '{profile}': {e}"
         ) from e

@@ -174,7 +174,7 @@ Check that the map file is valid and that every secret it declares exists in the
 ```csharp
 using Envilder;
 
-var result = await Env.FromMapFile("envilder.json").ValidateContractAsync(cancellationToken);
+var result = await Env.FromMapFile("envilder.json").ValidateContractAsync();
 
 if (!result.IsValid)
 {

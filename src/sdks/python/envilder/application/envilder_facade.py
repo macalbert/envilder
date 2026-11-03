@@ -5,6 +5,7 @@ from typing import overload
 from envilder.application.contract_validation import (
     ContractValidationError,
     check_remote_keys,
+    every_key_result,
     invalid_map_file_result,
 )
 from envilder.application.envilder_client import EnvilderClient
@@ -12,6 +13,7 @@ from envilder.application.map_file_parser import MapFileParser
 from envilder.application.map_file_validator import validate_map_file_content
 from envilder.domain.contract_validation_result import (
     ContractValidationResult,
+    SecretExistenceStatus,
 )
 from envilder.domain.envilder_options import EnvilderOptions
 from envilder.domain.parsed_map_file import ParsedMapFile
@@ -20,6 +22,7 @@ from envilder.domain.ports.secret_existence_checker import (
 )
 from envilder.domain.secret_provider_type import SecretProviderType
 from envilder.infrastructure.secret_provider_factory import (
+    _AwsProfileError,
     _SecretProviderFactory,
 )
 
@@ -237,6 +240,19 @@ class Envilder:
         The load then fails with :class:`~envilder.ContractValidationError`
         when it does not pass. Off by default: without it, a load makes no
         extra provider call.
+
+        Example::
+
+            from envilder import ContractValidationError, Envilder
+
+            try:
+                (
+                    Envilder.from_map_file("envilder.json")
+                    .with_contract_validation()
+                    .inject()
+                )
+            except ContractValidationError as e:
+                print(e)  # names the failing keys, never their values
         """
         self._contract_validation = True
         return self
@@ -249,7 +265,19 @@ class Envilder:
         exists. Expected failures (invalid map file, missing secret, access
         denied, rejected credentials, provider errors) are reported in the
         result, not raised. When the map file is invalid, no provider is
-        created or called.
+        created or called. A missing map file still raises
+        ``FileNotFoundError``.
+
+        Example::
+
+            from envilder import Envilder, SecretExistenceStatus
+
+            result = Envilder.from_map_file("envilder.json").validate_contract()
+            for error in result.map_file_errors:
+                print(f"{error.key}: {error.message}")
+            for key in result.keys:
+                if key.status is not SecretExistenceStatus.EXISTS:
+                    print(f"{key.variable} ({key.path}): {key.status.value}")
         """
         result, _, _ = self._check_contract(self._read_map_file())
         return result
@@ -292,14 +320,26 @@ class Envilder:
             return invalid_map_file_result(map_file_errors), None, None
         map_file = MapFileParser().parse(json_content)
         options = self._build_options()
-        provider = _SecretProviderFactory.create(
-            map_file.config, options=options
-        )
         provider_type = (
             (options.provider if options else None)
             or map_file.config.provider
             or SecretProviderType.AWS
         )
+        try:
+            provider = _SecretProviderFactory.create(
+                map_file.config, options=options
+            )
+        except _AwsProfileError as e:
+            return (
+                every_key_result(
+                    map_file,
+                    provider_type,
+                    SecretExistenceStatus.AUTHENTICATION_FAILED,
+                    str(e),
+                ),
+                None,
+                None,
+            )
         result = check_remote_keys(map_file, provider, provider_type)
         return result, map_file, provider
 

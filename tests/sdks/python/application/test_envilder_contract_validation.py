@@ -47,6 +47,71 @@ def env_cleanup() -> Generator[list[str], None, None]:
         os.environ.pop(key, None)
 
 
+class TestValidateContractWithUnknownAwsProfile:
+    @pytest.fixture(autouse=True)
+    def _empty_aws_config(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        empty = tmp_path / "empty-aws-config"
+        empty.write_text("", encoding="utf-8")
+        monkeypatch.setenv("AWS_CONFIG_FILE", str(empty))
+        monkeypatch.setenv("AWS_SHARED_CREDENTIALS_FILE", str(empty))
+
+    def Should_ReportAuthenticationFailed_When_ProfileDoesNotExist(
+        self, tmp_path: Path
+    ) -> None:
+        # Arrange
+        path = _write_map_file(
+            tmp_path,
+            {"$config": {"profile": "nonexistent"}, "DB_URL": "/app/db"},
+        )
+        sut = Envilder.from_map_file(path)
+
+        # Act
+        actual = sut.validate_contract()
+
+        # Assert
+        assert actual.is_valid is False
+        assert len(actual.keys) == 1
+        assert actual.keys[0].variable == "DB_URL"
+        assert (
+            actual.keys[0].status
+            is SecretExistenceStatus.AUTHENTICATION_FAILED
+        )
+        assert "nonexistent" in (actual.keys[0].reason or "")
+
+    def Should_ReportAuthenticationFailed_When_ProfileIsWhitespace(
+        self, tmp_path: Path
+    ) -> None:
+        # Arrange
+        path = _write_map_file(tmp_path, {"DB_URL": "/app/db"})
+        sut = Envilder.from_map_file(path).with_profile("  ")
+
+        # Act
+        actual = sut.validate_contract()
+
+        # Assert
+        assert actual.is_valid is False
+        assert (
+            actual.keys[0].status
+            is SecretExistenceStatus.AUTHENTICATION_FAILED
+        )
+
+    def Should_StillRaiseValueError_When_LoadingWithUnknownProfile(
+        self, tmp_path: Path
+    ) -> None:
+        # Arrange
+        path = _write_map_file(
+            tmp_path,
+            {"$config": {"profile": "nonexistent"}, "DB_URL": "/app/db"},
+        )
+        sut = Envilder.from_map_file(path)
+
+        # Act / Assert
+        with pytest.raises(ValueError, match="nonexistent"):
+            sut.resolve()
+
+
 class TestValidateContract:
     def Should_BeValid_When_EveryKeyExists(self, tmp_path: Path) -> None:
         # Arrange

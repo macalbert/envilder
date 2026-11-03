@@ -24,6 +24,20 @@ class ContractValidationError(Exception):
 
     Attributes:
         result: The full outcome of the check that failed.
+
+    Example::
+
+        from envilder import ContractValidationError, Envilder
+
+        try:
+            (
+                Envilder.from_map_file("envilder.json")
+                .with_contract_validation()
+                .resolve()
+            )
+        except ContractValidationError as e:
+            for key in e.result.keys:
+                print(key.variable, key.status.value)
     """
 
     def __init__(self, result: ContractValidationResult) -> None:
@@ -74,6 +88,32 @@ def check_remote_keys(
         is_valid=all(k.status is SecretExistenceStatus.EXISTS for k in keys),
         map_file_errors=(),
         keys=tuple(keys),
+    )
+
+
+def every_key_result(
+    map_file: ParsedMapFile,
+    provider: SecretProviderType,
+    status: SecretExistenceStatus,
+    reason: str,
+) -> ContractValidationResult:
+    """The result when no key can be checked, every key with one status.
+
+    Used when the provider cannot be built with the configured credentials,
+    for example an AWS profile that does not exist.
+    """
+    keys = tuple(
+        KeyCheck(
+            variable=variable,
+            path=path,
+            provider=provider,
+            status=status,
+            reason=reason,
+        )
+        for variable, path in map_file.mappings.items()
+    )
+    return ContractValidationResult(
+        is_valid=False, map_file_errors=(), keys=keys
     )
 
 

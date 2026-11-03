@@ -46,13 +46,33 @@ internal static class ContractValidation
 	/// </summary>
 	public static ContractValidationResult NotCheckable(ParsedMapFile mapFile, SecretProviderType provider)
 	{
+		return EveryKey(
+			mapFile,
+			provider,
+			SecretExistenceStatus.ProviderError,
+			"The provider cannot check whether a secret exists.");
+	}
+
+	/// <summary>
+	/// The result when the provider cannot be built because the AWS profile is
+	/// not in the credential store: no key can be checked with those credentials.
+	/// </summary>
+	public static ContractValidationResult ProfileNotFound(
+		ParsedMapFile mapFile,
+		SecretProviderType provider,
+		string reason)
+	{
+		return EveryKey(mapFile, provider, SecretExistenceStatus.AuthenticationFailed, reason);
+	}
+
+	private static ContractValidationResult EveryKey(
+		ParsedMapFile mapFile,
+		SecretProviderType provider,
+		SecretExistenceStatus status,
+		string reason)
+	{
 		var keys = mapFile.Mappings
-			.Select(mapping => new KeyCheck(
-				mapping.Key,
-				mapping.Value,
-				provider,
-				SecretExistenceStatus.ProviderError,
-				"The provider cannot check whether a secret exists."))
+			.Select(mapping => new KeyCheck(mapping.Key, mapping.Value, provider, status, reason))
 			.ToList();
 		return new([], keys);
 	}

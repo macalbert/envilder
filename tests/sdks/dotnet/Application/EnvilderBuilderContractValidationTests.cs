@@ -68,6 +68,29 @@ public class EnvilderBuilderContractValidationTests : IDisposable
 	}
 
 	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
+	public async Task Should_ReportAuthenticationFailedWithoutThrowing_When_ProfileIsNotFound()
+	{
+		// Arrange
+		var path = Path.Combine(_directory, $"{Guid.NewGuid():N}.json");
+		File.WriteAllText(path, """{"$config":{"profile":"nonexistent"},"A":"/a"}""");
+		var sut = new EnvilderBuilder(
+			path,
+			(_, _) => throw new global::Envilder.Infrastructure.AwsProfileNotFoundException("nonexistent"));
+
+		// Act
+		var actual = await sut.ValidateContractAsync(TestContext.Current.CancellationToken);
+
+		// Assert
+		actual.IsValid.Should().BeFalse();
+		actual.Keys.Should().ContainSingle().Which.Should().BeEquivalentTo(new KeyCheck(
+			"A",
+			"/a",
+			SecretProviderType.Aws,
+			SecretExistenceStatus.AuthenticationFailed,
+			"AWS profile 'nonexistent' was not found in the credential store."));
+	}
+
+	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
 	public async Task Should_ReportMapFileErrorsWithoutCreatingProvider_When_MapFileIsInvalid()
 	{
 		// Arrange

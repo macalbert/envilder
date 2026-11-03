@@ -145,8 +145,10 @@ public class AwsSsmSecretProvider : ISecretProvider, ISecretExistenceChecker
 					missing.Contains(name) ? SecretExistenceStatus.Missing : SecretExistenceStatus.Exists)))
 				.ToList();
 		}
-		catch (Exception ex) when (ex is not OperationCanceledException)
+		catch (Exception ex)
 		{
+			// Only the caller's cancellation propagates: a client timeout also surfaces
+			// as a canceled task, and is reported as a provider error.
 			cancellationToken.ThrowIfCancellationRequested();
 
 			// One name can fail the whole call, so each is checked on its own to tell which.

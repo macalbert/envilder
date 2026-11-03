@@ -91,8 +91,10 @@ public class AzureKeyVaultSecretProvider : ISecretProvider, ISecretExistenceChec
 		{
 			enabled = await ListEnabledSecretNamesAsync(cancellationToken).ConfigureAwait(false);
 		}
-		catch (Exception ex) when (ex is not OperationCanceledException)
+		catch (Exception ex)
 		{
+			// Only the caller's cancellation propagates: a client timeout also surfaces
+			// as a canceled task, and is reported as a provider error.
 			cancellationToken.ThrowIfCancellationRequested();
 			var existence = ToExistence(ex);
 			return distinct.ToDictionary(name => name, _ => existence);

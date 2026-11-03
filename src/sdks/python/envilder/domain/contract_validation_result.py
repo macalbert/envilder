@@ -69,6 +69,15 @@ class ContractValidationResult:
     The contract holds when the map file is valid and every declared secret
     exists. When the map file is invalid, ``keys`` is empty because no
     provider was called.
+
+    Example::
+
+        from envilder import Envilder
+
+        result = Envilder.from_map_file("envilder.json").validate_contract()
+        if not result.is_valid:
+            failing = [k.variable for k in result.keys if k.status != "exists"]
+            print(result.map_file_errors, failing)
     """
 
     is_valid: bool

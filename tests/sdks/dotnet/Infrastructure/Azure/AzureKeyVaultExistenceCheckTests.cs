@@ -194,18 +194,35 @@ public class AzureKeyVaultExistenceCheckTests
 	}
 
 	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
-	public async Task Should_PropagateCancellation_When_ListIsCanceled()
+	public async Task Should_PropagateCancellation_When_CallerCancels()
 	{
 		// Arrange
+		using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+		cts.Cancel();
 		_secretClient.GetPropertiesOfSecretsAsync(Arg.Any<CancellationToken>())
-			.Returns(_ => throw new OperationCanceledException());
+			.Returns(_ => throw new OperationCanceledException(cts.Token));
 		var sut = CreateSut();
 
 		// Act
-		var act = () => sut.CheckSecretsExistAsync(["a"], TestContext.Current.CancellationToken);
+		var act = () => sut.CheckSecretsExistAsync(["a"], cts.Token);
 
 		// Assert
 		await act.Should().ThrowAsync<OperationCanceledException>();
+	}
+
+	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
+	public async Task Should_ReportProviderError_When_ClientTimesOut()
+	{
+		// Arrange
+		_secretClient.GetPropertiesOfSecretsAsync(Arg.Any<CancellationToken>())
+			.Returns(_ => throw new TaskCanceledException("The operation was cancelled because it exceeded the configured timeout."));
+		var sut = CreateSut();
+
+		// Act
+		var actual = await sut.CheckSecretsExistAsync(["a"], TestContext.Current.CancellationToken);
+
+		// Assert
+		actual["a"].Status.Should().Be(SecretExistenceStatus.ProviderError);
 	}
 
 	[Fact(Timeout = CancellationTokenForTest.ShortTimeout)]
