@@ -14,6 +14,7 @@ envilder validate --provider=azure --vault-url=https://my-vault.vault.azure.net
 envilder validate --offline
 envilder validate --envfile=.env
 envilder validate --envfile=.env --compare-values
+envilder validate --format=json
 ```
 
 By default, `validate` checks the map file and then asks the provider whether
@@ -21,12 +22,13 @@ each declared secret exists. With `--envfile`, it also compares the keys of a
 local env file with the variables the map file declares, and with
 `--compare-values` their values with the remote ones, printing only
 `matches` or `differs`. With `--offline`, only local files are read: no
-provider is called and no cloud credentials are needed.
+provider is called and no cloud credentials are needed. With `--format=json`,
+the result is printed as one JSON document for CI and tooling.
 
 ## Usage
 
 ```text
-envilder validate [--offline] [--envfile <path> [--compare-values]] [--map <path>] [--provider <name>] [--profile <name>] [--vault-url <url>]
+envilder validate [--offline] [--envfile <path> [--compare-values]] [--format <text|json>] [--map <path>] [--provider <name>] [--profile <name>] [--vault-url <url>]
 ```
 
 | Option | Description |
@@ -34,6 +36,7 @@ envilder validate [--offline] [--envfile <path> [--compare-values]] [--map <path
 | `--offline` | Validate the map file locally without calling the provider |
 | `--envfile <path>` | Compare the keys of this env file with the map file. Not read unless given |
 | `--compare-values` | Also compare each declared value in the env file with its remote value. Requires `--envfile`; cannot be combined with `--offline` |
+| `--format <format>` | `text` (default) for human-readable output, or `json` for one JSON document on stdout. See [JSON output](#json-output) |
 | `--map <path>` | Map file to check. Defaults to `envilder.json` in the current directory, as for pull and `exec` |
 | `--provider <name>` | Provider to check against: `aws` or `azure`. Overrides `$config.provider` |
 | `--profile <name>` | AWS CLI profile. Overrides `$config.profile` |
@@ -45,8 +48,9 @@ after `validate`; options written before it are rejected. `--envfile` keeps
 the name pull and push use, but `validate` only reads an env file when it is
 given. As in push, an empty `--envfile` value is an error rather than ignored.
 
-`--compare-values` without `--envfile`, or together with `--offline`, is
-rejected before any file is read or any provider is called.
+`--compare-values` without `--envfile`, or together with `--offline`, and a
+`--format` other than `text` or `json` are rejected before any file is read or
+any provider is called.
 
 ## What is checked
 
@@ -239,6 +243,59 @@ An invalid map file, on stderr:
   • $config.profile is only supported with the aws provider (current provider: azure).
 ```
 
+## JSON output
+
+With `--format=json`, `validate` prints exactly one JSON document to stdout and
+nothing else, whatever the outcome. Logs, the AWS identity banner, warnings,
+error messages and the SSO login prompt go to stderr, so stdout can be piped to
+`jq` or saved as a CI artifact. The exit codes are the same as with text
+output. Option errors, such as `--format=yaml`, are reported on stderr before
+anything runs, without a document.
+
+```json
+{
+  "valid": false,
+  "offline": false,
+  "mapFile": { "path": "envilder.json", "valid": true, "errors": [] },
+  "keys": [
+    { "name": "DB_URL", "provider": "aws", "path": "/myapp/db-url", "status": "exists" },
+    { "name": "API_KEY", "provider": "aws", "path": "/myapp/api-key", "status": "missing" },
+    {
+      "name": "TOKEN",
+      "provider": "aws",
+      "path": "/myapp/token",
+      "status": "access_denied",
+      "reason": "User: arn:aws:sts::123456789012:assumed-role/dev/ci is not authorized to perform: ssm:GetParameters ..."
+    }
+  ],
+  "envFile": {
+    "path": ".env",
+    "valid": false,
+    "keys": [
+      { "name": "DB_URL", "status": "present", "value": "matches" },
+      { "name": "API_KEY", "status": "present", "value": "differs" },
+      { "name": "TOKEN", "status": "missing" }
+    ],
+    "duplicates": [],
+    "undeclared": ["DEBUG"]
+  },
+  "error": null
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `valid` | `true` exactly when the exit code is `0` |
+| `offline` | `true` with `--offline` |
+| `mapFile` | `path`, `valid`, and `errors`: one `{ "key", "message" }` per problem, the same messages as the text output. `null` when the map file could not be read |
+| `keys` | One entry per declared variable, in map file order: `name`, `provider` (`aws` or `azure`), `path`, `status` and, when the provider gave one, `reason`. `status` is `exists`, `missing`, `access_denied`, `authentication_failed` or `provider_error`. `null` when the secrets were not checked: with `--offline`, after an invalid map file, or when the run stopped first |
+| `envFile` | `null` without `--envfile`. `path`, `valid`, `keys` (each declared variable with `status` `present` or `missing`, the variables in the env file first), `duplicates` (`{ "name", "count" }` for each key assigned more than once) and `undeclared` (keys only in the env file, warnings). With `--compare-values`, a compared key also has `value`: `matches`, `differs` or `unreadable` (with a `reason`) |
+| `error` | `null`, or `{ "message" }` when the run stopped before every check finished, for example expired credentials, a missing env file, or a declined SSO login. The sections that completed before it are still filled in |
+
+The document never holds a secret value, local or remote: value comparison
+only reports `matches`, `differs` or `unreadable`. A section can gain fields
+in later versions; existing fields keep their meaning.
+
 ## Exit codes
 
 | Code | Meaning |
@@ -258,6 +315,14 @@ An invalid map file, on stderr:
 
 To check that a committed `.env.example` declares every variable without
 credentials, add `--offline --envfile=.env.example` to the first step.
+
+To keep the result for later steps or other tools, use JSON output; the step
+still fails when validation fails:
+
+```yaml
+- name: Check that every secret exists
+  run: npx envilder validate --map=envilder.json --format=json > validate.json
+```
 
 The offline step needs no cloud credentials, so it can run on every pull
 request, including from forks. The second step needs the same credentials as

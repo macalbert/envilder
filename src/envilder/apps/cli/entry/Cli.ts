@@ -38,6 +38,7 @@ import {
 } from '../../../core/domain/errors/DomainErrors.js';
 import type { MapFileConfig } from '../../../core/domain/MapFileConfig.js';
 import { resolveMapFileTarget } from '../../../core/domain/MapFileUpdate.js';
+import type { MapFileViolation } from '../../../core/domain/MapFileValidator.js';
 import { OperationMode } from '../../../core/domain/OperationMode.js';
 import type { ILogger } from '../../../core/domain/ports/ILogger.js';
 import type { ISecretMasker } from '../../../core/domain/ports/ISecretMasker.js';
@@ -49,6 +50,7 @@ import {
 import { GitHubActionsLogger } from '../../../core/infrastructure/github/GitHubActionsLogger.js';
 import { GitHubActionsSecretMasker } from '../../../core/infrastructure/github/GitHubActionsSecretMasker.js';
 import { NoOpSecretMasker } from '../../../core/infrastructure/github/NoOpSecretMasker.js';
+import { ConsoleLogger } from '../../../core/infrastructure/logger/ConsoleLogger.js';
 import { StderrConsoleLogger } from '../../../core/infrastructure/logger/StderrConsoleLogger.js';
 import { PackageVersionReader } from '../../../core/infrastructure/package/PackageVersionReader.js';
 import { readMapFileConfig } from '../../../core/infrastructure/variableStore/FileVariableStore.js';
@@ -65,8 +67,13 @@ import {
   createConfirm,
   createRunLogin,
   executeWithSsoRecovery,
+  type RecoveryDeps,
 } from '../recovery/SsoLoginRecovery.js';
 import { Startup } from '../Startup.js';
+import {
+  toValidationJson,
+  type ValidationResults,
+} from '../validate/ValidationJsonReport.js';
 
 const DEFAULT_MAP_FILE = 'envilder.json';
 const DEFAULT_ENV_FILE = '.env';
@@ -76,6 +83,7 @@ type ValidateOptions = {
   offline?: boolean;
   envfile?: string;
   compareValues?: boolean;
+  format?: string;
   map?: string;
   profile?: string;
   provider?: string;
@@ -463,7 +471,9 @@ function registerValidateCommand(program: Command): void {
         'declared value is also compared with its remote value, and only ' +
         '"matches" or "differs" is printed.\n\n' +
         'With --offline nothing but local files is read: no provider is ' +
-        'called and no credentials are needed.',
+        'called and no credentials are needed.\n\n' +
+        'With --format json one JSON document is printed to stdout and ' +
+        'everything else goes to stderr.',
     )
     .option(
       '--offline',
@@ -477,6 +487,7 @@ function registerValidateCommand(program: Command): void {
       '--compare-values',
       'Also compare env file values with remote values (requires --envfile)',
     )
+    .option('--format <format>', 'Output format: text or json (default: text)')
     .option(
       '--map <path>',
       `Path to the JSON file with environment variable mapping (default: ${DEFAULT_MAP_FILE})`,
@@ -496,11 +507,11 @@ function registerValidateCommand(program: Command): void {
         (validateCommand.parent?.opts() ?? {}) as ExecOptions,
       );
       rejectInvalidValidateOptions(options);
-      if (options.offline) {
-        await runOfflineValidation(options);
+      if (options.format === 'json') {
+        await runJsonValidation(options);
         return;
       }
-      await runRemoteValidation(options);
+      await runValidation(options, TEXT_OUTPUT);
     });
 
   validate.configureOutput({
@@ -519,6 +530,7 @@ Examples:
   envilder validate --envfile=.env
   envilder validate --envfile=.env --compare-values
   envilder validate --offline --envfile=.env
+  envilder validate --format=json
 
 Exit codes:
   0  the map file is valid, every declared secret exists and, with
@@ -529,6 +541,7 @@ Exit codes:
      file is missing, lacks a declared variable, repeats a key or holds a
      value that differs
 Variables only in the env file are warnings and do not change the exit code.
+--format=json does not change the exit codes.
 
 See docs/validate-command.md.`;
 
@@ -557,43 +570,167 @@ function rejectRootOptionsBeforeValidate(rootOptions: ExecOptions): void {
  * read or any provider is called.
  */
 function rejectInvalidValidateOptions(options: ValidateOptions): void {
-  if (!options.compareValues) {
-    return;
-  }
-  const problem =
-    options.envfile === undefined
-      ? '--compare-values requires --envfile.'
-      : options.offline
-        ? '--compare-values cannot be used with --offline: comparing ' +
-          'values reads them from the provider.'
-        : undefined;
+  const problem = findInvalidValidateOption(options);
   if (problem !== undefined) {
     console.error(pc.red(`error: ${problem}`));
     throw new SilentExitError(1);
   }
 }
 
-async function runOfflineValidation(options: ValidateOptions): Promise<void> {
-  const mapPath = await validateMapFileOffline(options);
-  const envFile = await checkEnvFileKeys(mapPath, options.envfile);
-  console.log(
-    pc.dim(
-      '  Remote validation skipped (--offline): no provider was called, so ' +
-        'the secrets were not checked.',
+function findInvalidValidateOption(
+  options: ValidateOptions,
+): string | undefined {
+  if (
+    options.format !== undefined &&
+    !VALIDATE_FORMATS.includes(options.format)
+  ) {
+    // The value is not echoed: it can be anything the user typed.
+    return `--format must be ${VALIDATE_FORMATS.join(' or ')}.`;
+  }
+  if (!options.compareValues) {
+    return undefined;
+  }
+  if (options.envfile === undefined) {
+    return '--compare-values requires --envfile.';
+  }
+  if (options.offline) {
+    return (
+      '--compare-values cannot be used with --offline: comparing values ' +
+      'reads them from the provider.'
+    );
+  }
+  return undefined;
+}
+
+const VALIDATE_FORMATS: readonly string[] = ['text', 'json'];
+
+/**
+ * Where `envilder validate` reports each step. Text output prints as it
+ * goes; JSON output collects the results and prints them once at the end, so
+ * its logger and its SSO login prompt keep stdout free.
+ */
+type ValidationOutput = {
+  readonly logger: ILogger;
+  readonly ssoRecovery: Partial<RecoveryDeps>;
+  mapFileChecked(path: string, violations: readonly MapFileViolation[]): void;
+  envFileChecked(path: string, comparison: EnvFileKeyComparison): void;
+  remoteSkipped(): void;
+  keysChecked(
+    checks: readonly RemoteKeyCheck[],
+    provider: string,
+    source: string,
+  ): void;
+  valuesCompared(checks: readonly EnvValueCheck[], source: string): void;
+  failed(failures: string): void;
+};
+
+const TEXT_OUTPUT: ValidationOutput = {
+  logger: new ConsoleLogger(),
+  ssoRecovery: {},
+  mapFileChecked: printMapFileCheck,
+  envFileChecked: printEnvFileComparison,
+  remoteSkipped: () =>
+    console.log(
+      pc.dim(
+        '  Remote validation skipped (--offline): no provider was called, ' +
+          'so the secrets were not checked.',
+      ),
     ),
-  );
-  failOnSummaries([envFile?.failures ?? '']);
+  keysChecked: (checks, _provider, source) =>
+    printRemoteKeyChecks(checks, source),
+  valuesCompared: printValueChecks,
+  failed: (failures) =>
+    console.error(pc.red(`✗ Validation failed: ${failures}`)),
+};
+
+function jsonOutput(results: ValidationResults): ValidationOutput {
+  return {
+    logger: new StderrConsoleLogger(),
+    ssoRecovery: {
+      confirm: createConfirm(process.stderr),
+      runLogin: createRunLogin({ stdout: 'stderr' }),
+    },
+    mapFileChecked: (path, violations) => {
+      results.mapFile = { path, violations };
+    },
+    envFileChecked: (path, comparison) => {
+      results.envFile = { path, comparison };
+    },
+    remoteSkipped: () => {},
+    keysChecked: (checks, provider) => {
+      results.keys = { provider, checks };
+    },
+    valuesCompared: (checks) => {
+      results.values = checks;
+    },
+    failed: () => {},
+  };
+}
+
+/** Exit 1 because a check failed, as opposed to a run that stopped early. */
+class ValidationFailedError extends SilentExitError {
+  constructor() {
+    super(1);
+  }
+}
+
+async function runValidation(
+  options: ValidateOptions,
+  output: ValidationOutput,
+): Promise<void> {
+  if (options.offline) {
+    await runOfflineValidation(options, output);
+    return;
+  }
+  await runRemoteValidation(options, output);
 }
 
 /**
- * Prints `✗ Validation failed: <summaries>` and exits with 1 when any
- * summary is not empty.
+ * Runs the validation and prints exactly one JSON document to stdout,
+ * whatever the outcome; the exit code is the same as with text output. When
+ * the run stops before every check finished, the document says why in
+ * `error`, and the usual message still goes to stderr.
  */
-function failOnSummaries(summaries: readonly string[]): void {
+async function runJsonValidation(options: ValidateOptions): Promise<void> {
+  const results: ValidationResults = { offline: options.offline === true };
+  let error: unknown;
+  try {
+    await runValidation(options, jsonOutput(results));
+  } catch (caught) {
+    if (!(caught instanceof ValidationFailedError)) {
+      error =
+        caught instanceof SilentExitError
+          ? new Error('Validation stopped before every check finished.')
+          : caught;
+    }
+    throw caught;
+  } finally {
+    console.log(JSON.stringify(toValidationJson(results, error), null, 2));
+  }
+}
+
+async function runOfflineValidation(
+  options: ValidateOptions,
+  output: ValidationOutput,
+): Promise<void> {
+  const mapPath = await validateMapFileOffline(options, output);
+  const envFile = await checkEnvFileKeys(mapPath, options.envfile, output);
+  output.remoteSkipped();
+  failOnSummaries([envFile?.failures ?? ''], output);
+}
+
+/**
+ * Reports `<summaries>` as failed and exits with 1 when any summary is not
+ * empty.
+ */
+function failOnSummaries(
+  summaries: readonly string[],
+  output: ValidationOutput,
+): void {
   const failures = summaries.filter((summary) => summary !== '').join(', ');
   if (failures !== '') {
-    console.error(pc.red(`✗ Validation failed: ${failures}`));
-    throw new SilentExitError(1);
+    output.failed(failures);
+    throw new ValidationFailedError();
   }
 }
 
@@ -606,24 +743,27 @@ type EnvFileCheck = {
 
 /**
  * Compares the env file keys with the declared variables, without calling
- * any provider, and prints the result. Does nothing without `--envfile`.
+ * any provider, and reports the result. Does nothing without `--envfile`.
  */
 async function checkEnvFileKeys(
   mapPath: string,
   envfileOption: string | undefined,
+  output: ValidationOutput,
 ): Promise<EnvFileCheck | undefined> {
   if (envfileOption === undefined) {
     return undefined;
   }
   const path = resolveEnvfile(envfileOption);
-  const container = Startup.build().configureOfflineValidation().create();
+  const container = Startup.build()
+    .configureOfflineValidation(output.logger)
+    .create();
   const handler = container.get<ValidateEnvFileKeysCommandHandler>(
     TYPES.ValidateEnvFileKeysCommandHandler,
   );
   const comparison = await handler.handle(
     ValidateEnvFileKeysCommand.create(mapPath, path),
   );
-  printEnvFileComparison(comparison, path);
+  output.envFileChecked(path, comparison);
   return {
     path,
     comparison,
@@ -632,8 +772,8 @@ async function checkEnvFileKeys(
 }
 
 function printEnvFileComparison(
-  comparison: EnvFileKeyComparison,
   path: string,
+  comparison: EnvFileKeyComparison,
 ): void {
   const name = basename(path);
   const declaredCount = comparison.present.length + comparison.missing.length;
@@ -678,15 +818,18 @@ function printEnvFileComparison(
 }
 
 /**
- * Checks the map file without calling any provider. Prints the result and
+ * Checks the map file without calling any provider. Reports the result and
  * returns the map file path when it is valid; reports every violation and
  * exits with 1 otherwise.
  */
 async function validateMapFileOffline(
   options: ValidateOptions,
+  output: ValidationOutput,
 ): Promise<string> {
   const mapPath = resolveMapFile(options.map);
-  const container = Startup.build().configureOfflineValidation().create();
+  const container = Startup.build()
+    .configureOfflineValidation(output.logger)
+    .create();
   const handler = container.get<ValidateMapFileCommandHandler>(
     TYPES.ValidateMapFileCommandHandler,
   );
@@ -702,18 +845,27 @@ async function validateMapFileOffline(
     ),
   );
 
+  output.mapFileChecked(mapPath, violations);
   if (violations.length > 0) {
-    const count =
-      violations.length === 1 ? '1 problem' : `${violations.length} problems`;
-    console.error(pc.red(`✗ Map file invalid: ${mapPath} (${count})`));
-    for (const violation of violations) {
-      console.error(`  ${pc.red('•')} ${violation.message}`);
-    }
-    throw new SilentExitError(1);
+    throw new ValidationFailedError();
   }
-
-  console.log(pc.green(`✓ Map file valid: ${mapPath}`));
   return mapPath;
+}
+
+function printMapFileCheck(
+  mapPath: string,
+  violations: readonly MapFileViolation[],
+): void {
+  if (violations.length === 0) {
+    console.log(pc.green(`✓ Map file valid: ${mapPath}`));
+    return;
+  }
+  const count =
+    violations.length === 1 ? '1 problem' : `${violations.length} problems`;
+  console.error(pc.red(`✗ Map file invalid: ${mapPath} (${count})`));
+  for (const violation of violations) {
+    console.error(`  ${pc.red('•')} ${violation.message}`);
+  }
 }
 
 /**
@@ -721,9 +873,12 @@ async function validateMapFileOffline(
  * provider, then checks that every declared secret exists. Lists each
  * variable with its path and status; values are never read.
  */
-async function runRemoteValidation(options: ValidateOptions): Promise<void> {
-  const mapPath = await validateMapFileOffline(options);
-  const envFile = await checkEnvFileKeys(mapPath, options.envfile);
+async function runRemoteValidation(
+  options: ValidateOptions,
+  output: ValidationOutput,
+): Promise<void> {
+  const mapPath = await validateMapFileOffline(options, output);
+  const envFile = await checkEnvFileKeys(mapPath, options.envfile, output);
   const fileConfig = await readMapFileConfig(mapPath);
   const config: MapFileConfig = {
     ...fileConfig,
@@ -733,7 +888,7 @@ async function runRemoteValidation(options: ValidateOptions): Promise<void> {
   };
 
   const container = Startup.build()
-    .configureRemoteValidation()
+    .configureRemoteValidation(output.logger)
     .configureInfrastructure(config)
     .create();
   const handler = container.get<ValidateRemoteKeysCommandHandler>(
@@ -743,10 +898,10 @@ async function runRemoteValidation(options: ValidateOptions): Promise<void> {
   let checks: RemoteKeyCheck[] = [];
   await executeWithSsoRecovery(async () => {
     checks = await handler.handle(ValidateRemoteKeysCommand.create(mapPath));
-  });
+  }, output.ssoRecovery);
 
   const source = describeSecretSource(config);
-  printRemoteKeyChecks(checks, source);
+  output.keysChecked(checks, config.provider?.toLowerCase() || 'aws', source);
 
   let valueFailures = '';
   if (options.compareValues && envFile !== undefined) {
@@ -756,14 +911,14 @@ async function runRemoteValidation(options: ValidateOptions): Promise<void> {
       envFile,
       checks,
       source,
+      output,
     );
   }
 
-  failOnSummaries([
-    summarizeFailures(checks),
-    envFile?.failures ?? '',
-    valueFailures,
-  ]);
+  failOnSummaries(
+    [summarizeFailures(checks), envFile?.failures ?? '', valueFailures],
+    output,
+  );
 }
 
 /**
@@ -777,6 +932,7 @@ async function compareEnvFileValues(
   envFile: EnvFileCheck,
   checks: readonly RemoteKeyCheck[],
   source: string,
+  output: ValidationOutput,
 ): Promise<string> {
   const inEnvFile = new Set(envFile.comparison.present);
   const variables = checks
@@ -795,8 +951,8 @@ async function compareEnvFileValues(
     valueChecks = await handler.handle(
       CompareEnvFileValuesCommand.create(mapPath, envFile.path, variables),
     );
-  });
-  printValueChecks(valueChecks, source);
+  }, output.ssoRecovery);
+  output.valuesCompared(valueChecks, source);
   return summarizeValueFailures(valueChecks);
 }
 

@@ -66,12 +66,10 @@ export class Startup {
    * Wires the local part of `envilder validate`: the map file and the env
    * file keys are read and checked locally, so no secret provider is bound.
    * Use it instead of `configureServices` and `configureInfrastructure`.
+   * JSON output passes a logger that keeps stdout free.
    */
-  configureOfflineValidation(): this {
-    this.container
-      .bind<ILogger>(TYPES.ILogger)
-      .to(ConsoleLogger)
-      .inSingletonScope();
+  configureOfflineValidation(logger: ILogger = new ConsoleLogger()): this {
+    this.container.bind<ILogger>(TYPES.ILogger).toConstantValue(logger);
     this.container
       .bind<IVariableStore>(TYPES.IVariableStore)
       .to(FileVariableStore)
@@ -93,9 +91,10 @@ export class Startup {
    * Wires the remote part of `envilder validate`, which checks that each
    * declared secret exists and, with `--compare-values`, compares remote
    * values with the env file. Call `configureInfrastructure` afterwards to bind
-   * the secret provider, the logger and the variable store.
+   * the secret provider and the variable store; the given logger is kept.
    */
-  configureRemoteValidation(): this {
+  configureRemoteValidation(logger: ILogger = new ConsoleLogger()): this {
+    this.container.bind<ILogger>(TYPES.ILogger).toConstantValue(logger);
     this.container
       .bind<ValidateRemoteKeysCommandHandler>(
         TYPES.ValidateRemoteKeysCommandHandler,

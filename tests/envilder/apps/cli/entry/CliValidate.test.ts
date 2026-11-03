@@ -13,6 +13,7 @@ import {
 import { main } from '../../../../../src/envilder/apps/cli/entry/Cli';
 import { SilentExitError } from '../../../../../src/envilder/apps/cli/errors/SilentExitError';
 import { Startup } from '../../../../../src/envilder/apps/cli/Startup';
+import type { ValidationJson } from '../../../../../src/envilder/apps/cli/validate/ValidationJsonReport';
 import {
   ExpiredCredentialsError,
   SsoSessionExpiredError,
@@ -784,5 +785,246 @@ describe('Cli validate', () => {
         expect(createAwsSecretProvider).not.toHaveBeenCalled();
       },
     );
+  });
+  describe('with --format json', () => {
+    const LOCAL_VALUE = 'fake-local-value-8Kd2Lp4Zy';
+    let stdoutWriteSpy: MockInstance;
+
+    beforeEach(() => {
+      stdoutWriteSpy = vi
+        .spyOn(process.stdout, 'write')
+        .mockImplementation(() => true);
+    });
+
+    async function givenEnvFile(content: string) {
+      const path = join(workDir, '.env');
+      await writeFile(path, content);
+      return path;
+    }
+
+    function printedJson(): ValidationJson {
+      return JSON.parse(logSpy.mock.calls[0][0] as string) as ValidationJson;
+    }
+
+    it('Should_PrintSingleJsonDocument_When_FormatIsJson', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({
+        DB_URL: '/app/db-url',
+        API_KEY: '/app/api-key',
+      });
+      givenAwsProvider({
+        '/app/db-url': { status: 'exists' },
+        '/app/api-key': { status: 'exists' },
+      });
+      givenArgs('validate', '--map', mapPath, '--format', 'json');
+
+      // Act
+      await main();
+
+      // Assert
+      expect(logSpy).toHaveBeenCalledTimes(1);
+      expect(stdoutWriteSpy).not.toHaveBeenCalled();
+      expect(printedJson()).toEqual({
+        valid: true,
+        offline: false,
+        mapFile: { path: mapPath, valid: true, errors: [] },
+        keys: [
+          {
+            name: 'DB_URL',
+            provider: 'aws',
+            path: '/app/db-url',
+            status: 'exists',
+          },
+          {
+            name: 'API_KEY',
+            provider: 'aws',
+            path: '/app/api-key',
+            status: 'exists',
+          },
+        ],
+        envFile: null,
+        error: null,
+      });
+    });
+
+    it('Should_KeepExitCode_When_FormatIsJson', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({
+        DB_URL: '/app/db-url',
+        API_KEY: '/app/api-key',
+      });
+      givenAwsProvider({
+        '/app/db-url': { status: 'exists' },
+        '/app/api-key': { status: 'missing' },
+      });
+      givenArgs('validate', '--map', mapPath, '--format', 'json');
+
+      // Act
+      const action = main();
+
+      // Assert
+      await expect(action).rejects.toEqual(new SilentExitError(1));
+      expect(logSpy).toHaveBeenCalledTimes(1);
+      expect(printedJson().valid).toBe(false);
+      expect(printedJson().keys?.[1]).toEqual({
+        name: 'API_KEY',
+        provider: 'aws',
+        path: '/app/api-key',
+        status: 'missing',
+      });
+    });
+
+    it('Should_NeverIncludeSecretValues_When_FormatIsJson', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({
+        DB_URL: '/app/db-url',
+        API_KEY: '/app/api-key',
+      });
+      const envPath = await givenEnvFile(
+        `DB_URL=${SECRET_LOOKING_VALUE}\nAPI_KEY=${LOCAL_VALUE}\nEXTRA=1\n`,
+      );
+      givenAwsProvider({
+        '/app/db-url': { status: 'exists' },
+        '/app/api-key': { status: 'exists' },
+      });
+      givenArgs(
+        'validate',
+        '--map',
+        mapPath,
+        '--envfile',
+        envPath,
+        '--compare-values',
+        '--format',
+        'json',
+      );
+
+      // Act
+      const action = main();
+
+      // Assert
+      await expect(action).rejects.toEqual(new SilentExitError(1));
+      expect(logSpy).toHaveBeenCalledTimes(1);
+      expect(printedJson().envFile).toEqual({
+        path: envPath,
+        valid: false,
+        keys: [
+          { name: 'DB_URL', status: 'present', value: 'matches' },
+          { name: 'API_KEY', status: 'present', value: 'differs' },
+        ],
+        duplicates: [],
+        undeclared: ['EXTRA'],
+      });
+      expect(allOutput()).not.toContain(SECRET_LOOKING_VALUE);
+      expect(allOutput()).not.toContain(LOCAL_VALUE);
+    });
+
+    it('Should_PrintMapFileErrorsAsJson_When_MapFileIsInvalid', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({ PORT: 5432 });
+      givenArgs('validate', '--map', mapPath, '--format', 'json');
+
+      // Act
+      const action = main();
+
+      // Assert
+      await expect(action).rejects.toEqual(new SilentExitError(1));
+      expect(logSpy).toHaveBeenCalledTimes(1);
+      expect(printedJson()).toMatchObject({
+        valid: false,
+        mapFile: { path: mapPath, valid: false, errors: [{ key: 'PORT' }] },
+        keys: null,
+        error: null,
+      });
+      expect(createAwsSecretProvider).not.toHaveBeenCalled();
+    });
+
+    it('Should_PrintOfflineResultAsJson_When_OfflineIsSet', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+      givenArgs('validate', '--offline', '--map', mapPath, '--format', 'json');
+
+      // Act
+      await main();
+
+      // Assert
+      expect(logSpy).toHaveBeenCalledTimes(1);
+      expect(printedJson()).toMatchObject({
+        valid: true,
+        offline: true,
+        keys: null,
+      });
+    });
+
+    it('Should_PrintErrorAsJson_When_CredentialsAreExpired', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+      givenAwsProviderFailing(new ExpiredCredentialsError());
+      givenArgs('validate', '--map', mapPath, '--format', 'json');
+
+      // Act
+      const action = main();
+
+      // Assert
+      await expect(action).rejects.toBeInstanceOf(ExpiredCredentialsError);
+      expect(logSpy).toHaveBeenCalledTimes(1);
+      expect(printedJson().valid).toBe(false);
+      expect(printedJson().keys).toBeNull();
+      expect(printedJson().error?.message).toContain(
+        'AWS credentials are expired',
+      );
+    });
+
+    it('Should_LogProviderMessagesToStderr_When_FormatIsJson', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+      vi.mocked(createAwsSecretProvider).mockImplementation(
+        (_config, logger) => ({
+          getSecret: vi.fn(),
+          setSecret: vi.fn(),
+          checkSecretsExist: vi.fn(async () => {
+            logger.info('AWS identity: account 123456789012');
+            return new Map([['/app/db-url', { status: 'exists' as const }]]);
+          }),
+        }),
+      );
+      givenArgs('validate', '--map', mapPath, '--format', 'json');
+
+      // Act
+      await main();
+
+      // Assert
+      expect(logSpy).toHaveBeenCalledTimes(1);
+      expect(outputOf(errorSpy)).toContain('AWS identity');
+    });
+
+    it('Should_KeepTextOutput_When_FormatIsText', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+      givenArgs('validate', '--offline', '--map', mapPath, '--format', 'text');
+
+      // Act
+      await main();
+
+      // Assert
+      expect(outputOf(logSpy)).toContain('✓ Map file valid');
+    });
+
+    it('Should_RejectFormat_When_FormatIsUnknown', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+      givenAwsProvider({ '/app/db-url': { status: 'exists' } });
+      givenArgs('validate', '--map', mapPath, '--format', 'yaml');
+
+      // Act
+      const action = main();
+
+      // Assert
+      await expect(action).rejects.toEqual(new SilentExitError(1));
+      expect(outputOf(errorSpy)).toContain(
+        'error: --format must be text or json.',
+      );
+      expect(logSpy).not.toHaveBeenCalled();
+      expect(createAwsSecretProvider).not.toHaveBeenCalled();
+    });
   });
 });

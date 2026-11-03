@@ -29,6 +29,17 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   `--compare-values` without `--envfile`, or with `--offline`, is rejected
   before any provider call
   ([#559](https://github.com/macalbert/envilder/issues/559))
+* **`envilder validate --format json`**: prints the result as exactly one
+  JSON document on stdout, with `valid`, `mapFile`, `keys` (name, provider,
+  path and status: `exists`, `missing`, `access_denied`,
+  `authentication_failed` or `provider_error`), `envFile` and `error`. Logs,
+  warnings, error messages and the SSO login prompt go to stderr, so stdout
+  stays valid JSON. Exit codes do not change, and the document never holds a
+  secret value: value comparison only reports `matches`, `differs` or
+  `unreadable`. `--format text` (the default) keeps the current output; any
+  other format is rejected before any provider call
+  ([#560](https://github.com/macalbert/envilder/issues/560)).
+  [Guide](../validate-command.md#json-output)
 
 ---
 
