@@ -1,8 +1,9 @@
 # 🗝️ Envilder ☁️
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/8a7188ef-9d8d-45fb-8c37-3af718fb5103" alt="Envilder">
+  <img src="https://github.com/user-attachments/assets/2c3d85a6-edd0-4b03-9b41-aaf113aee819" alt="Envilder">
 </p>
+
 
 <p align="center">
   <b>One secret mapping for local dev, CI/CD, and runtime.</b><br>
