@@ -9,7 +9,7 @@ on:
 
   pull_request:
     branches:
-      - "*"
+      - '*'
     types:
       - opened
       - reopened
@@ -54,7 +54,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.11", "3.13"]
+        python-version: ['3.11', '3.13']
 
     steps:
       - name: 🧱 Checkout repository

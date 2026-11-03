@@ -16,12 +16,12 @@ allowBuilds:
   ssh2: true
 
 catalog:
-  "@biomejs/biome": 2.6.3
+  '@biomejs/biome': 2.5.14
   typescript: ^7.0.2
   tsx: ^4.23.15
-  "@types/node": ^26.1.0
+  '@types/node': ^26.1.0
   vitest: 4.1.12
-  "@vitest/coverage-v8": 4.1.12
+  '@vitest/coverage-v8': 4.1.12
   aws-cdk-lib: ^2.273.0
   constructs: ^10.8.1
 
