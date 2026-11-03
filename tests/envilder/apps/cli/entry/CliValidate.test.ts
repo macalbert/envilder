@@ -479,4 +479,310 @@ describe('Cli validate', () => {
       'Put envilder options after "validate" (found --map).',
     );
   });
+
+  describe('with --envfile', () => {
+    const LOCAL_VALUE = 'fake-local-value-6Vb3Nq8Rx';
+
+    async function givenEnvFile(content: string, name = '.env') {
+      const path = join(workDir, name);
+      await writeFile(path, content);
+      return path;
+    }
+
+    it('Should_FailValidation_When_DeclaredKeyIsMissingFromEnvFile', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({
+        DB_URL: '/app/db-url',
+        API_KEY: '/app/api-key',
+      });
+      const envPath = await givenEnvFile(`DB_URL=${LOCAL_VALUE}\n`);
+      givenAwsProvider({
+        '/app/db-url': { status: 'exists' },
+        '/app/api-key': { status: 'exists' },
+      });
+      givenArgs('validate', '--map', mapPath, '--envfile', envPath);
+
+      // Act
+      const action = main();
+
+      // Assert
+      await expect(action).rejects.toEqual(new SilentExitError(1));
+      expect(outputOf(logSpy)).toMatch(/✗ API_KEY\s+missing from \.env/);
+      expect(outputOf(errorSpy)).toContain(
+        '✗ Validation failed: 1 missing from .env',
+      );
+    });
+
+    it('Should_WarnWithoutFailing_When_EnvFileHasUndeclaredKey', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+      const envPath = await givenEnvFile(`DB_URL=${LOCAL_VALUE}\nDEBUG=true\n`);
+      givenArgs(
+        'validate',
+        '--offline',
+        '--map',
+        mapPath,
+        '--envfile',
+        envPath,
+      );
+
+      // Act
+      await main();
+
+      // Assert
+      expect(outputOf(logSpy)).toMatch(/⚠ DEBUG\s+not declared in map file/);
+      expect(outputOf(errorSpy)).not.toContain('Validation failed');
+    });
+
+    it('Should_TreatEmptyValueAsPresent_When_EnvFileHasEmptyAssignment', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({ API_KEY: '/app/api-key' });
+      const envPath = await givenEnvFile('API_KEY=\n');
+      givenArgs(
+        'validate',
+        '--offline',
+        '--map',
+        mapPath,
+        '--envfile',
+        envPath,
+      );
+
+      // Act
+      await main();
+
+      // Assert
+      expect(outputOf(logSpy)).toContain(
+        '✓ The 1 declared variable is in .env',
+      );
+    });
+
+    it('Should_ReportDuplicate_When_EnvFileRepeatsKey', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({ API_KEY: '/app/api-key' });
+      const envPath = await givenEnvFile(
+        `API_KEY=${LOCAL_VALUE}\nAPI_KEY=${LOCAL_VALUE}-2\n`,
+      );
+      givenArgs(
+        'validate',
+        '--offline',
+        '--map',
+        mapPath,
+        '--envfile',
+        envPath,
+      );
+
+      // Act
+      const action = main();
+
+      // Assert
+      await expect(action).rejects.toEqual(new SilentExitError(1));
+      expect(outputOf(logSpy)).toMatch(
+        /✗ API_KEY\s+duplicated in \.env \(2 assignments\)/,
+      );
+      expect(outputOf(errorSpy)).toContain(
+        '✗ Validation failed: 1 duplicated in .env',
+      );
+    });
+
+    it('Should_ReportEnvFileNotFound_When_EnvFileDoesNotExist', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+      const envPath = join(workDir, 'missing.env');
+      givenAwsProvider({ '/app/db-url': { status: 'exists' } });
+      givenArgs('validate', '--map', mapPath, '--envfile', envPath);
+
+      // Act
+      const action = main();
+
+      // Assert
+      await expect(action).rejects.toThrow(`Env file not found: ${envPath}`);
+      expect(createAwsSecretProvider).not.toHaveBeenCalled();
+    });
+
+    it('Should_CheckKeysWithoutCallingProvider_When_OfflineAndEnvFileAreSet', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+      const envPath = await givenEnvFile(`DB_URL=${LOCAL_VALUE}\n`);
+      givenArgs(
+        'validate',
+        '--offline',
+        '--map',
+        mapPath,
+        '--envfile',
+        envPath,
+      );
+
+      // Act
+      await main();
+
+      // Assert
+      expect(createAwsSecretProvider).not.toHaveBeenCalled();
+      expect(outputOf(logSpy)).toContain(
+        '✓ The 1 declared variable is in .env',
+      );
+      expect(outputOf(logSpy)).toContain('Remote validation skipped');
+    });
+
+    it('Should_ParseEnvFileLikePush_When_EnvFileHasCommentsBlankLinesAndQuotes', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({
+        DB_URL: '/app/db-url',
+        API_KEY: '/app/api-key',
+        TOKEN: '/app/token',
+      });
+      const envPath = await givenEnvFile(
+        '# local settings\n\nexport DB_URL="postgres://localhost"\n' +
+          "API_KEY='quoted # not a comment' # trailing comment\n\n" +
+          'TOKEN=`backtick`\n',
+      );
+      givenArgs(
+        'validate',
+        '--offline',
+        '--map',
+        mapPath,
+        '--envfile',
+        envPath,
+      );
+
+      // Act
+      await main();
+
+      // Assert
+      expect(outputOf(logSpy)).toContain(
+        '✓ All 3 declared variables are in .env',
+      );
+    });
+
+    it('Should_NotReadRemoteValues_When_CompareValuesIsNotSet', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+      const envPath = await givenEnvFile(`DB_URL=${LOCAL_VALUE}\n`);
+      const provider = givenAwsProvider({
+        '/app/db-url': { status: 'exists' },
+      });
+      givenArgs('validate', '--map', mapPath, '--envfile', envPath);
+
+      // Act
+      await main();
+
+      // Assert
+      expect(provider.getSecret).not.toHaveBeenCalled();
+      expect(allOutput()).not.toContain('matches');
+    });
+
+    it('Should_ReportDiffersWithoutValues_When_LocalAndRemoteValuesDiffer', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({
+        DB_URL: '/app/db-url',
+        API_KEY: '/app/api-key',
+      });
+      const envPath = await givenEnvFile(
+        `DB_URL=${SECRET_LOOKING_VALUE}\nAPI_KEY=${LOCAL_VALUE}\n`,
+      );
+      givenAwsProvider({
+        '/app/db-url': { status: 'exists' },
+        '/app/api-key': { status: 'exists' },
+      });
+      givenArgs(
+        'validate',
+        '--map',
+        mapPath,
+        '--envfile',
+        envPath,
+        '--compare-values',
+      );
+
+      // Act
+      const action = main();
+
+      // Assert
+      await expect(action).rejects.toEqual(new SilentExitError(1));
+      expect(outputOf(logSpy)).toMatch(/✓ DB_URL\s+matches/);
+      expect(outputOf(logSpy)).toMatch(/✗ API_KEY\s+differs/);
+      expect(outputOf(errorSpy)).toContain('✗ Validation failed: 1 differs');
+      expect(allOutput()).not.toContain(SECRET_LOOKING_VALUE);
+      expect(allOutput()).not.toContain(LOCAL_VALUE);
+    });
+
+    it('Should_ExitZero_When_EveryComparedValueMatches', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+      const envPath = await givenEnvFile(`DB_URL=${SECRET_LOOKING_VALUE}\n`);
+      givenAwsProvider({ '/app/db-url': { status: 'exists' } });
+      givenArgs(
+        'validate',
+        '--map',
+        mapPath,
+        '--envfile',
+        envPath,
+        '--compare-values',
+      );
+
+      // Act
+      await main();
+
+      // Assert
+      expect(outputOf(logSpy)).toContain('✓ The 1 compared value matches');
+    });
+
+    it('Should_SkipValueComparison_When_KeyIsMissingRemotely', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({
+        DB_URL: '/app/db-url',
+        API_KEY: '/app/api-key',
+      });
+      const envPath = await givenEnvFile(
+        `DB_URL=${SECRET_LOOKING_VALUE}\nAPI_KEY=${LOCAL_VALUE}\n`,
+      );
+      const provider = givenAwsProvider({
+        '/app/db-url': { status: 'exists' },
+        '/app/api-key': { status: 'missing' },
+      });
+      givenArgs(
+        'validate',
+        '--map',
+        mapPath,
+        '--envfile',
+        envPath,
+        '--compare-values',
+      );
+
+      // Act
+      const action = main();
+
+      // Assert
+      await expect(action).rejects.toEqual(new SilentExitError(1));
+      expect(provider.getSecret).toHaveBeenCalledTimes(1);
+      expect(provider.getSecret).toHaveBeenCalledWith('/app/db-url');
+    });
+
+    it.each([
+      [
+        'without --envfile',
+        ['--compare-values'],
+        '--compare-values requires --envfile',
+      ],
+      [
+        'with --offline',
+        ['--compare-values', '--offline', '--envfile', '.env'],
+        '--compare-values cannot be used with --offline',
+      ],
+    ])(
+      'Should_RejectCompareValues_When_EnvFileIsMissingOrOffline (%s)',
+      async (_, flags, expected) => {
+        // Arrange
+        const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
+        givenAwsProvider({ '/app/db-url': { status: 'exists' } });
+        givenArgs('validate', '--map', mapPath, ...flags);
+
+        // Act
+        const action = main();
+
+        // Assert
+        await expect(action).rejects.toEqual(new SilentExitError(1));
+        expect(outputOf(errorSpy)).toContain(expected);
+        expect(createAwsSecretProvider).not.toHaveBeenCalled();
+      },
+    );
+  });
 });

@@ -1,6 +1,9 @@
 import * as dotenv from 'dotenv';
 import { describe, expect, it } from 'vitest';
-import { parseEnvFile } from '../../../../../src/envilder/core/infrastructure/variableStore/EnvFileParser';
+import {
+  parseEnvFile,
+  parseEnvFileEntries,
+} from '../../../../../src/envilder/core/infrastructure/variableStore/EnvFileParser';
 
 const LINE_SEPARATOR = String.fromCharCode(0x2028);
 
@@ -44,5 +47,35 @@ describe('parseEnvFile', () => {
       'Database/Password': 'fictional value',
       A: '1',
     });
+  });
+});
+
+describe('parseEnvFileEntries', () => {
+  it('Should_KeepEveryAssignmentInOrder_When_KeyRepeats', () => {
+    // Arrange
+    const content = '# heading\n\nA=1\nexport B="two"\nA=3 # again\n';
+
+    // Act
+    const actual = parseEnvFileEntries(content);
+
+    // Assert
+    expect(actual).toEqual([
+      { key: 'A', value: '1' },
+      { key: 'B', value: 'two' },
+      { key: 'A', value: '3' },
+    ]);
+  });
+
+  it('Should_ReadValuesAsParseEnvFileDoes_When_ValuesAreQuotedOrEmpty', () => {
+    // Arrange
+    const content = `A='single'\nB=\nC="line\\nbreak"\nD=\`tick\``;
+
+    // Act
+    const actual = parseEnvFileEntries(content);
+
+    // Assert
+    expect(Object.fromEntries(actual.map((e) => [e.key, e.value]))).toEqual(
+      parseEnvFile(content),
+    );
   });
 });

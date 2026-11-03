@@ -17,6 +17,11 @@
 
 ### Changed
 
+* **Env file reading for `envilder validate`**: the env file parser and file
+  store bundled with the Action can now return every assignment of an env
+  file, repeated keys included, for the CLI's `envilder validate --envfile`.
+  The Action does not use it, and its behavior is unchanged
+  ([#559](https://github.com/macalbert/envilder/issues/559))
 * **`env-file` is optional**: When set, the Action writes the `.env` file as
   before, so existing workflows (which always set it) keep their behavior
 

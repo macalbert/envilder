@@ -5,6 +5,33 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [Unreleased]
+
+### Added
+
+* **`envilder validate --envfile` compares a local env file with the map
+  file**: the env file is read with the parser pull and push use, and its keys
+  are compared with the declared variables. A declared variable absent from
+  the file is reported as `missing from .env` and a key assigned twice as
+  `duplicated in .env`; both fail. A key only in the env file is a
+  `not declared in map file` warning that does not change the exit code.
+  `KEY=` counts as present, and a missing file fails with
+  `Env file not found: <path>`. The check runs before any provider call and
+  also with `--offline`
+  ([#559](https://github.com/macalbert/envilder/issues/559)).
+  [Guide](../validate-command.md)
+* **`envilder validate --compare-values`**: with `--envfile`, each declared
+  variable that is in the env file and exists remotely is reported as
+  `matches` or `differs` (or `unreadable` when its value cannot be read),
+  and any `differs` exits with `1`. Remote values are read through the same
+  resolution path as a pull and dropped right after the comparison; neither
+  value is ever printed. Without `--compare-values` no value is read.
+  `--compare-values` without `--envfile`, or with `--offline`, is rejected
+  before any provider call
+  ([#559](https://github.com/macalbert/envilder/issues/559))
+
+---
+
 ## [0.20.0] - 2026-11-01
 
 ### Added
