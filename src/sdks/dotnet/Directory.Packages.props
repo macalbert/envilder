@@ -9,6 +9,7 @@
     <PackageVersion Include="AWSSDK.SSO" Version="4.0.100.23" />
     <PackageVersion Include="AWSSDK.Signin" Version="4.0.102" />
     <PackageVersion Include="AWSSDK.SSOOIDC" Version="4.0.100.22" />
+    <PackageVersion Include="BouncyCastle.Cryptography" Version="2.7.0" />
   </ItemGroup>
   <ItemGroup Label="Azure">
     <PackageVersion Include="Azure.Identity" Version="1.21.0" />
