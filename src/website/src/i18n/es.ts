@@ -360,6 +360,13 @@ export const es: Translations = {
           'Ejecuta un comando con tus secretos en su entorno, sin escribir un archivo .env: envilder exec [options] [--] <command> [args...]',
       },
       {
+        status: 'done',
+        label: '✅',
+        title: 'Comando validate (envilder validate)',
+        description:
+          'Comprueba el archivo de mapeo y que cada secreto existe antes de un pull o un despliegue, opcionalmente contra un .env local, sin mostrar ningún valor',
+      },
+      {
         status: 'next',
         label: '🐹',
         title: 'Go SDK (envilder)',
@@ -385,13 +392,6 @@ export const es: Translations = {
         label: '🔐',
         title: 'AWS Secrets Manager',
         description: 'Soporte de secretos JSON junto a SSM Parameter Store',
-      },
-      {
-        status: 'planned',
-        label: '✔️',
-        title: 'Modo check/sync (--check)',
-        description:
-          'Valida secretos en la nube vs .env local. Falla CI si están desincronizados',
       },
     ],
   },
@@ -437,6 +437,7 @@ export const es: Translations = {
     linkPullCommand: 'Comando Pull',
     linkPushCommand: 'Comando Push',
     linkExecCommand: 'Comando Exec',
+    linkValidateCommand: 'Comando Validate',
     linkGithubAction: 'GitHub Action',
     linkIssues: 'Incidencias',
     linkDiscussions: 'Discusiones',
@@ -963,6 +964,166 @@ export const es: Translations = {
       guideLink:
         'Guía completa de exec en GitHub: detalles de Windows y todos los mensajes de error',
     },
+    validateReference: {
+      tabAws: 'AWS SSM',
+      tabAzure: 'Azure Key Vault',
+      tabRbac: 'Azure RBAC',
+      tabPolicy: 'Directivas de acceso',
+      prereqTitle: 'Requisitos previos',
+      prereqItems: [
+        'La CLI de envilder. --offline está disponible desde la versión 0.18 y la comprobación de existencia de los secretos desde la 0.20. --envfile, --compare-values y --format json llegan con la próxima versión.',
+        'Un archivo de mapeo. Sin --offline, credenciales del proveedor y los permisos que se detallan en el apartado Permisos.',
+      ],
+      synopsisTitle: 'Sinopsis',
+      synopsisDesc:
+        'Por defecto, validate comprueba el archivo de mapeo y después pregunta al proveedor si existe cada secreto declarado. Con --envfile también compara las claves de un archivo env local con el archivo de mapeo, y con --compare-values compara sus valores con los remotos. Con --offline solo se leen archivos locales: no se llama a ningún proveedor y no hacen falta credenciales de la nube. Nunca muestra ningún valor de secreto.',
+      optionsTitle: 'Opciones',
+      thOption: 'Opción',
+      thDescription: 'Descripción',
+      optOffline: 'Valida el archivo de mapeo en local sin llamar al proveedor',
+      optEnvfile:
+        'Compara las claves de este archivo env con el archivo de mapeo. No se lee si no se indica',
+      optCompareValues:
+        'Compara también cada valor declarado en el archivo env con su valor remoto. Requiere --envfile; no se puede combinar con --offline',
+      optFormat:
+        'text (por defecto) para una salida legible, o json para un único documento JSON en stdout',
+      optMap: 'Archivo de mapeo a comprobar (por defecto: envilder.json)',
+      optProvider: 'aws o azure. Sustituye $config.provider',
+      optProfile: 'Perfil de AWS CLI. Sustituye $config.profile',
+      optVault: 'URL de Azure Key Vault. Sustituye $config.vaultUrl',
+      optionsNote:
+        'Las opciones tienen los mismos nombres, valores por defecto y precedencia que pull y exec: las opciones ganan a $config, y una opción vacía se ignora. Ponlas después de validate; las que se escriben antes se rechazan. Como en push, un valor vacío de --envfile es un error.',
+      optionsRejected:
+        '--compare-values sin --envfile o con --offline, y un --format que no sea text ni json, se rechazan antes de leer ningún archivo o llamar a ningún proveedor.',
+      checksTitle: 'Qué se comprueba',
+      mapTitle: 'El archivo de mapeo (siempre)',
+      mapDesc:
+        'El archivo de mapeo se comprueba primero, con los mismos mensajes que usan pull, push y exec. Se informa de cada problema, no solo del primero, con la clave que lo causa ($config.profile, --vault-url, DB_URL...). Los mensajes nombran claves y tipos, nunca valores mapeados.',
+      mapRules: [
+        'El archivo se analiza como JSON. Un error de análisis indica la ruta y, cuando el analizador la da, la línea y la columna, pero nunca cita el texto de alrededor, porque puede ser un secreto pegado en el archivo.',
+        'El documento cumple el esquema publicado del archivo de mapeo (map-file.v1.json): campos de $config conocidos, nombres de variable válidos y mapeos de tipo string.',
+        'La configuración del proveedor es coherente una vez aplicadas las opciones: aws o azure, profile solo con aws, vaultUrl solo con azure, y azure tiene un vaultUrl.',
+      ],
+      mapNote:
+        'Cuando el archivo de mapeo no es válido, validate se detiene ahí: no se llama a ningún proveedor, con --offline o sin él.',
+      remoteTitle: 'Las claves remotas (sin --offline)',
+      remoteDesc:
+        'Cada ruta de secreto declarada en el archivo de mapeo se comprueba en el proveedor sin leer su valor. Una ruta a la que apuntan varias variables se comprueba una sola vez. Cada variable recibe un estado:',
+      thStatus: 'Estado',
+      thMeaning: 'Significado',
+      statusExists: 'El secreto existe y la identidad puede verlo',
+      statusMissing: 'El proveedor ha respondido que ese secreto no existe',
+      statusDenied:
+        'La identidad no tiene permiso para comprobar el secreto, así que no se sabe si existe. Nunca se informa como missing',
+      statusAuth:
+        'El proveedor ha rechazado las credenciales, o no se ha encontrado ninguna',
+      statusError:
+        'Cualquier otra cosa, por ejemplo un proveedor inaccesible o un nombre de secreto no válido',
+      remoteSsoNote:
+        'Las credenciales de AWS y las sesiones SSO caducadas se informan con el mismo mensaje que pull y exec. En un terminal interactivo, una sesión SSO caducada ofrece ejecutar aws sso login y después vuelve a intentarlo.',
+      envfileTitle: 'Las claves del archivo env (con --envfile)',
+      envfileDesc:
+        'El archivo env se lee con el mismo analizador que usan pull y push, así que los comentarios, export, las comillas y los valores multilínea se comportan igual. Sus claves se comparan con las variables que declara el archivo de mapeo, por el nombre exacto, distinguiendo mayúsculas y minúsculas:',
+      thFinding: 'Hallazgo',
+      thEffect: 'Efecto',
+      envMissing: 'Una variable declarada no está en el archivo env. Falla',
+      envDuplicated: 'Una clave se asigna más de una vez. Falla',
+      envUndeclared:
+        'Una clave solo está en el archivo env. Un aviso que no cambia el código de salida',
+      envfileNote:
+        'KEY= con un valor vacío cuenta como presente, y un archivo env inexistente falla con Env file not found. Esta comprobación solo lee archivos locales, así que se ejecuta antes de cualquier llamada al proveedor y también con --offline. Los valores no se comparan ni se muestran.',
+      valuesTitle: 'Los valores del archivo env (con --compare-values)',
+      valuesDesc:
+        'Para cada variable declarada que está en el archivo env y existe en el proveedor, el valor remoto se lee como lo hace pull y se compara con el local. Cuando una clave se repite, se compara la última asignación, tal como la carga dotenv:',
+      valMatches: 'Los dos valores son idénticos',
+      valDiffers: 'Los dos valores no son idénticos. Falla',
+      valUnreadable:
+        'El secreto existe pero su valor no se ha podido leer, con el motivo del proveedor. Falla',
+      valuesNote:
+        'Ninguno de los dos valores se muestra nunca, y cada valor remoto se descarta justo después de la comparación. Las variables ya informadas como ausentes no se leen. Sin --compare-values no se lee ningún valor.',
+      permTitle: 'Permisos',
+      permDesc:
+        'La comprobación de existencia usa una llamada al proveedor que pull no hace, así que la identidad necesita un permiso más que para un pull. --offline no necesita ninguna credencial.',
+      permAwsDesc:
+        'Las rutas se comprueban con GetParameters, diez por llamada, con WithDecryption: false: los parámetros SecureString nunca se descifran. Es una acción de IAM distinta de la ssm:GetParameter que usa pull, así que añádela a la política, limitada a las mismas rutas:',
+      permAwsNote:
+        'No hace falta el permiso kms:Decrypt. Cuando se deniega una llamada, cada ruta se comprueba por separado, así que access denied solo se informa para las rutas que la identidad no puede leer.',
+      permAzureDesc:
+        'Los nombres de los secretos del vault se listan una vez (solo metadatos) y cada nombre declarado, tras la conversión habitual de / a -, se compara con esa lista sin distinguir mayúsculas. Un secreto deshabilitado se informa como missing, porque pull no puede leerlo. Listar requiere:',
+      permAzureItems: [
+        'Azure RBAC: Microsoft.KeyVault/vaults/secrets/readMetadata/action sobre el vault, incluido en los roles integrados Key Vault Secrets User y Key Vault Reader.',
+        'Directivas de acceso: el permiso de secreto List, además de Get.',
+      ],
+      permAzureNote:
+        'La lista cubre todo el vault, así que una identidad sin este permiso recibe access denied para cada clave, con el motivo que devuelve Key Vault.',
+      permValuesNote:
+        '--compare-values también lee valores, así que necesita los mismos permisos que un pull además de estos.',
+      outputTitle: 'Salida',
+      outputOkDesc: 'Todos los secretos existen (código de salida 0):',
+      outputFailDesc:
+        'Algunos secretos faltan o no se pueden comprobar (código de salida 1; el resumen va a stderr):',
+      outputOfflineDesc: 'Con --offline:',
+      outputEnvfileDesc:
+        'Con --envfile=.env --compare-values (código de salida 1):',
+      outputEnvfileNote:
+        'Cuando todas las variables declaradas están en el archivo env, su bloque termina con ✓ All 3 declared variables are in .env, y cuando todos los valores comparados coinciden, el bloque de valores termina con ✓ All 2 values match.',
+      outputInvalidDesc: 'Un archivo de mapeo no válido, en stderr:',
+      jsonTitle: 'Salida JSON (--format json)',
+      jsonDesc:
+        'Con --format=json, validate escribe exactamente un documento JSON en stdout y nada más, sea cual sea el resultado. Los logs, el banner de identidad de AWS, los avisos, los errores y la solicitud de inicio de sesión SSO van a stderr, así que stdout se puede pasar a jq o guardar como artefacto de CI. Los códigos de salida son los mismos que con la salida de texto. Los errores de opciones como --format=yaml se informan en stderr antes de ejecutar nada, sin documento.',
+      thField: 'Campo',
+      fieldValid: 'true exactamente cuando el código de salida es 0',
+      fieldOffline: 'true con --offline',
+      fieldMapFile:
+        'path, valid y errors (un { key, message } por problema, con los mismos mensajes que la salida de texto). null cuando el archivo de mapeo no se ha podido leer',
+      fieldKeys:
+        'Una entrada por variable declarada, en el orden del archivo de mapeo: name, provider, path, status y, cuando el proveedor da uno, reason. status es exists, missing, access_denied, authentication_failed o provider_error. null cuando no se han comprobado los secretos',
+      fieldEnvFile:
+        'null sin --envfile. Si no, path, valid, keys (cada variable declarada con status present o missing, y value matches, differs o unreadable con --compare-values), duplicates ({ name, count }) y undeclared',
+      fieldError:
+        'null, o { message } cuando la ejecución se ha detenido antes de terminar todas las comprobaciones (credenciales caducadas, un archivo env inexistente, un inicio de sesión SSO rechazado). Las secciones completadas antes siguen llenas',
+      jsonNote:
+        'El documento nunca contiene ningún valor de secreto, ni local ni remoto. Una sección puede ganar campos en versiones futuras; los campos existentes mantienen su significado.',
+      exitTitle: 'Códigos de salida',
+      thCode: 'Código',
+      exit0:
+        'El archivo de mapeo es válido; sin --offline, cada secreto declarado existe; con --envfile, cada variable declarada está en el archivo env exactamente una vez; con --compare-values, cada valor comparado coincide. Las claves que solo están en el archivo env no lo cambian',
+      exit1:
+        'Cualquier otra cosa: archivo de mapeo ausente o no válido, opciones no válidas, un secreto que falta o no se puede comprobar, credenciales ausentes o caducadas, o un archivo env que no existe, no tiene una variable declarada, repite una clave o tiene un valor que difiere o no se puede comparar',
+      ciTitle: 'En CI',
+      ciDesc:
+        'Ejecuta la comprobación offline en cada pull request, también desde forks, porque no necesita credenciales de la nube. Ejecuta la comprobación de existencia donde el job tenga las mismas credenciales que un pull, más los permisos de esta página:',
+      ciEnvExample:
+        'Para comprobar sin credenciales que un .env.example versionado declara cada variable, añade --offline --envfile=.env.example al primer paso.',
+      ciJsonDesc:
+        'Para conservar el resultado para pasos posteriores u otras herramientas, usa la salida JSON. El paso sigue fallando cuando la validación falla:',
+      ciNote:
+        'validate sale con 1 ante cualquier error, así que puede bloquear un paso de despliegue antes de que se ejecute pull o envilder exec.',
+      sdkTitle: 'Desde los SDK',
+      sdkDesc:
+        'Los SDK de .NET, Python y Node.js (versión 1.1 o posterior) ejecutan la misma comprobación del archivo de mapeo y de existencia de claves desde el código de la aplicación, con los mismos estados, sin la comparación del archivo env:',
+      thSdk: 'SDK',
+      thCheck: 'Comprobación que devuelve un resultado',
+      thLoad: 'Hacer fallar la carga si no pasa',
+      sdkNote:
+        'La validación del contrato es distinta de la validación de secretos: comprueba el archivo de mapeo y que cada secreto existe antes de cargar, mientras que la validación de secretos comprueba que los valores ya resueltos no estén vacíos.',
+      limitsTitle: 'Qué no hace validate',
+      limitsItems: [
+        'Nunca muestra valores de secretos, y solo los lee con --compare-values.',
+        'Con --offline no comprueba que los secretos existan ni que las credenciales puedan leerlos.',
+        'No corrige el archivo env: informa de lo que hay que cambiar.',
+        'No comprueba la forma de los valores (tipos, URL, longitud).',
+      ],
+      relatedTitle: 'Páginas relacionadas',
+      relatedMap:
+        'Referencia del archivo de mapeo: campos de $config y reglas de validación',
+      relatedPull: 'Modo pull: escribe los secretos en un archivo .env',
+      relatedExec:
+        'Modo exec: ejecuta un comando con los secretos en su entorno',
+      relatedGha: 'GitHub Action: carga los secretos en un workflow con OIDC',
+      guideLink:
+        'Guía completa de validate en GitHub: cada comprobación, mensaje y campo JSON',
+    },
     title: 'Docs Envilder: secretos con AWS SSM y Azure Key Vault',
     description:
       'Aprende a resolver variables de entorno desde AWS SSM Parameter Store y Azure Key Vault con la CLI, GitHub Action y SDKs de runtime de Envilder.',
@@ -1078,6 +1239,20 @@ export const es: Translations = {
         cardTitle: 'Comando CLI exec',
         cardSummary:
           'Arranca un comando con los secretos mapeados en memoria, sin archivo .env.',
+      },
+      'cli-validate': {
+        title:
+          'envilder validate: comprueba un archivo de mapeo y sus secretos de AWS SSM o Azure Key Vault',
+        description:
+          'Referencia de envilder validate: comprobaciones del archivo de mapeo, --offline, estados de las claves remotas, --envfile y --compare-values, salida JSON, códigos de salida y los permisos de IAM y Key Vault que necesita.',
+        heading: 'Referencia de envilder validate',
+        intro:
+          '¿Cómo sabes que un archivo de mapeo funcionará antes de un pull, un despliegue o envilder exec? envilder validate comprueba que el archivo de mapeo es válido y que cada secreto declarado existe en AWS SSM o Azure Key Vault, y puede compararlo con un archivo .env local. Nunca muestra ningún valor de secreto y sale con 1 cuando algo falla, así que encaja como paso de CI.',
+        breadcrumb: 'CLI validate',
+        navLabel: 'CLI validate',
+        cardTitle: 'Comando validate de la CLI',
+        cardSummary:
+          'Comprueba el archivo de mapeo y que cada secreto existe, sin mostrar valores.',
       },
       'github-action': {
         title: 'Carga secretos de AWS SSM y Azure Key Vault en GitHub Actions',
@@ -1572,6 +1747,8 @@ export const es: Translations = {
       'Comprueba, sin cargar nada ni leer ningún valor, que el fichero de mapeo es válido y que cada secreto declarado existe con las credenciales actuales: la misma comprobación que envilder validate. Los errores de validación esperados se devuelven en el resultado en lugar de lanzarse; un fichero de mapeo inexistente sí lanza un error. Cada clave informa exists, missing, access_denied, authentication_failed o provider_error:',
     sdkContractValidationLoadDesc:
       'Para que la carga falle, activa la validación del contrato en el builder. La comprobación se ejecuta una vez antes de resolver y el error nombra las claves que fallan, nunca sus valores. Está desactivada por defecto, así que una carga normal no hace ninguna llamada extra al proveedor. A diferencia de la validación de secretos, que revisa los valores resueltos, revisa el fichero de mapeo y las claves antes de resolver:',
+    sdkContractValidationCliLink:
+      'Consulta la referencia de envilder validate para los estados y los permisos que necesita la comprobación →',
     sdkNodejsFullDocs: 'Documentación completa →',
     sdkNodejsExamplesDesc:
       'Un proyecto Vitest con Testcontainers y un AppHost de Aspire en TypeScript que resuelven un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack y Lowkey Vault) y pasan los valores a los contenedores, sin ningún archivo .env:',

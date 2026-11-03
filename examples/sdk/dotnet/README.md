@@ -27,9 +27,11 @@ All commands from the **`examples/sdk/dotnet/`** directory:
 | `1_configuration.cs`   | Use as `IConfiguration` source           | `dotnet run 1_configuration.cs`  |
 | `2_fluent.cs`          | Fluent builder with provider overrides   | `dotnet run 2_fluent.cs`         |
 | `3_env_routing.cs`     | Environment-based map file routing       | `dotnet run 3_env_routing.cs`    |
-| `4_validation.cs`      | Fail fast on missing secrets             | `dotnet run 4_validation.cs`     |
+| `4_validation.cs`      | Check contract before, values after load | `dotnet run 4_validation.cs`     |
 | `5_load.cs`            | Resolve + inject into env vars           | `dotnet run 5_load.cs`           |
 | `6_resolve.cs`         | Resolve secrets without injecting        | `dotnet run 6_resolve.cs`        |
+
+`4_validation.cs` shows the two validation checks. `ValidateContractAsync()` / `WithContractValidation()` checks, before loading and without reading any value, that the map file is valid and that every declared secret exists: the same check as [`envilder validate`](https://envilder.com/docs/cli/validate/). It needs `ssm:GetParameters` on AWS. `ValidateSecrets()` runs after a load and checks that every resolved value is non-empty.
 
 ```bash
 cd examples/sdk/dotnet

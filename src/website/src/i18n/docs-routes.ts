@@ -7,6 +7,7 @@ export const docsRouteKeys = [
   'cli-pull',
   'cli-push',
   'cli-exec',
+  'cli-validate',
   'github-action',
   'sdk-dotnet',
   'sdk-python',
@@ -69,6 +70,12 @@ export const docsRouteManifest = [
   {
     key: 'cli-exec',
     path: '/docs/cli/exec/',
+    navGroup: 'cli',
+    legacyHashes: [],
+  },
+  {
+    key: 'cli-validate',
+    path: '/docs/cli/validate/',
     navGroup: 'cli',
     legacyHashes: [],
   },

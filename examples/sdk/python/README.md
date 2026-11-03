@@ -25,9 +25,11 @@ All commands from the **`examples/sdk/python/`** directory:
 |--------------------|------------------------------------------|-------------------------------|
 | `1_fluent.py`      | Fluent builder with provider overrides   | `uv run 1_fluent.py`          |
 | `2_env_routing.py` | Pick map file by environment             | `uv run 2_env_routing.py`     |
-| `3_validation.py`  | Fail fast on missing secrets             | `uv run 3_validation.py`      |
+| `3_validation.py`  | Check contract before, values after load | `uv run 3_validation.py`      |
 | `4_load.py`        | Load + inject into `os.environ`          | `uv run 4_load.py`            |
 | `5_resolve.py`     | Resolve without injecting                | `uv run 5_resolve.py`         |
+
+`3_validation.py` shows the two validation checks. `validate_contract()` / `with_contract_validation()` checks, before loading and without reading any value, that the map file is valid and that every declared secret exists: the same check as [`envilder validate`](https://envilder.com/docs/cli/validate/). It needs `ssm:GetParameters` on AWS. `validate_secrets()` runs after a load and checks that every resolved value is non-empty.
 
 ```bash
 cd examples/sdk/python
