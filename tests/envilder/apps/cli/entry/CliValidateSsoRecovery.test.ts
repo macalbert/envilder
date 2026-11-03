@@ -57,6 +57,7 @@ async function runCli(args: string[]): Promise<number> {
 describe('Cli validate SSO recovery prompt with --format json', () => {
   const originalStdoutIsTTY = process.stdout.isTTY;
   const originalStdinIsTTY = process.stdin.isTTY;
+  const originalStderrIsTTY = process.stderr.isTTY;
   let workDir: string;
   let mapPath: string;
   let stdoutChunks: string[];
@@ -70,7 +71,7 @@ describe('Cli validate SSO recovery prompt with --format json', () => {
       mapPath,
       JSON.stringify({ $config: { profile: 'dev' }, DB_URL: '/app/db-url' }),
     );
-    for (const stream of [process.stdout, process.stdin]) {
+    for (const stream of [process.stdout, process.stdin, process.stderr]) {
       Object.defineProperty(stream, 'isTTY', {
         value: true,
         configurable: true,
@@ -110,6 +111,10 @@ describe('Cli validate SSO recovery prompt with --format json', () => {
       value: originalStdinIsTTY,
       configurable: true,
     });
+    Object.defineProperty(process.stderr, 'isTTY', {
+      value: originalStderrIsTTY,
+      configurable: true,
+    });
     vi.restoreAllMocks();
     await rm(workDir, { recursive: true, force: true });
   });
@@ -142,6 +147,30 @@ describe('Cli validate SSO recovery prompt with --format json', () => {
       valid: true,
       keys: [{ name: 'DB_URL', status: 'exists' }],
     });
+  });
+
+  it('Should_PromptOnStderr_When_JsonStdoutIsRedirected', async () => {
+    // Arrange
+    Object.defineProperty(process.stdout, 'isTTY', {
+      value: false,
+      configurable: true,
+    });
+
+    // Act
+    const actual = await runCli([
+      'validate',
+      '--map',
+      mapPath,
+      '--format',
+      'json',
+    ]);
+
+    // Assert
+    expect(actual).toBe(0);
+    expect(strip(stderrChunks.join(''))).toContain(
+      "Run 'aws sso login --profile dev' now? [y/N]",
+    );
+    expect(JSON.parse(stdoutChunks.join(''))).toMatchObject({ valid: true });
   });
 
   it('Should_PrintErrorAsJson_When_SsoLoginIsDeclined', async () => {

@@ -647,6 +647,9 @@ function jsonOutput(results: ValidationResults): ValidationOutput {
   return {
     logger: new StderrConsoleLogger(),
     ssoRecovery: {
+      // The prompt is on stderr, so stdout may be redirected to a file.
+      isInteractive: () =>
+        Boolean(process.stdin.isTTY) && Boolean(process.stderr.isTTY),
       confirm: createConfirm(process.stderr),
       runLogin: createRunLogin({ stdout: 'stderr' }),
     },
