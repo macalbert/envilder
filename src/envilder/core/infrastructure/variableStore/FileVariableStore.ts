@@ -1,5 +1,6 @@
 import * as fs from 'node:fs/promises';
 import { inject, injectable } from 'inversify';
+import type { EnvFileEntry } from '../../domain/EnvFileComparison.js';
 import {
   invalidEnvironmentVariableNameMessage,
   isPortableEnvFileName,
@@ -18,7 +19,7 @@ import type {
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
 import { TYPES } from '../../types.js';
-import { parseEnvFile } from './EnvFileParser.js';
+import { parseEnvFile, parseEnvFileEntries } from './EnvFileParser.js';
 
 /** The delimiters dotenv recognizes for quoting a `.env` value. */
 const ENV_QUOTES = ["'", '"', '`'] as const;
@@ -210,6 +211,17 @@ export class FileVariableStore implements IVariableStore {
     Object.assign(envVariables, parsedEnv);
 
     return envVariables;
+  }
+
+  async readEnvironmentEntries(source: string): Promise<EnvFileEntry[] | null> {
+    try {
+      return parseEnvFileEntries(await fs.readFile(source, 'utf-8'));
+    } catch (error) {
+      if (isErrnoCode(error, 'ENOENT')) {
+        return null;
+      }
+      throw new EnvironmentFileError(`Failed to read env file: ${source}`);
+    }
   }
 
   async saveEnvironment(

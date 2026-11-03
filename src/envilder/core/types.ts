@@ -21,6 +21,12 @@ export const APPLICATION = {
   ValidateRemoteKeysCommandHandler: Symbol.for(
     'ValidateRemoteKeysCommandHandler',
   ),
+  ValidateEnvFileKeysCommandHandler: Symbol.for(
+    'ValidateEnvFileKeysCommandHandler',
+  ),
+  CompareEnvFileValuesCommandHandler: Symbol.for(
+    'CompareEnvFileValuesCommandHandler',
+  ),
 };
 
 export const INFRASTRUCTURE = {

@@ -1,3 +1,5 @@
+import type { EnvFileEntry } from '../../domain/EnvFileComparison.js';
+
 /**
  * dotenv's `LINE` grammar and `parse`, copied from dotenv 17 with two changes.
  * The key class also admits `/`, the hierarchy separator map files use
@@ -21,6 +23,20 @@ export function parseEnvFile(src: string): Record<string, string> {
   // A plain object on purpose, as in dotenv: `__proto__` must vanish here too,
   // which is why the name rule rejects it.
   const obj: Record<string, string> = {};
+  for (const { key, value } of parseEnvFileEntries(src)) {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+/**
+ * Every assignment of an env file in file order, with the values
+ * {@link parseEnvFile} reads. A repeated key appears once per assignment,
+ * where `parseEnvFile` keeps only the last one.
+ */
+export function parseEnvFileEntries(src: string): EnvFileEntry[] {
+  const entries: EnvFileEntry[] = [];
   const lines = src.replace(/\r\n?/gm, '\n');
 
   for (const match of lines.matchAll(LINE)) {
@@ -31,8 +47,8 @@ export function parseEnvFile(src: string): Record<string, string> {
     if (maybeQuote === '"') {
       value = value.replace(/\\n/g, '\n').replace(/\\r/g, '\r');
     }
-    obj[key] = value;
+    entries.push({ key, value });
   }
 
-  return obj;
+  return entries;
 }

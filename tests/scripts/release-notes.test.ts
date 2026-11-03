@@ -371,10 +371,11 @@ describe('release-notes CLI --dry-run', () => {
   const script = fileURLToPath(
     new URL('../../scripts/release-notes.mjs', import.meta.url),
   );
+  // The first released version: an `[Unreleased]` section may come first.
   const latestCliVersion = readFileSync(
     fileURLToPath(new URL('../../docs/changelogs/cli.md', import.meta.url)),
     'utf-8',
-  ).match(/^## \[([^\]]+)\]/m)?.[1] as string;
+  ).match(/^## \[(\d[^\]]*)\]/m)?.[1] as string;
 
   it('Should_RenderWithoutCallingGitHubOrWritingOutputs_When_DryRun', () => {
     // Arrange

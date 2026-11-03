@@ -12,21 +12,28 @@ envilder validate
 envilder validate --map=config/envilder.json --profile=dev
 envilder validate --provider=azure --vault-url=https://my-vault.vault.azure.net
 envilder validate --offline
+envilder validate --envfile=.env
+envilder validate --envfile=.env --compare-values
 ```
 
 By default, `validate` checks the map file and then asks the provider whether
-each declared secret exists. With `--offline`, only the map file is read: no
+each declared secret exists. With `--envfile`, it also compares the keys of a
+local env file with the variables the map file declares, and with
+`--compare-values` their values with the remote ones, printing only
+`matches` or `differs`. With `--offline`, only local files are read: no
 provider is called and no cloud credentials are needed.
 
 ## Usage
 
 ```text
-envilder validate [--offline] [--map <path>] [--provider <name>] [--profile <name>] [--vault-url <url>]
+envilder validate [--offline] [--envfile <path> [--compare-values]] [--map <path>] [--provider <name>] [--profile <name>] [--vault-url <url>]
 ```
 
 | Option | Description |
 |--------|-------------|
 | `--offline` | Validate the map file locally without calling the provider |
+| `--envfile <path>` | Compare the keys of this env file with the map file. Not read unless given |
+| `--compare-values` | Also compare each declared value in the env file with its remote value. Requires `--envfile`; cannot be combined with `--offline` |
 | `--map <path>` | Map file to check. Defaults to `envilder.json` in the current directory, as for pull and `exec` |
 | `--provider <name>` | Provider to check against: `aws` or `azure`. Overrides `$config.provider` |
 | `--profile <name>` | AWS CLI profile. Overrides `$config.profile` |
@@ -34,7 +41,12 @@ envilder validate [--offline] [--map <path>] [--provider <name>] [--profile <nam
 
 The options have the same names, defaults and precedence as pull and `exec`:
 flags take precedence over `$config`, and an empty flag is ignored. Put them
-after `validate`; options written before it are rejected.
+after `validate`; options written before it are rejected. `--envfile` keeps
+the name pull and push use, but `validate` only reads an env file when it is
+given. As in push, an empty `--envfile` value is an error rather than ignored.
+
+`--compare-values` without `--envfile`, or together with `--offline`, is
+rejected before any file is read or any provider is called.
 
 ## What is checked
 
@@ -85,6 +97,43 @@ variable gets one of these statuses:
 Expired AWS credentials and expired AWS SSO sessions are reported with the
 same message as pull and `exec`. On an interactive terminal, an expired SSO
 session offers to run `aws sso login` and then retries, as pull does.
+
+### The env file keys (with `--envfile`)
+
+The env file is read with the same parser pull and push use, so comments,
+blank lines, `export`, quotes and multiline quoted values are handled the
+same way. Its keys are compared with the variables the map file declares, by
+exact name (case-sensitive):
+
+| Finding | Effect |
+|---------|--------|
+| A declared variable is absent from the env file | `missing from .env`, fails |
+| A key is assigned more than once | `duplicated in .env`, fails |
+| A key is only in the env file | `not declared in map file`, a warning that does not change the exit code |
+
+`KEY=` with an empty value counts as present. A missing env file fails with
+`Env file not found: <path>`. This check reads local files only: it runs
+before any provider call, and with `--offline` too. Values are read by the
+parser but neither compared nor printed.
+
+### The env file values (with `--compare-values`)
+
+For every declared variable that is both in the env file and `exists` in the
+provider, the remote value is read with the same resolution path pull uses
+and compared with the env file value. When a key repeats, the last assignment
+is compared, as dotenv loads it. A remote secret with an empty value matches
+`KEY=`. Each variable is reported as:
+
+| Status | Meaning |
+|--------|---------|
+| `matches` | The two values are identical |
+| `differs` | The two values are not identical. Fails |
+| `unreadable` | The secret exists but its value could not be read, with the provider's reason. Fails |
+
+Neither value is ever printed, and each remote value is dropped right after
+the comparison. Variables already reported as missing (from the env file or
+the provider) are not read. Reading values needs the same permissions as a pull, on top of the ones the
+existence check needs. Without `--compare-values`, no value is read.
 
 #### AWS SSM Parameter Store
 
@@ -160,6 +209,27 @@ With `--offline`:
   Remote validation skipped (--offline): no provider was called, so the secrets were not checked.
 ```
 
+With `--envfile=.env --compare-values` (exit code `1`):
+
+```text
+✓ Map file valid: envilder.json
+Checking env file .env
+  ✗ TOKEN  missing from .env
+  ⚠ DEBUG  not declared in map file
+Checking 3 secrets in aws, profile=dev
+  ✓ DB_URL   /myapp/db-url   exists
+  ✓ API_KEY  /myapp/api-key  exists
+  ✓ TOKEN    /myapp/token    exists
+Comparing 2 values with aws, profile=dev
+  ✓ DB_URL   matches
+  ✗ API_KEY  differs
+✗ Validation failed: 1 missing from .env, 1 differs
+```
+
+When every declared variable is in the env file, the env file block ends with
+`✓ All 3 declared variables are in .env`, and when every compared value
+matches, the values block ends with `✓ All 2 values match`.
+
 An invalid map file, on stderr:
 
 ```text
@@ -173,8 +243,8 @@ An invalid map file, on stderr:
 
 | Code | Meaning |
 |------|---------|
-| `0` | The map file is valid and, without `--offline`, every declared secret exists |
-| `1` | Anything else: the map file is missing, is not valid JSON, breaks the schema or the provider rules, the options are invalid, a secret is missing or cannot be checked, or the credentials are missing or expired |
+| `0` | The map file is valid; without `--offline`, every declared secret exists; with `--envfile`, every declared variable is in the env file exactly once; with `--compare-values`, every compared value matches. Variables only in the env file are warnings and do not change it |
+| `1` | Anything else: the map file is missing, is not valid JSON, breaks the schema or the provider rules, the options are invalid, a secret is missing or cannot be checked, the credentials are missing or expired, or the env file is missing, lacks a declared variable, repeats a key, or holds a value that differs or cannot be compared |
 
 ## In CI
 
@@ -186,13 +256,18 @@ An invalid map file, on stderr:
   run: npx envilder validate --map=envilder.json
 ```
 
+To check that a committed `.env.example` declares every variable without
+credentials, add `--offline --envfile=.env.example` to the first step.
+
 The offline step needs no cloud credentials, so it can run on every pull
 request, including from forks. The second step needs the same credentials as
 a pull, plus the permissions listed above.
 
 ## What validate does not do
 
-- It does not read, compare or print secret values.
+- It never prints secret values, and it reads them only with
+  `--compare-values`.
 - In `--offline` mode it does not check that the secrets exist or that the
   credentials can read them.
+- It does not fix the env file: it reports what to change.
 - It does not check what the values look like (types, URLs, length).

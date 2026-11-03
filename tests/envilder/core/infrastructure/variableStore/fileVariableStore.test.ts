@@ -1495,6 +1495,44 @@ describe('FileVariableStore', () => {
     });
   });
 
+  describe('readEnvironmentEntries', () => {
+    it('Should_ReturnEveryAssignment_When_EnvFileExists', async () => {
+      // Arrange
+      mockInMemoryFiles.set(mockEnvFilePath, '# comment\nA=1\nB=\nA="2"\n');
+
+      // Act
+      const actual = await sut.readEnvironmentEntries(mockEnvFilePath);
+
+      // Assert
+      expect(actual).toEqual([
+        { key: 'A', value: '1' },
+        { key: 'B', value: '' },
+        { key: 'A', value: '2' },
+      ]);
+    });
+
+    it('Should_ReturnNull_When_EnvFileDoesNotExist', async () => {
+      // Act
+      const actual = await sut.readEnvironmentEntries('./tests/missing.env');
+
+      // Assert
+      expect(actual).toBeNull();
+    });
+
+    it('Should_ThrowEnvironmentFileError_When_EnvFileCannotBeRead', async () => {
+      // Arrange
+      vi.mocked(fs.readFile).mockRejectedValueOnce(new Error('EACCES'));
+
+      // Act
+      const action = sut.readEnvironmentEntries(mockEnvFilePath);
+
+      // Assert
+      await expect(action).rejects.toThrow(
+        new EnvironmentFileError(`Failed to read env file: ${mockEnvFilePath}`),
+      );
+    });
+  });
+
   describe('getParsedMapping', () => {
     it.each([
       '   ',

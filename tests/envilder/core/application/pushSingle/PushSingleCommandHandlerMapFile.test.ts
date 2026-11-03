@@ -42,6 +42,7 @@ describe('PushSingleCommandHandler map file update', () => {
       getMapping: vi.fn(),
       getParsedMapping: vi.fn(),
       getEnvironment: vi.fn(),
+      readEnvironmentEntries: vi.fn(),
       saveEnvironment: vi.fn(),
       readMapFileContent: vi.fn(async () => null),
       writeMapFileContent: vi.fn(async (): Promise<void> => {}),

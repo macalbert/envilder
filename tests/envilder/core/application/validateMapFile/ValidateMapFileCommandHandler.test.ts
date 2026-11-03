@@ -17,6 +17,7 @@ describe('ValidateMapFileCommandHandler', () => {
       getMapping: vi.fn(),
       getParsedMapping: vi.fn(),
       getEnvironment: vi.fn(),
+      readEnvironmentEntries: vi.fn(),
       saveEnvironment: vi.fn(),
       readMapFileContent: vi.fn(),
       writeMapFileContent: vi.fn(),

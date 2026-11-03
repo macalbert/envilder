@@ -1,5 +1,7 @@
 import { Container } from 'inversify';
 import { ExecWithSecretsCommandHandler } from '../../core/application/execWithSecrets/ExecWithSecretsCommandHandler.js';
+import { CompareEnvFileValuesCommandHandler } from '../../core/application/validateEnvFile/CompareEnvFileValuesCommandHandler.js';
+import { ValidateEnvFileKeysCommandHandler } from '../../core/application/validateEnvFile/ValidateEnvFileKeysCommandHandler.js';
 import { ValidateMapFileCommandHandler } from '../../core/application/validateMapFile/ValidateMapFileCommandHandler.js';
 import { ValidateRemoteKeysCommandHandler } from '../../core/application/validateRemoteKeys/ValidateRemoteKeysCommandHandler.js';
 import type { MapFileConfig } from '../../core/domain/MapFileConfig.js';
@@ -61,9 +63,9 @@ export class Startup {
   }
 
   /**
-   * Wires `envilder validate --offline`: the map file is read and checked
-   * locally, so no secret provider is bound. Use it instead of
-   * `configureServices` and `configureInfrastructure`.
+   * Wires the local part of `envilder validate`: the map file and the env
+   * file keys are read and checked locally, so no secret provider is bound.
+   * Use it instead of `configureServices` and `configureInfrastructure`.
    */
   configureOfflineValidation(): this {
     this.container
@@ -78,12 +80,19 @@ export class Startup {
       .bind<ValidateMapFileCommandHandler>(TYPES.ValidateMapFileCommandHandler)
       .to(ValidateMapFileCommandHandler)
       .inTransientScope();
+    this.container
+      .bind<ValidateEnvFileKeysCommandHandler>(
+        TYPES.ValidateEnvFileKeysCommandHandler,
+      )
+      .to(ValidateEnvFileKeysCommandHandler)
+      .inTransientScope();
     return this;
   }
 
   /**
    * Wires the remote part of `envilder validate`, which checks that each
-   * declared secret exists. Call `configureInfrastructure` afterwards to bind
+   * declared secret exists and, with `--compare-values`, compares remote
+   * values with the env file. Call `configureInfrastructure` afterwards to bind
    * the secret provider, the logger and the variable store.
    */
   configureRemoteValidation(): this {
@@ -92,6 +101,12 @@ export class Startup {
         TYPES.ValidateRemoteKeysCommandHandler,
       )
       .to(ValidateRemoteKeysCommandHandler)
+      .inTransientScope();
+    this.container
+      .bind<CompareEnvFileValuesCommandHandler>(
+        TYPES.CompareEnvFileValuesCommandHandler,
+      )
+      .to(CompareEnvFileValuesCommandHandler)
       .inTransientScope();
     return this;
   }

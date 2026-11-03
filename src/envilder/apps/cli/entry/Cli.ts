@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { existsSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command, CommanderError, Option } from 'commander';
 import type { Container } from 'inversify';
@@ -11,11 +11,21 @@ import {
   formatArgument,
   formatProgram,
 } from '../../../core/application/execWithSecrets/CommandLineFormatter.js';
+import { CompareEnvFileValuesCommand } from '../../../core/application/validateEnvFile/CompareEnvFileValuesCommand.js';
+import type { CompareEnvFileValuesCommandHandler } from '../../../core/application/validateEnvFile/CompareEnvFileValuesCommandHandler.js';
+import { ValidateEnvFileKeysCommand } from '../../../core/application/validateEnvFile/ValidateEnvFileKeysCommand.js';
+import type { ValidateEnvFileKeysCommandHandler } from '../../../core/application/validateEnvFile/ValidateEnvFileKeysCommandHandler.js';
 import { ValidateMapFileCommand } from '../../../core/application/validateMapFile/ValidateMapFileCommand.js';
 import type { ValidateMapFileCommandHandler } from '../../../core/application/validateMapFile/ValidateMapFileCommandHandler.js';
 import { ValidateRemoteKeysCommand } from '../../../core/application/validateRemoteKeys/ValidateRemoteKeysCommand.js';
 import type { ValidateRemoteKeysCommandHandler } from '../../../core/application/validateRemoteKeys/ValidateRemoteKeysCommandHandler.js';
 import type { CliOptions } from '../../../core/domain/CliOptions.js';
+import {
+  type EnvFileKeyComparison,
+  type EnvValueCheck,
+  summarizeEnvFileFailures,
+  summarizeValueFailures,
+} from '../../../core/domain/EnvFileComparison.js';
 import {
   EXEC_COMMAND_NOT_EXECUTABLE,
   EXEC_COMMAND_NOT_FOUND,
@@ -64,6 +74,8 @@ const EXEC_USAGE = 'envilder exec [options] [--] <command> [args...]';
 
 type ValidateOptions = {
   offline?: boolean;
+  envfile?: string;
+  compareValues?: boolean;
   map?: string;
   profile?: string;
   provider?: string;
@@ -446,12 +458,24 @@ function registerValidateCommand(program: Command): void {
         'exists in the provider with the current credentials. Every problem ' +
         'is reported with the key that causes it. Secret values are never ' +
         'read or printed.\n\n' +
-        'With --offline nothing but the map file is read: no provider is ' +
+        'With --envfile the keys of a local env file are compared with the ' +
+        'variables the map file declares. With --compare-values each ' +
+        'declared value is also compared with its remote value, and only ' +
+        '"matches" or "differs" is printed.\n\n' +
+        'With --offline nothing but local files is read: no provider is ' +
         'called and no credentials are needed.',
     )
     .option(
       '--offline',
       'Validate the map file locally without calling the provider',
+    )
+    .option(
+      '--envfile <path>',
+      'Compare the keys of this env file with the map file',
+    )
+    .option(
+      '--compare-values',
+      'Also compare env file values with remote values (requires --envfile)',
     )
     .option(
       '--map <path>',
@@ -471,6 +495,7 @@ function registerValidateCommand(program: Command): void {
       rejectRootOptionsBeforeValidate(
         (validateCommand.parent?.opts() ?? {}) as ExecOptions,
       );
+      rejectInvalidValidateOptions(options);
       if (options.offline) {
         await runOfflineValidation(options);
         return;
@@ -491,11 +516,19 @@ Examples:
   envilder validate --map=config/envilder.json --profile=dev
   envilder validate --provider=azure --vault-url=https://my-vault.vault.azure.net
   envilder validate --offline
+  envilder validate --envfile=.env
+  envilder validate --envfile=.env --compare-values
+  envilder validate --offline --envfile=.env
 
 Exit codes:
-  0  the map file is valid and every declared secret exists
+  0  the map file is valid, every declared secret exists and, with
+     --envfile, every declared variable is in the env file once (with
+     --compare-values, with the remote value)
   1  the map file or the options are not valid, a secret is missing or
-     cannot be checked, or the credentials are missing or expired
+     cannot be checked, the credentials are missing or expired, or the env
+     file is missing, lacks a declared variable, repeats a key or holds a
+     value that differs
+Variables only in the env file are warnings and do not change the exit code.
 
 See docs/validate-command.md.`;
 
@@ -519,14 +552,129 @@ function rejectRootOptionsBeforeValidate(rootOptions: ExecOptions): void {
   throw new SilentExitError(1);
 }
 
+/**
+ * Rejects option combinations that cannot be honoured, before any file is
+ * read or any provider is called.
+ */
+function rejectInvalidValidateOptions(options: ValidateOptions): void {
+  if (!options.compareValues) {
+    return;
+  }
+  const problem =
+    options.envfile === undefined
+      ? '--compare-values requires --envfile.'
+      : options.offline
+        ? '--compare-values cannot be used with --offline: comparing ' +
+          'values reads them from the provider.'
+        : undefined;
+  if (problem !== undefined) {
+    console.error(pc.red(`error: ${problem}`));
+    throw new SilentExitError(1);
+  }
+}
+
 async function runOfflineValidation(options: ValidateOptions): Promise<void> {
-  await validateMapFileOffline(options);
+  const mapPath = await validateMapFileOffline(options);
+  const envFile = await checkEnvFileKeys(mapPath, options.envfile);
   console.log(
     pc.dim(
       '  Remote validation skipped (--offline): no provider was called, so ' +
         'the secrets were not checked.',
     ),
   );
+  failOnSummaries([envFile?.failures ?? '']);
+}
+
+/**
+ * Prints `✗ Validation failed: <summaries>` and exits with 1 when any
+ * summary is not empty.
+ */
+function failOnSummaries(summaries: readonly string[]): void {
+  const failures = summaries.filter((summary) => summary !== '').join(', ');
+  if (failures !== '') {
+    console.error(pc.red(`✗ Validation failed: ${failures}`));
+    throw new SilentExitError(1);
+  }
+}
+
+type EnvFileCheck = {
+  readonly path: string;
+  readonly comparison: EnvFileKeyComparison;
+  /** What fails, for example `1 missing from .env`; empty when nothing does. */
+  readonly failures: string;
+};
+
+/**
+ * Compares the env file keys with the declared variables, without calling
+ * any provider, and prints the result. Does nothing without `--envfile`.
+ */
+async function checkEnvFileKeys(
+  mapPath: string,
+  envfileOption: string | undefined,
+): Promise<EnvFileCheck | undefined> {
+  if (envfileOption === undefined) {
+    return undefined;
+  }
+  const path = resolveEnvfile(envfileOption);
+  const container = Startup.build().configureOfflineValidation().create();
+  const handler = container.get<ValidateEnvFileKeysCommandHandler>(
+    TYPES.ValidateEnvFileKeysCommandHandler,
+  );
+  const comparison = await handler.handle(
+    ValidateEnvFileKeysCommand.create(mapPath, path),
+  );
+  printEnvFileComparison(comparison, path);
+  return {
+    path,
+    comparison,
+    failures: summarizeEnvFileFailures(comparison, basename(path)),
+  };
+}
+
+function printEnvFileComparison(
+  comparison: EnvFileKeyComparison,
+  path: string,
+): void {
+  const name = basename(path);
+  const declaredCount = comparison.present.length + comparison.missing.length;
+  console.log(pc.bold(`Checking env file ${path}`));
+  const rows = [
+    ...comparison.missing.map((key) => ({
+      key,
+      ok: false,
+      text: `missing from ${name}`,
+    })),
+    ...comparison.duplicates.map(({ key, count }) => ({
+      key,
+      ok: false,
+      text: `duplicated in ${name} (${count} assignments)`,
+    })),
+  ];
+  const width = Math.max(
+    0,
+    ...rows.map((row) => row.key.length),
+    ...comparison.undeclared.map((key) => key.length),
+  );
+  for (const row of rows) {
+    console.log(
+      `  ${pc.red('✗')} ${pc.bold(row.key.padEnd(width))}  ${pc.red(row.text)}`,
+    );
+  }
+  for (const key of comparison.undeclared) {
+    console.log(
+      `  ${pc.yellow('⚠')} ${pc.bold(key.padEnd(width))}  ` +
+        pc.yellow('not declared in map file'),
+    );
+  }
+  if (rows.length === 0) {
+    console.log(
+      pc.green(
+        declaredCount === 1
+          ? `✓ The 1 declared variable is in ${name}`
+          : `✓ All ${declaredCount} declared variables are in ${name}`,
+      ),
+    );
+  }
 }
 
 /**
@@ -575,6 +723,7 @@ async function validateMapFileOffline(
  */
 async function runRemoteValidation(options: ValidateOptions): Promise<void> {
   const mapPath = await validateMapFileOffline(options);
+  const envFile = await checkEnvFileKeys(mapPath, options.envfile);
   const fileConfig = await readMapFileConfig(mapPath);
   const config: MapFileConfig = {
     ...fileConfig,
@@ -596,11 +745,86 @@ async function runRemoteValidation(options: ValidateOptions): Promise<void> {
     checks = await handler.handle(ValidateRemoteKeysCommand.create(mapPath));
   });
 
-  printRemoteKeyChecks(checks, describeSecretSource(config));
-  const failures = summarizeFailures(checks);
-  if (failures !== '') {
-    console.error(pc.red(`✗ Validation failed: ${failures}`));
-    throw new SilentExitError(1);
+  const source = describeSecretSource(config);
+  printRemoteKeyChecks(checks, source);
+
+  let valueFailures = '';
+  if (options.compareValues && envFile !== undefined) {
+    valueFailures = await compareEnvFileValues(
+      container,
+      mapPath,
+      envFile,
+      checks,
+      source,
+    );
+  }
+
+  failOnSummaries([
+    summarizeFailures(checks),
+    envFile?.failures ?? '',
+    valueFailures,
+  ]);
+}
+
+/**
+ * Compares the env file value of every declared variable that is both in the
+ * env file and exists remotely; the others already fail. Prints only
+ * `matches`, `differs` or `unreadable` per variable and returns what fails.
+ */
+async function compareEnvFileValues(
+  container: Container,
+  mapPath: string,
+  envFile: EnvFileCheck,
+  checks: readonly RemoteKeyCheck[],
+  source: string,
+): Promise<string> {
+  const inEnvFile = new Set(envFile.comparison.present);
+  const variables = checks
+    .filter((check) => check.status === 'exists')
+    .map((check) => check.variable)
+    .filter((variable) => inEnvFile.has(variable));
+  if (variables.length === 0) {
+    return '';
+  }
+
+  const handler = container.get<CompareEnvFileValuesCommandHandler>(
+    TYPES.CompareEnvFileValuesCommandHandler,
+  );
+  let valueChecks: EnvValueCheck[] = [];
+  await executeWithSsoRecovery(async () => {
+    valueChecks = await handler.handle(
+      CompareEnvFileValuesCommand.create(mapPath, envFile.path, variables),
+    );
+  });
+  printValueChecks(valueChecks, source);
+  return summarizeValueFailures(valueChecks);
+}
+
+function printValueChecks(
+  checks: readonly EnvValueCheck[],
+  source: string,
+): void {
+  const count = checks.length === 1 ? '1 value' : `${checks.length} values`;
+  console.log(pc.bold(`Comparing ${count} with ${source}`));
+  const width = Math.max(0, ...checks.map((c) => c.variable.length));
+  for (const check of checks) {
+    const matches = check.status === 'matches';
+    const reason =
+      check.reason === undefined ? '' : pc.dim(` (${check.reason})`);
+    console.log(
+      `  ${matches ? pc.green('✓') : pc.red('✗')} ` +
+        `${pc.bold(check.variable.padEnd(width))}  ` +
+        `${matches ? pc.green(check.status) : pc.red(check.status)}${reason}`,
+    );
+  }
+  if (summarizeValueFailures(checks) === '') {
+    console.log(
+      pc.green(
+        checks.length === 1
+          ? '✓ The 1 compared value matches'
+          : `✓ All ${count} match`,
+      ),
+    );
   }
 }
 

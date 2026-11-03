@@ -69,8 +69,14 @@ describe('envilder validate (E2E)', () => {
     return path;
   }
 
-  function validate(mapPath: string): Promise<void> {
-    process.argv = ['node', 'envilder', 'validate', '--map', mapPath];
+  async function givenEnvFile(content: string): Promise<string> {
+    const path = join(workDir, `.env.${randomUUID().slice(0, 8)}`);
+    await writeFile(path, content);
+    return path;
+  }
+
+  function validate(mapPath: string, ...flags: string[]): Promise<void> {
+    process.argv = ['node', 'envilder', 'validate', '--map', mapPath, ...flags];
     return main();
   }
 
@@ -168,6 +174,52 @@ describe('envilder validate (E2E)', () => {
       await expect(action).rejects.toEqual(new SilentExitError(1));
       expect(output()).not.toContain(secretValue);
     });
+
+    it('Should_ReportMissingFromEnvFile_When_DeclaredKeyIsAbsent', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({
+        DB_URL: `${prefix}/db-url`,
+        API_KEY: `${prefix}/api-key`,
+      });
+      const envPath = await givenEnvFile('DB_URL=local\nDEBUG=true\n');
+
+      // Act
+      const action = validate(mapPath, '--envfile', envPath);
+
+      // Assert
+      await expect(action).rejects.toEqual(new SilentExitError(1));
+      expect(output()).toMatch(/✗ API_KEY\s+missing from \.env\./);
+      expect(output()).toMatch(/⚠ DEBUG\s+not declared in map file/);
+      expect(output()).toContain('✓ All 2 secrets exist');
+    });
+
+    it('Should_ReportDiffersWithoutValues_When_LocalAndRemoteValuesDiffer', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({
+        DB_URL: `${prefix}/db-url`,
+        API_KEY: `${prefix}/api-key`,
+      });
+      const localValue = `local-value-${runId}`;
+      const envPath = await givenEnvFile(
+        `DB_URL=${secretValue}\nAPI_KEY=${localValue}\n`,
+      );
+
+      // Act
+      const action = validate(
+        mapPath,
+        '--envfile',
+        envPath,
+        '--compare-values',
+      );
+
+      // Assert
+      await expect(action).rejects.toEqual(new SilentExitError(1));
+      expect(output()).toMatch(/✓ DB_URL\s+matches/);
+      expect(output()).toMatch(/✗ API_KEY\s+differs/);
+      expect(output()).toContain('✗ Validation failed: 1 differs');
+      expect(output()).not.toContain(secretValue);
+      expect(output()).not.toContain(localValue);
+    });
   });
 
   describe('Azure Key Vault', { timeout: AZURE_TEST_TIMEOUT_MS }, () => {
@@ -217,6 +269,23 @@ describe('envilder validate (E2E)', () => {
       await expect(action).rejects.toEqual(new SilentExitError(1));
       expect(output()).toContain('API_KEY  validate-api-key  missing');
       expect(output()).toContain('✗ Validation failed: 1 missing');
+      expect(output()).not.toContain(secretValue);
+    });
+
+    it('Should_ReportMatches_When_LocalAndRemoteValuesAreEqual', async () => {
+      // Arrange
+      const mapPath = await givenMapFile({
+        $config: { provider: 'azure', vaultUrl },
+        DB_URL: 'validate-db-url',
+      });
+      const envPath = await givenEnvFile(`DB_URL="${secretValue}"\n`);
+
+      // Act
+      await validate(mapPath, '--envfile', envPath, '--compare-values');
+
+      // Assert
+      expect(output()).toMatch(/✓ DB_URL\s+matches/);
+      expect(output()).toContain('✓ The 1 compared value matches');
       expect(output()).not.toContain(secretValue);
     });
   });
