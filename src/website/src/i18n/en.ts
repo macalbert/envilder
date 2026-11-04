@@ -356,6 +356,13 @@ export const en: Translations = {
           'Run a command with your secrets in its environment, without writing a .env file: envilder exec [options] [--] <command> [args...]',
       },
       {
+        status: 'done',
+        label: '✅',
+        title: 'Validate command (envilder validate)',
+        description:
+          'Check the map file and that every secret exists before a pull or deploy, optionally against a local .env, without printing values',
+      },
+      {
         status: 'next',
         label: '🐹',
         title: 'Go SDK (envilder)',
@@ -381,13 +388,6 @@ export const en: Translations = {
         title: 'AWS Secrets Manager',
         description:
           'Support JSON-structured secrets alongside SSM Parameter Store',
-      },
-      {
-        status: 'planned',
-        label: '✔️',
-        title: 'Check/sync mode (--check)',
-        description:
-          'Validate cloud secrets vs local .env. Fail CI if out-of-sync',
       },
     ],
   },
@@ -432,6 +432,7 @@ export const en: Translations = {
     linkPullCommand: 'Pull Command',
     linkPushCommand: 'Push Command',
     linkExecCommand: 'Exec Command',
+    linkValidateCommand: 'Validate Command',
     linkGithubAction: 'GitHub Action',
     linkIssues: 'Issues',
     linkDiscussions: 'Discussions',
@@ -1050,6 +1051,164 @@ export const en: Translations = {
       guideLink:
         'Full exec guide on GitHub: Windows details and every error message',
     },
+    validateReference: {
+      tabAws: 'AWS SSM',
+      tabAzure: 'Azure Key Vault',
+      tabRbac: 'Azure RBAC',
+      tabPolicy: 'Access policies',
+      prereqTitle: 'Prerequisites',
+      prereqItems: [
+        'The envilder CLI. --offline is available since version 0.18 and the secret existence check since 0.20. --envfile, --compare-values and --format json come with the next release.',
+        'A map file. Without --offline, credentials for the provider and the permissions listed under Permissions.',
+      ],
+      synopsisTitle: 'Synopsis',
+      synopsisDesc:
+        'By default, validate checks the map file and then asks the provider whether each declared secret exists. With --envfile it also compares the keys of a local env file with the map file, and with --compare-values their values with the remote ones. With --offline only local files are read: no provider is called and no cloud credentials are needed. It never prints a secret value.',
+      optionsTitle: 'Options',
+      thOption: 'Option',
+      thDescription: 'Description',
+      optOffline: 'Validate the map file locally without calling the provider',
+      optEnvfile:
+        'Compare the keys of this env file with the map file. Not read unless given',
+      optCompareValues:
+        'Also compare each declared value in the env file with its remote value. Requires --envfile; cannot be combined with --offline',
+      optFormat:
+        'text (default) for human-readable output, or json for one JSON document on stdout',
+      optMap: 'Map file to check (default: envilder.json)',
+      optProvider: 'aws or azure. Overrides $config.provider',
+      optProfile: 'AWS CLI profile. Overrides $config.profile',
+      optVault: 'Azure Key Vault URL. Overrides $config.vaultUrl',
+      optionsNote:
+        'The options have the same names, defaults and precedence as pull and exec: flags win over $config, and an empty flag is ignored. Put them after validate; options written before it are rejected. As in push, an empty --envfile value is an error.',
+      optionsRejected:
+        '--compare-values without --envfile or together with --offline, and a --format other than text or json, are rejected before any file is read or any provider is called.',
+      checksTitle: 'What is checked',
+      mapTitle: 'The map file (always)',
+      mapDesc:
+        'The map file is checked first, with the same messages pull, push and exec use. Every problem is reported, not only the first, each with the key that causes it ($config.profile, --vault-url, DB_URL...). Messages name keys and types only, never mapped values.',
+      mapRules: [
+        'The file parses as JSON. A parse error gives the path and, when the parser has one, the line and column, but never quotes the text around it, because it can be a secret pasted into the file.',
+        'The document matches the published map file schema (map-file.v1.json): known $config fields, valid variable names and string mappings.',
+        'The provider configuration is coherent after the flags are applied: aws or azure, profile only with aws, vaultUrl only with azure, and azure has a vaultUrl.',
+      ],
+      mapNote:
+        'When the map file is invalid, validate stops there: no provider is called, with or without --offline.',
+      remoteTitle: 'The remote keys (without --offline)',
+      remoteDesc:
+        'Every secret path declared in the map file is checked in the provider. Envilder never uses or prints a value: on AWS, String parameters can come back in the response, and they are discarded. A path that several variables map to is checked once. Each variable gets one status:',
+      thStatus: 'Status',
+      thMeaning: 'Meaning',
+      statusExists: 'The secret exists and the identity can see it',
+      statusMissing: 'The provider answered that there is no such secret',
+      statusDenied:
+        'The identity is not allowed to check the secret, so whether it exists is unknown. Never reported as missing',
+      statusAuth:
+        'The provider rejected the credentials, or none could be found',
+      statusError:
+        'Anything else, for example an unreachable provider or an invalid secret name',
+      remoteSsoNote:
+        'Expired AWS credentials and SSO sessions are reported with the same message as pull and exec. On an interactive terminal, an expired SSO session offers to run aws sso login and then retries.',
+      envfileTitle: 'The env file keys (with --envfile)',
+      envfileDesc:
+        'Available from the next release. The env file is read with the parser pull and push use, so comments, export, quotes and multiline values behave the same. Its keys are compared with the variables the map file declares, by exact, case-sensitive name:',
+      thFinding: 'Finding',
+      thEffect: 'Effect',
+      envMissing: 'A declared variable is absent from the env file. Fails',
+      envDuplicated: 'A key is assigned more than once. Fails',
+      envUndeclared:
+        'A key is only in the env file. A warning that does not change the exit code',
+      envfileNote:
+        'KEY= with an empty value counts as present, and a missing env file fails with Env file not found. This check reads local files only, so it runs before any provider call and with --offline too. Values are neither compared nor printed.',
+      valuesTitle: 'The env file values (with --compare-values)',
+      valuesDesc:
+        'For every declared variable that is in the env file and exists in the provider, the remote value is read the way pull reads it and compared with the local one. When a key repeats, the last assignment is compared, as dotenv loads it:',
+      valMatches: 'The two values are identical',
+      valDiffers: 'The two values are not identical. Fails',
+      valUnreadable:
+        "The secret exists but its value could not be read, with the provider's reason. Fails",
+      valuesNote:
+        'Neither value is ever printed, and each remote value is dropped right after the comparison. Variables already reported as missing are not read. Without --compare-values, no value is read at all.',
+      permTitle: 'Permissions',
+      permDesc:
+        'The existence check uses a provider call that pull does not, so the identity needs one more permission than a pull. --offline needs no credentials at all.',
+      permAwsDesc:
+        'Paths are checked with GetParameters, ten per call, with WithDecryption: false: SecureString parameters are never decrypted. This is a separate IAM action from the ssm:GetParameter pull uses, so add it to the policy, scoped to the same paths:',
+      permAwsNote:
+        'The existence check needs no kms:Decrypt permission. --compare-values reads values as pull does, so it needs the same KMS access as pull: kms:Decrypt on the key of each SecureString parameter encrypted with a customer managed key. With kms:Decrypt, ssm:GetParameters can also read decrypted values, so scope it to the same paths as ssm:GetParameter. When a call is denied, each path in it is checked on its own, so access denied is reported only for the paths the identity cannot read.',
+      permAzureDesc:
+        'The secret names of the vault are listed once (metadata only) and each declared name, after the usual / to - translation, is matched against that list ignoring case. A disabled secret is reported as missing, because pull cannot read it. Listing needs:',
+      permAzureItems: [
+        'Azure RBAC: Microsoft.KeyVault/vaults/secrets/readMetadata/action on the vault, included in the built-in Key Vault Secrets User and Key Vault Reader roles.',
+        'Access policies: the List secret permission, besides Get.',
+      ],
+      permAzureNote:
+        'The list covers the whole vault, so an identity without it gets access denied for every key, with the reason Key Vault returns.',
+      permValuesNote:
+        '--compare-values also reads values, so it needs the same permissions as a pull on top of these.',
+      outputTitle: 'Output',
+      outputOkDesc: 'Every secret exists (exit code 0):',
+      outputFailDesc:
+        'Some secrets are missing or cannot be checked (exit code 1; the summary goes to stderr):',
+      outputOfflineDesc: 'With --offline:',
+      outputEnvfileDesc: 'With --envfile=.env --compare-values (exit code 1):',
+      outputEnvfileNote:
+        'When every declared variable is in the env file, its block ends with ✓ All 3 declared variables are in .env, and when every compared value matches, the values block ends with ✓ All 2 values match.',
+      outputInvalidDesc: 'An invalid map file, on stderr:',
+      jsonTitle: 'JSON output (--format json)',
+      jsonDesc:
+        'Available from the next release. With --format=json, validate prints exactly one JSON document to stdout and nothing else, whatever the outcome. Logs, the AWS identity banner, warnings, errors and the SSO login prompt go to stderr, so stdout can be piped to jq or saved as a CI artifact. Exit codes are the same as with text output. Option errors such as --format=yaml are reported on stderr before anything runs, without a document.',
+      thField: 'Field',
+      fieldValid: 'true exactly when the exit code is 0',
+      fieldOffline: 'true with --offline',
+      fieldMapFile:
+        'path, valid and errors (one { key, message } per problem, the same messages as the text output). Left out when the map file could not be read',
+      fieldKeys:
+        'One entry per declared variable, in map file order: name, provider, path, status and, when the provider gave one, reason. status is exists, missing, access_denied, authentication_failed or provider_error. Left out when the secrets were not checked',
+      fieldEnvFile:
+        'Left out without --envfile. Otherwise path, valid, keys (each declared variable with status present or missing, plus value matches, differs or unreadable with --compare-values), duplicates ({ name, count }) and undeclared',
+      fieldError:
+        '{ message }, only when the run stopped before every check finished (expired credentials, a missing env file, a declined SSO login). Sections that completed before it are still filled in',
+      jsonNote:
+        'The document never holds a secret value, local or remote, and no field is ever null: a section that does not apply is left out. A section can gain fields in later versions; existing fields keep their meaning.',
+      exitTitle: 'Exit codes',
+      thCode: 'Code',
+      exit0:
+        'The map file is valid; without --offline, every declared secret exists; with --envfile, every declared variable is in the env file exactly once; with --compare-values, every compared value matches. Keys only in the env file do not change it',
+      exit1:
+        'Anything else: missing or invalid map file, invalid options, a secret that is missing or cannot be checked, missing or expired credentials, or an env file that is missing, lacks a declared variable, repeats a key or holds a value that differs or cannot be compared',
+      ciTitle: 'In CI',
+      ciDesc:
+        'Run the offline check on every pull request, including from forks, since it needs no cloud credentials. Run the existence check where the job has the same credentials as a pull, plus the permissions above:',
+      ciEnvExample:
+        'From the next release, to check that a committed .env.example declares every variable without credentials, add --offline --envfile=.env.example to the first step.',
+      ciJsonDesc:
+        'From the next release, to keep the result for later steps or other tools, use JSON output. The step still fails when validation fails:',
+      ciNote:
+        'validate exits with 1 on any failure, so it can gate a deploy step before pull or envilder exec runs.',
+      sdkTitle: 'From the SDKs',
+      sdkDesc:
+        'The .NET, Python and Node.js SDKs (version 1.1 or later) run the same map file and key existence check from application code, with the same statuses, without the env file comparison:',
+      thSdk: 'SDK',
+      thCheck: 'Check, returns a result',
+      thLoad: 'Fail the load when it does not pass',
+      sdkNote:
+        'Contract validation is different from secret validation: it checks the map file and that each secret exists before loading, while secret validation checks that the values already resolved are not empty.',
+      limitsTitle: 'What validate does not do',
+      limitsItems: [
+        'It never prints secret values, and reads them only with --compare-values.',
+        'With --offline it does not check that the secrets exist or that the credentials can read them.',
+        'It does not fix the env file: it reports what to change.',
+        'It does not check what the values look like (types, URLs, length).',
+      ],
+      relatedTitle: 'Related pages',
+      relatedMap: 'Map file reference: $config fields and validation rules',
+      relatedPull: 'Pull mode: write the secrets to a .env file',
+      relatedExec:
+        'Exec mode: run a command with the secrets in its environment',
+      relatedGha: 'GitHub Action: load the secrets in a workflow with OIDC',
+      guideLink:
+        'Full validate guide on GitHub: every check, message and JSON field',
+    },
     title: 'Envilder docs: AWS SSM and Azure Key Vault secrets',
     description:
       'Learn how to resolve environment variables from AWS SSM Parameter Store and Azure Key Vault with the Envilder CLI, GitHub Action, and runtime SDKs.',
@@ -1179,6 +1338,20 @@ export const en: Translations = {
         cardTitle: 'CLI exec command',
         cardSummary:
           'Start a command with mapped secrets in memory, with no .env file.',
+      },
+      'cli-validate': {
+        title:
+          'envilder validate: check a map file and its AWS SSM or Azure Key Vault secrets',
+        description:
+          'envilder validate reference: map file checks, --offline, remote key statuses, --envfile and --compare-values, JSON output, exit codes and the IAM and Key Vault permissions it needs.',
+        heading: 'envilder validate reference',
+        intro:
+          'How do you know a map file will work before a pull, a deploy or envilder exec runs? envilder validate checks that the map file is valid and that every declared secret exists in AWS SSM or Azure Key Vault, and can compare a local .env file with it. It never prints a secret value, and it exits with 1 when anything fails, so it fits as a CI step.',
+        breadcrumb: 'CLI validate',
+        navLabel: 'CLI validate',
+        cardTitle: 'CLI validate command',
+        cardSummary:
+          'Check the map file and that every secret exists, without printing values.',
       },
       'github-action': {
         title: 'Load AWS SSM and Azure Key Vault secrets in GitHub Actions',
@@ -1662,9 +1835,11 @@ export const en: Translations = {
       'Opt-in validation ensures all resolved secrets have non-empty values:',
     sdkContractValidation: 'Map file contract validation',
     sdkContractValidationDesc:
-      'Check, without loading anything or reading any value, that the map file is valid and that every declared secret exists with the current credentials: the same check as envilder validate. Expected validation failures are returned in the result instead of thrown; a missing map file still throws. Each key reports exists, missing, access_denied, authentication_failed or provider_error:',
+      'Check, without loading anything and without using or printing any value, that the map file is valid and that every declared secret exists with the current credentials: the same check as envilder validate. Expected validation failures are returned in the result instead of thrown; a missing map file still throws. Each key reports exists, missing, access_denied, authentication_failed or provider_error:',
     sdkContractValidationLoadDesc:
       'To fail the load instead, enable contract validation on the builder. The check runs once before resolving and the error names the failing keys, never their values. It is off by default, so a normal load makes no extra provider call. Unlike secret validation, which checks resolved values, it checks the map file and the keys before resolving:',
+    sdkContractValidationCliLink:
+      'See the envilder validate reference for the statuses and the permissions the check needs →',
     sdkNodejsFullDocs: 'Full documentation →',
     sdkNodejsExamplesDesc:
       'A Vitest project with Testcontainers and an Aspire TypeScript AppHost resolve a map file against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to containers, with no .env file:',

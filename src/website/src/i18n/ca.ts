@@ -360,6 +360,13 @@ export const ca: Translations = {
           'Executa una comanda amb els teus secrets al seu entorn, sense escriure cap fitxer .env: envilder exec [options] [--] <command> [args...]',
       },
       {
+        status: 'done',
+        label: '✅',
+        title: 'Comanda validate (envilder validate)',
+        description:
+          "Comprova el fitxer de mapatge i que cada secret existeix abans d'un pull o un desplegament, opcionalment contra un .env local, sense mostrar cap valor",
+      },
+      {
         status: 'next',
         label: '🐹',
         title: 'Go SDK (envilder)',
@@ -385,13 +392,6 @@ export const ca: Translations = {
         label: '🔐',
         title: 'AWS Secrets Manager',
         description: 'Suport de secrets JSON junt amb SSM Parameter Store',
-      },
-      {
-        status: 'planned',
-        label: '✔️',
-        title: 'Mode check/sync (--check)',
-        description:
-          'Valida secrets al núvol vs .env local. Falla CI si estan desincronitzats',
       },
     ],
   },
@@ -437,6 +437,7 @@ export const ca: Translations = {
     linkPullCommand: 'Comanda Pull',
     linkPushCommand: 'Comanda Push',
     linkExecCommand: 'Comanda Exec',
+    linkValidateCommand: 'Comanda Validate',
     linkGithubAction: 'GitHub Action',
     linkIssues: 'Incidències',
     linkDiscussions: 'Discussions',
@@ -1060,6 +1061,167 @@ export const ca: Translations = {
       guideLink:
         "Guia completa d'exec a GitHub: detalls de Windows i tots els missatges d'error",
     },
+    validateReference: {
+      tabAws: 'AWS SSM',
+      tabAzure: 'Azure Key Vault',
+      tabRbac: 'Azure RBAC',
+      tabPolicy: "Polítiques d'accés",
+      prereqTitle: 'Requisits previs',
+      prereqItems: [
+        "La CLI d'envilder. --offline està disponible des de la versió 0.18 i la comprovació d'existència dels secrets des de la 0.20. --envfile, --compare-values i --format json arriben amb la propera versió.",
+        "Un fitxer de mapatge. Sense --offline, credencials del proveïdor i els permisos que es detallen a l'apartat Permisos.",
+      ],
+      synopsisTitle: 'Sinopsi',
+      synopsisDesc:
+        "Per defecte, validate comprova el fitxer de mapatge i després pregunta al proveïdor si existeix cada secret declarat. Amb --envfile també compara les claus d'un fitxer env local amb el fitxer de mapatge, i amb --compare-values en compara els valors amb els remots. Amb --offline només es llegeixen fitxers locals: no es crida cap proveïdor i no calen credencials del núvol. No mostra mai cap valor de secret.",
+      optionsTitle: 'Opcions',
+      thOption: 'Opció',
+      thDescription: 'Descripció',
+      optOffline:
+        'Valida el fitxer de mapatge en local sense cridar el proveïdor',
+      optEnvfile:
+        "Compara les claus d'aquest fitxer env amb el fitxer de mapatge. No es llegeix si no s'indica",
+      optCompareValues:
+        'Compara també cada valor declarat al fitxer env amb el seu valor remot. Requereix --envfile; no es pot combinar amb --offline',
+      optFormat:
+        'text (per defecte) per a una sortida llegible, o json per a un únic document JSON a stdout',
+      optMap: 'Fitxer de mapatge a comprovar (per defecte: envilder.json)',
+      optProvider: 'aws o azure. Substitueix $config.provider',
+      optProfile: "Perfil d'AWS CLI. Substitueix $config.profile",
+      optVault: "URL d'Azure Key Vault. Substitueix $config.vaultUrl",
+      optionsNote:
+        "Les opcions tenen els mateixos noms, valors per defecte i precedència que pull i exec: les opcions guanyen a $config, i una opció buida s'ignora. Posa-les després de validate; les que s'escriuen abans es rebutgen. Com a push, un valor buit de --envfile és un error.",
+      optionsRejected:
+        '--compare-values sense --envfile o amb --offline, i un --format que no sigui text ni json, es rebutgen abans de llegir cap fitxer o cridar cap proveïdor.',
+      checksTitle: 'Què es comprova',
+      mapTitle: 'El fitxer de mapatge (sempre)',
+      mapDesc:
+        "El fitxer de mapatge es comprova primer, amb els mateixos missatges que fan servir pull, push i exec. S'informa de cada problema, no només del primer, amb la clau que el causa ($config.profile, --vault-url, DB_URL...). Els missatges anomenen claus i tipus, mai valors mapats.",
+      mapRules: [
+        "El fitxer s'analitza com a JSON. Un error d'anàlisi indica la ruta i, quan l'analitzador la dona, la línia i la columna, però mai cita el text del voltant, perquè pot ser un secret enganxat al fitxer.",
+        "El document compleix l'esquema publicat del fitxer de mapatge (map-file.v1.json): camps de $config coneguts, noms de variable vàlids i mapatges de tipus string.",
+        'La configuració del proveïdor és coherent un cop aplicades les opcions: aws o azure, profile només amb aws, vaultUrl només amb azure, i azure té un vaultUrl.',
+      ],
+      mapNote:
+        "Quan el fitxer de mapatge no és vàlid, validate s'atura aquí: no es crida cap proveïdor, amb --offline o sense.",
+      remoteTitle: 'Les claus remotes (sense --offline)',
+      remoteDesc:
+        'Cada ruta de secret declarada al fitxer de mapatge es comprova al proveïdor. Envilder no fa servir ni mostra mai cap valor: a AWS, els paràmetres String poden arribar a la resposta, i es descarten. Una ruta a la qual apunten diverses variables es comprova una sola vegada. Cada variable rep un estat:',
+      thStatus: 'Estat',
+      thMeaning: 'Significat',
+      statusExists: 'El secret existeix i la identitat el pot veure',
+      statusMissing: 'El proveïdor ha respost que aquest secret no existeix',
+      statusDenied:
+        "La identitat no té permís per comprovar el secret, així que no se sap si existeix. Mai s'informa com a missing",
+      statusAuth:
+        "El proveïdor ha rebutjat les credencials, o no se n'ha trobat cap",
+      statusError:
+        'Qualsevol altra cosa, per exemple un proveïdor inaccessible o un nom de secret no vàlid',
+      remoteSsoNote:
+        "Les credencials d'AWS i les sessions SSO caducades s'informen amb el mateix missatge que pull i exec. En un terminal interactiu, una sessió SSO caducada ofereix executar aws sso login i després torna a provar.",
+      envfileTitle: 'Les claus del fitxer env (amb --envfile)',
+      envfileDesc:
+        'Disponible a partir de la propera versió. El fitxer env es llegeix amb el mateix analitzador que fan servir pull i push, així que els comentaris, export, les cometes i els valors multilínia es comporten igual. Les seves claus es comparen amb les variables que declara el fitxer de mapatge, pel nom exacte, distingint majúscules i minúscules:',
+      thFinding: 'Troballa',
+      thEffect: 'Efecte',
+      envMissing: 'Una variable declarada no és al fitxer env. Falla',
+      envDuplicated: "Una clau s'assigna més d'una vegada. Falla",
+      envUndeclared:
+        'Una clau només és al fitxer env. Un avís que no canvia el codi de sortida',
+      envfileNote:
+        "KEY= amb un valor buit compta com a present, i un fitxer env inexistent falla amb Env file not found. Aquesta comprovació només llegeix fitxers locals, així que s'executa abans de cap crida al proveïdor i també amb --offline. Els valors no es comparen ni es mostren.",
+      valuesTitle: 'Els valors del fitxer env (amb --compare-values)',
+      valuesDesc:
+        "Per a cada variable declarada que és al fitxer env i existeix al proveïdor, el valor remot es llegeix com ho fa pull i es compara amb el local. Quan una clau es repeteix, es compara l'última assignació, tal com la carrega dotenv:",
+      valMatches: 'Els dos valors són idèntics',
+      valDiffers: 'Els dos valors no són idèntics. Falla',
+      valUnreadable:
+        "El secret existeix però el seu valor no s'ha pogut llegir, amb el motiu del proveïdor. Falla",
+      valuesNote:
+        "Cap dels dos valors es mostra mai, i cada valor remot es descarta just després de la comparació. Les variables que ja s'han informat com a absents no es llegeixen. Sense --compare-values no es llegeix cap valor.",
+      permTitle: 'Permisos',
+      permDesc:
+        "La comprovació d'existència fa servir una crida al proveïdor que pull no fa, així que la identitat necessita un permís més que per a un pull. --offline no necessita cap credencial.",
+      permAwsDesc:
+        "Les rutes es comproven amb GetParameters, deu per crida, amb WithDecryption: false: els paràmetres SecureString no es desxifren mai. És una acció d'IAM diferent de la ssm:GetParameter que fa servir pull, així que afegeix-la a la política, limitada a les mateixes rutes:",
+      permAwsNote:
+        "La comprovació d'existència no necessita el permís kms:Decrypt. --compare-values llegeix els valors com pull, així que necessita el mateix accés a KMS que pull: kms:Decrypt sobre la clau de cada paràmetre SecureString xifrat amb una clau gestionada pel client. Amb kms:Decrypt, ssm:GetParameters també pot llegir valors desxifrats, així que limita'l a les mateixes rutes que ssm:GetParameter. Quan es denega una crida, cada ruta s'hi comprova per separat, així que access denied només s'informa per a les rutes que la identitat no pot llegir.",
+      permAzureDesc:
+        "Els noms dels secrets del vault es llisten una vegada (només metadades) i cada nom declarat, després de la conversió habitual de / a -, es compara amb aquesta llista sense distingir majúscules. Un secret desactivat s'informa com a missing, perquè pull no el pot llegir. Llistar requereix:",
+      permAzureItems: [
+        'Azure RBAC: Microsoft.KeyVault/vaults/secrets/readMetadata/action sobre el vault, inclòs als rols integrats Key Vault Secrets User i Key Vault Reader.',
+        "Polítiques d'accés: el permís de secret List, a més de Get.",
+      ],
+      permAzureNote:
+        'La llista cobreix tot el vault, així que una identitat sense aquest permís rep access denied per a cada clau, amb el motiu que retorna Key Vault.',
+      permValuesNote:
+        "--compare-values també llegeix valors, així que necessita els mateixos permisos que un pull a més d'aquests.",
+      outputTitle: 'Sortida',
+      outputOkDesc: 'Tots els secrets existeixen (codi de sortida 0):',
+      outputFailDesc:
+        'Alguns secrets falten o no es poden comprovar (codi de sortida 1; el resum va a stderr):',
+      outputOfflineDesc: 'Amb --offline:',
+      outputEnvfileDesc:
+        'Amb --envfile=.env --compare-values (codi de sortida 1):',
+      outputEnvfileNote:
+        'Quan totes les variables declarades són al fitxer env, el seu bloc acaba amb ✓ All 3 declared variables are in .env, i quan tots els valors comparats coincideixen, el bloc de valors acaba amb ✓ All 2 values match.',
+      outputInvalidDesc: 'Un fitxer de mapatge no vàlid, a stderr:',
+      jsonTitle: 'Sortida JSON (--format json)',
+      jsonDesc:
+        "Disponible a partir de la propera versió. Amb --format=json, validate escriu exactament un document JSON a stdout i res més, sigui quin sigui el resultat. Els logs, el bàner d'identitat d'AWS, els avisos, els errors i la sol·licitud d'inici de sessió SSO van a stderr, així que stdout es pot passar a jq o desar com a artefacte de CI. Els codis de sortida són els mateixos que amb la sortida de text. Els errors d'opcions com --format=yaml s'informen a stderr abans d'executar res, sense document.",
+      thField: 'Camp',
+      fieldValid: 'true exactament quan el codi de sortida és 0',
+      fieldOffline: 'true amb --offline',
+      fieldMapFile:
+        "path, valid i errors (un { key, message } per problema, amb els mateixos missatges que la sortida de text). S'omet quan el fitxer de mapatge no s'ha pogut llegir",
+      fieldKeys:
+        "Una entrada per variable declarada, en l'ordre del fitxer de mapatge: name, provider, path, status i, quan el proveïdor en dona un, reason. status és exists, missing, access_denied, authentication_failed o provider_error. S'omet quan no s'han comprovat els secrets",
+      fieldEnvFile:
+        "S'omet sense --envfile. Si no, path, valid, keys (cada variable declarada amb status present o missing, i value matches, differs o unreadable amb --compare-values), duplicates ({ name, count }) i undeclared",
+      fieldError:
+        "{ message }, només quan l'execució s'ha aturat abans d'acabar totes les comprovacions (credencials caducades, un fitxer env inexistent, un inici de sessió SSO rebutjat). Les seccions completades abans continuen plenes",
+      jsonNote:
+        "El document no conté mai cap valor de secret, ni local ni remot, i cap camp és mai null: una secció que no aplica s'omet. Una secció pot guanyar camps en versions futures; els camps existents mantenen el seu significat.",
+      exitTitle: 'Codis de sortida',
+      thCode: 'Codi',
+      exit0:
+        'El fitxer de mapatge és vàlid; sense --offline, cada secret declarat existeix; amb --envfile, cada variable declarada és al fitxer env exactament una vegada; amb --compare-values, cada valor comparat coincideix. Les claus que només són al fitxer env no el canvien',
+      exit1:
+        'Qualsevol altra cosa: fitxer de mapatge absent o no vàlid, opcions no vàlides, un secret que falta o no es pot comprovar, credencials absents o caducades, o un fitxer env que no existeix, no té una variable declarada, repeteix una clau o té un valor que difereix o no es pot comparar',
+      ciTitle: 'A CI',
+      ciDesc:
+        "Executa la comprovació offline a cada pull request, també des de forks, perquè no necessita credencials del núvol. Executa la comprovació d'existència on el job tingui les mateixes credencials que un pull, més els permisos d'aquesta pàgina:",
+      ciEnvExample:
+        'A partir de la propera versió, per comprovar sense credencials que un .env.example versionat declara cada variable, afegeix --offline --envfile=.env.example al primer pas.',
+      ciJsonDesc:
+        'A partir de la propera versió, per conservar el resultat per a passos posteriors o altres eines, fes servir la sortida JSON. El pas continua fallant quan la validació falla:',
+      ciNote:
+        "validate surt amb 1 davant de qualsevol error, així que pot bloquejar un pas de desplegament abans que s'executi pull o envilder exec.",
+      sdkTitle: 'Des dels SDK',
+      sdkDesc:
+        "Els SDK de .NET, Python i Node.js (versió 1.1 o posterior) executen la mateixa comprovació del fitxer de mapatge i d'existència de claus des del codi de l'aplicació, amb els mateixos estats, sense la comparació del fitxer env:",
+      thSdk: 'SDK',
+      thCheck: 'Comprovació que retorna un resultat',
+      thLoad: 'Fer fallar la càrrega si no passa',
+      sdkNote:
+        'La validació del contracte és diferent de la validació de secrets: comprova el fitxer de mapatge i que cada secret existeix abans de carregar, mentre que la validació de secrets comprova que els valors ja resolts no siguin buits.',
+      limitsTitle: 'Què no fa validate',
+      limitsItems: [
+        'No mostra mai valors de secrets, i només els llegeix amb --compare-values.',
+        'Amb --offline no comprova que els secrets existeixin ni que les credencials els puguin llegir.',
+        'No corregeix el fitxer env: informa del que cal canviar.',
+        'No comprova la forma dels valors (tipus, URL, longitud).',
+      ],
+      relatedTitle: 'Pàgines relacionades',
+      relatedMap:
+        'Referència del fitxer de mapatge: camps de $config i regles de validació',
+      relatedPull: 'Mode pull: escriu els secrets en un fitxer .env',
+      relatedExec:
+        'Mode exec: executa una comanda amb els secrets al seu entorn',
+      relatedGha: 'GitHub Action: carrega els secrets en un workflow amb OIDC',
+      guideLink:
+        'Guia completa de validate a GitHub: cada comprovació, missatge i camp JSON',
+    },
     title: 'Docs Envilder: secrets amb AWS SSM i Azure Key Vault',
     description:
       "Aprèn a resoldre variables d'entorn des d'AWS SSM Parameter Store i Azure Key Vault amb la CLI, GitHub Action i SDKs de runtime d'Envilder.",
@@ -1189,6 +1351,20 @@ export const ca: Translations = {
         cardTitle: 'Comanda CLI exec',
         cardSummary:
           'Inicia una comanda amb els secrets mapats en memòria, sense fitxer .env.',
+      },
+      'cli-validate': {
+        title:
+          "envilder validate: comprova un fitxer de mapatge i els seus secrets d'AWS SSM o Azure Key Vault",
+        description:
+          "Referència d'envilder validate: comprovacions del fitxer de mapatge, --offline, estats de les claus remotes, --envfile i --compare-values, sortida JSON, codis de sortida i els permisos d'IAM i Key Vault que necessita.",
+        heading: "Referència d'envilder validate",
+        intro:
+          "Com saps que un fitxer de mapatge funcionarà abans d'un pull, un desplegament o envilder exec? envilder validate comprova que el fitxer de mapatge és vàlid i que cada secret declarat existeix a AWS SSM o Azure Key Vault, i pot comparar-hi un fitxer .env local. No mostra mai cap valor de secret i surt amb 1 quan alguna cosa falla, així que encaixa com a pas de CI.",
+        breadcrumb: 'CLI validate',
+        navLabel: 'CLI validate',
+        cardTitle: 'Comanda validate de la CLI',
+        cardSummary:
+          'Comprova el fitxer de mapatge i que cada secret existeix, sense mostrar valors.',
       },
       'github-action': {
         title: "Carrega secrets d'AWS SSM i Azure Key Vault a GitHub Actions",
@@ -1679,9 +1855,11 @@ export const ca: Translations = {
       'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
     sdkContractValidation: 'Validació del contracte del fitxer de mapatge',
     sdkContractValidationDesc:
-      'Comprova, sense carregar res ni llegir cap valor, que el fitxer de mapatge és vàlid i que cada secret declarat existeix amb les credencials actuals: la mateixa comprovació que envilder validate. Els errors de validació esperats es retornen al resultat en lloc de llançar-se; un fitxer de mapatge inexistent sí que llança un error. Cada clau informa exists, missing, access_denied, authentication_failed o provider_error:',
+      'Comprova, sense carregar res i sense fer servir ni mostrar cap valor, que el fitxer de mapatge és vàlid i que cada secret declarat existeix amb les credencials actuals: la mateixa comprovació que envilder validate. Els errors de validació esperats es retornen al resultat en lloc de llançar-se; un fitxer de mapatge inexistent sí que llança un error. Cada clau informa exists, missing, access_denied, authentication_failed o provider_error:',
     sdkContractValidationLoadDesc:
       "Per fer fallar la càrrega, activa la validació del contracte al builder. La comprovació s'executa una vegada abans de resoldre i l'error anomena les claus que fallen, mai els seus valors. Està desactivada per defecte, així que una càrrega normal no fa cap crida extra al proveïdor. A diferència de la validació de secrets, que revisa els valors resolts, revisa el fitxer de mapatge i les claus abans de resoldre:",
+    sdkContractValidationCliLink:
+      "Consulta la referència d'envilder validate per als estats i els permisos que necessita la comprovació →",
     sdkNodejsFullDocs: 'Documentació completa →',
     sdkNodejsExamplesDesc:
       "Un projecte Vitest amb Testcontainers i un AppHost d'Aspire en TypeScript que resolen un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack i Lowkey Vault) i passen els valors als contenidors, sense cap fitxer .env:",

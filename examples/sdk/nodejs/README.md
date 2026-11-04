@@ -29,9 +29,11 @@ All commands from the **`examples/sdk/nodejs/`** directory:
 |--------------------|------------------------------------------|-------------------------------|
 | `1_fluent.ts`      | Fluent builder with provider overrides   | `npm run 1_fluent`            |
 | `2_env_routing.ts` | Pick map file by environment             | `npm run 2_env_routing`       |
-| `3_validation.ts`  | Fail fast on missing secrets             | `npm run 3_validation`        |
+| `3_validation.ts`  | Check contract before, values after load | `npm run 3_validation`        |
 | `4_load.ts`        | Load + inject into `process.env`         | `npm run 4_load`              |
 | `5_resolve.ts`     | Resolve without injecting                | `npm run 5_resolve`           |
+
+`3_validation.ts` shows the two validation checks. `validateContract()` / `withContractValidation()` checks, before loading and without using or printing any value, that the map file is valid and that every declared secret exists: the same check as [`envilder validate`](https://envilder.com/docs/cli/validate/). On AWS it calls `ssm:GetParameters` without decryption: plain `String` values can still come back in that response and are discarded, and the same permission reads decrypted values when the identity also has `kms:Decrypt`, so scope it like the `ssm:GetParameter` that a load uses. `validateSecrets()` runs after a load and checks that every resolved value is non-empty.
 
 ```bash
 cd examples/sdk/nodejs
