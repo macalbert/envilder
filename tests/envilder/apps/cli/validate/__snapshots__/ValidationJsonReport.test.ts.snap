@@ -1,0 +1,75 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`toValidationJson > Should_MatchDocumentedShape_When_EveryStepRan 1`] = `
+{
+  "envFile": {
+    "duplicates": [
+      {
+        "count": 2,
+        "name": "DB_URL",
+      },
+    ],
+    "keys": [
+      {
+        "name": "DB_URL",
+        "status": "present",
+        "value": "differs",
+      },
+      {
+        "name": "API_KEY",
+        "status": "present",
+      },
+      {
+        "name": "TOKEN",
+        "status": "missing",
+      },
+    ],
+    "path": ".env",
+    "undeclared": [
+      "ASPNETCORE_ENVIRONMENT",
+    ],
+    "valid": false,
+  },
+  "keys": [
+    {
+      "name": "DB_URL",
+      "path": "/app/db",
+      "provider": "aws",
+      "status": "exists",
+    },
+    {
+      "name": "API_KEY",
+      "path": "/app/api",
+      "provider": "aws",
+      "status": "missing",
+    },
+    {
+      "name": "TOKEN",
+      "path": "/app/token",
+      "provider": "aws",
+      "reason": "not authorized to perform ssm:GetParameters",
+      "status": "access_denied",
+    },
+    {
+      "name": "SECRET",
+      "path": "/app/secret",
+      "provider": "aws",
+      "status": "authentication_failed",
+    },
+    {
+      "name": "QUEUE_URL",
+      "path": "/app/queue",
+      "provider": "aws",
+      "reason": "connect ETIMEDOUT",
+      "status": "provider_error",
+    },
+  ],
+  "mapFile": {
+    "errors": [],
+    "path": "envilder.json",
+    "valid": true,
+  },
+  "offline": false,
+  "valid": false,
+}
+`;
