@@ -1742,7 +1742,7 @@ export const ca: Translations = {
       'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
     sdkContractValidation: 'Validació del contracte del fitxer de mapatge',
     sdkContractValidationDesc:
-      'Comprova, sense carregar res ni llegir cap valor, que el fitxer de mapatge és vàlid i que cada secret declarat existeix amb les credencials actuals: la mateixa comprovació que envilder validate. Els errors de validació esperats es retornen al resultat en lloc de llançar-se; un fitxer de mapatge inexistent sí que llança un error. Cada clau informa exists, missing, access_denied, authentication_failed o provider_error:',
+      'Comprova, sense carregar res i sense fer servir ni mostrar cap valor, que el fitxer de mapatge és vàlid i que cada secret declarat existeix amb les credencials actuals: la mateixa comprovació que envilder validate. Els errors de validació esperats es retornen al resultat en lloc de llançar-se; un fitxer de mapatge inexistent sí que llança un error. Cada clau informa exists, missing, access_denied, authentication_failed o provider_error:',
     sdkContractValidationLoadDesc:
       "Per fer fallar la càrrega, activa la validació del contracte al builder. La comprovació s'executa una vegada abans de resoldre i l'error anomena les claus que fallen, mai els seus valors. Està desactivada per defecte, així que una càrrega normal no fa cap crida extra al proveïdor. A diferència de la validació de secrets, que revisa els valors resolts, revisa el fitxer de mapatge i les claus abans de resoldre:",
     sdkContractValidationCliLink:

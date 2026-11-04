@@ -1744,7 +1744,7 @@ export const es: Translations = {
       'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
     sdkContractValidation: 'Validación del contrato del fichero de mapeo',
     sdkContractValidationDesc:
-      'Comprueba, sin cargar nada ni leer ningún valor, que el fichero de mapeo es válido y que cada secreto declarado existe con las credenciales actuales: la misma comprobación que envilder validate. Los errores de validación esperados se devuelven en el resultado en lugar de lanzarse; un fichero de mapeo inexistente sí lanza un error. Cada clave informa exists, missing, access_denied, authentication_failed o provider_error:',
+      'Comprueba, sin cargar nada y sin usar ni mostrar ningún valor, que el fichero de mapeo es válido y que cada secreto declarado existe con las credenciales actuales: la misma comprobación que envilder validate. Los errores de validación esperados se devuelven en el resultado en lugar de lanzarse; un fichero de mapeo inexistente sí lanza un error. Cada clave informa exists, missing, access_denied, authentication_failed o provider_error:',
     sdkContractValidationLoadDesc:
       'Para que la carga falle, activa la validación del contrato en el builder. La comprobación se ejecuta una vez antes de resolver y el error nombra las claves que fallan, nunca sus valores. Está desactivada por defecto, así que una carga normal no hace ninguna llamada extra al proveedor. A diferencia de la validación de secretos, que revisa los valores resueltos, revisa el fichero de mapeo y las claves antes de resolver:',
     sdkContractValidationCliLink:

@@ -167,8 +167,8 @@ except SecretValidationError as e:
 
 ### Map file contract validation
 
-`validate_contract()` checks that a map file can be used without reading any
-secret value: the map file matches the published schema (the same rules and
+`validate_contract()` checks that a map file can be used without using or
+printing any secret value: the map file matches the published schema (the same rules and
 messages as `envilder validate --offline`), the provider configuration it
 resolves to is coherent, and every declared secret exists. Builder overrides
 (`with_provider()`, `with_profile()`, `with_vault_url()`) take precedence over
@@ -218,10 +218,13 @@ Each `KeyCheck` carries one status (`SecretExistenceStatus`):
 | `authentication_failed` | The provider rejected the credentials, or none were available (an expired AWS session includes the `aws sso login` remediation as `reason`) |
 | `provider_error` | Anything else, for example an unreachable provider |
 
-Required permissions (existence is checked without reading values):
+Required permissions (existence is checked without using any value):
 
 - **AWS SSM**: `ssm:GetParameters` on the parameters. Values are requested
-  without decryption and never read, so `kms:Decrypt` is not needed.
+  without decryption, so `kms:Decrypt` is not needed. Plain `String` values can
+  still come back in the response; the SDK discards them. With `kms:Decrypt`,
+  `ssm:GetParameters` can read decrypted values, so grant it only on paths the
+  identity may already read with `ssm:GetParameter`.
 - **Azure Key Vault**: the `List` secret permission (access policies) or
   `Microsoft.KeyVault/vaults/secrets/readMetadata/action` (Azure RBAC, included
   in the Key Vault Secrets User role). Names are matched case-insensitively.
