@@ -1075,15 +1075,15 @@ export const es: Translations = {
       fieldValid: 'true exactamente cuando el código de salida es 0',
       fieldOffline: 'true con --offline',
       fieldMapFile:
-        'path, valid y errors (un { key, message } por problema, con los mismos mensajes que la salida de texto). null cuando el archivo de mapeo no se ha podido leer',
+        'path, valid y errors (un { key, message } por problema, con los mismos mensajes que la salida de texto). Se omite cuando el archivo de mapeo no se ha podido leer',
       fieldKeys:
-        'Una entrada por variable declarada, en el orden del archivo de mapeo: name, provider, path, status y, cuando el proveedor da uno, reason. status es exists, missing, access_denied, authentication_failed o provider_error. null cuando no se han comprobado los secretos',
+        'Una entrada por variable declarada, en el orden del archivo de mapeo: name, provider, path, status y, cuando el proveedor da uno, reason. status es exists, missing, access_denied, authentication_failed o provider_error. Se omite cuando no se han comprobado los secretos',
       fieldEnvFile:
-        'null sin --envfile. Si no, path, valid, keys (cada variable declarada con status present o missing, y value matches, differs o unreadable con --compare-values), duplicates ({ name, count }) y undeclared',
+        'Se omite sin --envfile. Si no, path, valid, keys (cada variable declarada con status present o missing, y value matches, differs o unreadable con --compare-values), duplicates ({ name, count }) y undeclared',
       fieldError:
-        'null, o { message } cuando la ejecución se ha detenido antes de terminar todas las comprobaciones (credenciales caducadas, un archivo env inexistente, un inicio de sesión SSO rechazado). Las secciones completadas antes siguen llenas',
+        '{ message }, solo cuando la ejecución se ha detenido antes de terminar todas las comprobaciones (credenciales caducadas, un archivo env inexistente, un inicio de sesión SSO rechazado). Las secciones completadas antes siguen llenas',
       jsonNote:
-        'El documento nunca contiene ningún valor de secreto, ni local ni remoto. Una sección puede ganar campos en versiones futuras; los campos existentes mantienen su significado.',
+        'El documento nunca contiene ningún valor de secreto, ni local ni remoto, y ningún campo es nunca null: una sección que no aplica se omite. Una sección puede ganar campos en versiones futuras; los campos existentes mantienen su significado.',
       exitTitle: 'Códigos de salida',
       thCode: 'Código',
       exit0:

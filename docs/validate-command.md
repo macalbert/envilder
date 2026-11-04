@@ -86,8 +86,8 @@ with or without `--offline`.
 
 ### The remote keys (without `--offline`)
 
-Every secret path declared in the map file is checked in the provider, without
-reading its value. A path that several variables map to is checked once. Each
+Every secret path declared in the map file is checked in the provider. Envilder
+never uses or prints a value during this check. A path that several variables map to is checked once. Each
 variable gets one of these statuses:
 
 | Status | Meaning |
@@ -144,7 +144,8 @@ existence check needs. Without `--compare-values`, no value is read.
 The paths are checked with
 [`GetParameters`](https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_GetParameters.html),
 ten per call, with `WithDecryption: false`: SecureString parameters are never
-decrypted, and the values returned are ignored. Names that do not exist come
+decrypted. `String` and `StringList` values still come back in the response;
+they are discarded without being inspected or printed. Names that do not exist come
 back in `InvalidParameters` and are reported as `missing`. When a call is
 denied, each path in it is checked on its own, so `access denied` is reported
 only for the paths the identity cannot read.
@@ -161,7 +162,10 @@ policy, scoped to the same paths:
 }
 ```
 
-No `kms:Decrypt` permission is needed for `validate`.
+No `kms:Decrypt` permission is needed for `validate`. An identity that does
+have `kms:Decrypt` can read decrypted values through `ssm:GetParameters`, so
+grant it only on the paths that identity may already read with
+`ssm:GetParameter`.
 
 #### Azure Key Vault
 

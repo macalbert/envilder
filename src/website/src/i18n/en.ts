@@ -1063,15 +1063,15 @@ export const en: Translations = {
       fieldValid: 'true exactly when the exit code is 0',
       fieldOffline: 'true with --offline',
       fieldMapFile:
-        'path, valid and errors (one { key, message } per problem, the same messages as the text output). null when the map file could not be read',
+        'path, valid and errors (one { key, message } per problem, the same messages as the text output). Left out when the map file could not be read',
       fieldKeys:
-        'One entry per declared variable, in map file order: name, provider, path, status and, when the provider gave one, reason. status is exists, missing, access_denied, authentication_failed or provider_error. null when the secrets were not checked',
+        'One entry per declared variable, in map file order: name, provider, path, status and, when the provider gave one, reason. status is exists, missing, access_denied, authentication_failed or provider_error. Left out when the secrets were not checked',
       fieldEnvFile:
-        'null without --envfile. Otherwise path, valid, keys (each declared variable with status present or missing, plus value matches, differs or unreadable with --compare-values), duplicates ({ name, count }) and undeclared',
+        'Left out without --envfile. Otherwise path, valid, keys (each declared variable with status present or missing, plus value matches, differs or unreadable with --compare-values), duplicates ({ name, count }) and undeclared',
       fieldError:
-        'null, or { message } when the run stopped before every check finished (expired credentials, a missing env file, a declined SSO login). Sections that completed before it are still filled in',
+        '{ message }, only when the run stopped before every check finished (expired credentials, a missing env file, a declined SSO login). Sections that completed before it are still filled in',
       jsonNote:
-        'The document never holds a secret value, local or remote. A section can gain fields in later versions; existing fields keep their meaning.',
+        'The document never holds a secret value, local or remote, and no field is ever null: a section that does not apply is left out. A section can gain fields in later versions; existing fields keep their meaning.',
       exitTitle: 'Exit codes',
       thCode: 'Code',
       exit0:

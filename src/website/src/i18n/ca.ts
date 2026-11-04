@@ -1075,15 +1075,15 @@ export const ca: Translations = {
       fieldValid: 'true exactament quan el codi de sortida és 0',
       fieldOffline: 'true amb --offline',
       fieldMapFile:
-        "path, valid i errors (un { key, message } per problema, amb els mateixos missatges que la sortida de text). null quan el fitxer de mapatge no s'ha pogut llegir",
+        "path, valid i errors (un { key, message } per problema, amb els mateixos missatges que la sortida de text). S'omet quan el fitxer de mapatge no s'ha pogut llegir",
       fieldKeys:
-        "Una entrada per variable declarada, en l'ordre del fitxer de mapatge: name, provider, path, status i, quan el proveïdor en dona un, reason. status és exists, missing, access_denied, authentication_failed o provider_error. null quan no s'han comprovat els secrets",
+        "Una entrada per variable declarada, en l'ordre del fitxer de mapatge: name, provider, path, status i, quan el proveïdor en dona un, reason. status és exists, missing, access_denied, authentication_failed o provider_error. S'omet quan no s'han comprovat els secrets",
       fieldEnvFile:
-        'null sense --envfile. Si no, path, valid, keys (cada variable declarada amb status present o missing, i value matches, differs o unreadable amb --compare-values), duplicates ({ name, count }) i undeclared',
+        "S'omet sense --envfile. Si no, path, valid, keys (cada variable declarada amb status present o missing, i value matches, differs o unreadable amb --compare-values), duplicates ({ name, count }) i undeclared",
       fieldError:
-        "null, o { message } quan l'execució s'ha aturat abans d'acabar totes les comprovacions (credencials caducades, un fitxer env inexistent, un inici de sessió SSO rebutjat). Les seccions completades abans continuen plenes",
+        "{ message }, només quan l'execució s'ha aturat abans d'acabar totes les comprovacions (credencials caducades, un fitxer env inexistent, un inici de sessió SSO rebutjat). Les seccions completades abans continuen plenes",
       jsonNote:
-        'El document no conté mai cap valor de secret, ni local ni remot. Una secció pot guanyar camps en versions futures; els camps existents mantenen el seu significat.',
+        "El document no conté mai cap valor de secret, ni local ni remot, i cap camp és mai null: una secció que no aplica s'omet. Una secció pot guanyar camps en versions futures; els camps existents mantenen el seu significat.",
       exitTitle: 'Codis de sortida',
       thCode: 'Codi',
       exit0:
