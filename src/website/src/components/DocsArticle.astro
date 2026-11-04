@@ -882,6 +882,134 @@ const execErrors = [
     fix: 'errNulFix',
   },
 ] as const;
+
+const va = t.docs.validateReference;
+
+const validateSynopsis = `envilder validate [--offline] [--envfile <path> [--compare-values]] \\
+  [--format <text|json>] [--map <path>] [--provider <name>] \\
+  [--profile <name>] [--vault-url <url>]`;
+
+const validateExamples = `envilder validate
+envilder validate --map=config/envilder.json --profile=dev
+envilder validate --provider=azure --vault-url=https://my-vault.vault.azure.net
+envilder validate --offline
+envilder validate --envfile=.env --compare-values
+envilder validate --format=json`;
+
+const validateOkOutput = `✓ Map file valid: envilder.json
+
+☁ AWS identity · account=123456789012 · region=eu-west-1 · profile=dev
+
+Checking 3 secrets in aws, profile=dev
+  ✓ DB_URL        /myapp/db-url   exists
+  ✓ DATABASE_URL  /myapp/db-url   exists
+  ✓ API_KEY       /myapp/api-key  exists
+
+✓ All 3 secrets exist`;
+
+const validateFailOutput = `✓ Map file valid: envilder.json
+
+Checking 3 secrets in aws, profile=dev
+  ✓ DB_URL   /myapp/db-url   exists
+  ✗ API_KEY  /myapp/api-key  missing
+  ✗ TOKEN    /myapp/token    access denied (User: arn:aws:sts::123456789012:assumed-role/dev/ci is not authorized to perform: ssm:GetParameters ...)
+✗ Validation failed: 1 missing, 1 access denied`;
+
+const validateOfflineOutput = `✓ Map file valid: envilder.json
+  Remote validation skipped (--offline): no provider was called, so the secrets were not checked.`;
+
+const validateEnvfileOutput = `✓ Map file valid: envilder.json
+Checking env file .env
+  ✗ TOKEN  missing from .env
+  ⚠ DEBUG  not declared in map file
+
+Checking 3 secrets in aws, profile=dev
+  ✓ DB_URL   /myapp/db-url   exists
+  ✓ API_KEY  /myapp/api-key  exists
+  ✓ TOKEN    /myapp/token    exists
+Comparing 2 values with aws, profile=dev
+  ✓ DB_URL   matches
+  ✗ API_KEY  differs
+✗ Validation failed: 1 missing from .env, 1 differs`;
+
+const validateInvalidOutput = `✗ Map file invalid: envilder.json (3 problems)
+  • $config.region is not a known field. Allowed fields: provider, profile, vaultUrl, projectId, namespace, path, name, description, owner, environment.
+  • DB_PORT must map to a string secret path, not a number.
+  • $config.profile is only supported with the aws provider (current provider: azure).`;
+
+const validateJson = `{
+  "valid": false,
+  "offline": false,
+  "mapFile": { "path": "envilder.json", "valid": true, "errors": [] },
+  "keys": [
+    { "name": "DB_URL", "provider": "aws", "path": "/myapp/db-url", "status": "exists" },
+    { "name": "API_KEY", "provider": "aws", "path": "/myapp/api-key", "status": "exists" },
+    {
+      "name": "TOKEN",
+      "provider": "aws",
+      "path": "/myapp/token",
+      "status": "access_denied",
+      "reason": "User: arn:aws:sts::123456789012:assumed-role/dev/ci is not authorized to perform: ssm:GetParameters ..."
+    }
+  ],
+  "envFile": {
+    "path": ".env",
+    "valid": false,
+    "keys": [
+      { "name": "DB_URL", "status": "present", "value": "matches" },
+      { "name": "API_KEY", "status": "present", "value": "differs" },
+      { "name": "TOKEN", "status": "missing" }
+    ],
+    "duplicates": [],
+    "undeclared": ["DEBUG"]
+  }
+}`;
+
+const validateAwsPolicy = `{
+  "Effect": "Allow",
+  "Action": ["ssm:GetParameter", "ssm:GetParameters"],
+  "Resource": "arn:aws:ssm:*:*:parameter/myapp/*"
+}`;
+
+const validateAzureRbac = `az role assignment create \\
+  --role "Key Vault Secrets User" \\
+  --assignee {YOUR_OBJECT_ID} \\
+  --scope /subscriptions/{SUB}/resourceGroups/{RG}/providers/Microsoft.KeyVault/vaults/{VAULT}`;
+
+const validateAzurePolicy = `az keyvault set-policy \\
+  --name {VAULT_NAME} \\
+  --object-id {YOUR_OBJECT_ID} \\
+  --secret-permissions get list`;
+
+const validateCi = `- name: Check the map file
+  run: npx envilder validate --offline --map=envilder.json
+
+- name: Check that every secret exists
+  run: npx envilder validate --map=envilder.json`;
+
+const validateCiJson = `- name: Check that every secret exists
+  run: npx envilder validate --map=envilder.json --format=json > validate.json`;
+
+const validateSdkRows = [
+  {
+    sdk: 'Node.js',
+    check: 'await Envilder.fromMapFile(path).validateContract()',
+    load: '.withContractValidation()',
+    href: '/docs/sdks/nodejs/',
+  },
+  {
+    sdk: 'Python',
+    check: 'Envilder.from_map_file(path).validate_contract()',
+    load: '.with_contract_validation()',
+    href: '/docs/sdks/python/',
+  },
+  {
+    sdk: '.NET',
+    check: 'await Env.FromMapFile(path).ValidateContractAsync(ct)',
+    load: '.WithContractValidation()',
+    href: '/docs/sdks/dotnet/',
+  },
+] as const;
 ---
 
 <DocsShell lang={lang} routeKey={routeKey}>
@@ -1760,6 +1888,214 @@ MULTILINE="first\\nsecond"`} />
     </>
   )}
 
+  {routeKey === 'cli-validate' && (
+    <>
+      <section id="validate-prerequisites" class="docs-section">
+        <h2>{va.prereqTitle}</h2>
+        <ul class="docs-list">
+          {va.prereqItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+
+      <section id="validate-command" class="docs-section">
+        <h2>{va.synopsisTitle}</h2>
+        <CodeBlock lang="bash" code={validateSynopsis} />
+        <p>{va.synopsisDesc}</p>
+        <CodeBlock lang="bash" code={validateExamples} />
+
+        <h3>{va.optionsTitle}</h3>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{va.thOption}</th><th>{va.thDescription}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>--offline</code></td><td>{va.optOffline}</td></tr>
+            <tr><td><code>--envfile</code></td><td>{va.optEnvfile}</td></tr>
+            <tr><td><code>--compare-values</code></td><td>{va.optCompareValues}</td></tr>
+            <tr><td><code>--format</code></td><td>{va.optFormat}</td></tr>
+            <tr><td><code>--map</code></td><td>{va.optMap}</td></tr>
+            <tr><td><code>--provider</code></td><td>{va.optProvider}</td></tr>
+            <tr><td><code>--profile</code></td><td>{va.optProfile}</td></tr>
+            <tr><td><code>--vault-url</code></td><td>{va.optVault}</td></tr>
+          </tbody>
+        </table>
+        <p>{va.optionsNote}</p>
+        <p>{va.optionsRejected}</p>
+      </section>
+
+      <section id="validate-checks" class="docs-section">
+        <h2>{va.checksTitle}</h2>
+
+        <h3>{va.mapTitle}</h3>
+        <p>{va.mapDesc}</p>
+        <ul class="docs-list">
+          {va.mapRules.map((rule) => <li>{rule}</li>)}
+        </ul>
+        <p>{va.mapNote}</p>
+
+        <h3>{va.remoteTitle}</h3>
+        <p>{va.remoteDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{va.thStatus}</th><th>{va.thMeaning}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>exists</code></td><td>{va.statusExists}</td></tr>
+            <tr><td><code>missing</code></td><td>{va.statusMissing}</td></tr>
+            <tr><td><code>access denied</code></td><td>{va.statusDenied}</td></tr>
+            <tr><td><code>authentication failed</code></td><td>{va.statusAuth}</td></tr>
+            <tr><td><code>provider error</code></td><td>{va.statusError}</td></tr>
+          </tbody>
+        </table>
+        <p>{va.remoteSsoNote}</p>
+
+        <h3>{va.envfileTitle}</h3>
+        <p>{va.envfileDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{va.thFinding}</th><th>{va.thEffect}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>missing from .env</code></td><td>{va.envMissing}</td></tr>
+            <tr><td><code>duplicated in .env</code></td><td>{va.envDuplicated}</td></tr>
+            <tr><td><code>not declared in map file</code></td><td>{va.envUndeclared}</td></tr>
+          </tbody>
+        </table>
+        <p>{va.envfileNote}</p>
+
+        <h3>{va.valuesTitle}</h3>
+        <p>{va.valuesDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{va.thStatus}</th><th>{va.thMeaning}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>matches</code></td><td>{va.valMatches}</td></tr>
+            <tr><td><code>differs</code></td><td>{va.valDiffers}</td></tr>
+            <tr><td><code>unreadable</code></td><td>{va.valUnreadable}</td></tr>
+          </tbody>
+        </table>
+        <p>{va.valuesNote}</p>
+      </section>
+
+      <section id="validate-permissions" class="docs-section">
+        <h2>{va.permTitle}</h2>
+        <p>{va.permDesc}</p>
+        <h3>{va.tabAws}</h3>
+        <p>{va.permAwsDesc}</p>
+        <CodeBlock lang="json" code={validateAwsPolicy} />
+        <p class="note">{va.permAwsNote}</p>
+        <h3>{va.tabAzure}</h3>
+        <p>{va.permAzureDesc}</p>
+        <ul class="docs-list">
+          {va.permAzureItems.map((item) => <li>{item}</li>)}
+        </ul>
+        <TabbedCodeBlock tabs={[
+          { label: va.tabRbac, lang: 'bash', code: validateAzureRbac },
+          { label: va.tabPolicy, lang: 'bash', code: validateAzurePolicy },
+        ]} />
+        <p class="note">{va.permAzureNote}</p>
+        <p>{va.permValuesNote}</p>
+      </section>
+
+      <section id="validate-output" class="docs-section">
+        <h2>{va.outputTitle}</h2>
+        <p>{va.outputOkDesc}</p>
+        <CodeBlock lang="text" code={validateOkOutput} />
+        <p>{va.outputFailDesc}</p>
+        <CodeBlock lang="text" code={validateFailOutput} />
+        <p>{va.outputOfflineDesc}</p>
+        <CodeBlock lang="text" code={validateOfflineOutput} />
+        <p>{va.outputEnvfileDesc}</p>
+        <CodeBlock lang="text" code={validateEnvfileOutput} />
+        <p>{va.outputEnvfileNote}</p>
+        <p>{va.outputInvalidDesc}</p>
+        <CodeBlock lang="text" code={validateInvalidOutput} />
+      </section>
+
+      <section id="validate-json" class="docs-section">
+        <h2>{va.jsonTitle}</h2>
+        <p>{va.jsonDesc}</p>
+        <CodeBlock lang="json" code={validateJson} />
+        <table class="docs-table">
+          <thead>
+            <tr><th>{va.thField}</th><th>{va.thDescription}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>valid</code></td><td>{va.fieldValid}</td></tr>
+            <tr><td><code>offline</code></td><td>{va.fieldOffline}</td></tr>
+            <tr><td><code>mapFile</code></td><td>{va.fieldMapFile}</td></tr>
+            <tr><td><code>keys</code></td><td>{va.fieldKeys}</td></tr>
+            <tr><td><code>envFile</code></td><td>{va.fieldEnvFile}</td></tr>
+            <tr><td><code>error</code></td><td>{va.fieldError}</td></tr>
+          </tbody>
+        </table>
+        <p class="note">{va.jsonNote}</p>
+      </section>
+
+      <section id="validate-exit-codes" class="docs-section">
+        <h2>{va.exitTitle}</h2>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{va.thCode}</th><th>{va.thMeaning}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>0</code></td><td>{va.exit0}</td></tr>
+            <tr><td><code>1</code></td><td>{va.exit1}</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="validate-ci" class="docs-section">
+        <h2>{va.ciTitle}</h2>
+        <p>{va.ciDesc}</p>
+        <CodeBlock lang="yaml" code={validateCi} />
+        <p>{va.ciEnvExample}</p>
+        <p>{va.ciJsonDesc}</p>
+        <CodeBlock lang="yaml" code={validateCiJson} />
+        <p class="note">{va.ciNote}</p>
+      </section>
+
+      <section id="validate-sdks" class="docs-section">
+        <h2>{va.sdkTitle}</h2>
+        <p>{va.sdkDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{va.thSdk}</th><th>{va.thCheck}</th><th>{va.thLoad}</th></tr>
+          </thead>
+          <tbody>
+            {validateSdkRows.map((row) => (
+              <tr>
+                <td><a href={localizedPath(lang, row.href)}>{row.sdk}</a></td>
+                <td><code>{row.check}</code></td>
+                <td><code>{row.load}</code></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>{va.sdkNote}</p>
+      </section>
+
+      <section id="validate-limits" class="docs-section">
+        <h2>{va.limitsTitle}</h2>
+        <ul class="docs-list">
+          {va.limitsItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+
+      <section id="validate-related" class="docs-section">
+        <h2>{va.relatedTitle}</h2>
+        <ul class="docs-list">
+          <li><a href={localizedPath(lang, '/docs/map-file/')}>{va.relatedMap}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/pull/')}>{va.relatedPull}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/exec/')}>{va.relatedExec}</a></li>
+          <li><a href={localizedPath(lang, '/docs/github-action/')}>{va.relatedGha}</a></li>
+        </ul>
+        <p><a href="https://github.com/macalbert/envilder/blob/main/docs/validate-command.md" target="_blank" rel="noopener noreferrer">{va.guideLink}</a></p>
+      </section>
+    </>
+  )}
+
   {routeKey === 'sdk-dotnet' && (
     <>
       <section id="sdk-dotnet" class="docs-section">
@@ -1849,6 +2185,7 @@ secrets.ValidateSecrets(); // throws SecretValidationException if any value is e
 
         <h3>{t.docs.sdkContractValidation}</h3>
         <p>{t.docs.sdkContractValidationDesc}</p>
+        <p><a href={localizedPath(lang, '/docs/cli/validate/')}>{t.docs.sdkContractValidationCliLink}</a></p>
         <CodeBlock lang="csharp" code={`using Envilder;
 
 var result = await Env.FromMapFile("envilder.json").ValidateContractAsync();
@@ -2048,6 +2385,7 @@ validate_secrets(secrets)  # raises SecretValidationError if any value is empty`
 
         <h3>{t.docs.sdkContractValidation}</h3>
         <p>{t.docs.sdkContractValidationDesc}</p>
+        <p><a href={localizedPath(lang, '/docs/cli/validate/')}>{t.docs.sdkContractValidationCliLink}</a></p>
         <CodeBlock lang="python" code={`from envilder import Envilder, SecretExistenceStatus
 
 result = Envilder.from_map_file('envilder.json').validate_contract()
@@ -2137,6 +2475,7 @@ validateSecrets(secrets); // throws SecretValidationError if any value is empty`
 
         <h3>{t.docs.sdkContractValidation}</h3>
         <p>{t.docs.sdkContractValidationDesc}</p>
+        <p><a href={localizedPath(lang, '/docs/cli/validate/')}>{t.docs.sdkContractValidationCliLink}</a></p>
         <CodeBlock lang="typescript" code={`import { Envilder } from '@envilder/sdk';
 
 const result = await Envilder.fromMapFile('envilder.json').validateContract();

@@ -254,6 +254,7 @@ export interface FooterTranslations {
   linkPullCommand: string;
   linkPushCommand: string;
   linkExecCommand: string;
+  linkValidateCommand: string;
   linkGithubAction: string;
   linkIssues: string;
   linkDiscussions: string;
@@ -655,6 +656,107 @@ export interface ExecReferenceTranslations {
   guideLink: string;
 }
 
+export interface ValidateReferenceTranslations {
+  tabAws: string;
+  tabAzure: string;
+  tabRbac: string;
+  tabPolicy: string;
+  prereqTitle: string;
+  prereqItems: string[];
+  synopsisTitle: string;
+  synopsisDesc: string;
+  optionsTitle: string;
+  thOption: string;
+  thDescription: string;
+  optOffline: string;
+  optEnvfile: string;
+  optCompareValues: string;
+  optFormat: string;
+  optMap: string;
+  optProvider: string;
+  optProfile: string;
+  optVault: string;
+  optionsNote: string;
+  optionsRejected: string;
+  checksTitle: string;
+  mapTitle: string;
+  mapDesc: string;
+  mapRules: string[];
+  mapNote: string;
+  remoteTitle: string;
+  remoteDesc: string;
+  thStatus: string;
+  thMeaning: string;
+  statusExists: string;
+  statusMissing: string;
+  statusDenied: string;
+  statusAuth: string;
+  statusError: string;
+  remoteSsoNote: string;
+  envfileTitle: string;
+  envfileDesc: string;
+  thFinding: string;
+  thEffect: string;
+  envMissing: string;
+  envDuplicated: string;
+  envUndeclared: string;
+  envfileNote: string;
+  valuesTitle: string;
+  valuesDesc: string;
+  valMatches: string;
+  valDiffers: string;
+  valUnreadable: string;
+  valuesNote: string;
+  permTitle: string;
+  permDesc: string;
+  permAwsDesc: string;
+  permAwsNote: string;
+  permAzureDesc: string;
+  permAzureItems: string[];
+  permAzureNote: string;
+  permValuesNote: string;
+  outputTitle: string;
+  outputOkDesc: string;
+  outputFailDesc: string;
+  outputOfflineDesc: string;
+  outputEnvfileDesc: string;
+  outputEnvfileNote: string;
+  outputInvalidDesc: string;
+  jsonTitle: string;
+  jsonDesc: string;
+  thField: string;
+  fieldValid: string;
+  fieldOffline: string;
+  fieldMapFile: string;
+  fieldKeys: string;
+  fieldEnvFile: string;
+  fieldError: string;
+  jsonNote: string;
+  exitTitle: string;
+  thCode: string;
+  exit0: string;
+  exit1: string;
+  ciTitle: string;
+  ciDesc: string;
+  ciEnvExample: string;
+  ciJsonDesc: string;
+  ciNote: string;
+  sdkTitle: string;
+  sdkDesc: string;
+  thSdk: string;
+  thCheck: string;
+  thLoad: string;
+  sdkNote: string;
+  limitsTitle: string;
+  limitsItems: string[];
+  relatedTitle: string;
+  relatedMap: string;
+  relatedPull: string;
+  relatedExec: string;
+  relatedGha: string;
+  guideLink: string;
+}
+
 export interface DocsTranslations {
   gettingStartedGuide: GettingStartedGuideTranslations;
   mapFileReference: MapFileReferenceTranslations;
@@ -662,6 +764,7 @@ export interface DocsTranslations {
   guideSsmToEnv: GuideSsmToEnvTranslations;
   pushReference: PushReferenceTranslations;
   execReference: ExecReferenceTranslations;
+  validateReference: ValidateReferenceTranslations;
   title: string;
   description: string;
   backToHome: string;
@@ -677,6 +780,7 @@ export interface DocsTranslations {
     | 'cli-pull'
     | 'cli-push'
     | 'cli-exec'
+    | 'cli-validate'
     | 'github-action'
     | 'sdk-dotnet'
     | 'sdk-python'
@@ -1004,6 +1108,7 @@ export interface DocsTranslations {
   sdkContractValidation: string;
   sdkContractValidationDesc: string;
   sdkContractValidationLoadDesc: string;
+  sdkContractValidationCliLink: string;
   sdkNodejsFullDocs: string;
   sdkNodejsExamplesDesc: string;
   // Pager
