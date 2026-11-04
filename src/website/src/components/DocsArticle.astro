@@ -236,6 +236,119 @@ const ghaAzureRole = `az role assignment create \\
   --assignee {APP_ID} \\
   --scope /subscriptions/{SUB}/resourceGroups/{RG}/providers/Microsoft.KeyVault/vaults/{VAULT}`;
 
+const g = t.docs.guideSsmToEnv;
+
+const guideIamPolicy = `{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "ssm:GetParameter",
+      "Resource": "arn:aws:ssm:eu-west-1:123456789012:parameter/my-app/dev/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "kms:Decrypt",
+      "Resource": "arn:aws:kms:eu-west-1:123456789012:key/<key-id>"
+    }
+  ]
+}`;
+
+const guideDevMap = `{
+  "DB_PASSWORD": "/my-app/dev/db-password",
+  "API_TOKEN": "/my-app/dev/api-token",
+  "DATABASE_URL": "/my-app/dev/database-url"
+}`;
+
+const guideDevOutput = `☁ AWS identity · account=123456789012 · region=eu-west-1 · profile=default
+
+🪙  RESOLVING SECRETS
+${'━'.repeat(60)}
+  ✓ DB_PASSWORD         → ***************ord
+  ✓ API_TOKEN           → ***************c21
+  ✓ DATABASE_URL        → ********************************************app
+
+⭐ LEVEL CLEARED  —  3/3 secrets loaded · .env written`;
+
+const guideDevEnv = `DB_PASSWORD=local-dev-password
+API_TOKEN=dev-token-7f3a9c21
+DATABASE_URL='postgres://app:p@ss w0rd#1@db.internal:5432/app'`;
+
+const guideProdMap = `{
+  "DB_PASSWORD": "/my-app/prod/db-password",
+  "API_TOKEN": "/my-app/prod/api-token",
+  "DATABASE_URL": "/my-app/prod/database-url"
+}`;
+
+const guideProdCmd =
+  'envilder --map=envilder.prod.json --envfile=.env.prod --profile=prod-account';
+
+const guideProdOutput = `☁ AWS identity · account=123456789012 · region=eu-west-1 · profile=prod-account
+
+🪙  RESOLVING SECRETS
+${'━'.repeat(60)}
+  ✓ DB_PASSWORD         → *******************4aa
+  ✓ API_TOKEN           → ****************0e3
+  ✓ DATABASE_URL        → ***********************************app
+
+⭐ LEVEL CLEARED  —  3/3 secrets loaded · .env.prod written`;
+
+const guideExecOutput = 'envilder: 3 secrets resolved (aws) → node …';
+
+const guideScript = `aws ssm get-parameters-by-path --path /my-app/dev/ --recursive \\
+  --with-decryption --query 'Parameters[].[Name,Value]' --output text \\
+  | while IFS=$'\\t' read -r name value; do
+      echo "$(basename "$name" | tr 'a-z-' 'A-Z_')=$value"
+    done > .env`;
+
+const guideCi = `name: CI
+on: [push]
+
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole
+          aws-region: eu-west-1
+      - uses: macalbert/envilder/github-action@v0
+        with:
+          map-file: envilder.json
+          env-file: \${{ runner.temp }}/app.env
+      - run: docker compose --env-file "$RUNNER_TEMP/app.env" up -d`;
+
+const guideErrors = [
+  {
+    message: 'Could not load credentials from any providers',
+    fix: 'errCredsFix',
+  },
+  {
+    message:
+      'User: arn:aws:sts::123456789012:assumed-role/dev/session is not authorized to perform: ssm:GetParameter on resource: arn:aws:ssm:eu-west-1:123456789012:parameter/my-app/dev/api-token …',
+    fix: 'errDeniedFix',
+  },
+  {
+    message: 'secret not found (path: *******************dsn) — skipped',
+    fix: 'errNotFoundFix',
+  },
+  {
+    message:
+      'Invalid environment variable name "MY VAR": names may only contain letters, digits, underscore, dot, hyphen and slash, so that they can be read back from a .env file',
+    fix: 'errNameFix',
+  },
+  {
+    message:
+      'No map file found. Provide --map or create envilder.json in the current directory.',
+    fix: 'errNoMapFix',
+  },
+] as const;
+
 const gs = t.docs.gettingStartedGuide;
 const mf = t.docs.mapFileReference;
 
@@ -983,6 +1096,122 @@ const validateSdkRows = [
     </>
   )}
 
+  {routeKey === 'guide-ssm-to-env' && (
+    <>
+      <section id="guide-prerequisites" class="docs-section">
+        <h2>{g.prereqTitle}</h2>
+        <ul class="docs-list">
+          {g.prereqItems.map((item) => <li>{item}</li>)}
+        </ul>
+        <p>{g.prereqPolicyDesc}</p>
+        <CodeBlock lang="json" filename="policy.json" code={guideIamPolicy} />
+        <p class="note">{g.prereqPolicyNote}</p>
+
+        <h3>{g.regionTitle}</h3>
+        <p>{g.regionDesc}</p>
+        <ol class="docs-list">
+          {g.regionItems.map((item) => <li>{item}</li>)}
+        </ol>
+        <p class="note">{g.regionNote}</p>
+      </section>
+
+      <section id="guide-example" class="docs-section">
+        <h2>{g.exampleTitle}</h2>
+        <p>{g.exampleParamsDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{g.thParameter}</th><th>{g.thVariable}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>/my-app/dev/db-password</code></td><td><code>DB_PASSWORD</code></td></tr>
+            <tr><td><code>/my-app/dev/api-token</code></td><td><code>API_TOKEN</code></td></tr>
+            <tr><td><code>/my-app/dev/database-url</code></td><td><code>DATABASE_URL</code></td></tr>
+          </tbody>
+        </table>
+        <p>{g.exampleMapDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={guideDevMap} />
+        <p>{g.exampleRunDesc}</p>
+        <CodeBlock lang="bash" code="envilder" />
+        <CodeBlock lang="text" code={guideDevOutput} />
+        <p>{g.exampleOutputDesc}</p>
+        <p>{g.exampleResultDesc}</p>
+        <CodeBlock lang="dotenv" filename=".env" code={guideDevEnv} />
+        <p>{g.exampleRerunDesc}</p>
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>{g.exampleGitignore}</div>
+        </div>
+      </section>
+
+      <section id="guide-environments" class="docs-section">
+        <h2>{g.envsTitle}</h2>
+        <p>{g.envsDesc}</p>
+        <CodeBlock lang="json" filename="envilder.prod.json" code={guideProdMap} />
+        <p>{g.envsRunDesc}</p>
+        <CodeBlock lang="bash" code={guideProdCmd} />
+        <CodeBlock lang="text" code={guideProdOutput} />
+        <p>{g.envsNote}</p>
+      </section>
+
+      <section id="guide-exec" class="docs-section">
+        <h2>{g.execTitle}</h2>
+        <p>{g.execDesc}</p>
+        <CodeBlock lang="bash" code="envilder exec -- node app.js" />
+        <CodeBlock lang="text" code={guideExecOutput} />
+        <p>{g.execOutputDesc}</p>
+
+        <h3>{g.whenTitle}</h3>
+        <ul class="docs-list">
+          {g.whenItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+
+      <section id="guide-by-hand" class="docs-section">
+        <h2>{g.handTitle}</h2>
+        <p>{g.handDesc}</p>
+        <CodeBlock lang="bash" code={guideScript} />
+        <p>{g.handIntro}</p>
+        <ul class="docs-list">
+          {g.handPoints.map((item) => <li>{item}</li>)}
+        </ul>
+        <p>{g.handFair}</p>
+      </section>
+
+      <section id="guide-errors" class="docs-section">
+        <h2>{g.errorsTitle}</h2>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{g.thMessage}</th><th>{g.thFix}</th></tr>
+          </thead>
+          <tbody>
+            {guideErrors.map((row) => (
+              <tr><td><code>{row.message}</code></td><td>{g[row.fix]}</td></tr>
+            ))}
+          </tbody>
+        </table>
+        <p><a href={localizedPath(lang, '/docs/cli/pull/#pull-errors')}>{g.errorsMore}</a></p>
+      </section>
+
+      <section id="guide-ci" class="docs-section">
+        <h2>{g.ciTitle}</h2>
+        <p>{g.ciDesc}</p>
+        <CodeBlock lang="yaml" filename=".github/workflows/ci.yml" code={guideCi} />
+        <p>{g.ciNote}</p>
+      </section>
+
+      <section id="guide-related" class="docs-section">
+        <h2>{g.relatedTitle}</h2>
+        <ul class="docs-list">
+          <li><a href={localizedPath(lang, '/docs/cli/pull/')}>{g.relatedPull}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/exec/')}>{g.relatedExec}</a></li>
+          <li><a href={localizedPath(lang, '/docs/map-file/')}>{g.relatedMap}</a></li>
+          <li><a href={localizedPath(lang, '/docs/providers/aws-ssm/')}>{g.relatedAws}</a></li>
+          <li><a href={localizedPath(lang, '/docs/github-action/')}>{g.relatedGha}</a></li>
+        </ul>
+      </section>
+    </>
+  )}
+
   {routeKey === 'aws-ssm' && (
     <>
       <section id="aws-setup" class="docs-section">
@@ -1359,6 +1588,7 @@ MULTILINE="first\\nsecond"`} />
           <li><a href={localizedPath(lang, '/docs/map-file/')}>{pr.relatedMap}</a></li>
           <li><a href={localizedPath(lang, '/docs/cli/exec/')}>{pr.relatedExec}</a></li>
           <li><a href={localizedPath(lang, '/docs/cli/push/')}>{pr.relatedPush}</a></li>
+          <li><a href={localizedPath(lang, '/docs/guides/ssm-to-env/')}>{pr.relatedGuide}</a></li>
         </ul>
       </section>
     </>

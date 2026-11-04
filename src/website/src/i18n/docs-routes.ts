@@ -1,6 +1,7 @@
 export const docsRouteKeys = [
   'hub',
   'getting-started',
+  'guide-ssm-to-env',
   'aws-ssm',
   'azure-key-vault',
   'map-file',
@@ -20,7 +21,13 @@ export type DocsArticleRouteKey = Exclude<DocsRouteKey, 'hub'>;
 export interface DocsRoute {
   key: DocsRouteKey;
   path: string;
-  navGroup: 'gettingStarted' | 'providers' | 'cli' | 'githubAction' | 'sdks';
+  navGroup:
+    | 'gettingStarted'
+    | 'guides'
+    | 'providers'
+    | 'cli'
+    | 'githubAction'
+    | 'sdks';
   legacyHashes: readonly string[];
 }
 
@@ -36,6 +43,12 @@ export const docsRouteManifest = [
     path: '/docs/getting-started/',
     navGroup: 'gettingStarted',
     legacyHashes: ['overview', 'requirements', 'installation'],
+  },
+  {
+    key: 'guide-ssm-to-env',
+    path: '/docs/guides/ssm-to-env/',
+    navGroup: 'guides',
+    legacyHashes: [],
   },
   {
     key: 'aws-ssm',
@@ -108,6 +121,7 @@ export const docsRouteManifest = [
 /** Docs navigation sections, in display order, shared by the sidebar and the navbar. */
 export const docsNavGroups = [
   { key: 'gettingStarted', labelKey: 'navGettingStarted' },
+  { key: 'guides', labelKey: 'navGuides' },
   { key: 'providers', labelKey: 'navProviders' },
   { key: 'cli', labelKey: 'sidebarCli' },
   { key: 'githubAction', labelKey: 'sidebarGha' },
