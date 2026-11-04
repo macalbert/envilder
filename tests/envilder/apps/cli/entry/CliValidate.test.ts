@@ -824,7 +824,7 @@ describe('Cli validate', () => {
       // Assert
       expect(logSpy).toHaveBeenCalledTimes(1);
       expect(stdoutWriteSpy).not.toHaveBeenCalled();
-      expect(printedJson()).toEqual({
+      expect(printedJson()).toStrictEqual({
         valid: true,
         offline: false,
         mapFile: { path: mapPath, valid: true, errors: [] },
@@ -842,8 +842,6 @@ describe('Cli validate', () => {
             status: 'exists',
           },
         ],
-        envFile: null,
-        error: null,
       });
     });
 
@@ -932,9 +930,9 @@ describe('Cli validate', () => {
       expect(printedJson()).toMatchObject({
         valid: false,
         mapFile: { path: mapPath, valid: false, errors: [{ key: 'PORT' }] },
-        keys: null,
-        error: null,
       });
+      expect(printedJson()).not.toHaveProperty('keys');
+      expect(printedJson()).not.toHaveProperty('error');
       expect(createAwsSecretProvider).not.toHaveBeenCalled();
     });
 
@@ -951,8 +949,8 @@ describe('Cli validate', () => {
       expect(printedJson()).toMatchObject({
         valid: true,
         offline: true,
-        keys: null,
       });
+      expect(printedJson()).not.toHaveProperty('keys');
     });
 
     it('Should_PrintErrorAsJson_When_CredentialsAreExpired', async () => {
@@ -968,7 +966,7 @@ describe('Cli validate', () => {
       await expect(action).rejects.toBeInstanceOf(ExpiredCredentialsError);
       expect(logSpy).toHaveBeenCalledTimes(1);
       expect(printedJson().valid).toBe(false);
-      expect(printedJson().keys).toBeNull();
+      expect(printedJson()).not.toHaveProperty('keys');
       expect(printedJson().error?.message).toContain(
         'AWS credentials are expired',
       );

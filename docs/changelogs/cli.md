@@ -32,7 +32,8 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 * **`envilder validate --format json`**: prints the result as exactly one
   JSON document on stdout, with `valid`, `mapFile`, `keys` (name, provider,
   path and status: `exists`, `missing`, `access_denied`,
-  `authentication_failed` or `provider_error`), `envFile` and `error`. Logs,
+  `authentication_failed` or `provider_error`), `envFile` and `error`. A
+  section that did not run is left out rather than `null`. Logs,
   warnings, error messages and the SSO login prompt go to stderr, so stdout
   stays valid JSON. Exit codes do not change, and the document never holds a
   secret value: value comparison only reports `matches`, `differs` or

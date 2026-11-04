@@ -30,7 +30,6 @@ exports[`toValidationJson > Should_MatchDocumentedShape_When_EveryStepRan 1`] = 
     ],
     "valid": false,
   },
-  "error": null,
   "keys": [
     {
       "name": "DB_URL",

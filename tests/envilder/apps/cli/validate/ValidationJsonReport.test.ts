@@ -87,7 +87,7 @@ describe('toValidationJson', () => {
     expect(actual.envFile?.valid).toBe(true);
   });
 
-  it('Should_LeaveKeysNull_When_RunIsOffline', () => {
+  it('Should_OmitSectionsThatDidNotRun_When_RunIsOffline', () => {
     // Arrange
     const results: ValidationResults = {
       offline: true,
@@ -98,13 +98,10 @@ describe('toValidationJson', () => {
     const actual = toValidationJson(results);
 
     // Assert
-    expect(actual).toEqual({
+    expect(actual).toStrictEqual({
       valid: true,
       offline: true,
       mapFile: { path: 'envilder.json', valid: true, errors: [] },
-      keys: null,
-      envFile: null,
-      error: null,
     });
   });
 
@@ -128,7 +125,7 @@ describe('toValidationJson', () => {
       valid: false,
       errors: [{ key: 'PORT', message: 'PORT must map to a string.' }],
     });
-    expect(actual.keys).toBeNull();
+    expect(actual).not.toHaveProperty('keys');
   });
 
   it('Should_ReportError_When_RunStoppedBeforeTheChecks', () => {

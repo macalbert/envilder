@@ -51,27 +51,27 @@ export type ValidationJsonEnvFileKey = {
 };
 
 /**
- * The document `envilder validate --format json` prints. A section is `null`
- * when its step did not run. It never carries a secret value: value
+ * The document `envilder validate --format json` prints. A section is left
+ * out when its step did not run, and `error` when nothing stopped the run. It never carries a secret value: value
  * comparison only reports `matches`, `differs` or `unreadable`.
  */
 export type ValidationJson = {
   valid: boolean;
   offline: boolean;
-  mapFile: {
+  mapFile?: {
     path: string;
     valid: boolean;
     errors: { key: string; message: string }[];
-  } | null;
-  keys: ValidationJsonKey[] | null;
-  envFile: {
+  };
+  keys?: ValidationJsonKey[];
+  envFile?: {
     path: string;
     valid: boolean;
     keys: ValidationJsonEnvFileKey[];
     duplicates: { name: string; count: number }[];
     undeclared: string[];
-  } | null;
-  error: { message: string } | null;
+  };
+  error?: { message: string };
 };
 
 /**
@@ -103,10 +103,10 @@ export function toValidationJson(
       summarizeFailures(results.keys?.checks ?? []) === '' &&
       (envFile?.valid ?? true),
     offline: results.offline,
-    mapFile: mapFile ?? null,
-    keys: keys ?? null,
-    envFile: envFile ?? null,
-    error: error === undefined ? null : { message: describeError(error) },
+    ...(mapFile !== undefined && { mapFile }),
+    ...(keys !== undefined && { keys }),
+    ...(envFile !== undefined && { envFile }),
+    ...(error !== undefined && { error: { message: describeError(error) } }),
   };
 }
 

@@ -284,8 +284,7 @@ anything runs, without a document.
     ],
     "duplicates": [],
     "undeclared": ["DEBUG"]
-  },
-  "error": null
+  }
 }
 ```
 
@@ -293,13 +292,14 @@ anything runs, without a document.
 |-------|-------------|
 | `valid` | `true` exactly when the exit code is `0` |
 | `offline` | `true` with `--offline` |
-| `mapFile` | `path`, `valid`, and `errors`: one `{ "key", "message" }` per problem, the same messages as the text output. `null` when the map file could not be read |
-| `keys` | One entry per declared variable, in map file order: `name`, `provider` (`aws` or `azure`), `path`, `status` and, when the provider gave one, `reason`. `status` is `exists`, `missing`, `access_denied`, `authentication_failed` or `provider_error`. `null` when the secrets were not checked: with `--offline`, after an invalid map file, or when the run stopped first |
-| `envFile` | `null` without `--envfile`. `path`, `valid`, `keys` (each declared variable with `status` `present` or `missing`, the variables in the env file first), `duplicates` (`{ "name", "count" }` for each key assigned more than once) and `undeclared` (keys only in the env file, warnings). With `--compare-values`, a compared key also has `value`: `matches`, `differs` or `unreadable` (with a `reason`) |
-| `error` | `null`, or `{ "message" }` when the run stopped before every check finished, for example expired credentials, a missing env file, or a declined SSO login. The sections that completed before it are still filled in |
+| `mapFile` | `path`, `valid`, and `errors`: one `{ "key", "message" }` per problem, the same messages as the text output. Left out when the map file could not be read |
+| `keys` | One entry per declared variable, in map file order: `name`, `provider` (`aws` or `azure`), `path`, `status` and, when the provider gave one, `reason`. `status` is `exists`, `missing`, `access_denied`, `authentication_failed` or `provider_error`. Left out when the secrets were not checked: with `--offline`, after an invalid map file, or when the run stopped first |
+| `envFile` | Left out without `--envfile`. `path`, `valid`, `keys` (each declared variable with `status` `present` or `missing`, the variables in the env file first), `duplicates` (`{ "name", "count" }` for each key assigned more than once) and `undeclared` (keys only in the env file, warnings). With `--compare-values`, a compared key also has `value`: `matches`, `differs` or `unreadable` (with a `reason`) |
+| `error` | `{ "message" }`, only when the run stopped before every check finished, for example expired credentials, a missing env file, or a declined SSO login. The sections that completed before it are still filled in |
 
 The document never holds a secret value, local or remote: value comparison
-only reports `matches`, `differs` or `unreadable`. A section can gain fields
+only reports `matches`, `differs` or `unreadable`. No field is ever `null`: a
+section that does not apply is left out. A section can gain fields
 in later versions; existing fields keep their meaning.
 
 ## Exit codes

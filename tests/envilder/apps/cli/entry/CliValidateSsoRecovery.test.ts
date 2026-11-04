@@ -188,9 +188,10 @@ describe('Cli validate SSO recovery prompt with --format json', () => {
 
     // Assert
     expect(actual).toBe(1);
-    expect(JSON.parse(stdoutChunks.join(''))).toMatchObject({
+    const json = JSON.parse(stdoutChunks.join(''));
+    expect(json).not.toHaveProperty('keys');
+    expect(json).toMatchObject({
       valid: false,
-      keys: null,
       error: { message: 'Validation stopped before every check finished.' },
     });
   });
