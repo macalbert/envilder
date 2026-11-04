@@ -740,6 +740,104 @@ export const en: Translations = {
       relatedExec:
         'envilder exec: run a command with the same secrets and no .env file',
       relatedPush: 'Push mode: upload a .env file or a single secret',
+      relatedGuide:
+        'Guide: load AWS SSM parameters into a .env file, step by step',
+    },
+    guideSsmToEnv: {
+      prereqTitle: 'Prerequisites',
+      prereqItems: [
+        'Node.js 22.12 or later. Run the CLI with npx envilder, or install it with npm install -g envilder.',
+        'AWS credentials the SDK can find: a named profile, environment variables, or an SSO session started with aws sso login --profile <name>.',
+        'Read access to every parameter you map. The CLI calls GetParameter once per variable, with decryption on.',
+      ],
+      prereqPolicyDesc:
+        'The minimum IAM policy allows ssm:GetParameter on the parameter ARNs in your map file. A wildcard on the path prefix covers one application and environment:',
+      prereqPolicyNote:
+        "The second statement is only needed for parameters encrypted with a customer-managed KMS key; replace <key-id> with that key's ID.",
+      regionTitle: 'Which region is used',
+      regionDesc:
+        'Envilder picks the region in this order and prints it on the first line of every run (region=eu-west-1 in the output below):',
+      regionItems: [
+        'The AWS_REGION environment variable.',
+        'The AWS_DEFAULT_REGION environment variable.',
+        'The region the AWS SDK finds for the selected profile, for example region in ~/.aws/config. The profile is --profile, then $config.profile, then the default one.',
+        'us-east-1, when none of the above is set.',
+      ],
+      regionNote:
+        'Parameters stored in another region are reported as not found, so check this line first when a parameter you know exists is skipped.',
+      exampleTitle: 'Example: from SSM parameters to a .env file',
+      exampleParamsDesc:
+        'The account already has three parameters under /my-app/dev/. The map file connects each one to the variable that should hold it:',
+      thParameter: 'SSM parameter',
+      thVariable: 'Variable in .env',
+      exampleMapDesc:
+        'Create envilder.json in the project root. Each key is the variable name to write and each value is the parameter name, exactly as it appears in SSM:',
+      exampleRunDesc:
+        'Run envilder with no options. Pull is the default mode: it reads envilder.json and writes .env in the current directory.',
+      exampleOutputDesc:
+        'Values are masked: for a value longer than 10 characters only the last three characters are shown, and paths are masked the same way.',
+      exampleResultDesc:
+        'The resulting .env. Envilder quotes the DATABASE_URL value because it contains a space and a #, and before writing it reads the result back the way dotenv does to check that every value survives:',
+      exampleRerunDesc:
+        'Running it again changes nothing: a line that already holds the right value is not rewritten, and lines the map file does not declare are kept.',
+      exampleGitignore:
+        'The .env file holds the real values: add it to .gitignore. envilder.json holds only variable names and parameter paths, so it is safe to commit.',
+      envsTitle: 'Several environments',
+      envsDesc:
+        'Keep one map file per environment and choose it with --map. The file names are yours. This envilder.prod.json maps the same variables to the /my-app/prod/ parameters:',
+      envsRunDesc:
+        'Pass --envfile for the file to write and --profile for the AWS profile that can read those parameters:',
+      envsNote:
+        '--profile overrides $config.profile in the map file, and AWS_REGION still wins over the region of the profile.',
+      execTitle: 'Or skip the file with envilder exec',
+      execDesc:
+        'If the values are only needed to start a process, envilder exec resolves the same map file and starts your command with the parameters added to its environment. Nothing is written to disk:',
+      execOutputDesc:
+        'The summary goes to stderr, so it never mixes with the output of your command. The command reads the values as ordinary environment variables.',
+      whenTitle: 'Which one to use',
+      whenItems: [
+        'Use envilder exec when you start the process yourself: npm scripts, test runs, migrations. No file with secrets stays on disk, and if a parameter is missing or unreadable the command does not start and Envilder exits with 125.',
+        'Use a .env file when a tool reads the file by path or you cannot wrap its start command: Docker Compose env_file, an IDE run configuration, a framework that loads .env itself. A missing parameter is only a warning in this mode, so check the summary (2/3 instead of 3/3).',
+      ],
+      handTitle: 'Compared with a script',
+      handDesc:
+        'The usual alternative is a shell script around get-parameters-by-path. For a quick export it works:',
+      handIntro: 'Where it falls short once the file is shared by a team:',
+      handPoints: [
+        '--with-decryption is easy to forget. Without it a SecureString comes back encrypted and the script writes the ciphertext.',
+        'The API returns at most 10 parameters per page. The AWS CLI follows the pages for you, but a script built on an SDK or a raw HTTP call has to follow NextToken itself.',
+        'Values are written unquoted. The DATABASE_URL above is saved as DATABASE_URL=postgres://app:p@ss w0rd#1@db.internal:5432/app, and dotenv reads it back as postgres://app:p@ss w0rd, because the # starts a comment.',
+        '> .env replaces the whole file, so a line such as LOG_LEVEL=debug is lost, and variable names come from the last path segment, so renaming a parameter silently renames the variable.',
+        'Nothing in Git says which parameters the application needs. With envilder.json the contract is reviewed in a pull request, and a variable whose parameter does not exist shows up as a warning on the next run.',
+      ],
+      handFair:
+        'The script has real advantages: it needs no Node.js, makes one call per page of results instead of one per variable, and exports everything under a path without a map. Envilder reads only the names in the map file, one GetParameter call each, so it needs ssm:GetParameter, not ssm:GetParametersByPath.',
+      errorsTitle: 'Common errors',
+      thMessage: 'Message',
+      thFix: 'Fix',
+      errCredsFix:
+        'The AWS SDK found no credentials. Run aws sso login --profile <name>, export credentials, or pass --profile for a named profile. Exit code 1, no .env written.',
+      errDeniedFix:
+        'The credentials work but cannot read that parameter. Allow ssm:GetParameter on its ARN, plus kms:Decrypt for a customer-managed key. The .env file is left untouched.',
+      errNotFoundFix:
+        'The parameter does not exist in the region on the first line of the output. Check the path and the region. The exit code is still 0, so read the 1/2 in the summary.',
+      errNameFix:
+        'Rename the key in envilder.json. The run stops before any parameter is read.',
+      errNoMapFix:
+        'Run envilder from the directory that holds envilder.json, or pass --map=path/to/file.json.',
+      errorsMore:
+        'Every message of pull mode is listed in the pull mode reference.',
+      ciTitle: 'In GitHub Actions',
+      ciDesc:
+        'In CI, sign the job in to AWS with OIDC and use the Envilder Action. It sets up Node.js itself and, with env-file, writes the file. Without env-file it exports the values to the later steps of the job instead.',
+      ciNote:
+        'To run the CLI directly, add actions/setup-node with node-version 22.x and run npx envilder exec -- npm test.',
+      relatedTitle: 'Related pages',
+      relatedPull: 'Pull mode reference',
+      relatedExec: 'envilder exec reference',
+      relatedMap: 'Map file reference',
+      relatedAws: 'AWS SSM provider setup',
+      relatedGha: 'GitHub Action guide',
     },
     pushReference: {
       tabAws: 'AWS SSM',
@@ -987,6 +1085,19 @@ export const en: Translations = {
         cardSummary:
           'Install the CLI, map one secret and run your app with envilder exec, for AWS SSM or Azure Key Vault.',
       },
+      'guide-ssm-to-env': {
+        title: 'Load AWS SSM Parameter Store secrets into a .env file',
+        description:
+          'Export AWS SSM Parameter Store parameters to a .env file with the Envilder CLI: IAM policy, envilder.json map, several environments, exec mode, CI and errors.',
+        heading: 'Load AWS SSM Parameter Store secrets into a .env file',
+        intro:
+          'How do you get AWS SSM Parameter Store parameters into a local .env file without a hand-written script? List each variable and its parameter path once in envilder.json, then run envilder: it reads every parameter, decrypts SecureString values and writes a .env file that parses back to the same values.',
+        breadcrumb: 'SSM to .env',
+        navLabel: 'SSM to .env',
+        cardTitle: 'Load SSM parameters into .env',
+        cardSummary:
+          'Map SSM Parameter Store paths to variables and write a .env file, or skip the file with envilder exec.',
+      },
       'aws-ssm': {
         title: 'Use Envilder with AWS SSM Parameter Store',
         description:
@@ -1123,6 +1234,7 @@ export const en: Translations = {
     navigationLabel: 'Documentation navigation',
     mobileNavigation: 'Choose a documentation page',
     navGettingStarted: 'Getting started',
+    navGuides: 'Guides',
     navProviders: 'Providers',
     hubCardsLabel: 'Documentation guides',
     openPage: 'Open guide',
