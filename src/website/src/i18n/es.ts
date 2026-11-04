@@ -1047,7 +1047,7 @@ export const es: Translations = {
       permAwsDesc:
         'Las rutas se comprueban con GetParameters, diez por llamada, con WithDecryption: false: los parámetros SecureString nunca se descifran. Es una acción de IAM distinta de la ssm:GetParameter que usa pull, así que añádela a la política, limitada a las mismas rutas:',
       permAwsNote:
-        'No hace falta el permiso kms:Decrypt. Con kms:Decrypt, ssm:GetParameters también puede leer valores descifrados, así que limítalo a las mismas rutas que ssm:GetParameter. Cuando se deniega una llamada, cada ruta se comprueba por separado, así que access denied solo se informa para las rutas que la identidad no puede leer.',
+        'La comprobación de existencia no necesita el permiso kms:Decrypt. --compare-values lee los valores como pull, así que necesita el mismo acceso a KMS que pull: kms:Decrypt sobre la clave de cada parámetro SecureString cifrado con una clave administrada por el cliente. Con kms:Decrypt, ssm:GetParameters también puede leer valores descifrados, así que limítalo a las mismas rutas que ssm:GetParameter. Cuando se deniega una llamada, cada ruta se comprueba por separado, así que access denied solo se informa para las rutas que la identidad no puede leer.',
       permAzureDesc:
         'Los nombres de los secretos del vault se listan una vez (solo metadatos) y cada nombre declarado, tras la conversión habitual de / a -, se compara con esa lista sin distinguir mayúsculas. Un secreto deshabilitado se informa como missing, porque pull no puede leerlo. Listar requiere:',
       permAzureItems: [

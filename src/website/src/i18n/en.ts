@@ -1036,7 +1036,7 @@ export const en: Translations = {
       permAwsDesc:
         'Paths are checked with GetParameters, ten per call, with WithDecryption: false: SecureString parameters are never decrypted. This is a separate IAM action from the ssm:GetParameter pull uses, so add it to the policy, scoped to the same paths:',
       permAwsNote:
-        'No kms:Decrypt permission is needed. With kms:Decrypt, ssm:GetParameters can also read decrypted values, so scope it to the same paths as ssm:GetParameter. When a call is denied, each path in it is checked on its own, so access denied is reported only for the paths the identity cannot read.',
+        'The existence check needs no kms:Decrypt permission. --compare-values reads values as pull does, so it needs the same KMS access as pull: kms:Decrypt on the key of each SecureString parameter encrypted with a customer managed key. With kms:Decrypt, ssm:GetParameters can also read decrypted values, so scope it to the same paths as ssm:GetParameter. When a call is denied, each path in it is checked on its own, so access denied is reported only for the paths the identity cannot read.',
       permAzureDesc:
         'The secret names of the vault are listed once (metadata only) and each declared name, after the usual / to - translation, is matched against that list ignoring case. A disabled secret is reported as missing, because pull cannot read it. Listing needs:',
       permAzureItems: [

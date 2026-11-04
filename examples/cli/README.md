@@ -5,7 +5,8 @@ Push one secret, let Envilder write the map file, then run a command with the se
 ## Prerequisites
 
 - Node.js 22.12+
-- AWS credentials with write access to SSM (`~/.aws/credentials`, env vars, or IAM role)
+- AWS credentials (`~/.aws/credentials`, env vars, or IAM role) allowed to run `ssm:PutParameter` (push),
+  `ssm:GetParameters` (validate) and `ssm:GetParameter` (exec) on `/envilder/demo/*`
 
 ## Push a secret and run an app
 

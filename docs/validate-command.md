@@ -162,7 +162,10 @@ policy, scoped to the same paths:
 }
 ```
 
-No `kms:Decrypt` permission is needed for `validate`. An identity that does
+The existence check needs no `kms:Decrypt` permission. `--compare-values` reads
+values as pull does, so it needs the same KMS access as pull: `kms:Decrypt` on
+the key of each `SecureString` parameter encrypted with a customer managed key.
+An identity that does
 have `kms:Decrypt` can read decrypted values through `ssm:GetParameters`, so
 grant it only on the paths that identity may already read with
 `ssm:GetParameter`.
@@ -269,7 +272,7 @@ anything runs, without a document.
   "mapFile": { "path": "envilder.json", "valid": true, "errors": [] },
   "keys": [
     { "name": "DB_URL", "provider": "aws", "path": "/myapp/db-url", "status": "exists" },
-    { "name": "API_KEY", "provider": "aws", "path": "/myapp/api-key", "status": "missing" },
+    { "name": "API_KEY", "provider": "aws", "path": "/myapp/api-key", "status": "exists" },
     {
       "name": "TOKEN",
       "provider": "aws",
