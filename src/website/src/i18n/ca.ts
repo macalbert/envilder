@@ -653,7 +653,7 @@ export const ca: Translations = {
       tabAzure: 'Azure Key Vault',
       prereqTitle: 'Requisits previs',
       prereqItems: [
-        "La CLI d'envilder. Aquesta pàgina descriu la versió 0.17.",
+        "La CLI d'envilder.",
         'Un fitxer de mapatge, envilder.json per defecte, que associa cada variable a un identificador de secret.',
         'Accés de lectura a tots els secrets mapats: ssm:GetParameter a AWS (més kms:Decrypt quan un paràmetre fa servir una clau gestionada pel client), o el permís Get de secrets a Azure Key Vault, per exemple amb el rol Key Vault Secrets User.',
         "Credencials que l'SDK del proveïdor pugui trobar: un perfil AWS, una sessió SSO o variables d'entorn, o un inici de sessió d'Azure com az login o una identitat gestionada.",
@@ -766,7 +766,7 @@ export const ca: Translations = {
       regionItems: [
         "La variable d'entorn AWS_REGION.",
         "La variable d'entorn AWS_DEFAULT_REGION.",
-        "La regió que l'SDK d'AWS troba per al perfil seleccionat, per exemple region a ~/.aws/config. El perfil és --profile, després $config.profile i després el predeterminat.",
+        "La regió que l'SDK d'AWS troba per al perfil seleccionat (--profile, després $config.profile i després el predeterminat), per exemple region a ~/.aws/config.",
         'us-east-1, si no hi ha cap de les anteriors.',
       ],
       regionNote:
@@ -778,16 +778,27 @@ export const ca: Translations = {
       thVariable: 'Variable al .env',
       exampleMapDesc:
         "Crea envilder.json a l'arrel del projecte. Cada clau és el nom de la variable que s'escriurà i cada valor és el nom del paràmetre, tal com apareix a SSM:",
+      pushTitle: "Crear el paràmetre i l'entrada del mapa amb una sola ordre",
+      pushDesc:
+        "Si estàs creant els paràmetres, o n'afegeixes un de nou, envilder pot fer els dos passos alhora. Aquesta ordre desa el valor com a paràmetre SecureString i crea envilder.json, o hi afegeix l'entrada si el fitxer ja existeix (CLI 0.16 o superior):",
+      pushResultDesc:
+        "El fitxer de mapa ja conté l'entrada que hauries escrit a mà:",
+      pushWarn:
+        "El push sempre escriu el valor (PutParameter amb sobreescriptura), així que un paràmetre existent en rep una versió nova. Per als paràmetres que ja existeixen, escriu el mapa a mà com abans. --value es queda a l'historial del shell: fes-lo servir per a valors de prova i fes push dels secrets reals des d'un .env amb envilder --push.",
+      pushNote:
+        "Si la variable ja apunta a una altra ruta, no es fa cap push i l'ordre surt amb 1; --no-map-update ometeix el fitxer de mapa.",
+      pushLink:
+        'Referència del mode push: totes les opcions i les regles del fitxer de mapa',
       exampleRunDesc:
         'Executa envilder sense opcions. Pull és el mode per defecte: llegeix envilder.json i escriu .env al directori actual.',
       exampleOutputDesc:
         "Els valors s'emmascaren: d'un valor de més de 10 caràcters només es mostren els tres últims, i les rutes s'emmascaren igual.",
       exampleResultDesc:
-        "El .env resultant. Envilder cita el valor de DATABASE_URL perquè conté un espai i un #, i abans d'escriure rellegeix el resultat com ho fa dotenv per comprovar que tots els valors es conserven:",
+        "El .env resultant. Envilder cita DATABASE_URL perquè conté un espai i un #, i rellegeix el resultat com ho fa dotenv abans d'escriure:",
       exampleRerunDesc:
         "Si l'executes de nou no canvia res: una línia que ja té el valor correcte no es reescriu, i les línies que el fitxer de mapa no declara es conserven.",
       exampleGitignore:
-        "El fitxer .env conté els valors reals. Afegeix .env i .env.prod (que fem servir més avall) a .gitignore: el patró .env no coincideix amb .env.prod, així que posa'ls tots dos. envilder.json només conté noms de variables i rutes de paràmetres, així que es pot commitejar sense problema.",
+        'El fitxer .env conté els valors reals. Afegeix .env i .env.prod (que fem servir més avall) a .gitignore: el patró .env no coincideix amb .env.prod. envilder.json només conté noms i rutes, així que es pot commitejar sense problema.',
       envsTitle: 'Diversos entorns',
       envsDesc:
         "Tingues un fitxer de mapa per entorn i tria'l amb --map. Els noms dels fitxers són teus. Aquest envilder.prod.json mapeja les mateixes variables als paràmetres de /my-app/prod/:",
@@ -797,12 +808,12 @@ export const ca: Translations = {
         '--profile substitueix $config.profile del fitxer de mapa, i AWS_REGION continua guanyant a la regió del perfil.',
       execTitle: 'O prescindeix del fitxer amb envilder exec',
       execDesc:
-        "Si només necessites els valors per arrencar un procés, envilder exec resol el mateix fitxer de mapa i arrenca la teva ordre amb els paràmetres afegits al seu entorn. No s'escriu res al disc:",
+        'Si només necessites els valors per arrencar un procés, envilder exec resol el mateix fitxer de mapa i arrenca la teva ordre amb els paràmetres afegits al seu entorn, sense escriure res al disc:',
       execOutputDesc:
         "El resum va a stderr, així que no es barreja amb la sortida de la teva ordre. L'ordre llegeix els valors com a variables d'entorn normals.",
       whenTitle: 'Quin triar',
       whenItems: [
-        "Fes servir envilder exec quan arrenques tu el procés: scripts d'npm, execucions de tests, migracions. No queda cap fitxer amb secrets al disc, i si un paràmetre falta o no es pot llegir, l'ordre no arrenca i Envilder surt amb 125.",
+        "Fes servir envilder exec quan arrenques tu el procés: scripts d'npm, tests, migracions. No queda cap fitxer amb secrets al disc, i un paràmetre inexistent o il·legible atura l'ordre abans d'arrencar (codi de sortida 125).",
         "Fes servir un fitxer .env quan una eina llegeix el fitxer per ruta o no pots embolcallar-ne l'ordre d'arrencada: env_file de Docker Compose, una configuració d'execució de l'IDE, un framework que carrega .env per si sol. En aquest mode un paràmetre inexistent només és un avís, així que mira el resum (2/3 en lloc de 3/3).",
       ],
       handTitle: 'Comparat amb un script',
@@ -812,12 +823,12 @@ export const ca: Translations = {
       handPoints: [
         "És fàcil oblidar --with-decryption. Sense aquesta opció un SecureString torna xifrat i l'script n'escriu el text xifrat.",
         "L'API retorna com a màxim 10 paràmetres per pàgina. La AWS CLI segueix les pàgines per tu, però un script basat en un SDK o en una crida HTTP directa ha de seguir NextToken pel seu compte.",
-        "Els valors s'escriuen sense cometes. El DATABASE_URL de dalt es desa com DATABASE_URL=postgres://app:p@ss w0rd#1@db.internal:5432/app, i dotenv el rellegeix com postgres://app:p@ss w0rd, perquè el # comença un comentari.",
+        "Els valors s'escriuen sense cometes: dotenv rellegeix DATABASE_URL=postgres://app:p@ss w0rd#1@db.internal:5432/app com postgres://app:p@ss w0rd, perquè el # comença un comentari.",
         "> .env substitueix tot el fitxer, així que una línia com LOG_LEVEL=debug es perd, i els noms de les variables surten de l'últim segment de la ruta, de manera que reanomenar un paràmetre reanomena la variable sense avisar.",
-        "Res a Git diu quins paràmetres necessita l'aplicació. Amb envilder.json el contracte es revisa en una pull request, i una variable el paràmetre de la qual no existeix surt com a avís a la propera execució.",
+        "Res a Git diu quins paràmetres necessita l'aplicació. Amb envilder.json el contracte es revisa en una pull request, i una variable sense paràmetre surt com a avís.",
       ],
       handFair:
-        "L'script té avantatges reals: no necessita Node.js, fa una crida per pàgina de resultats en lloc d'una per variable, i exporta tot el que hi ha sota una ruta sense mapa. Envilder només llegeix els noms del fitxer de mapa, amb una crida GetParameter cadascun, així que necessita ssm:GetParameter, no ssm:GetParametersByPath.",
+        "L'script no necessita Node.js, fa una crida per pàgina de resultats en lloc d'una per variable, i exporta tot el que hi ha sota una ruta sense mapa. Envilder només llegeix els noms del fitxer de mapa, amb una crida GetParameter cadascun, així que necessita ssm:GetParameter, no ssm:GetParametersByPath.",
       errorsTitle: 'Errors habituals',
       thMessage: 'Missatge',
       thFix: 'Solució',
@@ -837,7 +848,7 @@ export const ca: Translations = {
       ciDesc:
         "A la CI, inicia la sessió del job a AWS amb OIDC i fes servir l'Action d'Envilder. Configura Node.js ella mateixa i, amb env-file, escriu el fitxer. Sense env-file exporta els valors als passos següents del job.",
       ciNote:
-        "El fitxer s'escriu al directori temporal del runner perquè els passos posteriors de build, cache o artifacts no el recullin. Si només arrenques processos tu mateix, l'input command de l'Action o envilder exec (executa npx envilder exec -- npm test després d'actions/setup-node amb node-version 22.x) no necessita cap fitxer.",
+        "El fitxer va al directori temporal del runner, fora de l'espai de treball, perquè els passos posteriors de build, cache o artifacts no el recullin. Per evitar el fitxer, fes servir l'input command de l'Action o envilder exec.",
       relatedTitle: 'Pàgines relacionades',
       relatedPull: 'Referència del mode pull',
       relatedExec: "Referència d'envilder exec",
@@ -850,7 +861,7 @@ export const ca: Translations = {
       tabAzure: 'Azure Key Vault',
       prereqTitle: 'Requisits previs',
       prereqItems: [
-        "La CLI d'envilder. Aquesta pàgina descriu la versió 0.17; el push d'un sol secret registra el mapatge des de la 0.16.",
+        "La CLI d'envilder. El push d'un sol secret registra el mapatge des de la 0.16.",
         "Accés d'escriptura al destí: ssm:PutParameter a AWS, o el permís Set de secrets a Azure Key Vault, per exemple amb el rol Key Vault Secrets Officer.",
         "Per a --push, un fitxer de mapatge i un fitxer .env amb els valors. El push d'un sol secret no necessita cap dels dos: crea el fitxer de mapatge si no existeix.",
       ],
@@ -944,7 +955,7 @@ export const ca: Translations = {
       tabAzure: 'Azure Key Vault',
       prereqTitle: 'Requisits previs',
       prereqItems: [
-        "La CLI d'envilder. Aquesta pàgina descriu la versió 0.17.",
+        "La CLI d'envilder.",
         'Un fitxer de mapatge i accés de lectura a tots els secrets mapats, igual que al mode pull.',
         'La comanda que vols executar, al PATH o indicada amb la seva ruta.',
       ],

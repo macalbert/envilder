@@ -478,6 +478,12 @@ export interface GuideSsmToEnvTranslations {
   thParameter: string;
   thVariable: string;
   exampleMapDesc: string;
+  pushTitle: string;
+  pushDesc: string;
+  pushResultDesc: string;
+  pushWarn: string;
+  pushNote: string;
+  pushLink: string;
   exampleRunDesc: string;
   exampleOutputDesc: string;
   exampleResultDesc: string;

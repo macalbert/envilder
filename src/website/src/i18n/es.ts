@@ -654,7 +654,7 @@ export const es: Translations = {
       tabAzure: 'Azure Key Vault',
       prereqTitle: 'Requisitos previos',
       prereqItems: [
-        'La CLI de envilder. Esta página describe la versión 0.17.',
+        'La CLI de envilder.',
         'Un archivo de mapeo, envilder.json por defecto, que asocia cada variable a un identificador de secreto.',
         'Acceso de lectura a todos los secretos mapeados: ssm:GetParameter en AWS (más kms:Decrypt cuando un parámetro usa una clave administrada por el cliente), o el permiso Get de secretos en Azure Key Vault, por ejemplo con el rol Key Vault Secrets User.',
         'Credenciales que el SDK del proveedor pueda encontrar: un perfil de AWS, una sesión SSO o variables de entorno, o un inicio de sesión de Azure como az login o una identidad administrada.',
@@ -767,7 +767,7 @@ export const es: Translations = {
       regionItems: [
         'La variable de entorno AWS_REGION.',
         'La variable de entorno AWS_DEFAULT_REGION.',
-        'La región que el SDK de AWS encuentra para el perfil seleccionado, por ejemplo region en ~/.aws/config. El perfil es --profile, luego $config.profile y luego el predeterminado.',
+        'La región que el SDK de AWS encuentra para el perfil seleccionado (--profile, luego $config.profile y luego el predeterminado), por ejemplo region en ~/.aws/config.',
         'us-east-1, si no hay ninguna de las anteriores.',
       ],
       regionNote:
@@ -779,16 +779,27 @@ export const es: Translations = {
       thVariable: 'Variable en .env',
       exampleMapDesc:
         'Crea envilder.json en la raíz del proyecto. Cada clave es el nombre de la variable que se escribirá y cada valor es el nombre del parámetro, tal como aparece en SSM:',
+      pushTitle: 'Crear el parámetro y la entrada del mapa con un solo comando',
+      pushDesc:
+        'Si estás creando los parámetros, o añades uno nuevo, envilder puede hacer los dos pasos a la vez. Este comando guarda el valor como parámetro SecureString y crea envilder.json, o añade la entrada si el archivo ya existe (CLI 0.16 o superior):',
+      pushResultDesc:
+        'El archivo de mapa ya contiene la entrada que habrías escrito a mano:',
+      pushWarn:
+        'El push siempre escribe el valor (PutParameter con sobrescritura), así que un parámetro existente recibe una versión nueva. Para los parámetros que ya existen, escribe el mapa a mano como antes. --value se queda en el historial del shell: úsalo para valores de prueba y haz push de los secretos reales desde un .env con envilder --push.',
+      pushNote:
+        'Si la variable ya apunta a otra ruta, no se hace ningún push y el comando sale con 1; --no-map-update omite el archivo de mapa.',
+      pushLink:
+        'Referencia del modo push: todas las opciones y las reglas del archivo de mapa',
       exampleRunDesc:
         'Ejecuta envilder sin opciones. Pull es el modo por defecto: lee envilder.json y escribe .env en el directorio actual.',
       exampleOutputDesc:
         'Los valores se enmascaran: de un valor de más de 10 caracteres solo se muestran los tres últimos, y las rutas se enmascaran igual.',
       exampleResultDesc:
-        'El .env resultante. Envilder entrecomilla el valor de DATABASE_URL porque contiene un espacio y un #, y antes de escribir relee el resultado como lo hace dotenv para comprobar que todos los valores se conservan:',
+        'El .env resultante. Envilder entrecomilla DATABASE_URL porque contiene un espacio y un #, y relee el resultado como lo hace dotenv antes de escribir:',
       exampleRerunDesc:
         'Si lo ejecutas de nuevo no cambia nada: una línea que ya tiene el valor correcto no se reescribe, y las líneas que el archivo de mapa no declara se conservan.',
       exampleGitignore:
-        'El archivo .env contiene los valores reales. Añade .env y .env.prod (que usamos más abajo) a .gitignore: el patrón .env no coincide con .env.prod, así que pon los dos. envilder.json solo contiene nombres de variables y rutas de parámetros, así que se puede commitear sin problema.',
+        'El archivo .env contiene los valores reales. Añade .env y .env.prod (que usamos más abajo) a .gitignore: el patrón .env no coincide con .env.prod. envilder.json solo contiene nombres y rutas, así que se puede commitear sin problema.',
       envsTitle: 'Varios entornos',
       envsDesc:
         'Mantén un archivo de mapa por entorno y elígelo con --map. Los nombres de los archivos son tuyos. Este envilder.prod.json mapea las mismas variables a los parámetros de /my-app/prod/:',
@@ -798,12 +809,12 @@ export const es: Translations = {
         '--profile sustituye a $config.profile del archivo de mapa, y AWS_REGION sigue ganando a la región del perfil.',
       execTitle: 'O prescinde del archivo con envilder exec',
       execDesc:
-        'Si solo necesitas los valores para arrancar un proceso, envilder exec resuelve el mismo archivo de mapa y arranca tu comando con los parámetros añadidos a su entorno. No se escribe nada en disco:',
+        'Si solo necesitas los valores para arrancar un proceso, envilder exec resuelve el mismo archivo de mapa y arranca tu comando con los parámetros añadidos a su entorno, sin escribir nada en disco:',
       execOutputDesc:
         'El resumen va a stderr, así que no se mezcla con la salida de tu comando. El comando lee los valores como variables de entorno normales.',
       whenTitle: 'Cuál elegir',
       whenItems: [
-        'Usa envilder exec cuando arrancas tú el proceso: scripts de npm, ejecuciones de tests, migraciones. No queda ningún archivo con secretos en disco, y si un parámetro falta o no se puede leer, el comando no arranca y Envilder sale con 125.',
+        'Usa envilder exec cuando arrancas tú el proceso: scripts de npm, tests, migraciones. No queda ningún archivo con secretos en disco, y un parámetro inexistente o ilegible detiene el comando antes de arrancar (código de salida 125).',
         'Usa un archivo .env cuando una herramienta lee el archivo por ruta o no puedes envolver su comando de arranque: env_file de Docker Compose, una configuración de ejecución del IDE, un framework que carga .env por sí solo. En este modo un parámetro inexistente es solo un aviso, así que mira el resumen (2/3 en lugar de 3/3).',
       ],
       handTitle: 'Comparado con un script',
@@ -814,12 +825,12 @@ export const es: Translations = {
       handPoints: [
         'Es fácil olvidar --with-decryption. Sin esa opción un SecureString vuelve cifrado y el script escribe el texto cifrado.',
         'La API devuelve como máximo 10 parámetros por página. La AWS CLI sigue las páginas por ti, pero un script basado en un SDK o en una llamada HTTP directa tiene que seguir NextToken por su cuenta.',
-        'Los valores se escriben sin comillas. El DATABASE_URL de arriba se guarda como DATABASE_URL=postgres://app:p@ss w0rd#1@db.internal:5432/app, y dotenv lo relee como postgres://app:p@ss w0rd, porque el # empieza un comentario.',
+        'Los valores se escriben sin comillas: dotenv relee DATABASE_URL=postgres://app:p@ss w0rd#1@db.internal:5432/app como postgres://app:p@ss w0rd, porque el # empieza un comentario.',
         '> .env sustituye todo el archivo, así que una línea como LOG_LEVEL=debug se pierde, y los nombres de las variables salen del último segmento de la ruta, de modo que renombrar un parámetro renombra la variable sin avisar.',
-        'Nada en Git dice qué parámetros necesita la aplicación. Con envilder.json el contrato se revisa en una pull request, y una variable cuyo parámetro no existe aparece como aviso en la siguiente ejecución.',
+        'Nada en Git dice qué parámetros necesita la aplicación. Con envilder.json el contrato se revisa en una pull request, y una variable sin parámetro aparece como aviso.',
       ],
       handFair:
-        'El script tiene ventajas reales: no necesita Node.js, hace una llamada por página de resultados en lugar de una por variable, y exporta todo lo que hay bajo una ruta sin mapa. Envilder solo lee los nombres del archivo de mapa, con una llamada GetParameter cada uno, así que necesita ssm:GetParameter, no ssm:GetParametersByPath.',
+        'El script no necesita Node.js, hace una llamada por página de resultados en lugar de una por variable, y exporta todo lo que hay bajo una ruta sin mapa. Envilder solo lee los nombres del archivo de mapa, con una llamada GetParameter cada uno, así que necesita ssm:GetParameter, no ssm:GetParametersByPath.',
       errorsTitle: 'Errores habituales',
       thMessage: 'Mensaje',
       thFix: 'Solución',
@@ -839,7 +850,7 @@ export const es: Translations = {
       ciDesc:
         'En la CI, inicia la sesión del job en AWS con OIDC y usa la Action de Envilder. Configura Node.js ella misma y, con env-file, escribe el archivo. Sin env-file exporta los valores a los pasos siguientes del job.',
       ciNote:
-        'El archivo se escribe en el directorio temporal del runner para que los pasos posteriores de build, cache o artifacts no lo recojan. Si solo arrancas procesos tú mismo, el input command de la Action o envilder exec (ejecuta npx envilder exec -- npm test después de actions/setup-node con node-version 22.x) no necesita ningún archivo.',
+        'El archivo va al directorio temporal del runner, fuera del espacio de trabajo, para que los pasos posteriores de build, cache o artifacts no lo recojan. Para evitar el archivo, usa el input command de la Action o envilder exec.',
       relatedTitle: 'Páginas relacionadas',
       relatedPull: 'Referencia del modo pull',
       relatedExec: 'Referencia de envilder exec',
@@ -852,7 +863,7 @@ export const es: Translations = {
       tabAzure: 'Azure Key Vault',
       prereqTitle: 'Requisitos previos',
       prereqItems: [
-        'La CLI de envilder. Esta página describe la versión 0.17; el push de un solo secreto registra el mapeo desde la 0.16.',
+        'La CLI de envilder. El push de un solo secreto registra el mapeo desde la 0.16.',
         'Acceso de escritura al destino: ssm:PutParameter en AWS, o el permiso Set de secretos en Azure Key Vault, por ejemplo con el rol Key Vault Secrets Officer.',
         'Para --push, un archivo de mapeo y un archivo .env con los valores. El push de un solo secreto no necesita ninguno de los dos: crea el archivo de mapeo si no existe.',
       ],
@@ -945,7 +956,7 @@ export const es: Translations = {
       tabAzure: 'Azure Key Vault',
       prereqTitle: 'Requisitos previos',
       prereqItems: [
-        'La CLI de envilder. Esta página describe la versión 0.17.',
+        'La CLI de envilder.',
         'Un archivo de mapeo y acceso de lectura a todos los secretos mapeados, igual que en el modo pull.',
         'El comando que quieres ejecutar, en el PATH o indicado con su ruta.',
       ],

@@ -260,6 +260,21 @@ const guideDevMap = `{
   "DATABASE_URL": "/my-app/dev/database-url"
 }`;
 
+const guidePushCmd =
+  'envilder --key=DB_PASSWORD --value=local-dev-password --secret-path=/my-app/dev/db-password';
+
+const guidePushOutput = `📤 PUSHING SECRET
+${'━'.repeat(60)}
+  → DB_PASSWORD → ********************ord
+
+⭐ SECRET PUSHED  —  DB_PASSWORD=***************ord → ********************ord
+
+✓ Created envilder.json`;
+
+const guidePushMap = `{
+  "DB_PASSWORD": "/my-app/dev/db-password"
+}`;
+
 const guideDevOutput = `☁ AWS identity · account=123456789012 · region=eu-west-1 · profile=default
 
 🪙  RESOLVING SECRETS
@@ -1002,6 +1017,19 @@ const execErrors = [
         </table>
         <p>{g.exampleMapDesc}</p>
         <CodeBlock lang="json" filename="envilder.json" code={guideDevMap} />
+
+        <p><strong>{g.pushTitle}</strong></p>
+        <p>{g.pushDesc}</p>
+        <CodeBlock lang="bash" code={guidePushCmd} />
+        <CodeBlock lang="text" code={guidePushOutput} />
+        <p>{g.pushResultDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={guidePushMap} />
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>{g.pushWarn}</div>
+        </div>
+        <p>{g.pushNote} <a href={localizedPath(lang, '/docs/cli/push/')}>{g.pushLink}</a></p>
+
         <p>{g.exampleRunDesc}</p>
         <CodeBlock lang="bash" code="envilder" />
         <CodeBlock lang="text" code={guideDevOutput} />
