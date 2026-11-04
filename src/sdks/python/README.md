@@ -231,8 +231,8 @@ Required permissions (existence is checked without using any value):
 
 This differs from `validate_secrets()`: `validate_secrets()` runs after
 resolution and checks that the resolved values are non-empty, while contract
-validation runs before any value is read and checks that the map file is valid
-and every declared secret exists.
+validation runs before resolution, without using any value the provider
+returns, and checks that the map file is valid and every declared secret exists.
 
 ### Advanced usage
 
