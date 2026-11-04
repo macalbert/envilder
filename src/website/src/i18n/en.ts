@@ -781,7 +781,7 @@ export const en: Translations = {
       exampleRerunDesc:
         'Running it again changes nothing: a line that already holds the right value is not rewritten, and lines the map file does not declare are kept.',
       exampleGitignore:
-        'The .env file holds the real values: add it to .gitignore. envilder.json holds only variable names and parameter paths, so it is safe to commit.',
+        'The .env file holds the real values. Add .env and .env.prod (used below) to .gitignore: the pattern .env does not match .env.prod, so list both. envilder.json holds only variable names and parameter paths, so it is safe to commit.',
       envsTitle: 'Several environments',
       envsDesc:
         'Keep one map file per environment and choose it with --map. The file names are yours. This envilder.prod.json maps the same variables to the /my-app/prod/ parameters:',
@@ -831,7 +831,7 @@ export const en: Translations = {
       ciDesc:
         'In CI, sign the job in to AWS with OIDC and use the Envilder Action. It sets up Node.js itself and, with env-file, writes the file. Without env-file it exports the values to the later steps of the job instead.',
       ciNote:
-        'To run the CLI directly, add actions/setup-node with node-version 22.x and run npx envilder exec -- npm test.',
+        "The file is written to the runner temp directory so that later build, cache or artifact steps do not pick it up. If you only start processes yourself, the Action's command input or envilder exec (run npx envilder exec -- npm test after actions/setup-node with node-version 22.x) needs no file at all.",
       relatedTitle: 'Related pages',
       relatedPull: 'Pull mode reference',
       relatedExec: 'envilder exec reference',

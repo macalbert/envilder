@@ -301,20 +301,27 @@ const guideScript = `aws ssm get-parameters-by-path --path /my-app/dev/ --recurs
       echo "$(basename "$name" | tr 'a-z-' 'A-Z_')=$value"
     done > .env`;
 
-const guideCi = `permissions:
+const guideCi = `name: CI
+on: [push]
+
+permissions:
   id-token: write # Required for OIDC
   contents: read
 
-steps:
-  - uses: actions/checkout@v7
-  - uses: aws-actions/configure-aws-credentials@v6
-    with:
-      role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole
-      aws-region: eu-west-1
-  - uses: macalbert/envilder/github-action@v0
-    with:
-      map-file: envilder.json
-      env-file: .env`;
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole
+          aws-region: eu-west-1
+      - uses: macalbert/envilder/github-action@v0
+        with:
+          map-file: envilder.json
+          env-file: \${{ runner.temp }}/app.env
+      - run: docker compose --env-file "$RUNNER_TEMP/app.env" up -d`;
 
 const guideErrors = [
   {

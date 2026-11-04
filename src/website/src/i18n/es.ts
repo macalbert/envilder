@@ -788,7 +788,7 @@ export const es: Translations = {
       exampleRerunDesc:
         'Si lo ejecutas de nuevo no cambia nada: una línea que ya tiene el valor correcto no se reescribe, y las líneas que el archivo de mapa no declara se conservan.',
       exampleGitignore:
-        'El archivo .env contiene los valores reales: añádelo a .gitignore. envilder.json solo contiene nombres de variables y rutas de parámetros, así que se puede commitear sin problema.',
+        'El archivo .env contiene los valores reales. Añade .env y .env.prod (que usamos más abajo) a .gitignore: el patrón .env no coincide con .env.prod, así que pon los dos. envilder.json solo contiene nombres de variables y rutas de parámetros, así que se puede commitear sin problema.',
       envsTitle: 'Varios entornos',
       envsDesc:
         'Mantén un archivo de mapa por entorno y elígelo con --map. Los nombres de los archivos son tuyos. Este envilder.prod.json mapea las mismas variables a los parámetros de /my-app/prod/:',
@@ -839,7 +839,7 @@ export const es: Translations = {
       ciDesc:
         'En la CI, inicia la sesión del job en AWS con OIDC y usa la Action de Envilder. Configura Node.js ella misma y, con env-file, escribe el archivo. Sin env-file exporta los valores a los pasos siguientes del job.',
       ciNote:
-        'Para ejecutar la CLI directamente, añade actions/setup-node con node-version 22.x y ejecuta npx envilder exec -- npm test.',
+        'El archivo se escribe en el directorio temporal del runner para que los pasos posteriores de build, cache o artifacts no lo recojan. Si solo arrancas procesos tú mismo, el input command de la Action o envilder exec (ejecuta npx envilder exec -- npm test después de actions/setup-node con node-version 22.x) no necesita ningún archivo.',
       relatedTitle: 'Páginas relacionadas',
       relatedPull: 'Referencia del modo pull',
       relatedExec: 'Referencia de envilder exec',

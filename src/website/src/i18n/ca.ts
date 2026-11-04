@@ -787,7 +787,7 @@ export const ca: Translations = {
       exampleRerunDesc:
         "Si l'executes de nou no canvia res: una línia que ja té el valor correcte no es reescriu, i les línies que el fitxer de mapa no declara es conserven.",
       exampleGitignore:
-        'El fitxer .env conté els valors reals: afegeix-lo a .gitignore. envilder.json només conté noms de variables i rutes de paràmetres, així que es pot commitejar sense problema.',
+        "El fitxer .env conté els valors reals. Afegeix .env i .env.prod (que fem servir més avall) a .gitignore: el patró .env no coincideix amb .env.prod, així que posa'ls tots dos. envilder.json només conté noms de variables i rutes de paràmetres, així que es pot commitejar sense problema.",
       envsTitle: 'Diversos entorns',
       envsDesc:
         "Tingues un fitxer de mapa per entorn i tria'l amb --map. Els noms dels fitxers són teus. Aquest envilder.prod.json mapeja les mateixes variables als paràmetres de /my-app/prod/:",
@@ -837,7 +837,7 @@ export const ca: Translations = {
       ciDesc:
         "A la CI, inicia la sessió del job a AWS amb OIDC i fes servir l'Action d'Envilder. Configura Node.js ella mateixa i, amb env-file, escriu el fitxer. Sense env-file exporta els valors als passos següents del job.",
       ciNote:
-        'Per executar la CLI directament, afegeix actions/setup-node amb node-version 22.x i executa npx envilder exec -- npm test.',
+        "El fitxer s'escriu al directori temporal del runner perquè els passos posteriors de build, cache o artifacts no el recullin. Si només arrenques processos tu mateix, l'input command de l'Action o envilder exec (executa npx envilder exec -- npm test després d'actions/setup-node amb node-version 22.x) no necessita cap fitxer.",
       relatedTitle: 'Pàgines relacionades',
       relatedPull: 'Referència del mode pull',
       relatedExec: "Referència d'envilder exec",
