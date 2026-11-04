@@ -6,7 +6,7 @@
 <p align="center">
   <b>One secret mapping for local dev, CI/CD, and runtime.</b><br>
   <span>Define secrets once in <code>envilder.json</code>. Resolve them consistently from AWS SSM or Azure Key Vault.</span><br>
-  <a href="https://envilder.com/?utm_source=github&utm_medium=readme&utm_campaign=root"><strong>Website & docs → envilder.com</strong></a>
+  <a href="https://envilder.com/docs/?utm_source=github&utm_medium=readme&utm_campaign=root"><strong>Website & docs → envilder.com</strong></a>
 </p>
 
 [![npm version](https://img.shields.io/npm/v/envilder.svg)](https://www.npmjs.com/package/envilder)
