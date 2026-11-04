@@ -461,6 +461,60 @@ export interface PullReferenceTranslations {
   relatedMap: string;
   relatedExec: string;
   relatedPush: string;
+  relatedGuide: string;
+}
+
+export interface GuideSsmToEnvTranslations {
+  prereqTitle: string;
+  prereqItems: string[];
+  prereqPolicyDesc: string;
+  prereqPolicyNote: string;
+  regionTitle: string;
+  regionDesc: string;
+  regionItems: string[];
+  regionNote: string;
+  exampleTitle: string;
+  exampleParamsDesc: string;
+  thParameter: string;
+  thVariable: string;
+  exampleMapDesc: string;
+  exampleRunDesc: string;
+  exampleOutputDesc: string;
+  exampleResultDesc: string;
+  exampleRerunDesc: string;
+  exampleGitignore: string;
+  envsTitle: string;
+  envsDesc: string;
+  envsRunDesc: string;
+  envsNote: string;
+  execTitle: string;
+  execDesc: string;
+  execOutputDesc: string;
+  whenTitle: string;
+  whenItems: string[];
+  handTitle: string;
+  handDesc: string;
+  handIntro: string;
+  handPoints: string[];
+  handFair: string;
+  errorsTitle: string;
+  thMessage: string;
+  thFix: string;
+  errCredsFix: string;
+  errDeniedFix: string;
+  errNotFoundFix: string;
+  errNameFix: string;
+  errNoMapFix: string;
+  errorsMore: string;
+  ciTitle: string;
+  ciDesc: string;
+  ciNote: string;
+  relatedTitle: string;
+  relatedPull: string;
+  relatedExec: string;
+  relatedMap: string;
+  relatedAws: string;
+  relatedGha: string;
 }
 
 export interface PushReferenceTranslations {
@@ -599,6 +653,7 @@ export interface DocsTranslations {
   gettingStartedGuide: GettingStartedGuideTranslations;
   mapFileReference: MapFileReferenceTranslations;
   pullReference: PullReferenceTranslations;
+  guideSsmToEnv: GuideSsmToEnvTranslations;
   pushReference: PushReferenceTranslations;
   execReference: ExecReferenceTranslations;
   title: string;
@@ -609,6 +664,7 @@ export interface DocsTranslations {
   pages: Record<
     | 'hub'
     | 'getting-started'
+    | 'guide-ssm-to-env'
     | 'aws-ssm'
     | 'azure-key-vault'
     | 'map-file'
@@ -627,6 +683,7 @@ export interface DocsTranslations {
   navigationLabel: string;
   mobileNavigation: string;
   navGettingStarted: string;
+  navGuides: string;
   navProviders: string;
   hubCardsLabel: string;
   openPage: string;

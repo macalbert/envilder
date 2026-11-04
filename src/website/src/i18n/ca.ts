@@ -746,6 +746,104 @@ export const ca: Translations = {
       relatedExec:
         'envilder exec: executa una comanda amb els mateixos secrets i sense fitxer .env',
       relatedPush: 'Mode push: puja un fitxer .env o un sol secret',
+      relatedGuide:
+        "Guia: carrega paràmetres d'AWS SSM en un fitxer .env, pas a pas",
+    },
+    guideSsmToEnv: {
+      prereqTitle: 'Requisits previs',
+      prereqItems: [
+        'Node.js 22.12 o superior. Executa la CLI amb npx envilder o instal·la-la amb npm install -g envilder.',
+        "Credencials d'AWS que l'SDK pugui trobar: un perfil amb nom, variables d'entorn o una sessió SSO iniciada amb aws sso login --profile <nom>.",
+        'Accés de lectura a cada paràmetre que mapis. La CLI crida GetParameter una vegada per variable, amb el desxifrat activat.',
+      ],
+      prereqPolicyDesc:
+        'La política IAM mínima permet ssm:GetParameter sobre els ARN dels paràmetres del teu fitxer de mapa. Un comodí sobre el prefix de la ruta cobreix una aplicació i un entorn:',
+      prereqPolicyNote:
+        "La segona sentència només cal per als paràmetres xifrats amb una clau KMS gestionada pel client; substitueix <key-id> per l'ID d'aquesta clau.",
+      regionTitle: "Quina regió s'utilitza",
+      regionDesc:
+        'Envilder tria la regió en aquest ordre i la mostra a la primera línia de cada execució (region=eu-west-1 a la sortida de sota):',
+      regionItems: [
+        "La variable d'entorn AWS_REGION.",
+        "La variable d'entorn AWS_DEFAULT_REGION.",
+        "La regió que l'SDK d'AWS troba per al perfil seleccionat, per exemple region a ~/.aws/config. El perfil és --profile, després $config.profile i després el predeterminat.",
+        'us-east-1, si no hi ha cap de les anteriors.',
+      ],
+      regionNote:
+        "Els paràmetres guardats en una altra regió es publiquen com a no trobats, així que mira primer aquesta línia quan s'ometi un paràmetre que saps que existeix.",
+      exampleTitle: 'Exemple: de paràmetres SSM a un fitxer .env',
+      exampleParamsDesc:
+        "El compte ja té tres paràmetres sota /my-app/dev/. El fitxer de mapa connecta cadascun amb la variable que l'ha de contenir:",
+      thParameter: 'Paràmetre SSM',
+      thVariable: 'Variable al .env',
+      exampleMapDesc:
+        "Crea envilder.json a l'arrel del projecte. Cada clau és el nom de la variable que s'escriurà i cada valor és el nom del paràmetre, tal com apareix a SSM:",
+      exampleRunDesc:
+        'Executa envilder sense opcions. Pull és el mode per defecte: llegeix envilder.json i escriu .env al directori actual.',
+      exampleOutputDesc:
+        "Els valors s'emmascaren: d'un valor de més de 10 caràcters només es mostren els tres últims, i les rutes s'emmascaren igual.",
+      exampleResultDesc:
+        "El .env resultant. Envilder cita el valor de DATABASE_URL perquè conté un espai i un #, i abans d'escriure rellegeix el resultat com ho fa dotenv per comprovar que tots els valors es conserven:",
+      exampleRerunDesc:
+        "Si l'executes de nou no canvia res: una línia que ja té el valor correcte no es reescriu, i les línies que el fitxer de mapa no declara es conserven.",
+      exampleGitignore:
+        "El fitxer .env conté els valors reals. Afegeix .env i .env.prod (que fem servir més avall) a .gitignore: el patró .env no coincideix amb .env.prod, així que posa'ls tots dos. envilder.json només conté noms de variables i rutes de paràmetres, així que es pot commitejar sense problema.",
+      envsTitle: 'Diversos entorns',
+      envsDesc:
+        "Tingues un fitxer de mapa per entorn i tria'l amb --map. Els noms dels fitxers són teus. Aquest envilder.prod.json mapeja les mateixes variables als paràmetres de /my-app/prod/:",
+      envsRunDesc:
+        "Passa --envfile pel fitxer que s'ha d'escriure i --profile pel perfil d'AWS que pot llegir aquests paràmetres:",
+      envsNote:
+        '--profile substitueix $config.profile del fitxer de mapa, i AWS_REGION continua guanyant a la regió del perfil.',
+      execTitle: 'O prescindeix del fitxer amb envilder exec',
+      execDesc:
+        "Si només necessites els valors per arrencar un procés, envilder exec resol el mateix fitxer de mapa i arrenca la teva ordre amb els paràmetres afegits al seu entorn. No s'escriu res al disc:",
+      execOutputDesc:
+        "El resum va a stderr, així que no es barreja amb la sortida de la teva ordre. L'ordre llegeix els valors com a variables d'entorn normals.",
+      whenTitle: 'Quin triar',
+      whenItems: [
+        "Fes servir envilder exec quan arrenques tu el procés: scripts d'npm, execucions de tests, migracions. No queda cap fitxer amb secrets al disc, i si un paràmetre falta o no es pot llegir, l'ordre no arrenca i Envilder surt amb 125.",
+        "Fes servir un fitxer .env quan una eina llegeix el fitxer per ruta o no pots embolcallar-ne l'ordre d'arrencada: env_file de Docker Compose, una configuració d'execució de l'IDE, un framework que carrega .env per si sol. En aquest mode un paràmetre inexistent només és un avís, així que mira el resum (2/3 en lloc de 3/3).",
+      ],
+      handTitle: 'Comparat amb un script',
+      handDesc:
+        "L'alternativa habitual és un script de shell al voltant de get-parameters-by-path. Per a una exportació ràpida funciona:",
+      handIntro: 'On es queda curt quan el fitxer el comparteix un equip:',
+      handPoints: [
+        "És fàcil oblidar --with-decryption. Sense aquesta opció un SecureString torna xifrat i l'script n'escriu el text xifrat.",
+        "L'API retorna com a màxim 10 paràmetres per pàgina. La AWS CLI segueix les pàgines per tu, però un script basat en un SDK o en una crida HTTP directa ha de seguir NextToken pel seu compte.",
+        "Els valors s'escriuen sense cometes. El DATABASE_URL de dalt es desa com DATABASE_URL=postgres://app:p@ss w0rd#1@db.internal:5432/app, i dotenv el rellegeix com postgres://app:p@ss w0rd, perquè el # comença un comentari.",
+        "> .env substitueix tot el fitxer, així que una línia com LOG_LEVEL=debug es perd, i els noms de les variables surten de l'últim segment de la ruta, de manera que reanomenar un paràmetre reanomena la variable sense avisar.",
+        "Res a Git diu quins paràmetres necessita l'aplicació. Amb envilder.json el contracte es revisa en una pull request, i una variable el paràmetre de la qual no existeix surt com a avís a la propera execució.",
+      ],
+      handFair:
+        "L'script té avantatges reals: no necessita Node.js, fa una crida per pàgina de resultats en lloc d'una per variable, i exporta tot el que hi ha sota una ruta sense mapa. Envilder només llegeix els noms del fitxer de mapa, amb una crida GetParameter cadascun, així que necessita ssm:GetParameter, no ssm:GetParametersByPath.",
+      errorsTitle: 'Errors habituals',
+      thMessage: 'Missatge',
+      thFix: 'Solució',
+      errCredsFix:
+        "L'SDK d'AWS no ha trobat cap credencial. Executa aws sso login --profile <nom>, exporta credencials o passa --profile per a un perfil amb nom. Codi de sortida 1, cap .env escrit.",
+      errDeniedFix:
+        'Les credencials funcionen però no poden llegir aquest paràmetre. Permet ssm:GetParameter sobre el seu ARN, i kms:Decrypt per a una clau gestionada pel client. El fitxer .env no es toca.',
+      errNotFoundFix:
+        "El paràmetre no existeix a la regió de la primera línia de la sortida. Comprova la ruta i la regió. El codi de sortida continua sent 0, així que mira l'1/2 del resum.",
+      errNameFix:
+        "Reanomena la clau a envilder.json. L'execució s'atura abans de llegir cap paràmetre.",
+      errNoMapFix:
+        'Executa envilder des del directori que conté envilder.json, o passa --map=ruta/al/fitxer.json.',
+      errorsMore:
+        'Tots els missatges del mode pull són a la referència del mode pull.',
+      ciTitle: 'A GitHub Actions',
+      ciDesc:
+        "A la CI, inicia la sessió del job a AWS amb OIDC i fes servir l'Action d'Envilder. Configura Node.js ella mateixa i, amb env-file, escriu el fitxer. Sense env-file exporta els valors als passos següents del job.",
+      ciNote:
+        "El fitxer s'escriu al directori temporal del runner perquè els passos posteriors de build, cache o artifacts no el recullin. Si només arrenques processos tu mateix, l'input command de l'Action o envilder exec (executa npx envilder exec -- npm test després d'actions/setup-node amb node-version 22.x) no necessita cap fitxer.",
+      relatedTitle: 'Pàgines relacionades',
+      relatedPull: 'Referència del mode pull',
+      relatedExec: "Referència d'envilder exec",
+      relatedMap: 'Referència del fitxer de mapa',
+      relatedAws: 'Configuració del proveïdor AWS SSM',
+      relatedGha: 'Guia de la GitHub Action',
     },
     pushReference: {
       tabAws: 'AWS SSM',
@@ -997,6 +1095,20 @@ export const ca: Translations = {
         cardSummary:
           'Instal·la la CLI, mapeja un secret i executa la teva app amb envilder exec, per a AWS SSM o Azure Key Vault.',
       },
+      'guide-ssm-to-env': {
+        title: "Carrega paràmetres d'AWS SSM Parameter Store en un fitxer .env",
+        description:
+          "Exporta paràmetres d'AWS SSM Parameter Store a un fitxer .env amb la CLI d'Envilder: política IAM, mapa envilder.json, diversos entorns, mode exec, CI i errors.",
+        heading:
+          "Carrega paràmetres d'AWS SSM Parameter Store en un fitxer .env",
+        intro:
+          "Com portes els paràmetres d'AWS SSM Parameter Store a un fitxer .env local sense escriure cap script a mà? Llista una sola vegada cada variable i la ruta del seu paràmetre a envilder.json i executa envilder: llegeix cada paràmetre, desxifra els valors SecureString i escriu un .env que, un cop llegit de nou, dona els mateixos valors.",
+        breadcrumb: 'SSM a .env',
+        navLabel: 'SSM a .env',
+        cardTitle: 'Carrega paràmetres SSM en un .env',
+        cardSummary:
+          "Relaciona rutes d'SSM Parameter Store amb variables i escriu un .env, o prescindeix del fitxer amb envilder exec.",
+      },
       'aws-ssm': {
         title: 'Utilitza Envilder amb AWS SSM Parameter Store',
         description:
@@ -1133,6 +1245,7 @@ export const ca: Translations = {
     navigationLabel: 'Navegació de documentació',
     mobileNavigation: 'Tria una pàgina de documentació',
     navGettingStarted: 'Comença',
+    navGuides: 'Guies',
     navProviders: 'Proveïdors',
     hubCardsLabel: 'Guies de documentació',
     openPage: 'Obre la guia',
