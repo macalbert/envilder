@@ -4,7 +4,7 @@
 
 # Validation: two checks that answer different questions
 #   validate_contract(): before loading, is the map file valid and does every
-#     declared secret exist? Reads no value (the same check as `envilder validate`)
+#     declared secret exist? Never uses or prints a value (same check as `envilder validate`)
 #   validate_secrets(): after resolving, is every resolved value non-empty?
 import sys
 
@@ -19,7 +19,8 @@ if not result.is_valid:
         print(f"{error.key}: {error.message}", file=sys.stderr)
     for key in result.keys:
         if key.status != SecretExistenceStatus.EXISTS:
-            print(f"{key.variable} ({key.path}): {key.status.value}", file=sys.stderr)
+            reason = key.reason or ""
+            print(f"{key.variable} ({key.path}): {key.status.value} {reason}".rstrip(), file=sys.stderr)
     sys.exit(1)
 
 # 2. Or fail the load itself: the contract check runs once before resolving

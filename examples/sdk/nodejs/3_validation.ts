@@ -1,6 +1,6 @@
 // Validation: two checks that answer different questions
 //   validateContract(): before loading, is the map file valid and does every
-//     declared secret exist? Reads no value (the same check as `envilder validate`)
+//     declared secret exist? Never uses or prints a value (same check as `envilder validate`)
 //   validateSecrets(): after resolving, is every resolved value non-empty?
 import { Envilder, validateSecrets } from '@envilder/sdk';
 
@@ -13,7 +13,9 @@ if (!result.isValid) {
     console.error(`${error.key}: ${error.message}`);
   }
   for (const key of result.keys.filter((k) => k.status !== 'exists')) {
-    console.error(`${key.variable} (${key.path}): ${key.status}`);
+    console.error(
+      `${key.variable} (${key.path}): ${key.status} ${key.reason ?? ''}`.trimEnd(),
+    );
   }
   process.exit(1);
 }

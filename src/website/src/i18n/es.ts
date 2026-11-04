@@ -1008,7 +1008,7 @@ export const es: Translations = {
         'Cuando el archivo de mapeo no es válido, validate se detiene ahí: no se llama a ningún proveedor, con --offline o sin él.',
       remoteTitle: 'Las claves remotas (sin --offline)',
       remoteDesc:
-        'Cada ruta de secreto declarada en el archivo de mapeo se comprueba en el proveedor sin leer su valor. Una ruta a la que apuntan varias variables se comprueba una sola vez. Cada variable recibe un estado:',
+        'Cada ruta de secreto declarada en el archivo de mapeo se comprueba en el proveedor. Envilder nunca usa ni muestra ningún valor: en AWS, los parámetros String pueden llegar en la respuesta, y se descartan. Una ruta a la que apuntan varias variables se comprueba una sola vez. Cada variable recibe un estado:',
       thStatus: 'Estado',
       thMeaning: 'Significado',
       statusExists: 'El secreto existe y la identidad puede verlo',
@@ -1023,7 +1023,7 @@ export const es: Translations = {
         'Las credenciales de AWS y las sesiones SSO caducadas se informan con el mismo mensaje que pull y exec. En un terminal interactivo, una sesión SSO caducada ofrece ejecutar aws sso login y después vuelve a intentarlo.',
       envfileTitle: 'Las claves del archivo env (con --envfile)',
       envfileDesc:
-        'El archivo env se lee con el mismo analizador que usan pull y push, así que los comentarios, export, las comillas y los valores multilínea se comportan igual. Sus claves se comparan con las variables que declara el archivo de mapeo, por el nombre exacto, distinguiendo mayúsculas y minúsculas:',
+        'Disponible a partir de la próxima versión. El archivo env se lee con el mismo analizador que usan pull y push, así que los comentarios, export, las comillas y los valores multilínea se comportan igual. Sus claves se comparan con las variables que declara el archivo de mapeo, por el nombre exacto, distinguiendo mayúsculas y minúsculas:',
       thFinding: 'Hallazgo',
       thEffect: 'Efecto',
       envMissing: 'Una variable declarada no está en el archivo env. Falla',
@@ -1047,7 +1047,7 @@ export const es: Translations = {
       permAwsDesc:
         'Las rutas se comprueban con GetParameters, diez por llamada, con WithDecryption: false: los parámetros SecureString nunca se descifran. Es una acción de IAM distinta de la ssm:GetParameter que usa pull, así que añádela a la política, limitada a las mismas rutas:',
       permAwsNote:
-        'No hace falta el permiso kms:Decrypt. Cuando se deniega una llamada, cada ruta se comprueba por separado, así que access denied solo se informa para las rutas que la identidad no puede leer.',
+        'No hace falta el permiso kms:Decrypt. Con kms:Decrypt, ssm:GetParameters también puede leer valores descifrados, así que limítalo a las mismas rutas que ssm:GetParameter. Cuando se deniega una llamada, cada ruta se comprueba por separado, así que access denied solo se informa para las rutas que la identidad no puede leer.',
       permAzureDesc:
         'Los nombres de los secretos del vault se listan una vez (solo metadatos) y cada nombre declarado, tras la conversión habitual de / a -, se compara con esa lista sin distinguir mayúsculas. Un secreto deshabilitado se informa como missing, porque pull no puede leerlo. Listar requiere:',
       permAzureItems: [
@@ -1070,7 +1070,7 @@ export const es: Translations = {
       outputInvalidDesc: 'Un archivo de mapeo no válido, en stderr:',
       jsonTitle: 'Salida JSON (--format json)',
       jsonDesc:
-        'Con --format=json, validate escribe exactamente un documento JSON en stdout y nada más, sea cual sea el resultado. Los logs, el banner de identidad de AWS, los avisos, los errores y la solicitud de inicio de sesión SSO van a stderr, así que stdout se puede pasar a jq o guardar como artefacto de CI. Los códigos de salida son los mismos que con la salida de texto. Los errores de opciones como --format=yaml se informan en stderr antes de ejecutar nada, sin documento.',
+        'Disponible a partir de la próxima versión. Con --format=json, validate escribe exactamente un documento JSON en stdout y nada más, sea cual sea el resultado. Los logs, el banner de identidad de AWS, los avisos, los errores y la solicitud de inicio de sesión SSO van a stderr, así que stdout se puede pasar a jq o guardar como artefacto de CI. Los códigos de salida son los mismos que con la salida de texto. Los errores de opciones como --format=yaml se informan en stderr antes de ejecutar nada, sin documento.',
       thField: 'Campo',
       fieldValid: 'true exactamente cuando el código de salida es 0',
       fieldOffline: 'true con --offline',
@@ -1094,9 +1094,9 @@ export const es: Translations = {
       ciDesc:
         'Ejecuta la comprobación offline en cada pull request, también desde forks, porque no necesita credenciales de la nube. Ejecuta la comprobación de existencia donde el job tenga las mismas credenciales que un pull, más los permisos de esta página:',
       ciEnvExample:
-        'Para comprobar sin credenciales que un .env.example versionado declara cada variable, añade --offline --envfile=.env.example al primer paso.',
+        'A partir de la próxima versión, para comprobar sin credenciales que un .env.example versionado declara cada variable, añade --offline --envfile=.env.example al primer paso.',
       ciJsonDesc:
-        'Para conservar el resultado para pasos posteriores u otras herramientas, usa la salida JSON. El paso sigue fallando cuando la validación falla:',
+        'A partir de la próxima versión, para conservar el resultado para pasos posteriores u otras herramientas, usa la salida JSON. El paso sigue fallando cuando la validación falla:',
       ciNote:
         'validate sale con 1 ante cualquier error, así que puede bloquear un paso de despliegue antes de que se ejecute pull o envilder exec.',
       sdkTitle: 'Desde los SDK',

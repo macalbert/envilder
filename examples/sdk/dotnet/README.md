@@ -31,7 +31,7 @@ All commands from the **`examples/sdk/dotnet/`** directory:
 | `5_load.cs`            | Resolve + inject into env vars           | `dotnet run 5_load.cs`           |
 | `6_resolve.cs`         | Resolve secrets without injecting        | `dotnet run 6_resolve.cs`        |
 
-`4_validation.cs` shows the two validation checks. `ValidateContractAsync()` / `WithContractValidation()` checks, before loading and without reading any value, that the map file is valid and that every declared secret exists: the same check as [`envilder validate`](https://envilder.com/docs/cli/validate/). It needs `ssm:GetParameters` on AWS. `ValidateSecrets()` runs after a load and checks that every resolved value is non-empty.
+`4_validation.cs` shows the two validation checks. `ValidateContractAsync()` / `WithContractValidation()` checks, before loading and without using or printing any value, that the map file is valid and that every declared secret exists: the same check as [`envilder validate`](https://envilder.com/docs/cli/validate/). On AWS it calls `ssm:GetParameters` without decryption: plain `String` values can still come back in that response and are discarded, and the same permission reads decrypted values when the identity also has `kms:Decrypt`, so scope it like the `ssm:GetParameter` that a load uses. `ValidateSecrets()` runs after a load and checks that every resolved value is non-empty.
 
 ```bash
 cd examples/sdk/dotnet

@@ -1008,7 +1008,7 @@ export const ca: Translations = {
         "Quan el fitxer de mapatge no és vàlid, validate s'atura aquí: no es crida cap proveïdor, amb --offline o sense.",
       remoteTitle: 'Les claus remotes (sense --offline)',
       remoteDesc:
-        'Cada ruta de secret declarada al fitxer de mapatge es comprova al proveïdor sense llegir-ne el valor. Una ruta a la qual apunten diverses variables es comprova una sola vegada. Cada variable rep un estat:',
+        'Cada ruta de secret declarada al fitxer de mapatge es comprova al proveïdor. Envilder no fa servir ni mostra mai cap valor: a AWS, els paràmetres String poden arribar a la resposta, i es descarten. Una ruta a la qual apunten diverses variables es comprova una sola vegada. Cada variable rep un estat:',
       thStatus: 'Estat',
       thMeaning: 'Significat',
       statusExists: 'El secret existeix i la identitat el pot veure',
@@ -1023,7 +1023,7 @@ export const ca: Translations = {
         "Les credencials d'AWS i les sessions SSO caducades s'informen amb el mateix missatge que pull i exec. En un terminal interactiu, una sessió SSO caducada ofereix executar aws sso login i després torna a provar.",
       envfileTitle: 'Les claus del fitxer env (amb --envfile)',
       envfileDesc:
-        'El fitxer env es llegeix amb el mateix analitzador que fan servir pull i push, així que els comentaris, export, les cometes i els valors multilínia es comporten igual. Les seves claus es comparen amb les variables que declara el fitxer de mapatge, pel nom exacte, distingint majúscules i minúscules:',
+        'Disponible a partir de la propera versió. El fitxer env es llegeix amb el mateix analitzador que fan servir pull i push, així que els comentaris, export, les cometes i els valors multilínia es comporten igual. Les seves claus es comparen amb les variables que declara el fitxer de mapatge, pel nom exacte, distingint majúscules i minúscules:',
       thFinding: 'Troballa',
       thEffect: 'Efecte',
       envMissing: 'Una variable declarada no és al fitxer env. Falla',
@@ -1047,7 +1047,7 @@ export const ca: Translations = {
       permAwsDesc:
         "Les rutes es comproven amb GetParameters, deu per crida, amb WithDecryption: false: els paràmetres SecureString no es desxifren mai. És una acció d'IAM diferent de la ssm:GetParameter que fa servir pull, així que afegeix-la a la política, limitada a les mateixes rutes:",
       permAwsNote:
-        "No cal el permís kms:Decrypt. Quan es denega una crida, cada ruta s'hi comprova per separat, així que access denied només s'informa per a les rutes que la identitat no pot llegir.",
+        "No cal el permís kms:Decrypt. Amb kms:Decrypt, ssm:GetParameters també pot llegir valors desxifrats, així que limita'l a les mateixes rutes que ssm:GetParameter. Quan es denega una crida, cada ruta s'hi comprova per separat, així que access denied només s'informa per a les rutes que la identitat no pot llegir.",
       permAzureDesc:
         "Els noms dels secrets del vault es llisten una vegada (només metadades) i cada nom declarat, després de la conversió habitual de / a -, es compara amb aquesta llista sense distingir majúscules. Un secret desactivat s'informa com a missing, perquè pull no el pot llegir. Llistar requereix:",
       permAzureItems: [
@@ -1070,7 +1070,7 @@ export const ca: Translations = {
       outputInvalidDesc: 'Un fitxer de mapatge no vàlid, a stderr:',
       jsonTitle: 'Sortida JSON (--format json)',
       jsonDesc:
-        "Amb --format=json, validate escriu exactament un document JSON a stdout i res més, sigui quin sigui el resultat. Els logs, el bàner d'identitat d'AWS, els avisos, els errors i la sol·licitud d'inici de sessió SSO van a stderr, així que stdout es pot passar a jq o desar com a artefacte de CI. Els codis de sortida són els mateixos que amb la sortida de text. Els errors d'opcions com --format=yaml s'informen a stderr abans d'executar res, sense document.",
+        "Disponible a partir de la propera versió. Amb --format=json, validate escriu exactament un document JSON a stdout i res més, sigui quin sigui el resultat. Els logs, el bàner d'identitat d'AWS, els avisos, els errors i la sol·licitud d'inici de sessió SSO van a stderr, així que stdout es pot passar a jq o desar com a artefacte de CI. Els codis de sortida són els mateixos que amb la sortida de text. Els errors d'opcions com --format=yaml s'informen a stderr abans d'executar res, sense document.",
       thField: 'Camp',
       fieldValid: 'true exactament quan el codi de sortida és 0',
       fieldOffline: 'true amb --offline',
@@ -1094,9 +1094,9 @@ export const ca: Translations = {
       ciDesc:
         "Executa la comprovació offline a cada pull request, també des de forks, perquè no necessita credencials del núvol. Executa la comprovació d'existència on el job tingui les mateixes credencials que un pull, més els permisos d'aquesta pàgina:",
       ciEnvExample:
-        'Per comprovar sense credencials que un .env.example versionat declara cada variable, afegeix --offline --envfile=.env.example al primer pas.',
+        'A partir de la propera versió, per comprovar sense credencials que un .env.example versionat declara cada variable, afegeix --offline --envfile=.env.example al primer pas.',
       ciJsonDesc:
-        'Per conservar el resultat per a passos posteriors o altres eines, fes servir la sortida JSON. El pas continua fallant quan la validació falla:',
+        'A partir de la propera versió, per conservar el resultat per a passos posteriors o altres eines, fes servir la sortida JSON. El pas continua fallant quan la validació falla:',
       ciNote:
         "validate surt amb 1 davant de qualsevol error, així que pot bloquejar un pas de desplegament abans que s'executi pull o envilder exec.",
       sdkTitle: 'Des dels SDK',

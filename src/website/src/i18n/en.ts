@@ -997,7 +997,7 @@ export const en: Translations = {
         'When the map file is invalid, validate stops there: no provider is called, with or without --offline.',
       remoteTitle: 'The remote keys (without --offline)',
       remoteDesc:
-        'Every secret path declared in the map file is checked in the provider without reading its value. A path that several variables map to is checked once. Each variable gets one status:',
+        'Every secret path declared in the map file is checked in the provider. Envilder never uses or prints a value: on AWS, String parameters can come back in the response, and they are discarded. A path that several variables map to is checked once. Each variable gets one status:',
       thStatus: 'Status',
       thMeaning: 'Meaning',
       statusExists: 'The secret exists and the identity can see it',
@@ -1012,7 +1012,7 @@ export const en: Translations = {
         'Expired AWS credentials and SSO sessions are reported with the same message as pull and exec. On an interactive terminal, an expired SSO session offers to run aws sso login and then retries.',
       envfileTitle: 'The env file keys (with --envfile)',
       envfileDesc:
-        'The env file is read with the parser pull and push use, so comments, export, quotes and multiline values behave the same. Its keys are compared with the variables the map file declares, by exact, case-sensitive name:',
+        'Available from the next release. The env file is read with the parser pull and push use, so comments, export, quotes and multiline values behave the same. Its keys are compared with the variables the map file declares, by exact, case-sensitive name:',
       thFinding: 'Finding',
       thEffect: 'Effect',
       envMissing: 'A declared variable is absent from the env file. Fails',
@@ -1036,7 +1036,7 @@ export const en: Translations = {
       permAwsDesc:
         'Paths are checked with GetParameters, ten per call, with WithDecryption: false: SecureString parameters are never decrypted. This is a separate IAM action from the ssm:GetParameter pull uses, so add it to the policy, scoped to the same paths:',
       permAwsNote:
-        'No kms:Decrypt permission is needed. When a call is denied, each path in it is checked on its own, so access denied is reported only for the paths the identity cannot read.',
+        'No kms:Decrypt permission is needed. With kms:Decrypt, ssm:GetParameters can also read decrypted values, so scope it to the same paths as ssm:GetParameter. When a call is denied, each path in it is checked on its own, so access denied is reported only for the paths the identity cannot read.',
       permAzureDesc:
         'The secret names of the vault are listed once (metadata only) and each declared name, after the usual / to - translation, is matched against that list ignoring case. A disabled secret is reported as missing, because pull cannot read it. Listing needs:',
       permAzureItems: [
@@ -1058,7 +1058,7 @@ export const en: Translations = {
       outputInvalidDesc: 'An invalid map file, on stderr:',
       jsonTitle: 'JSON output (--format json)',
       jsonDesc:
-        'With --format=json, validate prints exactly one JSON document to stdout and nothing else, whatever the outcome. Logs, the AWS identity banner, warnings, errors and the SSO login prompt go to stderr, so stdout can be piped to jq or saved as a CI artifact. Exit codes are the same as with text output. Option errors such as --format=yaml are reported on stderr before anything runs, without a document.',
+        'Available from the next release. With --format=json, validate prints exactly one JSON document to stdout and nothing else, whatever the outcome. Logs, the AWS identity banner, warnings, errors and the SSO login prompt go to stderr, so stdout can be piped to jq or saved as a CI artifact. Exit codes are the same as with text output. Option errors such as --format=yaml are reported on stderr before anything runs, without a document.',
       thField: 'Field',
       fieldValid: 'true exactly when the exit code is 0',
       fieldOffline: 'true with --offline',
@@ -1082,9 +1082,9 @@ export const en: Translations = {
       ciDesc:
         'Run the offline check on every pull request, including from forks, since it needs no cloud credentials. Run the existence check where the job has the same credentials as a pull, plus the permissions above:',
       ciEnvExample:
-        'To check that a committed .env.example declares every variable without credentials, add --offline --envfile=.env.example to the first step.',
+        'From the next release, to check that a committed .env.example declares every variable without credentials, add --offline --envfile=.env.example to the first step.',
       ciJsonDesc:
-        'To keep the result for later steps or other tools, use JSON output. The step still fails when validation fails:',
+        'From the next release, to keep the result for later steps or other tools, use JSON output. The step still fails when validation fails:',
       ciNote:
         'validate exits with 1 on any failure, so it can gate a deploy step before pull or envilder exec runs.',
       sdkTitle: 'From the SDKs',

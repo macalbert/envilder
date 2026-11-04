@@ -29,7 +29,7 @@ All commands from the **`examples/sdk/python/`** directory:
 | `4_load.py`        | Load + inject into `os.environ`          | `uv run 4_load.py`            |
 | `5_resolve.py`     | Resolve without injecting                | `uv run 5_resolve.py`         |
 
-`3_validation.py` shows the two validation checks. `validate_contract()` / `with_contract_validation()` checks, before loading and without reading any value, that the map file is valid and that every declared secret exists: the same check as [`envilder validate`](https://envilder.com/docs/cli/validate/). It needs `ssm:GetParameters` on AWS. `validate_secrets()` runs after a load and checks that every resolved value is non-empty.
+`3_validation.py` shows the two validation checks. `validate_contract()` / `with_contract_validation()` checks, before loading and without using or printing any value, that the map file is valid and that every declared secret exists: the same check as [`envilder validate`](https://envilder.com/docs/cli/validate/). On AWS it calls `ssm:GetParameters` without decryption: plain `String` values can still come back in that response and are discarded, and the same permission reads decrypted values when the identity also has `kms:Decrypt`, so scope it like the `ssm:GetParameter` that a load uses. `validate_secrets()` runs after a load and checks that every resolved value is non-empty.
 
 ```bash
 cd examples/sdk/python

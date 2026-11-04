@@ -1,6 +1,6 @@
 // Validation: two checks that answer different questions
 //   ValidateContractAsync(): before loading, is the map file valid and does every
-//     declared secret exist? Reads no value (the same check as `envilder validate`)
+//     declared secret exist? Never uses or prints a value (same check as `envilder validate`)
 //   ValidateSecrets(): after resolving, is every resolved value non-empty?
 #:package Envilder@1.1.0
 #:property PublishAot=false
@@ -17,7 +17,7 @@ if (!result.IsValid)
         Console.Error.WriteLine($"{error.Key}: {error.Message}");
 
     foreach (var key in result.Keys.Where(k => k.Status != SecretExistenceStatus.Exists))
-        Console.Error.WriteLine($"{key.Variable} ({key.Path}): {key.Status}");
+        Console.Error.WriteLine($"{key.Variable} ({key.Path}): {key.Status} {key.Reason}".TrimEnd());
 
     return 1;
 }

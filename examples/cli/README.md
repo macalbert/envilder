@@ -18,7 +18,7 @@ cd examples/cli
 npx envilder --key=API_KEY --value=s3cret --secret-path=/envilder/demo/api-key
 # Created envilder.json
 
-# 2. Check the map file and that every secret exists, without reading any value
+# 2. Check the map file and that every secret exists, without printing any value
 npx envilder validate
 # ✓ 1 secret exists
 
