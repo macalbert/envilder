@@ -1,7 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { docsRouteManifest } from '../../src/website/src/i18n/docs-routes';
+import {
+  docsArticleRoutes,
+  docsRouteManifest,
+} from '../../src/website/src/i18n/docs-routes';
 import { localizedLanguages } from '../../src/website/src/i18n/utils';
 
 const siteUrl = 'https://envilder.com';
@@ -208,6 +211,92 @@ describe('Static website SEO', () => {
     // Assert
     expect(actual).toEqual(expected);
   }, 15_000);
+
+  it('Should_ExposeTechArticleNode_When_EnglishDocsArticlesAreBuilt', () => {
+    // Arrange
+    const expected: string[] = [];
+    const articlePages = englishDocsPages.filter(
+      (page) => page.path !== '/docs/',
+    );
+
+    // Act
+    const actual = articlePages.flatMap((page) => {
+      const html = readDistFile(page.file);
+      const jsonLd = html.match(
+        /<script type="application\/ld\+json">([\s\S]*?)<\/script>/,
+      )?.[1];
+      const graph = JSON.parse(jsonLd ?? '{}')['@graph'] as Record<
+        string,
+        unknown
+      >[];
+      const article = graph.find((node) => node['@type'] === 'TechArticle');
+      const dateModified = String(article?.dateModified);
+      const modifiedTime = getTags(html, 'meta')
+        .find(
+          (tag) => getAttribute(tag, 'property') === 'article:modified_time',
+        )
+        ?.match(/content="([^"]+)"/)?.[1];
+
+      return [
+        ...(article ? [] : [`${page.file}: missing TechArticle`]),
+        ...(article?.url === `${siteUrl}${page.path}`
+          ? []
+          : [`${page.file}: invalid TechArticle url`]),
+        ...(article?.inLanguage === 'en'
+          ? []
+          : [`${page.file}: invalid TechArticle inLanguage`]),
+        ...(JSON.stringify(article?.isPartOf) ===
+        JSON.stringify({ '@id': `${siteUrl}/#website` })
+          ? []
+          : [`${page.file}: invalid TechArticle isPartOf`]),
+        ...(JSON.stringify(article?.publisher) ===
+        JSON.stringify({ '@id': `${siteUrl}/#organization` })
+          ? []
+          : [`${page.file}: invalid TechArticle publisher`]),
+        ...(/^\d{4}-\d{2}-\d{2}$/.test(dateModified) &&
+        Date.parse(dateModified) <= Date.now()
+          ? []
+          : [`${page.file}: invalid dateModified`]),
+        ...(modifiedTime === dateModified
+          ? []
+          : [`${page.file}: invalid article:modified_time`]),
+      ];
+    });
+
+    // Assert
+    expect(actual).toEqual(expected);
+  });
+
+  it('Should_OmitTechArticle_When_PageIsDocsHubOrTranslatedDocs', () => {
+    // Arrange
+    const expected: string[] = [];
+    const pages = [{ file: 'docs/index.html' }, ...translatedDocsPages];
+
+    // Act
+    const actual = pages
+      .filter((page) => readDistFile(page.file).includes('"TechArticle"'))
+      .map((page) => page.file);
+
+    // Assert
+    expect(actual).toEqual(expected);
+  });
+
+  it('Should_ListEveryEnglishDocsArticle_When_LlmsTxtIsBuilt', () => {
+    // Arrange
+    const expected: string[] = [];
+    const llms = readDistFile('llms.txt');
+
+    // Act
+    const actual = docsArticleRoutes
+      .map((route) => `${siteUrl}${route.path}`)
+      .filter((url) => !llms.includes(`](${url})`));
+
+    // Assert
+    expect(actual).toEqual(expected);
+    expect(llms.startsWith('# Envilder\n\n> ')).toBe(true);
+    expect(llms).toContain('## Docs: Guides');
+    expect(llms).toContain(`(${siteUrl}/docs/guides/ssm-to-env/)`);
+  });
 
   it('Should_ExposeManifestBackedHreflangClusters_When_IndexablePagesAreBuilt', () => {
     // Arrange

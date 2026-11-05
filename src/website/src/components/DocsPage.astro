@@ -1,5 +1,5 @@
 ---
-import type { DocsRouteKey } from '../i18n/docs-routes';
+import { type DocsRouteKey, getDocsRoute } from '../i18n/docs-routes';
 import { useTranslations } from '../i18n/utils';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BackToTop from './BackToTop.astro';
@@ -17,6 +17,8 @@ const t = useTranslations(lang);
 const page = t.docs.pages[routeKey];
 // Only the English docs are indexed; CA/ES copies split crawl budget.
 const noindex = lang !== 'en';
+const isArticle = routeKey !== 'hub';
+const dateModified = getDocsRoute(routeKey)?.dateModified;
 ---
 
 <BaseLayout
@@ -24,6 +26,7 @@ const noindex = lang !== 'en';
   description={page.description}
   lang={lang}
   noindex={noindex}
+  article={isArticle ? { dateModified } : undefined}
 >
   <Navbar lang={lang} />
   {routeKey === 'hub' ? (
