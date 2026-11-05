@@ -10,6 +10,7 @@ const ENV_KEYS = [
   'AWS_SHARED_CREDENTIALS_FILE',
   'AWS_REGION',
   'AWS_DEFAULT_REGION',
+  'AWS_EC2_METADATA_DISABLED',
 ];
 
 describe('resolveRegionWithFallback', () => {
@@ -21,6 +22,7 @@ describe('resolveRegionWithFallback', () => {
     for (const key of ENV_KEYS) {
       savedEnv[key] = process.env[key];
     }
+    process.env.AWS_EC2_METADATA_DISABLED = 'true';
     tempDir = mkdtempSync(join(tmpdir(), 'envilder-sdk-aws-'));
   });
 
