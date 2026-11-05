@@ -1433,6 +1433,7 @@ export const es: Translations = {
     breadcrumbDocs: 'Documentación',
     navigationLabel: 'Navegación de documentación',
     mobileNavigation: 'Elige una página de documentación',
+    anchorLabel: 'Enlace a esta sección',
     navGettingStarted: 'Primeros pasos',
     navGuides: 'Guías',
     navProviders: 'Proveedores',

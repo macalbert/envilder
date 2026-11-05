@@ -1431,6 +1431,7 @@ export const ca: Translations = {
     breadcrumbDocs: 'Documentació',
     navigationLabel: 'Navegació de documentació',
     mobileNavigation: 'Tria una pàgina de documentació',
+    anchorLabel: 'Enllaç a aquesta secció',
     navGettingStarted: 'Comença',
     navGuides: 'Guies',
     navProviders: 'Proveïdors',

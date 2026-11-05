@@ -68,7 +68,7 @@ const articleRoutes = docsArticleRoutes;
       </nav>
     </aside>
 
-    <div class="docs-content">
+    <div class="docs-content" data-anchor-label={t.docs.anchorLabel}>
       <nav class="breadcrumb" aria-label={t.docs.breadcrumbLabel}>
         <a href={localizedPath(lang, '/')}>{t.docs.breadcrumbHome}</a>
         <span aria-hidden="true">/</span>
@@ -225,6 +225,108 @@ const articleRoutes = docsArticleRoutes;
     .docs-mobile-select {
       display: block;
       margin-bottom: var(--space-lg);
+    }
+  }
+</style>
+
+<script>
+  const content = document.querySelector<HTMLElement>('.docs-content');
+  const label = content?.dataset.anchorLabel ?? 'Link to this section';
+  const svgNs = 'http://www.w3.org/2000/svg';
+
+  const slugify = (text: string) =>
+    text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'section';
+
+  const uniqueId = (base: string) => {
+    let id = base;
+    for (let n = 2; document.getElementById(id); n++) id = `${base}-${n}`;
+    return id;
+  };
+
+  const createIcon = () => {
+    const svg = document.createElementNS(svgNs, 'svg');
+    svg.setAttribute('viewBox', '0 0 16 16');
+    svg.setAttribute('width', '16');
+    svg.setAttribute('height', '16');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    const path = document.createElementNS(svgNs, 'path');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', 'currentColor');
+    path.setAttribute('stroke-width', '1.6');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute(
+      'd',
+      'M6.5 9.5a3 3 0 0 0 4.2 0l2.3-2.3a3 3 0 0 0-4.2-4.2L8 3.8M9.5 6.5a3 3 0 0 0-4.2 0L3 8.8A3 3 0 0 0 7.2 13l.8-.8',
+    );
+    svg.append(path);
+    return svg;
+  };
+
+  content?.querySelectorAll<HTMLHeadingElement>('h2, h3').forEach((heading) => {
+    if (heading.closest('.docs-header')) return;
+    const text = heading.textContent?.trim() ?? '';
+    const sectionId = heading.closest('section[id]')?.id;
+    let id = heading.id;
+    if (!id && heading.tagName === 'H2' && sectionId) id = sectionId;
+    if (!id) {
+      id = uniqueId(slugify(text));
+      heading.id = id;
+    }
+
+    const link = document.createElement('a');
+    link.className = 'heading-anchor';
+    link.href = `#${id}`;
+    link.setAttribute('aria-label', `${label}: ${text}`);
+    link.append(createIcon());
+    heading.classList.add('has-anchor');
+    heading.prepend(link);
+  });
+</script>
+
+<style>
+  .docs-content :global(.has-anchor) {
+    position: relative;
+  }
+
+  .docs-content :global(.heading-anchor) {
+    position: absolute;
+    left: -1.5rem;
+    top: 0;
+    bottom: 0;
+    width: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+    opacity: 0;
+    transition: opacity var(--transition-fast), color var(--transition-fast);
+  }
+
+  .docs-content :global(.has-anchor:hover .heading-anchor),
+  .docs-content :global(.heading-anchor:focus-visible) {
+    opacity: 1;
+  }
+
+  .docs-content :global(.heading-anchor:hover),
+  .docs-content :global(.heading-anchor:focus-visible) {
+    color: var(--color-primary);
+  }
+
+  .docs-content :global(.heading-anchor:focus-visible) {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  /* Touch devices cannot hover: keep the icon faintly visible */
+  @media (hover: none) {
+    .docs-content :global(.heading-anchor) {
+      opacity: 0.45;
     }
   }
 </style>

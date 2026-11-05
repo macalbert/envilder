@@ -233,6 +233,21 @@ describe('Static website SEO', () => {
     expect(actual).toEqual(expected.sort());
   });
 
+  it('Should_ExposeLocalizedAnchorLabel_When_DocsPagesAreBuilt', () => {
+    // Arrange
+    const expected: string[] = [];
+
+    // Act
+    const actual = localizedDocsPages
+      .filter(
+        (page) => !/data-anchor-label="[^"]+"/.test(readDistFile(page.file)),
+      )
+      .map((page) => page.file);
+
+    // Assert
+    expect(actual).toEqual(expected);
+  });
+
   it('Should_NoindexTranslatedDocs_When_StaticSiteIsBuilt', () => {
     // Arrange
     const expected: string[] = [];
