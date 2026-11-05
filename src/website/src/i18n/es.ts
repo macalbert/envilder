@@ -411,7 +411,7 @@ export const es: Translations = {
     install: 'Instalar',
     quickStart: 'Inicio rápido',
     step1:
-      'Sube un secreto con npx envilder --key --value --secret-path: Envilder escribe envilder.json por ti',
+      'Sube un secreto con npx envilder --push --key --value --secret-path: Envilder escribe envilder.json por ti',
     step2:
       'Ejecuta npx envilder exec -- seguido de tu comando de arranque habitual',
     step3: 'Tu app arranca con sus secretos ✔',
@@ -871,7 +871,7 @@ export const es: Translations = {
       ],
       synopsisTitle: 'Sinopsis',
       synopsisDesc:
-        'Push tiene dos formas. --push sube valores de un archivo .env. --key, --value y --secret-path juntos suben un solo secreto; con ellos, --push es opcional. No hay ningún subcomando push. --ssm-path es un alias obsoleto de --secret-path y muestra un aviso.',
+        'Push tiene dos formas. --push sube valores de un archivo .env. --key, --value y --secret-path juntos suben un solo secreto; con ellos, --push es opcional (bastan las tres opciones), y la documentación lo escribe por claridad. No hay ningún subcomando push. --ssm-path es un alias obsoleto de --secret-path y muestra un aviso.',
       thOption: 'Opción',
       thDefault: 'Por defecto',
       thDescription: 'Descripción',

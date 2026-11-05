@@ -16,7 +16,7 @@ All commands from the **`examples/cli/`** directory:
 cd examples/cli
 
 # 1. Push the secret. Envilder also creates envilder.json
-npx envilder --key=API_KEY --value=s3cret --secret-path=/envilder/demo/api-key
+npx envilder --push --key=API_KEY --value=s3cret --secret-path=/envilder/demo/api-key
 # Created envilder.json
 
 # 2. Check the map file and that every secret exists, without printing any value
