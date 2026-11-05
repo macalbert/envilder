@@ -1723,7 +1723,7 @@ export const ca: Translations = {
       "Analitza el fitxer de mapeig, resol secrets i injecta'ls a les variables d'entorn:",
     sdkDotnetFullDocs: 'Documentació completa →',
     sdkDotnetExamplesDesc:
-      'Projectes de proves xUnit amb Testcontainers i Aspire que resolen un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack i Lowkey Vault) i passen els valors als contenidors, sense cap fitxer .env:',
+      'Projectes de proves xUnit amb Testcontainers i Aspire que resolen un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack for AWS i LocalStack for Azure) i passen els valors als contenidors, sense cap fitxer .env:',
     sdkDotnetPrereqTitle: 'Prerequisits',
     sdkDotnetPrereqDesc:
       "El paquet apunta a .NET Standard 2.0, així que funciona amb qualsevol versió de .NET amb suport (les proves de l'SDK s'executen a .NET 10, l'LTS actual). Cada proveïdor fa servir la seva cadena de credencials per defecte:",
@@ -1847,7 +1847,7 @@ export const ca: Translations = {
       'Validació opcional que assegura que tots els secrets resolts tenen valors no buits:',
     sdkPythonFullDocs: 'Documentació completa →',
     sdkPythonExamplesDesc:
-      'Un projecte pytest amb Testcontainers que resol un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack i Lowkey Vault) i passa els valors als contenidors, sense cap fitxer .env:',
+      'Un projecte pytest amb Testcontainers que resol un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack for AWS i LocalStack for Azure) i passa els valors als contenidors, sense cap fitxer .env:',
     sdkNodejsTitle: 'Node.js SDK',
     sdkNodejsDesc:
       "Carrega secrets directament a la teva aplicació Node.js a l'inici. API asíncrona amb façana d'una línia o constructor fluent per a control total.",
@@ -1875,7 +1875,7 @@ export const ca: Translations = {
       "Consulta la referència d'envilder validate per als estats i els permisos que necessita la comprovació →",
     sdkNodejsFullDocs: 'Documentació completa →',
     sdkNodejsExamplesDesc:
-      "Un projecte Vitest amb Testcontainers i un AppHost d'Aspire en TypeScript que resolen un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack i Lowkey Vault) i passen els valors als contenidors, sense cap fitxer .env:",
+      "Un projecte Vitest amb Testcontainers i un AppHost d'Aspire en TypeScript que resolen un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack for AWS i LocalStack for Azure) i passen els valors als contenidors, sense cap fitxer .env:",
     pagerPrev: 'Anterior',
     pagerNext: 'Següent',
   },
