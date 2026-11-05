@@ -260,16 +260,22 @@ const guideDevMap = `{
   "DATABASE_URL": "/my-app/dev/database-url"
 }`;
 
-const guidePushCmd =
-  'envilder --key=DB_PASSWORD --value=local-dev-password --secret-path=/my-app/dev/db-password';
+const guidePushCmd = `envilder --key=DB_PASSWORD --value=local-dev-password \\
+  --secret-path=/my-app/dev/db-password
+envilder --key=API_TOKEN --value=dev-token-7f3a9c21 \\
+  --secret-path=/my-app/dev/api-token
+envilder --key=DATABASE_URL \\
+  --value='postgres://app:p@ss w0rd#1@db.internal:5432/app' \\
+  --secret-path=/my-app/dev/database-url`;
 
-const guidePushOutput = `📤 PUSHING SECRET
-${'━'.repeat(60)}
-  → DB_PASSWORD → ********************ord
+const guidePushOutput = `⭐ SECRET PUSHED  —  DB_PASSWORD=***************ord → ********************ord
+✓ Created envilder.json
 
-⭐ SECRET PUSHED  —  DB_PASSWORD=***************ord → ********************ord
+⭐ SECRET PUSHED  —  API_TOKEN=***************c21 → ******************ken
+✓ Added API_TOKEN to envilder.json
 
-✓ Created envilder.json`;
+⭐ SECRET PUSHED  —  DATABASE_URL=********************************************app → *********************url
+✓ Added DATABASE_URL to envilder.json`;
 
 const guideDevOutput = `☁ AWS identity · account=123456789012 · region=eu-west-1 · profile=default
 
@@ -1140,20 +1146,16 @@ const validateSdkRows = [
           </tbody>
         </table>
         <p>{g.exampleMapDesc}</p>
+        <CodeBlock lang="bash" code={guidePushCmd} />
+        <p>{g.pushOutputDesc}</p>
+        <CodeBlock lang="text" code={guidePushOutput} />
+        <p>{g.pushResultDesc}</p>
         <CodeBlock lang="json" filename="envilder.json" code={guideDevMap} />
-
-        <p><strong>{g.pushTitle}</strong></p>
         <div class="callout callout-warning">
           <span class="callout-icon">⚠️</span>
           <div>{g.pushWarn}</div>
         </div>
-        <p>{g.pushDesc}</p>
-        <CodeBlock lang="bash" code={guidePushCmd} />
-        <CodeBlock lang="text" code={guidePushOutput} />
-        <p>{g.pushResultDesc}</p>
-        <CodeBlock lang="json" filename="envilder.json" code={guideDevMap} />
         <p>{g.pushNote} <a href={localizedPath(lang, '/docs/cli/push/')}>{g.pushLink}</a></p>
-
         <p>{g.exampleRunDesc}</p>
         <CodeBlock lang="bash" code="envilder" />
         <CodeBlock lang="text" code={guideDevOutput} />

@@ -774,20 +774,19 @@ export const ca: Translations = {
         "Els paràmetres guardats en una altra regió es publiquen com a no trobats, així que mira primer aquesta línia quan s'ometi un paràmetre que saps que existeix.",
       exampleTitle: 'Exemple: de paràmetres SSM a un fitxer .env',
       exampleParamsDesc:
-        "El compte ja té tres paràmetres sota /my-app/dev/. El fitxer de mapa connecta cadascun amb la variable que l'ha de contenir:",
+        'Partim de zero i creem tres paràmetres sota /my-app/dev/, cadascun llegit en una variable:',
       thParameter: 'Paràmetre SSM',
       thVariable: 'Variable al .env',
       exampleMapDesc:
-        "Crea envilder.json a l'arrel del projecte. Cada clau és el nom de la variable que s'escriurà i cada valor és el nom del paràmetre, tal com apareix a SSM:",
-      pushTitle: "Crear el paràmetre i l'entrada del mapa amb una sola ordre",
-      pushDesc:
-        "Si estàs creant els paràmetres en lloc de mapar-ne d'existents, envilder pot fer els dos passos alhora. Executa una ordre per variable: cadascuna desa el valor com a paràmetre SecureString i crea envilder.json, o hi afegeix l'entrada si el fitxer ja existeix (CLI 0.16 o superior). La primera:",
+        "Fes push de cada valor una sola vegada. Un push d'un sol secret desa el valor com a paràmetre SecureString i, en el mateix pas, crea envilder.json o hi afegeix l'entrada (CLI 0.16 o superior). La primera ordre crea el fitxer:",
+      pushOutputDesc:
+        "Línies de resultat de cada ordre (s'ometen la capçalera i la línia d'identitat). Els valors i les rutes estan emmascarats:",
       pushResultDesc:
-        'Després de les tres ordres (una per variable), el fitxer de mapa conté les mateixes entrades que hauries escrit a mà:',
+        'envilder.json ja mapeja les tres variables. Només conté noms i rutes, mai valors:',
       pushWarn:
-        "El push sempre escriu el valor (PutParameter amb sobreescriptura), així que un paràmetre existent en rep una versió nova. Per als paràmetres que ja existeixen, escriu el mapa a mà com abans. --value es queda a l'historial del shell: fes-lo servir per a valors de prova i fes push dels secrets reals des d'un .env amb envilder --push.",
+        "El push sempre escriu el valor (PutParameter amb sobreescriptura), així que un paràmetre existent en rep una versió nova. --value es queda a l'historial del shell: fes-lo servir per a valors de prova i fes push dels secrets reals des d'un .env amb envilder --push.",
       pushNote:
-        "Si la variable ja apunta a una altra ruta, no es fa cap push i l'ordre surt amb 1; --no-map-update ometeix el fitxer de mapa.",
+        'Si els paràmetres ja existeixen, no els tornis a pujar: escriu envilder.json a mà amb la mateixa forma, un nom de variable per cada nom de paràmetre. Si una variable ja apunta a una altra ruta, el push surt amb 1 i no puja res; --no-map-update ometeix el fitxer de mapa.',
       pushLink:
         'Referència del mode push: totes les opcions i les regles del fitxer de mapa',
       exampleRunDesc:

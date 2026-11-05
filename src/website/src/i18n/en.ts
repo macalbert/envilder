@@ -768,20 +768,19 @@ export const en: Translations = {
         'Parameters stored in another region are reported as not found, so check this line first when a parameter you know exists is skipped.',
       exampleTitle: 'Example: from SSM parameters to a .env file',
       exampleParamsDesc:
-        'The account already has three parameters under /my-app/dev/. The map file connects each one to the variable that should hold it:',
+        'We start from nothing and create three parameters under /my-app/dev/, each read into one variable:',
       thParameter: 'SSM parameter',
       thVariable: 'Variable in .env',
       exampleMapDesc:
-        'Create envilder.json in the project root. Each key is the variable name to write and each value is the parameter name, exactly as it appears in SSM:',
-      pushTitle: 'Creating the parameter and the map entry in one command',
-      pushDesc:
-        'If you are creating the parameters rather than mapping existing ones, envilder can do both steps at once. Run one command per variable: each stores the value as a SecureString parameter and creates envilder.json, or adds the entry when the file exists (CLI 0.16 or later). The first one:',
+        'Push each value once. A single-secret push stores the value as a SecureString parameter and, in the same step, creates envilder.json or adds the entry to it (CLI 0.16 or later). The first command creates the file:',
+      pushOutputDesc:
+        'Result lines of each command (the header and identity lines are left out). Values and paths are masked:',
       pushResultDesc:
-        'After the three commands (one per variable), the map file holds the same entries you would have written by hand:',
+        'envilder.json now maps the three variables. It holds names and paths only, never values:',
       pushWarn:
-        'Push always writes the value (PutParameter with overwrite), so an existing parameter gets a new version. For parameters that already exist, write the map by hand as above. --value stays in your shell history: use it for test values, and push real secrets from a .env file with envilder --push.',
+        'Push always writes the value (PutParameter with overwrite), so an existing parameter gets a new version. --value stays in your shell history: use it for test values, and push real secrets from a .env file with envilder --push.',
       pushNote:
-        'If the variable already maps to another path, nothing is pushed and the command exits with 1; --no-map-update skips the map file.',
+        'If the parameters already exist, do not push them again: write envilder.json by hand with the same shape, one variable name per parameter name. If a variable already maps to another path, push exits with 1 and pushes nothing; --no-map-update skips the map file.',
       pushLink: 'Push mode reference: every option and the map file rules',
       exampleRunDesc:
         'Run envilder with no options. Pull is the default mode: it reads envilder.json and writes .env in the current directory.',
