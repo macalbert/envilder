@@ -32,7 +32,7 @@ CI/CD (GitHub Action), and application startup (runtime SDKs).
 
 ```bash
 # Push a secret: it is stored in your cloud and mapped in envilder.json
-npx envilder --key=API_KEY --value=s3cret --secret-path=/my-app/api-key
+npx envilder --push --key=API_KEY --value=s3cret --secret-path=/my-app/api-key
 
 # Zero-config: uses envilder.json and .env by default
 npx envilder
@@ -111,10 +111,10 @@ npm install -g envilder
 Push a secret and Envilder writes the mapping for you:
 
 ```bash
-npx envilder --key=API_KEY --value=s3cret --secret-path=/my-app/api-key
+npx envilder --push --key=API_KEY --value=s3cret --secret-path=/my-app/api-key
 # ✓ Created envilder.json
 
-npx envilder --key=DB_PASSWORD --value=pa55word --secret-path=/my-app/db/password
+npx envilder --push --key=DB_PASSWORD --value=pa55word --secret-path=/my-app/db/password
 # ✓ Added DB_PASSWORD to envilder.json
 ```
 

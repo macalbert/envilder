@@ -140,10 +140,10 @@ const override = await Envilder.fromMapFile('envilder.json')
           <p>
             {t.howItWorks.steps[0].description}
           </p>
-          <CodeBlock lang="bash" filename="terminal" code={`$ envilder --key=API_KEY --value=s3cret --secret-path=/my-app/prod/api-key
+          <CodeBlock lang="bash" filename="terminal" code={`$ envilder --push --key=API_KEY --value=s3cret --secret-path=/my-app/prod/api-key
 ✓ Created envilder.json
 
-$ envilder --key=DB_PASSWORD --value=pa55word --secret-path=/my-app/prod/db-password
+$ envilder --push --key=DB_PASSWORD --value=pa55word --secret-path=/my-app/prod/db-password
 ✓ Added DB_PASSWORD to envilder.json`} />
           <CodeBlock lang="json" filename="envilder.json" code={`{
   "API_KEY": "/my-app/prod/api-key",

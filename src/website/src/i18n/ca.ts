@@ -411,7 +411,7 @@ export const ca: Translations = {
     install: 'Instal·lar',
     quickStart: 'Inici ràpid',
     step1:
-      'Puja un secret amb npx envilder --key --value --secret-path: Envilder escriu envilder.json per tu',
+      'Puja un secret amb npx envilder --push --key --value --secret-path: Envilder escriu envilder.json per tu',
     step2:
       "Executa npx envilder exec -- seguit de l'ordre habitual d'arrencada",
     step3: 'La teva app arrenca amb els seus secrets ✔',
@@ -869,7 +869,7 @@ export const ca: Translations = {
       ],
       synopsisTitle: 'Sinopsi',
       synopsisDesc:
-        "Push té dues formes. --push puja valors d'un fitxer .env. --key, --value i --secret-path junts pugen un sol secret; amb ells, --push és opcional. No hi ha cap subcomanda push. --ssm-path és un àlies obsolet de --secret-path i mostra un avís.",
+        "Push té dues formes. --push puja valors d'un fitxer .env. --key, --value i --secret-path junts pugen un sol secret; amb ells, --push és opcional (amb les tres opcions n'hi ha prou), i la documentació l'escriu per claredat. No hi ha cap subcomanda push. --ssm-path és un àlies obsolet de --secret-path i mostra un avís.",
       thOption: 'Opció',
       thDefault: 'Per defecte',
       thDescription: 'Descripció',

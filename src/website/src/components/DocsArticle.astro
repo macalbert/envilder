@@ -35,13 +35,13 @@ const azVaultPolicy = `az keyvault set-policy \
   --secret-permissions get set list`;
 
 const awsVerifyCmd = `# 1. Push a test secret; Envilder also writes aws-test-map.json
-envilder --provider=aws --map=aws-test-map.json --key=HELLO --value=world --secret-path=/test/hello
+envilder --push --provider=aws --map=aws-test-map.json --key=HELLO --value=world --secret-path=/test/hello
 
 # 2. Pull it back with Envilder
 envilder --map=aws-test-map.json --envfile=.env`;
 
 const azureVerifyCmd = `# 1. Push a test secret; Envilder also writes azure-test-map.json
-envilder --provider=azure --vault-url=https://{VAULT_NAME}.vault.azure.net \\
+envilder --push --provider=azure --vault-url=https://{VAULT_NAME}.vault.azure.net \\
   --map=azure-test-map.json --key=HELLO --value=world --secret-path=test-hello
 
 # 2. Pull it back with Envilder
@@ -260,11 +260,11 @@ const guideDevMap = `{
   "DATABASE_URL": "/my-app/dev/database-url"
 }`;
 
-const guidePushCmd = `envilder --key=DB_PASSWORD --value=local-dev-password \\
+const guidePushCmd = `envilder --push --key=DB_PASSWORD --value=local-dev-password \\
   --secret-path=/my-app/dev/db-password
-envilder --key=API_TOKEN --value=dev-token-7f3a9c21 \\
+envilder --push --key=API_TOKEN --value=dev-token-7f3a9c21 \\
   --secret-path=/my-app/dev/api-token
-envilder --key=DATABASE_URL \\
+envilder --push --key=DATABASE_URL \\
   --value='postgres://app:p@ss w0rd#1@db.internal:5432/app' \\
   --secret-path=/my-app/dev/database-url`;
 
@@ -375,11 +375,11 @@ const gsInstallTabs = [
   { label: 'npx', lang: 'bash', code: 'npx envilder --version' },
 ];
 
-const gsAwsSecret = `envilder --provider=aws --profile=default \\
+const gsAwsSecret = `envilder --push --provider=aws --profile=default \\
   --key=DB_PASSWORD --value=local-dev-password \\
   --secret-path=/my-app/dev/db-password`;
 
-const gsAzureSecret = `envilder --provider=azure --vault-url=https://my-vault.vault.azure.net \\
+const gsAzureSecret = `envilder --push --provider=azure --vault-url=https://my-vault.vault.azure.net \\
   --key=DB_PASSWORD --value=local-dev-password \\
   --secret-path=my-app-dev-db-password`;
 
@@ -661,7 +661,7 @@ const pullErrors = [
 const pushSynopsis = `envilder --push [--envfile=<file>] [--map=<file>] \\
   [--provider=aws|azure] [--vault-url=<url>] [--profile=<name>]
 
-envilder --key=<NAME> --value=<value> --secret-path=<path> \\
+envilder [--push] --key=<NAME> --value=<value> --secret-path=<path> \\
   [--map=<file>] [--no-map-update] \\
   [--provider=aws|azure] [--vault-url=<url>] [--profile=<name>]`;
 
@@ -687,9 +687,9 @@ Pushed API_TOKEN=**************2e4 to secret store at path ******************ken
 Successfully pushed environment variables from '.env' to secret store.`;
 
 const pushSingleAwsCmd =
-  'envilder --key=API_KEY --value=dev-api-key-4821 --secret-path=/my-app/dev/api-key';
+  'envilder --push --key=API_KEY --value=dev-api-key-4821 --secret-path=/my-app/dev/api-key';
 
-const pushSingleAzureCmd = `envilder --provider=azure --vault-url=https://my-vault.vault.azure.net \\
+const pushSingleAzureCmd = `envilder --push --provider=azure --vault-url=https://my-vault.vault.azure.net \\
   --key=API_KEY --value=dev-api-key-4821 --secret-path=/my-app/dev/api-key`;
 
 const pushSingleOutputBody = `📤 PUSHING SECRET

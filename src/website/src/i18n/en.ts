@@ -407,7 +407,7 @@ export const en: Translations = {
     install: 'Install',
     quickStart: 'Quick start',
     step1:
-      'Push a secret with npx envilder --key --value --secret-path: Envilder writes envilder.json for you',
+      'Push a secret with npx envilder --push --key --value --secret-path: Envilder writes envilder.json for you',
     step2: 'Run npx envilder exec -- followed by your usual start command',
     step3: 'Your app starts with its secrets ✔',
     terminalTitle: 'Quick start',
@@ -862,7 +862,7 @@ export const en: Translations = {
       ],
       synopsisTitle: 'Synopsis',
       synopsisDesc:
-        'Push has two forms. --push uploads values from a .env file. --key, --value and --secret-path together upload one secret; --push is optional with them. There is no push subcommand. --ssm-path is a deprecated alias of --secret-path and prints a warning.',
+        'Push has two forms. --push uploads values from a .env file. --key, --value and --secret-path together upload one secret; --push is optional with them (the three options are enough), and the docs write it for clarity. There is no push subcommand. --ssm-path is a deprecated alias of --secret-path and prints a warning.',
       thOption: 'Option',
       thDefault: 'Default',
       thDescription: 'Description',
