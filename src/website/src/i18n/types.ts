@@ -792,6 +792,7 @@ export interface DocsTranslations {
   breadcrumbDocs: string;
   navigationLabel: string;
   mobileNavigation: string;
+  anchorLabel: string;
   navGettingStarted: string;
   navGuides: string;
   navProviders: string;

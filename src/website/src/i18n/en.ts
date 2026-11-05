@@ -1417,6 +1417,7 @@ export const en: Translations = {
     breadcrumbDocs: 'Documentation',
     navigationLabel: 'Documentation navigation',
     mobileNavigation: 'Choose a documentation page',
+    anchorLabel: 'Link to this section',
     navGettingStarted: 'Getting started',
     navGuides: 'Guides',
     navProviders: 'Providers',
