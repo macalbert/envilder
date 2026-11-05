@@ -100,9 +100,15 @@ jobs:
 - With `env-file`, the Action only writes the file: the secrets reach a later
   step only if that step loads `.env`. Keep the project's existing test or
   build command, and check that its setup already loads `.env` (for example
-  `dotenv` in the test setup file, or Docker Compose `env_file`). If it does
-  not, tell the user instead of replacing the command with another runner. On
-  a ref without the `env-file` requirement, drop `env-file` to export the
+  `dotenv` in the test setup file). If it does not, tell the user instead of
+  replacing the command with another runner.
+- The file is written for `dotenv`'s grammar and checked against it. Other
+  loaders can read some values differently: Node's `--env-file` keeps a
+  carriage return escaped in a quoted value as a literal `\r`, Docker Compose
+  expands `$`, and Node `dotenv`, Compose and `source .env` skip or reject keys
+  with `/`. If the project's loader is affected by its keys or values, say so
+  and prefer the job environment or `command`, which pass values as they are.
+- On a ref without the `env-file` requirement, drop `env-file` to export the
   secrets to later steps, or use `command` to scope them to one command.
 - Do not set `$config.profile` in a map file used in CI: named profiles do not
   exist on the runner. Keep a separate CI map file when local files use one.
