@@ -40,7 +40,8 @@ secret-loading code, and do not add Envilder features to the user's project.
 
    | Class | Commands | Run it? |
    |-------|----------|---------|
-   | Offline | `npx envilder --version`, `--help`, `npx envilder validate --offline` | Yes |
+   | Offline | `envilder --version`, `--help`, `envilder validate --offline` with the CLI the project already installs (`npx --no envilder ...`, `pnpm exec envilder ...`) | Yes |
+   | Downloads and runs the CLI | Any `npx envilder ...` when the project does not install `envilder` (npx fetches the package and runs it with access to the workspace and environment) | Ask first, or propose adding `envilder` as a dev dependency |
    | Checks existence (calls the provider, reads no value) | `npx envilder validate` | Ask first: it uses the user's credentials and prints the cloud identity |
    | Reads values | `npx envilder` (pull to `.env`), `envilder exec`, `validate --compare-values`, running code that calls an SDK `load`/`resolve` | Only when the user explicitly asks for that run |
    | Writes secrets | `envilder --push`, single-secret push (`--key`/`--value`/`--secret-path`) | Never run it yourself. Give the user the command to run |

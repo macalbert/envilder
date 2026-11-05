@@ -79,12 +79,35 @@ function readFrontmatter(): { keys: string[]; values: Map<string, string> } {
   return { keys: [...values.keys()], values };
 }
 
+function fencedBlocks(file: string): CodeBlock[] {
+  const blocks: CodeBlock[] = [];
+  let open: { fence: string; language: string; lines: string[] } | undefined;
+  for (const line of skillText(file).split(/\r?\n/)) {
+    const fence = /^\s*(`{3,}|~{3,})\s*([^`\s]*)\s*$/.exec(line);
+    if (open === undefined && fence) {
+      open = { fence: fence[1], language: fence[2], lines: [] };
+    } else if (
+      open !== undefined &&
+      fence &&
+      fence[2] === '' &&
+      fence[1][0] === open.fence[0] &&
+      fence[1].length >= open.fence.length
+    ) {
+      blocks.push({
+        file: relative(file),
+        language: open.language,
+        code: open.lines.join('\n'),
+      });
+      open = undefined;
+    } else if (open !== undefined) {
+      open.lines.push(line);
+    }
+  }
+  return blocks;
+}
+
 function codeBlocks(): CodeBlock[] {
-  return skillFiles.flatMap((file) =>
-    [...skillText(file).matchAll(/^\s*```(\w+)\r?\n([\s\S]*?)^\s*```/gm)].map(
-      ([, language, code]) => ({ file: relative(file), language, code }),
-    ),
-  );
+  return skillFiles.flatMap(fencedBlocks);
 }
 
 function referencedCliOptions(): Array<[string, string]> {
@@ -107,11 +130,17 @@ function referencedSubcommands(): Array<[string, string]> {
   );
 }
 
-function cliOptions(): Set<string> {
-  const cli = readFileSync(
-    join(REPO_ROOT, 'src/envilder/apps/cli/entry/Cli.ts'),
-    'utf-8',
+const cliSource = () =>
+  readFileSync(join(REPO_ROOT, 'src/envilder/apps/cli/entry/Cli.ts'), 'utf-8');
+
+function cliSubcommands(): Set<string> {
+  return new Set(
+    [...cliSource().matchAll(/\.command\('([a-z]+)'\)/g)].map(([, n]) => n),
   );
+}
+
+function cliOptions(): Set<string> {
+  const cli = cliSource();
   const declared = [...cli.matchAll(/'(--[a-z][a-z-]*)/g)].map(([, o]) => o);
   return new Set([...declared, '--version', '--help']);
 }
@@ -310,7 +339,7 @@ describe('Envilder Agent Skill: references match the implementation', () => {
     'Should_ReferenceExistingSubcommand_When_%s_Uses_%s',
     (_file, subcommand) => {
       // Act
-      const actual = ['exec', 'validate'].includes(subcommand);
+      const actual = cliSubcommands().has(subcommand);
 
       // Assert
       expect(actual).toBe(true);
