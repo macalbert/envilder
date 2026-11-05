@@ -1,0 +1,11 @@
+{
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
+  "$config": {
+    "provider": "aws",
+    "profile": "orders-api-dev",
+    "name": "orders-api",
+    "environment": "dev"
+  },
+  "ConnectionStrings__Orders": "/orders-api/dev/db/connection-string",
+  "Payments/ApiKey": "/orders-api/dev/payments/api-key"
+}

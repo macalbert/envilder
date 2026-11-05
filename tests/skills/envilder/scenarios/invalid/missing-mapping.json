@@ -1,0 +1,4 @@
+{
+  "DB_PASSWORD": "/billing/dev/db-password",
+  "SMTP_PASSWORD": "/billing/dev/smtp-password"
+}
