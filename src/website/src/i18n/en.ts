@@ -774,9 +774,9 @@ export const en: Translations = {
         'Create envilder.json in the project root. Each key is the variable name to write and each value is the parameter name, exactly as it appears in SSM:',
       pushTitle: 'Creating the parameter and the map entry in one command',
       pushDesc:
-        'If you are creating the parameters, or adding a new one, envilder can do both steps at once. This command stores the value as a SecureString parameter and creates envilder.json, or adds the entry when the file already exists (CLI 0.16 or later):',
+        'If you are creating the parameters rather than mapping existing ones, envilder can do both steps at once. Run one command per variable: each stores the value as a SecureString parameter and creates envilder.json, or adds the entry when the file exists (CLI 0.16 or later). The first one:',
       pushResultDesc:
-        'The map file now holds the entry you would have written by hand:',
+        'After the three commands (one per variable), the map file holds the same entries you would have written by hand:',
       pushWarn:
         'Push always writes the value (PutParameter with overwrite), so an existing parameter gets a new version. For parameters that already exist, write the map by hand as above. --value stays in your shell history: use it for test values, and push real secrets from a .env file with envilder --push.',
       pushNote:

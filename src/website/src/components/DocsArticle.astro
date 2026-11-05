@@ -271,10 +271,6 @@ ${'━'.repeat(60)}
 
 ✓ Created envilder.json`;
 
-const guidePushMap = `{
-  "DB_PASSWORD": "/my-app/dev/db-password"
-}`;
-
 const guideDevOutput = `☁ AWS identity · account=123456789012 · region=eu-west-1 · profile=default
 
 🪙  RESOLVING SECRETS
@@ -1019,15 +1015,15 @@ const execErrors = [
         <CodeBlock lang="json" filename="envilder.json" code={guideDevMap} />
 
         <p><strong>{g.pushTitle}</strong></p>
-        <p>{g.pushDesc}</p>
-        <CodeBlock lang="bash" code={guidePushCmd} />
-        <CodeBlock lang="text" code={guidePushOutput} />
-        <p>{g.pushResultDesc}</p>
-        <CodeBlock lang="json" filename="envilder.json" code={guidePushMap} />
         <div class="callout callout-warning">
           <span class="callout-icon">⚠️</span>
           <div>{g.pushWarn}</div>
         </div>
+        <p>{g.pushDesc}</p>
+        <CodeBlock lang="bash" code={guidePushCmd} />
+        <CodeBlock lang="text" code={guidePushOutput} />
+        <p>{g.pushResultDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={guideDevMap} />
         <p>{g.pushNote} <a href={localizedPath(lang, '/docs/cli/push/')}>{g.pushLink}</a></p>
 
         <p>{g.exampleRunDesc}</p>

@@ -780,9 +780,9 @@ export const ca: Translations = {
         "Crea envilder.json a l'arrel del projecte. Cada clau és el nom de la variable que s'escriurà i cada valor és el nom del paràmetre, tal com apareix a SSM:",
       pushTitle: "Crear el paràmetre i l'entrada del mapa amb una sola ordre",
       pushDesc:
-        "Si estàs creant els paràmetres, o n'afegeixes un de nou, envilder pot fer els dos passos alhora. Aquesta ordre desa el valor com a paràmetre SecureString i crea envilder.json, o hi afegeix l'entrada si el fitxer ja existeix (CLI 0.16 o superior):",
+        "Si estàs creant els paràmetres en lloc de mapar-ne d'existents, envilder pot fer els dos passos alhora. Executa una ordre per variable: cadascuna desa el valor com a paràmetre SecureString i crea envilder.json, o hi afegeix l'entrada si el fitxer ja existeix (CLI 0.16 o superior). La primera:",
       pushResultDesc:
-        "El fitxer de mapa ja conté l'entrada que hauries escrit a mà:",
+        'Després de les tres ordres (una per variable), el fitxer de mapa conté les mateixes entrades que hauries escrit a mà:',
       pushWarn:
         "El push sempre escriu el valor (PutParameter amb sobreescriptura), així que un paràmetre existent en rep una versió nova. Per als paràmetres que ja existeixen, escriu el mapa a mà com abans. --value es queda a l'historial del shell: fes-lo servir per a valors de prova i fes push dels secrets reals des d'un .env amb envilder --push.",
       pushNote:

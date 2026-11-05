@@ -781,9 +781,9 @@ export const es: Translations = {
         'Crea envilder.json en la raíz del proyecto. Cada clave es el nombre de la variable que se escribirá y cada valor es el nombre del parámetro, tal como aparece en SSM:',
       pushTitle: 'Crear el parámetro y la entrada del mapa con un solo comando',
       pushDesc:
-        'Si estás creando los parámetros, o añades uno nuevo, envilder puede hacer los dos pasos a la vez. Este comando guarda el valor como parámetro SecureString y crea envilder.json, o añade la entrada si el archivo ya existe (CLI 0.16 o superior):',
+        'Si estás creando los parámetros en lugar de mapear otros existentes, envilder puede hacer los dos pasos a la vez. Ejecuta un comando por variable: cada uno guarda el valor como parámetro SecureString y crea envilder.json, o añade la entrada si el archivo ya existe (CLI 0.16 o superior). El primero:',
       pushResultDesc:
-        'El archivo de mapa ya contiene la entrada que habrías escrito a mano:',
+        'Tras los tres comandos (uno por variable), el archivo de mapa contiene las mismas entradas que habrías escrito a mano:',
       pushWarn:
         'El push siempre escribe el valor (PutParameter con sobrescritura), así que un parámetro existente recibe una versión nueva. Para los parámetros que ya existen, escribe el mapa a mano como antes. --value se queda en el historial del shell: úsalo para valores de prueba y haz push de los secretos reales desde un .env con envilder --push.',
       pushNote:
