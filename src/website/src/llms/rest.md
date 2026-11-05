@@ -7,7 +7,7 @@
 
 ## Examples
 
-- [Examples README](https://raw.githubusercontent.com/macalbert/envilder-examples/main/README.md): Runnable .NET, Python, and TypeScript examples that resolve secrets from AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) using Testcontainers or Aspire, plus `envilder exec`; paths, not values, are committed.
+- [Examples README](https://raw.githubusercontent.com/macalbert/envilder-examples/main/README.md): Runnable .NET, Python, and TypeScript examples that resolve secrets from AWS SSM and Azure Key Vault (emulated with LocalStack for AWS and LocalStack for Azure) using Testcontainers or Aspire, plus `envilder exec`; paths, not values, are committed.
 - [Examples repository](https://github.com/macalbert/envilder-examples): Source for the supported example scope above.
 - [.NET Testcontainers example](https://github.com/macalbert/envilder-examples/tree/main/dotnet-testcontainers): xUnit v3 and Testcontainers.
 - [.NET Aspire example](https://github.com/macalbert/envilder-examples/tree/main/dotnet-aspire): Aspire AppHost tested with `Aspire.Hosting.Testing`.
