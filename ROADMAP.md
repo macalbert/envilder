@@ -44,6 +44,7 @@ Versions refer to each component's own changelog: [CLI](./docs/changelogs/cli.md
 | **Zero-config defaults** | CLI v0.14.0 | `envilder` with no flags reads `envilder.json` and writes `.env` |
 | **Safe `.env` writing** | CLI v0.14.0, Action v0.14.0 | Values round-trip exactly, and mapping keys a `.env` file cannot represent are rejected |
 | **Exec mode** (`envilder exec`) | CLI v0.15.0 | `envilder exec [options] [--] <command> [args...]` starts a command with the resolved secrets in its environment, without writing a `.env` file. [Guide](./docs/exec-command.md) |
+| **Validate command** (`envilder validate`) | CLI v0.18.0, .NET SDK v1.1.0, Python SDK v1.1.0, Node.js SDK v1.1.0 | Preflight check that the map file is valid and every declared secret exists, without printing values ([#532](https://github.com/macalbert/envilder/issues/532)). The offline map file check (`--offline`) is available since CLI v0.18.0 and the remote key existence check since v0.20.0. The local env file comparison (`--envfile`, `--compare-values`) and JSON output (`--format json`) ship in the next CLI release. The SDKs run the same map file and key existence check: `validateContract()` and `withContractValidation()` in Node.js, `validate_contract()` and `with_contract_validation()` in Python, `ValidateContractAsync()` and `WithContractValidation()` in .NET. [Guide](./docs/validate-command.md) |
 
 ### 🔥 Up Next
 
@@ -52,7 +53,7 @@ Versions refer to each component's own changelog: [CLI](./docs/changelogs/cli.md
 | **Go SDK** (`envilder`) | 🔴 High | Runtime library for Go: cloud-native apps, Kubernetes tooling. Published as Go module ([#561](https://github.com/macalbert/envilder/issues/561) → [#562](https://github.com/macalbert/envilder/issues/562) → [#563](https://github.com/macalbert/envilder/issues/563)) |
 | **Java SDK** (`envilder`) | 🔴 High | Runtime library for Java/Kotlin: Spring Boot, Android backends. Published to Maven Central ([#569](https://github.com/macalbert/envilder/issues/569)) |
 | **SDK conformance tests** | 🔴 High | Language-agnostic test fixtures (JSON input → expected output) that all SDKs must pass |
-| **Validate command** (`envilder validate`) | 🟡 Medium | Preflight check: map file, remote key existence and optional `.env` comparison, without printing values. CLI first, then the SDKs ([#532](https://github.com/macalbert/envilder/issues/532)). The offline map file check (`--offline`) is available since CLI v0.18.0, and the remote key existence check since v0.20.0. The SDKs run the same map file and key existence check with `validateContract()` and `withContractValidation()` since .NET, Python and Node.js SDK v1.1.0. [Guide](./docs/validate-command.md) |
+| **Environment delivery in the GitHub Action** | 🟡 Medium | Export resolved values to later job steps instead of writing a `.env` file ([#478](https://github.com/macalbert/envilder/issues/478)). Done in the Action's unreleased changes: without `env-file`, the Action exports every secret to the job environment, and the new `command` input runs one command with the secrets in its environment only. Ships in the next Action release |
 | **GCP Secret Manager** | 🟡 Medium | Third cloud provider: similar DX to AWS SSM. Completes the multi-cloud trident (AWS + Azure + GCP) ([#573](https://github.com/macalbert/envilder/issues/573)) |
 | **AWS Secrets Manager** | 🟡 Medium | Support AWS Secrets Manager alongside SSM Parameter Store for teams using JSON-structured secrets |
 
@@ -62,7 +63,6 @@ Versions refer to each component's own changelog: [CLI](./docs/changelogs/cli.md
 |---------|----------|-------|
 | **Auto-discovery mode** (`--auto`) | Medium | Fetch all parameters matching a given prefix (e.g., `/my-app/prod/*`) |
 | **Local override map file** (`envilder.local.json`) | Medium | Personal, gitignored layer on top of the committed map file, on every surface (ADR-0011, [#385](https://github.com/macalbert/envilder/issues/385)) |
-| **Environment delivery in the GitHub Action** | Medium | Export resolved values to later job steps instead of writing a `.env` file ([#478](https://github.com/macalbert/envilder/issues/478)) |
 | **Exec with refresh** (`--refresh-interval`) | Low | Kill & restart child process periodically with fresh secrets (builds on `envilder exec`, [#479](https://github.com/macalbert/envilder/issues/479)) |
 | **Named providers and per-environment config** | Medium | Several providers in one map file, per-environment provider settings and optional secrets, through `$config.providers`. Additive to the current schema; the flat `$config` fields are deprecated, with `envilder migrate` ([#586](https://github.com/macalbert/envilder/issues/586)) |
 | **Per-provider packages** | Medium | Split the SDK packages per provider, so an app installs only the cloud SDKs it uses. Prerequisite for adding more providers |

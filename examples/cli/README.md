@@ -5,7 +5,8 @@ Push one secret, let Envilder write the map file, then run a command with the se
 ## Prerequisites
 
 - Node.js 22.12+
-- AWS credentials with write access to SSM (`~/.aws/credentials`, env vars, or IAM role)
+- AWS credentials (`~/.aws/credentials`, env vars, or IAM role) allowed to run `ssm:PutParameter` (push),
+  `ssm:GetParameters` (validate) and `ssm:GetParameter` (exec) on `/envilder/demo/*`
 
 ## Push a secret and run an app
 
@@ -18,10 +19,19 @@ cd examples/cli
 npx envilder --key=API_KEY --value=s3cret --secret-path=/envilder/demo/api-key
 # Created envilder.json
 
-# 2. Run the app with API_KEY in its environment
+# 2. Check the map file and that every secret exists, without printing any value
+npx envilder validate
+# ✓ 1 secret exists
+
+# 3. Run the app with API_KEY in its environment
 npx envilder exec -- node app.mjs
 # API_KEY=set
 ```
+
+`envilder validate` exits with `1` when the map file is invalid or a secret is missing or cannot be
+checked, so it works as a preflight step in CI. It needs `ssm:GetParameters` on the secret paths.
+Add `--offline` to check only the map file with no cloud call, or `--envfile=.env` to compare the keys of
+a local env file with the map file. See the [validate reference](https://envilder.com/docs/cli/validate/).
 
 The generated `envilder.json` maps the variable to its secret path. It never contains the value:
 

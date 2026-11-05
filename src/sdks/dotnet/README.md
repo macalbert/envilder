@@ -169,7 +169,7 @@ secrets.ValidateSecrets(); // throws SecretValidationException if any value is e
 
 ### Contract validation
 
-Check that the map file is valid and that every secret it declares exists in the provider, without reading any value:
+Check that the map file is valid and that every secret it declares exists in the provider, without using or printing any value:
 
 ```csharp
 using Envilder;
@@ -212,10 +212,10 @@ The exception message names the failing variables and paths, for example `Map fi
 
 Required permissions:
 
-- **AWS SSM**: `ssm:GetParameters` on the mapped parameters. Parameters are requested in batches of 10 without decryption, so no `kms:Decrypt` is needed for this check.
+- **AWS SSM**: `ssm:GetParameters` on the mapped parameters. Parameters are requested in batches of 10 without decryption, so no `kms:Decrypt` is needed for this check. Plain `String` values can still come back in the response; the SDK discards them. With `kms:Decrypt`, `ssm:GetParameters` can read decrypted values, so grant it only on paths the identity may already read with `ssm:GetParameter`.
 - **Azure Key Vault**: the `List` secret permission (access policies) or `Microsoft.KeyVault/vaults/secrets/readMetadata/action` (Azure RBAC, included in the Key Vault Secrets User role). Only secret metadata is listed.
 
-This differs from `ValidateSecrets()`: contract validation checks the map file and that each secret exists, before loading and without reading values. `ValidateSecrets()` runs after a load and checks that the resolved values are not empty.
+This differs from `ValidateSecrets()`: contract validation checks the map file and that each secret exists, before loading and without using any value. `ValidateSecrets()` runs after a load and checks that the resolved values are not empty.
 
 ### Via IConfiguration (ASP.NET)
 
@@ -294,7 +294,7 @@ var config = new ConfigurationBuilder()
 | `ResolveAsync(ct?)` | Async version of `Resolve` |
 | `Inject()` | Resolve + inject into `Environment` |
 | `InjectAsync(ct?)` | Async version of `Inject` |
-| `ValidateContractAsync(ct?)` | Check the map file and that every secret exists, without reading values |
+| `ValidateContractAsync(ct?)` | Check the map file and that every secret exists, without using any value |
 | `WithContractValidation()` | Run the contract check before every load and throw `ContractValidationException` on failure |
 
 ### Validation (`SecretValidationExtensions`)

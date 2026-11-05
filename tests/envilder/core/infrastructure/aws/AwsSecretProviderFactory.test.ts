@@ -13,6 +13,7 @@ const envKeys = [
   'AWS_SHARED_CREDENTIALS_FILE',
   'AWS_REGION',
   'AWS_DEFAULT_REGION',
+  'AWS_EC2_METADATA_DISABLED',
 ] as const;
 
 describe('AwsSecretProviderFactory', () => {
@@ -33,6 +34,7 @@ describe('AwsSecretProviderFactory', () => {
     writeFileSync(configPath, '');
     process.env.AWS_SHARED_CREDENTIALS_FILE = credentialsPath;
     process.env.AWS_CONFIG_FILE = configPath;
+    process.env.AWS_EC2_METADATA_DISABLED = 'true';
   });
 
   afterEach(() => {

@@ -159,7 +159,7 @@ try {
 ### Map file contract validation
 
 Check, before loading anything, that the map file is valid and that every
-declared secret exists with the current credentials. No secret value is read
+declared secret exists with the current credentials. No secret value is used
 or returned. This is the same check as `envilder validate` in the CLI.
 
 ```typescript
@@ -202,7 +202,10 @@ await Envilder.fromMapFile('envilder.json')
 
 Without `withContractValidation()`, a load makes no extra provider call and
 needs no extra permission. The check needs `ssm:GetParameters` on AWS (it
-uses `GetParameters` in batches of ten with `WithDecryption: false`) and, on
+uses `GetParameters` in batches of ten with `WithDecryption: false`; plain
+`String` values can still come back in the response and are discarded, and
+with `kms:Decrypt` the same permission reads decrypted values, so scope it
+like `ssm:GetParameter`) and, on
 Azure Key Vault, the `List` secret permission (access policies) or
 `Microsoft.KeyVault/vaults/secrets/readMetadata/action` (Azure RBAC, included
 in Key Vault Secrets User), because it lists secret metadata instead of
