@@ -761,6 +761,8 @@ export const ca: Translations = {
         'La política IAM mínima permet ssm:GetParameter sobre els ARN dels paràmetres del teu fitxer de mapa. Un comodí sobre el prefix de la ruta cobreix una aplicació i un entorn:',
       prereqPolicyNote:
         "La segona sentència només cal per als paràmetres xifrats amb una clau KMS gestionada pel client; substitueix <key-id> per l'ID d'aquesta clau.",
+      prereqPushNote:
+        "Les ordres push de l'exemple de sota necessiten un permís més, ssm:PutParameter, sobre els mateixos ARN. El push fa servir la clau KMS predeterminada del compte, així que no cal cap sentència kms:Encrypt. Concedeix-lo només a qui crea paràmetres: per fer pull n'hi ha prou amb la política de lectura de dalt.",
       regionTitle: "Quina regió s'utilitza",
       regionDesc:
         'Envilder tria la regió en aquest ordre i la mostra a la primera línia de cada execució (region=eu-west-1 a la sortida de sota):',

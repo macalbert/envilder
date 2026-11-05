@@ -1123,6 +1123,7 @@ const validateSdkRows = [
         <p>{g.prereqPolicyDesc}</p>
         <CodeBlock lang="json" filename="policy.json" code={guideIamPolicy} />
         <p class="note">{g.prereqPolicyNote}</p>
+        <p class="note">{g.prereqPushNote}</p>
 
         <h3>{g.regionTitle}</h3>
         <p>{g.regionDesc}</p>
@@ -1145,17 +1146,17 @@ const validateSdkRows = [
             <tr><td><code>/my-app/dev/database-url</code></td><td><code>DATABASE_URL</code></td></tr>
           </tbody>
         </table>
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>{g.pushWarn}</div>
+        </div>
+        <p>{g.pushNote} <a href={localizedPath(lang, '/docs/cli/push/')}>{g.pushLink}</a></p>
         <p>{g.exampleMapDesc}</p>
         <CodeBlock lang="bash" code={guidePushCmd} />
         <p>{g.pushOutputDesc}</p>
         <CodeBlock lang="text" code={guidePushOutput} />
         <p>{g.pushResultDesc}</p>
         <CodeBlock lang="json" filename="envilder.json" code={guideDevMap} />
-        <div class="callout callout-warning">
-          <span class="callout-icon">⚠️</span>
-          <div>{g.pushWarn}</div>
-        </div>
-        <p>{g.pushNote} <a href={localizedPath(lang, '/docs/cli/push/')}>{g.pushLink}</a></p>
         <p>{g.exampleRunDesc}</p>
         <CodeBlock lang="bash" code="envilder" />
         <CodeBlock lang="text" code={guideDevOutput} />

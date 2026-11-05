@@ -755,6 +755,8 @@ export const en: Translations = {
         'The minimum IAM policy allows ssm:GetParameter on the parameter ARNs in your map file. A wildcard on the path prefix covers one application and environment:',
       prereqPolicyNote:
         "The second statement is only needed for parameters encrypted with a customer-managed KMS key; replace <key-id> with that key's ID.",
+      prereqPushNote:
+        'The push commands in the example below need one more permission, ssm:PutParameter, on the same ARNs. Push uses the default KMS key of the account, so no kms:Encrypt statement is needed. Grant it only to whoever creates parameters: pulling needs just the read policy above.',
       regionTitle: 'Which region is used',
       regionDesc:
         'Envilder picks the region in this order and prints it on the first line of every run (region=eu-west-1 in the output below):',

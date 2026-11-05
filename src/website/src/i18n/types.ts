@@ -470,6 +470,7 @@ export interface GuideSsmToEnvTranslations {
   prereqItems: string[];
   prereqPolicyDesc: string;
   prereqPolicyNote: string;
+  prereqPushNote: string;
   regionTitle: string;
   regionDesc: string;
   regionItems: string[];
