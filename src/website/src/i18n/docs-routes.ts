@@ -28,6 +28,12 @@ export interface DocsRoute {
     | 'cli'
     | 'githubAction'
     | 'sdks';
+  /**
+   * Last substantive content change (YYYY-MM-DD), taken from the commit
+   * history of the route's section in DocsArticle.astro. Update it when the
+   * page content changes. Omitted on the hub, which is not an article.
+   */
+  dateModified?: string;
   legacyHashes: readonly string[];
 }
 
@@ -42,78 +48,91 @@ export const docsRouteManifest = [
     key: 'getting-started',
     path: '/docs/getting-started/',
     navGroup: 'gettingStarted',
+    dateModified: '2026-10-27',
     legacyHashes: ['overview', 'requirements', 'installation'],
   },
   {
     key: 'guide-ssm-to-env',
     path: '/docs/guides/ssm-to-env/',
     navGroup: 'guides',
+    dateModified: '2026-11-05',
     legacyHashes: [],
   },
   {
     key: 'aws-ssm',
     path: '/docs/providers/aws-ssm/',
     navGroup: 'providers',
+    dateModified: '2026-10-27',
     legacyHashes: ['aws-setup'],
   },
   {
     key: 'azure-key-vault',
     path: '/docs/providers/azure-key-vault/',
     navGroup: 'providers',
+    dateModified: '2026-10-27',
     legacyHashes: ['azure-setup'],
   },
   {
     key: 'map-file',
     path: '/docs/map-file/',
     navGroup: 'cli',
+    dateModified: '2026-10-27',
     legacyHashes: ['mapping-file', 'config-priority'],
   },
   {
     key: 'cli-pull',
     path: '/docs/cli/pull/',
     navGroup: 'cli',
+    dateModified: '2026-11-05',
     legacyHashes: ['pull-command'],
   },
   {
     key: 'cli-push',
     path: '/docs/cli/push/',
     navGroup: 'cli',
+    dateModified: '2026-10-29',
     legacyHashes: ['push-command', 'push-single'],
   },
   {
     key: 'cli-exec',
     path: '/docs/cli/exec/',
     navGroup: 'cli',
+    dateModified: '2026-10-29',
     legacyHashes: [],
   },
   {
     key: 'cli-validate',
     path: '/docs/cli/validate/',
     navGroup: 'cli',
+    dateModified: '2026-11-05',
     legacyHashes: [],
   },
   {
     key: 'github-action',
     path: '/docs/github-action/',
     navGroup: 'githubAction',
+    dateModified: '2026-11-01',
     legacyHashes: [],
   },
   {
     key: 'sdk-dotnet',
     path: '/docs/sdks/dotnet/',
     navGroup: 'sdks',
+    dateModified: '2026-11-05',
     legacyHashes: ['sdk-dotnet'],
   },
   {
     key: 'sdk-python',
     path: '/docs/sdks/python/',
     navGroup: 'sdks',
+    dateModified: '2026-11-05',
     legacyHashes: ['sdk-python'],
   },
   {
     key: 'sdk-nodejs',
     path: '/docs/sdks/nodejs/',
     navGroup: 'sdks',
+    dateModified: '2026-11-05',
     legacyHashes: ['sdk-nodejs'],
   },
 ] as const satisfies readonly DocsRoute[];

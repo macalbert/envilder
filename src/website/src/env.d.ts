@@ -8,6 +8,11 @@ declare const __SDK_DOTNET_VERSION__: string;
 declare const __SDK_PYTHON_VERSION__: string;
 declare const __SDK_NODEJS_VERSION__: string;
 
+declare module '*.md?raw' {
+  const content: string;
+  export default content;
+}
+
 interface Window {
   gtag?: (...args: unknown[]) => void;
 }
