@@ -762,6 +762,8 @@ export const es: Translations = {
         'La política IAM mínima permite ssm:GetParameter sobre los ARN de los parámetros de tu archivo de mapa. Un comodín sobre el prefijo de la ruta cubre una aplicación y un entorno:',
       prereqPolicyNote:
         'La segunda sentencia solo hace falta para los parámetros cifrados con una clave KMS administrada por el cliente; sustituye <key-id> por el ID de esa clave.',
+      prereqPushNote:
+        'Los comandos push del ejemplo de abajo necesitan un permiso más, ssm:PutParameter, sobre los mismos ARN. El push usa la clave KMS predeterminada de la cuenta, así que no hace falta ninguna sentencia kms:Encrypt. Concédelo solo a quien crea parámetros: para hacer pull basta con la política de lectura de arriba.',
       regionTitle: 'Qué región se utiliza',
       regionDesc:
         'Envilder elige la región en este orden y la muestra en la primera línea de cada ejecución (region=eu-west-1 en la salida de abajo):',
@@ -775,20 +777,19 @@ export const es: Translations = {
         'Los parámetros guardados en otra región se notifican como no encontrados, así que mira primero esta línea cuando se omita un parámetro que sabes que existe.',
       exampleTitle: 'Ejemplo: de parámetros SSM a un archivo .env',
       exampleParamsDesc:
-        'La cuenta ya tiene tres parámetros bajo /my-app/dev/. El archivo de mapa conecta cada uno con la variable que debe contenerlo:',
+        'Partimos de cero y creamos tres parámetros bajo /my-app/dev/, cada uno leído en una variable:',
       thParameter: 'Parámetro SSM',
       thVariable: 'Variable en .env',
       exampleMapDesc:
-        'Crea envilder.json en la raíz del proyecto. Cada clave es el nombre de la variable que se escribirá y cada valor es el nombre del parámetro, tal como aparece en SSM:',
-      pushTitle: 'Crear el parámetro y la entrada del mapa con un solo comando',
-      pushDesc:
-        'Si estás creando los parámetros en lugar de mapear otros existentes, envilder puede hacer los dos pasos a la vez. Ejecuta un comando por variable: cada uno guarda el valor como parámetro SecureString y crea envilder.json, o añade la entrada si el archivo ya existe (CLI 0.16 o superior). El primero:',
+        'Haz push de cada valor una sola vez. Un push de un solo secreto guarda el valor como parámetro SecureString y, en el mismo paso, crea envilder.json o le añade la entrada (CLI 0.16 o superior). El primer comando crea el archivo:',
+      pushOutputDesc:
+        'Líneas de resultado de cada comando (se omiten la cabecera y la línea de identidad). Los valores y las rutas están enmascarados:',
       pushResultDesc:
-        'Tras los tres comandos (uno por variable), el archivo de mapa contiene las mismas entradas que habrías escrito a mano:',
+        'envilder.json ya mapea las tres variables. Solo contiene nombres y rutas, nunca valores:',
       pushWarn:
-        'El push siempre escribe el valor (PutParameter con sobrescritura), así que un parámetro existente recibe una versión nueva. Para los parámetros que ya existen, escribe el mapa a mano como antes. --value se queda en el historial del shell: úsalo para valores de prueba y haz push de los secretos reales desde un .env con envilder --push.',
+        'El push siempre escribe el valor (PutParameter con sobrescritura), así que un parámetro existente recibe una versión nueva. --value se queda en el historial del shell: úsalo para valores de prueba y haz push de los secretos reales desde un .env con envilder --push.',
       pushNote:
-        'Si la variable ya apunta a otra ruta, no se hace ningún push y el comando sale con 1; --no-map-update omite el archivo de mapa.',
+        'Si los parámetros ya existen, no los vuelvas a subir: escribe envilder.json a mano con la misma forma, un nombre de variable por cada nombre de parámetro. Si una variable ya apunta a otra ruta, el push sale con 1 y no sube nada; --no-map-update omite el archivo de mapa.',
       pushLink:
         'Referencia del modo push: todas las opciones y las reglas del archivo de mapa',
       exampleRunDesc:
