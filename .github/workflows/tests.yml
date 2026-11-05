@@ -47,6 +47,8 @@ jobs:
               - "tests/envilder/**"
               - "skills/**"
               - "tests/skills/**"
+              - "spec/**"
+              - "tests/spec/**"
               - "e2e/**"
               - "package.json"
               - "pnpm-lock.yaml"

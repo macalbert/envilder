@@ -92,16 +92,18 @@ jobs:
           map-file: config/ci/envilder.json
           env-file: .env
 
-      - name: Test with the secrets from .env
-        run: node --env-file=.env --test
+      # Keep the project's own test command. It must load .env itself
+      # (see the note below).
+      - run: npm test
 ```
 
 - With `env-file`, the Action only writes the file: the secrets reach a later
-  step only if that step loads `.env` (`node --env-file=.env`, `dotenv`,
-  Docker Compose `env_file`). Check how the project's test command reads its
-  configuration and adapt that step. On a ref without the `env-file`
-  requirement, drop `env-file` to export the secrets to later steps, or use
-  `command` to scope them to one command.
+  step only if that step loads `.env`. Keep the project's existing test or
+  build command, and check that its setup already loads `.env` (for example
+  `dotenv` in the test setup file, or Docker Compose `env_file`). If it does
+  not, tell the user instead of replacing the command with another runner. On
+  a ref without the `env-file` requirement, drop `env-file` to export the
+  secrets to later steps, or use `command` to scope them to one command.
 - Do not set `$config.profile` in a map file used in CI: named profiles do not
   exist on the runner. Keep a separate CI map file when local files use one.
 - IAM: allow `ssm:GetParameter` on the mapped paths only
