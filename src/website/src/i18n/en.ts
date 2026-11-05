@@ -1702,7 +1702,7 @@ export const en: Translations = {
       'Parse the map file, resolve secrets, and inject them into environment variables:',
     sdkDotnetFullDocs: 'Full documentation →',
     sdkDotnetExamplesDesc:
-      'xUnit test projects with Testcontainers and Aspire resolve a map file against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to containers, with no .env file:',
+      'xUnit test projects with Testcontainers and Aspire resolve a map file against AWS SSM and Azure Key Vault (emulated with LocalStack for AWS and LocalStack for Azure) and pass the values to containers, with no .env file:',
     sdkDotnetPrereqTitle: 'Prerequisites',
     sdkDotnetPrereqDesc:
       'The package targets .NET Standard 2.0, so it runs on any in-support .NET release (its tests run on .NET 10, the current LTS). Each provider uses its own default credential chain:',
@@ -1825,7 +1825,7 @@ export const en: Translations = {
       'Opt-in validation ensures all resolved secrets have non-empty values:',
     sdkPythonFullDocs: 'Full documentation →',
     sdkPythonExamplesDesc:
-      'A pytest project with Testcontainers resolves a map file against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and passes the values to containers, with no .env file:',
+      'A pytest project with Testcontainers resolves a map file against AWS SSM and Azure Key Vault (emulated with LocalStack for AWS and LocalStack for Azure) and passes the values to containers, with no .env file:',
     sdkNodejsTitle: 'Node.js SDK',
     sdkNodejsDesc:
       'Load secrets directly into your Node.js application at startup. Async-first API with one-liner facade or fluent builder for full control.',
@@ -1854,7 +1854,7 @@ export const en: Translations = {
       'See the envilder validate reference for the statuses and the permissions the check needs →',
     sdkNodejsFullDocs: 'Full documentation →',
     sdkNodejsExamplesDesc:
-      'A Vitest project with Testcontainers and an Aspire TypeScript AppHost resolve a map file against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to containers, with no .env file:',
+      'A Vitest project with Testcontainers and an Aspire TypeScript AppHost resolve a map file against AWS SSM and Azure Key Vault (emulated with LocalStack for AWS and LocalStack for Azure) and pass the values to containers, with no .env file:',
     pagerPrev: 'Previous',
     pagerNext: 'Next',
   },

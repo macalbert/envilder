@@ -1725,7 +1725,7 @@ export const es: Translations = {
       'Analiza el archivo de mapeo, resuelve secretos e inyéctalos en las variables de entorno:',
     sdkDotnetFullDocs: 'Documentación completa →',
     sdkDotnetExamplesDesc:
-      'Proyectos de pruebas xUnit con Testcontainers y Aspire que resuelven un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack y Lowkey Vault) y pasan los valores a los contenedores, sin ningún archivo .env:',
+      'Proyectos de pruebas xUnit con Testcontainers y Aspire que resuelven un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack for AWS y LocalStack for Azure) y pasan los valores a los contenedores, sin ningún archivo .env:',
     sdkDotnetPrereqTitle: 'Requisitos previos',
     sdkDotnetPrereqDesc:
       'El paquete apunta a .NET Standard 2.0, así que funciona con cualquier versión de .NET con soporte (las pruebas del SDK se ejecutan en .NET 10, la LTS actual). Cada proveedor usa su cadena de credenciales por defecto:',
@@ -1849,7 +1849,7 @@ export const es: Translations = {
       'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
     sdkPythonFullDocs: 'Documentación completa →',
     sdkPythonExamplesDesc:
-      'Un proyecto pytest con Testcontainers que resuelve un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack y Lowkey Vault) y pasa los valores a los contenedores, sin ningún archivo .env:',
+      'Un proyecto pytest con Testcontainers que resuelve un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack for AWS y LocalStack for Azure) y pasa los valores a los contenedores, sin ningún archivo .env:',
     sdkNodejsTitle: 'Node.js SDK',
     sdkNodejsDesc:
       'Carga secretos directamente en tu aplicación Node.js al inicio. API asíncrona con fachada de una línea o constructor fluido para control total.',
@@ -1878,7 +1878,7 @@ export const es: Translations = {
       'Consulta la referencia de envilder validate para los estados y los permisos que necesita la comprobación →',
     sdkNodejsFullDocs: 'Documentación completa →',
     sdkNodejsExamplesDesc:
-      'Un proyecto Vitest con Testcontainers y un AppHost de Aspire en TypeScript que resuelven un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack y Lowkey Vault) y pasan los valores a los contenedores, sin ningún archivo .env:',
+      'Un proyecto Vitest con Testcontainers y un AppHost de Aspire en TypeScript que resuelven un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack for AWS y LocalStack for Azure) y pasan los valores a los contenedores, sin ningún archivo .env:',
     pagerPrev: 'Anterior',
     pagerNext: 'Siguiente',
   },
