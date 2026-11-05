@@ -268,12 +268,22 @@ const articleRoutes = docsArticleRoutes;
     return svg;
   };
 
+  const claimedSections = new Set<string>();
+
   content?.querySelectorAll<HTMLHeadingElement>('h2, h3').forEach((heading) => {
-    if (heading.closest('.docs-header')) return;
+    if (heading.closest('.docs-header, a')) return;
     const text = heading.textContent?.trim() ?? '';
     const sectionId = heading.closest('section[id]')?.id;
     let id = heading.id;
-    if (!id && heading.tagName === 'H2' && sectionId) id = sectionId;
+    if (
+      !id &&
+      heading.tagName === 'H2' &&
+      sectionId &&
+      !claimedSections.has(sectionId)
+    ) {
+      id = sectionId;
+      claimedSections.add(sectionId);
+    }
     if (!id) {
       id = uniqueId(slugify(text));
       heading.id = id;
