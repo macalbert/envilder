@@ -108,6 +108,10 @@ jobs:
   expands `$`, and Node `dotenv`, Compose and `source .env` skip or reject keys
   with `/`. If the project's loader is affected by its keys or values, say so
   and prefer the job environment or `command`, which pass values as they are.
+- The `v0` tag at the time of writing predates support for `/` in keys and
+  rejects a map file with a key such as `Database/Password` before writing
+  anything. With that ref, use `__` (`Database__Password`) in both the map file
+  and the application, or pin a newer ref that accepts `/`.
 - On a ref without the `env-file` requirement, drop `env-file` to export the
   secrets to later steps, or use `command` to scope them to one command.
 - Do not set `$config.profile` in a map file used in CI: named profiles do not
