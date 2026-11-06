@@ -364,7 +364,7 @@ for the full reference and the reasoning behind the rules.
 ## Examples
 
 Runnable projects in [envilder-examples](https://github.com/macalbert/envilder-examples) resolve a map file
-against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to
+against AWS SSM and Azure Key Vault (emulated with LocalStack for AWS and LocalStack for Azure) and pass the values to
 containers, with no `.env` file:
 
 - [dotnet-testcontainers](https://github.com/macalbert/envilder-examples/tree/main/dotnet-testcontainers): xUnit v3 + Testcontainers

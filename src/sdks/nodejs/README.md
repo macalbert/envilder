@@ -326,7 +326,7 @@ See the [root README](https://github.com/macalbert/envilder#%EF%B8%8F-mapping-fi
 ## Examples
 
 Runnable projects in [envilder-examples](https://github.com/macalbert/envilder-examples) resolve a map file
-against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to
+against AWS SSM and Azure Key Vault (emulated with LocalStack for AWS and LocalStack for Azure) and pass the values to
 containers, with no `.env` file:
 
 - [typescript-testcontainers](https://github.com/macalbert/envilder-examples/tree/main/typescript-testcontainers): Vitest + Testcontainers
