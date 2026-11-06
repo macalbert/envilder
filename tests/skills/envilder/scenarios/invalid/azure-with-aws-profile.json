@@ -1,0 +1,8 @@
+{
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://billing-dev.vault.azure.net",
+    "profile": "billing-dev"
+  },
+  "DB_PASSWORD": "billing-db-password"
+}

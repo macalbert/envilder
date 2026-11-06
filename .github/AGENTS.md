@@ -41,6 +41,7 @@ src/envilder/core/application/ Command/Handler use cases
 src/envilder/core/infrastructure/ Provider adapters (AWS, Azure)
 src/sdks/{dotnet,python,nodejs}/ Independent runtime SDKs
 src/website/                 Astro documentation website
+skills/envilder/             Public Agent Skill for Envilder users (not for contributors)
 tests/                       Mirrors src/ structure
 e2e/                         End-to-end tests (TestContainers)
 ```
@@ -53,6 +54,9 @@ e2e/                         End-to-end tests (TestContainers)
   validation only.
 - SDKs are independent: they share the map-file format but have zero code
   dependency on the TypeScript core.
+- `skills/envilder/` documents CLI options, Action inputs, SDK APIs and
+  supported providers. `tests/skills/envilder/` fails when they drift: update
+  the skill in the same change.
 - E2E tests require Docker running (LocalStack AWS + LocalStack Azure containers).
 
 ## Architecture Reference

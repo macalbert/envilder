@@ -511,6 +511,8 @@ a tool needs a file.
 - [Validate Command Guide](docs/validate-command.md)
 - [envilder-examples](https://github.com/macalbert/envilder-examples): runnable examples for the SDKs and `envilder exec`
   (Testcontainers and Aspire, AWS SSM and Azure Key Vault)
+- [🧠 Envilder Agent Skill](skills/README.md): lets Claude Code, GitHub Copilot, Codex and other agents
+  integrate Envilder into your project (`gh skill install macalbert/envilder envilder`)
 - [🤖 Envilder on Context7](https://context7.com/macalbert/envilder): up-to-date docs for AI coding assistants
   (Claude Code, Cursor, Copilot). Add `use context7` to your prompt, or reference the library ID `/macalbert/envilder`.
 
