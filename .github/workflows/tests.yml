@@ -88,6 +88,9 @@ jobs:
       - name: 📦 Open the ? Block (Install packages)
         run: pnpm install --frozen-lockfile
 
+      - name: 🔒 Check the Vault (Scan skill and schema files for secrets)
+        run: pnpm exec secretlint "skills/**/*" "tests/skills/**/*" "spec/**/*" "tests/spec/**/*"
+
       - name: 📜 Read the Map (Run skill and schema tests)
         run: pnpm exec vitest run tests/skills tests/spec
 
