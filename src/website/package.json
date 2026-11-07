@@ -8,6 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "docs:dates": "astro build && node scripts/update-docs-dates.mjs",
     "format": "biome check --write --unsafe && biome format --write",
     "format:check": "biome check && biome format",
     "lint": "biome check",

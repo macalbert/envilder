@@ -57,6 +57,9 @@ e2e/                         End-to-end tests (TestContainers)
 - `skills/envilder/` documents CLI options, Action inputs, SDK APIs and
   supported providers. `tests/skills/envilder/` fails when they drift: update
   the skill in the same change.
+- After changing the English text of a docs page, run `pnpm docs:dates` and
+  commit `src/website/src/i18n/docs-dates.json`: it keeps each page's
+  `dateModified` accurate, and `tests/website` fails when it is stale.
 - E2E tests require Docker running (LocalStack AWS + LocalStack Azure containers).
 
 ## Architecture Reference
