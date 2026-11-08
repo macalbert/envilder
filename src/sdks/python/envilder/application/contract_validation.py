@@ -9,7 +9,7 @@ from envilder.domain.contract_validation_result import (
 )
 from envilder.domain.parsed_map_file import ParsedMapFile
 from envilder.domain.ports.secret_existence_checker import (
-    _SecretExistenceChecker,
+    ISecretExistenceChecker,
 )
 from envilder.domain.secret_provider_type import SecretProviderType
 
@@ -56,7 +56,7 @@ def invalid_map_file_result(
 
 def check_remote_keys(
     map_file: ParsedMapFile,
-    checker: _SecretExistenceChecker,
+    checker: ISecretExistenceChecker,
     provider: SecretProviderType,
 ) -> ContractValidationResult:
     """Check that every secret path of a valid map file exists.
@@ -88,6 +88,23 @@ def check_remote_keys(
         is_valid=all(k.status is SecretExistenceStatus.EXISTS for k in keys),
         map_file_errors=(),
         keys=tuple(keys),
+    )
+
+
+def not_checkable_result(
+    map_file: ParsedMapFile,
+    provider: SecretProviderType,
+) -> ContractValidationResult:
+    """The result for a provider that cannot check existence.
+
+    A custom provider that does not implement ``ISecretExistenceChecker``:
+    every key is a provider error.
+    """
+    return every_key_result(
+        map_file,
+        provider,
+        SecretExistenceStatus.PROVIDER_ERROR,
+        "The provider cannot check whether a secret exists.",
     )
 
 

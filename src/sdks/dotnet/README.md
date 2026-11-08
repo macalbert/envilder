@@ -217,6 +217,45 @@ Required permissions:
 
 This differs from `ValidateSecrets()`: contract validation checks the map file and that each secret exists, before loading and without using any value. `ValidateSecrets()` runs after a load and checks that the resolved values are not empty.
 
+### Custom provider in the fluent builder
+
+`WithSecretProvider()` hands the builder your own `ISecretProvider` instance instead of the one it would build from `$config`. The map file is still validated as usual, so this is also the way to test your startup code against an in-memory fake, with no cloud account, emulator or environment variables:
+
+```csharp
+using Envilder;
+using Envilder.Domain.Ports;
+
+await Env.FromMapFile("envilder.json")
+    .WithSecretProvider(new InMemoryProvider())
+    .WithContractValidation()
+    .InjectAsync();
+
+public sealed class InMemoryProvider : ISecretProvider, ISecretExistenceChecker
+{
+    private readonly Dictionary<string, string> _secrets = new()
+    {
+        ["/app/db-url"] = "Server=localhost;Database=test",
+    };
+
+    public string? GetSecret(string name) => _secrets.GetValueOrDefault(name);
+
+    public Task<string?> GetSecretAsync(string name, CancellationToken cancellationToken = default)
+        => Task.FromResult(GetSecret(name));
+
+    public Task<IReadOnlyDictionary<string, SecretExistence>> CheckSecretsExistAsync(
+        IReadOnlyCollection<string> names,
+        CancellationToken cancellationToken)
+        => Task.FromResult<IReadOnlyDictionary<string, SecretExistence>>(names.ToDictionary(
+            name => name,
+            name => new SecretExistence(
+                _secrets.ContainsKey(name) ? SecretExistenceStatus.Exists : SecretExistenceStatus.Missing)));
+}
+```
+
+To take part in contract validation, the provider also implements `ISecretExistenceChecker`. A provider that only implements `ISecretProvider` still resolves secrets, but `ValidateContractAsync()` reports every key as `ProviderError`, so `WithContractValidation()` fails the load. The `Provider` of each key keeps the configured type (`WithProvider()`, then `$config.provider`, then `Aws`).
+
+For a complete, runnable walkthrough, see [`dotnet-custom-provider`](https://github.com/macalbert/envilder-examples/tree/main/dotnet-custom-provider) in envilder-examples: a custom provider over a local AES-256-GCM encrypted file, with tests for loading, failing at startup on a missing secret, and validating the contract without decrypting anything.
+
 ### Via IConfiguration (ASP.NET)
 
 ```csharp
@@ -290,6 +329,7 @@ var config = new ConfigurationBuilder()
 | `WithProvider(type)` | Override secret provider (AWS/Azure) |
 | `WithProfile(name)` | Override AWS named profile |
 | `WithVaultUrl(url)` | Override Azure Key Vault URL |
+| `WithSecretProvider(provider)` | Use your own `ISecretProvider` instance instead of building one from `$config` |
 | `Resolve()` | Resolve secrets, return as dictionary |
 | `ResolveAsync(ct?)` | Async version of `Resolve` |
 | `Inject()` | Resolve + inject into `Environment` |

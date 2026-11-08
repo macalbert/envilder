@@ -1,3 +1,20 @@
+## [1.2.0] - 2026-11-08
+
+### Added
+
+* **Use your own provider in the fluent builder**:
+  `Envilder.fromMapFile(path).withSecretProvider(provider)` resolves secrets
+  and runs contract validation with any `ISecretProvider` instance instead of
+  the one built from `$config`. The map file is still validated as usual, so
+  startup code can be tested against an in-memory fake with no cloud account,
+  emulator or environment variables. `ISecretExistenceChecker` is now
+  exported: a custom provider that implements it takes part in
+  `validateContract()` and `withContractValidation()`; one that does not has
+  every key reported as `provider_error`, so a load with contract validation
+  fails ([#669](https://github.com/macalbert/envilder/issues/669))
+
+---
+
 ## [1.1.0] - 2026-11-02
 
 ### Added

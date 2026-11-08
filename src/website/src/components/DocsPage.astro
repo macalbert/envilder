@@ -1,4 +1,5 @@
 ---
+import docsDates from '../i18n/docs-dates.json';
 import { type DocsRouteKey, getDocsRoute } from '../i18n/docs-routes';
 import { useTranslations } from '../i18n/utils';
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -18,7 +19,12 @@ const page = t.docs.pages[routeKey];
 // Only the English docs are indexed; CA/ES copies split crawl budget.
 const noindex = lang !== 'en';
 const isArticle = routeKey !== 'hub';
-const dateModified = getDocsRoute(routeKey)?.dateModified;
+// Maintained by `pnpm docs:dates` from a hash of each page's English text.
+const route = getDocsRoute(routeKey);
+const dateModified = route
+  ? (docsDates as Record<string, { dateModified: string }>)[route.path]
+      ?.dateModified
+  : undefined;
 ---
 
 <BaseLayout
