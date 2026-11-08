@@ -3063,13 +3063,15 @@ jobs:
     line-height: 1.7;
   }
 
-  /* Inline links in prose must read as links, even when they wrap <code> */
-  .docs-section p a {
+  /* Inline links in prose and lists must read as links, even when they wrap <code> */
+  .docs-section p a,
+  .docs-section li a {
     text-decoration: underline;
     text-underline-offset: 3px;
   }
 
-  .docs-section p a code {
+  .docs-section p a code,
+  .docs-section li a code {
     color: inherit;
     border-color: currentColor;
     text-decoration: inherit;

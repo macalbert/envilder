@@ -261,6 +261,11 @@ pre,
   user-select: text;
 }
 
+/* Code inside a link is part of the link: show the hand, not the text caret */
+a code {
+  cursor: pointer;
+}
+
 img,
 video {
   display: block;
