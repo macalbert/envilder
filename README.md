@@ -135,7 +135,20 @@ See the [Push Command Guide](docs/push-command.md#single-variable-push) for the 
 > 💡 Using Azure Key Vault? Add `--provider=azure --vault-url=https://my-vault.vault.azure.net` to the first push
 > and Envilder writes the matching `$config`. See [Mapping File Format](#️-mapping-file-format) below.
 
-### 3. Run your app with the secrets
+### 3. Check that every secret exists
+
+```bash
+npx envilder validate
+```
+
+`envilder validate` checks the map file against the schema and the provider rules, then asks the provider whether
+each declared secret exists. It never reads or prints a value. Use `--offline` to check only the local files,
+without credentials, `--envfile=.env` to compare a local `.env` with the map file, and `--format=json` in CI.
+It exits with `1` when something is wrong, so it works as a CI step.
+
+📖 See the [Validate Command Guide](docs/validate-command.md) for every check, status and exit code.
+
+### 4. Run your app with the secrets
 
 ```bash
 npx envilder exec -- npm run dev
@@ -148,7 +161,7 @@ It is not a sandbox: your command and everything it starts can read the secrets.
 
 📖 See the [Exec Command Guide](docs/exec-command.md) for exit codes, signals and GitHub Actions masking.
 
-### 4. Need a `.env` file? Pull it
+### 5. Need a `.env` file? Pull it
 
 ```bash
 npx envilder
