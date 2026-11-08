@@ -64,6 +64,23 @@ node scripts/check-released-changelogs.mjs --base=origin/main
 To correct an already released section on purpose, label the PR
 `changelog-correction` and the check is skipped.
 
+## `check-test-try-blocks.mjs`
+
+Fails when a test body contains a `try` block: Vitest `it`/`test` callbacks
+(including `.only`, `.skip`, `.each`), xUnit `[Fact]`/`[Theory]` methods and
+pytest `Should_*`/`test*` functions. Tests clean up with framework teardown
+(`afterEach`, `onTestFinished`, `IAsyncLifetime`, pytest `yield` fixtures) and
+check errors with throw assertions, so a `try` there hides a failure or skips
+an assertion (see the `common-testing-conventions` skill). Helpers, hooks and
+fixtures are not checked.
+
+It scans tracked files only and has no dependencies. `pnpm lint` runs it, and
+`test-try-blocks.yml` runs it on PRs that touch tests.
+
+```bash
+node scripts/check-test-try-blocks.mjs
+```
+
 ## Publishing Workflows
 
 ### GitHub Action Publishing (`.github/workflows/publish-action.yml`)
