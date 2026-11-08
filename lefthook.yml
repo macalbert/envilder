@@ -7,6 +7,11 @@ pre-commit:
         pnpm exec biome check --write --unsafe --no-errors-on-unmatched {staged_files} &&
         pnpm exec biome format --write --no-errors-on-unmatched {staged_files}
       stage_fixed: true
+    docs-dates:
+      glob: "src/website/src/**"
+      run: >-
+        pnpm docs:dates &&
+        git add src/website/src/i18n/docs-dates.json
     dotnet-format:
       glob: "**/*.{cs,csproj}"
       run: dotnet format src/sdks/dotnet/Envilder.sln --include {staged_files}
