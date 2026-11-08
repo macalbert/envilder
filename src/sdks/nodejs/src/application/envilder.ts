@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import type { ContractValidationResult } from '../domain/contract-validation-result.js';
 import type { EnvilderOptions } from '../domain/envilder-options.js';
 import type { ParsedMapFile } from '../domain/parsed-map-file.js';
+import type { ISecretExistenceChecker } from '../domain/ports/secret-existence-checker.js';
 import type { ISecretProvider } from '../domain/ports/secret-provider.js';
 import { SecretProviderType } from '../domain/secret-provider-type.js';
 import { createSecretProvider } from '../infrastructure/secret-provider-factory.js';
@@ -9,6 +10,7 @@ import {
   ContractValidationError,
   checkRemoteKeys,
   invalidMapFileResult,
+  notCheckableResult,
 } from './contract-validation.js';
 import { EnvilderClient } from './envilder-client.js';
 import { MapFileParser } from './map-file-parser.js';
@@ -40,12 +42,19 @@ import { validateMapFileContent } from './map-file-validator.js';
  *
  * // Fail the load when the contract does not hold:
  * await Envilder.fromMapFile('envilder.json').withContractValidation().inject();
+ *
+ * // Use your own provider instance (for example, an in-memory fake in tests):
+ * await Envilder.fromMapFile('envilder.json')
+ *   .withSecretProvider(fakeProvider)
+ *   .withContractValidation()
+ *   .inject();
  * ```
  */
 export class Envilder {
   private readonly filePath: string;
   private options: EnvilderOptions = {};
   private contractValidation = false;
+  private secretProvider?: ISecretProvider;
 
   private constructor(filePath: string) {
     this.filePath = filePath;
@@ -127,6 +136,22 @@ export class Envilder {
   }
 
   /**
+   * Use this provider instance instead of building one from the map file
+   * `$config`. The map file is still validated as usual, and the provider
+   * overrides still set the provider type reported by
+   * {@link validateContract}. To take part in contract validation, the
+   * provider must also implement {@link ISecretExistenceChecker}; otherwise
+   * every key is reported as `provider_error`.
+   */
+  withSecretProvider(provider: ISecretProvider): Envilder {
+    if (!provider) {
+      throw new Error('provider cannot be null or undefined');
+    }
+    this.secretProvider = provider;
+    return this;
+  }
+
+  /**
    * Run {@link validateContract} once before resolving, and fail the load
    * with a {@link ContractValidationError} when it does not pass. Off by
    * default: without it, a load makes no extra provider call.
@@ -160,7 +185,7 @@ export class Envilder {
       return new EnvilderClient(provider).resolveSecrets(mapFile);
     }
     const mapFile = new MapFileParser().parse(json);
-    const provider = createSecretProvider(mapFile.config, this.buildOptions());
+    const provider = this.createProvider(mapFile);
     const client = new EnvilderClient(provider);
     return client.resolveSecrets(mapFile);
   }
@@ -186,12 +211,22 @@ export class Envilder {
       return { result: invalidMapFileResult(mapFileErrors) };
     }
     const mapFile = new MapFileParser().parse(json);
-    const options = this.buildOptions();
-    const provider = createSecretProvider(mapFile.config, options);
+    const provider = this.createProvider(mapFile);
     const providerType =
-      options?.provider ?? mapFile.config.provider ?? SecretProviderType.Aws;
-    const result = await checkRemoteKeys(mapFile, provider, providerType);
+      this.options.provider ??
+      mapFile.config.provider ??
+      SecretProviderType.Aws;
+    const result = canCheckExistence(provider)
+      ? await checkRemoteKeys(mapFile, provider, providerType)
+      : notCheckableResult(mapFile, providerType);
     return { result, mapFile, provider };
+  }
+
+  private createProvider(mapFile: ParsedMapFile): ISecretProvider {
+    return (
+      this.secretProvider ??
+      createSecretProvider(mapFile.config, this.buildOptions())
+    );
   }
 
   private async readMapFile(): Promise<string> {
@@ -212,6 +247,15 @@ export class Envilder {
       this.options.profile !== undefined;
     return hasOverrides ? this.options : undefined;
   }
+}
+
+function canCheckExistence(
+  provider: ISecretProvider,
+): provider is ISecretProvider & ISecretExistenceChecker {
+  return (
+    typeof (provider as Partial<ISecretExistenceChecker>).checkSecretsExist ===
+    'function'
+  );
 }
 
 function validateFilePath(filePath: string): void {

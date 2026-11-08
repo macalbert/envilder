@@ -1873,6 +1873,9 @@ export const ca: Translations = {
       "Per fer fallar la càrrega, activa la validació del contracte al builder. La comprovació s'executa una vegada abans de resoldre i l'error anomena les claus que fallen, mai els seus valors. Està desactivada per defecte, així que una càrrega normal no fa cap crida extra al proveïdor. A diferència de la validació de secrets, que revisa els valors resolts, revisa el fitxer de mapatge i les claus abans de resoldre:",
     sdkContractValidationCliLink:
       "Consulta la referència d'envilder validate per als estats i els permisos que necessita la comprovació →",
+    sdkCustomProvider: 'Proveïdor propi i fakes per a tests',
+    sdkCustomProviderDesc:
+      "Passa al builder la teva pròpia instància de proveïdor en lloc de la que construeix a partir de $config. El fitxer de mapatge es continua validant igual, així que pots provar el codi d'arrencada amb un fake en memòria, sense compte al núvol, emulador ni variables d'entorn. Implementa també el comprovador d'existència perquè la validació del contracte pugui revisar cada clau; sense ell, totes les claus surten com a provider_error:",
     sdkNodejsFullDocs: 'Documentació completa →',
     sdkNodejsExamplesDesc:
       "Un projecte Vitest amb Testcontainers i un AppHost d'Aspire en TypeScript que resolen un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack for AWS i LocalStack for Azure) i passen els valors als contenidors, sense cap fitxer .env:",

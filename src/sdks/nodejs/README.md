@@ -245,6 +245,55 @@ const secrets = await client.resolveSecrets(mapFile);
 EnvilderClient.injectIntoEnvironment(secrets);
 ```
 
+### Custom provider in the fluent builder
+
+`withSecretProvider()` hands the builder your own provider instance instead of
+the one it would build from `$config`. The map file is still validated as
+usual, so this is also the way to test your startup code against an in-memory
+fake, with no cloud account, emulator or environment variables:
+
+```typescript
+import {
+  Envilder,
+  type ISecretExistenceChecker,
+  type ISecretProvider,
+} from '@envilder/sdk';
+
+const fakeSecrets = new Map([['/app/db-url', 'postgres://localhost/test']]);
+
+class InMemoryProvider implements ISecretProvider, ISecretExistenceChecker {
+  async getSecrets(names: string[]): Promise<Map<string, string>> {
+    return new Map(
+      names.flatMap((name) => {
+        const value = fakeSecrets.get(name);
+        return value === undefined ? [] : [[name, value]];
+      }),
+    );
+  }
+
+  async checkSecretsExist(names: readonly string[]) {
+    return new Map(
+      names.map((name) => [
+        name,
+        { status: fakeSecrets.has(name) ? 'exists' : 'missing' } as const,
+      ]),
+    );
+  }
+}
+
+await Envilder.fromMapFile('envilder.json')
+  .withSecretProvider(new InMemoryProvider())
+  .withContractValidation()
+  .inject();
+```
+
+To take part in contract validation, the provider also implements
+`ISecretExistenceChecker`. A provider that only implements `ISecretProvider`
+still resolves secrets, but `validateContract()` reports every key as
+`provider_error`, so `withContractValidation()` fails the load. The
+`provider` field of each key keeps the configured type (`withProvider()`,
+then `$config.provider`, then `aws`).
+
 ## API Reference
 
 ### Static facade (`Envilder`)
@@ -264,6 +313,7 @@ EnvilderClient.injectIntoEnvironment(secrets);
 | `withProvider(type)` | Override secret provider (AWS/Azure) |
 | `withProfile(name)` | Override AWS named profile |
 | `withVaultUrl(url)` | Override Azure Key Vault URL |
+| `withSecretProvider(provider)` | Use your own `ISecretProvider` instance instead of building one from `$config` |
 | `withContractValidation()` | Check the map file contract once before resolving; fail with `ContractValidationError` |
 | `validateContract()` | Check the map file contract and return a `ContractValidationResult`, without loading |
 | `resolve()` | Resolve secrets, return as `Map` |

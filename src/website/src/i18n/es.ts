@@ -1876,6 +1876,9 @@ export const es: Translations = {
       'Para que la carga falle, activa la validación del contrato en el builder. La comprobación se ejecuta una vez antes de resolver y el error nombra las claves que fallan, nunca sus valores. Está desactivada por defecto, así que una carga normal no hace ninguna llamada extra al proveedor. A diferencia de la validación de secretos, que revisa los valores resueltos, revisa el fichero de mapeo y las claves antes de resolver:',
     sdkContractValidationCliLink:
       'Consulta la referencia de envilder validate para los estados y los permisos que necesita la comprobación →',
+    sdkCustomProvider: 'Proveedor propio y fakes para tests',
+    sdkCustomProviderDesc:
+      'Pasa al builder tu propia instancia de proveedor en lugar de la que construye a partir de $config. El fichero de mapeo se sigue validando igual, así que puedes probar el código de arranque con un fake en memoria, sin cuenta en la nube, emulador ni variables de entorno. Implementa también el comprobador de existencia para que la validación del contrato pueda revisar cada clave; sin él, todas las claves salen como provider_error:',
     sdkNodejsFullDocs: 'Documentación completa →',
     sdkNodejsExamplesDesc:
       'Un proyecto Vitest con Testcontainers y un AppHost de Aspire en TypeScript que resuelven un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack for AWS y LocalStack for Azure) y pasan los valores a los contenedores, sin ningún archivo .env:',
