@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/2c3d85a6-edd0-4b03-9b41-aaf113aee819" alt="Envilder">
+  <img src="https://raw.githubusercontent.com/macalbert/envilder/main/docs/envilder-hero.jpg" alt="Envilder">
 </p>
 
 <p align="center">
