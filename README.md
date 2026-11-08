@@ -82,7 +82,7 @@ No SaaS middleman. One versioned mapping contract. Secrets stay in your cloud.
 | 📋 **Declarative Mapping** | One JSON file defines how application variables map to cloud secrets. Git-versioned, PR-reviewable, and diff-able |
 | ☁️ **Cloud-native Providers** | AWS SSM and Azure Key Vault today |
 | ⚡ **Exec Mode** | `envilder exec -- <command>` runs any command with the secrets in its environment. Nothing written to disk, fail-closed, exit codes propagated. [Guide](docs/exec-command.md) |
-| ✅ **Validate** | `envilder validate` checks the map file against the schema and the provider rules, then checks that every declared secret exists, without reading or printing values. `--envfile` compares a local `.env` with the map file by keys, and by values with `--compare-values`. `--offline` checks local files only, without credentials. [Guide](docs/validate-command.md) |
+| ✅ **Validate** | `envilder validate` checks the map file against the schema and the provider rules, then checks that every declared secret exists, without printing values. `--envfile` compares a local `.env` with the map file by keys, and by values with `--compare-values`. `--offline` checks local files only, without credentials. [Guide](docs/validate-command.md) |
 | 🔌 **Runtime SDKs** | Load secrets into memory at app startup: [.NET](./src/sdks/dotnet/README.md), [Python](./src/sdks/python/README.md), [Node.js](./src/sdks/nodejs/README.md). No `.env` on disk |
 | ⚙️ **GitHub Action** | Pull secrets in CI/CD. Same mapping, zero manual config |
 | 🔄 **Pull & Controlled Push** | Pull secrets to `.env`, or intentionally push local values to your cloud provider when bootstrapping or rotating |
@@ -135,7 +135,19 @@ See the [Push Command Guide](docs/push-command.md#single-variable-push) for the 
 > 💡 Using Azure Key Vault? Add `--provider=azure --vault-url=https://my-vault.vault.azure.net` to the first push
 > and Envilder writes the matching `$config`. See [Mapping File Format](#️-mapping-file-format) below.
 
-### 3. Run your app with the secrets
+### 3. Check that every secret exists
+
+```bash
+npx envilder validate
+```
+
+`envilder validate` checks the map file against the schema and the provider rules, then asks the provider whether
+each declared secret exists. It never prints a value. Use `--offline` to check only the local files, without
+credentials. It exits with `1` when something is wrong, so it works as a CI step.
+
+📖 See the [Validate Command Guide](docs/validate-command.md) for every check, status and exit code.
+
+### 4. Run your app with the secrets
 
 ```bash
 npx envilder exec -- npm run dev
@@ -148,7 +160,7 @@ It is not a sandbox: your command and everything it starts can read the secrets.
 
 📖 See the [Exec Command Guide](docs/exec-command.md) for exit codes, signals and GitHub Actions masking.
 
-### 4. Need a `.env` file? Pull it
+### 5. Need a `.env` file? Pull it
 
 ```bash
 npx envilder
