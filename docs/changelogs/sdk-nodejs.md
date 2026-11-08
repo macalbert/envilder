@@ -1,3 +1,13 @@
+## [1.2.1] - 2026-11-08
+
+### Security
+
+* Raise the minimum `@azure/identity` to `^4.14.1`, the first release that
+  depends on `@azure/msal-node` 7.1 or later, which fixes an authorization
+  code flow that could disclose parameters to an attacker-controlled endpoint
+
+---
+
 ## [1.2.0] - 2026-11-08
 
 ### Added
