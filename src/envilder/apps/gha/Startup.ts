@@ -1,6 +1,7 @@
 import { Container } from 'inversify';
 import { ExecWithSecretsCommandHandler } from '../../core/application/execWithSecrets/ExecWithSecretsCommandHandler.js';
 import { ExportSecretsToEnvironmentCommandHandler } from '../../core/application/exportSecretsToEnvironment/ExportSecretsToEnvironmentCommandHandler.js';
+import { ValidateMapFileCommandHandler } from '../../core/application/validateMapFile/ValidateMapFileCommandHandler.js';
 import type { MapFileConfig } from '../../core/domain/MapFileConfig.js';
 import type { IEnvironmentExporter } from '../../core/domain/ports/IEnvironmentExporter.js';
 import type { ILogger } from '../../core/domain/ports/ILogger.js';
@@ -33,7 +34,8 @@ export class Startup {
   /**
    * Binds the shared handlers plus the two modes only the action offers
    * together: exporting secrets to the job environment (the default) and
-   * running a command with them (the `command` input).
+   * running a command with them (the `command` input), and the offline map
+   * file check every run starts with.
    */
   configureServices(): this {
     configureApplicationServices(this.container);
@@ -46,6 +48,10 @@ export class Startup {
     this.container
       .bind<ExecWithSecretsCommandHandler>(TYPES.ExecWithSecretsCommandHandler)
       .to(ExecWithSecretsCommandHandler)
+      .inTransientScope();
+    this.container
+      .bind<ValidateMapFileCommandHandler>(TYPES.ValidateMapFileCommandHandler)
+      .to(ValidateMapFileCommandHandler)
       .inTransientScope();
     return this;
   }
