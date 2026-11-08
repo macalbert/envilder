@@ -294,12 +294,6 @@ still resolves secrets, but `validateContract()` reports every key as
 `provider` field of each key keeps the configured type (`withProvider()`,
 then `$config.provider`, then `aws`).
 
-For a complete, runnable walkthrough, see
-[`typescript-custom-provider`](https://github.com/macalbert/envilder-examples/tree/main/typescript-custom-provider)
-in envilder-examples: a custom provider over a local AES-256-GCM encrypted
-file, with tests for loading, failing at startup on a missing secret, and
-validating the contract without decrypting anything.
-
 ## API Reference
 
 ### Static facade (`Envilder`)
