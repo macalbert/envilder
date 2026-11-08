@@ -137,7 +137,8 @@ is compared, as dotenv loads it. A remote secret with an empty value matches
 Neither value is ever printed, and each remote value is dropped right after
 the comparison. Variables already reported as missing (from the env file or
 the provider) are not read. Reading values needs the same permissions as a pull, on top of the ones the
-existence check needs. Without `--compare-values`, no value is read.
+existence check needs. Without `--compare-values`, no value is compared and no `SecureString`
+is decrypted.
 
 #### AWS SSM Parameter Store
 
