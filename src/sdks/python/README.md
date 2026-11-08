@@ -310,6 +310,12 @@ still resolves secrets, but `validate_contract()` reports every key as
 `provider` field of each key keeps the configured type (`with_provider()`,
 then `$config.provider`, then `aws`).
 
+For a complete, runnable walkthrough, see
+[`python-custom-provider`](https://github.com/macalbert/envilder-examples/tree/main/python-custom-provider)
+in envilder-examples: a custom provider over a local AES-256-GCM encrypted
+file, with tests for loading, failing at startup on a missing secret, and
+validating the contract without decrypting anything.
+
 ## API Reference
 
 ### Static facade (`Envilder`)

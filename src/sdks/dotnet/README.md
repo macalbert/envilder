@@ -254,6 +254,8 @@ public sealed class InMemoryProvider : ISecretProvider, ISecretExistenceChecker
 
 To take part in contract validation, the provider also implements `ISecretExistenceChecker`. A provider that only implements `ISecretProvider` still resolves secrets, but `ValidateContractAsync()` reports every key as `ProviderError`, so `WithContractValidation()` fails the load. The `Provider` of each key keeps the configured type (`WithProvider()`, then `$config.provider`, then `Aws`).
 
+For a complete, runnable walkthrough, see [`dotnet-custom-provider`](https://github.com/macalbert/envilder-examples/tree/main/dotnet-custom-provider) in envilder-examples: a custom provider over a local AES-256-GCM encrypted file, with tests for loading, failing at startup on a missing secret, and validating the contract without decrypting anything.
+
 ### Via IConfiguration (ASP.NET)
 
 ```csharp
