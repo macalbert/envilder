@@ -5,7 +5,7 @@
 `envilder validate` is a preflight check. It answers *"is this map file
 valid, and can every declared secret be resolved with the current
 credentials?"* before a pull, a push or `envilder exec` runs, locally or as a
-CI step. It never reads or prints a secret value.
+CI step. It never prints a secret value.
 
 ```bash
 envilder validate
@@ -137,7 +137,8 @@ is compared, as dotenv loads it. A remote secret with an empty value matches
 Neither value is ever printed, and each remote value is dropped right after
 the comparison. Variables already reported as missing (from the env file or
 the provider) are not read. Reading values needs the same permissions as a pull, on top of the ones the
-existence check needs. Without `--compare-values`, no value is read.
+existence check needs. Without `--compare-values`, no value is compared and no `SecureString`
+is decrypted.
 
 #### AWS SSM Parameter Store
 
@@ -364,7 +365,7 @@ reported as `provider_error`, so a load with contract validation fails.
 
 ## What validate does not do
 
-- It never prints secret values, and it reads them only with
+- It never prints secret values, and it compares them only with
   `--compare-values`.
 - In `--offline` mode it does not check that the secrets exist or that the
   credentials can read them.
