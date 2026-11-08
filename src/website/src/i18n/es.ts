@@ -1075,6 +1075,44 @@ export const es: Translations = {
       guideLink:
         'Guía completa de exec en GitHub: detalles de Windows y todos los mensajes de error',
     },
+    customProviderGuide: {
+      whenTitle: 'Cuándo usarlo',
+      whenDesc:
+        'Un proveedor propio sustituye el cliente de AWS o Azure que el SDK construiría a partir de $config. Dos motivos habituales:',
+      whenUnsupported:
+        'Tus secretos están en un almacén que Envilder aún no soporta (HashiCorp Vault, 1Password, una base de datos, una API interna).',
+      whenTests:
+        'Quieres probar el código de arranque con un fake en memoria: sin cuenta en la nube, sin emulador y sin variables de entorno.',
+      whenCliNote:
+        'Solo los SDKs (1.2+) aceptan un proveedor propio. El CLI y la GitHub Action soportan AWS SSM y Azure Key Vault.',
+      howTitle: 'Cómo funciona',
+      howDesc:
+        'Un proveedor implementa una interfaz y, opcionalmente, una segunda para la validación del contrato:',
+      howInterface: 'Interfaz',
+      howMethod: 'Método (Node.js · Python · .NET)',
+      howUsedFor: 'Para qué sirve',
+      howResolve:
+        'Resolver los valores que se inyectan. Los secretos que faltan se omiten, no lanzan ningún error.',
+      howCheck:
+        'Opcional. Validación del contrato: responder exists o missing para cada clave sin leer ningún valor.',
+      howMapFile:
+        'Pasa la instancia con withSecretProvider() (with_secret_provider() en Python, WithSecretProvider() en .NET). El SDK ya no construye ningún proveedor a partir de $config, pero sigue validando el fichero de mapeo, así que un error en el fichero que la app usa en producción también falla en los tests que usan un fake.',
+      codeTitle: 'Ejemplo',
+      codeDesc:
+        'Un proveedor en memoria que implementa las dos interfaces, conectado a una carga con validación del contrato:',
+      validationTitle: 'Validación del contrato con un proveedor propio',
+      validationWith:
+        'Si el proveedor implementa ISecretExistenceChecker, validateContract() y withContractValidation() comprueban cada clave con él, como con los proveedores incluidos.',
+      validationWithout:
+        'Si no, todas las claves salen como provider_error ("The provider cannot check whether a secret exists."), y una carga con validación del contrato falla en lugar de pasar en silencio.',
+      validationProviderField:
+        'El campo provider de cada clave mantiene el tipo configurado: el override de withProvider(), luego $config.provider y, si no, aws.',
+      validationLink:
+        'Consulta la referencia de envilder validate para todos los estados →',
+      examplesTitle: 'Ejemplos ejecutables',
+      examplesDesc:
+        'envilder-examples tiene un ejemplo por SDK: un proveedor sobre un fichero local cifrado con AES-256-GCM, con tests de carga, de fallo en el arranque cuando falta un secreto y de validación del contrato sin descifrar nada.',
+    },
     validateReference: {
       tabAws: 'AWS SSM',
       tabAzure: 'Azure Key Vault',
@@ -1309,6 +1347,20 @@ export const es: Translations = {
         cardTitle: 'Configuración de Azure Key Vault',
         cardSummary:
           'Configura la autenticación de Azure y los permisos de Key Vault.',
+      },
+      'custom-provider': {
+        title:
+          'Proveedor de secretos propio: conecta cualquier almacén o un fake de tests a los SDKs de Envilder',
+        description:
+          'Usa withSecretProvider en los SDKs de Envilder para .NET, Python y Node.js para resolver un fichero de mapeo desde tu propio almacén de secretos o un fake en memoria, con validación del fichero y del contrato.',
+        heading: 'Proveedor de secretos propio',
+        intro:
+          '¿Cómo usas Envilder con un almacén de secretos que no soporta, o pruebas el código de arranque sin cuenta en la nube? En los SDKs, pasa tu propio proveedor al builder. El fichero de mapeo, la validación del contrato y la inyección funcionan igual que con AWS SSM o Azure Key Vault.',
+        breadcrumb: 'Proveedor propio',
+        navLabel: 'Proveedor propio',
+        cardTitle: 'Proveedor propio (SDKs)',
+        cardSummary:
+          'Conecta tu almacén de secretos o un fake en memoria a los SDKs.',
       },
       'map-file': {
         title:
@@ -1879,6 +1931,7 @@ export const es: Translations = {
     sdkCustomProvider: 'Proveedor propio y fakes para tests',
     sdkCustomProviderDesc:
       'Pasa al builder tu propia instancia de proveedor en lugar de la que construye a partir de $config. El fichero de mapeo se sigue validando igual, así que puedes probar el código de arranque con un fake en memoria, sin cuenta en la nube, emulador ni variables de entorno. Implementa también el comprobador de existencia para que la validación del contrato pueda revisar cada clave; sin él, todas las claves salen como provider_error:',
+    sdkCustomProviderGuideLink: 'Guía completa: proveedor de secretos propio →',
     sdkNodejsFullDocs: 'Documentación completa →',
     sdkNodejsExamplesDesc:
       'Un proyecto Vitest con Testcontainers y un AppHost de Aspire en TypeScript que resuelven un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack for AWS y LocalStack for Azure) y pasan los valores a los contenedores, sin ningún archivo .env:',

@@ -4,6 +4,7 @@ export const docsRouteKeys = [
   'guide-ssm-to-env',
   'aws-ssm',
   'azure-key-vault',
+  'custom-provider',
   'map-file',
   'cli-pull',
   'cli-push',
@@ -61,6 +62,12 @@ export const docsRouteManifest = [
     path: '/docs/providers/azure-key-vault/',
     navGroup: 'providers',
     legacyHashes: ['azure-setup'],
+  },
+  {
+    key: 'custom-provider',
+    path: '/docs/providers/custom/',
+    navGroup: 'providers',
+    legacyHashes: [],
   },
   {
     key: 'map-file',
