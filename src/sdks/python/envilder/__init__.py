@@ -17,6 +17,9 @@ from envilder.domain.envilder_options import EnvilderOptions
 from envilder.domain.expired_credentials_error import ExpiredCredentialsError
 from envilder.domain.map_file_config import MapFileConfig
 from envilder.domain.parsed_map_file import ParsedMapFile
+from envilder.domain.ports.secret_existence_checker import (
+    ISecretExistenceChecker,
+)
 from envilder.domain.ports.secret_provider import ISecretProvider
 from envilder.domain.secret_provider_type import SecretProviderType
 from envilder.domain.sso_session_expired_error import SsoSessionExpiredError
@@ -36,6 +39,7 @@ __all__ = [
     "EnvilderClient",
     "EnvilderOptions",
     "ExpiredCredentialsError",
+    "ISecretExistenceChecker",
     "ISecretProvider",
     "KeyCheck",
     "MapFileConfig",

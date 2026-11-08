@@ -2,6 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ContractValidationError } from '../../../../src/sdks/nodejs/src/application/contract-validation.js';
 import { Envilder } from '../../../../src/sdks/nodejs/src/application/envilder.js';
 import { SecretProviderType } from '../../../../src/sdks/nodejs/src/domain/secret-provider-type.js';
+import type {
+  ISecretExistenceChecker,
+  ISecretProvider,
+} from '../../../../src/sdks/nodejs/src/index.js';
 
 // Mock fs/promises for file reading
 vi.mock('node:fs/promises', () => ({
@@ -441,5 +445,189 @@ describe('Envilder', () => {
       );
       expect(mockCreateProvider).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('Envilder with an injected secret provider', () => {
+  const inMemorySecrets = new Map([
+    ['/app/db-url', 'postgres://fake'],
+    ['/app/api-key', 'sk-fake'],
+  ]);
+
+  function createFakeProvider(): ISecretProvider {
+    return {
+      getSecrets: vi.fn(async (names: string[]) => {
+        const result = new Map<string, string>();
+        for (const name of names) {
+          const value = inMemorySecrets.get(name);
+          if (value !== undefined) {
+            result.set(name, value);
+          }
+        }
+        return result;
+      }),
+    };
+  }
+
+  function createCheckableFakeProvider(): ISecretProvider &
+    ISecretExistenceChecker {
+    return {
+      ...createFakeProvider(),
+      checkSecretsExist: vi.fn(async (names: readonly string[]) => {
+        return new Map(
+          names.map((name) => [
+            name,
+            {
+              status: inMemorySecrets.has(name)
+                ? ('exists' as const)
+                : ('missing' as const),
+            },
+          ]),
+        );
+      }),
+    };
+  }
+
+  beforeEach(() => {
+    mockReadFile.mockResolvedValue(SAMPLE_MAP_JSON);
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    delete process.env.DB_URL;
+    delete process.env.API_KEY;
+  });
+
+  it('Should_ResolveFromInjectedProvider_When_SecretProviderInjected', async () => {
+    // Arrange
+    const sut = Envilder.fromMapFile('envilder.json').withSecretProvider(
+      createFakeProvider(),
+    );
+
+    // Act
+    const actual = await sut.resolve();
+
+    // Assert
+    expect(actual).toEqual(
+      new Map([
+        ['DB_URL', 'postgres://fake'],
+        ['API_KEY', 'sk-fake'],
+      ]),
+    );
+    expect(mockCreateProvider).not.toHaveBeenCalled();
+  });
+
+  it('Should_CheckKeysWithInjectedProvider_When_ProviderCanCheckExistence', async () => {
+    // Arrange
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({ DB_URL: '/app/db-url', TOKEN: '/app/token' }),
+    );
+    const sut = Envilder.fromMapFile('envilder.json').withSecretProvider(
+      createCheckableFakeProvider(),
+    );
+
+    // Act
+    const actual = await sut.validateContract();
+
+    // Assert
+    expect(actual).toEqual({
+      isValid: false,
+      mapFileErrors: [],
+      keys: [
+        {
+          variable: 'DB_URL',
+          path: '/app/db-url',
+          provider: SecretProviderType.Aws,
+          status: 'exists',
+        },
+        {
+          variable: 'TOKEN',
+          path: '/app/token',
+          provider: SecretProviderType.Aws,
+          status: 'missing',
+        },
+      ],
+    });
+    expect(mockCreateProvider).not.toHaveBeenCalled();
+  });
+
+  it('Should_ReportEveryKeyAsProviderError_When_InjectedProviderCannotCheckExistence', async () => {
+    // Arrange
+    const sut = Envilder.fromMapFile('envilder.json').withSecretProvider(
+      createFakeProvider(),
+    );
+
+    // Act
+    const actual = await sut.validateContract();
+
+    // Assert
+    expect(actual.isValid).toBe(false);
+    expect(actual.keys.map((key) => [key.variable, key.status])).toEqual([
+      ['DB_URL', 'provider_error'],
+      ['API_KEY', 'provider_error'],
+    ]);
+    expect(actual.keys[0]?.reason).toBe(
+      'The provider cannot check whether a secret exists.',
+    );
+  });
+
+  it('Should_ThrowContractValidationError_When_InjectedProviderCannotCheckExistence', async () => {
+    // Arrange
+    const sut = Envilder.fromMapFile('envilder.json')
+      .withSecretProvider(createFakeProvider())
+      .withContractValidation();
+
+    // Act
+    const act = sut.inject();
+
+    // Assert
+    await expect(act).rejects.toBeInstanceOf(ContractValidationError);
+    expect(process.env.DB_URL).toBeUndefined();
+  });
+
+  it('Should_InjectSecrets_When_InjectedProviderPassesContractValidation', async () => {
+    // Arrange
+    const sut = Envilder.fromMapFile('envilder.json')
+      .withSecretProvider(createCheckableFakeProvider())
+      .withContractValidation();
+
+    // Act
+    await sut.inject();
+
+    // Assert
+    expect(process.env.DB_URL).toBe('postgres://fake');
+    expect(process.env.API_KEY).toBe('sk-fake');
+  });
+
+  it('Should_ReportMapFileErrors_When_ProviderInjectedAndConfigIsIncomplete', async () => {
+    // Arrange
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({ $config: { provider: 'azure' }, DB_URL: 'db-url' }),
+    );
+    const provider = createCheckableFakeProvider();
+    const sut =
+      Envilder.fromMapFile('envilder.json').withSecretProvider(provider);
+
+    // Act
+    const actual = await sut.validateContract();
+
+    // Assert
+    expect(actual.isValid).toBe(false);
+    expect(actual.mapFileErrors.map((error) => error.key)).toEqual([
+      '$config.vaultUrl',
+    ]);
+    expect(provider.checkSecretsExist).not.toHaveBeenCalled();
+  });
+
+  it('Should_Throw_When_InjectedProviderIsMissing', () => {
+    // Arrange
+    const sut = Envilder.fromMapFile('envilder.json');
+
+    // Act
+    const act = () =>
+      sut.withSecretProvider(undefined as unknown as ISecretProvider);
+
+    // Assert
+    expect(act).toThrow('provider cannot be null or undefined');
   });
 });

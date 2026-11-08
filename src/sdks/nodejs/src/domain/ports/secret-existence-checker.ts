@@ -4,6 +4,8 @@ import type { SecretExistence } from '../contract-validation-result.js';
  * Checks whether secrets exist without reading their values. Implemented by
  * the built-in providers and used by contract validation; kept apart from
  * {@link ISecretProvider} so custom providers do not have to implement it.
+ * A custom provider passed to `withSecretProvider()` implements it to take
+ * part in contract validation.
  */
 export interface ISecretExistenceChecker {
   /**

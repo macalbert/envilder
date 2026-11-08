@@ -1852,6 +1852,9 @@ export const en: Translations = {
       'To fail the load instead, enable contract validation on the builder. The check runs once before resolving and the error names the failing keys, never their values. It is off by default, so a normal load makes no extra provider call. Unlike secret validation, which checks resolved values, it checks the map file and the keys before resolving:',
     sdkContractValidationCliLink:
       'See the envilder validate reference for the statuses and the permissions the check needs →',
+    sdkCustomProvider: 'Custom provider and test fakes',
+    sdkCustomProviderDesc:
+      'Pass your own provider instance to the builder instead of the one it builds from $config. The map file is still validated as usual, so you can test your startup code against an in-memory fake, with no cloud account, emulator or environment variables. Implement the existence checker as well so contract validation can check each key; without it, every key is reported as provider_error:',
     sdkNodejsFullDocs: 'Full documentation →',
     sdkNodejsExamplesDesc:
       'A Vitest project with Testcontainers and an Aspire TypeScript AppHost resolve a map file against AWS SSM and Azure Key Vault (emulated with LocalStack for AWS and LocalStack for Azure) and pass the values to containers, with no .env file:',

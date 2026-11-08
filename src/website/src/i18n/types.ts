@@ -1110,6 +1110,8 @@ export interface DocsTranslations {
   sdkContractValidationDesc: string;
   sdkContractValidationLoadDesc: string;
   sdkContractValidationCliLink: string;
+  sdkCustomProvider: string;
+  sdkCustomProviderDesc: string;
   sdkNodejsFullDocs: string;
   sdkNodejsExamplesDesc: string;
   // Pager

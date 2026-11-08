@@ -7,6 +7,7 @@ from envilder.application.contract_validation import (
     check_remote_keys,
     every_key_result,
     invalid_map_file_result,
+    not_checkable_result,
 )
 from envilder.application.envilder_client import EnvilderClient
 from envilder.application.map_file_parser import MapFileParser
@@ -18,8 +19,9 @@ from envilder.domain.contract_validation_result import (
 from envilder.domain.envilder_options import EnvilderOptions
 from envilder.domain.parsed_map_file import ParsedMapFile
 from envilder.domain.ports.secret_existence_checker import (
-    _CheckableSecretProvider,
+    ISecretExistenceChecker,
 )
+from envilder.domain.ports.secret_provider import ISecretProvider
 from envilder.domain.secret_provider_type import SecretProviderType
 from envilder.infrastructure.secret_provider_factory import (
     _AwsProfileError,
@@ -62,6 +64,14 @@ class Envilder:
 
         # Fail the load when the contract does not hold:
         Envilder.from_map_file("envilder.json").with_contract_validation().inject()
+
+        # Use your own provider instance (for example, a fake in tests):
+        (
+            Envilder.from_map_file("envilder.json")
+            .with_secret_provider(fake_provider)
+            .with_contract_validation()
+            .inject()
+        )
     """
 
     def __init__(self, file_path: str) -> None:
@@ -70,6 +80,7 @@ class Envilder:
         self._file_path = file_path
         self._options = EnvilderOptions()
         self._contract_validation = False
+        self._secret_provider: ISecretProvider | None = None
 
     @staticmethod
     def from_map_file(file_path: str) -> Envilder:
@@ -234,6 +245,23 @@ class Envilder:
         self._options.profile = profile
         return self
 
+    def with_secret_provider(self, provider: ISecretProvider) -> Envilder:
+        """Use *provider* instead of building one from the map file ``$config``.
+
+        The map file is still validated as usual, and the provider overrides
+        still set the provider type reported by :meth:`validate_contract`. To
+        take part in contract validation, *provider* must also implement
+        :class:`~envilder.ISecretExistenceChecker`; otherwise every key is
+        reported as ``provider_error``.
+
+        Raises:
+            ValueError: If *provider* is ``None``.
+        """
+        if provider is None:
+            raise ValueError("provider cannot be None.")
+        self._secret_provider = provider
+        return self
+
     def with_contract_validation(self) -> Envilder:
         """Run :meth:`validate_contract` once before resolving.
 
@@ -291,10 +319,11 @@ class Envilder:
                 raise ContractValidationError(result)
             return EnvilderClient(provider).resolve_secrets(map_file)
         map_file = MapFileParser().parse(json_content)
-        options = self._build_options()
-        provider = _SecretProviderFactory.create(
-            map_file.config, options=options
-        )
+        provider = self._secret_provider
+        if provider is None:
+            provider = _SecretProviderFactory.create(
+                map_file.config, options=self._build_options()
+            )
         client = EnvilderClient(provider)
         return client.resolve_secrets(map_file)
 
@@ -307,7 +336,7 @@ class Envilder:
     def _check_contract(self, json_content: str) -> tuple[
         ContractValidationResult,
         ParsedMapFile | None,
-        _CheckableSecretProvider | None,
+        ISecretProvider | None,
     ]:
         """Validate the map file and, when valid, check every declared key.
 
@@ -325,6 +354,10 @@ class Envilder:
             or map_file.config.provider
             or SecretProviderType.AWS
         )
+        if self._secret_provider is not None:
+            return self._check_injected_provider(
+                map_file, self._secret_provider, provider_type
+            )
         try:
             provider = _SecretProviderFactory.create(
                 map_file.config, options=options
@@ -341,6 +374,18 @@ class Envilder:
                 None,
             )
         result = check_remote_keys(map_file, provider, provider_type)
+        return result, map_file, provider
+
+    @staticmethod
+    def _check_injected_provider(
+        map_file: ParsedMapFile,
+        provider: ISecretProvider,
+        provider_type: SecretProviderType,
+    ) -> tuple[ContractValidationResult, ParsedMapFile, ISecretProvider]:
+        if isinstance(provider, ISecretExistenceChecker):
+            result = check_remote_keys(map_file, provider, provider_type)
+        else:
+            result = not_checkable_result(map_file, provider_type)
         return result, map_file, provider
 
     def _read_map_file(self) -> str:

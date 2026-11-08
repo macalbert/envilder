@@ -26,6 +26,7 @@ public class EnvilderBuilder
 	private readonly EnvilderOptions _options = new();
 	private readonly Func<MapFileConfig, EnvilderOptions, ISecretProvider> _createProvider;
 	private bool _contractValidation;
+	private ISecretProvider? _secretProvider;
 
 	internal EnvilderBuilder(string filePath)
 		: this(filePath, static (config, options) => SecretProviderFactory.Create(config, options))
@@ -72,6 +73,24 @@ public class EnvilderBuilder
 	public EnvilderBuilder WithVaultUrl(string vaultUrl)
 	{
 		_options.VaultUrl = vaultUrl;
+		return this;
+	}
+
+	/// <summary>
+	/// Uses this provider instance instead of building one from the map file
+	/// <c>$config</c>. The map file is still validated as usual, and the
+	/// provider overrides still set the provider type reported by
+	/// <see cref="ValidateContractAsync"/>. To take part in contract
+	/// validation, the provider must also implement
+	/// <see cref="ISecretExistenceChecker"/>; otherwise every key is reported
+	/// as <see cref="SecretExistenceStatus.ProviderError"/>.
+	/// </summary>
+	/// <param name="provider">The secret store to resolve values from.</param>
+	/// <returns>This builder for chaining.</returns>
+	/// <exception cref="ArgumentNullException">When <paramref name="provider"/> is null.</exception>
+	public EnvilderBuilder WithSecretProvider(ISecretProvider provider)
+	{
+		_secretProvider = provider ?? throw new ArgumentNullException(nameof(provider));
 		return this;
 	}
 
@@ -130,7 +149,7 @@ public class EnvilderBuilder
 		}
 
 		var mapFile = new MapFileParser().Parse(json);
-		var provider = _createProvider(mapFile.Config, _options);
+		var provider = CreateProvider(mapFile);
 		return new Dictionary<string, string>(new EnvilderClient(provider).ResolveSecrets(mapFile));
 	}
 
@@ -153,7 +172,7 @@ public class EnvilderBuilder
 		}
 
 		var mapFile = new MapFileParser().Parse(json);
-		var provider = _createProvider(mapFile.Config, _options);
+		var provider = CreateProvider(mapFile);
 		var secrets = await new EnvilderClient(provider).ResolveSecretsAsync(mapFile, cancellationToken).ConfigureAwait(false);
 		return new Dictionary<string, string>(secrets);
 	}
@@ -200,7 +219,7 @@ public class EnvilderBuilder
 		ISecretProvider provider;
 		try
 		{
-			provider = _createProvider(mapFile.Config, _options);
+			provider = CreateProvider(mapFile);
 		}
 		catch (AwsProfileNotFoundException ex)
 		{
@@ -213,6 +232,11 @@ public class EnvilderBuilder
 				.ConfigureAwait(false)
 			: ContractValidation.NotCheckable(mapFile, providerType);
 		return new(result, mapFile, provider);
+	}
+
+	private ISecretProvider CreateProvider(ParsedMapFile mapFile)
+	{
+		return _secretProvider ?? _createProvider(mapFile.Config, _options);
 	}
 
 	private sealed class ContractCheck

@@ -42,7 +42,7 @@ Three levels of API complexity for different consumer needs:
 | Level | API | Purpose |
 | ----- | --- | ------- |
 | Simple | `Envilder.load(path)` / `Envilder.resolveFile(path)` | One-liner, auto-injects into process env |
-| Fluent | `Envilder.fromMapFile(path).withProvider("azure").inject()` | Configurable builder |
+| Fluent | `Envilder.fromMapFile(path).withProvider("azure").inject()` | Configurable builder; `withSecretProvider(provider)` plugs a custom or fake provider into it |
 | Advanced | `EnvilderClient` + custom `ISecretProvider` | Full control, custom providers |
 
 ### 3. Internal vs Public Separation

@@ -8,9 +8,11 @@ using System.Threading.Tasks;
 /// Checks whether secrets exist without reading their values. Implemented by
 /// the built-in providers and used by contract validation; kept apart from
 /// <see cref="ISecretProvider"/> so custom providers do not have to
-/// implement it.
+/// implement it. A custom provider passed to
+/// <see cref="EnvilderBuilder.WithSecretProvider"/> implements it to take
+/// part in contract validation.
 /// </summary>
-internal interface ISecretExistenceChecker
+public interface ISecretExistenceChecker
 {
 	/// <summary>
 	/// Returns one entry per distinct name. Expected failures (missing secret,

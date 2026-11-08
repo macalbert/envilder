@@ -2205,6 +2205,37 @@ if (!result.IsValid)
     .WithContractValidation()
     .InjectAsync(); // throws ContractValidationException`} />
 
+        <h3>{t.docs.sdkCustomProvider}</h3>
+        <p>{t.docs.sdkCustomProviderDesc}</p>
+        <CodeBlock lang="csharp" code={`using Envilder;
+using Envilder.Domain.Ports;
+
+await Env.FromMapFile("envilder.json")
+    .WithSecretProvider(new InMemoryProvider())
+    .WithContractValidation()
+    .InjectAsync();
+
+public sealed class InMemoryProvider : ISecretProvider, ISecretExistenceChecker
+{
+    private readonly Dictionary<string, string> _secrets = new()
+    {
+        ["/app/db-url"] = "Server=localhost;Database=test",
+    };
+
+    public string? GetSecret(string name) => _secrets.GetValueOrDefault(name);
+
+    public Task<string?> GetSecretAsync(string name, CancellationToken ct = default)
+        => Task.FromResult(GetSecret(name));
+
+    public Task<IReadOnlyDictionary<string, SecretExistence>> CheckSecretsExistAsync(
+        IReadOnlyCollection<string> names, CancellationToken ct)
+        => Task.FromResult<IReadOnlyDictionary<string, SecretExistence>>(names.ToDictionary(
+            name => name,
+            name => new SecretExistence(_secrets.ContainsKey(name)
+                ? SecretExistenceStatus.Exists
+                : SecretExistenceStatus.Missing)));
+}`} />
+
         <h3>{t.docs.sdkDotnetQuickStartResolve}</h3>
         <p>{t.docs.sdkDotnetQuickStartResolveDesc}</p>
         <CodeBlock lang="csharp" code={`using Envilder;
@@ -2398,6 +2429,41 @@ if not result.is_valid:
         <CodeBlock lang="python" code={`Envilder.from_map_file('envilder.json').with_contract_validation().inject()
 # raises ContractValidationError`} />
 
+        <h3>{t.docs.sdkCustomProvider}</h3>
+        <p>{t.docs.sdkCustomProviderDesc}</p>
+        <CodeBlock lang="python" code={`from envilder import (
+    Envilder,
+    ISecretExistenceChecker,
+    ISecretProvider,
+    SecretExistence,
+    SecretExistenceStatus,
+)
+
+FAKE_SECRETS = {'/app/db-url': 'postgres://localhost/test'}
+
+
+class InMemoryProvider(ISecretProvider, ISecretExistenceChecker):
+    def get_secret(self, name):
+        return FAKE_SECRETS.get(name)
+
+    def check_secrets_exist(self, names):
+        return {
+            name: SecretExistence(
+                SecretExistenceStatus.EXISTS
+                if name in FAKE_SECRETS
+                else SecretExistenceStatus.MISSING
+            )
+            for name in names
+        }
+
+
+(
+    Envilder.from_map_file('envilder.json')
+    .with_secret_provider(InMemoryProvider())
+    .with_contract_validation()
+    .inject()
+)`} />
+
         <div class="callout">
           <span class="callout-icon">💡</span>
           <div>
@@ -2490,6 +2556,41 @@ if (!result.isValid) {
         <CodeBlock lang="typescript" code={`await Envilder.fromMapFile('envilder.json')
   .withContractValidation()
   .inject(); // throws ContractValidationError`} />
+
+        <h3>{t.docs.sdkCustomProvider}</h3>
+        <p>{t.docs.sdkCustomProviderDesc}</p>
+        <CodeBlock lang="typescript" code={`import {
+  Envilder,
+  type ISecretExistenceChecker,
+  type ISecretProvider,
+} from '@envilder/sdk';
+
+const fakeSecrets = new Map([['/app/db-url', 'postgres://localhost/test']]);
+
+class InMemoryProvider implements ISecretProvider, ISecretExistenceChecker {
+  async getSecrets(names: string[]) {
+    return new Map(
+      names.flatMap((name) => {
+        const value = fakeSecrets.get(name);
+        return value === undefined ? [] : [[name, value] as const];
+      }),
+    );
+  }
+
+  async checkSecretsExist(names: readonly string[]) {
+    return new Map(
+      names.map((name) => [
+        name,
+        { status: fakeSecrets.has(name) ? 'exists' : 'missing' } as const,
+      ]),
+    );
+  }
+}
+
+await Envilder.fromMapFile('envilder.json')
+  .withSecretProvider(new InMemoryProvider())
+  .withContractValidation()
+  .inject();`} />
 
         <div class="callout">
           <span class="callout-icon">💡</span>
