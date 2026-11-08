@@ -39,16 +39,20 @@
     "hash": "7ab44fac3c655b7fdda7d2dcf043e36f47c8b70f267fba5f91d73ed9ff6f5a04",
     "dateModified": "2026-10-27"
   },
+  "/docs/providers/custom/": {
+    "hash": "4aca45680876d61762571c1e2100b1522ce976be6f432544eea79ec97009fe4f",
+    "dateModified": "2026-11-08"
+  },
   "/docs/sdks/dotnet/": {
-    "hash": "17c05cd5e3e1285e81b944fda019f24ea7dfd0590f66656c6e0439788b8cc132",
+    "hash": "3462cdf802874b508098335a0b7a141374b83d32a1ad0de1042152a883b44f06",
     "dateModified": "2026-11-08"
   },
   "/docs/sdks/nodejs/": {
-    "hash": "b44ddb9bfda144b4d267a4388fd1f0803faf18a86384d7e189fda55b2424dbbb",
+    "hash": "5adbcd297d2398322397d49b87af2b01e833be7af28e4375614c7fd6cc9ae302",
     "dateModified": "2026-11-08"
   },
   "/docs/sdks/python/": {
-    "hash": "c0aba102a15c497b79de289bfd95d6759edeed8843411ecfa4bba9f5fc1d38ec",
+    "hash": "3bef2d79681402d29459fd6a2ef9c1b49166bc30133bff74e3da74be9b8f3dec",
     "dateModified": "2026-11-08"
   }
 }

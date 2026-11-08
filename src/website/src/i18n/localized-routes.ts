@@ -5,6 +5,7 @@ export const localizedRoutes = {
   '/docs/guides/ssm-to-env/': ['en', 'ca', 'es'],
   '/docs/providers/aws-ssm/': ['en', 'ca', 'es'],
   '/docs/providers/azure-key-vault/': ['en', 'ca', 'es'],
+  '/docs/providers/custom/': ['en', 'ca', 'es'],
   '/docs/map-file/': ['en', 'ca', 'es'],
   '/docs/cli/pull/': ['en', 'ca', 'es'],
   '/docs/cli/push/': ['en', 'ca', 'es'],

@@ -757,6 +757,31 @@ export interface ValidateReferenceTranslations {
   guideLink: string;
 }
 
+export interface CustomProviderGuideTranslations {
+  whenTitle: string;
+  whenDesc: string;
+  whenUnsupported: string;
+  whenTests: string;
+  whenCliNote: string;
+  howTitle: string;
+  howDesc: string;
+  howInterface: string;
+  howMethod: string;
+  howUsedFor: string;
+  howResolve: string;
+  howCheck: string;
+  howMapFile: string;
+  codeTitle: string;
+  codeDesc: string;
+  validationTitle: string;
+  validationWith: string;
+  validationWithout: string;
+  validationProviderField: string;
+  validationLink: string;
+  examplesTitle: string;
+  examplesDesc: string;
+}
+
 export interface DocsTranslations {
   gettingStartedGuide: GettingStartedGuideTranslations;
   mapFileReference: MapFileReferenceTranslations;
@@ -765,6 +790,7 @@ export interface DocsTranslations {
   pushReference: PushReferenceTranslations;
   execReference: ExecReferenceTranslations;
   validateReference: ValidateReferenceTranslations;
+  customProviderGuide: CustomProviderGuideTranslations;
   title: string;
   description: string;
   backToHome: string;
@@ -776,6 +802,7 @@ export interface DocsTranslations {
     | 'guide-ssm-to-env'
     | 'aws-ssm'
     | 'azure-key-vault'
+    | 'custom-provider'
     | 'map-file'
     | 'cli-pull'
     | 'cli-push'
@@ -1112,6 +1139,7 @@ export interface DocsTranslations {
   sdkContractValidationCliLink: string;
   sdkCustomProvider: string;
   sdkCustomProviderDesc: string;
+  sdkCustomProviderGuideLink: string;
   sdkNodejsFullDocs: string;
   sdkNodejsExamplesDesc: string;
   // Pager

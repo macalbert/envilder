@@ -1062,6 +1062,43 @@ export const en: Translations = {
       guideLink:
         'Full exec guide on GitHub: Windows details and every error message',
     },
+    customProviderGuide: {
+      whenTitle: 'When to use it',
+      whenDesc:
+        'A custom provider replaces the AWS or Azure client that the SDK would build from $config. Two common reasons:',
+      whenUnsupported:
+        'Your secrets live in a store Envilder does not support yet (HashiCorp Vault, 1Password, a database, an internal API).',
+      whenTests:
+        'You want to test your startup code against an in-memory fake: no cloud account, no emulator, no environment variables.',
+      whenCliNote:
+        'Only the runtime SDKs (1.2+) accept a custom provider. The CLI and the GitHub Action support AWS SSM and Azure Key Vault.',
+      howTitle: 'How it works',
+      howDesc:
+        'A provider implements one interface, and optionally a second one for contract validation:',
+      howInterface: 'Interface',
+      howMethod: 'Method (Node.js · Python · .NET)',
+      howUsedFor: 'Used for',
+      howResolve:
+        'Resolving the values to inject. Missing secrets are left out, not raised.',
+      howCheck:
+        'Optional. Contract validation: answering exists or missing for each key without reading any value.',
+      howMapFile:
+        'Pass the instance with withSecretProvider() (with_secret_provider() in Python, WithSecretProvider() in .NET). The SDK no longer builds a provider from $config, but it still validates the map file, so a mistake in the file your app uses in production also fails in tests that use a fake.',
+      codeTitle: 'Example',
+      codeDesc:
+        'An in-memory provider that implements both interfaces, plugged into a load with contract validation:',
+      validationTitle: 'Contract validation with a custom provider',
+      validationWith:
+        'If the provider implements ISecretExistenceChecker, validateContract() and withContractValidation() check every key with it, as with the built-in providers.',
+      validationWithout:
+        'If it does not, every key is reported as provider_error ("The provider cannot check whether a secret exists."), so a load with contract validation fails instead of passing silently.',
+      validationProviderField:
+        'The provider field of each key keeps the configured type: the withProvider() override, then $config.provider, then aws.',
+      validationLink: 'See the envilder validate reference for every status →',
+      examplesTitle: 'Runnable examples',
+      examplesDesc:
+        'envilder-examples has one example per SDK: a provider over a local file encrypted with AES-256-GCM, with tests for loading, failing at startup on a missing secret, and validating the contract without decrypting anything.',
+    },
     validateReference: {
       tabAws: 'AWS SSM',
       tabAzure: 'Azure Key Vault',
@@ -1293,6 +1330,20 @@ export const en: Translations = {
         cardTitle: 'Azure Key Vault setup',
         cardSummary:
           'Configure Azure authentication and Key Vault permissions.',
+      },
+      'custom-provider': {
+        title:
+          'Custom secret provider: plug any secret store or a test fake into the Envilder SDKs',
+        description:
+          'Use withSecretProvider in the Envilder .NET, Python and Node.js SDKs to resolve a map file from your own secret store or an in-memory fake, with map file and contract validation.',
+        heading: 'Custom secret provider',
+        intro:
+          'How do you use Envilder with a secret store it does not support, or test your startup code without a cloud account? In the SDKs, pass your own provider to the fluent builder. The map file, contract validation and injection work exactly as with AWS SSM or Azure Key Vault.',
+        breadcrumb: 'Custom provider',
+        navLabel: 'Custom provider',
+        cardTitle: 'Custom provider (SDKs)',
+        cardSummary:
+          'Plug your own secret store or an in-memory fake into the SDKs.',
       },
       'map-file': {
         title:
@@ -1855,6 +1906,7 @@ export const en: Translations = {
     sdkCustomProvider: 'Custom provider and test fakes',
     sdkCustomProviderDesc:
       'Pass your own provider instance to the builder instead of the one it builds from $config. The map file is still validated as usual, so you can test your startup code against an in-memory fake, with no cloud account, emulator or environment variables. Implement the existence checker as well so contract validation can check each key; without it, every key is reported as provider_error:',
+    sdkCustomProviderGuideLink: 'Full guide: custom secret provider →',
     sdkNodejsFullDocs: 'Full documentation →',
     sdkNodejsExamplesDesc:
       'A Vitest project with Testcontainers and an Aspire TypeScript AppHost resolve a map file against AWS SSM and Azure Key Vault (emulated with LocalStack for AWS and LocalStack for Azure) and pass the values to containers, with no .env file:',
