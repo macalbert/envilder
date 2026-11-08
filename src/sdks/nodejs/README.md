@@ -266,7 +266,7 @@ class InMemoryProvider implements ISecretProvider, ISecretExistenceChecker {
     return new Map(
       names.flatMap((name) => {
         const value = fakeSecrets.get(name);
-        return value === undefined ? [] : [[name, value]];
+        return value === undefined ? [] : [[name, value] as const];
       }),
     );
   }

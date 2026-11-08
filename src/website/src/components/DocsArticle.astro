@@ -2210,6 +2210,11 @@ if (!result.IsValid)
         <CodeBlock lang="csharp" code={`using Envilder;
 using Envilder.Domain.Ports;
 
+await Env.FromMapFile("envilder.json")
+    .WithSecretProvider(new InMemoryProvider())
+    .WithContractValidation()
+    .InjectAsync();
+
 public sealed class InMemoryProvider : ISecretProvider, ISecretExistenceChecker
 {
     private readonly Dictionary<string, string> _secrets = new()
@@ -2229,12 +2234,7 @@ public sealed class InMemoryProvider : ISecretProvider, ISecretExistenceChecker
             name => new SecretExistence(_secrets.ContainsKey(name)
                 ? SecretExistenceStatus.Exists
                 : SecretExistenceStatus.Missing)));
-}
-
-await Env.FromMapFile("envilder.json")
-    .WithSecretProvider(new InMemoryProvider())
-    .WithContractValidation()
-    .InjectAsync();`} />
+}`} />
 
         <h3>{t.docs.sdkDotnetQuickStartResolve}</h3>
         <p>{t.docs.sdkDotnetQuickStartResolveDesc}</p>

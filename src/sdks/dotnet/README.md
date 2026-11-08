@@ -225,6 +225,11 @@ This differs from `ValidateSecrets()`: contract validation checks the map file a
 using Envilder;
 using Envilder.Domain.Ports;
 
+await Env.FromMapFile("envilder.json")
+    .WithSecretProvider(new InMemoryProvider())
+    .WithContractValidation()
+    .InjectAsync();
+
 public sealed class InMemoryProvider : ISecretProvider, ISecretExistenceChecker
 {
     private readonly Dictionary<string, string> _secrets = new()
@@ -245,11 +250,6 @@ public sealed class InMemoryProvider : ISecretProvider, ISecretExistenceChecker
             name => new SecretExistence(
                 _secrets.ContainsKey(name) ? SecretExistenceStatus.Exists : SecretExistenceStatus.Missing)));
 }
-
-await Env.FromMapFile("envilder.json")
-    .WithSecretProvider(new InMemoryProvider())
-    .WithContractValidation()
-    .InjectAsync();
 ```
 
 To take part in contract validation, the provider also implements `ISecretExistenceChecker`. A provider that only implements `ISecretProvider` still resolves secrets, but `ValidateContractAsync()` reports every key as `ProviderError`, so `WithContractValidation()` fails the load. The `Provider` of each key keeps the configured type (`WithProvider()`, then `$config.provider`, then `Aws`).
