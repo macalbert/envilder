@@ -1,7 +1,7 @@
 # 🗝️ Envilder GitHub Action 🏰
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/8a7188ef-9d8d-45fb-8c37-3af718fb5103" alt="Envilder">
+  <img src="https://github.com/user-attachments/assets/2c3d85a6-edd0-4b03-9b41-aaf113aee819" alt="Envilder">
 </p>
 
 <p align="center">
@@ -459,6 +459,37 @@ jobs:
           map-file: config/${{ matrix.environment }}/envilder.json
           command: pnpm deploy   # secrets only for the deploy
 ```
+
+### ✅ Validate the map file before loading
+
+Every run starts with an offline check of the map file (schema and provider configuration, no provider
+call). Each problem is logged as a warning and the secrets are still loaded. To fail instead, or to check
+that every secret exists before loading, run the Envilder CLI's `validate` command as an earlier step.
+It never reads or prints a value:
+
+```yaml
+- uses: actions/checkout@v5
+
+- name: ✅ Check the map file (no credentials needed)
+  run: npx envilder validate --offline --map=envilder.json
+
+- uses: aws-actions/configure-aws-credentials@v5
+  with:
+    role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+    aws-region: us-east-1
+
+- name: ✅ Check that every secret exists
+  run: npx envilder validate --map=envilder.json
+
+- uses: macalbert/envilder/github-action@v0
+  with:
+    map-file: envilder.json
+```
+
+The remote check needs permissions a pull does not: `ssm:GetParameters` on AWS, and listing secret
+metadata on Azure Key Vault. See the
+[Validate Command Guide](https://github.com/macalbert/envilder/blob/main/docs/validate-command.md) for the
+permissions, the JSON output and the exit codes.
 
 ## 📦 Output
 

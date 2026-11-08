@@ -14,6 +14,13 @@
   the secrets in its environment only, and ends the step with the command's
   exit code. The secrets are not exported, so later steps never see them.
   Cannot be combined with `env-file`
+* **Map file check on every run**: Before loading any secret, the Action
+  checks the map file offline, as `envilder validate --offline` does: the
+  schema (`$config` fields, `$`-prefixed keys, string mappings, variable
+  names) and the provider configuration after the `provider` and `vault-url`
+  inputs. No provider is called and no value is printed. Each problem is
+  reported as a warning and the secrets are still loaded, so map files that
+  load today keep working
 
 ### Changed
 

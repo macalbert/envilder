@@ -2,6 +2,8 @@ import 'reflect-metadata';
 import type { Container } from 'inversify';
 import { DispatchActionCommand } from '../../../core/application/dispatch/DispatchActionCommand.js';
 import type { DispatchActionCommandHandler } from '../../../core/application/dispatch/DispatchActionCommandHandler.js';
+import { ValidateMapFileCommand } from '../../../core/application/validateMapFile/ValidateMapFileCommand.js';
+import type { ValidateMapFileCommandHandler } from '../../../core/application/validateMapFile/ValidateMapFileCommandHandler.js';
 import { InvalidArgumentError } from '../../../core/domain/errors/DomainErrors.js';
 import type { MapFileConfig } from '../../../core/domain/MapFileConfig.js';
 import type { ILogger } from '../../../core/domain/ports/ILogger.js';
@@ -9,6 +11,7 @@ import { GitHubActionsLogger } from '../../../core/infrastructure/github/GitHubA
 import { ConsoleLogger } from '../../../core/infrastructure/logger/ConsoleLogger.js';
 import { readMapFileConfig } from '../../../core/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../../core/types.js';
+import { SUPPORTED_PROVIDERS } from '../../shared/ContainerConfiguration.js';
 import { presentGhaError } from '../errors/GhaErrorPresenter.js';
 import { Startup } from '../Startup.js';
 
@@ -84,6 +87,45 @@ function describeMode(inputs: ActionInputs): string {
 }
 
 /**
+ * Checks the map file against the schema and the provider rules, without
+ * calling any provider, and reports every problem as a warning. It does not
+ * stop the run yet: the schema is stricter than the parsers that load the
+ * secrets, so a map file that loads today could otherwise start failing.
+ */
+async function warnAboutMapFileProblems(
+  serviceProvider: Container,
+  logger: ILogger,
+  mapFile: string,
+  inputs: ActionInputs,
+): Promise<void> {
+  const handler = serviceProvider.get<ValidateMapFileCommandHandler>(
+    TYPES.ValidateMapFileCommandHandler,
+  );
+  const violations = await handler.handle(
+    ValidateMapFileCommand.create(
+      mapFile,
+      {
+        ...(inputs.provider && { provider: inputs.provider }),
+        ...(inputs.vaultUrl && { vaultUrl: inputs.vaultUrl }),
+      },
+      SUPPORTED_PROVIDERS,
+    ),
+  );
+  if (violations.length === 0) {
+    return;
+  }
+  const count =
+    violations.length === 1 ? '1 problem' : `${violations.length} problems`;
+  logger.warn(`⚠️ Map file has ${count}: ${mapFile}`);
+  for (const violation of violations) {
+    logger.warn(`  • ${violation.message}`);
+  }
+  logger.warn(
+    '⚠️ The secrets are still loaded. Run `npx envilder validate --offline` locally to check the file.',
+  );
+}
+
+/**
  * Runs the action. Returns the exit code the step must end with: the
  * command's when the `command` input is set, 0 otherwise.
  */
@@ -123,6 +165,12 @@ export async function main(): Promise<number> {
     logger.info('🔑 Envilder GitHub Action - Starting...');
     logger.info(`📋 Map file: ${inputs.mapFile}`);
     logger.info(describeMode(inputs));
+    await warnAboutMapFileProblems(
+      serviceProvider,
+      logger,
+      inputs.mapFile,
+      inputs,
+    );
 
     const commandHandler = serviceProvider.get<DispatchActionCommandHandler>(
       TYPES.DispatchActionCommandHandler,
