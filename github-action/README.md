@@ -463,9 +463,10 @@ jobs:
 ### ✅ Validate the map file before loading
 
 Every run starts with an offline check of the map file (schema and provider configuration, no provider
-call). Each problem is logged as a warning and the secrets are still loaded. To fail instead, or to check
-that every secret exists before loading, run the Envilder CLI's `validate` command as an earlier step.
-It never reads or prints a value:
+call). The problems it finds are logged as warnings and do not stop the run on their own. A map file the
+action cannot load (invalid JSON, Azure without a vault URL, an invalid variable name) still fails the step
+as before. To fail on every problem, or to check that every secret exists before loading, run the Envilder
+CLI's `validate` command as an earlier step. It never prints a value:
 
 ```yaml
 - uses: actions/checkout@v5
@@ -485,6 +486,9 @@ It never reads or prints a value:
   with:
     map-file: envilder.json
 ```
+
+If you set the action's `provider` or `vault-url` inputs, pass the same values to both checks
+(`--provider=azure --vault-url=...`), so they check the provider the action loads from.
 
 The remote check needs permissions a pull does not: `ssm:GetParameters` on AWS, and listing secret
 metadata on Azure Key Vault. See the

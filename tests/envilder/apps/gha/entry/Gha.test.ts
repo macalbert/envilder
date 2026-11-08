@@ -8,7 +8,10 @@ import { DispatchActionCommand } from '../../../../../src/envilder/core/applicat
 import { DispatchActionCommandHandler } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommandHandler';
 import { ValidateMapFileCommandHandler } from '../../../../../src/envilder/core/application/validateMapFile/ValidateMapFileCommandHandler';
 import type { CliOptions } from '../../../../../src/envilder/core/domain/CliOptions';
-import { SecretsFetchError } from '../../../../../src/envilder/core/domain/errors/DomainErrors';
+import {
+  EnvironmentFileError,
+  SecretsFetchError,
+} from '../../../../../src/envilder/core/domain/errors/DomainErrors';
 import { OperationMode } from '../../../../../src/envilder/core/domain/OperationMode';
 import { GitHubActionsLogger } from '../../../../../src/envilder/core/infrastructure/github/GitHubActionsLogger';
 import * as FileVariableStore from '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore';
@@ -434,6 +437,41 @@ describe('GitHubAction', () => {
         expect.stringContaining('second problem.'),
       );
       expect(mocks.mockCommandHandler.handleCommand).toHaveBeenCalledTimes(1);
+    });
+
+    it('Should_WarnAndStillLoadSecrets_When_MapFileCannotBeReadForTheCheck', async () => {
+      // Arrange
+      process.env.INPUT_MAP_FILE = 'test-map.json';
+      mocks.validateMapFile.mockRejectedValue(
+        new EnvironmentFileError('Failed to read map file: test-map.json'),
+      );
+      const warn = vi
+        .spyOn(GitHubActionsLogger.prototype, 'warn')
+        .mockImplementation(() => {});
+
+      // Act
+      const exitCode = await main();
+
+      // Assert
+      expect(exitCode).toBe(0);
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to read map file: test-map.json'),
+      );
+      expect(mocks.mockCommandHandler.handleCommand).toHaveBeenCalledTimes(1);
+    });
+
+    it('Should_Throw_When_MapFileCheckFailsUnexpectedly', async () => {
+      // Arrange
+      process.env.INPUT_MAP_FILE = 'test-map.json';
+      mocks.validateMapFile.mockRejectedValue(new Error('boom'));
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      // Act
+      const action = () => main();
+
+      // Assert
+      await expect(action()).rejects.toThrow('boom');
+      expect(mocks.mockCommandHandler.handleCommand).not.toHaveBeenCalled();
     });
 
     it('Should_NotWarn_When_MapFileIsValid', async () => {

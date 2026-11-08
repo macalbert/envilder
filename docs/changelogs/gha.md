@@ -18,9 +18,11 @@
   checks the map file offline, as `envilder validate --offline` does: the
   schema (`$config` fields, `$`-prefixed keys, string mappings, variable
   names) and the provider configuration after the `provider` and `vault-url`
-  inputs. No provider is called and no value is printed. Each problem is
-  reported as a warning and the secrets are still loaded, so map files that
-  load today keep working
+  inputs. No provider is called and no value is printed. The problems it
+  finds are reported as warnings and do not stop the run on their own, so
+  map files that load today keep working. A map file the Action cannot load
+  (invalid JSON, Azure without a vault URL, an invalid variable name) still
+  fails as before
 
 ### Changed
 

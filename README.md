@@ -142,9 +142,8 @@ npx envilder validate
 ```
 
 `envilder validate` checks the map file against the schema and the provider rules, then asks the provider whether
-each declared secret exists. It never reads or prints a value. Use `--offline` to check only the local files,
-without credentials, `--envfile=.env` to compare a local `.env` with the map file, and `--format=json` in CI.
-It exits with `1` when something is wrong, so it works as a CI step.
+each declared secret exists. It never prints a value. Use `--offline` to check only the local files, without
+credentials. It exits with `1` when something is wrong, so it works as a CI step.
 
 📖 See the [Validate Command Guide](docs/validate-command.md) for every check, status and exit code.
 

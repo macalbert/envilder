@@ -4,8 +4,12 @@ import { DispatchActionCommand } from '../../../core/application/dispatch/Dispat
 import type { DispatchActionCommandHandler } from '../../../core/application/dispatch/DispatchActionCommandHandler.js';
 import { ValidateMapFileCommand } from '../../../core/application/validateMapFile/ValidateMapFileCommand.js';
 import type { ValidateMapFileCommandHandler } from '../../../core/application/validateMapFile/ValidateMapFileCommandHandler.js';
-import { InvalidArgumentError } from '../../../core/domain/errors/DomainErrors.js';
+import {
+  EnvironmentFileError,
+  InvalidArgumentError,
+} from '../../../core/domain/errors/DomainErrors.js';
 import type { MapFileConfig } from '../../../core/domain/MapFileConfig.js';
+import type { MapFileViolation } from '../../../core/domain/MapFileValidator.js';
 import type { ILogger } from '../../../core/domain/ports/ILogger.js';
 import { GitHubActionsLogger } from '../../../core/infrastructure/github/GitHubActionsLogger.js';
 import { ConsoleLogger } from '../../../core/infrastructure/logger/ConsoleLogger.js';
@@ -101,16 +105,27 @@ async function warnAboutMapFileProblems(
   const handler = serviceProvider.get<ValidateMapFileCommandHandler>(
     TYPES.ValidateMapFileCommandHandler,
   );
-  const violations = await handler.handle(
-    ValidateMapFileCommand.create(
-      mapFile,
-      {
-        ...(inputs.provider && { provider: inputs.provider }),
-        ...(inputs.vaultUrl && { vaultUrl: inputs.vaultUrl }),
-      },
-      SUPPORTED_PROVIDERS,
-    ),
-  );
+  let violations: MapFileViolation[];
+  try {
+    violations = await handler.handle(
+      ValidateMapFileCommand.create(
+        mapFile,
+        {
+          ...(inputs.provider && { provider: inputs.provider }),
+          ...(inputs.vaultUrl && { vaultUrl: inputs.vaultUrl }),
+        },
+        SUPPORTED_PROVIDERS,
+      ),
+    );
+  } catch (error) {
+    // The check must never stop the run on its own: when the file cannot be
+    // read, loading reports it with its own error.
+    if (error instanceof EnvironmentFileError) {
+      logger.warn(`⚠️ Map file check skipped: ${error.message}`);
+      return;
+    }
+    throw error;
+  }
   if (violations.length === 0) {
     return;
   }
