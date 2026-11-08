@@ -42,7 +42,8 @@ internal static class ContractValidation
 
 	/// <summary>
 	/// The result for a provider that cannot check existence (a custom one
-	/// injected through the internal seam): every key is a provider error.
+	/// that does not implement <see cref="ISecretExistenceChecker"/>): every
+	/// key is a provider error.
 	/// </summary>
 	public static ContractValidationResult NotCheckable(ParsedMapFile mapFile, SecretProviderType provider)
 	{

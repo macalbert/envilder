@@ -96,5 +96,8 @@ map file per environment. `validateContract()` returns a result;
 - Overrides (`withProvider`, `withProfile`, `withVaultUrl` and their .NET and
   Python equivalents) are for exceptions. Keep provider settings in
   `$config` so the contract stays in the file.
-- Tests must not call the provider. Inject variables directly in tests, or use
-  a `test: null` entry in environment routing.
+- Tests must not call the provider. Inject variables directly in tests, use
+  a `test: null` entry in environment routing, or pass an in-memory fake to
+  `withSecretProvider` (`with_secret_provider`, `WithSecretProvider`). A fake
+  that also implements `ISecretExistenceChecker` exercises contract
+  validation; without it every key fails as `provider_error`.

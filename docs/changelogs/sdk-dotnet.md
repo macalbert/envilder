@@ -1,3 +1,19 @@
+## [1.2.0] - 2026-11-08
+
+### Added
+
+* **Use your own provider in the fluent builder**:
+  `Env.FromMapFile(path).WithSecretProvider(provider)` resolves secrets and
+  runs contract validation with any `ISecretProvider` instance instead of the
+  one built from `$config`. The map file is still validated as usual, so
+  startup code can be tested against an in-memory fake with no cloud account,
+  emulator or environment variables. `ISecretExistenceChecker` is now public:
+  a custom provider that implements it takes part in `ValidateContractAsync()`
+  and `WithContractValidation()`; one that does not has every key reported as
+  `ProviderError`, so a load with contract validation fails ([#669](https://github.com/macalbert/envilder/issues/669))
+
+---
+
 ## [1.1.0] - 2026-11-02
 
 ### Added

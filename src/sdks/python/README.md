@@ -257,6 +257,65 @@ secrets = EnvilderClient(provider).resolve_secrets(map_file)
 EnvilderClient.inject_into_environment(secrets)
 ```
 
+### Custom provider in the fluent builder
+
+`with_secret_provider()` hands the builder your own provider instance instead
+of the one it would build from `$config`. The map file is still validated as
+usual, so this is also the way to test your startup code against an in-memory
+fake, with no cloud account, emulator or environment variables:
+
+```python
+from collections.abc import Collection, Mapping
+
+from envilder import (
+    Envilder,
+    ISecretExistenceChecker,
+    ISecretProvider,
+    SecretExistence,
+    SecretExistenceStatus,
+)
+
+FAKE_SECRETS = {"/app/db-url": "postgres://localhost/test"}
+
+
+class InMemoryProvider(ISecretProvider, ISecretExistenceChecker):
+    def get_secret(self, name: str) -> str | None:
+        return FAKE_SECRETS.get(name)
+
+    def check_secrets_exist(
+        self, names: Collection[str]
+    ) -> Mapping[str, SecretExistence]:
+        return {
+            name: SecretExistence(
+                SecretExistenceStatus.EXISTS
+                if name in FAKE_SECRETS
+                else SecretExistenceStatus.MISSING
+            )
+            for name in names
+        }
+
+
+(
+    Envilder.from_map_file("envilder.json")
+    .with_secret_provider(InMemoryProvider())
+    .with_contract_validation()
+    .inject()
+)
+```
+
+To take part in contract validation, the provider also implements
+`ISecretExistenceChecker`. A provider that only implements `ISecretProvider`
+still resolves secrets, but `validate_contract()` reports every key as
+`provider_error`, so `with_contract_validation()` fails the load. The
+`provider` field of each key keeps the configured type (`with_provider()`,
+then `$config.provider`, then `aws`).
+
+For a complete, runnable walkthrough, see
+[`python-custom-provider`](https://github.com/macalbert/envilder-examples/tree/main/python-custom-provider)
+in envilder-examples: a custom provider over a local AES-256-GCM encrypted
+file, with tests for loading, failing at startup on a missing secret, and
+validating the contract without decrypting anything.
+
 ## API Reference
 
 ### Static facade (`Envilder`)
@@ -276,6 +335,7 @@ EnvilderClient.inject_into_environment(secrets)
 | `with_provider(type)` | Override secret provider (AWS/Azure) |
 | `with_profile(name)` | Override AWS named profile |
 | `with_vault_url(url)` | Override Azure Key Vault URL |
+| `with_secret_provider(provider)` | Use your own `ISecretProvider` instance instead of building one from `$config` |
 | `resolve()` | Resolve secrets, return as dict |
 | `inject()` | Resolve + inject into `os.environ` |
 | `validate_contract()` | Check the map file and that every declared secret exists, returns `ContractValidationResult` |

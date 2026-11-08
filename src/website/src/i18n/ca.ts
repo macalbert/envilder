@@ -1073,6 +1073,44 @@ export const ca: Translations = {
       guideLink:
         "Guia completa d'exec a GitHub: detalls de Windows i tots els missatges d'error",
     },
+    customProviderGuide: {
+      whenTitle: 'Quan fer-lo servir',
+      whenDesc:
+        "Un proveïdor propi substitueix el client d'AWS o Azure que l'SDK construiria a partir de $config. Dos motius habituals:",
+      whenUnsupported:
+        'Els teus secrets són en un magatzem que Envilder encara no suporta (HashiCorp Vault, 1Password, una base de dades, una API interna).',
+      whenTests:
+        "Vols provar el codi d'arrencada amb un fake en memòria: sense compte al núvol, sense emulador i sense variables d'entorn.",
+      whenCliNote:
+        'Només els SDKs (1.2+) accepten un proveïdor propi. El CLI i la GitHub Action suporten AWS SSM i Azure Key Vault.',
+      howTitle: 'Com funciona',
+      howDesc:
+        'Un proveïdor implementa una interfície i, opcionalment, una segona per a la validació del contracte:',
+      howInterface: 'Interfície',
+      howMethod: 'Mètode (Node.js · Python · .NET)',
+      howUsedFor: 'Per a què serveix',
+      howResolve:
+        "Resoldre els valors que s'injecten. Els secrets que falten s'ometen, no llancen cap error.",
+      howCheck:
+        'Opcional. Validació del contracte: respondre exists o missing per a cada clau sense llegir cap valor.',
+      howMapFile:
+        "Passa la instància amb withSecretProvider() (with_secret_provider() a Python, WithSecretProvider() a .NET). L'SDK ja no construeix cap proveïdor a partir de $config, però continua validant el fitxer de mapatge, així que un error al fitxer que l'app fa servir a producció també falla als tests que fan servir un fake.",
+      codeTitle: 'Exemple',
+      codeDesc:
+        'Un proveïdor en memòria que implementa les dues interfícies, connectat a una càrrega amb validació del contracte:',
+      validationTitle: 'Validació del contracte amb un proveïdor propi',
+      validationWith:
+        'Si el proveïdor implementa ISecretExistenceChecker, validateContract() i withContractValidation() hi comproven cada clau, com amb els proveïdors inclosos.',
+      validationWithout:
+        'Si no, totes les claus surten com a provider_error ("The provider cannot check whether a secret exists."), i una càrrega amb validació del contracte falla en lloc de passar en silenci.',
+      validationProviderField:
+        "El camp provider de cada clau manté el tipus configurat: l'override de withProvider(), després $config.provider i, si no, aws.",
+      validationLink:
+        "Consulta la referència d'envilder validate per a tots els estats →",
+      examplesTitle: 'Exemples executables',
+      examplesDesc:
+        "envilder-examples té un exemple per SDK: un proveïdor sobre un fitxer local xifrat amb AES-256-GCM, amb tests de càrrega, de fallada a l'arrencada quan falta un secret i de validació del contracte sense desxifrar res.",
+    },
     validateReference: {
       tabAws: 'AWS SSM',
       tabAzure: 'Azure Key Vault',
@@ -1308,6 +1346,20 @@ export const ca: Translations = {
         cardTitle: "Configuració d'Azure Key Vault",
         cardSummary:
           "Configura l'autenticació Azure i els permisos de Key Vault.",
+      },
+      'custom-provider': {
+        title:
+          "Proveïdor de secrets propi: connecta qualsevol magatzem o un fake de tests als SDKs d'Envilder",
+        description:
+          "Fes servir withSecretProvider als SDKs d'Envilder per a .NET, Python i Node.js per resoldre un fitxer de mapatge des del teu propi magatzem de secrets o un fake en memòria, amb validació del fitxer i del contracte.",
+        heading: 'Proveïdor de secrets propi',
+        intro:
+          "Com pots fer servir Envilder amb un magatzem de secrets que no suporta, o provar el codi d'arrencada sense compte al núvol? Als SDKs, passa el teu propi proveïdor al builder. El fitxer de mapatge, la validació del contracte i la injecció funcionen igual que amb AWS SSM o Azure Key Vault.",
+        breadcrumb: 'Proveïdor propi',
+        navLabel: 'Proveïdor propi',
+        cardTitle: 'Proveïdor propi (SDKs)',
+        cardSummary:
+          'Connecta el teu magatzem de secrets o un fake en memòria als SDKs.',
       },
       'map-file': {
         title:
@@ -1873,6 +1925,10 @@ export const ca: Translations = {
       "Per fer fallar la càrrega, activa la validació del contracte al builder. La comprovació s'executa una vegada abans de resoldre i l'error anomena les claus que fallen, mai els seus valors. Està desactivada per defecte, així que una càrrega normal no fa cap crida extra al proveïdor. A diferència de la validació de secrets, que revisa els valors resolts, revisa el fitxer de mapatge i les claus abans de resoldre:",
     sdkContractValidationCliLink:
       "Consulta la referència d'envilder validate per als estats i els permisos que necessita la comprovació →",
+    sdkCustomProvider: 'Proveïdor propi i fakes per a tests',
+    sdkCustomProviderDesc:
+      "Passa al builder la teva pròpia instància de proveïdor en lloc de la que construeix a partir de $config. El fitxer de mapatge es continua validant igual, així que pots provar el codi d'arrencada amb un fake en memòria, sense compte al núvol, emulador ni variables d'entorn. Implementa també el comprovador d'existència perquè la validació del contracte pugui revisar cada clau; sense ell, totes les claus surten com a provider_error:",
+    sdkCustomProviderGuideLink: 'Guia completa: proveïdor de secrets propi →',
     sdkNodejsFullDocs: 'Documentació completa →',
     sdkNodejsExamplesDesc:
       "Un projecte Vitest amb Testcontainers i un AppHost d'Aspire en TypeScript que resolen un fitxer de mapeig contra AWS SSM i Azure Key Vault (emulats amb LocalStack for AWS i LocalStack for Azure) i passen els valors als contenidors, sense cap fitxer .env:",

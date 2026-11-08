@@ -31,6 +31,25 @@ export function invalidMapFileResult(
 }
 
 /**
+ * The result for a provider that cannot check existence (a custom one that
+ * does not implement `ISecretExistenceChecker`): every key is a provider
+ * error.
+ */
+export function notCheckableResult(
+  mapFile: ParsedMapFile,
+  provider: SecretProviderType,
+): ContractValidationResult {
+  const keys: KeyCheck[] = [...mapFile.mappings].map(([variable, path]) => ({
+    variable,
+    path,
+    provider,
+    status: 'provider_error',
+    reason: 'The provider cannot check whether a secret exists.',
+  }));
+  return { isValid: false, mapFileErrors: [], keys };
+}
+
+/**
  * Checks that every secret path declared in a valid map file exists, without
  * reading any value. A path shared by several variables is checked once.
  * Returns one check per variable, in map-file order.
