@@ -357,6 +357,11 @@ Details in the [Node.js](../src/sdks/nodejs/README.md),
 [Python](../src/sdks/python/README.md) and
 [.NET](../src/sdks/dotnet/README.md) SDK READMEs.
 
+A custom provider passed to the builder with `withSecretProvider()`
+(`with_secret_provider()`, `WithSecretProvider()`) takes part in this check
+when it also implements `ISecretExistenceChecker`. Without it, every key is
+reported as `provider_error`, so a load with contract validation fails.
+
 ## What validate does not do
 
 - It never prints secret values, and it reads them only with
