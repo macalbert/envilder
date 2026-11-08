@@ -82,7 +82,7 @@ No SaaS middleman. One versioned mapping contract. Secrets stay in your cloud.
 | 📋 **Declarative Mapping** | One JSON file defines how application variables map to cloud secrets. Git-versioned, PR-reviewable, and diff-able |
 | ☁️ **Cloud-native Providers** | AWS SSM and Azure Key Vault today |
 | ⚡ **Exec Mode** | `envilder exec -- <command>` runs any command with the secrets in its environment. Nothing written to disk, fail-closed, exit codes propagated. [Guide](docs/exec-command.md) |
-| ✅ **Validate** | `envilder validate` checks the map file against the schema and the provider rules, then checks that every declared secret exists, without reading or printing values. `--envfile` compares a local `.env` with the map file by keys, and by values with `--compare-values`. `--offline` checks local files only, without credentials. [Guide](docs/validate-command.md) |
+| ✅ **Validate** | `envilder validate` checks the map file against the schema and the provider rules, then checks that every declared secret exists, without printing values. `--envfile` compares a local `.env` with the map file by keys, and by values with `--compare-values`. `--offline` checks local files only, without credentials. [Guide](docs/validate-command.md) |
 | 🔌 **Runtime SDKs** | Load secrets into memory at app startup: [.NET](./src/sdks/dotnet/README.md), [Python](./src/sdks/python/README.md), [Node.js](./src/sdks/nodejs/README.md). No `.env` on disk |
 | ⚙️ **GitHub Action** | Pull secrets in CI/CD. Same mapping, zero manual config |
 | 🔄 **Pull & Controlled Push** | Pull secrets to `.env`, or intentionally push local values to your cloud provider when bootstrapping or rotating |
