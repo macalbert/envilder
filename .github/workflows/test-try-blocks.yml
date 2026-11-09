@@ -4,7 +4,7 @@ permissions:
   contents: read
 
 # Fails when a test body (Vitest `it`/`test`, xUnit `[Fact]`/`[Theory]`,
-# pytest `Should_*`/`test*`) contains a `try` block. Tests clean up with
+# pytest `Should_*`) contains a `try` block. Tests clean up with
 # framework teardown and check errors with throw assertions, so a `try` there
 # hides a failure or skips an assertion. The script has no dependencies, so
 # no install step is needed.

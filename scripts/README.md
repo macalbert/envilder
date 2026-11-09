@@ -68,7 +68,7 @@ To correct an already released section on purpose, label the PR
 
 Fails when a test body contains a `try` block: Vitest `it`/`test` callbacks
 (including `.only`, `.skip`, `.each`), xUnit `[Fact]`/`[Theory]` methods and
-pytest `Should_*`/`test*` functions. Tests clean up with framework teardown
+pytest `Should_*` functions (the `python_functions` rule in `tests/sdks/python/pyproject.toml`). Tests clean up with framework teardown
 (`afterEach`, `onTestFinished`, `IAsyncLifetime`, pytest `yield` fixtures) and
 check errors with throw assertions, so a `try` there hides a failure or skips
 an assertion (see the `common-testing-conventions` skill). Helpers, hooks and

@@ -57,6 +57,21 @@ describe('findTryBlocksInTests', () => {
     expect(actual).toEqual([]);
   });
 
+  it('Should_ReportTryBlock_When_DivisionFollowsKeywordNamedProperty', () => {
+    // Arrange
+    const source = [
+      "it('ratio', () => {",
+      '  const ratio = stats.in / 2; try { a(); } catch {}',
+      '});',
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.ts', source);
+
+    // Assert
+    expect(actual).toEqual([{ line: 2, test: 'ratio' }]);
+  });
+
   it('Should_ReportNothing_When_TryAppearsInStringCommentOrRegex', () => {
     // Arrange
     const source = [
@@ -96,8 +111,11 @@ describe('findTryBlocksInTests', () => {
       '        finally:',
       '            clean_up()',
       '',
-      'async def test_other():',
-      '    assert act() == 1',
+      'def testing_setup():',
+      '    try:',
+      '        pass',
+      '    finally:',
+      '        pass',
     ].join('\n');
 
     // Act

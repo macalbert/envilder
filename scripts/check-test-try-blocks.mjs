@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { extname } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -7,9 +7,8 @@ const CSHARP_TEST_ATTRIBUTE = /^\s*\[(?:Fact|Theory|SkippableFact)\b/;
 const CSHARP_METHOD_NAME = /\b(\w+)\s*(?:<[^>]*>)?\s*\(/;
 const CSHARP_TRY = /^\s*try\b\s*(?:\{|$)/;
 
-// tests/sdks/python/pyproject.toml collects `Should_*`; `test*` is pytest's default.
-const PYTHON_TEST_FUNCTION =
-  /^(\s*)(?:async\s+)?def\s+((?:Should_|test)\w*)\s*\(/;
+// tests/sdks/python/pyproject.toml sets python_functions = ["Should_*"].
+const PYTHON_TEST_FUNCTION = /^(\s*)(?:async\s+)?def\s+(Should_\w*)\s*\(/;
 const PYTHON_SIGNATURE_END = /:\s*(?:#.*)?$/;
 const PYTHON_TRY = /^\s*try\s*:/;
 
@@ -116,7 +115,8 @@ function maskNonCode(text) {
     word.lastIndex = index;
     const identifier = word.exec(text);
     if (identifier) {
-      previous = identifier[0];
+      // A property such as `stats.in` is a value, never a keyword.
+      previous = previous === '.' ? 'value' : identifier[0];
       index += identifier[0].length;
       continue;
     }
@@ -281,7 +281,7 @@ export function findTryBlocksInTests(path, text) {
 function isTestFile(path) {
   return (
     /\.(?:test|spec)\.(?:ts|tsx|mts|cts|js|mjs)$/.test(path) ||
-    /(?:^|\/)test_[^/]*\.py$|_test\.py$/.test(path) ||
+    /(?:^|\/)test_[^/]*\.py$/.test(path) ||
     /(?:^|\/)tests?\/.*\.cs$/.test(path)
   );
 }
@@ -289,7 +289,7 @@ function isTestFile(path) {
 function main() {
   const files = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf-8' })
     .split('\0')
-    .filter(isTestFile);
+    .filter((path) => isTestFile(path) && existsSync(path));
   const findings = files.flatMap((path) =>
     findTryBlocksInTests(path, readFileSync(path, 'utf-8')).map(
       ({ line, test }) =>
