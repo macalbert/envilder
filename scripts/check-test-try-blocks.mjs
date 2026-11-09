@@ -4,11 +4,13 @@ import { extname } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const CSHARP_TEST_ATTRIBUTE = /^\s*\[(?:Fact|Theory|SkippableFact)\b/;
-const CSHARP_METHOD_NAME = /\b(\w+)\s*(?:<[^>]*>)?\s*\(/;
+const CSHARP_METHOD =
+  /^(\s*)(?:(?:public|private|protected|internal|static|async|override|virtual|sealed|unsafe|extern)\s+)+[^=;(]*?\b(\w+)\s*(?:<[^>]*>)?\s*\(/;
 const CSHARP_TRY = /^\s*try\b\s*(?:\{|$)/;
 
+const PYTHON_FUNCTION = /^(\s*)(?:async\s+)?def\s+(\w+)\s*\(/;
 // tests/sdks/python/pyproject.toml sets python_functions = ["Should_*"].
-const PYTHON_TEST_FUNCTION = /^(\s*)(?:async\s+)?def\s+(Should_\w*)\s*\(/;
+const PYTHON_TEST_NAME = /^Should_/;
 const PYTHON_SIGNATURE_END = /:\s*(?:#.*)?$/;
 const PYTHON_TRY = /^\s*try\s*:/;
 
@@ -172,21 +174,112 @@ function lineAt(text, offset) {
   return text.slice(0, offset).split('\n').length;
 }
 
-function findInTypeScript(text) {
-  const masked = maskNonCode(text);
-  const findings = [];
-  for (const call of masked.matchAll(TEST_CALL)) {
-    const args = testArguments(masked, call.index + call[0].length);
-    if (!args) {
+const TS_IDENTIFIER = /(?<![\w$])(?<!\.\s*)[A-Za-z_$][\w$]*/g;
+const TS_FUNCTION =
+  /\bfunction\s*\*?\s*([A-Za-z_$][\w$]*)\s*(?:<[^>(]*>)?\s*\(/g;
+const TS_ARROW =
+  /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*(?::[^=]*)?=\s*(?:async\s+)?(\(|function\b)/g;
+
+function closingBraceOf(masked, start) {
+  let depth = 0;
+  for (let index = start; index < masked.length; index++) {
+    if (masked[index] === '{') depth++;
+    else if (masked[index] === '}' && --depth === 0) return index;
+  }
+  return masked.length;
+}
+
+/**
+ * Finds the `{` that opens a function body after its parameter list,
+ * skipping a return type annotation such as `: { code: number }`.
+ */
+function bodyOpenAfter(masked, from) {
+  let previous = ')';
+  for (let index = from; index < masked.length; index++) {
+    const char = masked[index];
+    if (/\s/.test(char)) continue;
+    if (char === '{') {
+      if (!/^[:|&<,(]$/.test(previous)) return index;
+      index = closingBraceOf(masked, index);
+      previous = '}';
       continue;
     }
-    const test = testName(text, args.open);
-    const body = masked.slice(args.open, args.close);
-    for (const statement of body.matchAll(TRY_BLOCK)) {
-      findings.push({ line: lineAt(text, args.open + statement.index), test });
+    if (char === '=' && masked[index + 1] === '>') {
+      previous = '=>';
+      index++;
+      continue;
+    }
+    if (char === ';') return undefined;
+    previous = char;
+  }
+  return undefined;
+}
+
+/** Returns where an arrow function's expression body ends. */
+function expressionEnd(masked, from) {
+  let depth = 0;
+  for (let index = from; index < masked.length; index++) {
+    const char = masked[index];
+    if ('([{'.includes(char)) depth++;
+    else if (')]}'.includes(char)) {
+      if (depth === 0) return index;
+      depth--;
+    } else if ((char === ';' || char === '\n') && depth === 0) return index;
+  }
+  return masked.length;
+}
+
+function typeScriptBlock(text, masked, name, start, end) {
+  const range = masked.slice(start, end);
+  return {
+    name,
+    tries: [...range.matchAll(TRY_BLOCK)].map((match) =>
+      lineAt(text, start + match.index),
+    ),
+    refs: new Set(range.match(TS_IDENTIFIER)),
+  };
+}
+
+function typeScriptHelpers(text, masked) {
+  const helpers = [];
+  for (const match of masked.matchAll(TS_FUNCTION)) {
+    const close = closingOf(masked, match.index + match[0].length - 1);
+    const open = bodyOpenAfter(masked, close + 1);
+    if (open !== undefined) {
+      const end = closingBraceOf(masked, open);
+      helpers.push(typeScriptBlock(text, masked, match[1], open, end));
     }
   }
-  return findings;
+  for (const match of masked.matchAll(TS_ARROW)) {
+    if (match[2] !== '(') {
+      continue;
+    }
+    const close = closingOf(masked, match.index + match[0].length - 1);
+    const arrow = masked.indexOf('=>', close);
+    if (arrow === -1) {
+      continue;
+    }
+    const bodyStart = masked.slice(arrow + 2).search(/\S/) + arrow + 2;
+    const end =
+      masked[bodyStart] === '{'
+        ? closingBraceOf(masked, bodyStart)
+        : expressionEnd(masked, bodyStart);
+    helpers.push(typeScriptBlock(text, masked, match[1], bodyStart, end));
+  }
+  return helpers;
+}
+
+function parseTypeScript(text) {
+  const masked = maskNonCode(text);
+  const tests = [];
+  for (const call of masked.matchAll(TEST_CALL)) {
+    const args = testArguments(masked, call.index + call[0].length);
+    if (args) {
+      const name = testName(text, args.open);
+      tests.push(typeScriptBlock(text, masked, name, args.open, args.close));
+    }
+  }
+  return { tests, helpers: typeScriptHelpers(text, masked) };
 }
 
 function codeLines(text) {
@@ -202,80 +295,142 @@ function codeLines(text) {
   });
 }
 
-function findInPython(text) {
-  const findings = [];
-  let current;
-  for (const { line, number } of codeLines(text)) {
-    if (current?.inSignature) {
-      current.inSignature = !PYTHON_SIGNATURE_END.test(line);
-      continue;
-    }
-    if (current && indentationOf(line) <= current.indent) {
-      current = undefined;
-    }
-    const declaration = line.match(PYTHON_TEST_FUNCTION);
-    if (declaration && !current) {
-      current = {
-        indent: declaration[1].length,
-        test: declaration[2],
-        inSignature: !PYTHON_SIGNATURE_END.test(line),
-      };
-      continue;
-    }
-    if (current && PYTHON_TRY.test(line)) {
-      findings.push({ line: number, test: current.test });
-    }
-  }
-  return findings;
+const IDENTIFIER = /[A-Za-z_]\w*/g;
+
+function lineBlock(name, lines, tryPattern) {
+  return {
+    name,
+    tries: lines
+      .filter(({ line }) => tryPattern.test(line))
+      .map(({ number }) => number),
+    refs: new Set(lines.flatMap(({ line }) => line.match(IDENTIFIER) ?? [])),
+  };
 }
 
-function findInCSharp(text) {
-  const findings = [];
-  let pending;
-  let current;
-  for (const { line, number } of codeLines(text)) {
-    if (current) {
-      if (indentationOf(line) === current.indent && line.trim() === '}') {
-        current = undefined;
-      } else if (CSHARP_TRY.test(line)) {
-        findings.push({ line: number, test: current.test });
-      }
-      continue;
+function parsePython(text) {
+  const lines = codeLines(text);
+  const tests = [];
+  const helpers = [];
+  lines.forEach(({ line }, start) => {
+    const declaration = line.match(PYTHON_FUNCTION);
+    if (!declaration) {
+      return;
     }
-    if (CSHARP_TEST_ATTRIBUTE.test(line)) {
-      pending ??= { indent: indentationOf(line) };
-      continue;
+    const indent = declaration[1].length;
+    let index = start;
+    while (
+      index < lines.length &&
+      !PYTHON_SIGNATURE_END.test(lines[index].line)
+    ) {
+      index++;
     }
-    if (pending && !line.trim().startsWith('[')) {
-      const test = line.match(CSHARP_METHOD_NAME)?.[1] ?? '<unknown>';
-      current = { indent: pending.indent, test };
-      pending = undefined;
+    const body = [];
+    for (index++; index < lines.length; index++) {
+      if (indentationOf(lines[index].line) <= indent) break;
+      body.push(lines[index]);
     }
+    const name = declaration[2];
+    const block = lineBlock(name, body, PYTHON_TRY);
+    (PYTHON_TEST_NAME.test(name) ? tests : helpers).push(block);
+  });
+  return { tests, helpers };
+}
+
+/** Collects a C# method body: the lines between its braces. */
+function cSharpBody(lines, start, indent) {
+  let index = start;
+  while (index < lines.length) {
+    const trimmed = lines[index].line.trimEnd();
+    if (trimmed.endsWith('{')) break;
+    if (trimmed.endsWith(';')) return [];
+    index++;
   }
-  return findings;
+  const body = [];
+  for (index++; index < lines.length; index++) {
+    const { line } = lines[index];
+    if (indentationOf(line) <= indent && line.trim().startsWith('}')) break;
+    body.push(lines[index]);
+  }
+  return body;
+}
+
+function parseCSharp(text) {
+  const lines = codeLines(text);
+  const tests = [];
+  const helpers = [];
+  let isTest = false;
+  lines.forEach(({ line }, start) => {
+    if (CSHARP_TEST_ATTRIBUTE.test(line)) {
+      isTest = true;
+      return;
+    }
+    if (line.trim().startsWith('[')) {
+      return;
+    }
+    const declaration = line.match(CSHARP_METHOD);
+    if (declaration) {
+      const body = cSharpBody(lines, start, declaration[1].length);
+      const block = lineBlock(declaration[2], body, CSHARP_TRY);
+      (isTest ? tests : helpers).push(block);
+    }
+    isTest = false;
+  });
+  return { tests, helpers };
 }
 
 /**
- * Lists the `try` statements written inside a test body. Tests clean up with
+ * Follows every helper a test references, directly or through other
+ * helpers of the same file, and reports each `try` reached on the way.
+ * Helpers that only hooks reference are never reached.
+ */
+function triesReachedFromTests({ tests, helpers }) {
+  const helpersByName = Map.groupBy(helpers, (helper) => helper.name);
+  const findings = new Map();
+  const report = (line, finding) => {
+    if (!findings.has(line)) findings.set(line, { line, ...finding });
+  };
+  for (const test of tests) {
+    for (const line of test.tries) {
+      report(line, { test: test.name });
+    }
+    const visited = new Set();
+    const pending = [...test.refs];
+    while (pending.length > 0) {
+      const name = pending.shift();
+      if (visited.has(name)) continue;
+      visited.add(name);
+      for (const helper of helpersByName.get(name) ?? []) {
+        for (const line of helper.tries) {
+          report(line, { test: test.name, helper: helper.name });
+        }
+        pending.push(...helper.refs);
+      }
+    }
+  }
+  return [...findings.values()].sort((a, b) => a.line - b.line);
+}
+
+const PARSERS = new Map([
+  ['.ts', parseTypeScript],
+  ['.tsx', parseTypeScript],
+  ['.mts', parseTypeScript],
+  ['.cts', parseTypeScript],
+  ['.js', parseTypeScript],
+  ['.mjs', parseTypeScript],
+  ['.py', parsePython],
+  ['.cs', parseCSharp],
+]);
+
+/**
+ * Lists the `try` statements a test runs: in its body or in a helper of the
+ * same file it calls, directly or through other helpers. Tests clean up with
  * framework teardown and check errors with the framework's throw assertions,
- * so a `try` there hides a failure or skips an assertion.
+ * so a `try` there hides a failure or skips an assertion. Hooks, and helpers
+ * only hooks call, are not checked.
  */
 export function findTryBlocksInTests(path, text) {
-  switch (extname(path)) {
-    case '.ts':
-    case '.tsx':
-    case '.mts':
-    case '.cts':
-    case '.js':
-    case '.mjs':
-      return findInTypeScript(text);
-    case '.py':
-      return findInPython(text);
-    case '.cs':
-      return findInCSharp(text);
-    default:
-      return [];
-  }
+  const parse = PARSERS.get(extname(path));
+  return parse ? triesReachedFromTests(parse(text)) : [];
 }
 
 function isTestFile(path) {
@@ -292,8 +447,8 @@ function main() {
     .filter((path) => isTestFile(path) && existsSync(path));
   const findings = files.flatMap((path) =>
     findTryBlocksInTests(path, readFileSync(path, 'utf-8')).map(
-      ({ line, test }) =>
-        `::error file=${path},line=${line}::try block inside test "${test}". Use framework teardown (afterEach, onTestFinished, IAsyncLifetime, pytest yield fixtures) for cleanup and the framework's throw assertions for errors.`,
+      ({ line, test, helper }) =>
+        `::error file=${path},line=${line}::try block ${helper ? `in helper "${helper}", called from test "${test}"` : `inside test "${test}"`}. Use framework teardown (afterEach, onTestFinished, IAsyncLifetime, pytest yield fixtures) for cleanup and the framework's throw assertions for errors.`,
     ),
   );
   if (findings.length > 0) {

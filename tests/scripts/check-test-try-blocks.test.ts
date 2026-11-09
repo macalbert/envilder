@@ -40,13 +40,53 @@ describe('findTryBlocksInTests', () => {
     ]);
   });
 
-  it('Should_ReportNothing_When_TryIsInHookOrHelper', () => {
+  it('Should_ReportTryBlock_When_TestCallsHelperWithTry', () => {
     // Arrange
     const source = [
-      'function helper() { try { a(); } catch {} }',
+      'function run() { try { a(); } catch {} }',
+      'const read = async () => {',
+      '  try { return a(); } catch { return undefined; }',
+      '};',
+      "it('direct', () => { expect(run()).toBe(1); });",
+      "it('arrow', async () => { expect(await read()).toBe(1); });",
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.ts', source);
+
+    // Assert
+    expect(actual).toEqual([
+      { line: 1, test: 'direct', helper: 'run' },
+      { line: 3, test: 'arrow', helper: 'read' },
+    ]);
+  });
+
+  it('Should_ReportTryBlock_When_HelperReachesAnotherHelperWithTry', () => {
+    // Arrange
+    const source = [
+      'function inner() {',
+      '  try { a(); } finally { b(); }',
+      '}',
+      'function outer() { return inner(); }',
+      "it('chain', () => { expect(outer()).toBe(1); });",
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.ts', source);
+
+    // Assert
+    expect(actual).toEqual([{ line: 2, test: 'chain', helper: 'inner' }]);
+  });
+
+  it('Should_ReportNothing_When_TryIsInHookOrHelperOnlyHooksCall', () => {
+    // Arrange
+    const source = [
+      'function cleanUp() { try { a(); } catch {} }',
+      'function unused() { try { a(); } catch {} }',
       "describe('suite', () => {",
       '  beforeEach(() => { try { a(); } catch {} });',
-      "  it('ok', () => { expect(helper()).toBe(1); });",
+      '  afterAll(() => cleanUp());',
+      "  it('ok', () => { expect(1).toBe(1); });",
       '});',
     ].join('\n');
 
@@ -164,5 +204,69 @@ describe('findTryBlocksInTests', () => {
 
     // Assert
     expect(actual).toEqual([{ line: 12, test: 'Should_Read_When_Called' }]);
+  });
+
+  it('Should_ReportTryBlock_When_PytestTestCallsHelperWithTry', () => {
+    // Arrange
+    const source = [
+      'def read_secret():',
+      '    try:',
+      '        return act()',
+      '    except KeyError:',
+      '        return None',
+      '',
+      'class TestClient:',
+      '    def _parse(self):',
+      '        try:',
+      '            pass',
+      '        finally:',
+      '            pass',
+      '',
+      '    def Should_Read_When_Called(self):',
+      '        assert read_secret() == self._parse()',
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/test_client.py', source);
+
+    // Assert
+    expect(actual).toEqual([
+      { line: 2, test: 'Should_Read_When_Called', helper: 'read_secret' },
+      { line: 9, test: 'Should_Read_When_Called', helper: '_parse' },
+    ]);
+  });
+
+  it('Should_ReportTryBlock_When_XunitTestCallsHelperWithTry', () => {
+    // Arrange
+    const source = [
+      'public class ClientTests',
+      '{',
+      '\tprivate static async Task<string> ReadAsync()',
+      '\t{',
+      '\t\ttry',
+      '\t\t{',
+      '\t\t\treturn await Act();',
+      '\t\t}',
+      '\t\tcatch (KeyNotFoundException)',
+      '\t\t{',
+      '\t\t\treturn null;',
+      '\t\t}',
+      '\t}',
+      '',
+      '\t[Fact]',
+      '\tpublic async Task Should_Read_When_Called()',
+      '\t{',
+      '\t\t(await ReadAsync()).Should().Be("x");',
+      '\t}',
+      '}',
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/ClientTests.cs', source);
+
+    // Assert
+    expect(actual).toEqual([
+      { line: 5, test: 'Should_Read_When_Called', helper: 'ReadAsync' },
+    ]);
   });
 });

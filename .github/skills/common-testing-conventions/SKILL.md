@@ -95,7 +95,8 @@ public async Task Should_CreateGroup_When_RequestIsValid()
   it to a separate test or use a guard clause that throws: not an assertion.
 - **No `if`, `switch`, or conditional logic** inside Arrange, Act, or Assert blocks
 - **No `try/catch/finally`** inside tests: use framework teardown (`IAsyncLifetime`, `[ClassCleanup]`, pytest `yield` fixtures,
-  Vitest `afterEach` or `onTestFinished`). `scripts/check-test-try-blocks.mjs` enforces it (`pnpm lint`, `test-try-blocks.yml`)
+  Vitest `afterEach` or `onTestFinished`). This includes helpers of the same file the test calls: a helper only shares or tidies
+  the test's code. `scripts/check-test-try-blocks.mjs` enforces it (`pnpm lint`, `test-try-blocks.yml`)
 - **No `// Act & Assert` combined blocks**: Act and Assert are ALWAYS separate phases
 - For exceptions: C# → `AwesomeAssertions` `.Should().ThrowAsync<T>()` | Python → `lambda` + `pytest.raises()` | Vitest
  → `expect(...).rejects.toThrow()`

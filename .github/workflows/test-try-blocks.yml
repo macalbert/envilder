@@ -3,11 +3,11 @@ name: 🧪 Test Try Blocks
 permissions:
   contents: read
 
-# Fails when a test body (Vitest `it`/`test`, xUnit `[Fact]`/`[Theory]`,
-# pytest `Should_*`) contains a `try` block. Tests clean up with
-# framework teardown and check errors with throw assertions, so a `try` there
-# hides a failure or skips an assertion. The script has no dependencies, so
-# no install step is needed.
+# Fails when a test (Vitest `it`/`test`, xUnit `[Fact]`/`[Theory]`, pytest
+# `Should_*`) runs a `try` block, in its body or in a helper of the same file
+# it calls. Tests clean up with framework teardown and check errors with throw
+# assertions, so a `try` there hides a failure or skips an assertion. The
+# script has no dependencies, so no install step is needed.
 on:
   workflow_dispatch:
 
