@@ -7,6 +7,11 @@ pre-commit:
         pnpm exec biome check --write --unsafe --no-errors-on-unmatched {staged_files} &&
         pnpm exec biome format --write --no-errors-on-unmatched {staged_files}
       stage_fixed: true
+    actions-lockfile:
+      glob:
+        - ".github/workflows/*.{yml,yaml,lock}"
+        - "**/action.{yml,yaml}"
+      run: node scripts/check-actions-lockfile.mjs
     docs-dates:
       glob: "src/website/src/**"
       run: >-
