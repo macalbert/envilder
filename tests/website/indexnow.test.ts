@@ -96,6 +96,24 @@ describe('normalizeHtml', () => {
     // Assert
     expect(a).not.toBe(b);
   });
+
+  it('Should_DetectDifference_When_WhitespaceInsidePreChanges', () => {
+    // Act
+    const a = normalizeHtml('<pre class="code">A  B</pre>');
+    const b = normalizeHtml('<pre class="code">A B</pre>');
+
+    // Assert
+    expect(a).not.toBe(b);
+  });
+
+  it('Should_IgnoreWhitespace_When_OnlyOutsidePreChanges', () => {
+    // Act
+    const a = normalizeHtml('<div>\n  <pre>A  B</pre>\n</div>');
+    const b = normalizeHtml('<div> <pre>A  B</pre> </div>');
+
+    // Assert
+    expect(a).toBe(b);
+  });
 });
 
 describe('changedUrls', () => {

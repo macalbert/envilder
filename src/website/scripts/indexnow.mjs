@@ -22,7 +22,8 @@ export function parseSitemapUrls(xml) {
 
 /**
  * Page markup reduced to what is stable across builds of the same content:
- * whitespace runs collapse, the content hash that Astro puts in bundled asset
+ * whitespace runs collapse outside <pre> (inside it whitespace is content),
+ * the content hash that Astro puts in bundled asset
  * names (/_assets/Name.HASH.ext) is dropped (otherwise editing one stylesheet
  * would flag every page), and the random ids TabbedCodeBlock.astro generates
  * per build (data-block-id, tab-ID-n, panel-ID-n) are blanked.
@@ -35,7 +36,9 @@ export function normalizeHtml(html) {
     )
     .replace(/data-block-id="[0-9a-f]{8}"/g, 'data-block-id=""')
     .replace(/\b(tab|panel)-[0-9a-f]{8}-(\d+)/g, '$1-$2')
-    .replace(/\s+/g, ' ')
+    .split(/(<pre\b[\s\S]*?<\/pre>)/i)
+    .map((part, i) => (i % 2 === 1 ? part : part.replace(/\s+/g, ' ')))
+    .join('')
     .trim();
 }
 
