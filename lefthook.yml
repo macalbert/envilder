@@ -8,6 +8,9 @@ pre-commit:
         pnpm exec biome format --write --no-errors-on-unmatched {staged_files}
       stage_fixed: true
     actions-lockfile:
+      # Default staged files leave out deletions; a removed workflow must
+      # still trigger the check
+      files: git diff --cached --name-only
       glob:
         - ".github/workflows/*.{yml,yaml,lock}"
         - "**/action.{yml,yaml}"

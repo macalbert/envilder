@@ -11,11 +11,18 @@ const WORKFLOWS_DIR = '.github/workflows';
 const LOCKFILE = `${WORKFLOWS_DIR}/actions.lock`;
 const SAME_REPO_USES = /^\s*-?\s*uses:\s*['"]?\$\/([^\s'"@#]+)/gm;
 
+// Skip only when gh or the extension is confirmed missing; any other
+// failure to run gh is reported instead of passing silently.
 function hasActionsLock() {
-  const result = spawnSync('gh', ['actions-lock', '--version'], {
-    stdio: 'ignore',
-  });
-  return !result.error && result.status === 0;
+  const result = spawnSync('gh', ['extension', 'list'], { encoding: 'utf8' });
+  if (result.error?.code === 'ENOENT') return false;
+  if (result.error || result.status !== 0) {
+    console.error(
+      `Could not run gh extension list: ${result.error?.message ?? result.stderr}`,
+    );
+    process.exit(1);
+  }
+  return /\bgithub\/gh-actions-lock\b/.test(result.stdout);
 }
 
 function workflowFiles() {

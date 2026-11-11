@@ -17,6 +17,7 @@ on:
       - ready_for_review
     paths:
       - ".github/workflows/test-action.yml"
+      - "action.yml"
       - "github-action/action.yml"
       - "github-action/dist/**"
       - "src/envilder/apps/gha/**"
