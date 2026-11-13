@@ -7,7 +7,7 @@ workflows:
         - 'actions/checkout@v7'
     '.github/workflows/codeql-analysis.yml':
         - 'actions/checkout@v7'
-        - 'github/codeql-action@v4.39.1'
+        - 'github/codeql-action@v4.39.3'
     '.github/workflows/context7-refresh.yml': []
     '.github/workflows/coverage-report.yml':
         - 'actions/cache@v6'
@@ -69,7 +69,7 @@ workflows:
         - 'pnpm/action-setup@v6'
     '.github/workflows/test-action.yml':
         - 'actions/checkout@v7'
-        - 'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020'
+        - 'actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1'
         - 'actions/setup-node@v7'
         - 'aws-actions/configure-aws-credentials@v6.3.0'
         - 'pnpm/action-setup@v6'
@@ -152,9 +152,9 @@ dependencies:
         commit: 'sha1-0f4a354dd5547a28c70b7853dbd95d5b67886e73'
         owner_id: 44036562
         repo_id: 192625306
-    'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020':
-        ref: 'v7.0.0'
-        commit: 'sha1-820762786026740c76f36085b0efc47a31fe5020'
+    'actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1':
+        ref: 'v7.1.0'
+        commit: 'sha1-949feb2413d6458794dcd2491c4babbbce0c15c1'
         owner_id: 44036562
         repo_id: 189476904
     'actions/setup-node@v7':
@@ -219,9 +219,9 @@ dependencies:
         commit: 'sha1-d1b5dff021aa968b288b02285a8bf47471c5928a'
         owner_id: 1588572
         repo_id: 300422142
-    'github/codeql-action@v4.39.1':
-        ref: 'v4.39.1'
-        commit: 'sha1-9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
+    'github/codeql-action@v4.39.3':
+        ref: 'v4.39.3'
+        commit: 'sha1-33d7b85da1a04171e211befe2c739303b9a4c066'
         owner_id: 9919
         repo_id: 259445878
     'ncipollo/release-action@v1':
