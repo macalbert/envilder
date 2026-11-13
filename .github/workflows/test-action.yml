@@ -17,7 +17,9 @@ on:
       - ready_for_review
     paths:
       - ".github/workflows/test-action.yml"
+      - "action.yml"
       - "github-action/action.yml"
+      - "github-action/dist/**"
       - "src/envilder/apps/gha/**"
       - "src/envilder/apps/shared/**"
       - "src/envilder/core/**"
@@ -57,14 +59,13 @@ jobs:
       - name: 📦 Open the ? Block (Install packages)
         run: pnpm install --frozen-lockfile
 
-      - name: 🏗️ Build the Castle
-        run: pnpm build
-
-      - name: 📦 Bundle GitHub Action
-        run: pnpm run build:gha
+      # `$/github-action` runs the action committed at this run's commit,
+      # not the workspace, so the committed bundle must match the source
+      - name: 🏗️ Build the Castle (verify the committed bundle)
+        run: pnpm verify:gha
 
       - name: 🔐 Test Action - Pull Secrets
-        uses: ./github-action
+        uses: $/github-action
         with:
           map-file: e2e/sample/envilder.json
           env-file: .env.test
@@ -84,7 +85,7 @@ jobs:
         run: rm -f .env.test
 
       - name: 🔐 Test Action - Command (secrets only in this step)
-        uses: ./github-action
+        uses: $/github-action
         with:
           map-file: e2e/sample/envilder.json
           command: test -n "$TOKEN_SECRET" && echo "✅ The command sees TOKEN_SECRET"
@@ -98,7 +99,7 @@ jobs:
           echo "✅ TOKEN_SECRET is not visible after the command step"
 
       - name: 🔐 Test Action - Export to the job environment
-        uses: ./github-action
+        uses: $/github-action
         with:
           map-file: e2e/sample/envilder.json
 

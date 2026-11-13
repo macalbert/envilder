@@ -217,7 +217,11 @@ updates:
   - macalbert
 
 - package-ecosystem: github-actions
-  directory: "/"
+  # "/" covers .github/workflows and the root action.yml; every local
+  # action folder needs its own entry
+  directories:
+  - "/"
+  - "/github-action"
   pull-request-branch-name:
     separator: "/"
   schedule:
