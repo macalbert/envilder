@@ -882,6 +882,8 @@ export const ca: Translations = {
       rolePush: 'Push',
       roleCommandDesc:
         "Amb Azure RBAC, assigna el rol sobre el vault. Dona el rol de lectura a tothom qui executa l'aplicació i el d'escriptura només a qui crea secrets:",
+      roleReadComment: 'Pull i exec: llegir secrets',
+      roleWriteComment: 'Push: escriure secrets',
       roleNote:
         "Quin dels dos models fa servir el teu vault i les ordres de la política d'accés s'expliquen a la pàgina del proveïdor Azure Key Vault. Una assignació de rol pot trigar uns minuts a aplicar-se.",
       namingTitle: 'Com una entrada del fitxer de mapa esdevé un nom de secret',

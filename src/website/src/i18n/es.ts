@@ -884,6 +884,8 @@ export const es: Translations = {
       rolePush: 'Push',
       roleCommandDesc:
         'Con Azure RBAC, asigna el rol sobre el vault. Da el rol de lectura a todos los que ejecutan la aplicación y el de escritura solo a quien crea secretos:',
+      roleReadComment: 'Pull y exec: leer secretos',
+      roleWriteComment: 'Push: escribir secretos',
       roleNote:
         'Cuál de los dos modelos usa tu vault y los comandos de la política de acceso se explican en la página del proveedor Azure Key Vault. Una asignación de rol puede tardar unos minutos en aplicarse.',
       namingTitle:

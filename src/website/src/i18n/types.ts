@@ -536,6 +536,8 @@ export interface GuideAzureKeyVaultToEnvTranslations {
   rolePull: string;
   rolePush: string;
   roleCommandDesc: string;
+  roleReadComment: string;
+  roleWriteComment: string;
   roleNote: string;
   namingTitle: string;
   namingDesc: string;

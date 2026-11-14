@@ -875,6 +875,8 @@ export const en: Translations = {
       rolePush: 'Push',
       roleCommandDesc:
         'With Azure RBAC, assign the role on the vault. Give the read role to everyone who runs the app and the write role only to whoever creates secrets:',
+      roleReadComment: 'Pull and exec: read secrets',
+      roleWriteComment: 'Push: write secrets',
       roleNote:
         'Which of the two models your vault uses, and the access policy commands, are covered in the Azure Key Vault provider page. A role assignment can take a few minutes to apply.',
       namingTitle: 'How a map file entry becomes a secret name',

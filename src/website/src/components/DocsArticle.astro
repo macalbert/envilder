@@ -243,13 +243,13 @@ const az = t.docs.guideAzureKeyVaultToEnv;
 const azGuideScope =
   '/subscriptions/{SUB}/resourceGroups/{RG}/providers/Microsoft.KeyVault/vaults/{VAULT}';
 
-const azGuideRoles = `# Pull and exec: read secrets
+const azGuideRoles = `# ${az.roleReadComment}
 az role assignment create \\
   --role "Key Vault Secrets User" \\
   --assignee {USER_OBJECT_ID} \\
   --scope ${azGuideScope}
 
-# Push: write secrets
+# ${az.roleWriteComment}
 az role assignment create \\
   --role "Key Vault Secrets Officer" \\
   --assignee {USER_OBJECT_ID} \\

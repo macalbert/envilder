@@ -314,6 +314,21 @@ describe('Static website SEO', () => {
     expect(firstParagraph?.[1]).toContain('.env');
   });
 
+  it('Should_LocalizeRoleCommandComments_When_CatalanAzureKeyVaultGuideIsBuilt', () => {
+    // Arrange
+    const html = readDistFile(
+      'ca/docs/guides/azure-key-vault-to-env/index.html',
+    );
+
+    // Act
+    const hasCatalanComment = html.includes('Pull i exec: llegir secrets');
+    const hasEnglishComment = html.includes('Pull and exec: read secrets');
+
+    // Assert
+    expect(hasCatalanComment).toBe(true);
+    expect(hasEnglishComment).toBe(false);
+  });
+
   it('Should_ExposeManifestBackedHreflangClusters_When_IndexablePagesAreBuilt', () => {
     // Arrange
     const expected: string[] = [];
