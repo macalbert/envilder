@@ -324,21 +324,28 @@ const IDENTIFIER = /[A-Za-z_]\w*/g;
 const STRING_LITERAL =
   /(?<![\w$@])([A-Za-z$@]{0,3})("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/g;
 const INTERPOLATING_PREFIX = /[fF$]/;
-const ESCAPED_BRACES = /\{\{|\}\}/g;
+const BRACE_DEPTH_CHANGE = { '{': 1, '}': -1 };
+const ESCAPED_BRACE = /^(?:\{\{|\}\})$/;
 
 /**
  * Keeps the code a string interpolates: the text inside `{...}`, nested
- * braces included, after dropping the `{{` and `}}` escapes.
+ * braces included. `{{` and `}}` are escapes only outside an interpolation.
  */
 function interpolationsOf(literal) {
+  let code = '';
   let depth = 0;
-  return [...literal.replace(ESCAPED_BRACES, '  ')]
-    .map((char) => {
-      const inside = depth > 0 || char === '{';
-      depth += char === '{' ? 1 : char === '}' ? -1 : 0;
-      return inside ? char : ' ';
-    })
-    .join('');
+  for (let index = 0; index < literal.length; index++) {
+    if (depth === 0 && ESCAPED_BRACE.test(literal.slice(index, index + 2))) {
+      code += '  ';
+      index++;
+      continue;
+    }
+    const char = literal[index];
+    const inside = depth > 0 || char === '{';
+    depth += BRACE_DEPTH_CHANGE[char] ?? 0;
+    code += inside ? char : ' ';
+  }
+  return code;
 }
 const PYTHON_COMMENTS = [/#.*/g];
 const CSHARP_COMMENTS = [/\/\*[\s\S]*?\*\//g, /\/\/.*/g];

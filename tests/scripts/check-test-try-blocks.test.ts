@@ -196,7 +196,7 @@ describe('findTryBlocksInTests', () => {
     const source = [
       ...helpers,
       'def Should_FormatName_When_Called():',
-      '    assert get_name() == f"{{literal()}} {cleanup({})}"',
+      '    assert get_name() == f"{{literal()}} {cleanup({})} { {1: 2}} literal"',
     ].join('\n');
 
     // Act
