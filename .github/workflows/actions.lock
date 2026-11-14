@@ -72,6 +72,7 @@ workflows:
         - 'actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1'
         - 'actions/setup-node@v7'
         - 'aws-actions/configure-aws-credentials@v6.3.0'
+        - 'dorny/paths-filter@v4'
         - 'pnpm/action-setup@v6'
     '.github/workflows/tests-dotnet-sdk.yml':
         - 'actions/cache@v6'
@@ -113,6 +114,7 @@ workflows:
     '.github/workflows/verify-action-build.yml':
         - 'actions/checkout@v7'
         - 'actions/setup-node@v7'
+        - 'dorny/paths-filter@v4'
         - 'pnpm/action-setup@v6'
     '.github/workflows/verify-actions-lock.yml':
         - 'actions/checkout@v7'
