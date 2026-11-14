@@ -324,7 +324,22 @@ const IDENTIFIER = /[A-Za-z_]\w*/g;
 const STRING_LITERAL =
   /(?<![\w$@])([A-Za-z$@]{0,3})("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/g;
 const INTERPOLATING_PREFIX = /[fF$]/;
-const INTERPOLATION = /\{[^{}]*\}/g;
+const ESCAPED_BRACES = /\{\{|\}\}/g;
+
+/**
+ * Keeps the code a string interpolates: the text inside `{...}`, nested
+ * braces included, after dropping the `{{` and `}}` escapes.
+ */
+function interpolationsOf(literal) {
+  let depth = 0;
+  return [...literal.replace(ESCAPED_BRACES, '  ')]
+    .map((char) => {
+      const inside = depth > 0 || char === '{';
+      depth += char === '{' ? 1 : char === '}' ? -1 : 0;
+      return inside ? char : ' ';
+    })
+    .join('');
+}
 const PYTHON_COMMENTS = [/#.*/g];
 const CSHARP_COMMENTS = [/\/\*[\s\S]*?\*\//g, /\/\/.*/g];
 
@@ -334,9 +349,7 @@ const CSHARP_COMMENTS = [/\/\*[\s\S]*?\*\//g, /\/\/.*/g];
  */
 function codeOf(body, comments) {
   const withoutStrings = body.replace(STRING_LITERAL, (_, prefix, literal) =>
-    INTERPOLATING_PREFIX.test(prefix)
-      ? ` ${(literal.match(INTERPOLATION) ?? []).join(' ')} `
-      : ' ',
+    INTERPOLATING_PREFIX.test(prefix) ? ` ${interpolationsOf(literal)} ` : ' ',
   );
   return comments.reduce(
     (code, comment) => code.replace(comment, ' '),

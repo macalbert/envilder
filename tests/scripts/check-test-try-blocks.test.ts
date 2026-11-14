@@ -177,6 +177,37 @@ describe('findTryBlocksInTests', () => {
     ]);
   });
 
+  it('Should_FollowOnlyCode_When_InterpolationHasEscapedOrNestedBraces', () => {
+    // Arrange
+    const helpers = [
+      'def cleanup(options):',
+      '    try:',
+      '        release()',
+      '    finally:',
+      '        finish()',
+      '',
+      'def literal():',
+      '    try:',
+      '        release()',
+      '    finally:',
+      '        finish()',
+      '',
+    ];
+    const source = [
+      ...helpers,
+      'def Should_FormatName_When_Called():',
+      '    assert get_name() == f"{{literal()}} {cleanup({})}"',
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/test_client.py', source);
+
+    // Assert
+    expect(actual).toEqual([
+      { line: 2, test: 'Should_FormatName_When_Called', helper: 'cleanup' },
+    ]);
+  });
+
   it('Should_ReportTryBlock_When_HelperReachesAnotherHelperWithTry', () => {
     // Arrange
     const source = [
