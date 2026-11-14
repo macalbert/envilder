@@ -1,5 +1,8 @@
 name: 🔍 Verify Action Build
 
+permissions:
+  contents: read
+
 on:
   pull_request:
 
