@@ -1107,6 +1107,8 @@ const tabRows = [
 </style>
 
 <script>
+  import { HeroPause } from '../utils/hero-pause';
+
   type Seg = { text: string; cls: string; instant?: boolean };
   type Editor = { file: string; lang: string; code: Seg[][] };
   type Line = {
@@ -1164,11 +1166,7 @@ const tabRows = [
 
     let runId = 0;
     let current = 0;
-    let paused = false;
-    // Hover/focus pauses temporarily; the pause button pauses until the
-    // user resumes it (touch users have no hover to stop the loop).
-    let hovering = false;
-    let userPaused = false;
+    const pause = new HeroPause();
     // True while a manually selected scene is shown statically during an
     // explicit pause, so Resume knows to replay it.
     let showingStatic = false;
@@ -1179,10 +1177,10 @@ const tabRows = [
       new Promise<void>((resolve) => setTimeout(resolve, ms));
 
     function waitWhilePaused(): Promise<void> {
-      if (!paused || isStale()) return Promise.resolve();
+      if (!pause.paused || isStale()) return Promise.resolve();
       return new Promise<void>((resolve) => {
         const check = () => {
-          if (paused && !isStale()) {
+          if (pause.paused && !isStale()) {
             setTimeout(check, 120);
           } else {
             resolve();
@@ -1588,7 +1586,7 @@ const tabRows = [
 
       // An explicit pause shows the chosen scene at once instead of leaving
       // the previous one on screen until Resume.
-      if (manual && userPaused) {
+      if (manual && pause.pausedByUser) {
         showingStatic = true;
         renderInstant(scene);
         return;
@@ -1627,25 +1625,12 @@ const tabRows = [
     // Pause only while the user hovers/focuses the terminal itself, so the
     // mode buttons can switch scenes without stalling playback.
     const hoverTarget = screen.closest('.terminal') ?? screen;
-    const syncPaused = () => {
-      paused = hovering || userPaused;
-    };
-    hoverTarget.addEventListener('mouseenter', () => {
-      hovering = true;
-      syncPaused();
+    hoverTarget.addEventListener('mouseenter', () => pause.pointerEnter());
+    hoverTarget.addEventListener('mouseleave', () => pause.pointerLeave());
+    hoverTarget.addEventListener('focusin', (event) => {
+      pause.focusIn((event.target as Element).matches(':focus-visible'));
     });
-    hoverTarget.addEventListener('mouseleave', () => {
-      hovering = false;
-      syncPaused();
-    });
-    hoverTarget.addEventListener('focusin', () => {
-      hovering = true;
-      syncPaused();
-    });
-    hoverTarget.addEventListener('focusout', () => {
-      hovering = false;
-      syncPaused();
-    });
+    hoverTarget.addEventListener('focusout', () => pause.focusOut());
 
     const pauseBtn = wrapper.querySelector<HTMLButtonElement>(
       '[data-hero-pause]',
@@ -1653,12 +1638,11 @@ const tabRows = [
     if (pauseBtn && !reduceMotion) {
       pauseBtn.hidden = false;
       pauseBtn.addEventListener('click', () => {
-        userPaused = !userPaused;
-        syncPaused();
+        pause.toggleUserPause();
         // Resuming after a scene was picked while paused replays it
-        if (!userPaused && showingStatic) play(current);
-        pauseBtn.setAttribute('aria-pressed', String(userPaused));
-        const label = userPaused
+        if (!pause.pausedByUser && showingStatic) play(current);
+        pauseBtn.setAttribute('aria-pressed', String(pause.pausedByUser));
+        const label = pause.pausedByUser
           ? pauseBtn.dataset.labelPlay
           : pauseBtn.dataset.labelPause;
         if (label) pauseBtn.setAttribute('aria-label', label);
