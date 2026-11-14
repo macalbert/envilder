@@ -62,17 +62,10 @@ function findDuplicateValues(values: string[]): string[] {
   return [...counts].flatMap(([value, count]) => (count > 1 ? [value] : []));
 }
 
-function isValidJsonLd(jsonLd: string | undefined): boolean {
-  if (!jsonLd) {
-    return false;
-  }
-
-  try {
-    JSON.parse(jsonLd);
-    return true;
-  } catch {
-    return false;
-  }
+function readJsonLd(html: string): string | undefined {
+  return html.match(
+    /<script type="application\/ld\+json">([\s\S]*?)<\/script>/,
+  )?.[1];
 }
 
 function getExpectedAlternateUrls(path: string): string[] {
@@ -108,9 +101,7 @@ function getSeoIssues(file: string, path: string, lang: string): string[] {
   const canonical = getTags(html, 'link')
     .find((tag) => getAttribute(tag, 'rel') === 'canonical')
     ?.match(/href="([^"]+)"/)?.[1];
-  const jsonLd = html.match(
-    /<script type="application\/ld\+json">([\s\S]*?)<\/script>/,
-  )?.[1];
+  const jsonLd = readJsonLd(html);
   const h1Count = (html.match(/<h1\b/g) ?? []).length;
   const htmlLang = html.match(/<html lang="([^"]+)">/)?.[1];
   const ogLocale = getTags(html, 'meta')
@@ -148,7 +139,7 @@ function getSeoIssues(file: string, path: string, lang: string): string[] {
       : [`${file}: invalid Open Graph locale`]),
     ...(duplicateIds.length === 0 ? [] : [`${file}: duplicate ids`]),
     ...(brokenFragments.length === 0 ? [] : [`${file}: broken fragments`]),
-    ...(isValidJsonLd(jsonLd) ? [] : [`${file}: invalid JSON-LD`]),
+    ...(jsonLd ? [] : [`${file}: missing JSON-LD`]),
     ...(ogImage === `${siteUrl}/og-image.png`
       ? []
       : [`${file}: missing Open Graph image`]),
@@ -188,15 +179,18 @@ function getSitemapUrls(): string[] {
 }
 
 describe('Static website SEO', () => {
-  it('Should_ReturnFalse_When_JsonLdIsInvalid', () => {
+  it('Should_ExposeParseableJsonLd_When_IndexablePagesAreBuilt', () => {
     // Arrange
-    const expected = false;
+    const jsonLdBlocks = indexablePages.map((page) =>
+      readJsonLd(readDistFile(page.file)),
+    );
 
     // Act
-    const actual = isValidJsonLd('{');
+    const parseAll = () =>
+      jsonLdBlocks.map((jsonLd) => JSON.parse(jsonLd ?? ''));
 
     // Assert
-    expect(actual).toBe(expected);
+    expect(parseAll).not.toThrow();
   });
 
   it('Should_ExposeValidSeoMarkup_When_IndexablePagesAreBuilt', () => {

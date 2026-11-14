@@ -1,7 +1,15 @@
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  onTestFinished,
+  vi,
+} from 'vitest';
 import { main } from '../../../../../src/envilder/apps/gha/entry/Gha';
 import { Startup } from '../../../../../src/envilder/apps/gha/Startup';
 import { DispatchActionCommand } from '../../../../../src/envilder/core/application/dispatch/DispatchActionCommand';
@@ -491,6 +499,7 @@ describe('GitHubAction', () => {
     it('Should_WarnAboutUnknownConfigField_When_RealMapFileHasOne', async () => {
       // Arrange
       const dir = await mkdtemp(join(tmpdir(), 'envilder-gha-'));
+      onTestFinished(() => rm(dir, { recursive: true, force: true }));
       const mapFile = join(dir, 'envilder.json');
       await writeFile(
         mapFile,
@@ -505,18 +514,14 @@ describe('GitHubAction', () => {
         .spyOn(GitHubActionsLogger.prototype, 'warn')
         .mockImplementation(() => {});
 
-      try {
-        // Act
-        await main();
+      // Act
+      await main();
 
-        // Assert
-        expect(warn).toHaveBeenCalledWith(
-          expect.stringContaining('$config.region'),
-        );
-        expect(mocks.mockCommandHandler.handleCommand).toHaveBeenCalledTimes(1);
-      } finally {
-        await rm(dir, { recursive: true, force: true });
-      }
+      // Assert
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('$config.region'),
+      );
+      expect(mocks.mockCommandHandler.handleCommand).toHaveBeenCalledTimes(1);
     });
   });
 });
