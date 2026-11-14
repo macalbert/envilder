@@ -524,6 +524,64 @@ export interface GuideSsmToEnvTranslations {
   relatedGha: string;
 }
 
+export interface GuideAzureKeyVaultToEnvTranslations {
+  whyTitle: string;
+  whyItems: string[];
+  prereqTitle: string;
+  prereqItems: string[];
+  rolesDesc: string;
+  thOperation: string;
+  thRbacRole: string;
+  thAccessPolicy: string;
+  rolePull: string;
+  rolePush: string;
+  roleCommandDesc: string;
+  roleNote: string;
+  namingTitle: string;
+  namingDesc: string;
+  thReference: string;
+  thSecretName: string;
+  namingNote: string;
+  exampleTitle: string;
+  exampleDesc: string;
+  thVaultSecret: string;
+  thVariable: string;
+  pushDesc: string;
+  pushOutputDesc: string;
+  pushResultDesc: string;
+  pushWarn: string;
+  pushNote: string;
+  pushLink: string;
+  pullDesc: string;
+  pullOutputDesc: string;
+  pullResultDesc: string;
+  pullGitignore: string;
+  execTitle: string;
+  execDesc: string;
+  execOutputDesc: string;
+  whenTitle: string;
+  whenItems: string[];
+  errorsTitle: string;
+  thMessage: string;
+  thFix: string;
+  errVaultFix: string;
+  errCollisionFix: string;
+  errNotFoundFix: string;
+  errNoMapFix: string;
+  errorsOther: string;
+  errorsMore: string;
+  saasTitle: string;
+  saasDesc: string;
+  saasItems: string[];
+  saasFair: string;
+  relatedTitle: string;
+  relatedAzure: string;
+  relatedPull: string;
+  relatedPush: string;
+  relatedExec: string;
+  relatedMap: string;
+}
+
 export interface PushReferenceTranslations {
   tabAws: string;
   tabAzure: string;
@@ -787,6 +845,7 @@ export interface DocsTranslations {
   mapFileReference: MapFileReferenceTranslations;
   pullReference: PullReferenceTranslations;
   guideSsmToEnv: GuideSsmToEnvTranslations;
+  guideAzureKeyVaultToEnv: GuideAzureKeyVaultToEnvTranslations;
   pushReference: PushReferenceTranslations;
   execReference: ExecReferenceTranslations;
   validateReference: ValidateReferenceTranslations;
@@ -800,6 +859,7 @@ export interface DocsTranslations {
     | 'hub'
     | 'getting-started'
     | 'guide-ssm-to-env'
+    | 'guide-azure-key-vault-to-env'
     | 'aws-ssm'
     | 'azure-key-vault'
     | 'custom-provider'

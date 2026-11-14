@@ -23,6 +23,10 @@
     "hash": "6cd8c63432cacbd6f437311a32c011264d2c046acda4ea3bbda14b22a859267d",
     "dateModified": "2026-11-01"
   },
+  "/docs/guides/azure-key-vault-to-env/": {
+    "hash": "299fce72c2c97b843276c9e84dd25f3d81d4b7f8812a6b923ff9731492ada3bd",
+    "dateModified": "2026-11-14"
+  },
   "/docs/guides/ssm-to-env/": {
     "hash": "6866f0e828239762f615cb6f1d700725226fc41c078ed7dafd4d6b3442ed2fd2",
     "dateModified": "2026-11-05"

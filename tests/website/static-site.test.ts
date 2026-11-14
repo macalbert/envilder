@@ -296,6 +296,22 @@ describe('Static website SEO', () => {
     expect(llms.startsWith('# Envilder\n\n> ')).toBe(true);
     expect(llms).toContain('## Docs: Guides');
     expect(llms).toContain(`(${siteUrl}/docs/guides/ssm-to-env/)`);
+    expect(llms).toContain(`(${siteUrl}/docs/guides/azure-key-vault-to-env/)`);
+  });
+
+  it('Should_AnswerTheQuestionFirst_When_AzureKeyVaultGuideIsBuilt', () => {
+    // Arrange
+    const html = readDistFile('docs/guides/azure-key-vault-to-env/index.html');
+
+    // Act
+    const firstParagraph = html.match(
+      /<p class="docs-intro"[^>]*>([\s\S]*?)<\/p>/,
+    );
+
+    // Assert
+    expect(firstParagraph?.[1]).toContain('Envilder');
+    expect(firstParagraph?.[1]).toContain('Azure Key Vault');
+    expect(firstParagraph?.[1]).toContain('.env');
   });
 
   it('Should_ExposeManifestBackedHreflangClusters_When_IndexablePagesAreBuilt', () => {

@@ -860,6 +860,108 @@ export const es: Translations = {
       relatedAws: 'Configuración del proveedor AWS SSM',
       relatedGha: 'Guía de la GitHub Action',
     },
+    guideAzureKeyVaultToEnv: {
+      whyTitle: 'Por qué leer Key Vault directamente',
+      whyItems: [
+        'Los secretos se quedan en tu Key Vault. No hay un segundo almacén que mantener sincronizado ni ningún servicio adicional que guarde tus valores.',
+        'Azure RBAC y los registros de diagnóstico de Key Vault siguen funcionando como hasta ahora: Envilder inicia sesión como desarrollador, así que el acceso se concede por persona.',
+        'Nadie pega un archivo .env en un chat o en un correo. Una persona nueva en el equipo recibe un rol en el vault y ejecuta un solo comando.',
+        'envilder.json solo contiene nombres de variable y nombres de secreto, así que se puede versionar sin riesgo y el contrato se revisa en una pull request.',
+      ],
+      prereqTitle: 'Requisitos previos',
+      prereqItems: [
+        'Node.js 22.12 o superior. Ejecuta la CLI con npx envilder o instálala con npm install -g envilder.',
+        'Un Key Vault existente y su URL, con la forma https://<nombre-del-vault>.vault.azure.net.',
+        'La Azure CLI con la sesión iniciada con az login. Envilder se autentica con DefaultAzureCredential del SDK de Azure, que prueba varias fuentes por orden (variables de entorno, workload identity, managed identity, la Azure CLI, Azure PowerShell y la Azure Developer CLI). En una máquina de desarrollo, la sesión iniciada de la Azure CLI es la habitual.',
+        'Un rol en el vault que te permita leer secretos y, si también haces push, uno que te permita escribirlos.',
+      ],
+      rolesDesc:
+        'Pull y exec solo leen secretos. Push los escribe. Esto es lo mínimo que necesitas para cada operación:',
+      thOperation: 'Operación',
+      thRbacRole: 'Rol de Azure RBAC',
+      thAccessPolicy: 'Permiso de política de acceso',
+      rolePull: 'Pull y exec',
+      rolePush: 'Push',
+      roleCommandDesc:
+        'Con Azure RBAC, asigna el rol sobre el vault. Da el rol de lectura a todos los que ejecutan la aplicación y el de escritura solo a quien crea secretos:',
+      roleNote:
+        'Cuál de los dos modelos usa tu vault y los comandos de la política de acceso se explican en la página del proveedor Azure Key Vault. Una asignación de rol puede tardar unos minutos en aplicarse.',
+      namingTitle:
+        'Cómo una entrada del archivo de mapa se convierte en un nombre de secreto',
+      namingDesc:
+        'Envilder aplica una sola regla a cada referencia del archivo de mapa: se elimina la barra inicial y cada una de las demás / pasa a ser un guion. No se cambia nada más:',
+      thReference: 'Referencia en envilder.json',
+      thSecretName: 'Secreto leído del vault',
+      namingNote:
+        'Key Vault solo acepta letras, dígitos y guiones en el nombre de un secreto, y compara los nombres sin distinguir mayúsculas. Una referencia que Key Vault rechaza, por ejemplo una con _ o ., falla con el error del propio Key Vault. Dos referencias que resuelven al mismo nombre en una ejecución se detienen con un error de colisión. El nombre de variable a la izquierda de la entrada es libre: DB_PASSWORD es válido aunque el secreto no pueda contener un guion bajo.',
+      exampleTitle: 'Ejemplo: de secretos de Key Vault a un archivo .env',
+      exampleDesc:
+        'Partimos de un vault vacío y creamos tres secretos. Cada uno se lee en una variable:',
+      thVaultSecret: 'Secreto en Key Vault',
+      thVariable: 'Variable en .env',
+      pushDesc:
+        'Haz push de cada valor una sola vez. Un push de un solo secreto escribe el valor en el vault y, en el mismo paso, crea envilder.json o le añade la entrada (CLI 0.16 o superior). El primer comando también guarda el proveedor y la URL del vault, así que los dos siguientes no necesitan ninguna opción:',
+      pushOutputDesc:
+        'Líneas de resultado de cada comando (se omiten las líneas de cabecera). Los valores y las rutas están enmascarados:',
+      pushResultDesc:
+        'envilder.json ya mapea las tres variables. Solo contiene nombres y referencias de secreto, nunca valores:',
+      pushWarn:
+        'El push siempre escribe el valor: un secreto existente recibe una versión nueva. --value se queda en el historial del shell, así que úsalo para valores de prueba. Para hacer push de secretos reales, ponlos en un archivo .env y ejecuta envilder --push.',
+      pushNote:
+        'Si los secretos ya existen en el vault, no los vuelvas a subir: escribe envilder.json a mano con la misma forma, un nombre de variable por cada secreto. Si una variable ya apunta a otra referencia, el push sale con 1 y no sube nada.',
+      pushLink:
+        'Referencia del modo push: todas las opciones y las reglas del archivo de mapa',
+      pullDesc:
+        'Ejecuta envilder sin opciones. El pull es el modo por defecto: lee envilder.json y escribe .env en el directorio actual. La URL del vault viene de $config, así que no hace falta ninguna opción:',
+      pullOutputDesc:
+        'Azure no muestra ninguna línea de identidad. Los valores están enmascarados: de un valor de más de 10 caracteres solo se ven los tres últimos.',
+      pullResultDesc:
+        'El .env resultante. Envilder entrecomilla DATABASE_URL porque contiene un espacio y un #, y lee el resultado como lo hace dotenv antes de escribir:',
+      pullGitignore:
+        'El archivo .env contiene los valores reales. Añádelo a .gitignore. envilder.json solo contiene nombres, así que se puede versionar. Si vuelves a ejecutar envilder y los valores no han cambiado, no cambia nada.',
+      execTitle: 'O prescinde del archivo con envilder exec',
+      execDesc:
+        'Si solo necesitas los valores para iniciar un proceso, envilder exec resuelve el mismo archivo de mapa e inicia tu comando con los secretos añadidos a su entorno, sin escribir nada en disco:',
+      execOutputDesc:
+        'El resumen va a stderr, así que nunca se mezcla con la salida de tu comando, que lee los valores como variables de entorno normales.',
+      whenTitle: 'Cuál usar',
+      whenItems: [
+        'Usa envilder exec cuando inicias tú el proceso: scripts npm, tests, migraciones. No queda ningún archivo con secretos en disco, y un secreto que falta o no se puede leer detiene el comando antes de que empiece (código de salida 125).',
+        'Usa un archivo .env cuando una herramienta lee el archivo por ruta o no puedes envolver su comando de inicio: env_file de Docker Compose, una configuración de ejecución del IDE, un framework que carga .env él mismo. Un secreto que falta es solo un aviso en este modo, así que mira el resumen (2/3 en lugar de 3/3).',
+      ],
+      errorsTitle: 'Errores habituales',
+      thMessage: 'Mensaje',
+      thFix: 'Solución',
+      errVaultFix:
+        'Añade "vaultUrl": "https://<nombre-del-vault>.vault.azure.net" a $config en envilder.json, o pasa --vault-url. Con --no-map-update en el push, pasa también --provider=azure.',
+      errCollisionFix:
+        'Dos referencias del archivo de mapa resuelven al mismo secreto de Key Vault. Usa una referencia por secreto.',
+      errNotFoundFix:
+        'El secreto no existe en ese vault. Revisa el nombre con la regla de arriba. El pull lo omite y sale igualmente con 0, así que mira el 2/3 del resumen; exec se detiene con 125.',
+      errNoMapFix:
+        'Ejecuta envilder desde el directorio que contiene envilder.json, o pasa --map=ruta/al/archivo.json.',
+      errorsOther:
+        'Cualquier otro fallo, como unas credenciales de Azure que faltan o un acceso denegado al vault, detiene la ejecución. El pull lista cada variable afectada con su referencia enmascarada y el motivo, deja intacto el archivo .env y sale con 1. Exec sale con 125 sin iniciar tu comando. Vuelve a ejecutar az login o revisa tu rol en el vault.',
+      errorsMore:
+        'Todos los mensajes del modo pull están en la referencia del modo pull.',
+      saasTitle: 'Cuándo encaja mejor un gestor de secretos SaaS',
+      saasDesc:
+        'Esta guía encaja con un equipo que ya guarda los secretos en Azure Key Vault y los quiere en desarrollo local sin añadir ningún producto. La CLI de Envilder lee y escribe Key Vault y AWS SSM, nada más, y no tiene panel ni rotación propia. Un gestor alojado como Doppler o Infisical puede ir mejor cuando:',
+      saasItems: [
+        'Tus secretos todavía no están en Key Vault y quieres un solo lugar para gestionarlos, con una interfaz web para quien no usa la terminal.',
+        'Necesitas flujos alrededor de los secretos mismos, como aprobaciones, sincronización por entorno con muchas plataformas o rotación, y prefieres un producto que los ofrezca.',
+        'No quieres gestionar el control de acceso de Azure para cada desarrollador que necesita un .env local.',
+      ],
+      saasFair:
+        'Esos productos son buenas herramientas para esas tareas. Si Key Vault ya es tu fuente de verdad, Envilder la mantiene así.',
+      relatedTitle: 'Páginas relacionadas',
+      relatedAzure:
+        'Configuración del proveedor Azure Key Vault: modelos de acceso y roles',
+      relatedPull: 'Referencia del modo pull',
+      relatedPush: 'Referencia del modo push',
+      relatedExec: 'Referencia de envilder exec',
+      relatedMap: 'Referencia del archivo de mapa',
+    },
     pushReference: {
       tabAws: 'AWS SSM',
       tabAzure: 'Azure Key Vault',
@@ -1321,6 +1423,21 @@ export const es: Translations = {
         cardTitle: 'Carga parámetros SSM en un .env',
         cardSummary:
           'Relaciona rutas de SSM Parameter Store con variables y escribe un .env, o prescinde del archivo con envilder exec.',
+      },
+      'guide-azure-key-vault-to-env': {
+        title:
+          'Sincroniza secretos de Azure Key Vault con un archivo .env local',
+        description:
+          'Envilder sincroniza secretos de Azure Key Vault con un archivo .env local para desarrollo, o con un comando mediante envilder exec: az login, roles RBAC, nombres de secreto y envilder.json.',
+        heading:
+          'Sincroniza secretos de Azure Key Vault con un archivo .env local',
+        intro:
+          '¿Qué herramienta puede sincronizar secretos de Azure Key Vault con un archivo .env local para desarrollo? Envilder, una CLI de código abierto: lista una sola vez cada variable y el nombre de su secreto de Key Vault en envilder.json, inicia sesión con az login y ejecuta envilder. Lee cada secreto y escribe un .env que, al leerlo de nuevo, da los mismos valores; o, con envilder exec, inicia tu comando con los secretos en su entorno sin escribir ningún archivo. Los secretos se quedan en tu vault: ningún SaaS adicional, y Azure RBAC sigue decidiendo quién puede leerlos.',
+        breadcrumb: 'Key Vault a .env',
+        navLabel: 'Key Vault a .env',
+        cardTitle: 'Carga secretos de Key Vault en un .env',
+        cardSummary:
+          'Relaciona secretos de Azure Key Vault con variables y escribe un .env, o prescinde del archivo con envilder exec.',
       },
       'aws-ssm': {
         title: 'Usa Envilder con AWS SSM Parameter Store',

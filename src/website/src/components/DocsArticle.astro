@@ -238,6 +238,82 @@ const ghaAzureRole = `az role assignment create \\
 
 const g = t.docs.guideSsmToEnv;
 
+const az = t.docs.guideAzureKeyVaultToEnv;
+
+const azGuideScope =
+  '/subscriptions/{SUB}/resourceGroups/{RG}/providers/Microsoft.KeyVault/vaults/{VAULT}';
+
+const azGuideRoles = `# Pull and exec: read secrets
+az role assignment create \\
+  --role "Key Vault Secrets User" \\
+  --assignee {USER_OBJECT_ID} \\
+  --scope ${azGuideScope}
+
+# Push: write secrets
+az role assignment create \\
+  --role "Key Vault Secrets Officer" \\
+  --assignee {USER_OBJECT_ID} \\
+  --scope ${azGuideScope}`;
+
+const azGuideNaming = [
+  { reference: '/my-app/dev/db-password', secret: 'my-app-dev-db-password' },
+  { reference: 'my-app-dev-db-password', secret: 'my-app-dev-db-password' },
+  { reference: '/db-password', secret: 'db-password' },
+  { reference: 'my_app/db-password', secret: 'my_app-db-password' },
+] as const;
+
+const azGuidePushCmd = `envilder --push --provider=azure --vault-url=https://my-vault.vault.azure.net \\
+  --key=DB_PASSWORD --value=local-dev-password \\
+  --secret-path=/my-app/dev/db-password
+envilder --push --key=API_TOKEN --value=dev-token-7f3a9c21 \\
+  --secret-path=/my-app/dev/api-token
+envilder --push --key=DATABASE_URL \\
+  --value='postgres://app:p@ss w0rd#1@db.internal:5432/app' \\
+  --secret-path=/my-app/dev/database-url`;
+
+const azGuideMap = `{
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "DB_PASSWORD": "/my-app/dev/db-password",
+  "API_TOKEN": "/my-app/dev/api-token",
+  "DATABASE_URL": "/my-app/dev/database-url"
+}`;
+
+const azGuidePullOutput = `🪙  RESOLVING SECRETS
+${'━'.repeat(60)}
+  ✓ DB_PASSWORD         → ***************ord
+  ✓ API_TOKEN           → ***************c21
+  ✓ DATABASE_URL        → ********************************************app
+
+⭐ LEVEL CLEARED  —  3/3 secrets loaded · .env written`;
+
+const azGuideExecOutput =
+  'envilder: 3 secrets resolved (azure, vault=my-vault.vault.azure.net) → node …';
+
+const azGuideErrors = [
+  {
+    message:
+      'vaultUrl is required when using Azure provider. Set it in $config.vaultUrl in your map file or via --vault-url flag.',
+    fix: 'errVaultFix',
+  },
+  {
+    message:
+      "Secret name collision: '/my-app/api-key' and 'my-app-api-key' both resolve to 'my-app-api-key'. Use distinct Key Vault secret names in your map file when targeting Azure.",
+    fix: 'errCollisionFix',
+  },
+  {
+    message: 'secret not found (path: *******************dsn) — skipped',
+    fix: 'errNotFoundFix',
+  },
+  {
+    message:
+      'No map file found. Provide --map or create envilder.json in the current directory.',
+    fix: 'errNoMapFix',
+  },
+] as const;
+
 const guideIamPolicy = `{
   "Version": "2012-10-17",
   "Statement": [
@@ -1328,6 +1404,139 @@ const validateSdkRows = [
           <li><a href={localizedPath(lang, '/docs/map-file/')}>{g.relatedMap}</a></li>
           <li><a href={localizedPath(lang, '/docs/providers/aws-ssm/')}>{g.relatedAws}</a></li>
           <li><a href={localizedPath(lang, '/docs/github-action/')}>{g.relatedGha}</a></li>
+        </ul>
+      </section>
+    </>
+  )}
+
+  {routeKey === 'guide-azure-key-vault-to-env' && (
+    <>
+      <section id="guide-why" class="docs-section">
+        <h2>{az.whyTitle}</h2>
+        <ul class="docs-list">
+          {az.whyItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+
+      <section id="guide-prerequisites" class="docs-section">
+        <h2>{az.prereqTitle}</h2>
+        <ul class="docs-list">
+          {az.prereqItems.map((item) => <li>{item}</li>)}
+        </ul>
+        <CodeBlock lang="bash" code="az login" />
+        <p>{az.rolesDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{az.thOperation}</th><th>{az.thRbacRole}</th><th>{az.thAccessPolicy}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>{az.rolePull}</td><td><code>Key Vault Secrets User</code></td><td><code>Get</code></td></tr>
+            <tr><td>{az.rolePush}</td><td><code>Key Vault Secrets Officer</code></td><td><code>Set</code></td></tr>
+          </tbody>
+        </table>
+        <p>{az.roleCommandDesc}</p>
+        <CodeBlock lang="bash" code={azGuideRoles} />
+        <p class="note">{az.roleNote} <a href={localizedPath(lang, '/docs/providers/azure-key-vault/')}>{az.relatedAzure}</a></p>
+      </section>
+
+      <section id="guide-naming" class="docs-section">
+        <h2>{az.namingTitle}</h2>
+        <p>{az.namingDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{az.thReference}</th><th>{az.thSecretName}</th></tr>
+          </thead>
+          <tbody>
+            {azGuideNaming.map((row) => (
+              <tr><td><code>{row.reference}</code></td><td><code>{row.secret}</code></td></tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="note">{az.namingNote}</p>
+      </section>
+
+      <section id="guide-example" class="docs-section">
+        <h2>{az.exampleTitle}</h2>
+        <p>{az.exampleDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{az.thVaultSecret}</th><th>{az.thVariable}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>my-app-dev-db-password</code></td><td><code>DB_PASSWORD</code></td></tr>
+            <tr><td><code>my-app-dev-api-token</code></td><td><code>API_TOKEN</code></td></tr>
+            <tr><td><code>my-app-dev-database-url</code></td><td><code>DATABASE_URL</code></td></tr>
+          </tbody>
+        </table>
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>{az.pushWarn}</div>
+        </div>
+        <p>{az.pushDesc}</p>
+        <CodeBlock lang="bash" code={azGuidePushCmd} />
+        <p>{az.pushOutputDesc}</p>
+        <CodeBlock lang="text" code={guidePushOutput} />
+        <p>{az.pushResultDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={azGuideMap} />
+        <p>{az.pushNote} <a href={localizedPath(lang, '/docs/cli/push/')}>{az.pushLink}</a></p>
+        <p>{az.pullDesc}</p>
+        <CodeBlock lang="bash" code="envilder" />
+        <CodeBlock lang="text" code={azGuidePullOutput} />
+        <p>{az.pullOutputDesc}</p>
+        <p>{az.pullResultDesc}</p>
+        <CodeBlock lang="dotenv" filename=".env" code={guideDevEnv} />
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>{az.pullGitignore}</div>
+        </div>
+      </section>
+
+      <section id="guide-exec" class="docs-section">
+        <h2>{az.execTitle}</h2>
+        <p>{az.execDesc}</p>
+        <CodeBlock lang="bash" code="envilder exec -- node app.js" />
+        <CodeBlock lang="text" code={azGuideExecOutput} />
+        <p>{az.execOutputDesc}</p>
+
+        <h3>{az.whenTitle}</h3>
+        <ul class="docs-list">
+          {az.whenItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+
+      <section id="guide-errors" class="docs-section">
+        <h2>{az.errorsTitle}</h2>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{az.thMessage}</th><th>{az.thFix}</th></tr>
+          </thead>
+          <tbody>
+            {azGuideErrors.map((row) => (
+              <tr><td><code>{row.message}</code></td><td>{az[row.fix]}</td></tr>
+            ))}
+          </tbody>
+        </table>
+        <p>{az.errorsOther}</p>
+        <p><a href={localizedPath(lang, '/docs/cli/pull/#pull-errors')}>{az.errorsMore}</a></p>
+      </section>
+
+      <section id="guide-saas" class="docs-section">
+        <h2>{az.saasTitle}</h2>
+        <p>{az.saasDesc}</p>
+        <ul class="docs-list">
+          {az.saasItems.map((item) => <li>{item}</li>)}
+        </ul>
+        <p>{az.saasFair}</p>
+      </section>
+
+      <section id="guide-related" class="docs-section">
+        <h2>{az.relatedTitle}</h2>
+        <ul class="docs-list">
+          <li><a href={localizedPath(lang, '/docs/providers/azure-key-vault/')}>{az.relatedAzure}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/pull/')}>{az.relatedPull}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/push/')}>{az.relatedPush}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/exec/')}>{az.relatedExec}</a></li>
+          <li><a href={localizedPath(lang, '/docs/map-file/')}>{az.relatedMap}</a></li>
         </ul>
       </section>
     </>
