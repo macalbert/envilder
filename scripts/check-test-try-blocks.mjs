@@ -177,8 +177,11 @@ function lineAt(text, offset) {
 const TS_IDENTIFIER = /(?<![\w$])(?<!\.\s*)[A-Za-z_$][\w$]*/g;
 const TS_FUNCTION =
   /\bfunction\s*\*?\s*([A-Za-z_$][\w$]*)\s*(?:<[^>(]*>)?\s*\(/g;
-const TS_ARROW =
-  /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*(?::[^=]*)?=\s*(?:async\s+)?(\(|function\b)/g;
+const TS_INITIALIZER =
+  /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*(?::[^=]*)?=\s*(?:async\s+)?(?=\(|function\b|[A-Za-z_$][\w$]*\s*=>)/g;
+// The arrow must follow the parameters, after an optional return type.
+const ARROW_AFTER_PARAMETERS = /\s*(?::[^;=]*?)?=>/y;
+const ARROW_AFTER_PARAMETER = /[A-Za-z_$][\w$]*\s*=>/y;
 
 function closingBraceOf(masked, start) {
   let depth = 0;
@@ -240,33 +243,54 @@ function typeScriptBlock(text, masked, name, start, end) {
   };
 }
 
+/** Returns the braced body of a function whose parameters open here. */
+function functionBody(masked, parametersOpen) {
+  const open = bodyOpenAfter(masked, closingOf(masked, parametersOpen) + 1);
+  return open === undefined
+    ? undefined
+    : { start: open, end: closingBraceOf(masked, open) };
+}
+
+/** Returns where the `=>` of an arrow whose parameters start here ends. */
+function arrowEndAt(masked, from) {
+  const arrow =
+    masked[from] === '(' ? ARROW_AFTER_PARAMETERS : ARROW_AFTER_PARAMETER;
+  arrow.lastIndex = masked[from] === '(' ? closingOf(masked, from) + 1 : from;
+  return arrow.exec(masked) ? arrow.lastIndex : undefined;
+}
+
+function arrowBody(masked, arrowEnd) {
+  const start = arrowEnd + masked.slice(arrowEnd).search(/\S/);
+  const end =
+    masked[start] === '{'
+      ? closingBraceOf(masked, start)
+      : expressionEnd(masked, start);
+  return { start, end };
+}
+
+/** Returns the body of a function assigned to a variable, if it is one. */
+function initializerBody(masked, from) {
+  if (masked.startsWith('function', from)) {
+    return functionBody(masked, masked.indexOf('(', from));
+  }
+  const arrowEnd = arrowEndAt(masked, from);
+  return arrowEnd === undefined ? undefined : arrowBody(masked, arrowEnd);
+}
+
 function typeScriptHelpers(text, masked) {
-  const helpers = [];
-  for (const match of masked.matchAll(TS_FUNCTION)) {
-    const close = closingOf(masked, match.index + match[0].length - 1);
-    const open = bodyOpenAfter(masked, close + 1);
-    if (open !== undefined) {
-      const end = closingBraceOf(masked, open);
-      helpers.push(typeScriptBlock(text, masked, match[1], open, end));
-    }
-  }
-  for (const match of masked.matchAll(TS_ARROW)) {
-    if (match[2] !== '(') {
-      continue;
-    }
-    const close = closingOf(masked, match.index + match[0].length - 1);
-    const arrow = masked.indexOf('=>', close);
-    if (arrow === -1) {
-      continue;
-    }
-    const bodyStart = masked.slice(arrow + 2).search(/\S/) + arrow + 2;
-    const end =
-      masked[bodyStart] === '{'
-        ? closingBraceOf(masked, bodyStart)
-        : expressionEnd(masked, bodyStart);
-    helpers.push(typeScriptBlock(text, masked, match[1], bodyStart, end));
-  }
-  return helpers;
+  const declared = [...masked.matchAll(TS_FUNCTION)].map((match) => ({
+    name: match[1],
+    body: functionBody(masked, match.index + match[0].length - 1),
+  }));
+  const assigned = [...masked.matchAll(TS_INITIALIZER)].map((match) => ({
+    name: match[1],
+    body: initializerBody(masked, match.index + match[0].length),
+  }));
+  return [...declared, ...assigned]
+    .filter(({ body }) => body !== undefined)
+    .map(({ name, body }) =>
+      typeScriptBlock(text, masked, name, body.start, body.end),
+    );
 }
 
 function parseTypeScript(text) {
@@ -296,14 +320,26 @@ function codeLines(text) {
 }
 
 const IDENTIFIER = /[A-Za-z_]\w*/g;
+const STRING_LITERAL = /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g;
+const PYTHON_COMMENT = /#.*/;
+const CSHARP_COMMENT = /\/\/.*/;
 
-function lineBlock(name, lines, tryPattern) {
+/** Keeps the code of a line: drops string literals, then the comment. */
+function codeOf(line, comment) {
+  return line.replace(STRING_LITERAL, '""').replace(comment, '');
+}
+
+function lineBlock(name, lines, tryPattern, comment) {
   return {
     name,
     tries: lines
       .filter(({ line }) => tryPattern.test(line))
       .map(({ number }) => number),
-    refs: new Set(lines.flatMap(({ line }) => line.match(IDENTIFIER) ?? [])),
+    refs: new Set(
+      lines.flatMap(
+        ({ line }) => codeOf(line, comment).match(IDENTIFIER) ?? [],
+      ),
+    ),
   };
 }
 
@@ -330,7 +366,7 @@ function parsePython(text) {
       body.push(lines[index]);
     }
     const name = declaration[2];
-    const block = lineBlock(name, body, PYTHON_TRY);
+    const block = lineBlock(name, body, PYTHON_TRY, PYTHON_COMMENT);
     (PYTHON_TEST_NAME.test(name) ? tests : helpers).push(block);
   });
   return { tests, helpers };
@@ -370,7 +406,7 @@ function parseCSharp(text) {
     const declaration = line.match(CSHARP_METHOD);
     if (declaration) {
       const body = cSharpBody(lines, start, declaration[1].length);
-      const block = lineBlock(declaration[2], body, CSHARP_TRY);
+      const block = lineBlock(declaration[2], body, CSHARP_TRY, CSHARP_COMMENT);
       (isTest ? tests : helpers).push(block);
     }
     isTest = false;

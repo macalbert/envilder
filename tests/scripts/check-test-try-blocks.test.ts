@@ -61,6 +61,77 @@ describe('findTryBlocksInTests', () => {
     ]);
   });
 
+  it('Should_ReportTryBlock_When_HelperIsBareArrowOrFunctionExpression', () => {
+    // Arrange
+    const source = [
+      'const read = name => { try { a(name); } catch {} };',
+      'const write = async function () { try { a(); } catch {} };',
+      "it('forms', async () => { expect(read('x') ?? (await write())).toBe(1); });",
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.ts', source);
+
+    // Assert
+    expect(actual).toEqual([
+      { line: 1, test: 'forms', helper: 'read' },
+      { line: 2, test: 'forms', helper: 'write' },
+    ]);
+  });
+
+  it('Should_ReportNothing_When_ParenthesizedInitializerPrecedesHookArrow', () => {
+    // Arrange
+    const source = [
+      'const options = ({ retries: 1 });',
+      'beforeEach(() => { try { prepare(); } finally { cleanup(); } });',
+      "it('ok', () => { expect(options.retries).toBe(1); });",
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.ts', source);
+
+    // Assert
+    expect(actual).toEqual([]);
+  });
+
+  it('Should_ReportNothing_When_HelperNameAppearsOnlyInStringOrComment', () => {
+    // Arrange
+    const python = [
+      'def cleanup():',
+      '    try:',
+      '        release()',
+      '    finally:',
+      '        finish()',
+      '',
+      'def Should_ReturnName_When_Called():',
+      '    assert get_name() == "cleanup"  # cleanup',
+    ].join('\n');
+    const cSharp = [
+      'public class ClientTests',
+      '{',
+      '\tprivate static void Cleanup()',
+      '\t{',
+      '\t\ttry { Release(); } finally { Finish(); }',
+      '\t}',
+      '',
+      '\t[Fact]',
+      '\tpublic void Should_ReturnName_When_Called()',
+      '\t{',
+      '\t\tGetName().Should().Be("Cleanup"); // Cleanup',
+      '\t}',
+      '}',
+    ].join('\n');
+
+    // Act
+    const actual = [
+      ...findTryBlocksInTests('tests/test_client.py', python),
+      ...findTryBlocksInTests('tests/ClientTests.cs', cSharp),
+    ];
+
+    // Assert
+    expect(actual).toEqual([]);
+  });
+
   it('Should_ReportTryBlock_When_HelperReachesAnotherHelperWithTry', () => {
     // Arrange
     const source = [
