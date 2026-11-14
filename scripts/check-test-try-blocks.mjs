@@ -320,26 +320,38 @@ function codeLines(text) {
 }
 
 const IDENTIFIER = /[A-Za-z_]\w*/g;
-const STRING_LITERAL = /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g;
-const PYTHON_COMMENT = /#.*/;
-const CSHARP_COMMENT = /\/\/.*/;
+// An optional prefix (f"", $"", $@"") marks a string that interpolates code.
+const STRING_LITERAL =
+  /(?<![\w$@])([A-Za-z$@]{0,3})("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/g;
+const INTERPOLATING_PREFIX = /[fF$]/;
+const INTERPOLATION = /\{[^{}]*\}/g;
+const PYTHON_COMMENTS = [/#.*/g];
+const CSHARP_COMMENTS = [/\/\*[\s\S]*?\*\//g, /\/\/.*/g];
 
-/** Keeps the code of a line: drops string literals, then the comment. */
-function codeOf(line, comment) {
-  return line.replace(STRING_LITERAL, '""').replace(comment, '');
+/**
+ * Keeps the code of a body: each string literal becomes the expressions it
+ * interpolates, then comments are dropped.
+ */
+function codeOf(body, comments) {
+  const withoutStrings = body.replace(STRING_LITERAL, (_, prefix, literal) =>
+    INTERPOLATING_PREFIX.test(prefix)
+      ? ` ${(literal.match(INTERPOLATION) ?? []).join(' ')} `
+      : ' ',
+  );
+  return comments.reduce(
+    (code, comment) => code.replace(comment, ' '),
+    withoutStrings,
+  );
 }
 
-function lineBlock(name, lines, tryPattern, comment) {
+function lineBlock(name, lines, tryPattern, comments) {
+  const body = lines.map(({ line }) => line).join('\n');
   return {
     name,
     tries: lines
       .filter(({ line }) => tryPattern.test(line))
       .map(({ number }) => number),
-    refs: new Set(
-      lines.flatMap(
-        ({ line }) => codeOf(line, comment).match(IDENTIFIER) ?? [],
-      ),
-    ),
+    refs: new Set(codeOf(body, comments).match(IDENTIFIER)),
   };
 }
 
@@ -366,7 +378,7 @@ function parsePython(text) {
       body.push(lines[index]);
     }
     const name = declaration[2];
-    const block = lineBlock(name, body, PYTHON_TRY, PYTHON_COMMENT);
+    const block = lineBlock(name, body, PYTHON_TRY, PYTHON_COMMENTS);
     (PYTHON_TEST_NAME.test(name) ? tests : helpers).push(block);
   });
   return { tests, helpers };
@@ -406,7 +418,12 @@ function parseCSharp(text) {
     const declaration = line.match(CSHARP_METHOD);
     if (declaration) {
       const body = cSharpBody(lines, start, declaration[1].length);
-      const block = lineBlock(declaration[2], body, CSHARP_TRY, CSHARP_COMMENT);
+      const block = lineBlock(
+        declaration[2],
+        body,
+        CSHARP_TRY,
+        CSHARP_COMMENTS,
+      );
       (isTest ? tests : helpers).push(block);
     }
     isTest = false;

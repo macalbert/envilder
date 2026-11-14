@@ -118,6 +118,10 @@ describe('findTryBlocksInTests', () => {
       '\tpublic void Should_ReturnName_When_Called()',
       '\t{',
       '\t\tGetName().Should().Be("Cleanup"); // Cleanup',
+      '\t\t/* Cleanup */',
+      '\t\t/*',
+      '\t\t   Cleanup',
+      '\t\t*/',
       '\t}',
       '}',
     ].join('\n');
@@ -130,6 +134,47 @@ describe('findTryBlocksInTests', () => {
 
     // Assert
     expect(actual).toEqual([]);
+  });
+
+  it('Should_ReportTryBlock_When_HelperIsCalledInsideInterpolation', () => {
+    // Arrange
+    const python = [
+      'def cleanup():',
+      '    try:',
+      '        release()',
+      '    finally:',
+      '        finish()',
+      '',
+      'def Should_ReturnName_When_Called():',
+      '    assert get_name() == f"{cleanup()}"',
+    ].join('\n');
+    const cSharp = [
+      'public class ClientTests',
+      '{',
+      '\tprivate static string Cleanup()',
+      '\t{',
+      '\t\ttry { return Release(); } finally { Finish(); }',
+      '\t}',
+      '',
+      '\t[Fact]',
+      '\tpublic void Should_ReturnName_When_Called()',
+      '\t{',
+      '\t\tGetName().Should().Be($"{Cleanup()}");',
+      '\t}',
+      '}',
+    ].join('\n');
+
+    // Act
+    const actual = [
+      ...findTryBlocksInTests('tests/test_client.py', python),
+      ...findTryBlocksInTests('tests/ClientTests.cs', cSharp),
+    ];
+
+    // Assert
+    expect(actual).toEqual([
+      { line: 2, test: 'Should_ReturnName_When_Called', helper: 'cleanup' },
+      { line: 5, test: 'Should_ReturnName_When_Called', helper: 'Cleanup' },
+    ]);
   });
 
   it('Should_ReportTryBlock_When_HelperReachesAnotherHelperWithTry', () => {
