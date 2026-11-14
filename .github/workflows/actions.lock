@@ -22,7 +22,7 @@ workflows:
         - 'actions/upload-pages-artifact@v5'
         - 'astral-sh/setup-uv@v7'
         - 'aws-actions/configure-aws-credentials@v6.3.0'
-        - 'danielpalme/reportgenerator-github-action@5.5.12'
+        - 'danielpalme/reportgenerator-github-action@v5.5.12'
         - 'pnpm/action-setup@v6'
     '.github/workflows/dependabot-automerge.yml':
         - 'dependabot/fetch-metadata@v3'
@@ -199,8 +199,8 @@ dependencies:
         commit: 'sha1-e1253824e5c10ff9df46874f81ed3ec929e19cfd'
         owner_id: 57468012
         repo_id: 220391287
-    'danielpalme/reportgenerator-github-action@5.5.12':
-        ref: '5.5.12'
+    'danielpalme/reportgenerator-github-action@v5.5.12':
+        ref: 'v5.5.12'
         commit: 'sha1-861674232075b2c6bd1405a04c4bb9b150653e81'
         owner_id: 859606
         repo_id: 240972573
