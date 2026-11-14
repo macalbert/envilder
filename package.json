@@ -102,7 +102,7 @@
     "@aws-sdk/client-sts": "^3.1149.0",
     "@aws-sdk/credential-providers": "^3.1149.0",
     "@azure/core-rest-pipeline": "^1.23.0",
-    "@azure/identity": "^4.13.1",
+    "@azure/identity": "^4.14.1",
     "@azure/keyvault-secrets": "^4.11.2",
     "commander": "^15.0.0",
     "cross-spawn": "^7.0.6",

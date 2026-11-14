@@ -48,6 +48,12 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
   secrets block from the AWS identity banner above it, and the
   `✓ All N secrets exist` summary from the list of secrets.
 
+### Security
+
+* Raise the minimum `@azure/identity` to `^4.14.1`, the first release that
+  depends on `@azure/msal-node` 7.1 or later, which fixes an authorization
+  code flow that could disclose parameters to an attacker-controlled endpoint
+
 ---
 
 ## [0.20.0] - 2026-11-01
