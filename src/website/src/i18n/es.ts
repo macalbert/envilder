@@ -902,7 +902,7 @@ export const es: Translations = {
       thVaultSecret: 'Secreto en Key Vault',
       thVariable: 'Variable en .env',
       pushDesc:
-        'Haz push de cada valor una sola vez. Un push de un solo secreto escribe el valor en el vault y, en el mismo paso, crea envilder.json o le añade la entrada (CLI 0.16 o superior). El primer comando también guarda el proveedor y la URL del vault, así que los dos siguientes no necesitan ninguna opción:',
+        'Haz push de cada valor una sola vez. Un push de un solo secreto escribe el valor en el vault y, en el mismo paso, crea envilder.json o le añade la entrada (CLI 0.16 o superior). Cada push indica el proveedor y el vault, porque un push va a AWS SSM si no se le dice lo contrario. El primero también los guarda en envilder.json como $config, así que pull y exec no necesitan ninguna opción:',
       pushOutputDesc:
         'Líneas de resultado de cada comando (se omiten las líneas de cabecera). Los valores y las rutas están enmascarados:',
       pushResultDesc:
@@ -928,7 +928,7 @@ export const es: Translations = {
         'El resumen va a stderr, así que nunca se mezcla con la salida de tu comando, que lee los valores como variables de entorno normales.',
       whenTitle: 'Cuál usar',
       whenItems: [
-        'Usa envilder exec cuando inicias tú el proceso: scripts npm, tests, migraciones. No queda ningún archivo con secretos en disco, y un secreto que falta o no se puede leer detiene el comando antes de que empiece (código de salida 125).',
+        'Usa envilder exec cuando inicias tú el proceso: scripts npm, tests, migraciones. No escribe ningún archivo; si ya hiciste pull de un .env, bórralo al cambiar. Un secreto que falta o no se puede leer detiene el comando antes de que empiece (código de salida 125).',
         'Usa un archivo .env cuando una herramienta lee el archivo por ruta o no puedes envolver su comando de inicio: env_file de Docker Compose, una configuración de ejecución del IDE, un framework que carga .env él mismo. Un secreto que falta es solo un aviso en este modo, así que mira el resumen (2/3 en lugar de 3/3).',
       ],
       errorsTitle: 'Errores habituales',

@@ -899,7 +899,7 @@ export const ca: Translations = {
       thVaultSecret: 'Secret a Key Vault',
       thVariable: 'Variable al .env',
       pushDesc:
-        "Fes push de cada valor una sola vegada. Un push d'un sol secret escriu el valor al vault i, en el mateix pas, crea envilder.json o hi afegeix l'entrada (CLI 0.16 o superior). La primera ordre també desa el proveïdor i la URL del vault, així que les dues següents no necessiten cap opció:",
+        "Fes push de cada valor una sola vegada. Un push d'un sol secret escriu el valor al vault i, en el mateix pas, crea envilder.json o hi afegeix l'entrada (CLI 0.16 o superior). Cada push indica el proveïdor i el vault, perquè un push va a AWS SSM si no se li diu el contrari. El primer també els desa a envilder.json com a $config, així que pull i exec no necessiten cap opció:",
       pushOutputDesc:
         "Línies de resultat de cada ordre (s'ometen les línies de capçalera). Els valors i les rutes estan emmascarats:",
       pushResultDesc:
@@ -925,7 +925,7 @@ export const ca: Translations = {
         "El resum va a stderr, així que mai es barreja amb la sortida de la teva ordre, que llegeix els valors com a variables d'entorn normals.",
       whenTitle: 'Quin fer servir',
       whenItems: [
-        "Fes servir envilder exec quan inicies tu el procés: scripts npm, tests, migracions. No queda cap fitxer amb secrets al disc, i un secret que falta o no es pot llegir atura l'ordre abans que comenci (codi de sortida 125).",
+        "Fes servir envilder exec quan inicies tu el procés: scripts npm, tests, migracions. No escriu cap fitxer; si ja havies fet pull d'un .env, esborra'l quan canviïs. Un secret que falta o no es pot llegir atura l'ordre abans que comenci (codi de sortida 125).",
         "Fes servir un fitxer .env quan una eina llegeix el fitxer per ruta o no pots embolcallar-ne l'ordre d'inici: env_file de Docker Compose, una configuració d'execució de l'IDE, un framework que carrega .env ell mateix. Un secret que falta només és un avís en aquest mode, així que mira el resum (2/3 en comptes de 3/3).",
       ],
       errorsTitle: 'Errors habituals',

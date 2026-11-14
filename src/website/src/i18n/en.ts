@@ -892,7 +892,7 @@ export const en: Translations = {
       thVaultSecret: 'Secret in Key Vault',
       thVariable: 'Variable in .env',
       pushDesc:
-        'Push each value once. A single-secret push writes the value to the vault and, in the same step, creates envilder.json or adds the entry to it (CLI 0.16 or later). The first command also records the provider and the vault URL, so the next two need no flags:',
+        'Push each value once. A single-secret push writes the value to the vault and, in the same step, creates envilder.json or adds the entry to it (CLI 0.16 or later). Each push names the provider and the vault, because a push targets AWS SSM unless told otherwise. The first one also records them in envilder.json as $config, so pull and exec need no flags:',
       pushOutputDesc:
         'Result lines of each command (the header lines are left out). Values and paths are masked:',
       pushResultDesc:
@@ -917,7 +917,7 @@ export const en: Translations = {
         'The summary goes to stderr, so it never mixes with the output of your command, which reads the values as ordinary environment variables.',
       whenTitle: 'Which one to use',
       whenItems: [
-        'Use envilder exec when you start the process yourself: npm scripts, tests, migrations. No file with secrets stays on disk, and a missing or unreadable secret stops the command before it starts (exit code 125).',
+        'Use envilder exec when you start the process yourself: npm scripts, tests, migrations. It writes no file; if you already pulled a .env, delete it when you switch. A missing or unreadable secret stops the command before it starts (exit code 125).',
         'Use a .env file when a tool reads the file by path or you cannot wrap its start command: Docker Compose env_file, an IDE run configuration, a framework that loads .env itself. A missing secret is only a warning in this mode, so check the summary (2/3 instead of 3/3).',
       ],
       errorsTitle: 'Common errors',

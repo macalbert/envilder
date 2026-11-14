@@ -265,9 +265,11 @@ const azGuideNaming = [
 const azGuidePushCmd = `envilder --push --provider=azure --vault-url=https://my-vault.vault.azure.net \\
   --key=DB_PASSWORD --value=local-dev-password \\
   --secret-path=/my-app/dev/db-password
-envilder --push --key=API_TOKEN --value=dev-token-7f3a9c21 \\
+envilder --push --provider=azure --vault-url=https://my-vault.vault.azure.net \\
+  --key=API_TOKEN --value=dev-token-7f3a9c21 \\
   --secret-path=/my-app/dev/api-token
-envilder --push --key=DATABASE_URL \\
+envilder --push --provider=azure --vault-url=https://my-vault.vault.azure.net \\
+  --key=DATABASE_URL \\
   --value='postgres://app:p@ss w0rd#1@db.internal:5432/app' \\
   --secret-path=/my-app/dev/database-url`;
 
