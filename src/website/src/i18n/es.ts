@@ -898,11 +898,11 @@ export const es: Translations = {
         'Key Vault solo acepta letras, dígitos y guiones en el nombre de un secreto, y compara los nombres sin distinguir mayúsculas. Una referencia que Key Vault rechaza, por ejemplo una con _ o ., falla con el error del propio Key Vault. Dos referencias que resuelven al mismo nombre en una ejecución se detienen con un error de colisión. El nombre de variable a la izquierda de la entrada es libre: DB_PASSWORD es válido aunque el secreto no pueda contener un guion bajo.',
       exampleTitle: 'Ejemplo: de secretos de Key Vault a un archivo .env',
       exampleDesc:
-        'Partimos de un vault vacío y creamos tres secretos. Cada uno se lee en una variable:',
+        'Partimos de una carpeta sin envilder.json y de un vault vacío, y creamos tres secretos. Cada uno se lee en una variable. Si el proyecto ya tiene un envilder.json para otro almacén, pasa --map con un archivo separado a cada comando de push, pull y exec:',
       thVaultSecret: 'Secreto en Key Vault',
       thVariable: 'Variable en .env',
       pushDesc:
-        'Haz push de cada valor una sola vez. Un push de un solo secreto escribe el valor en el vault y, en el mismo paso, crea envilder.json o le añade la entrada (CLI 0.16 o superior). Cada push indica el proveedor y el vault, porque un push va a AWS SSM si no se le dice lo contrario. El primero también los guarda en envilder.json como $config, así que pull y exec no necesitan ninguna opción:',
+        'Haz push de cada valor una sola vez. Un push de un solo secreto escribe el valor en el vault y, en el mismo paso, crea envilder.json o le añade la entrada (CLI 0.16 o superior). Cada push indica el proveedor y el vault, así que el secreto va a Key Vault diga lo que diga el archivo de mapeo. El primero crea envilder.json con esos valores en $config, así que pull y exec no necesitan ninguna opción:',
       pushOutputDesc:
         'Líneas de resultado de cada comando (se omiten las líneas de cabecera). Los valores y las rutas están enmascarados:',
       pushResultDesc:

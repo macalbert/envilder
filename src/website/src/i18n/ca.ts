@@ -895,11 +895,11 @@ export const ca: Translations = {
         "Key Vault només accepta lletres, dígits i guionets en el nom d'un secret, i compara els noms sense distingir majúscules. Una referència que Key Vault rebutja, per exemple una amb _ o ., falla amb l'error del mateix Key Vault. Dues referències que resolen al mateix nom en una execució s'aturen amb un error de col·lisió. El nom de variable de l'esquerra de l'entrada és lliure: DB_PASSWORD és correcte tot i que el secret no pot contenir un guió baix.",
       exampleTitle: 'Exemple: de secrets de Key Vault a un fitxer .env',
       exampleDesc:
-        "Partim d'un vault buit i creem tres secrets. Cadascun es llegeix en una variable:",
+        "Partim d'una carpeta sense envilder.json i d'un vault buit, i creem tres secrets. Cadascun es llegeix en una variable. Si el projecte ja té un envilder.json per a un altre magatzem, passa --map amb un fitxer separat a cada ordre de push, pull i exec:",
       thVaultSecret: 'Secret a Key Vault',
       thVariable: 'Variable al .env',
       pushDesc:
-        "Fes push de cada valor una sola vegada. Un push d'un sol secret escriu el valor al vault i, en el mateix pas, crea envilder.json o hi afegeix l'entrada (CLI 0.16 o superior). Cada push indica el proveïdor i el vault, perquè un push va a AWS SSM si no se li diu el contrari. El primer també els desa a envilder.json com a $config, així que pull i exec no necessiten cap opció:",
+        "Fes push de cada valor una sola vegada. Un push d'un sol secret escriu el valor al vault i, en el mateix pas, crea envilder.json o hi afegeix l'entrada (CLI 0.16 o superior). Cada push indica el proveïdor i el vault, així que el secret va a Key Vault digui el que digui el fitxer de mapatge. El primer crea envilder.json amb aquests valors a $config, així que pull i exec no necessiten cap opció:",
       pushOutputDesc:
         "Línies de resultat de cada ordre (s'ometen les línies de capçalera). Els valors i les rutes estan emmascarats:",
       pushResultDesc:

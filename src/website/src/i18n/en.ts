@@ -888,11 +888,11 @@ export const en: Translations = {
         'Key Vault accepts only letters, digits and hyphens in a secret name, and compares names without case. A reference that Key Vault rejects, for example one with _ or ., fails with the error from Key Vault itself. Two references that resolve to the same name in one run stop with a collision error. The variable name on the left of the entry is free: DB_PASSWORD is fine even though the secret cannot contain an underscore.',
       exampleTitle: 'Example: from Key Vault secrets to a .env file',
       exampleDesc:
-        'We start with an empty vault and create three secrets. Each one is read into one variable:',
+        'We start in a folder with no envilder.json and an empty vault, and create three secrets. Each one is read into one variable. If the project already has an envilder.json for another store, pass --map with a separate file to every push, pull and exec command:',
       thVaultSecret: 'Secret in Key Vault',
       thVariable: 'Variable in .env',
       pushDesc:
-        'Push each value once. A single-secret push writes the value to the vault and, in the same step, creates envilder.json or adds the entry to it (CLI 0.16 or later). Each push names the provider and the vault, because a push targets AWS SSM unless told otherwise. The first one also records them in envilder.json as $config, so pull and exec need no flags:',
+        'Push each value once. A single-secret push writes the value to the vault and, in the same step, creates envilder.json or adds the entry to it (CLI 0.16 or later). Each push names the provider and the vault, so the secret goes to Key Vault whatever the map file says. The first one creates envilder.json with them in $config, so pull and exec need no flags:',
       pushOutputDesc:
         'Result lines of each command (the header lines are left out). Values and paths are masked:',
       pushResultDesc:
