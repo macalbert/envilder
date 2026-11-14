@@ -1,5 +1,86 @@
-import { describe, expect, it } from 'vitest';
-import { findTryBlocksInTests } from '../../scripts/check-test-try-blocks.mjs';
+import { execFileSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
+import { describe, expect, it, onTestFinished } from 'vitest';
+import {
+  checkRepository,
+  findTryBlocksInTests,
+} from '../../scripts/check-test-try-blocks.mjs';
+
+const TRY_IN_TEST = "it('fails', () => { try { a(); } catch {} });";
+
+/** Creates a git repository whose index tracks the given files. */
+function aRepository(files: Record<string, string>): string {
+  const dir = mkdtempSync(join(tmpdir(), 'check-test-try-blocks-'));
+  onTestFinished(() => rmSync(dir, { recursive: true, force: true }));
+  execFileSync('git', ['init', '--quiet'], { cwd: dir });
+  for (const [path, content] of Object.entries(files)) {
+    mkdirSync(dirname(join(dir, path)), { recursive: true });
+    writeFileSync(join(dir, path), content);
+  }
+  execFileSync('git', ['add', '.'], { cwd: dir });
+  return dir;
+}
+
+describe('checkRepository', () => {
+  it('Should_FailWithAnnotation_When_TrackedTestHasTryBlock', () => {
+    // Arrange
+    const dir = aRepository({
+      'tests/a.test.ts': TRY_IN_TEST,
+      'tests/helper.ts': TRY_IN_TEST,
+      'src/notes.md': TRY_IN_TEST,
+    });
+
+    // Act
+    const actual = checkRepository(dir);
+
+    // Assert
+    expect(actual).toEqual({
+      exitCode: 1,
+      message: expect.stringMatching(
+        /^::error file=tests\/a\.test\.ts,line=1::try block inside test "fails"\./,
+      ),
+    });
+  });
+
+  it('Should_PassAndCountFiles_When_TrackedTestsHaveNoTryBlock', () => {
+    // Arrange
+    const dir = aRepository({
+      'tests/a.test.ts': "it('ok', () => { expect(1).toBe(1); });",
+      'tests/test_client.py': 'def Should_Pass():\n    assert True\n',
+      'tests/deleted.test.ts': TRY_IN_TEST,
+    });
+    rmSync(join(dir, 'tests/deleted.test.ts'));
+
+    // Act
+    const actual = checkRepository(dir);
+
+    // Assert
+    expect(actual).toEqual({
+      exitCode: 0,
+      message: 'No try blocks inside tests in 2 test files.',
+    });
+  });
+
+  it('Should_NameHelperInAnnotation_When_TestReachesHelperWithTry', () => {
+    // Arrange
+    const dir = aRepository({
+      'tests/a.test.ts': [
+        'function run() { try { a(); } catch {} }',
+        "it('calls', () => { expect(run()).toBe(1); });",
+      ].join('\n'),
+    });
+
+    // Act
+    const actual = checkRepository(dir);
+
+    // Assert
+    expect(actual.message).toContain(
+      'try block in helper "run", called from test "calls"',
+    );
+  });
+});
 
 describe('findTryBlocksInTests', () => {
   it('Should_ReportTryBlock_When_VitestTestBodyHasTryFinally', () => {
@@ -206,6 +287,103 @@ describe('findTryBlocksInTests', () => {
     expect(actual).toEqual([
       { line: 2, test: 'Should_FormatName_When_Called', helper: 'cleanup' },
     ]);
+  });
+
+  it('Should_ReportTryBlock_When_HelperDeclaresObjectReturnType', () => {
+    // Arrange
+    const source = [
+      'function run(): { code: number; output: string } {',
+      "  try { return { code: 0, output: '' }; } catch { return { code: 1, output: '' }; }",
+      '}',
+      "it('typed', () => { expect(run().code).toBe(0); });",
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.ts', source);
+
+    // Assert
+    expect(actual).toEqual([{ line: 2, test: 'typed', helper: 'run' }]);
+  });
+
+  it('Should_ReportTryBlock_When_ExpressionBodiedArrowCallsHelperWithTry', () => {
+    // Arrange
+    const source = [
+      'function inner() { try { a(); } catch {} }',
+      'const outer = () => inner();',
+      'const unrelated = 1;',
+      "it('expression', () => { expect(outer()).toBe(1); });",
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.ts', source);
+
+    // Assert
+    expect(actual).toEqual([{ line: 1, test: 'expression', helper: 'inner' }]);
+  });
+
+  it('Should_ReportEachTryOnce_When_SeveralTestsReachTheSameHelper', () => {
+    // Arrange
+    const source = [
+      'function run() { try { a(); } catch {} }',
+      "it('first', () => { expect(run()).toBe(1); });",
+      "it('second', () => { expect(run()).toBe(1); });",
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.ts', source);
+
+    // Assert
+    expect(actual).toEqual([{ line: 1, test: 'first', helper: 'run' }]);
+  });
+
+  it('Should_ReportTryBlock_When_TestNameIsDynamicOrHasEscapedQuotes', () => {
+    // Arrange
+    const source = [
+      "it('it\\'s `quoted`', () => { const t = `a\\`b`; try { a(t); } catch {} });",
+      'it(name, () => { try { a(); } catch {} });',
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.ts', source);
+
+    // Assert
+    expect(actual).toEqual([
+      { line: 1, test: "it\\'s `quoted`" },
+      { line: 2, test: '<dynamic name>' },
+    ]);
+  });
+
+  it('Should_ReadNextMethod_When_CSharpHelperHasNoBlockBody', () => {
+    // Arrange
+    const source = [
+      'public class ClientTests',
+      '{',
+      '\tprivate static int Value() => 1;',
+      '',
+      '\t[Fact]',
+      '\tpublic void Should_Read_When_Called()',
+      '\t{',
+      '\t\ttry { Act(Value()); } finally { CleanUp(); }',
+      '\t}',
+      '}',
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/ClientTests.cs', source);
+
+    // Assert
+    expect(actual).toEqual([{ line: 8, test: 'Should_Read_When_Called' }]);
+  });
+
+  it('Should_ReportNothing_When_FileTypeIsNotSupported', () => {
+    // Arrange
+    const source = "it('x', () => { try { a(); } catch {} });";
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.rb', source);
+
+    // Assert
+    expect(actual).toEqual([]);
   });
 
   it('Should_ReportTryBlock_When_HelperReachesAnotherHelperWithTry', () => {

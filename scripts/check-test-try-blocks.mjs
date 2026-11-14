@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
-import { extname } from 'node:path';
+import { extname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const CSHARP_TEST_ATTRIBUTE = /^\s*\[(?:Fact|Theory|SkippableFact)\b/;
@@ -593,22 +593,41 @@ function isTestFile(path) {
   );
 }
 
-function main() {
-  const files = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf-8' })
+function errorAnnotation(path, { line, test, helper }) {
+  const location = helper
+    ? `in helper "${helper}", called from test "${test}"`
+    : `inside test "${test}"`;
+  return `::error file=${path},line=${line}::try block ${location}. Use framework teardown (afterEach, onTestFinished, IAsyncLifetime, pytest yield fixtures) for cleanup and the framework's throw assertions for errors.`;
+}
+
+/**
+ * Checks the tracked test files of the repository at `cwd`, skipping files
+ * deleted from the working tree, and returns the exit code and message.
+ */
+export function checkRepository(cwd) {
+  const files = execFileSync('git', ['ls-files', '-z'], {
+    cwd,
+    encoding: 'utf-8',
+  })
     .split('\0')
-    .filter((path) => isTestFile(path) && existsSync(path));
+    .filter((path) => isTestFile(path) && existsSync(join(cwd, path)));
   const findings = files.flatMap((path) =>
-    findTryBlocksInTests(path, readFileSync(path, 'utf-8')).map(
-      ({ line, test, helper }) =>
-        `::error file=${path},line=${line}::try block ${helper ? `in helper "${helper}", called from test "${test}"` : `inside test "${test}"`}. Use framework teardown (afterEach, onTestFinished, IAsyncLifetime, pytest yield fixtures) for cleanup and the framework's throw assertions for errors.`,
+    findTryBlocksInTests(path, readFileSync(join(cwd, path), 'utf-8')).map(
+      (finding) => errorAnnotation(path, finding),
     ),
   );
-  if (findings.length > 0) {
-    console.log(findings.join('\n'));
-    process.exitCode = 1;
-    return;
-  }
-  console.log(`No try blocks inside tests in ${files.length} test files.`);
+  return findings.length > 0
+    ? { exitCode: 1, message: findings.join('\n') }
+    : {
+        exitCode: 0,
+        message: `No try blocks inside tests in ${files.length} test files.`,
+      };
+}
+
+function main() {
+  const { exitCode, message } = checkRepository(process.cwd());
+  console.log(message);
+  process.exitCode = exitCode;
 }
 
 if (
