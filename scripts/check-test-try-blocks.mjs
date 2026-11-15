@@ -6,7 +6,8 @@ import { pathToFileURL } from 'node:url';
 const CSHARP_TEST_ATTRIBUTE = /^\s*\[(?:Fact|Theory|SkippableFact)\b/;
 const CSHARP_METHOD =
   /^(\s*)(?:(?:public|private|protected|internal|static|async|override|virtual|sealed|unsafe|extern)\s+)+[^=;(]*?\b(\w+)\s*(?:<[^>]*>)?\s*\(/;
-const CSHARP_TRY = /^\s*try\b\s*(?:\{|$)/;
+// A `try` that starts a statement: at the start of a line or after another.
+const CSHARP_TRY = /(?:^|[;{}])\s*try\b\s*(?:\{|$)/;
 // A signature ends where its body opens, or with `;` when it has none.
 const CSHARP_SIGNATURE_END = /[{;]\s*$/;
 // A method whose body opens and closes on the signature line.
@@ -147,8 +148,7 @@ const CODE_STEPS = [
     WORD.lastIndex = scan.index;
     const word = WORD.exec(scan.text);
     if (!word) return false;
-    // A property such as `stats.in` is a value, never a keyword.
-    scan.previous = scan.previous === '.' ? 'value' : word[0];
+    scan.previous = tokenAfterWord(scan.previous, word[0]);
     scan.index += word[0].length;
     return true;
   },
@@ -186,8 +186,18 @@ const BRACE_DEPTH_CHANGE = { '{': 1, '}': -1 };
 const CHARACTER_CLASS_STATE = { '[': true, ']': false };
 
 const REGEX_MAY_FOLLOW =
-  // `of` is left out: unlike these keywords, it is also a valid variable name.
-  /^(?:|[(,=:[!&|?{};+\-*%<>~^]|return|typeof|case|do|else|in|void|yield|await)$/;
+  /^(?:|[(,=:[!&|?{};+\-*%<>~^]|return|typeof|case|do|else|in|of|void|yield|await)$/;
+const LOOP_VARIABLE_END = /^(?:[\w$]+|[\]}])$/;
+
+/**
+ * Returns the token a word leaves for the regex check. A property such as
+ * `stats.in` is a value. `of` is a keyword only right after a loop variable,
+ * as in `for (const ch of /re/)`; elsewhere it is a variable name.
+ */
+function tokenAfterWord(previous, word) {
+  if (previous === '.') return 'value';
+  return word === 'of' && !LOOP_VARIABLE_END.test(previous) ? 'value' : word;
+}
 
 const TEST_CALL = /(?<![\w$.]\s*)\b(?:it|test)(?![\w$])/g;
 const TRY_BLOCK = /\btry\s*\{/g;
@@ -358,16 +368,23 @@ function typeScriptHelpers(text, masked) {
 }
 
 const TEARDOWN_CALL = /\bonTest(?:Finished|Failed)\s*\(/g;
+// A function literal or a reference: it runs later, not while registering.
+const DEFERRED_CALLBACK =
+  /^\s*(?:async\s+)?(?:function\b|\([^)]*\)\s*=>|[\w$]+\s*=>|[\w$.]+\s*$)/;
 
 /**
- * Blanks the arguments of `onTestFinished` and `onTestFailed`: the callbacks
- * a test registers there run as teardown, like hooks.
+ * Blanks the callbacks a test registers with `onTestFinished` or
+ * `onTestFailed`: they run as teardown, like hooks. An argument that calls
+ * a function, such as `onTestFinished(makeCleanup())`, runs now and stays.
  */
 function withoutTeardown(masked) {
   const chars = masked.split('');
   for (const call of masked.matchAll(TEARDOWN_CALL)) {
     const open = call.index + call[0].length - 1;
-    blankChars(chars, open + 1, closingOf(masked, open));
+    const close = closingOf(masked, open);
+    if (DEFERRED_CALLBACK.test(masked.slice(open + 1, close))) {
+      blankChars(chars, open + 1, close);
+    }
   }
   return chars.join('');
 }
@@ -401,7 +418,8 @@ function codeLines(text, codeBeforeComment) {
   let insideTripleQuotes = false;
   return text.split(/\r?\n/).flatMap((line, index) => {
     const wasInside = insideTripleQuotes;
-    const code = line.match(codeBeforeComment)[0];
+    // Inside a string, a comment marker is text: the whole line counts.
+    const code = wasInside ? line : line.match(codeBeforeComment)[0];
     const quotes = (code.match(/"""|'''/g) ?? []).length;
     insideTripleQuotes = insideTripleQuotes !== (quotes % 2 === 1);
     if (wasInside || quotes > 0 || line.trim() === '') {

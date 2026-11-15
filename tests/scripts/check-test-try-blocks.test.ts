@@ -390,6 +390,37 @@ describe('findTryBlocksInTests', () => {
     expect(actual).toEqual([{ line: 2, test: 'of' }]);
   });
 
+  it('Should_ReportNothing_When_ForOfIteratesRegexWithTryText', () => {
+    // Arrange
+    const source = [
+      "it('regex', () => {",
+      '  for (const ch of /try {1}x/.source) { void ch; }',
+      '});',
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.ts', source);
+
+    // Assert
+    expect(actual).toEqual([]);
+  });
+
+  it('Should_ReportTryBlock_When_TeardownArgumentCallsHelperDuringTest', () => {
+    // Arrange
+    const source = [
+      'function makeCleanup() { try { return () => {}; } finally {} }',
+      "it('registers', () => { onTestFinished(makeCleanup()); });",
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.ts', source);
+
+    // Assert
+    expect(actual).toEqual([
+      { line: 1, test: 'registers', helper: 'makeCleanup' },
+    ]);
+  });
+
   it('Should_ReportOnlyDirectCalls_When_TestRegistersTeardownCallback', () => {
     // Arrange
     const source = [
@@ -429,13 +460,32 @@ describe('findTryBlocksInTests', () => {
     expect(actual).toEqual([{ line: 5, test: 'Should_Read_When_Called' }]);
   });
 
+  it('Should_CloseMultilineString_When_ClosingLineLooksLikeComment', () => {
+    // Arrange
+    const source = [
+      '"""',
+      '# """',
+      'def Should_Read_When_Called():',
+      '    try:',
+      '        act()',
+      '    finally:',
+      '        clean_up()',
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/test_client.py', source);
+
+    // Assert
+    expect(actual).toEqual([{ line: 4, test: 'Should_Read_When_Called' }]);
+  });
+
   it('Should_ReadCSharpTest_When_BodyIsOnOneLineOrHasCommentedTry', () => {
     // Arrange
     const source = [
       'public class ClientTests',
       '{',
       '\t[Fact]',
-      '\tpublic void Should_Read_When_Called() { try { Act(); } finally { CleanUp(); } }',
+      '\tpublic void Should_Read_When_Called() { Act(); try { Run(); } finally { CleanUp(); } }',
       '',
       '\t[Fact]',
       '\tpublic void Should_Pass_When_Called()',
