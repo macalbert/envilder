@@ -418,15 +418,17 @@ function codeLines(text, codeBeforeComment) {
   let insideTripleQuotes = false;
   return text.split(/\r?\n/).flatMap((line, index) => {
     const wasInside = insideTripleQuotes;
-    // Inside a string, a comment marker is text: the whole line counts.
-    const code = wasInside ? line : line.match(codeBeforeComment)[0];
-    const quotes = (code.match(/"""|'''/g) ?? []).length;
+    const quotes = tripleQuotesIn(line, wasInside, codeBeforeComment);
     insideTripleQuotes = insideTripleQuotes !== (quotes % 2 === 1);
-    if (wasInside || quotes > 0 || line.trim() === '') {
-      return [];
-    }
-    return [{ line, number: index + 1 }];
+    const isCode = !wasInside && quotes === 0 && line.trim() !== '';
+    return isCode ? [{ line, number: index + 1 }] : [];
   });
+}
+
+/** Counts triple quotes; inside a string, a comment marker is plain text. */
+function tripleQuotesIn(line, insideString, codeBeforeComment) {
+  const code = insideString ? line : line.match(codeBeforeComment)[0];
+  return (code.match(/"""|'''/g) ?? []).length;
 }
 
 const IDENTIFIER = /[A-Za-z_]\w*/g;
