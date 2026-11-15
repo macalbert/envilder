@@ -60,6 +60,13 @@ e2e/                         End-to-end tests (TestContainers)
 - After changing the English text of a docs page, run `pnpm docs:dates` and
   commit `src/website/src/i18n/docs-dates.json`: it keeps each page's
   `dateModified` accurate, and `tests/website` fails when it is stale.
+- `src/website/public/<32 hex>.txt` is the public IndexNow key file (its
+  content is its own name; it is not a secret). The website deploy compares
+  each built page with the live one before `cdk deploy`, then notifies
+  IndexNow of the changed URLs afterwards via
+  `src/website/scripts/indexnow.mjs` (`--dry-run` prints the payload without
+  sending). Both steps are `continue-on-error`, so they never fail a deploy.
+  Do not rename or remove the key file, and do not list it in the sitemap.
 - E2E tests require Docker running (LocalStack AWS + LocalStack Azure containers).
 
 ## Architecture Reference
