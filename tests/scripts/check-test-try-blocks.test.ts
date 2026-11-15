@@ -375,6 +375,96 @@ describe('findTryBlocksInTests', () => {
     expect(actual).toEqual([{ line: 8, test: 'Should_Read_When_Called' }]);
   });
 
+  it('Should_ReportTryBlock_When_DivisionFollowsVariableNamedOf', () => {
+    // Arrange
+    const source = [
+      "it('of', () => {",
+      '  const of = 4; const ratio = of / 2; try { a(ratio); } catch {}',
+      '});',
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.ts', source);
+
+    // Assert
+    expect(actual).toEqual([{ line: 2, test: 'of' }]);
+  });
+
+  it('Should_ReportOnlyDirectCalls_When_TestRegistersTeardownCallback', () => {
+    // Arrange
+    const source = [
+      'function cleanUp() { try { a(); } finally { b(); } }',
+      'function release() { try { a(); } finally { b(); } }',
+      "it('teardown', () => {",
+      '  onTestFinished(cleanUp);',
+      '  onTestFailed(() => { try { a(); } catch {} });',
+      '  expect(release()).toBe(1);',
+      '});',
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.ts', source);
+
+    // Assert
+    expect(actual).toEqual([{ line: 2, test: 'teardown', helper: 'release' }]);
+  });
+
+  it('Should_KeepReadingPythonTests_When_CommentHasTripleQuotesOrNoIndent', () => {
+    // Arrange
+    const source = [
+      '# Example delimiter: """',
+      'def Should_Read_When_Called():',
+      '    act()',
+      '# unindented note',
+      '    try:',
+      '        act()',
+      '    finally:',
+      '        clean_up()',
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/test_client.py', source);
+
+    // Assert
+    expect(actual).toEqual([{ line: 5, test: 'Should_Read_When_Called' }]);
+  });
+
+  it('Should_ReadCSharpTest_When_BodyIsOnOneLineOrHasCommentedTry', () => {
+    // Arrange
+    const source = [
+      'public class ClientTests',
+      '{',
+      '\t[Fact]',
+      '\tpublic void Should_Read_When_Called() { try { Act(); } finally { CleanUp(); } }',
+      '',
+      '\t[Fact]',
+      '\tpublic void Should_Pass_When_Called()',
+      '\t{',
+      '\t\t/*',
+      '\t\ttry { Example(); } finally { CleanUp(); }',
+      '\t\t*/',
+      '\t\tAct().Should().Be(1);',
+      '\t}',
+      '',
+      '\t[Fact]',
+      '\tpublic void Should_Parse_When_JsonHasUrl()',
+      '\t{',
+      '\t\tvar json = """{"url":"https://envilder.com"}""";',
+      '\t\ttry { Act(json); } finally { CleanUp(); }',
+      '\t}',
+      '}',
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/ClientTests.cs', source);
+
+    // Assert
+    expect(actual).toEqual([
+      { line: 4, test: 'Should_Read_When_Called' },
+      { line: 19, test: 'Should_Parse_When_JsonHasUrl' },
+    ]);
+  });
+
   it('Should_ReportNothing_When_FileTypeIsNotSupported', () => {
     // Arrange
     const source = "it('x', () => { try { a(); } catch {} });";

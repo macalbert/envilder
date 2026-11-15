@@ -9,22 +9,29 @@ const CSHARP_METHOD =
 const CSHARP_TRY = /^\s*try\b\s*(?:\{|$)/;
 // A signature ends where its body opens, or with `;` when it has none.
 const CSHARP_SIGNATURE_END = /[{;]\s*$/;
+// A method whose body opens and closes on the signature line.
+const CSHARP_ONE_LINE_BODY = /\{.*\}\s*$/;
 
 const PYTHON_FUNCTION = /^(\s*)(?:async\s+)?def\s+(\w+)\s*\(/;
 // tests/sdks/python/pyproject.toml sets python_functions = ["Should_*"].
 const PYTHON_TEST_NAME = /^Should_/;
 const PYTHON_SIGNATURE_END = /:\s*(?:#.*)?$/;
 const PYTHON_TRY = /^\s*try\s*:/;
+const PYTHON_COMMENT_LINE = /^\s*#/;
 
 function indentationOf(line) {
   return line.match(/^\s*/)[0].length;
 }
 
-/** Blanks a range of the masked text, keeping its line breaks. */
-function blank(scan, from, to) {
-  for (let index = from; index < Math.min(to, scan.masked.length); index++) {
-    if (!LINE_BREAK.test(scan.masked[index])) scan.masked[index] = ' ';
+/** Blanks a range of characters, keeping its line breaks. */
+function blankChars(chars, from, to) {
+  for (let index = from; index < Math.min(to, chars.length); index++) {
+    if (!LINE_BREAK.test(chars[index])) chars[index] = ' ';
   }
+}
+
+function blank(scan, from, to) {
+  blankChars(scan.masked, from, to);
 }
 
 function charAt(scan) {
@@ -179,7 +186,8 @@ const BRACE_DEPTH_CHANGE = { '{': 1, '}': -1 };
 const CHARACTER_CLASS_STATE = { '[': true, ']': false };
 
 const REGEX_MAY_FOLLOW =
-  /^(?:|[(,=:[!&|?{};+\-*%<>~^]|return|typeof|case|do|else|in|of|void|yield|await)$/;
+  // `of` is left out: unlike these keywords, it is also a valid variable name.
+  /^(?:|[(,=:[!&|?{};+\-*%<>~^]|return|typeof|case|do|else|in|void|yield|await)$/;
 
 const TEST_CALL = /(?<![\w$.]\s*)\b(?:it|test)(?![\w$])/g;
 const TRY_BLOCK = /\btry\s*\{/g;
@@ -349,8 +357,23 @@ function typeScriptHelpers(text, masked) {
     );
 }
 
+const TEARDOWN_CALL = /\bonTest(?:Finished|Failed)\s*\(/g;
+
+/**
+ * Blanks the arguments of `onTestFinished` and `onTestFailed`: the callbacks
+ * a test registers there run as teardown, like hooks.
+ */
+function withoutTeardown(masked) {
+  const chars = masked.split('');
+  for (const call of masked.matchAll(TEARDOWN_CALL)) {
+    const open = call.index + call[0].length - 1;
+    blankChars(chars, open + 1, closingOf(masked, open));
+  }
+  return chars.join('');
+}
+
 function parseTypeScript(text) {
-  const masked = maskNonCode(text);
+  const masked = withoutTeardown(maskNonCode(text));
   const tests = [];
   for (const call of masked.matchAll(TEST_CALL)) {
     const args = testArguments(masked, call.index + call[0].length);
@@ -362,11 +385,24 @@ function parseTypeScript(text) {
   return { tests, helpers: typeScriptHelpers(text, masked) };
 }
 
-function codeLines(text) {
+// The code of a line before its comment: strings, closed or not, are kept
+// whole so a comment marker or quote inside them is not read as one. Triple
+// quoted strings come first, as their contents may hold single quotes.
+const TRIPLE_QUOTED = `"""(?:(?!""").)*(?:"""|$)|'''(?:(?!''').)*(?:'''|$)`;
+const QUOTED = `"[^"]*"?|'[^']*'?`;
+const PYTHON_CODE_BEFORE_COMMENT = new RegExp(
+  `^(?:${TRIPLE_QUOTED}|${QUOTED}|[^"'#])*`,
+);
+const CSHARP_CODE_BEFORE_COMMENT = new RegExp(
+  String.raw`^(?:${TRIPLE_QUOTED}|${QUOTED}|[^"'/]|\/(?!\/))*`,
+);
+
+function codeLines(text, codeBeforeComment) {
   let insideTripleQuotes = false;
   return text.split(/\r?\n/).flatMap((line, index) => {
     const wasInside = insideTripleQuotes;
-    const quotes = (line.match(/"""|'''/g) ?? []).length;
+    const code = line.match(codeBeforeComment)[0];
+    const quotes = (code.match(/"""|'''/g) ?? []).length;
     insideTripleQuotes = insideTripleQuotes !== (quotes % 2 === 1);
     if (wasInside || quotes > 0 || line.trim() === '') {
       return [];
@@ -415,26 +451,28 @@ const CSHARP_COMMENTS = [/\/\*[\s\S]*?\*\//g, /\/\/.*/g];
 
 /**
  * Keeps the code of a body: each string literal becomes the expressions it
- * interpolates, then comments are dropped.
+ * interpolates, then comments are blanked. Line breaks stay in place.
  */
 function codeOf(body, comments) {
   const withoutStrings = body.replace(STRING_LITERAL, (_, prefix, literal) =>
     INTERPOLATING_PREFIX.test(prefix) ? ` ${interpolationsOf(literal)} ` : ' ',
   );
   return comments.reduce(
-    (code, comment) => code.replace(comment, ' '),
+    (code, comment) =>
+      code.replace(comment, (text) => text.replace(/[^\n]/g, ' ')),
     withoutStrings,
   );
 }
 
 function lineBlock(name, lines, tryPattern, comments) {
-  const body = lines.map(({ line }) => line).join('\n');
+  const code = codeOf(lines.map(({ line }) => line).join('\n'), comments);
+  const codeByLine = code.split('\n');
   return {
     name,
     tries: lines
-      .filter(({ line }) => tryPattern.test(line))
+      .filter((_, index) => tryPattern.test(codeByLine[index]))
       .map(({ number }) => number),
-    refs: new Set(codeOf(body, comments).match(IDENTIFIER)),
+    refs: new Set(code.match(IDENTIFIER)),
   };
 }
 
@@ -457,11 +495,16 @@ function firstLineMatching(lines, from, pattern) {
 function pythonBody(lines, start, indent) {
   const signatureEnd = firstLineMatching(lines, start, PYTHON_SIGNATURE_END);
   const from = signatureEnd === -1 ? lines.length : signatureEnd + 1;
-  return linesUntil(lines, from, (line) => indentationOf(line) <= indent);
+  return linesUntil(lines, from, (line) => endsPythonBody(line, indent));
+}
+
+/** A line back at the signature's indentation ends the body; a comment never does. */
+function endsPythonBody(line, indent) {
+  return indentationOf(line) <= indent && !PYTHON_COMMENT_LINE.test(line);
 }
 
 function parsePython(text) {
-  const lines = codeLines(text);
+  const lines = codeLines(text, PYTHON_CODE_BEFORE_COMMENT);
   const tests = [];
   const helpers = [];
   lines.forEach(({ line }, start) => {
@@ -479,6 +522,10 @@ function parsePython(text) {
 
 /** Collects a C# method body: the lines between its braces. */
 function cSharpBody(lines, start, indent) {
+  const { line, number } = lines[start];
+  if (CSHARP_ONE_LINE_BODY.test(line)) {
+    return [{ line: line.slice(line.indexOf('{') + 1), number }];
+  }
   const open = firstLineMatching(lines, start, CSHARP_SIGNATURE_END);
   if (open === -1 || lines[open].line.trimEnd().endsWith(';')) {
     return [];
@@ -491,7 +538,7 @@ function cSharpBody(lines, start, indent) {
 }
 
 function parseCSharp(text) {
-  const lines = codeLines(text);
+  const lines = codeLines(text, CSHARP_CODE_BEFORE_COMMENT);
   const tests = [];
   const helpers = [];
   let isTest = false;

@@ -75,9 +75,15 @@ directly or through other helpers: a helper is just a way to share or tidy
 the test's own code. Tests clean up with framework teardown (`afterEach`,
 `onTestFinished`, `IAsyncLifetime`, pytest `yield` fixtures) and check errors
 with throw assertions, so a `try` there hides a failure or skips an assertion
-(see the `common-testing-conventions` skill). Hooks, helpers that only hooks
-call, and code in other files (such as `tests/support/` and the LocalStack
-fixtures) are not checked.
+(see the `common-testing-conventions` skill). Hooks, callbacks registered
+with `onTestFinished` or `onTestFailed`, helpers that only those call, and
+code in other files (such as `tests/support/` and the LocalStack fixtures) are
+not checked.
+
+The check reads source text, not a syntax tree, and follows helpers by name
+within the file. A test that calls a local function with the same name as
+another helper of the file is treated as calling both; rename one of them if
+that reports a `try` the test never runs.
 
 It scans tracked files only and has no dependencies. `pnpm lint` runs it, and
 `test-try-blocks.yml` runs it on PRs that touch tests.
