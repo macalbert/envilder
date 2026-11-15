@@ -399,6 +399,8 @@ describe('findTryBlocksInTests', () => {
     const source = [
       "it('regex', () => {",
       '  for (const ch of /try {1}x/.source) { void ch; }',
+      '  for (const { length } of /try {1}x/.source) { void length; }',
+      '  for (const [first] of /try {1}x/.source) { void first; }',
       '});',
     ].join('\n');
 
@@ -471,6 +473,9 @@ describe('findTryBlocksInTests', () => {
       '# """',
       '"""',
       '# """  # """',
+      '"""',
+      "'''",
+      '"""',
       'def Should_Read_When_Called():',
       '    try:',
       '        act()',
@@ -482,7 +487,7 @@ describe('findTryBlocksInTests', () => {
     const actual = findTryBlocksInTests('tests/test_client.py', source);
 
     // Assert
-    expect(actual).toEqual([{ line: 6, test: 'Should_Read_When_Called' }]);
+    expect(actual).toEqual([{ line: 9, test: 'Should_Read_When_Called' }]);
   });
 
   it('Should_ReadCSharpTest_When_BodyIsOnOneLineOrHasCommentedTry', () => {

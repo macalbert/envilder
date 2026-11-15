@@ -187,6 +187,8 @@ const CHARACTER_CLASS_STATE = { '[': true, ']': false };
 
 const REGEX_MAY_FOLLOW =
   /^(?:|[(,=:[!&|?{};+\-*%<>~^]|return|typeof|case|do|else|in|of|void|yield|await)$/;
+const KEYWORD_BEFORE_REGEX =
+  /^(?:return|typeof|case|do|else|in|of|void|yield|await)$/;
 const LOOP_VARIABLE_END = /^(?:[\w$]+|[\]}])$/;
 
 /**
@@ -201,7 +203,9 @@ function tokenAfterWord(previous, word) {
 
 /** A loop variable is a name or a destructuring, never a keyword like `await`. */
 function endsLoopVariable(previous) {
-  return LOOP_VARIABLE_END.test(previous) && !REGEX_MAY_FOLLOW.test(previous);
+  return (
+    LOOP_VARIABLE_END.test(previous) && !KEYWORD_BEFORE_REGEX.test(previous)
+  );
 }
 
 const TEST_CALL = /(?<![\w$.]\s*)\b(?:it|test)(?![\w$])/g;
@@ -420,41 +424,44 @@ const CSHARP_CODE_BEFORE_COMMENT = new RegExp(
 );
 
 function codeLines(text, codeBeforeComment) {
-  let insideTripleQuotes = false;
+  let openQuote = '';
   return text.split(/\r?\n/).flatMap((line, index) => {
-    const wasInside = insideTripleQuotes;
-    const quotes = tripleQuotesIn(line, wasInside, codeBeforeComment);
-    insideTripleQuotes = insideTripleQuotes !== (quotes % 2 === 1);
-    const isCode = !wasInside && quotes === 0 && line.trim() !== '';
+    const wasInside = openQuote !== '';
+    openQuote = openQuoteAfter(line, openQuote, codeBeforeComment);
+    const hasQuote = TRIPLE_QUOTE.test(line.match(codeBeforeComment)[0]);
+    const isCode = !wasInside && !hasQuote && line.trim() !== '';
     return isCode ? [{ line, number: index + 1 }] : [];
   });
 }
 
 /**
- * Counts triple quotes outside comments. Inside a string, the text up to the
- * closing delimiter is plain text, comment marker or not; after it, the line
- * is code again.
+ * Returns the triple quote left open at the end of a line ('' when none).
+ * Inside a string, only its own delimiter closes it and everything before is
+ * plain text; outside, delimiters in comments are ignored.
  */
-function tripleQuotesIn(line, insideString, codeBeforeComment) {
-  return insideString
-    ? quotesClosingString(line, codeBeforeComment)
-    : quotesInCode(line, codeBeforeComment);
+function openQuoteAfter(line, openQuote, codeBeforeComment) {
+  const scan = { quote: openQuote, rest: line };
+  while (scan.rest !== undefined) {
+    if (scan.quote) closeQuote(scan);
+    else openNextQuote(scan, codeBeforeComment);
+  }
+  return scan.quote;
 }
 
-function quotesClosingString(line, codeBeforeComment) {
-  const close = line.search(TRIPLE_QUOTE);
-  return close === -1
-    ? 0
-    : 1 + quotesInCode(line.slice(close + 3), codeBeforeComment);
+function closeQuote(scan) {
+  const close = scan.rest.indexOf(scan.quote);
+  scan.rest = close === -1 ? undefined : scan.rest.slice(close + 3);
+  scan.quote = close === -1 ? scan.quote : '';
 }
 
-function quotesInCode(line, codeBeforeComment) {
-  const code = line.match(codeBeforeComment)[0];
-  return (code.match(TRIPLE_QUOTES) ?? []).length;
+function openNextQuote(scan, codeBeforeComment) {
+  const code = scan.rest.match(codeBeforeComment)[0];
+  const open = code.search(TRIPLE_QUOTE);
+  scan.quote = open === -1 ? '' : code.slice(open, open + 3);
+  scan.rest = open === -1 ? undefined : scan.rest.slice(open + 3);
 }
 
 const TRIPLE_QUOTE = /"""|'''/;
-const TRIPLE_QUOTES = /"""|'''/g;
 
 const IDENTIFIER = /[A-Za-z_]\w*/g;
 // An optional prefix (f"", $"", $@"") marks a string that interpolates code.
