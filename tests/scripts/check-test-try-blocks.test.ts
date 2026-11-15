@@ -380,6 +380,7 @@ describe('findTryBlocksInTests', () => {
     const source = [
       "it('of', () => {",
       '  const of = 4; const ratio = of / 2; try { a(ratio); } catch {}',
+      '  const awaited = await of / 2; try { a(awaited); } catch {}',
       '});',
     ].join('\n');
 
@@ -387,7 +388,10 @@ describe('findTryBlocksInTests', () => {
     const actual = findTryBlocksInTests('tests/a.test.ts', source);
 
     // Assert
-    expect(actual).toEqual([{ line: 2, test: 'of' }]);
+    expect(actual).toEqual([
+      { line: 2, test: 'of' },
+      { line: 3, test: 'of' },
+    ]);
   });
 
   it('Should_ReportNothing_When_ForOfIteratesRegexWithTryText', () => {
@@ -465,6 +469,8 @@ describe('findTryBlocksInTests', () => {
     const source = [
       '"""',
       '# """',
+      '"""',
+      '# """  # """',
       'def Should_Read_When_Called():',
       '    try:',
       '        act()',
@@ -476,7 +482,7 @@ describe('findTryBlocksInTests', () => {
     const actual = findTryBlocksInTests('tests/test_client.py', source);
 
     // Assert
-    expect(actual).toEqual([{ line: 4, test: 'Should_Read_When_Called' }]);
+    expect(actual).toEqual([{ line: 6, test: 'Should_Read_When_Called' }]);
   });
 
   it('Should_ReadCSharpTest_When_BodyIsOnOneLineOrHasCommentedTry', () => {
