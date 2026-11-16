@@ -27,6 +27,10 @@
     "hash": "1ec2c2ecfdead17cd9a7c869681560c0bb159d4f1876904f4cae7e523b641838",
     "dateModified": "2026-11-14"
   },
+  "/docs/guides/github-actions-ssm/": {
+    "hash": "79db790c78d7a74b0906bb778234b6b9345e79277c57d7211184159ab7d14f3b",
+    "dateModified": "2026-11-16"
+  },
   "/docs/guides/ssm-to-env/": {
     "hash": "6866f0e828239762f615cb6f1d700725226fc41c078ed7dafd4d6b3442ed2fd2",
     "dateModified": "2026-11-05"

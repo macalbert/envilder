@@ -961,6 +961,118 @@ export const ca: Translations = {
       relatedExec: "Referència d'envilder exec",
       relatedMap: 'Referència del fitxer de mapa',
     },
+    guideGithubActionsSsm: {
+      flowTitle: 'Com funciona',
+      flowItems: [
+        "El job demana un token OIDC a GitHub. aws-actions/configure-aws-credentials l'intercanvia per credencials de curta durada d'un rol IAM que només confia en el teu repositori i branca. No es desa cap clau d'accés d'AWS a GitHub.",
+        "L'Envilder Action llegeix envilder.json i crida ssm:GetParameter, amb desxifrat, un cop per variable, amb aquestes credencials. No inicia sessió a AWS per si mateixa.",
+        "Cada valor es registra per a l'emmascarament de logs de GitHub i després s'exporta a l'entorn de tots els passos següents del mateix job.",
+      ],
+      prereqTitle: 'Requisits previs',
+      prereqItems: [
+        "Paràmetres a SSM Parameter Store, en un sol compte i regió. Els paràmetres SecureString funcionen: l'acció els llegeix amb desxifrat.",
+        "Un proveïdor d'identitat OpenID Connect d'IAM per a token.actions.githubusercontent.com en aquest compte, amb audience sts.amazonaws.com. Es crea un sol cop per compte.",
+      ],
+      prereqMapDesc:
+        'Un envilder.json al repositori, amb una entrada per variable, cadascuna apuntant al nom d’un paràmetre:',
+      prereqMapNote:
+        'Per crear els paràmetres i aquest fitxer des de zero, segueix la',
+      prereqMapLink: 'guia SSM a .env',
+      iamTitle: 'Crea el rol IAM',
+      iamTrustDesc:
+        "La política de confiança deixa que GitHub assumeixi el rol per a l'audience sts.amazonaws.com i per a un sol subject: la branca main d'aquest repositori. Substitueix l'ID del compte, l'organització i el repositori:",
+      iamTrustNote:
+        'Un job que apunta a un entorn de GitHub, una etiqueta o una pull request envia un sub diferent, igual que els repositoris que usen subject claims immutables. La referència de GitHub Action llista cada forma.',
+      iamTrustLink: 'Referència de GitHub Action: entorns i subjects OIDC',
+      iamPolicyDesc:
+        "Adjunta una política de permisos que permeti només el que crida Envilder: ssm:GetParameter, un cop per variable, sobre els paràmetres d'aquesta aplicació. Mai llista, escriu ni elimina paràmetres.",
+      iamPolicyNote:
+        "Els paràmetres xifrats amb la clau per defecte aws/ssm no necessiten res més. Afegeix kms:Decrypt sobre la clau només si usen una clau KMS gestionada pel client. L'ARN ha de dur la regió dels paràmetres.",
+      workflowTitle: 'Afegeix Envilder al workflow',
+      workflowDesc:
+        "Inicia sessió primer amb configure-aws-credentials i després executa l'acció. El job necessita id-token: write per demanar el token OIDC. Tots els passos següents llegeixen DB_PASSWORD i API_TOKEN com a variables d'entorn normals:",
+      commentOidc: 'Permet que el job demani un token OIDC',
+      commentUse: 'DB_PASSWORD i API_TOKEN estan definides en aquest pas',
+      workflowOutputDesc:
+        'El log del pas llista cada variable amb el valor emmascarat i acaba amb aquesta línia:',
+      workflowProviderNote:
+        "provider: aws s'escriu expressament. Sense això, el proveïdor surt de $config.provider al fitxer de mapa i per defecte és aws. L'input preval sobre el fitxer de mapa, així que aquest job llegeix SSM encara que el fitxer nomeni un altre proveïdor.",
+      workflowRegionNote:
+        "La regió ve d'aws-region al pas de credencials, que exporta AWS_REGION i AWS_DEFAULT_REGION. Envilder llegeix primer AWS_REGION, després AWS_DEFAULT_REGION, i acaba a us-east-1 si no en troba cap. Un paràmetre desat en una altra regió es reporta com a no trobat.",
+      workflowScopeNote:
+        "Els valors arriben als passos següents a través del fitxer GITHUB_ENV del runner, així que tots els passos següents d'aquest job els poden llegir, incloses les accions de tercers. Els altres jobs no reben res: executa l'acció a cada job que necessiti els valors.",
+      inputsNote:
+        'Aquest workflow només defineix map-file i provider. Els altres inputs i la sortida estan descrits a la',
+      inputsLink: 'referència de GitHub Action',
+      modesTitle: 'Quan només un pas necessita els secrets',
+      modesDesc:
+        'El mode per defecte comparteix els valors amb la resta del job. Dos inputs ho redueixen.',
+      modeCommandTitle: 'Executa una sola ordre',
+      modeCommandDesc:
+        "Amb command, l'acció l'executa amb bash, i els secrets només existeixen per a aquesta ordre i els processos que inicia. Els passos següents no els veuen, i el pas acaba amb el codi de sortida de l'ordre. Si falta un paràmetre o és buit, l'ordre no s'inicia.",
+      modeCliDesc:
+        'El mateix amb la CLI en un pas run necessita Node.js 22.12 o superior, així que primer configura’l:',
+      modeCliNote:
+        "La CLI resol el mateix fitxer de mapa i surt amb 125, sense iniciar l'ordre, quan no es pot llegir un paràmetre. Deixa el seu stderr al log del pas: porta els registres de màscares. L'Action no necessita cap pas previ i executa la versió empaquetada amb la seva etiqueta, mentre que npx envilder baixa l'última CLI publicada tret que n'ancoris una amb npx envilder@<version>.",
+      modeFileTitle: 'Escriu un fitxer per a una eina que el necessita',
+      modeFileDesc:
+        "Algunes eines llegeixen un fitxer en lloc de l'entorn, per exemple docker compose --env-file. Usa env-file i posa'l sota runner.temp, fora de l'espai de treball. La sortida env-file-path retorna la ruta que has passat:",
+      modeFileNote:
+        'Aquest mode escriu els valors en text pla al runner: no pugis mai aquest fitxer com a artifact ni el posis a la memòria cau. Un paràmetre que falta només és un avís aquí, així que comprova que el resum compti totes les variables. env-file i command no es poden combinar.',
+      modesMore: 'Referència de GitHub Action: triar un mode',
+      maskTitle: 'Què s’emmascara als logs',
+      maskDesc:
+        "GitHub amaga un valor al log només després que alguna cosa el registri. Això és el que fan l'acció i la CLI:",
+      maskItems: [
+        "L'Action registra cada valor que llegeix amb una ordre de workflow ::add-mask::, en els tres modes. En els modes per defecte i command espera que els registres s'hagin escrit abans d'exportar els valors o iniciar l'ordre, i s'atura sense exportar res si un registre falla.",
+        'Envilder imprimeix cada variable amb el valor amb asteriscs: un valor de més de 10 caràcters conserva els tres últims, un de més curt va tot amb asteriscs. Les rutes de paràmetre també conserven els tres últims caràcters.',
+        "L'emmascarament compara el text exacte. Una còpia transformada d'un valor, per exemple codificada en base64, no es reconeix i s'imprimeix en clar. L'emmascarament només afecta el log: no protegeix un fitxer, un artifact ni una memòria cau.",
+        "Els errors que vénen d'AWS s'imprimeixen tal com els retorna AWS i poden contenir l'ARN complet del paràmetre.",
+      ],
+      maskCliNote:
+        "Si executes la CLI tu mateix en lloc de l'Action, envilder exec registra les màscares quan GITHUB_ACTIONS és true. Envilder sense subordre, que escriu un fitxer .env, no registra cap màscara en un workflow i imprimeix els tres últims caràcters dels valors llargs. A CI, prefereix l'Action o envilder exec.",
+      errorsTitle: 'Errors habituals',
+      thMessage: 'Missatge',
+      thFix: 'Solució',
+      errAssumeFix:
+        "El mostra configure-aws-credentials, abans que s'executi Envilder. El sub o l'aud de la política de confiança no coincideix amb el token, o falta el proveïdor d'identitat en aquest compte. El sub canvia amb la branca, etiqueta, pull request o entorn de l'execució.",
+      errIdTokenLabel: 'El pas de credencials falla en obtenir un ID token',
+      errIdTokenFix:
+        "Al job li falta id-token: write, així que GitHub no li dona cap token OIDC. Afegeix-lo a nivell de workflow o de job, juntament amb contents: read. El text exacte depèn de la versió de l'acció, així que busca un missatge sobre l'ID token.",
+      errRegionFix:
+        'configure-aws-credentials sempre requereix aws-region. Defineix-la en aquest pas: també fixa la regió que usa Envilder.',
+      errNoCredsFix:
+        "Es mostra sota WHY? al log d'Envilder. Cap credencial ha arribat a Envilder: falta el pas de credencials, va després del pas d'Envilder o és en un altre job. Les credencials no passen d'un job a un altre.",
+      errDeniedFix:
+        "El rol s'ha assumit però la seva política no cobreix aquest paràmetre. Compara l'ARN de Resource, regió inclosa, amb el paràmetre del missatge. Un missatge semblant sobre kms:Decrypt vol dir que al rol o a la política de la clau li falta aquest permís.",
+      errNotFoundFix:
+        "El motiu que es mostra sota WHY? quan GetParameter no troba el paràmetre. Revisa el nom i compara la regió de la línia d'identitat amb la regió del paràmetre. El pas falla en els modes per defecte i command, i només avisa amb env-file.",
+      errBothFix: 'Defineix només un dels dos inputs.',
+      errBlockedFix:
+        'Una variable del mapa és un dels noms que el runner no deixa definir a GITHUB_ENV. Canvia-li el nom, o usa command o env-file.',
+      errorsMore: 'Hi ha més casos, com credencials caducades i Azure, a la',
+      altTitle: 'Comparat amb altres maneres de llegir SSM en un workflow',
+      altDesc:
+        "L'alternativa simple és un pas run amb l'AWS CLI, que ve preinstal·lada als runners Ubuntu allotjats per GitHub, després del pas de credencials. Per a un o dos paràmetres funciona:",
+      altComment:
+        'Registra el valor per emmascarar-lo abans que res el pugui imprimir',
+      altPoints: [
+        "Cada paràmetre necessita la seva ordre, i els noms viuen al workflow en lloc d'un fitxer de mapa que els desenvolupadors també usen en local amb la CLI.",
+        "Has d'emmascarar el valor abans d'escriure'l, i un valor amb salt de línia no pot usar la forma NAME=value: GITHUB_ENV necessita la seva sintaxi de delimitador multilínia.",
+        "--with-decryption és fàcil d'oblidar: sense això un SecureString torna com a text xifrat.",
+      ],
+      altFair:
+        "Per a un o dos paràmetres l'script és més curt i no necessita cap acció addicional. Envilder comença a compensar amb diverses variables, un fitxer de mapa compartit amb el desenvolupament local i un pas que falla si falta qualsevol paràmetre.",
+      altMarketplace:
+        "Altres accions del GitHub Marketplace també llegeixen paràmetres SSM. Abans d'escollir-ne una, comprova què emmascara, quines accions IAM necessita (GetParameter o GetParametersByPath), si un paràmetre que falta fa fallar el pas, i com es versiona i es manté. Per a Envilder les respostes són cada valor, només ssm:GetParameter, i sí en els modes per defecte i command. Aquesta guia no compara altres accions una per una.",
+      relatedTitle: 'Pàgines relacionades',
+      relatedGha:
+        'Referència de GitHub Action: cada input, els tres modes i Azure',
+      relatedAws: 'Configuració del proveïdor AWS SSM',
+      relatedSsm: 'Guia SSM a .env: crea els paràmetres i el fitxer de mapa',
+      relatedExec: 'Referència de envilder exec',
+      relatedMap: 'Referència del fitxer de mapa',
+    },
     pushReference: {
       tabAws: 'AWS SSM',
       tabAzure: 'Azure Key Vault',
@@ -1437,6 +1549,21 @@ export const ca: Translations = {
         cardTitle: 'Carrega secrets de Key Vault en un .env',
         cardSummary:
           "Relaciona secrets d'Azure Key Vault amb variables i escriu un .env, o prescindeix del fitxer amb envilder exec.",
+      },
+      'guide-github-actions-ssm': {
+        title:
+          "Carrega paràmetres d'AWS SSM com a variables d'entorn a GitHub Actions",
+        description:
+          "Injecta paràmetres d'AWS SSM Parameter Store com a variables d'entorn a GitHub Actions amb OIDC i l'Envilder Action: rol IAM, workflow, emmascarament als logs i errors habituals.",
+        heading:
+          "Carrega paràmetres d'AWS SSM com a variables d'entorn a GitHub Actions",
+        intro:
+          "Com injecto paràmetres d'AWS SSM com a variables d'entorn a GitHub Actions? Inicia la sessió del job a AWS amb OIDC de GitHub i executa l'Envilder Action després d'aquest pas amb la ruta del teu fitxer de mapa: llegeix cada paràmetre d'AWS SSM Parameter Store llistat a envilder.json, registra cada valor perquè s'emmascari als logs i els defineix com a variables d'entorn per a tots els passos següents del job. No cal desar cap clau d'accés d'AWS a GitHub, i Envilder no escriu cap fitxer .env en aquest mode.",
+        breadcrumb: 'SSM a GitHub Actions',
+        navLabel: 'SSM a GitHub Actions',
+        cardTitle: 'Carrega paràmetres SSM a GitHub Actions',
+        cardSummary:
+          "Inicia sessió a AWS amb OIDC i exporta paràmetres SSM com a variables d'entorn als passos d'un job d'un workflow.",
       },
       'aws-ssm': {
         title: 'Utilitza Envilder amb AWS SSM Parameter Store',

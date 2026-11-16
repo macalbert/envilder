@@ -316,6 +316,128 @@ const azGuideErrors = [
   },
 ] as const;
 
+const ga = t.docs.guideGithubActionsSsm;
+
+const gaMap = `{
+  "DB_PASSWORD": "/my-app/prod/db-password",
+  "API_TOKEN": "/my-app/prod/api-token"
+}`;
+
+const gaTrustPolicy = `{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": {
+      "Federated": "arn:aws:iam::123456789012:oidc-provider/token.actions.githubusercontent.com"
+    },
+    "Action": "sts:AssumeRoleWithWebIdentity",
+    "Condition": {
+      "StringEquals": {
+        "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+        "token.actions.githubusercontent.com:sub": "repo:my-org/my-repo:ref:refs/heads/main"
+      }
+    }
+  }]
+}`;
+
+const gaReadPolicy = `{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": "ssm:GetParameter",
+    "Resource": "arn:aws:ssm:eu-west-1:123456789012:parameter/my-app/prod/*"
+  }]
+}`;
+
+const gaWorkflow = `name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write   # ${ga.commentOidc}
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/github-envilder
+          aws-region: eu-west-1
+
+      - uses: macalbert/envilder/github-action@v0
+        with:
+          map-file: envilder.json
+          provider: aws
+
+      - run: ./deploy.sh   # ${ga.commentUse}`;
+
+const gaSummary =
+  'envilder: 2 secrets exported to the job environment (DB_PASSWORD, API_TOKEN)';
+
+const gaCommandStep = `- uses: macalbert/envilder/github-action@v0
+  with:
+    map-file: envilder.json
+    provider: aws
+    command: ./deploy.sh --prod`;
+
+const gaCliStep = `- uses: actions/setup-node@v7
+  with:
+    node-version: 22.x
+
+- run: npx envilder exec --map=envilder.json --provider=aws -- ./deploy.sh --prod`;
+
+const gaFileStep = `- id: envilder
+  uses: macalbert/envilder/github-action@v0
+  with:
+    map-file: envilder.json
+    provider: aws
+    env-file: \${{ runner.temp }}/app.env
+
+- run: docker compose --env-file "\${{ steps.envilder.outputs.env-file-path }}" up -d`;
+
+const gaAwsCliStep = `- run: |
+    value=$(aws ssm get-parameter --name /my-app/prod/db-password \\
+      --with-decryption --query Parameter.Value --output text)
+    echo "::add-mask::$value"   # ${ga.altComment}
+    echo "DB_PASSWORD=$value" >> "$GITHUB_ENV"`;
+
+const gaErrors = [
+  {
+    message:
+      'Could not assume role with OIDC: Not authorized to perform sts:AssumeRoleWithWebIdentity',
+    fix: 'errAssumeFix',
+  },
+  { label: 'errIdTokenLabel', fix: 'errIdTokenFix' },
+  {
+    message: 'Input required and not supplied: aws-region',
+    fix: 'errRegionFix',
+  },
+  {
+    message: 'Could not load credentials from any providers',
+    fix: 'errNoCredsFix',
+  },
+  {
+    message: 'is not authorized to perform: ssm:GetParameter on resource',
+    fix: 'errDeniedFix',
+  },
+  { message: 'not found', fix: 'errNotFoundFix' },
+  {
+    message: 'Use either env-file or command, not both.',
+    fix: 'errBothFix',
+  },
+  {
+    message:
+      'NODE_OPTIONS cannot be exported to the job environment: GitHub Actions does not let GITHUB_ENV set NODE_OPTIONS or its default GITHUB_* and RUNNER_* variables. Use the command or env-file input instead.',
+    fix: 'errBlockedFix',
+  },
+] as const;
+
 const guideIamPolicy = `{
   "Version": "2012-10-17",
   "Statement": [
@@ -1539,6 +1661,119 @@ const validateSdkRows = [
           <li><a href={localizedPath(lang, '/docs/cli/push/')}>{az.relatedPush}</a></li>
           <li><a href={localizedPath(lang, '/docs/cli/exec/')}>{az.relatedExec}</a></li>
           <li><a href={localizedPath(lang, '/docs/map-file/')}>{az.relatedMap}</a></li>
+        </ul>
+      </section>
+    </>
+  )}
+
+  {routeKey === 'guide-github-actions-ssm' && (
+    <>
+      <section id="guide-flow" class="docs-section">
+        <h2>{ga.flowTitle}</h2>
+        <ol class="docs-list">
+          {ga.flowItems.map((item) => <li>{item}</li>)}
+        </ol>
+      </section>
+
+      <section id="guide-prerequisites" class="docs-section">
+        <h2>{ga.prereqTitle}</h2>
+        <ul class="docs-list">
+          {ga.prereqItems.map((item) => <li>{item}</li>)}
+        </ul>
+        <p>{ga.prereqMapDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={gaMap} />
+        <p class="note">{ga.prereqMapNote} <a href={localizedPath(lang, '/docs/guides/ssm-to-env/')}>{ga.prereqMapLink}</a>.</p>
+      </section>
+
+      <section id="guide-iam" class="docs-section">
+        <h2>{ga.iamTitle}</h2>
+        <p>{ga.iamTrustDesc}</p>
+        <CodeBlock lang="json" filename="trust-policy.json" code={gaTrustPolicy} />
+        <p class="note">{ga.iamTrustNote} <a href={localizedPath(lang, '/docs/github-action/#gha-multi-env')}>{ga.iamTrustLink}</a></p>
+        <p>{ga.iamPolicyDesc}</p>
+        <CodeBlock lang="json" filename="envilder-read.json" code={gaReadPolicy} />
+        <p class="note">{ga.iamPolicyNote}</p>
+      </section>
+
+      <section id="guide-workflow" class="docs-section">
+        <h2>{ga.workflowTitle}</h2>
+        <p>{ga.workflowDesc}</p>
+        <CodeBlock lang="yaml" filename=".github/workflows/deploy.yml" code={gaWorkflow} />
+        <p>{ga.workflowOutputDesc}</p>
+        <CodeBlock lang="text" code={gaSummary} />
+        <p class="note">{ga.workflowProviderNote}</p>
+        <p class="note">{ga.workflowRegionNote}</p>
+        <p class="note">{ga.workflowScopeNote}</p>
+        <p class="note">{ga.inputsNote} <a href={localizedPath(lang, '/docs/github-action/#gha-inputs')}>{ga.inputsLink}</a>.</p>
+      </section>
+
+      <section id="guide-modes" class="docs-section">
+        <h2>{ga.modesTitle}</h2>
+        <p>{ga.modesDesc}</p>
+
+        <h3>{ga.modeCommandTitle}</h3>
+        <p>{ga.modeCommandDesc}</p>
+        <CodeBlock lang="yaml" code={gaCommandStep} />
+        <p>{ga.modeCliDesc}</p>
+        <CodeBlock lang="yaml" code={gaCliStep} />
+        <p class="note">{ga.modeCliNote}</p>
+
+        <h3>{ga.modeFileTitle}</h3>
+        <p>{ga.modeFileDesc}</p>
+        <CodeBlock lang="yaml" code={gaFileStep} />
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>{ga.modeFileNote}</div>
+        </div>
+        <p><a href={localizedPath(lang, '/docs/github-action/#gha-modes')}>{ga.modesMore}</a></p>
+      </section>
+
+      <section id="guide-masking" class="docs-section">
+        <h2>{ga.maskTitle}</h2>
+        <p>{ga.maskDesc}</p>
+        <ul class="docs-list">
+          {ga.maskItems.map((item) => <li>{item}</li>)}
+        </ul>
+        <p class="note">{ga.maskCliNote}</p>
+      </section>
+
+      <section id="guide-errors" class="docs-section">
+        <h2>{ga.errorsTitle}</h2>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{ga.thMessage}</th><th>{ga.thFix}</th></tr>
+          </thead>
+          <tbody>
+            {gaErrors.map((row) => (
+              <tr>
+                <td>{'message' in row ? <code>{row.message}</code> : ga[row.label]}</td>
+                <td>{ga[row.fix]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>{ga.errorsMore} <a href={localizedPath(lang, '/docs/github-action/#gha-errors')}>{ga.inputsLink}</a>.</p>
+      </section>
+
+      <section id="guide-alternatives" class="docs-section">
+        <h2>{ga.altTitle}</h2>
+        <p>{ga.altDesc}</p>
+        <CodeBlock lang="yaml" code={gaAwsCliStep} />
+        <ul class="docs-list">
+          {ga.altPoints.map((item) => <li>{item}</li>)}
+        </ul>
+        <p>{ga.altFair}</p>
+        <p>{ga.altMarketplace}</p>
+      </section>
+
+      <section id="guide-related" class="docs-section">
+        <h2>{ga.relatedTitle}</h2>
+        <ul class="docs-list">
+          <li><a href={localizedPath(lang, '/docs/github-action/')}>{ga.relatedGha}</a></li>
+          <li><a href={localizedPath(lang, '/docs/providers/aws-ssm/')}>{ga.relatedAws}</a></li>
+          <li><a href={localizedPath(lang, '/docs/guides/ssm-to-env/')}>{ga.relatedSsm}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/exec/')}>{ga.relatedExec}</a></li>
+          <li><a href={localizedPath(lang, '/docs/map-file/')}>{ga.relatedMap}</a></li>
         </ul>
       </section>
     </>
