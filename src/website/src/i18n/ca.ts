@@ -1333,7 +1333,7 @@ export const ca: Translations = {
       tabPolicy: "Polítiques d'accés",
       prereqTitle: 'Requisits previs',
       prereqItems: [
-        "La CLI d'envilder. --offline està disponible des de la versió 0.18 i la comprovació d'existència dels secrets des de la 0.20. --envfile, --compare-values i --format json arriben amb la propera versió.",
+        "La CLI d'envilder. --offline està disponible des de la versió 0.18 i la comprovació d'existència dels secrets des de la 0.20. --envfile, --compare-values i --format json estan disponibles des de la 0.21.",
         "Un fitxer de mapatge. Sense --offline, credencials del proveïdor i els permisos que es detallen a l'apartat Permisos.",
       ],
       synopsisTitle: 'Sinopsi',
@@ -1386,7 +1386,7 @@ export const ca: Translations = {
         "Les credencials d'AWS i les sessions SSO caducades s'informen amb el mateix missatge que pull i exec. En un terminal interactiu, una sessió SSO caducada ofereix executar aws sso login i després torna a provar.",
       envfileTitle: 'Les claus del fitxer env (amb --envfile)',
       envfileDesc:
-        'Disponible a partir de la propera versió. El fitxer env es llegeix amb el mateix analitzador que fan servir pull i push, així que els comentaris, export, les cometes i els valors multilínia es comporten igual. Les seves claus es comparen amb les variables que declara el fitxer de mapatge, pel nom exacte, distingint majúscules i minúscules:',
+        'Disponible des de la versió 0.21. El fitxer env es llegeix amb el mateix analitzador que fan servir pull i push, així que els comentaris, export, les cometes i els valors multilínia es comporten igual. Les seves claus es comparen amb les variables que declara el fitxer de mapatge, pel nom exacte, distingint majúscules i minúscules:',
       thFinding: 'Troballa',
       thEffect: 'Efecte',
       envMissing: 'Una variable declarada no és al fitxer env. Falla',
@@ -1433,7 +1433,7 @@ export const ca: Translations = {
       outputInvalidDesc: 'Un fitxer de mapatge no vàlid, a stderr:',
       jsonTitle: 'Sortida JSON (--format json)',
       jsonDesc:
-        "Disponible a partir de la propera versió. Amb --format=json, validate escriu exactament un document JSON a stdout i res més, sigui quin sigui el resultat. Els logs, el bàner d'identitat d'AWS, els avisos, els errors i la sol·licitud d'inici de sessió SSO van a stderr, així que stdout es pot passar a jq o desar com a artefacte de CI. Els codis de sortida són els mateixos que amb la sortida de text. Els errors d'opcions com --format=yaml s'informen a stderr abans d'executar res, sense document.",
+        "Disponible des de la versió 0.21. Amb --format=json, validate escriu exactament un document JSON a stdout i res més, sigui quin sigui el resultat. Els logs, el bàner d'identitat d'AWS, els avisos, els errors i la sol·licitud d'inici de sessió SSO van a stderr, així que stdout es pot passar a jq o desar com a artefacte de CI. Els codis de sortida són els mateixos que amb la sortida de text. Els errors d'opcions com --format=yaml s'informen a stderr abans d'executar res, sense document.",
       thField: 'Camp',
       fieldValid: 'true exactament quan el codi de sortida és 0',
       fieldOffline: 'true amb --offline',
@@ -1457,9 +1457,9 @@ export const ca: Translations = {
       ciDesc:
         "Executa la comprovació offline a cada pull request, també des de forks, perquè no necessita credencials del núvol. Executa la comprovació d'existència on el job tingui les mateixes credencials que un pull, més els permisos d'aquesta pàgina:",
       ciEnvExample:
-        'A partir de la propera versió, per comprovar sense credencials que un .env.example versionat declara cada variable, afegeix --offline --envfile=.env.example al primer pas.',
+        'Des de la versió 0.21, per comprovar sense credencials que un .env.example versionat declara cada variable, afegeix --offline --envfile=.env.example al primer pas.',
       ciJsonDesc:
-        'A partir de la propera versió, per conservar el resultat per a passos posteriors o altres eines, fes servir la sortida JSON. El pas continua fallant quan la validació falla:',
+        'Des de la versió 0.21, per conservar el resultat per a passos posteriors o altres eines, fes servir la sortida JSON. El pas continua fallant quan la validació falla:',
       ciNote:
         "validate surt amb 1 davant de qualsevol error, així que pot bloquejar un pas de desplegament abans que s'executi pull o envilder exec.",
       sdkTitle: 'Des dels SDK',

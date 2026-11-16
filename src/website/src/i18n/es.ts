@@ -1336,7 +1336,7 @@ export const es: Translations = {
       tabPolicy: 'Directivas de acceso',
       prereqTitle: 'Requisitos previos',
       prereqItems: [
-        'La CLI de envilder. --offline está disponible desde la versión 0.18 y la comprobación de existencia de los secretos desde la 0.20. --envfile, --compare-values y --format json llegan con la próxima versión.',
+        'La CLI de envilder. --offline está disponible desde la versión 0.18 y la comprobación de existencia de los secretos desde la 0.20. --envfile, --compare-values y --format json están disponibles desde la 0.21.',
         'Un archivo de mapeo. Sin --offline, credenciales del proveedor y los permisos que se detallan en el apartado Permisos.',
       ],
       synopsisTitle: 'Sinopsis',
@@ -1388,7 +1388,7 @@ export const es: Translations = {
         'Las credenciales de AWS y las sesiones SSO caducadas se informan con el mismo mensaje que pull y exec. En un terminal interactivo, una sesión SSO caducada ofrece ejecutar aws sso login y después vuelve a intentarlo.',
       envfileTitle: 'Las claves del archivo env (con --envfile)',
       envfileDesc:
-        'Disponible a partir de la próxima versión. El archivo env se lee con el mismo analizador que usan pull y push, así que los comentarios, export, las comillas y los valores multilínea se comportan igual. Sus claves se comparan con las variables que declara el archivo de mapeo, por el nombre exacto, distinguiendo mayúsculas y minúsculas:',
+        'Disponible desde la versión 0.21. El archivo env se lee con el mismo analizador que usan pull y push, así que los comentarios, export, las comillas y los valores multilínea se comportan igual. Sus claves se comparan con las variables que declara el archivo de mapeo, por el nombre exacto, distinguiendo mayúsculas y minúsculas:',
       thFinding: 'Hallazgo',
       thEffect: 'Efecto',
       envMissing: 'Una variable declarada no está en el archivo env. Falla',
@@ -1435,7 +1435,7 @@ export const es: Translations = {
       outputInvalidDesc: 'Un archivo de mapeo no válido, en stderr:',
       jsonTitle: 'Salida JSON (--format json)',
       jsonDesc:
-        'Disponible a partir de la próxima versión. Con --format=json, validate escribe exactamente un documento JSON en stdout y nada más, sea cual sea el resultado. Los logs, el banner de identidad de AWS, los avisos, los errores y la solicitud de inicio de sesión SSO van a stderr, así que stdout se puede pasar a jq o guardar como artefacto de CI. Los códigos de salida son los mismos que con la salida de texto. Los errores de opciones como --format=yaml se informan en stderr antes de ejecutar nada, sin documento.',
+        'Disponible desde la versión 0.21. Con --format=json, validate escribe exactamente un documento JSON en stdout y nada más, sea cual sea el resultado. Los logs, el banner de identidad de AWS, los avisos, los errores y la solicitud de inicio de sesión SSO van a stderr, así que stdout se puede pasar a jq o guardar como artefacto de CI. Los códigos de salida son los mismos que con la salida de texto. Los errores de opciones como --format=yaml se informan en stderr antes de ejecutar nada, sin documento.',
       thField: 'Campo',
       fieldValid: 'true exactamente cuando el código de salida es 0',
       fieldOffline: 'true con --offline',
@@ -1459,9 +1459,9 @@ export const es: Translations = {
       ciDesc:
         'Ejecuta la comprobación offline en cada pull request, también desde forks, porque no necesita credenciales de la nube. Ejecuta la comprobación de existencia donde el job tenga las mismas credenciales que un pull, más los permisos de esta página:',
       ciEnvExample:
-        'A partir de la próxima versión, para comprobar sin credenciales que un .env.example versionado declara cada variable, añade --offline --envfile=.env.example al primer paso.',
+        'Desde la versión 0.21, para comprobar sin credenciales que un .env.example versionado declara cada variable, añade --offline --envfile=.env.example al primer paso.',
       ciJsonDesc:
-        'A partir de la próxima versión, para conservar el resultado para pasos posteriores u otras herramientas, usa la salida JSON. El paso sigue fallando cuando la validación falla:',
+        'Desde la versión 0.21, para conservar el resultado para pasos posteriores u otras herramientas, usa la salida JSON. El paso sigue fallando cuando la validación falla:',
       ciNote:
         'validate sale con 1 ante cualquier error, así que puede bloquear un paso de despliegue antes de que se ejecute pull o envilder exec.',
       sdkTitle: 'Desde los SDK',
