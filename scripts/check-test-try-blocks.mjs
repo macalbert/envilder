@@ -12,8 +12,9 @@ const CSHARP_METHOD =
 const CSHARP_TRY = /(?:^|[;{}])\s*try\b\s*(?:\{|$)/;
 // A signature ends where its body opens, or with `;` when it has none.
 const CSHARP_SIGNATURE_END = /[{;]\s*$/;
-// A method whose body opens and closes on the signature line.
-const CSHARP_ONE_LINE_BODY = /\{.*\}\s*$/;
+// A body written on the signature line: a block that opens and closes there,
+// or an expression body (`=> Inner();`), whose calls still count.
+const CSHARP_INLINE_BODY = /\{(.*\})\s*$|=>(.*)$/;
 
 const PYTHON_FUNCTION = /^(\s*)(?:async\s+)?def\s+(\w+)\s*\(/;
 // tests/sdks/python/pyproject.toml sets python_functions = ["Should_*"].
@@ -154,12 +155,29 @@ const CODE_STEPS = [
     scan.index += word[0].length;
     return true;
   },
+  function openParenthesis(scan) {
+    if (charAt(scan) !== '(') return false;
+    scan.parentheses.push(CONTROL_KEYWORD.test(scan.previous));
+    scan.previous = '(';
+    scan.index++;
+    return true;
+  },
+  // After the condition of `if (...)` or `while (...)` a statement starts,
+  // so a `/` there opens a regex; after a call it is a division.
+  function closeParenthesis(scan) {
+    if (charAt(scan) !== ')') return false;
+    scan.previous = scan.parentheses.pop() ? ';' : ')';
+    scan.index++;
+    return true;
+  },
   function other(scan) {
     if (!/\s/.test(charAt(scan))) scan.previous = charAt(scan);
     scan.index++;
     return true;
   },
 ];
+
+const CONTROL_KEYWORD = /^(?:if|while|for|with)$/;
 
 /**
  * Replaces the contents of strings, template literals, comments and regex
@@ -173,6 +191,7 @@ function maskNonCode(text) {
     index: 0,
     previous: '',
     stack: [{ inTemplate: false, depth: 0 }],
+    parentheses: [],
   };
   while (scan.index < text.length) {
     const steps = scan.stack.at(-1).inTemplate ? TEMPLATE_STEPS : CODE_STEPS;
@@ -309,7 +328,8 @@ function expressionEnd(masked, from) {
 }
 
 const TYPE_POSITION = /^[:|&<,(]$/;
-const EXPRESSION_END = /^[)\]};\n]$/;
+// A comma ends it too: `const a = () => 1, b = ...` declares another name.
+const EXPRESSION_END = /^[)\]};,\n]$/;
 const NESTING_DEPTH_CHANGE = {
   '(': 1,
   '[': 1,
@@ -475,41 +495,41 @@ const CSHARP_CODE_BEFORE_COMMENT = new RegExp(
   String.raw`^(?:${TRIPLE_QUOTED}|${QUOTED}|[^"'/]|\/(?!\/))*`,
 );
 
+/**
+ * Returns the lines that hold code, with every triple quoted string reduced
+ * to `""` so the code beside it on the same line stays. Lines entirely inside
+ * such a string are dropped.
+ */
 function codeLines(text, codeBeforeComment) {
   let openQuote = '';
   return text.split(/\r?\n/).flatMap((line, index) => {
-    const wasInside = openQuote !== '';
-    openQuote = openQuoteAfter(line, openQuote, codeBeforeComment);
-    const hasQuote = TRIPLE_QUOTE.test(line.match(codeBeforeComment)[0]);
-    const isCode = !wasInside && !hasQuote && line.trim() !== '';
-    return isCode ? [{ line, number: index + 1 }] : [];
+    const scan = { quote: openQuote, rest: line, code: '' };
+    while (scan.rest !== undefined) {
+      if (scan.quote) closeQuote(scan);
+      else openNextQuote(scan, codeBeforeComment);
+    }
+    openQuote = scan.quote;
+    return scan.code.trim() === ''
+      ? []
+      : [{ line: scan.code, number: index + 1 }];
   });
 }
 
 /**
- * Returns the triple quote left open at the end of a line ('' when none).
  * Inside a string, only its own delimiter closes it and everything before is
- * plain text; outside, delimiters in comments are ignored.
+ * plain text.
  */
-function openQuoteAfter(line, openQuote, codeBeforeComment) {
-  const scan = { quote: openQuote, rest: line };
-  while (scan.rest !== undefined) {
-    if (scan.quote) closeQuote(scan);
-    else openNextQuote(scan, codeBeforeComment);
-  }
-  return scan.quote;
-}
-
 function closeQuote(scan) {
   const close = scan.rest.indexOf(scan.quote);
   scan.rest = close === -1 ? undefined : scan.rest.slice(close + 3);
   scan.quote = close === -1 ? scan.quote : '';
 }
 
+/** Outside a string, keeps the code up to the next triple quote, if any. */
 function openNextQuote(scan, codeBeforeComment) {
-  const code = scan.rest.match(codeBeforeComment)[0];
-  const open = code.search(TRIPLE_QUOTE);
-  scan.quote = open === -1 ? '' : code.slice(open, open + 3);
+  const open = scan.rest.match(codeBeforeComment)[0].search(TRIPLE_QUOTE);
+  scan.code += open === -1 ? scan.rest : `${scan.rest.slice(0, open)}""`;
+  scan.quote = open === -1 ? '' : scan.rest.slice(open, open + 3);
   scan.rest = open === -1 ? undefined : scan.rest.slice(open + 3);
 }
 
@@ -645,8 +665,9 @@ function parsePython(text) {
 /** Collects a C# method body: the lines between its braces. */
 function cSharpBody(lines, start, indent) {
   const { line, number } = lines[start];
-  if (CSHARP_ONE_LINE_BODY.test(line)) {
-    return [{ line: line.slice(line.indexOf('{') + 1), number }];
+  const inline = line.match(CSHARP_INLINE_BODY);
+  if (inline) {
+    return [{ line: inline[1] ?? inline[2], number }];
   }
   const open = firstLineMatching(lines, start, CSHARP_SIGNATURE_END);
   if (open === -1 || lines[open].line.trimEnd().endsWith(';')) {

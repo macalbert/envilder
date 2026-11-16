@@ -365,6 +365,19 @@ describe('findTryBlocksInTests', () => {
       '\t{',
       '\t\ttry { Act(Value()); } finally { CleanUp(); }',
       '\t}',
+      '',
+      '\tprivate static int Outer() => Inner();',
+      '',
+      '\tprivate static int Inner()',
+      '\t{',
+      '\t\ttry { return Act(); } finally { CleanUp(); }',
+      '\t}',
+      '',
+      '\t[Fact]',
+      '\tpublic void Should_Read_When_HelperIsExpressionBodied()',
+      '\t{',
+      '\t\tOuter().Should().Be(1);',
+      '\t}',
       '}',
     ].join('\n');
 
@@ -372,7 +385,14 @@ describe('findTryBlocksInTests', () => {
     const actual = findTryBlocksInTests('tests/ClientTests.cs', source);
 
     // Assert
-    expect(actual).toEqual([{ line: 8, test: 'Should_Read_When_Called' }]);
+    expect(actual).toEqual([
+      { line: 8, test: 'Should_Read_When_Called' },
+      {
+        line: 15,
+        test: 'Should_Read_When_HelperIsExpressionBodied',
+        helper: 'Inner',
+      },
+    ]);
   });
 
   it('Should_ReportTryBlock_When_DivisionFollowsVariableNamedOf', () => {
@@ -402,6 +422,40 @@ describe('findTryBlocksInTests', () => {
       '  for (const { length } of /try {1}x/.source) { void length; }',
       '  for (const [first] of /try {1}x/.source) { void first; }',
       '});',
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.ts', source);
+
+    // Assert
+    expect(actual).toEqual([]);
+  });
+
+  it('Should_MaskRegex_When_ItFollowsControlCondition', () => {
+    // Arrange
+    const source = [
+      "it('regex', () => {",
+      "  if (true) /try {1}x/.test('try x');",
+      '  while (false) /try {2}/.exec(text);',
+      '  const ratio = calc(1) / 2; try { a(ratio); } catch {}',
+      '});',
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.ts', source);
+
+    // Assert
+    expect(actual).toEqual([{ line: 4, test: 'regex' }]);
+  });
+
+  it('Should_StopExpressionBody_When_DeclarationListContinues', () => {
+    // Arrange
+    const source = [
+      'const safe = () => pick(1, 2), cleanup = () => {',
+      '  try { release(); } finally {}',
+      '};',
+      'afterEach(cleanup);',
+      "it('ok', () => { expect(safe()).toBe(1); });",
     ].join('\n');
 
     // Act
@@ -496,6 +550,28 @@ describe('findTryBlocksInTests', () => {
 
     // Assert
     expect(actual).toEqual([{ line: 5, test: 'Should_Read_When_Called' }]);
+  });
+
+  it('Should_FollowHelper_When_CallSharesLineWithTripleQuotedString', () => {
+    // Arrange
+    const source = [
+      'def run():',
+      '    try:',
+      '        act()',
+      '    finally:',
+      '        clean_up()',
+      '',
+      'def Should_Read_When_Called():',
+      '    assert run() == """ok"""',
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/test_client.py', source);
+
+    // Assert
+    expect(actual).toEqual([
+      { line: 2, test: 'Should_Read_When_Called', helper: 'run' },
+    ]);
   });
 
   it('Should_CloseMultilineString_When_ClosingLineLooksLikeComment', () => {
