@@ -406,7 +406,9 @@ const gaAwsCliStep = `- run: |
       --with-decryption --query Parameter.Value --output text)
     # ${ga.altComment}
     while IFS= read -r line; do
-      [ -n "$line" ] && echo "::add-mask::\${line//%/%25}"
+      line="\${line//%/%25}"
+      line="\${line//$'\\r'/%0D}"
+      [ -n "$line" ] && echo "::add-mask::$line"
     done <<< "$value"
     delim="EOF_$(openssl rand -hex 8)"
     { echo "DB_PASSWORD<<$delim"; echo "$value"; echo "$delim"; } >> "$GITHUB_ENV"`;
