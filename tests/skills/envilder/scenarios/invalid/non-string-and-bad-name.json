@@ -1,0 +1,7 @@
+{
+  "$config": {
+    "region": "eu-west-1"
+  },
+  "DB_PORT": 5432,
+  "DB URL": "/billing/dev/db-url"
+}

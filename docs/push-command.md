@@ -154,7 +154,7 @@ graph LR
 **Example:**
 
 ```bash
-envilder --key=API_KEY --value=abc123 --secret-path=/myapp/api/key
+envilder --push --key=API_KEY --value=abc123 --secret-path=/myapp/api/key
 ```
 
 Will push:
@@ -170,7 +170,7 @@ Pass `--provider`/`--vault-url` to override.
 After a single push, `envilder.json` (or the file passed with `--map`) is ready for `envilder` and `envilder exec`:
 
 ```bash
-envilder --key=API_KEY --value=abc123 --secret-path=/myapp/api/key
+envilder --push --key=API_KEY --value=abc123 --secret-path=/myapp/api/key
 envilder exec -- node app.mjs
 ```
 
@@ -209,7 +209,7 @@ envilder exec -- node app.mjs
 
 | Option        | Description                                                |
 |-------------- | ---------------------------------------------------------- |
-| `--push`      | Optional: For single-variable push, `--key` + `--value` + `--secret-path` already activate push mode |
+| `--push`      | Optional: For single-variable push, `--key` + `--value` + `--secret-path` already activate push mode; the examples include `--push` for clarity |
 | `--provider`  | Optional: Cloud provider `aws` (default) or `azure`        |
 | `--vault-url` | Optional: Azure Key Vault URL (overrides `$config.vaultUrl`)|
 | `--profile`   | Optional: AWS CLI profile to use (AWS only)                |
@@ -254,17 +254,17 @@ envilder --push --provider=azure --vault-url=https://my-vault.vault.azure.net --
 **Single variable push:**
 
 ```bash
-envilder --key=API_KEY --value=secret123 --secret-path=/my/path
+envilder --push --key=API_KEY --value=secret123 --secret-path=/my/path
 ```
 
 With AWS profile:
 
 ```bash
-envilder --key=API_KEY --value=secret123 --secret-path=/my/path --profile=dev
+envilder --push --key=API_KEY --value=secret123 --secret-path=/my/path --profile=dev
 ```
 
 Without recording the mapping:
 
 ```bash
-envilder --key=API_KEY --value=secret123 --secret-path=/my/path --no-map-update
+envilder --push --key=API_KEY --value=secret123 --secret-path=/my/path --no-map-update
 ```

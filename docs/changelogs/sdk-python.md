@@ -1,3 +1,43 @@
+## [1.2.0] - 2026-11-08
+
+### Added
+
+* **Use your own provider in the fluent builder**:
+  `Envilder.from_map_file(path).with_secret_provider(provider)` resolves
+  secrets and runs contract validation with any `ISecretProvider` instance
+  instead of the one built from `$config`. The map file is still validated as
+  usual, so startup code can be tested against an in-memory fake with no cloud
+  account, emulator or environment variables. `ISecretExistenceChecker` is now
+  exported: a custom provider that implements it takes part in
+  `validate_contract()` and `with_contract_validation()`; one that does not
+  has every key reported as `provider_error`, so a load with contract
+  validation fails ([#669](https://github.com/macalbert/envilder/issues/669))
+
+---
+
+## [1.1.0] - 2026-11-02
+
+### Added
+
+* **Map file contract validation**: `Envilder.from_map_file(path).validate_contract()`
+  checks, without reading any secret value, that the map file matches the
+  published schema (same rules and messages as `envilder validate --offline`),
+  that the provider configuration is coherent, and that every declared secret
+  exists. It returns a `ContractValidationResult` with `is_valid`,
+  `map_file_errors` and one `KeyCheck` per variable, each with a
+  `SecretExistenceStatus` (`exists`, `missing`, `access_denied`,
+  `authentication_failed`, `provider_error`). Expected failures are reported
+  in the result, never raised, and an invalid map file calls no provider.
+  Needs `ssm:GetParameters` on AWS, and the `List` secret permission or
+  `secrets/readMetadata` RBAC (included in Key Vault Secrets User) on Azure
+  ([#533](https://github.com/macalbert/envilder/issues/533))
+* **Opt-in contract validation on load**: `.with_contract_validation()` runs
+  the check once before `resolve()` or `inject()`, reuses the same provider for
+  the resolution, and raises `ContractValidationError` (with the outcome in
+  `.result`) when it fails. The message names the failing keys and paths,
+  never a value. Off by default: a load makes no extra provider call
+  ([#533](https://github.com/macalbert/envilder/issues/533))
+
 ## [1.0.0] - 2026-10-27
 
 ### Changed
@@ -19,6 +59,14 @@
   `=`, a line break or `U+2028`/`U+2029` that the CLI treats as an
   injection vector ([#511](https://github.com/macalbert/envilder/issues/511))
 
+### Fixed
+
+* **Azure Key Vault references with `/` resolve the same secret as the CLI**:
+  A path-style value such as `/myapp/prod/db-password` was sent to Key Vault
+  as written, so it never matched the secret the CLI pushes under
+  `myapp-prod-db-password`. The SDK now applies the CLI's rule: `/` becomes
+  `-`, ignoring leading slashes, and anything else is sent as written
+
 ### Documentation
 
 * **Document accepted map-file keys, values and limits**: The SDK README now
@@ -39,14 +87,6 @@
   lowest in-support minor), the package now requires Python 3.11 or later,
   drops the 3.10 classifier, and CI tests 3.11 and 3.13. Projects still on
   Python 3.10 keep resolving 0.5.x
-
-### Fixed
-
-* **Azure Key Vault references with `/` resolve the same secret as the CLI**:
-  A path-style value such as `/myapp/prod/db-password` was sent to Key Vault
-  as written, so it never matched the secret the CLI pushes under
-  `myapp-prod-db-password`. The SDK now applies the CLI's rule: `/` becomes
-  `-`, ignoring leading slashes, and anything else is sent as written
 
 ### Dependencies
 

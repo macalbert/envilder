@@ -1,14 +1,9 @@
 import { inject, injectable } from 'inversify';
-import {
-  buildChildEnvironment,
-  findCaseCollisions,
-} from '../../domain/ChildEnvironment.js';
+import { buildChildEnvironment } from '../../domain/ChildEnvironment.js';
 import { exitCodeForChild } from '../../domain/ExecExitCode.js';
 import {
   ExecInterruptedError,
   ExpiredCredentialsError,
-  InvalidArgumentError,
-  SecretsFetchError,
   SsoSessionExpiredError,
 } from '../../domain/errors/DomainErrors.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
@@ -18,11 +13,7 @@ import type { ISecretMasker } from '../../domain/ports/ISecretMasker.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
 import type { IVariableStore } from '../../domain/ports/IVariableStore.js';
 import { TYPES } from '../../types.js';
-import {
-  type FailedSecret,
-  SecretResolver,
-  type UnresolvedSecret,
-} from '../secretResolution/SecretResolver.js';
+import { RequiredSecretsResolver } from '../secretResolution/RequiredSecretsResolver.js';
 import { formatProgram } from './CommandLineFormatter.js';
 import type { ExecWithSecretsCommand } from './ExecWithSecretsCommand.js';
 
@@ -33,8 +24,6 @@ export type PreparedExec = {
   readonly command: ExecWithSecretsCommand;
   readonly secrets: Readonly<Record<string, string>>;
 };
-
-const NUL = '\0';
 
 /**
  * Runs a command with the secrets of a map file in its environment, without
@@ -49,13 +38,13 @@ const NUL = '\0';
  */
 @injectable()
 export class ExecWithSecretsCommandHandler {
-  private readonly secretResolver: SecretResolver;
+  private readonly requiredSecrets: RequiredSecretsResolver;
 
   constructor(
     @inject(TYPES.ISecretProvider)
     secretProvider: ISecretProvider,
     @inject(TYPES.IVariableStore)
-    private readonly variableStore: IVariableStore,
+    variableStore: IVariableStore,
     @inject(TYPES.ILogger) private readonly logger: ILogger,
     @inject(TYPES.ISecretMasker)
     private readonly secretMasker: ISecretMasker,
@@ -64,10 +53,12 @@ export class ExecWithSecretsCommandHandler {
     @inject(TYPES.IProcessContext)
     private readonly processContext: IProcessContext,
   ) {
-    this.secretResolver = new SecretResolver(
+    this.requiredSecrets = new RequiredSecretsResolver(
       secretProvider,
+      variableStore,
       logger,
       secretMasker,
+      processContext,
     );
   }
 
@@ -85,32 +76,7 @@ export class ExecWithSecretsCommandHandler {
    * `.env` file. Throws `SecretsFetchError` when any secret does not resolve.
    */
   async prepare(command: ExecWithSecretsCommand): Promise<PreparedExec> {
-    const mappings = await this.variableStore.getMapping(command.mapPath);
-    if (Object.keys(mappings).length === 0) {
-      this.logger.warn('Map file declares no variables.');
-    }
-    this.assertNoCaseCollisions(Object.keys(mappings));
-
-    const { outcomes, resolved } = await this.secretResolver.resolve(mappings);
-    const failures = outcomes.filter(
-      (outcome): outcome is UnresolvedSecret | FailedSecret =>
-        outcome.status !== 'resolved',
-    );
-    if (failures.length > 0) {
-      this.secretResolver.logSecretsSection(resolved, []);
-      throw new SecretsFetchError(failures.map(SecretResolver.toFailure));
-    }
-
-    const secrets: Record<string, string> = {};
-    for (const { envVar, value } of resolved) {
-      if (value.includes(NUL)) {
-        throw new InvalidArgumentError(
-          `Secret for ${envVar} contains a NUL byte and cannot be passed as an environment variable.`,
-        );
-      }
-      secrets[envVar] = value;
-    }
-
+    const secrets = await this.requiredSecrets.resolve(command.mapPath);
     return { command, secrets };
   }
 
@@ -167,24 +133,6 @@ export class ExecWithSecretsCommandHandler {
 
     return exitCodeForChild(exit, (signal) =>
       this.processContext.signalNumber(signal),
-    );
-  }
-
-  /**
-   * On Windows two mapped names that differ only by case are one variable,
-   * so one value would be silently dropped. Refuse before resolving.
-   */
-  private assertNoCaseCollisions(names: string[]): void {
-    const collisions = findCaseCollisions(
-      names,
-      this.processContext.platform(),
-    );
-    if (collisions.length === 0) {
-      return;
-    }
-    const listed = collisions.map((group) => group.join(', ')).join('; ');
-    throw new InvalidArgumentError(
-      `Map file declares variables that differ only by case (${listed}); Windows treats them as the same variable.`,
     );
   }
 

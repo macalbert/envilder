@@ -135,7 +135,6 @@ describe('Cli exec', () => {
     secrets = { [DB_URL_PATH]: DB_URL_VALUE, [API_KEY_PATH]: API_KEY_VALUE };
     process.exitCode = undefined;
     vi.stubEnv('GITHUB_ACTIONS', undefined);
-    vi.stubEnv('ENVILDER_ALLOWED_VAULT_HOSTS', undefined);
     vi.stubEnv('API_KEY', undefined);
     vi.stubEnv('DB_URL', undefined);
 
@@ -289,7 +288,6 @@ describe('Cli exec', () => {
       // Assert
       expect(infraSpy).toHaveBeenCalledWith(
         expect.objectContaining({ profile: 'dev' }),
-        expect.any(Object),
       );
       expect(runSpy).toHaveBeenCalledTimes(1);
     });
@@ -313,7 +311,6 @@ describe('Cli exec', () => {
           provider: 'azure',
           vaultUrl: 'https://my-vault.vault.azure.net',
         }),
-        expect.any(Object),
       );
       expect(runRequest().command).toBe('dotnet');
     });
@@ -1312,6 +1309,28 @@ describe('Cli exec', () => {
       expect(stderr()).toContain(`::add-mask::${DB_URL_VALUE}`);
       expect(stderr()).toContain(`::add-mask::${API_KEY_VALUE}`);
       expect(runSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('Should_NotEmitWorkflowCommand_When_ExecFailureMessageCarriesOneInGitHubActions', async () => {
+      // Arrange
+      vi.stubEnv('GITHUB_ACTIONS', 'true');
+      const { readMapFileConfig } = await import(
+        '../../../../../src/envilder/core/infrastructure/variableStore/FileVariableStore'
+      );
+      vi.mocked(readMapFileConfig).mockRejectedValue(
+        new Error('Cannot read cfg.json\n::stop-commands::token'),
+      );
+
+      // Act
+      const actual = await runCli(['exec', '--map=cfg.json', 'npm', 'test']);
+
+      // Assert
+      expect(actual).not.toBe(0);
+      expect(stderr()).toContain('stop-commands');
+      const commandLines = stderr()
+        .split('\n')
+        .filter((line) => line.trimStart().startsWith('::'));
+      expect(commandLines).toEqual([]);
     });
 
     it('Should_NotEmitMaskCommands_When_NotRunningInGitHubActions', async () => {

@@ -43,19 +43,19 @@ def invalid_environment_variable_name_message(name: str) -> str:
 
     if name in _UNSUPPORTED_NAMES:
         return (
-            f"Unsupported environment variable name {_quote_name(name)}: "
+            f"Unsupported environment variable name {quote_name(name)}: "
             "a .env parser cannot read this name back, so it would be "
             "written but never resolved"
         )
 
     return (
-        f"Invalid environment variable name {_quote_name(name)}: names may "
+        f"Invalid environment variable name {quote_name(name)}: names may "
         "only contain letters, digits, underscore, dot, hyphen and slash, so "
         "that they can be read back from a .env file"
     )
 
 
-def _quote_name(name: str) -> str:
+def quote_name(name: str) -> str:
     # ``ensure_ascii`` escapes every non-ASCII character, U+2028/U+2029
     # included, and control characters are always escaped.
     return json.dumps(name, ensure_ascii=True)

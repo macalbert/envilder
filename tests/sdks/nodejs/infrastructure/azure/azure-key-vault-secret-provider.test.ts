@@ -135,4 +135,97 @@ describe('AzureKeyVaultSecretProvider', () => {
     // Assert
     await expect(act).rejects.toThrow('Forbidden');
   });
+
+  describe('checkSecretsExist', () => {
+    function clientListing(
+      secrets: Array<{ name: string; enabled?: boolean }>,
+    ): SecretClient {
+      return {
+        listPropertiesOfSecrets: vi.fn(async function* () {
+          yield* secrets;
+        }),
+        getSecret: vi.fn(),
+      } as unknown as SecretClient;
+    }
+
+    it('Should_MatchIgnoringCaseWithoutReadingValues_When_ListingSecrets', async () => {
+      // Arrange
+      const client = clientListing([
+        { name: 'MyApp-Db-Password', enabled: true },
+        { name: 'api-key' },
+      ]);
+      const sut = new AzureKeyVaultSecretProvider(client);
+
+      // Act
+      const actual = await sut.checkSecretsExist([
+        '/myapp/db/password',
+        'api-key',
+        'missing-key',
+      ]);
+
+      // Assert
+      expect(actual).toEqual(
+        new Map([
+          ['/myapp/db/password', { status: 'exists' }],
+          ['api-key', { status: 'exists' }],
+          ['missing-key', { status: 'missing' }],
+        ]),
+      );
+      expect(client.listPropertiesOfSecrets).toHaveBeenCalledTimes(1);
+      expect(client.getSecret).not.toHaveBeenCalled();
+    });
+
+    it('Should_ReportMissing_When_SecretIsDisabled', async () => {
+      // Arrange
+      const sut = new AzureKeyVaultSecretProvider(
+        clientListing([{ name: 'api-key', enabled: false }]),
+      );
+
+      // Act
+      const actual = await sut.checkSecretsExist(['api-key']);
+
+      // Assert
+      expect(actual.get('api-key')).toEqual({ status: 'missing' });
+    });
+
+    it.each([
+      [{ statusCode: 403 }, 'access_denied'],
+      [{ statusCode: 401 }, 'authentication_failed'],
+      [{ name: 'CredentialUnavailableError' }, 'authentication_failed'],
+      [{ statusCode: 500 }, 'provider_error'],
+    ])(
+      'Should_MapListingErrorToStatus_When_ListingFails %#',
+      async (fields, status) => {
+        // Arrange
+        const error = Object.assign(new Error('listing failed'), fields);
+        const client = {
+          // biome-ignore lint/correctness/useYield: fails before yielding
+          listPropertiesOfSecrets: vi.fn(async function* () {
+            throw error;
+          }),
+        } as unknown as SecretClient;
+        const sut = new AzureKeyVaultSecretProvider(client);
+
+        // Act
+        const actual = await sut.checkSecretsExist(['a', 'b']);
+
+        // Assert
+        expect(actual.get('a')).toEqual({ status, reason: 'listing failed' });
+        expect(actual.get('b')).toEqual({ status, reason: 'listing failed' });
+      },
+    );
+
+    it('Should_NotCallProvider_When_NoNames', async () => {
+      // Arrange
+      const client = clientListing([]);
+      const sut = new AzureKeyVaultSecretProvider(client);
+
+      // Act
+      const actual = await sut.checkSecretsExist([]);
+
+      // Assert
+      expect(actual.size).toBe(0);
+      expect(client.listPropertiesOfSecrets).not.toHaveBeenCalled();
+    });
+  });
 });

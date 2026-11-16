@@ -1,6 +1,7 @@
 // Domain
 
 // Application
+export { ContractValidationError } from './application/contract-validation.js';
 export { Envilder } from './application/envilder.js';
 export { EnvilderClient } from './application/envilder-client.js';
 export { MapFileParser } from './application/map-file-parser.js';
@@ -8,10 +9,18 @@ export {
   SecretValidationError,
   validateSecrets,
 } from './application/secret-validation.js';
+export type {
+  ContractValidationResult,
+  KeyCheck,
+  MapFileError,
+  SecretExistence,
+  SecretExistenceStatus,
+} from './domain/contract-validation-result.js';
 export type { EnvilderOptions } from './domain/envilder-options.js';
 export { ExpiredCredentialsError } from './domain/expired-credentials-error.js';
 export type { MapFileConfig } from './domain/map-file-config.js';
 export type { ParsedMapFile } from './domain/parsed-map-file.js';
+export type { ISecretExistenceChecker } from './domain/ports/secret-existence-checker.js';
 export type { ISecretProvider } from './domain/ports/secret-provider.js';
 export { SecretProviderType } from './domain/secret-provider-type.js';
 export { SsoSessionExpiredError } from './domain/sso-session-expired-error.js';

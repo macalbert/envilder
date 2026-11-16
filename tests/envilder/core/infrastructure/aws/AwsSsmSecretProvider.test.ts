@@ -238,6 +238,177 @@ describe('AwsSsmSecretProvider (unit tests)', () => {
     });
   });
 
+  describe('checkSecretsExist', () => {
+    it('Should_ReportExistsAndMissing_When_InvalidParametersListsMissingNames', async () => {
+      // Arrange
+      mockSendFn.mockResolvedValueOnce({
+        Parameters: [{ Name: '/app/db-url', Value: 'ciphertext' }],
+        InvalidParameters: ['/app/api-key'],
+      });
+
+      // Act
+      const actual = await sut.checkSecretsExist([
+        '/app/db-url',
+        '/app/api-key',
+      ]);
+
+      // Assert
+      expect(Object.fromEntries(actual)).toEqual({
+        '/app/db-url': { status: 'exists' },
+        '/app/api-key': { status: 'missing' },
+      });
+    });
+
+    it('Should_NotDecryptValues_When_CheckingSecretsExist', async () => {
+      // Arrange
+      mockSendFn.mockResolvedValueOnce({
+        Parameters: [],
+        InvalidParameters: [],
+      });
+
+      // Act
+      await sut.checkSecretsExist(['/app/db-url']);
+
+      // Assert
+      expect(mockSendFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: { Names: ['/app/db-url'], WithDecryption: false },
+        }),
+      );
+    });
+
+    it('Should_CallGetParametersInBatchesOfTen_When_CheckingMoreThanTenNames', async () => {
+      // Arrange
+      const names = Array.from({ length: 23 }, (_, i) => `/app/key-${i}`);
+      mockSendFn.mockResolvedValue({ Parameters: [], InvalidParameters: [] });
+
+      // Act
+      await sut.checkSecretsExist(names);
+
+      // Assert
+      const batchSizes = mockSendFn.mock.calls.map(
+        ([command]) => command.input.Names.length,
+      );
+      expect(batchSizes).toEqual([10, 10, 3]);
+    });
+
+    it('Should_CheckDuplicateNameOnce_When_NameIsRepeated', async () => {
+      // Arrange
+      mockSendFn.mockResolvedValueOnce({
+        Parameters: [],
+        InvalidParameters: [],
+      });
+
+      // Act
+      await sut.checkSecretsExist(['/app/db-url', '/app/db-url']);
+
+      // Assert
+      expect(mockSendFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: { Names: ['/app/db-url'], WithDecryption: false },
+        }),
+      );
+    });
+
+    it('Should_ReportAccessDeniedOnlyForDeniedName_When_BatchIsDenied', async () => {
+      // Arrange
+      const accessDenied = Object.assign(
+        new Error('User is not authorized to perform: ssm:GetParameters'),
+        { name: 'AccessDeniedException' },
+      );
+      mockSendFn.mockImplementation(async (command) => {
+        if (command.input.Names.includes('/app/secret')) {
+          throw accessDenied;
+        }
+        return { Parameters: [], InvalidParameters: [] };
+      });
+
+      // Act
+      const actual = await sut.checkSecretsExist([
+        '/app/db-url',
+        '/app/secret',
+      ]);
+
+      // Assert
+      expect(Object.fromEntries(actual)).toEqual({
+        '/app/db-url': { status: 'exists' },
+        '/app/secret': {
+          status: 'access_denied',
+          reason: 'User is not authorized to perform: ssm:GetParameters',
+        },
+      });
+    });
+
+    it('Should_ReportAuthenticationFailed_When_CredentialsCannotBeLoaded', async () => {
+      // Arrange
+      mockSendFn.mockRejectedValueOnce(
+        Object.assign(
+          new Error('Could not load credentials from any providers'),
+          {
+            name: 'CredentialsProviderError',
+          },
+        ),
+      );
+
+      // Act
+      const actual = await sut.checkSecretsExist(['/app/db-url']);
+
+      // Assert
+      expect(actual.get('/app/db-url')?.status).toBe('authentication_failed');
+    });
+
+    it('Should_ReportProviderError_When_ProviderIsUnreachable', async () => {
+      // Arrange
+      mockSendFn.mockRejectedValueOnce(
+        Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:4566'), {
+          name: 'Error',
+        }),
+      );
+
+      // Act
+      const actual = await sut.checkSecretsExist(['/app/db-url']);
+
+      // Assert
+      expect(actual.get('/app/db-url')).toEqual({
+        status: 'provider_error',
+        reason: 'connect ECONNREFUSED 127.0.0.1:4566',
+      });
+    });
+
+    it('Should_ThrowExpiredCredentialsError_When_CheckFailsWithExpiredToken', async () => {
+      // Arrange
+      mockSendFn.mockRejectedValueOnce(
+        Object.assign(
+          new Error('The security token included in the request is expired'),
+          {
+            name: 'ExpiredTokenException',
+          },
+        ),
+      );
+
+      // Act
+      const action = sut.checkSecretsExist(['/app/db-url']);
+
+      // Assert
+      await expect(action).rejects.toBeInstanceOf(ExpiredCredentialsError);
+    });
+
+    it('Should_ThrowSsoSessionExpiredError_When_CheckFailsWithTokenProviderError', async () => {
+      // Arrange
+      mockSendFn.mockRejectedValueOnce(
+        Object.assign(new Error('SSO session is expired'), {
+          name: 'TokenProviderError',
+        }),
+      );
+
+      // Act
+      const action = sut.checkSecretsExist(['/app/db-url']);
+
+      // Assert
+      await expect(action).rejects.toBeInstanceOf(SsoSessionExpiredError);
+    });
+  });
+
   describe('identity logging', () => {
     it('Should_NotLogIdentity_When_SecretRead', async () => {
       // Arrange
@@ -387,6 +558,24 @@ describe('AwsSsmSecretProvider (integration with LocalStack)', () => {
 
     // Assert
     expect(actual).toBeUndefined();
+  });
+
+  it('Should_ReportExistsAndMissing_When_CheckingSecretsExist', async () => {
+    // Arrange
+    const sut = new AwsSsmSecretProvider(ssmClient, mockLogger, stsClient);
+    const missingNames = Array.from(
+      { length: 11 },
+      (_, i) => `${NON_EXISTENT_PARAM}-${i}`,
+    );
+
+    // Act
+    const actual = await sut.checkSecretsExist([PARAM_NAME, ...missingNames]);
+
+    // Assert
+    expect(actual.get(PARAM_NAME)).toEqual({ status: 'exists' });
+    expect(missingNames.map((name) => actual.get(name)?.status)).toEqual(
+      missingNames.map(() => 'missing'),
+    );
   });
 
   it('Should_StoreSecretValue_When_SetSecretIsCalled', async () => {

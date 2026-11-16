@@ -7,6 +7,10 @@ on:
       - "github-action/**"
       - "scripts/build-github-action.mjs"
       - ".github/workflows/verify-action-build.yml"
+      # Dependency bumps change the bundle too
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
 
 jobs:
   verify-build:

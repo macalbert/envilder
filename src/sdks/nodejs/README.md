@@ -156,6 +156,66 @@ try {
 }
 ```
 
+### Map file contract validation
+
+Check, before loading anything, that the map file is valid and that every
+declared secret exists with the current credentials. No secret value is used
+or returned. This is the same check as `envilder validate` in the CLI.
+
+```typescript
+import { Envilder } from '@envilder/sdk';
+
+const result = await Envilder.fromMapFile('envilder.json').validateContract();
+
+if (!result.isValid) {
+  for (const error of result.mapFileErrors) {
+    console.error(`${error.key}: ${error.message}`);
+  }
+  for (const key of result.keys.filter((k) => k.status !== 'exists')) {
+    console.error(`${key.variable} (${key.provider} ${key.path}): ${key.status}`);
+  }
+}
+```
+
+`validateContract()` never throws for expected failures; they are reported in
+the result:
+
+- `mapFileErrors`: the map file does not match the
+  [published schema](https://envilder.com/schema/map-file.v1.json) or its
+  provider configuration cannot work (for example `vaultUrl` with AWS). When
+  there are any, no provider is called and `keys` is empty.
+- `keys`: one entry per variable with its `path`, `provider` and `status`:
+  `exists`, `missing`, `access_denied` (the identity cannot check the secret,
+  never reported as `missing`), `authentication_failed` or `provider_error`.
+  `reason` explains the last three when the provider gave one.
+
+To fail a load when the contract does not hold, opt in on the builder. The
+check runs once before resolving and throws `ContractValidationError`, whose
+message names the failing keys and paths (never their values) and whose
+`result` holds the full outcome:
+
+```typescript
+await Envilder.fromMapFile('envilder.json')
+  .withContractValidation()
+  .inject(); // throws ContractValidationError if a key is missing
+```
+
+Without `withContractValidation()`, a load makes no extra provider call and
+needs no extra permission. The check needs `ssm:GetParameters` on AWS (it
+uses `GetParameters` in batches of ten with `WithDecryption: false`; plain
+`String` values can still come back in the response and are discarded, and
+with `kms:Decrypt` the same permission reads decrypted values, so scope it
+like `ssm:GetParameter`) and, on
+Azure Key Vault, the `List` secret permission (access policies) or
+`Microsoft.KeyVault/vaults/secrets/readMetadata/action` (Azure RBAC, included
+in Key Vault Secrets User), because it lists secret metadata instead of
+reading values.
+
+Contract validation and `validateSecrets()` answer different questions:
+contract validation checks that the map file is valid and each declared secret
+exists, before resolving; `validateSecrets()` checks that the values already
+resolved are not empty.
+
 ### Advanced usage
 
 Implement the `ISecretProvider` interface to plug in a custom backend
@@ -185,6 +245,61 @@ const secrets = await client.resolveSecrets(mapFile);
 EnvilderClient.injectIntoEnvironment(secrets);
 ```
 
+### Custom provider in the fluent builder
+
+`withSecretProvider()` hands the builder your own provider instance instead of
+the one it would build from `$config`. The map file is still validated as
+usual, so this is also the way to test your startup code against an in-memory
+fake, with no cloud account, emulator or environment variables:
+
+```typescript
+import {
+  Envilder,
+  type ISecretExistenceChecker,
+  type ISecretProvider,
+} from '@envilder/sdk';
+
+const fakeSecrets = new Map([['/app/db-url', 'postgres://localhost/test']]);
+
+class InMemoryProvider implements ISecretProvider, ISecretExistenceChecker {
+  async getSecrets(names: string[]): Promise<Map<string, string>> {
+    return new Map(
+      names.flatMap((name) => {
+        const value = fakeSecrets.get(name);
+        return value === undefined ? [] : [[name, value] as const];
+      }),
+    );
+  }
+
+  async checkSecretsExist(names: readonly string[]) {
+    return new Map(
+      names.map((name) => [
+        name,
+        { status: fakeSecrets.has(name) ? 'exists' : 'missing' } as const,
+      ]),
+    );
+  }
+}
+
+await Envilder.fromMapFile('envilder.json')
+  .withSecretProvider(new InMemoryProvider())
+  .withContractValidation()
+  .inject();
+```
+
+To take part in contract validation, the provider also implements
+`ISecretExistenceChecker`. A provider that only implements `ISecretProvider`
+still resolves secrets, but `validateContract()` reports every key as
+`provider_error`, so `withContractValidation()` fails the load. The
+`provider` field of each key keeps the configured type (`withProvider()`,
+then `$config.provider`, then `aws`).
+
+For a complete, runnable walkthrough, see
+[`typescript-custom-provider`](https://github.com/macalbert/envilder-examples/tree/main/typescript-custom-provider)
+in envilder-examples: a custom provider over a local AES-256-GCM encrypted
+file, with tests for loading, failing at startup on a missing secret, and
+validating the contract without decrypting anything.
+
 ## API Reference
 
 ### Static facade (`Envilder`)
@@ -204,6 +319,9 @@ EnvilderClient.injectIntoEnvironment(secrets);
 | `withProvider(type)` | Override secret provider (AWS/Azure) |
 | `withProfile(name)` | Override AWS named profile |
 | `withVaultUrl(url)` | Override Azure Key Vault URL |
+| `withSecretProvider(provider)` | Use your own `ISecretProvider` instance instead of building one from `$config` |
+| `withContractValidation()` | Check the map file contract once before resolving; fail with `ContractValidationError` |
+| `validateContract()` | Check the map file contract and return a `ContractValidationResult`, without loading |
 | `resolve()` | Resolve secrets, return as `Map` |
 | `inject()` | Resolve + inject into `process.env` |
 
@@ -264,7 +382,7 @@ See the [root README](https://github.com/macalbert/envilder#%EF%B8%8F-mapping-fi
 ## Examples
 
 Runnable projects in [envilder-examples](https://github.com/macalbert/envilder-examples) resolve a map file
-against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to
+against AWS SSM and Azure Key Vault (emulated with LocalStack for AWS and LocalStack for Azure) and pass the values to
 containers, with no `.env` file:
 
 - [typescript-testcontainers](https://github.com/macalbert/envilder-examples/tree/main/typescript-testcontainers): Vitest + Testcontainers

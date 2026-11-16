@@ -1,0 +1,9 @@
+{
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://reports-dev.vault.azure.net"
+  },
+  "DB_PASSWORD": "/reports/dev/db-password",
+  "OPENAI_API_KEY": "reports-dev-openai-api-key"
+}

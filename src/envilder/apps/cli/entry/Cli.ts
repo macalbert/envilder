@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { existsSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Command, CommanderError, Option } from 'commander';
 import type { Container } from 'inversify';
@@ -11,7 +11,21 @@ import {
   formatArgument,
   formatProgram,
 } from '../../../core/application/execWithSecrets/CommandLineFormatter.js';
+import { CompareEnvFileValuesCommand } from '../../../core/application/validateEnvFile/CompareEnvFileValuesCommand.js';
+import type { CompareEnvFileValuesCommandHandler } from '../../../core/application/validateEnvFile/CompareEnvFileValuesCommandHandler.js';
+import { ValidateEnvFileKeysCommand } from '../../../core/application/validateEnvFile/ValidateEnvFileKeysCommand.js';
+import type { ValidateEnvFileKeysCommandHandler } from '../../../core/application/validateEnvFile/ValidateEnvFileKeysCommandHandler.js';
+import { ValidateMapFileCommand } from '../../../core/application/validateMapFile/ValidateMapFileCommand.js';
+import type { ValidateMapFileCommandHandler } from '../../../core/application/validateMapFile/ValidateMapFileCommandHandler.js';
+import { ValidateRemoteKeysCommand } from '../../../core/application/validateRemoteKeys/ValidateRemoteKeysCommand.js';
+import type { ValidateRemoteKeysCommandHandler } from '../../../core/application/validateRemoteKeys/ValidateRemoteKeysCommandHandler.js';
 import type { CliOptions } from '../../../core/domain/CliOptions.js';
+import {
+  type EnvFileKeyComparison,
+  type EnvValueCheck,
+  summarizeEnvFileFailures,
+  summarizeValueFailures,
+} from '../../../core/domain/EnvFileComparison.js';
 import {
   EXEC_COMMAND_NOT_EXECUTABLE,
   EXEC_COMMAND_NOT_FOUND,
@@ -24,14 +38,24 @@ import {
 } from '../../../core/domain/errors/DomainErrors.js';
 import type { MapFileConfig } from '../../../core/domain/MapFileConfig.js';
 import { resolveMapFileTarget } from '../../../core/domain/MapFileUpdate.js';
+import type { MapFileViolation } from '../../../core/domain/MapFileValidator.js';
 import { OperationMode } from '../../../core/domain/OperationMode.js';
 import type { ILogger } from '../../../core/domain/ports/ILogger.js';
 import type { ISecretMasker } from '../../../core/domain/ports/ISecretMasker.js';
+import {
+  describeSecretExistenceStatus,
+  type RemoteKeyCheck,
+  summarizeFailures,
+} from '../../../core/domain/SecretExistence.js';
+import { GitHubActionsLogger } from '../../../core/infrastructure/github/GitHubActionsLogger.js';
 import { GitHubActionsSecretMasker } from '../../../core/infrastructure/github/GitHubActionsSecretMasker.js';
 import { NoOpSecretMasker } from '../../../core/infrastructure/github/NoOpSecretMasker.js';
+import { ConsoleLogger } from '../../../core/infrastructure/logger/ConsoleLogger.js';
+import { StderrConsoleLogger } from '../../../core/infrastructure/logger/StderrConsoleLogger.js';
 import { PackageVersionReader } from '../../../core/infrastructure/package/PackageVersionReader.js';
 import { readMapFileConfig } from '../../../core/infrastructure/variableStore/FileVariableStore.js';
 import { TYPES } from '../../../core/types.js';
+import { SUPPORTED_PROVIDERS } from '../../shared/ContainerConfiguration.js';
 import { presentError } from '../errors/CliErrorPresenter.js';
 import {
   type KnownOption,
@@ -43,12 +67,28 @@ import {
   createConfirm,
   createRunLogin,
   executeWithSsoRecovery,
+  type RecoveryDeps,
 } from '../recovery/SsoLoginRecovery.js';
 import { Startup } from '../Startup.js';
+import {
+  toValidationJson,
+  type ValidationResults,
+} from '../validate/ValidationJsonReport.js';
 
 const DEFAULT_MAP_FILE = 'envilder.json';
 const DEFAULT_ENV_FILE = '.env';
 const EXEC_USAGE = 'envilder exec [options] [--] <command> [args...]';
+
+type ValidateOptions = {
+  offline?: boolean;
+  envfile?: string;
+  compareValues?: boolean;
+  format?: string;
+  map?: string;
+  profile?: string;
+  provider?: string;
+  vaultUrl?: string;
+};
 
 type ExecOptions = {
   map?: string;
@@ -106,6 +146,9 @@ export async function main() {
 
   ${pc.yellow('>')} ${pc.bold('Run a command with secrets')}  ${pc.dim('(nothing written to disk)')}
     ${pc.cyan('envilder exec -- npm run dev')}  ${pc.dim('# see: envilder exec --help')}
+
+  ${pc.green('>')} ${pc.bold('Check the map file and its secrets')}  ${pc.dim('(no value is read)')}
+    ${pc.cyan('envilder validate')}  ${pc.dim('# see: envilder validate --help')}
 `;
 
   program
@@ -231,20 +274,17 @@ export async function main() {
             }),
         };
 
-        const infraOptions = buildInfrastructureOptions();
-
         serviceProvider = Startup.build()
           .configureServices()
-          .configureInfrastructure(config, infraOptions)
+          .configureInfrastructure(config)
           .create();
 
         if (isPushSingle) {
           const logger = serviceProvider.get<ILogger>(TYPES.ILogger);
           const providerName = config.provider?.toLowerCase() || 'aws';
-          const vaultInfo =
-            providerName === 'azure' && config.vaultUrl
-              ? `, vault=${new URL(config.vaultUrl).origin}`
-              : '';
+          const origin =
+            providerName === 'azure' ? vaultOrigin(config.vaultUrl) : undefined;
+          const vaultInfo = origin ? `, vault=${origin}` : '';
           const source = mapFileExists
             ? `configuration from ${resolvedMap}`
             : 'configuration';
@@ -256,6 +296,7 @@ export async function main() {
     );
 
   registerExecCommand(program);
+  registerValidateCommand(program);
   rejectDashValues(program, 1);
 
   try {
@@ -268,7 +309,8 @@ export async function main() {
     }
     // Only the exec subcommand overrides Commander's exit, so a parse error
     // reaching this point belongs to exec and uses its exit code. Commander
-    // has already printed the message.
+    // has already printed the message. `validate` fails with 1, which
+    // Commander's own exit already uses.
     if (error instanceof CommanderError) {
       if (error.exitCode === 0) {
         return;
@@ -411,6 +453,568 @@ function registerExecCommand(program: Command): void {
       write(redactParseError(message, knownOptionsOf(exec))),
   });
   rejectDashValues(exec, EXEC_ENVILDER_FAILURE);
+}
+
+function registerValidateCommand(program: Command): void {
+  const validate = program
+    .command('validate')
+    .summary('Check the map file before pulling, pushing or running a command')
+    .description(
+      'Check that the map file is valid JSON, matches the map file schema, ' +
+        'and resolves to a coherent provider configuration (flags take ' +
+        'precedence over $config), then check that every secret it declares ' +
+        'exists in the provider with the current credentials. Every problem ' +
+        'is reported with the key that causes it. Secret values are never ' +
+        'read or printed.\n\n' +
+        'With --envfile the keys of a local env file are compared with the ' +
+        'variables the map file declares. With --compare-values each ' +
+        'declared value is also compared with its remote value, and only ' +
+        '"matches" or "differs" is printed.\n\n' +
+        'With --offline nothing but local files is read: no provider is ' +
+        'called and no credentials are needed.\n\n' +
+        'With --format json one JSON document is printed to stdout and ' +
+        'everything else goes to stderr.',
+    )
+    .option(
+      '--offline',
+      'Validate the map file locally without calling the provider',
+    )
+    .option(
+      '--envfile <path>',
+      'Compare the keys of this env file with the map file',
+    )
+    .option(
+      '--compare-values',
+      'Also compare env file values with remote values (requires --envfile)',
+    )
+    .option('--format <format>', 'Output format: text or json (default: text)')
+    .option(
+      '--map <path>',
+      `Path to the JSON file with environment variable mapping (default: ${DEFAULT_MAP_FILE})`,
+    )
+    .option('--profile <name>', 'AWS CLI profile to use (optional)')
+    .option(
+      '--provider <name>',
+      'Cloud provider to use: aws or azure (default: aws)',
+    )
+    .option(
+      '--vault-url <url>',
+      'Azure Key Vault URL (overrides $config.vaultUrl in map file)',
+    )
+    .addHelpText('after', VALIDATE_HELP)
+    .action(async (options: ValidateOptions, validateCommand: Command) => {
+      rejectRootOptionsBeforeValidate(
+        (validateCommand.parent?.opts() ?? {}) as ExecOptions,
+      );
+      rejectInvalidValidateOptions(options);
+      if (options.format === 'json') {
+        await runJsonValidation(options);
+        return;
+      }
+      await runValidation(options, TEXT_OUTPUT);
+    });
+
+  validate.configureOutput({
+    outputError: (message, write) =>
+      write(redactParseError(message, knownOptionsOf(validate))),
+  });
+  rejectDashValues(validate, 1);
+}
+
+const VALIDATE_HELP = `
+Examples:
+  envilder validate
+  envilder validate --map=config/envilder.json --profile=dev
+  envilder validate --provider=azure --vault-url=https://my-vault.vault.azure.net
+  envilder validate --offline
+  envilder validate --envfile=.env
+  envilder validate --envfile=.env --compare-values
+  envilder validate --offline --envfile=.env
+  envilder validate --format=json
+
+Exit codes:
+  0  the map file is valid, every declared secret exists and, with
+     --envfile, every declared variable is in the env file once (with
+     --compare-values, with the remote value)
+  1  the map file or the options are not valid, a secret is missing or
+     cannot be checked, the credentials are missing or expired, or the env
+     file is missing, lacks a declared variable, repeats a key or holds a
+     value that differs
+Variables only in the env file are warnings and do not change the exit code.
+--format=json does not change the exit codes.
+
+See docs/validate-command.md.`;
+
+/**
+ * Root options written before `validate` are parsed by the root command and
+ * never reach it. Reject them by name instead of validating something else
+ * than what was asked; values are not echoed, since `--value` can be a secret.
+ */
+function rejectRootOptionsBeforeValidate(rootOptions: ExecOptions): void {
+  const misplaced = [
+    ...EXEC_COMPATIBLE_ROOT_OPTIONS,
+    ...EXEC_INCOMPATIBLE_ROOT_OPTIONS,
+  ].filter(([name]) => rootOptions[name] !== undefined);
+  if (misplaced.length === 0) {
+    return;
+  }
+  const flags = misplaced.map(([, flag]) => flag).join(', ');
+  console.error(
+    pc.red(`error: Put envilder options after "validate" (found ${flags}).`),
+  );
+  throw new SilentExitError(1);
+}
+
+/**
+ * Rejects option combinations that cannot be honoured, before any file is
+ * read or any provider is called.
+ */
+function rejectInvalidValidateOptions(options: ValidateOptions): void {
+  const problem = findInvalidValidateOption(options);
+  if (problem !== undefined) {
+    console.error(pc.red(`error: ${problem}`));
+    throw new SilentExitError(1);
+  }
+}
+
+function findInvalidValidateOption(
+  options: ValidateOptions,
+): string | undefined {
+  if (
+    options.format !== undefined &&
+    !VALIDATE_FORMATS.includes(options.format)
+  ) {
+    // The value is not echoed: it can be anything the user typed.
+    return `--format must be ${VALIDATE_FORMATS.join(' or ')}.`;
+  }
+  if (!options.compareValues) {
+    return undefined;
+  }
+  if (options.envfile === undefined) {
+    return '--compare-values requires --envfile.';
+  }
+  if (options.offline) {
+    return (
+      '--compare-values cannot be used with --offline: comparing values ' +
+      'reads them from the provider.'
+    );
+  }
+  return undefined;
+}
+
+const VALIDATE_FORMATS: readonly string[] = ['text', 'json'];
+
+/**
+ * Where `envilder validate` reports each step. Text output prints as it
+ * goes; JSON output collects the results and prints them once at the end, so
+ * its logger and its SSO login prompt keep stdout free.
+ */
+type ValidationOutput = {
+  readonly logger: ILogger;
+  readonly ssoRecovery: Partial<RecoveryDeps>;
+  mapFileChecked(path: string, violations: readonly MapFileViolation[]): void;
+  envFileChecked(path: string, comparison: EnvFileKeyComparison): void;
+  remoteSkipped(): void;
+  keysChecked(
+    checks: readonly RemoteKeyCheck[],
+    provider: string,
+    source: string,
+  ): void;
+  valuesCompared(checks: readonly EnvValueCheck[], source: string): void;
+  failed(failures: string): void;
+};
+
+const TEXT_OUTPUT: ValidationOutput = {
+  logger: new ConsoleLogger(),
+  ssoRecovery: {},
+  mapFileChecked: printMapFileCheck,
+  envFileChecked: printEnvFileComparison,
+  remoteSkipped: () =>
+    console.log(
+      pc.dim(
+        '  Remote validation skipped (--offline): no provider was called, ' +
+          'so the secrets were not checked.',
+      ),
+    ),
+  keysChecked: (checks, _provider, source) =>
+    printRemoteKeyChecks(checks, source),
+  valuesCompared: printValueChecks,
+  failed: (failures) =>
+    console.error(pc.red(`✗ Validation failed: ${failures}`)),
+};
+
+function jsonOutput(results: ValidationResults): ValidationOutput {
+  return {
+    logger: new StderrConsoleLogger(),
+    ssoRecovery: {
+      // The prompt is on stderr, so stdout may be redirected to a file.
+      isInteractive: () =>
+        Boolean(process.stdin.isTTY) && Boolean(process.stderr.isTTY),
+      confirm: createConfirm(process.stderr),
+      runLogin: createRunLogin({ stdout: 'stderr' }),
+    },
+    mapFileChecked: (path, violations) => {
+      results.mapFile = { path, violations };
+    },
+    envFileChecked: (path, comparison) => {
+      results.envFile = { path, comparison };
+    },
+    remoteSkipped: () => {},
+    keysChecked: (checks, provider) => {
+      results.keys = { provider, checks };
+    },
+    valuesCompared: (checks) => {
+      results.values = checks;
+    },
+    failed: () => {},
+  };
+}
+
+/** Exit 1 because a check failed, as opposed to a run that stopped early. */
+class ValidationFailedError extends SilentExitError {
+  constructor() {
+    super(1);
+  }
+}
+
+async function runValidation(
+  options: ValidateOptions,
+  output: ValidationOutput,
+): Promise<void> {
+  if (options.offline) {
+    await runOfflineValidation(options, output);
+    return;
+  }
+  await runRemoteValidation(options, output);
+}
+
+/**
+ * Runs the validation and prints exactly one JSON document to stdout,
+ * whatever the outcome; the exit code is the same as with text output. When
+ * the run stops before every check finished, the document says why in
+ * `error`, and the usual message still goes to stderr.
+ */
+async function runJsonValidation(options: ValidateOptions): Promise<void> {
+  const results: ValidationResults = { offline: options.offline === true };
+  let error: unknown;
+  try {
+    await runValidation(options, jsonOutput(results));
+  } catch (caught) {
+    if (!(caught instanceof ValidationFailedError)) {
+      error =
+        caught instanceof SilentExitError
+          ? new Error('Validation stopped before every check finished.')
+          : caught;
+    }
+    throw caught;
+  } finally {
+    console.log(JSON.stringify(toValidationJson(results, error), null, 2));
+  }
+}
+
+async function runOfflineValidation(
+  options: ValidateOptions,
+  output: ValidationOutput,
+): Promise<void> {
+  const mapPath = await validateMapFileOffline(options, output);
+  const envFile = await checkEnvFileKeys(mapPath, options.envfile, output);
+  output.remoteSkipped();
+  failOnSummaries([envFile?.failures ?? ''], output);
+}
+
+/**
+ * Reports `<summaries>` as failed and exits with 1 when any summary is not
+ * empty.
+ */
+function failOnSummaries(
+  summaries: readonly string[],
+  output: ValidationOutput,
+): void {
+  const failures = summaries.filter((summary) => summary !== '').join(', ');
+  if (failures !== '') {
+    output.failed(failures);
+    throw new ValidationFailedError();
+  }
+}
+
+type EnvFileCheck = {
+  readonly path: string;
+  readonly comparison: EnvFileKeyComparison;
+  /** What fails, for example `1 missing from .env`; empty when nothing does. */
+  readonly failures: string;
+};
+
+/**
+ * Compares the env file keys with the declared variables, without calling
+ * any provider, and reports the result. Does nothing without `--envfile`.
+ */
+async function checkEnvFileKeys(
+  mapPath: string,
+  envfileOption: string | undefined,
+  output: ValidationOutput,
+): Promise<EnvFileCheck | undefined> {
+  if (envfileOption === undefined) {
+    return undefined;
+  }
+  const path = resolveEnvfile(envfileOption);
+  const container = Startup.build()
+    .configureOfflineValidation(output.logger)
+    .create();
+  const handler = container.get<ValidateEnvFileKeysCommandHandler>(
+    TYPES.ValidateEnvFileKeysCommandHandler,
+  );
+  const comparison = await handler.handle(
+    ValidateEnvFileKeysCommand.create(mapPath, path),
+  );
+  output.envFileChecked(path, comparison);
+  return {
+    path,
+    comparison,
+    failures: summarizeEnvFileFailures(comparison, basename(path)),
+  };
+}
+
+function printEnvFileComparison(
+  path: string,
+  comparison: EnvFileKeyComparison,
+): void {
+  const name = basename(path);
+  const declaredCount = comparison.present.length + comparison.missing.length;
+  console.log(pc.bold(`Checking env file ${path}`));
+  const rows = [
+    ...comparison.missing.map((key) => ({
+      key,
+      ok: false,
+      text: `missing from ${name}`,
+    })),
+    ...comparison.duplicates.map(({ key, count }) => ({
+      key,
+      ok: false,
+      text: `duplicated in ${name} (${count} assignments)`,
+    })),
+  ];
+  const width = Math.max(
+    0,
+    ...rows.map((row) => row.key.length),
+    ...comparison.undeclared.map((key) => key.length),
+  );
+  for (const row of rows) {
+    console.log(
+      `  ${pc.red('✗')} ${pc.bold(row.key.padEnd(width))}  ${pc.red(row.text)}`,
+    );
+  }
+  for (const key of comparison.undeclared) {
+    console.log(
+      `  ${pc.yellow('⚠')} ${pc.bold(key.padEnd(width))}  ` +
+        pc.yellow('not declared in map file'),
+    );
+  }
+  if (rows.length === 0) {
+    console.log(
+      pc.green(
+        declaredCount === 1
+          ? `✓ The 1 declared variable is in ${name}`
+          : `✓ All ${declaredCount} declared variables are in ${name}`,
+      ),
+    );
+  }
+}
+
+/**
+ * Checks the map file without calling any provider. Reports the result and
+ * returns the map file path when it is valid; reports every violation and
+ * exits with 1 otherwise.
+ */
+async function validateMapFileOffline(
+  options: ValidateOptions,
+  output: ValidationOutput,
+): Promise<string> {
+  const mapPath = resolveMapFile(options.map);
+  const container = Startup.build()
+    .configureOfflineValidation(output.logger)
+    .create();
+  const handler = container.get<ValidateMapFileCommandHandler>(
+    TYPES.ValidateMapFileCommandHandler,
+  );
+  const violations = await handler.handle(
+    ValidateMapFileCommand.create(
+      mapPath,
+      {
+        provider: options.provider,
+        profile: options.profile,
+        vaultUrl: options.vaultUrl,
+      },
+      SUPPORTED_PROVIDERS,
+    ),
+  );
+
+  output.mapFileChecked(mapPath, violations);
+  if (violations.length > 0) {
+    throw new ValidationFailedError();
+  }
+  return mapPath;
+}
+
+function printMapFileCheck(
+  mapPath: string,
+  violations: readonly MapFileViolation[],
+): void {
+  if (violations.length === 0) {
+    console.log(pc.green(`✓ Map file valid: ${mapPath}`));
+    return;
+  }
+  const count =
+    violations.length === 1 ? '1 problem' : `${violations.length} problems`;
+  console.error(pc.red(`✗ Map file invalid: ${mapPath} (${count})`));
+  for (const violation of violations) {
+    console.error(`  ${pc.red('•')} ${violation.message}`);
+  }
+}
+
+/**
+ * Validates the map file offline first, so an invalid file never reaches the
+ * provider, then checks that every declared secret exists. Lists each
+ * variable with its path and status; values are never read.
+ */
+async function runRemoteValidation(
+  options: ValidateOptions,
+  output: ValidationOutput,
+): Promise<void> {
+  const mapPath = await validateMapFileOffline(options, output);
+  const envFile = await checkEnvFileKeys(mapPath, options.envfile, output);
+  const fileConfig = await readMapFileConfig(mapPath);
+  const config: MapFileConfig = {
+    ...fileConfig,
+    ...(options.provider && { provider: options.provider }),
+    ...(options.vaultUrl && { vaultUrl: options.vaultUrl }),
+    ...(options.profile && { profile: options.profile }),
+  };
+
+  const container = Startup.build()
+    .configureRemoteValidation(output.logger)
+    .configureInfrastructure(config)
+    .create();
+  const handler = container.get<ValidateRemoteKeysCommandHandler>(
+    TYPES.ValidateRemoteKeysCommandHandler,
+  );
+
+  let checks: RemoteKeyCheck[] = [];
+  await executeWithSsoRecovery(async () => {
+    checks = await handler.handle(ValidateRemoteKeysCommand.create(mapPath));
+  }, output.ssoRecovery);
+
+  const source = describeSecretSource(config);
+  output.keysChecked(checks, config.provider?.toLowerCase() || 'aws', source);
+
+  let valueFailures = '';
+  if (options.compareValues && envFile !== undefined) {
+    valueFailures = await compareEnvFileValues(
+      container,
+      mapPath,
+      envFile,
+      checks,
+      source,
+      output,
+    );
+  }
+
+  failOnSummaries(
+    [summarizeFailures(checks), envFile?.failures ?? '', valueFailures],
+    output,
+  );
+}
+
+/**
+ * Compares the env file value of every declared variable that is both in the
+ * env file and exists remotely; the others already fail. Prints only
+ * `matches`, `differs` or `unreadable` per variable and returns what fails.
+ */
+async function compareEnvFileValues(
+  container: Container,
+  mapPath: string,
+  envFile: EnvFileCheck,
+  checks: readonly RemoteKeyCheck[],
+  source: string,
+  output: ValidationOutput,
+): Promise<string> {
+  const inEnvFile = new Set(envFile.comparison.present);
+  const variables = checks
+    .filter((check) => check.status === 'exists')
+    .map((check) => check.variable)
+    .filter((variable) => inEnvFile.has(variable));
+  if (variables.length === 0) {
+    return '';
+  }
+
+  const handler = container.get<CompareEnvFileValuesCommandHandler>(
+    TYPES.CompareEnvFileValuesCommandHandler,
+  );
+  let valueChecks: EnvValueCheck[] = [];
+  await executeWithSsoRecovery(async () => {
+    valueChecks = await handler.handle(
+      CompareEnvFileValuesCommand.create(mapPath, envFile.path, variables),
+    );
+  }, output.ssoRecovery);
+  output.valuesCompared(valueChecks, source);
+  return summarizeValueFailures(valueChecks);
+}
+
+function printValueChecks(
+  checks: readonly EnvValueCheck[],
+  source: string,
+): void {
+  const count = checks.length === 1 ? '1 value' : `${checks.length} values`;
+  console.log(pc.bold(`Comparing ${count} with ${source}`));
+  const width = Math.max(0, ...checks.map((c) => c.variable.length));
+  for (const check of checks) {
+    const matches = check.status === 'matches';
+    const reason =
+      check.reason === undefined ? '' : pc.dim(` (${check.reason})`);
+    console.log(
+      `  ${matches ? pc.green('✓') : pc.red('✗')} ` +
+        `${pc.bold(check.variable.padEnd(width))}  ` +
+        `${matches ? pc.green(check.status) : pc.red(check.status)}${reason}`,
+    );
+  }
+  if (summarizeValueFailures(checks) === '') {
+    console.log(
+      pc.green(
+        checks.length === 1
+          ? '✓ The 1 compared value matches'
+          : `✓ All ${count} match`,
+      ),
+    );
+  }
+}
+
+function printRemoteKeyChecks(
+  checks: readonly RemoteKeyCheck[],
+  source: string,
+): void {
+  const count = checks.length === 1 ? '1 secret' : `${checks.length} secrets`;
+  // A blank line separates the block from the AWS identity banner above it.
+  console.log(`\n${pc.bold(`Checking ${count} in ${source}`)}`);
+  const variableWidth = Math.max(0, ...checks.map((c) => c.variable.length));
+  const pathWidth = Math.max(0, ...checks.map((c) => c.path.length));
+  for (const check of checks) {
+    const exists = check.status === 'exists';
+    const status = describeSecretExistenceStatus(check.status);
+    const reason =
+      check.reason === undefined ? '' : pc.dim(` (${check.reason})`);
+    console.log(
+      `  ${exists ? pc.green('✓') : pc.red('✗')} ` +
+        `${pc.bold(check.variable.padEnd(variableWidth))}  ` +
+        `${pc.dim(check.path.padEnd(pathWidth))}  ` +
+        `${exists ? pc.green(status) : pc.red(status)}${reason}`,
+    );
+  }
+  if (summarizeFailures(checks) === '') {
+    console.log(
+      `\n${pc.green(
+        checks.length === 1 ? '✓ 1 secret exists' : `✓ All ${count} exist`,
+      )}`,
+    );
+  }
 }
 
 const EXEC_HELP = `
@@ -558,9 +1162,9 @@ async function resolveSecretsAndRun(
   };
 
   const container = Startup.build()
-    .configureExec(createExecSecretMasker())
+    .configureExec(createExecSecretMasker(), createExecLogger())
     .configureServices()
-    .configureInfrastructure(config, buildInfrastructureOptions())
+    .configureInfrastructure(config)
     .create();
   const dispatcher = container.get<DispatchActionCommandHandler>(
     TYPES.DispatchActionCommandHandler,
@@ -615,20 +1219,31 @@ async function dispatchExec(
   return exitCode;
 }
 
+/**
+ * Writes through the exec logger, which may fail before the container
+ * exists (reading the map file), so input-derived text in the message is
+ * escaped like any other exec output under GitHub Actions.
+ */
 function reportExecFailure(error: unknown): number {
   if (error instanceof SilentExitError) {
     // SSO recovery was declined or failed and already explained why.
     return EXEC_ENVILDER_FAILURE;
   }
+  const logger = createExecLogger();
+  const logLines = (text: string) => {
+    for (const line of text.split('\n')) {
+      logger.error(line);
+    }
+  };
   if (error instanceof CommandNotFoundError) {
-    console.error(pc.red(error.message));
+    logLines(pc.red(error.message));
     return EXEC_COMMAND_NOT_FOUND;
   }
   if (error instanceof CommandNotExecutableError) {
-    console.error(pc.red(error.message));
+    logLines(pc.red(error.message));
     return EXEC_COMMAND_NOT_EXECUTABLE;
   }
-  console.error(presentError(error));
+  logLines(presentError(error));
   return EXEC_ENVILDER_FAILURE;
 }
 
@@ -657,14 +1272,30 @@ function createExecSecretMasker(): ISecretMasker {
     : new NoOpSecretMasker();
 }
 
-function buildInfrastructureOptions(): Record<string, unknown> {
-  const infraOptions: Record<string, unknown> = {};
-  const extraHosts = process.env.ENVILDER_ALLOWED_VAULT_HOSTS;
-  if (extraHosts) {
-    infraOptions.allowedVaultHosts = extraHosts.split(',').map((h) => h.trim());
-    infraOptions.disableChallengeResourceVerification = true;
+/**
+ * Exec logs to stderr, keeping stdout for the child. Under GitHub Actions
+ * each message stays one inert line, so input-derived text cannot issue
+ * workflow commands ahead of the mask registrations.
+ */
+function createExecLogger(): ILogger {
+  return process.env.GITHUB_ACTIONS === 'true'
+    ? new GitHubActionsLogger(new StderrConsoleLogger())
+    : new StderrConsoleLogger();
+}
+
+/**
+ * The vault origin to log, never the full URL, which can carry credentials.
+ * `undefined` when the URL does not parse: the Azure client reports that.
+ */
+function vaultOrigin(vaultUrl: string | undefined): string | undefined {
+  if (!vaultUrl) {
+    return undefined;
   }
-  return infraOptions;
+  try {
+    return new URL(vaultUrl).origin;
+  } catch {
+    return undefined;
+  }
 }
 
 /**

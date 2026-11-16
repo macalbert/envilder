@@ -7,6 +7,19 @@ pre-commit:
         pnpm exec biome check --write --unsafe --no-errors-on-unmatched {staged_files} &&
         pnpm exec biome format --write --no-errors-on-unmatched {staged_files}
       stage_fixed: true
+    actions-lockfile:
+      # Default staged files leave out deletions; a removed workflow must
+      # still trigger the check
+      files: git diff --cached --name-only
+      glob:
+        - ".github/workflows/*.{yml,yaml,lock}"
+        - "**/action.{yml,yaml}"
+      run: node scripts/check-actions-lockfile.mjs
+    docs-dates:
+      glob: "src/website/src/**"
+      run: >-
+        pnpm docs:dates &&
+        git add src/website/src/i18n/docs-dates.json
     dotnet-format:
       glob: "**/*.{cs,csproj}"
       run: dotnet format src/sdks/dotnet/Envilder.sln --include {staged_files}

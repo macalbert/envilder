@@ -41,6 +41,7 @@ src/envilder/core/application/ Command/Handler use cases
 src/envilder/core/infrastructure/ Provider adapters (AWS, Azure)
 src/sdks/{dotnet,python,nodejs}/ Independent runtime SDKs
 src/website/                 Astro documentation website
+skills/envilder/             Public Agent Skill for Envilder users (not for contributors)
 tests/                       Mirrors src/ structure
 e2e/                         End-to-end tests (TestContainers)
 ```
@@ -53,6 +54,19 @@ e2e/                         End-to-end tests (TestContainers)
   validation only.
 - SDKs are independent: they share the map-file format but have zero code
   dependency on the TypeScript core.
+- `skills/envilder/` documents CLI options, Action inputs, SDK APIs and
+  supported providers. `tests/skills/envilder/` fails when they drift: update
+  the skill in the same change.
+- After changing the English text of a docs page, run `pnpm docs:dates` and
+  commit `src/website/src/i18n/docs-dates.json`: it keeps each page's
+  `dateModified` accurate, and `tests/website` fails when it is stale.
+- `src/website/public/<32 hex>.txt` is the public IndexNow key file (its
+  content is its own name; it is not a secret). The website deploy compares
+  each built page with the live one before `cdk deploy`, then notifies
+  IndexNow of the changed URLs afterwards via
+  `src/website/scripts/indexnow.mjs` (`--dry-run` prints the payload without
+  sending). Both steps are `continue-on-error`, so they never fail a deploy.
+  Do not rename or remove the key file, and do not list it in the sitemap.
 - E2E tests require Docker running (LocalStack AWS + LocalStack Azure containers).
 
 ## Architecture Reference

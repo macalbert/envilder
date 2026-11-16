@@ -1,13 +1,11 @@
-# 🗝️ Envilder ☁️
-
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/8a7188ef-9d8d-45fb-8c37-3af718fb5103" alt="Envilder">
+  <img src="https://raw.githubusercontent.com/macalbert/envilder/main/docs/envilder-hero.jpg" alt="Envilder">
 </p>
 
 <p align="center">
   <b>One secret mapping for local dev, CI/CD, and runtime.</b><br>
   <span>Define secrets once in <code>envilder.json</code>. Resolve them consistently from AWS SSM or Azure Key Vault.</span><br>
-  <a href="https://envilder.com/?utm_source=github&utm_medium=readme&utm_campaign=root"><strong>Website & docs → envilder.com</strong></a>
+  <a href="https://envilder.com/docs/?utm_source=github&utm_medium=readme&utm_campaign=root"><strong>Website & docs → envilder.com</strong></a>
 </p>
 
 [![npm version](https://img.shields.io/npm/v/envilder.svg)](https://www.npmjs.com/package/envilder)
@@ -34,7 +32,7 @@ CI/CD (GitHub Action), and application startup (runtime SDKs).
 
 ```bash
 # Push a secret: it is stored in your cloud and mapped in envilder.json
-npx envilder --key=API_KEY --value=s3cret --secret-path=/my-app/api-key
+npx envilder --push --key=API_KEY --value=s3cret --secret-path=/my-app/api-key
 
 # Zero-config: uses envilder.json and .env by default
 npx envilder
@@ -84,6 +82,7 @@ No SaaS middleman. One versioned mapping contract. Secrets stay in your cloud.
 | 📋 **Declarative Mapping** | One JSON file defines how application variables map to cloud secrets. Git-versioned, PR-reviewable, and diff-able |
 | ☁️ **Cloud-native Providers** | AWS SSM and Azure Key Vault today |
 | ⚡ **Exec Mode** | `envilder exec -- <command>` runs any command with the secrets in its environment. Nothing written to disk, fail-closed, exit codes propagated. [Guide](docs/exec-command.md) |
+| ✅ **Validate** | `envilder validate` checks the map file against the schema and the provider rules, then checks that every declared secret exists, without printing values. `--envfile` compares a local `.env` with the map file by keys, and by values with `--compare-values`. `--offline` checks local files only, without credentials. [Guide](docs/validate-command.md) |
 | 🔌 **Runtime SDKs** | Load secrets into memory at app startup: [.NET](./src/sdks/dotnet/README.md), [Python](./src/sdks/python/README.md), [Node.js](./src/sdks/nodejs/README.md). No `.env` on disk |
 | ⚙️ **GitHub Action** | Pull secrets in CI/CD. Same mapping, zero manual config |
 | 🔄 **Pull & Controlled Push** | Pull secrets to `.env`, or intentionally push local values to your cloud provider when bootstrapping or rotating |
@@ -112,10 +111,10 @@ npm install -g envilder
 Push a secret and Envilder writes the mapping for you:
 
 ```bash
-npx envilder --key=API_KEY --value=s3cret --secret-path=/my-app/api-key
+npx envilder --push --key=API_KEY --value=s3cret --secret-path=/my-app/api-key
 # ✓ Created envilder.json
 
-npx envilder --key=DB_PASSWORD --value=pa55word --secret-path=/my-app/db/password
+npx envilder --push --key=DB_PASSWORD --value=pa55word --secret-path=/my-app/db/password
 # ✓ Added DB_PASSWORD to envilder.json
 ```
 
@@ -136,7 +135,19 @@ See the [Push Command Guide](docs/push-command.md#single-variable-push) for the 
 > 💡 Using Azure Key Vault? Add `--provider=azure --vault-url=https://my-vault.vault.azure.net` to the first push
 > and Envilder writes the matching `$config`. See [Mapping File Format](#️-mapping-file-format) below.
 
-### 3. Run your app with the secrets
+### 3. Check that every secret exists
+
+```bash
+npx envilder validate
+```
+
+`envilder validate` checks the map file against the schema and the provider rules, then asks the provider whether
+each declared secret exists. It never prints a value. Use `--offline` to check only the local files, without
+credentials. It exits with `1` when something is wrong, so it works as a CI step.
+
+📖 See the [Validate Command Guide](docs/validate-command.md) for every check, status and exit code.
+
+### 4. Run your app with the secrets
 
 ```bash
 npx envilder exec -- npm run dev
@@ -149,7 +160,7 @@ It is not a sandbox: your command and everything it starts can read the secrets.
 
 📖 See the [Exec Command Guide](docs/exec-command.md) for exit codes, signals and GitHub Actions masking.
 
-### 4. Need a `.env` file? Pull it
+### 5. Need a `.env` file? Pull it
 
 ```bash
 npx envilder
@@ -470,12 +481,18 @@ prebuilt action, so consumers do not need an Envilder build step.
     role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
     aws-region: us-east-1
 
-- name: Pull secrets from AWS SSM
+- name: Load secrets from AWS SSM
   uses: macalbert/envilder/github-action@v0
   with:
     map-file: envilder.json
-    env-file: .env
+
+- run: pnpm test   # the secrets are environment variables here
 ```
+
+Without `env-file`, the secrets are exported to **every later step of the job** and no
+`.env` file is written. To limit them to **a single process**, set `command` instead
+(for example `command: ./deploy.sh`): later steps never see them. Set `env-file` only when
+a tool needs a file.
 
 **Azure Key Vault:**
 
@@ -487,11 +504,10 @@ prebuilt action, so consumers do not need an Envilder build step.
     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-- name: Pull secrets from Azure Key Vault
+- name: Load secrets from Azure Key Vault
   uses: macalbert/envilder/github-action@v0
   with:
     map-file: envilder.json
-    env-file: .env
     provider: azure
     vault-url: ${{ secrets.AZURE_KEY_VAULT_URL }}
 ```
@@ -504,8 +520,11 @@ prebuilt action, so consumers do not need an Envilder build step.
 - [Push Command Guide](docs/push-command.md)
 - [Pull Command Guide](docs/pull-command.md)
 - [Exec Command Guide](docs/exec-command.md)
+- [Validate Command Guide](docs/validate-command.md)
 - [envilder-examples](https://github.com/macalbert/envilder-examples): runnable examples for the SDKs and `envilder exec`
   (Testcontainers and Aspire, AWS SSM and Azure Key Vault)
+- [🧠 Envilder Agent Skill](skills/README.md): lets Claude Code, GitHub Copilot, Codex and other agents
+  integrate Envilder into your project (`gh skill install macalbert/envilder envilder`)
 - [🤖 Envilder on Context7](https://context7.com/macalbert/envilder): up-to-date docs for AI coding assistants
   (Claude Code, Cursor, Copilot). Add `use context7` to your prompt, or reference the library ID `/macalbert/envilder`.
 

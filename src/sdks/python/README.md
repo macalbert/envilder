@@ -165,6 +165,75 @@ except SecretValidationError as e:
     print(f"Missing: {', '.join(e.missing_keys)}")
 ```
 
+### Map file contract validation
+
+`validate_contract()` checks that a map file can be used without using or
+printing any secret value: the map file matches the published schema (the same rules and
+messages as `envilder validate --offline`), the provider configuration it
+resolves to is coherent, and every declared secret exists. Builder overrides
+(`with_provider()`, `with_profile()`, `with_vault_url()`) take precedence over
+`$config`, as they do on a load.
+
+```python
+from envilder import Envilder
+
+result = Envilder.from_map_file('envilder.json').validate_contract()
+
+if not result.is_valid:
+    for error in result.map_file_errors:
+        print(f"{error.key}: {error.message}")
+    for key in result.keys:
+        print(f"{key.variable} ({key.path}): {key.status.value}")
+```
+
+Expected failures are reported in the result, not raised. When the map file is
+invalid, `keys` is empty and no provider is created or called. A missing map
+file still raises `FileNotFoundError`, as a load does.
+
+To fail a load when the contract does not hold, opt in with
+`with_contract_validation()`. The check runs once before resolving, reuses the
+same provider for the resolution, and raises `ContractValidationError` (with
+the full outcome in `.result`). It is off by default: without it a load makes
+no extra provider call.
+
+```python
+from envilder import ContractValidationError, Envilder
+
+try:
+    Envilder.from_map_file('envilder.json').with_contract_validation().inject()
+except ContractValidationError as e:
+    print(e)  # Map file contract validation failed: DB_URL (/app/db): missing
+    print(e.result.keys)
+```
+
+The message names the failing keys and paths, never a secret value.
+
+Each `KeyCheck` carries one status (`SecretExistenceStatus`):
+
+| Status | Meaning |
+|--------|---------|
+| `exists` | The secret is there and the identity can see it |
+| `missing` | The provider answered that there is no such secret (a disabled Azure secret counts as missing) |
+| `access_denied` | The identity may not check the secret, so whether it exists is unknown. Never reported as `missing` |
+| `authentication_failed` | The provider rejected the credentials, or none were available (an expired AWS session includes the `aws sso login` remediation as `reason`) |
+| `provider_error` | Anything else, for example an unreachable provider |
+
+Required permissions (existence is checked without using any value):
+
+- **AWS SSM**: `ssm:GetParameters` on the parameters. Values are requested
+  without decryption, so `kms:Decrypt` is not needed. Plain `String` values can
+  still come back in the response; the SDK discards them. With `kms:Decrypt`,
+  `ssm:GetParameters` can read decrypted values, so grant it only on paths the
+  identity may already read with `ssm:GetParameter`.
+- **Azure Key Vault**: the `List` secret permission (access policies) or
+  `Microsoft.KeyVault/vaults/secrets/readMetadata/action` (Azure RBAC, included
+  in the Key Vault Secrets User role). Names are matched case-insensitively.
+
+This differs from `validate_secrets()`: `validate_secrets()` runs after
+resolution and checks that the resolved values are non-empty, while contract
+validation runs before resolution, without using any value the provider
+returns, and checks that the map file is valid and every declared secret exists.
+
 ### Advanced usage
 
 Implement the `ISecretProvider` protocol to plug in a custom backend
@@ -188,6 +257,65 @@ secrets = EnvilderClient(provider).resolve_secrets(map_file)
 EnvilderClient.inject_into_environment(secrets)
 ```
 
+### Custom provider in the fluent builder
+
+`with_secret_provider()` hands the builder your own provider instance instead
+of the one it would build from `$config`. The map file is still validated as
+usual, so this is also the way to test your startup code against an in-memory
+fake, with no cloud account, emulator or environment variables:
+
+```python
+from collections.abc import Collection, Mapping
+
+from envilder import (
+    Envilder,
+    ISecretExistenceChecker,
+    ISecretProvider,
+    SecretExistence,
+    SecretExistenceStatus,
+)
+
+FAKE_SECRETS = {"/app/db-url": "postgres://localhost/test"}
+
+
+class InMemoryProvider(ISecretProvider, ISecretExistenceChecker):
+    def get_secret(self, name: str) -> str | None:
+        return FAKE_SECRETS.get(name)
+
+    def check_secrets_exist(
+        self, names: Collection[str]
+    ) -> Mapping[str, SecretExistence]:
+        return {
+            name: SecretExistence(
+                SecretExistenceStatus.EXISTS
+                if name in FAKE_SECRETS
+                else SecretExistenceStatus.MISSING
+            )
+            for name in names
+        }
+
+
+(
+    Envilder.from_map_file("envilder.json")
+    .with_secret_provider(InMemoryProvider())
+    .with_contract_validation()
+    .inject()
+)
+```
+
+To take part in contract validation, the provider also implements
+`ISecretExistenceChecker`. A provider that only implements `ISecretProvider`
+still resolves secrets, but `validate_contract()` reports every key as
+`provider_error`, so `with_contract_validation()` fails the load. The
+`provider` field of each key keeps the configured type (`with_provider()`,
+then `$config.provider`, then `aws`).
+
+For a complete, runnable walkthrough, see
+[`python-custom-provider`](https://github.com/macalbert/envilder-examples/tree/main/python-custom-provider)
+in envilder-examples: a custom provider over a local AES-256-GCM encrypted
+file, with tests for loading, failing at startup on a missing secret, and
+validating the contract without decrypting anything.
+
 ## API Reference
 
 ### Static facade (`Envilder`)
@@ -207,14 +335,18 @@ EnvilderClient.inject_into_environment(secrets)
 | `with_provider(type)` | Override secret provider (AWS/Azure) |
 | `with_profile(name)` | Override AWS named profile |
 | `with_vault_url(url)` | Override Azure Key Vault URL |
+| `with_secret_provider(provider)` | Use your own `ISecretProvider` instance instead of building one from `$config` |
 | `resolve()` | Resolve secrets, return as dict |
 | `inject()` | Resolve + inject into `os.environ` |
+| `validate_contract()` | Check the map file and that every declared secret exists, returns `ContractValidationResult` |
+| `with_contract_validation()` | Run the check before `resolve()`/`inject()`, raising `ContractValidationError` on failure |
 
 ### Validation
 
 | Function | Description |
 |----------|-------------|
 | `validate_secrets(dict)` | Raises `SecretValidationError` if any value is empty or dict is empty |
+| `Envilder.from_map_file(path).validate_contract()` | Returns a `ContractValidationResult` (`is_valid`, `map_file_errors`, `keys`) |
 
 ## Map File Format
 
@@ -265,7 +397,7 @@ for the full reference and the reasoning behind the rules.
 ## Examples
 
 Runnable projects in [envilder-examples](https://github.com/macalbert/envilder-examples) resolve a map file
-against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to
+against AWS SSM and Azure Key Vault (emulated with LocalStack for AWS and LocalStack for Azure) and pass the values to
 containers, with no `.env` file:
 
 - [python-testcontainers](https://github.com/macalbert/envilder-examples/tree/main/python-testcontainers): pytest + Testcontainers

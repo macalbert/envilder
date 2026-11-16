@@ -126,7 +126,7 @@ export const es: Translations = {
       {
         title: '¿Necesitas un archivo? Usa pull',
         description:
-          'Algunas herramientas y pasos de CI esperan un archivo .env. pull escribe uno a partir del mismo mapeo, y la GitHub Action lo hace en tus workflows. Trata el archivo generado como un secreto.',
+          'Algunas herramientas esperan un archivo .env, y pull escribe uno a partir del mismo mapeo. Trátalo como un secreto. En GitHub Actions normalmente no hace falta ningún archivo: la Action exporta los secretos a los pasos posteriores del job.',
       },
     ],
     sdkTabPython: 'Python',
@@ -216,7 +216,7 @@ export const es: Translations = {
       },
       {
         q: '¿Puedo usarlo en CI/CD?',
-        a: 'Sí. La GitHub Action obtiene los secretos mapeados en un archivo .env dentro del workflow, y la CLI (exec o pull) funciona en cualquier runner de CI con credenciales de la nube.',
+        a: 'Sí. La GitHub Action exporta los secretos mapeados a los pasos posteriores del job, ejecuta un comando con ellos o escribe un archivo .env cuando una herramienta lo necesita. La CLI (exec o pull) funciona en cualquier runner de CI con credenciales de la nube.',
       },
       {
         q: '¿Qué almacenes de secretos soporta?',
@@ -245,11 +245,25 @@ export const es: Translations = {
     thDescription: 'Descripción',
     inputMapDesc:
       'Ruta al archivo JSON que mapea variables de entorno a rutas de secretos',
-    inputEnvDesc: 'Ruta al archivo .env a generar',
+    inputEnvDesc:
+      'Opcional. Ruta a un archivo .env que escribir, para herramientas que necesitan un archivo',
     inputProviderDesc: 'Proveedor en la nube: aws o azure (por defecto: aws)',
     inputVaultDesc: 'URL de Azure Key Vault',
+    inputCommandDesc:
+      'Opcional. Comando que se ejecuta con los secretos solo en su entorno. No se puede combinar con env-file',
+    modesTitle: 'Tres formas de usar los secretos',
+    modeJobTitle: 'Entorno del job (por defecto)',
+    modeJobDesc:
+      'Solo con map-file, cada secreto se convierte en una variable de entorno para todos los pasos posteriores del job. No se escribe ningún archivo .env; el runner guarda los valores en su archivo GITHUB_ENV, en su directorio temporal, hasta que termina el job.',
+    modeCommandTitle: 'command',
+    modeCommandDesc:
+      'La Action ejecuta ese único comando con los secretos en su entorno. Los pasos posteriores nunca los ven.',
+    modeEnvFileTitle: 'env-file',
+    modeEnvFileDesc:
+      'Escribe un archivo .env. Úsalo solo cuando una herramienta no puede leer los secretos de otra forma que de un archivo.',
     output: 'Output:',
-    outputDesc: 'Ruta al archivo .env generado',
+    outputDesc:
+      'Ruta al archivo .env generado (vacía si no se define env-file)',
     yes: 'Sí',
     no: 'No',
   },
@@ -346,6 +360,13 @@ export const es: Translations = {
           'Ejecuta un comando con tus secretos en su entorno, sin escribir un archivo .env: envilder exec [options] [--] <command> [args...]',
       },
       {
+        status: 'done',
+        label: '✅',
+        title: 'Comando validate (envilder validate)',
+        description:
+          'Comprueba el archivo de mapeo y que cada secreto existe antes de un pull o un despliegue, opcionalmente contra un .env local, sin mostrar ningún valor',
+      },
+      {
         status: 'next',
         label: '🐹',
         title: 'Go SDK (envilder)',
@@ -372,13 +393,6 @@ export const es: Translations = {
         title: 'AWS Secrets Manager',
         description: 'Soporte de secretos JSON junto a SSM Parameter Store',
       },
-      {
-        status: 'planned',
-        label: '✔️',
-        title: 'Modo check/sync (--check)',
-        description:
-          'Valida secretos en la nube vs .env local. Falla CI si están desincronizados',
-      },
     ],
   },
   getStarted: {
@@ -397,7 +411,7 @@ export const es: Translations = {
     install: 'Instalar',
     quickStart: 'Inicio rápido',
     step1:
-      'Sube un secreto con npx envilder --key --value --secret-path: Envilder escribe envilder.json por ti',
+      'Sube un secreto con npx envilder --push --key --value --secret-path: Envilder escribe envilder.json por ti',
     step2:
       'Ejecuta npx envilder exec -- seguido de tu comando de arranque habitual',
     step3: 'Tu app arranca con sus secretos ✔',
@@ -423,6 +437,7 @@ export const es: Translations = {
     linkPullCommand: 'Comando Pull',
     linkPushCommand: 'Comando Push',
     linkExecCommand: 'Comando Exec',
+    linkValidateCommand: 'Comando Validate',
     linkGithubAction: 'GitHub Action',
     linkIssues: 'Incidencias',
     linkDiscussions: 'Discusiones',
@@ -566,7 +581,7 @@ export const es: Translations = {
       fieldProfile:
         'Perfil con nombre de ~/.aws/config o ~/.aws/credentials. Solo AWS: con azure se ignora y se muestra un aviso.',
       fieldVaultUrl:
-        'URL del Key Vault. Obligatoria para azure. Debe usar https:// y un host de Key Vault (.vault.azure.net, .vault.azure.cn, .vault.usgovcloudapi.net o .vault.microsoftazure.de). aws la ignora.',
+        'URL del Key Vault, por ejemplo https://my-vault.vault.azure.net. Obligatoria para azure. aws la ignora.',
       configSdkNote:
         'Los SDK de runtime leen los mismos campos, pero pueden rechazar combinaciones que la CLI solo avisa, como profile con azure. Cada página de SDK lista sus propios errores.',
       providersTitle: 'Identificadores de secretos por proveedor',
@@ -626,10 +641,6 @@ export const es: Translations = {
       errProviderFix: 'Usa aws o azure en $config.provider o en --provider.',
       errVaultMissingFix:
         'Define $config.vaultUrl, o pasa --vault-url, cuando el proveedor sea azure.',
-      errVaultHttpsFix:
-        'Usa la URL https:// que aparece en la vista general del vault.',
-      errVaultHostFix:
-        'Usa el URI del vault que da Azure, por ejemplo https://my-vault.vault.azure.net, no un dominio propio.',
       errProfileAzureFix:
         'Es un aviso, no un error. Quita profile de $config, o no pases --profile, cuando uses azure.',
       errCaseFix:
@@ -638,6 +649,629 @@ export const es: Translations = {
       relatedStart: 'Primeros pasos: de un secreto a una app en marcha',
       relatedExec: 'Referencia de envilder exec',
       relatedAzure: 'Configuración de Azure Key Vault',
+    },
+    pullReference: {
+      tabAws: 'AWS SSM',
+      tabAzure: 'Azure Key Vault',
+      prereqTitle: 'Requisitos previos',
+      prereqItems: [
+        'La CLI de envilder.',
+        'Un archivo de mapeo, envilder.json por defecto, que asocia cada variable a un identificador de secreto.',
+        'Acceso de lectura a todos los secretos mapeados: ssm:GetParameter en AWS (más kms:Decrypt cuando un parámetro usa una clave administrada por el cliente), o el permiso Get de secretos en Azure Key Vault, por ejemplo con el rol Key Vault Secrets User.',
+        'Credenciales que el SDK del proveedor pueda encontrar: un perfil de AWS, una sesión SSO o variables de entorno, o un inicio de sesión de Azure como az login o una identidad administrada.',
+      ],
+      synopsisTitle: 'Sinopsis',
+      synopsisDesc:
+        'Pull es el modo por defecto: no hay ningún subcomando pull. Ejecuta envilder sin opciones para leer envilder.json y escribir .env en el directorio actual. Añadir --push, o --key, --value y --secret-path, cambia al modo push, y envilder exec es un subcomando aparte.',
+      optionsTitle: 'Opciones',
+      thOption: 'Opción',
+      thDefault: 'Por defecto',
+      thDescription: 'Descripción',
+      optMapDefault: 'envilder.json en el directorio actual',
+      optMap:
+        'Archivo de mapeo que se lee. La ejecución se detiene si el archivo no existe o el valor está vacío.',
+      optEnvfile:
+        'Archivo que se escribe. Se crea si no existe y se actualiza en su sitio si existe. Su directorio tiene que existir.',
+      optProviderDefault: '$config.provider y, si no, aws',
+      optProvider:
+        'aws o azure, en mayúsculas o minúsculas. Cualquier otro valor detiene la ejecución antes de leer ningún secreto.',
+      optVault:
+        'URL de Key Vault, por ejemplo https://my-vault.vault.azure.net. Obligatoria con azure.',
+      optProfileDefault:
+        '$config.profile y, si no, la cadena de credenciales por defecto de AWS',
+      optProfile:
+        'Perfil de AWS con nombre. Con azure se ignora y se muestra un aviso.',
+      optionsNote:
+        "Una opción que recibe una ruta o un nombre nunca acepta un valor que empiece por -. En envilder --map --envfile=.env, --map no tiene valor, así que la ejecución se detiene con error: option '--map <path>' argument missing en lugar de leer --envfile=.env como ruta. envilder --help lista todas las opciones.",
+      configTitle: 'Cómo se combinan $config y las opciones',
+      configDesc:
+        'Cada ajuste sale de la primera fuente que lo define: la opción, después $config en el archivo de mapeo y después el valor por defecto. Una opción sustituye solo el campo que nombra, así que el resto de campos de $config se siguen aplicando. Toma este archivo de producción:',
+      configRun:
+        'El primer comando usa la configuración del archivo. El segundo sustituye un campo y mantiene el resto:',
+      configAwsNote:
+        'El segundo comando lee los mismos parámetros con el perfil ci-readonly. El proveedor sigue saliendo de $config.',
+      configAzureNote:
+        'El segundo comando lee los mismos nombres de secreto de otro vault. El proveedor sigue saliendo de $config.',
+      configLink:
+        'Reglas de precedencia completas en la referencia del archivo de mapeo',
+      exampleTitle: 'Ejemplo: actualizar un .env existente',
+      exampleDesc:
+        'El archivo de mapeo declara cuatro variables. En el vault, SENTRY_DSN no existe y FEATURE_FLAG está vacío. El proyecto ya tiene un archivo .env:',
+      exampleRun:
+        'Ejecuta envilder desde la raíz del proyecto. Salida esperada con AWS:',
+      exampleOutputNote:
+        'Con Azure no se muestra la línea de identidad de AWS; el resto es igual. Los valores van enmascarados: uno de más de 10 caracteres muestra los 3 últimos, uno más corto se oculta entero, y las rutas muestran sus 3 últimos caracteres. Las líneas omitidas son avisos en stderr; el resto va a stdout.',
+      exampleResult: 'El archivo .env después:',
+      envTitle: 'Cómo se actualiza un .env existente',
+      envRules: [
+        'Una variable mapeada que ya está en el archivo se sustituye en su sitio: la misma línea, el mismo comentario en línea y las mismas comillas cuando todavía representan el valor nuevo.',
+        'Una línea que ya tiene el valor correcto no se reescribe, así que una ejecución sin nada nuevo deja el archivo idéntico byte a byte.',
+        'Se conservan las líneas que el archivo de mapeo no declara (LOG_LEVEL en el ejemplo), los comentarios, las líneas en blanco, el orden y los saltos de línea.',
+        'Las variables que todavía no están en el archivo se añaden al final. Un archivo nuevo termina con un salto de línea.',
+        'Un secreto omitido conserva el valor que el archivo ya tenía (SENTRY_DSN en el ejemplo). Envilder nunca elimina una línea.',
+        'Antes de escribir, Envilder vuelve a leer el resultado como lo hace dotenv. Si se perdiera o cambiara algún valor, no escribe nada y se detiene con un error que nombra las variables, nunca los valores.',
+      ],
+      envNote:
+        'Las comillas, los valores multilínea y el único valor que un archivo .env no puede contener se describen en',
+      envNoteLink: 'qué puede contener un secreto',
+      envWarn:
+        'El archivo .env contiene los valores reales de los secretos. Añádelo a .gitignore y bórralo cuando ya no lo necesites, o usa envilder exec para evitar el archivo.',
+      missingTitle: 'Secretos que faltan, vacíos o que fallan',
+      missingDesc:
+        'Un secreto que no existe (ParameterNotFound en AWS SSM, 404 en Key Vault) o cuyo valor está vacío se omite con un aviso. Los demás secretos se escriben igualmente, el resumen cuenta solo los resueltos (2/4 en el ejemplo) y el código de salida es 0.',
+      failDesc:
+        'Cualquier otro fallo, como un acceso denegado, credenciales que faltan o un error de red, detiene la ejecución. Envilder lista cada variable afectada con su ruta enmascarada y el motivo, no toca el archivo .env y sale con 1:',
+      ssoDesc:
+        "Cuando una sesión SSO de AWS ha caducado y stdin y stdout son un terminal, Envilder pregunta Run 'aws sso login --profile dev' now? [y/N]. Si aceptas y el inicio de sesión funciona, lo vuelve a intentar una vez. En CI, o si lo rechazas, muestra el comando que hay que ejecutar y sale con 1. Si un secreto que falta también debe detener la ejecución, usa envilder exec: nunca arranca un comando con un conjunto de secretos incompleto.",
+      errorsTitle: 'Errores habituales',
+      thMessage: 'Mensaje',
+      thFix: 'Solución',
+      errNoMapFix:
+        'Ejecuta envilder desde el directorio que contiene envilder.json, o pasa --map=ruta/al/archivo.json.',
+      errReadMapFix:
+        'El archivo indicado con --map no existe o no se puede leer. Las rutas relativas parten del directorio actual.',
+      errJsonFix:
+        'Corrige la sintaxis JSON del archivo de mapeo. Una coma final o un comentario es la causa habitual.',
+      errCredsFix:
+        'El SDK de AWS no ha encontrado credenciales. Ejecuta aws configure o aws sso login, o pasa --profile con un perfil configurado.',
+      errDeniedFix:
+        'Las credenciales funcionan pero no pueden leer ese parámetro. Permite ssm:GetParameter sobre su ARN, más kms:Decrypt para una clave administrada por el cliente.',
+      errVaultFix:
+        'Añade "vaultUrl": "https://<nombre-del-vault>.vault.azure.net" a $config, o pasa --vault-url.',
+      errSsoFix:
+        'Ejecuta aws sso login --profile dev y vuelve a ejecutar envilder. En un terminal, Envilder se ofrece a iniciar la sesión por ti.',
+      errRepresentFix:
+        'El valor no se puede escribir en un archivo .env sin cambiarlo, y no se ha escrito nada. Lee ese secreto con envilder exec o un SDK, o guárdalo codificado (por ejemplo en base64).',
+      relatedTitle: 'Páginas relacionadas',
+      relatedMap:
+        'Referencia del archivo de mapeo: campos de $config, reglas de validación y precedencia de las opciones',
+      relatedExec:
+        'envilder exec: ejecuta un comando con los mismos secretos y sin archivo .env',
+      relatedPush: 'Modo push: sube un archivo .env o un solo secreto',
+      relatedGuide:
+        'Guía: carga parámetros de AWS SSM en un archivo .env, paso a paso',
+    },
+    guideSsmToEnv: {
+      prereqTitle: 'Requisitos previos',
+      prereqItems: [
+        'Node.js 22.12 o superior. Ejecuta la CLI con npx envilder o instálala con npm install -g envilder.',
+        'Credenciales de AWS que el SDK pueda encontrar: un perfil con nombre, variables de entorno o una sesión SSO iniciada con aws sso login --profile <nombre>.',
+        'Acceso de lectura a cada parámetro que mapees. La CLI llama a GetParameter una vez por variable, con el descifrado activado.',
+      ],
+      prereqPolicyDesc:
+        'La política IAM mínima permite ssm:GetParameter sobre los ARN de los parámetros de tu archivo de mapa. Un comodín sobre el prefijo de la ruta cubre una aplicación y un entorno:',
+      prereqPolicyNote:
+        'La segunda sentencia solo hace falta para los parámetros cifrados con una clave KMS administrada por el cliente; sustituye <key-id> por el ID de esa clave.',
+      prereqPushNote:
+        'Los comandos push del ejemplo de abajo necesitan un permiso más, ssm:PutParameter, sobre los mismos ARN. El push usa la clave KMS predeterminada de la cuenta, así que no hace falta ninguna sentencia kms:Encrypt. Concédelo solo a quien crea parámetros: para hacer pull basta con la política de lectura de arriba.',
+      regionTitle: 'Qué región se utiliza',
+      regionDesc:
+        'Envilder elige la región en este orden y la muestra en la primera línea de cada ejecución (region=eu-west-1 en la salida de abajo):',
+      regionItems: [
+        'La variable de entorno AWS_REGION.',
+        'La variable de entorno AWS_DEFAULT_REGION.',
+        'La región que el SDK de AWS encuentra para el perfil seleccionado (--profile, luego $config.profile y luego el predeterminado), por ejemplo region en ~/.aws/config.',
+        'us-east-1, si no hay ninguna de las anteriores.',
+      ],
+      regionNote:
+        'Los parámetros guardados en otra región se notifican como no encontrados, así que mira primero esta línea cuando se omita un parámetro que sabes que existe.',
+      exampleTitle: 'Ejemplo: de parámetros SSM a un archivo .env',
+      exampleParamsDesc:
+        'Partimos de cero y creamos tres parámetros bajo /my-app/dev/, cada uno leído en una variable:',
+      thParameter: 'Parámetro SSM',
+      thVariable: 'Variable en .env',
+      exampleMapDesc:
+        'Haz push de cada valor una sola vez. Un push de un solo secreto guarda el valor como parámetro SecureString y, en el mismo paso, crea envilder.json o le añade la entrada (CLI 0.16 o superior). El primer comando crea el archivo:',
+      pushOutputDesc:
+        'Líneas de resultado de cada comando (se omiten la cabecera y la línea de identidad). Los valores y las rutas están enmascarados:',
+      pushResultDesc:
+        'envilder.json ya mapea las tres variables. Solo contiene nombres y rutas, nunca valores:',
+      pushWarn:
+        'El push siempre escribe el valor (PutParameter con sobrescritura), así que un parámetro existente recibe una versión nueva. --value se queda en el historial del shell: úsalo para valores de prueba y haz push de los secretos reales desde un .env con envilder --push.',
+      pushNote:
+        'Si los parámetros ya existen, no los vuelvas a subir: escribe envilder.json a mano con la misma forma, un nombre de variable por cada nombre de parámetro. Si una variable ya apunta a otra ruta, el push sale con 1 y no sube nada; --no-map-update omite el archivo de mapa.',
+      pushLink:
+        'Referencia del modo push: todas las opciones y las reglas del archivo de mapa',
+      exampleRunDesc:
+        'Ejecuta envilder sin opciones. Pull es el modo por defecto: lee envilder.json y escribe .env en el directorio actual.',
+      exampleOutputDesc:
+        'Los valores se enmascaran: de un valor de más de 10 caracteres solo se muestran los tres últimos, y las rutas se enmascaran igual.',
+      exampleResultDesc:
+        'El .env resultante. Envilder entrecomilla DATABASE_URL porque contiene un espacio y un #, y relee el resultado como lo hace dotenv antes de escribir:',
+      exampleRerunDesc:
+        'Si lo ejecutas de nuevo no cambia nada: una línea que ya tiene el valor correcto no se reescribe, y las líneas que el archivo de mapa no declara se conservan.',
+      exampleGitignore:
+        'El archivo .env contiene los valores reales. Añade .env y .env.prod (que usamos más abajo) a .gitignore: el patrón .env no coincide con .env.prod. envilder.json solo contiene nombres y rutas, así que se puede commitear sin problema.',
+      envsTitle: 'Varios entornos',
+      envsDesc:
+        'Mantén un archivo de mapa por entorno y elígelo con --map. Los nombres de los archivos son tuyos. Este envilder.prod.json mapea las mismas variables a los parámetros de /my-app/prod/:',
+      envsRunDesc:
+        'Pasa --envfile para el archivo que se debe escribir y --profile para el perfil de AWS que puede leer esos parámetros:',
+      envsNote:
+        '--profile sustituye a $config.profile del archivo de mapa, y AWS_REGION sigue ganando a la región del perfil.',
+      execTitle: 'O prescinde del archivo con envilder exec',
+      execDesc:
+        'Si solo necesitas los valores para arrancar un proceso, envilder exec resuelve el mismo archivo de mapa y arranca tu comando con los parámetros añadidos a su entorno, sin escribir nada en disco:',
+      execOutputDesc:
+        'El resumen va a stderr, así que no se mezcla con la salida de tu comando. El comando lee los valores como variables de entorno normales.',
+      whenTitle: 'Cuál elegir',
+      whenItems: [
+        'Usa envilder exec cuando arrancas tú el proceso: scripts de npm, tests, migraciones. No queda ningún archivo con secretos en disco, y un parámetro inexistente o ilegible detiene el comando antes de arrancar (código de salida 125).',
+        'Usa un archivo .env cuando una herramienta lee el archivo por ruta o no puedes envolver su comando de arranque: env_file de Docker Compose, una configuración de ejecución del IDE, un framework que carga .env por sí solo. En este modo un parámetro inexistente es solo un aviso, así que mira el resumen (2/3 en lugar de 3/3).',
+      ],
+      handTitle: 'Comparado con un script',
+      handDesc:
+        'La alternativa habitual es un script de shell alrededor de get-parameters-by-path. Para una exportación rápida funciona:',
+      handIntro:
+        'Dónde se queda corto cuando el archivo lo comparte un equipo:',
+      handPoints: [
+        'Es fácil olvidar --with-decryption. Sin esa opción un SecureString vuelve cifrado y el script escribe el texto cifrado.',
+        'La API devuelve como máximo 10 parámetros por página. La AWS CLI sigue las páginas por ti, pero un script basado en un SDK o en una llamada HTTP directa tiene que seguir NextToken por su cuenta.',
+        'Los valores se escriben sin comillas: dotenv relee DATABASE_URL=postgres://app:p@ss w0rd#1@db.internal:5432/app como postgres://app:p@ss w0rd, porque el # empieza un comentario.',
+        '> .env sustituye todo el archivo, así que una línea como LOG_LEVEL=debug se pierde, y los nombres de las variables salen del último segmento de la ruta, de modo que renombrar un parámetro renombra la variable sin avisar.',
+        'Nada en Git dice qué parámetros necesita la aplicación. Con envilder.json el contrato se revisa en una pull request, y una variable sin parámetro aparece como aviso.',
+      ],
+      handFair:
+        'El script no necesita Node.js, hace una llamada por página de resultados en lugar de una por variable, y exporta todo lo que hay bajo una ruta sin mapa. Envilder solo lee los nombres del archivo de mapa, con una llamada GetParameter cada uno, así que necesita ssm:GetParameter, no ssm:GetParametersByPath.',
+      errorsTitle: 'Errores habituales',
+      thMessage: 'Mensaje',
+      thFix: 'Solución',
+      errCredsFix:
+        'El SDK de AWS no ha encontrado ninguna credencial. Ejecuta aws sso login --profile <nombre>, exporta credenciales o pasa --profile para un perfil con nombre. Código de salida 1, ningún .env escrito.',
+      errDeniedFix:
+        'Las credenciales funcionan pero no pueden leer ese parámetro. Permite ssm:GetParameter sobre su ARN, y kms:Decrypt para una clave administrada por el cliente. El archivo .env no se toca.',
+      errNotFoundFix:
+        'El parámetro no existe en la región de la primera línea de la salida. Comprueba la ruta y la región. El código de salida sigue siendo 0, así que mira el 1/2 del resumen.',
+      errNameFix:
+        'Renombra la clave en envilder.json. La ejecución se detiene antes de leer ningún parámetro.',
+      errNoMapFix:
+        'Ejecuta envilder desde el directorio que contiene envilder.json, o pasa --map=ruta/al/archivo.json.',
+      errorsMore:
+        'Todos los mensajes del modo pull están en la referencia del modo pull.',
+      ciTitle: 'En GitHub Actions',
+      ciDesc:
+        'En la CI, inicia la sesión del job en AWS con OIDC y usa la Action de Envilder. Configura Node.js ella misma y, con env-file, escribe el archivo. Sin env-file exporta los valores a los pasos siguientes del job.',
+      ciNote:
+        'El archivo va al directorio temporal del runner, fuera del espacio de trabajo, para que los pasos posteriores de build, cache o artifacts no lo recojan. Para evitar el archivo, usa el input command de la Action o envilder exec.',
+      relatedTitle: 'Páginas relacionadas',
+      relatedPull: 'Referencia del modo pull',
+      relatedExec: 'Referencia de envilder exec',
+      relatedMap: 'Referencia del archivo de mapa',
+      relatedAws: 'Configuración del proveedor AWS SSM',
+      relatedGha: 'Guía de la GitHub Action',
+    },
+    pushReference: {
+      tabAws: 'AWS SSM',
+      tabAzure: 'Azure Key Vault',
+      prereqTitle: 'Requisitos previos',
+      prereqItems: [
+        'La CLI de envilder. El push de un solo secreto registra el mapeo desde la 0.16.',
+        'Acceso de escritura al destino: ssm:PutParameter en AWS, o el permiso Set de secretos en Azure Key Vault, por ejemplo con el rol Key Vault Secrets Officer.',
+        'Para --push, un archivo de mapeo y un archivo .env con los valores. El push de un solo secreto no necesita ninguno de los dos: crea el archivo de mapeo si no existe.',
+      ],
+      synopsisTitle: 'Sinopsis',
+      synopsisDesc:
+        'Push tiene dos formas. --push sube valores de un archivo .env. --key, --value y --secret-path juntos suben un solo secreto; con ellos, --push es opcional (bastan las tres opciones), y la documentación lo escribe por claridad. No hay ningún subcomando push. --ssm-path es un alias obsoleto de --secret-path y muestra un aviso.',
+      thOption: 'Opción',
+      thDefault: 'Por defecto',
+      thDescription: 'Descripción',
+      envTitle: 'Subir un archivo .env',
+      envDesc:
+        'Para cada variable que declara el archivo de mapeo, Envilder lee su valor del archivo .env y lo escribe en la ruta mapeada. Las variables del archivo .env que el archivo de mapeo no declara se ignoran.',
+      optPush: 'Selecciona el modo push. Obligatoria en esta forma.',
+      optEnvfile: 'Archivo del que se leen los valores.',
+      optMap: 'Archivo de mapeo con las variables que se suben y sus rutas.',
+      optShared:
+        'Igual que en el modo pull: cada opción sustituye un campo de $config, y el proveedor por defecto es aws.',
+      envExample:
+        'Con este archivo de mapeo y este .env, envilder --push escribe dos secretos e ignora LOG_LEVEL. Salida esperada con AWS (Azure muestra las mismas líneas sin la de identidad):',
+      envRules: [
+        'Una variable mapeada que no está en el archivo .env se omite con un aviso. Que el archivo .env no exista tampoco es un error: se omiten todas las variables y la ejecución sale con 0.',
+        'Varias variables pueden apuntar a la misma ruta solo si tienen el mismo valor. Si no, Envilder se detiene antes de escribir nada.',
+        'Los secretos se escriben en paralelo. Los errores de limitación (throttling) se reintentan hasta 5 veces con espera creciente. Cualquier otro error detiene la ejecución con código 1, y los secretos ya escritos se quedan escritos.',
+      ],
+      singleTitle: 'Subir un solo secreto',
+      singleDesc:
+        'Pasa el nombre de la variable, el valor y la ruta del secreto. Envilder escribe el secreto y registra "NOMBRE": "<ruta>" en el archivo de mapeo, para que el siguiente envilder o envilder exec lo resuelva. El valor nunca se escribe en el archivo de mapeo.',
+      optKey:
+        'Nombre de la variable, que se registra como clave en el archivo de mapeo.',
+      optValue: 'Valor que se guarda. No puede estar vacío.',
+      optSecretPath:
+        'Nombre del parámetro en AWS SSM, o la referencia del secreto para Key Vault. Se registra tal como se escribe.',
+      optMapSingle:
+        'Archivo de mapeo que registra el mapeo y aporta $config. Se crea si no existe; su directorio tiene que existir.',
+      optNoMapUpdate:
+        'Sube sin leer, crear ni actualizar ningún archivo de mapeo. El proveedor y el vault salen solo de las opciones.',
+      singleExample:
+        'En un directorio sin archivo de mapeo, sube un secreto. El comando, la salida esperada y el archivo de mapeo que crea:',
+      singleAwsNote:
+        'aws es el proveedor por defecto, así que no se escribe $config. Tampoco se escribe nunca --profile: el perfil es una elección local de credenciales.',
+      singleAzureNote:
+        'Para Azure el archivo nuevo registra $config con provider y vaultUrl, así que las ejecuciones siguientes no necesitan opciones. En el vault, el secreto se llama my-app-dev-api-key.',
+      mapRulesTitle: 'Cómo se actualiza el archivo de mapeo',
+      mapRules: [
+        'Sin archivo: Envilder lo crea. Un archivo llamado envilder.json o envilder.*.json no recibe la línea $schema, porque los editores ya lo reconocen a través de SchemaStore; cualquier otro nombre la recibe.',
+        'La variable no está en el archivo: se añade la entrada, manteniendo la sangría y los saltos de línea del archivo (✓ Added API_KEY to envilder.json).',
+        'La variable ya apunta a la misma ruta: el archivo no se toca (✓ API_KEY already mapped in envilder.json, no changes).',
+        'La variable apunta a otra ruta: no se sube nada y Envilder sale con 1.',
+        'El archivo apunta a otro proveedor o vault que el push: el secreto se sube, el archivo se queda como está y un aviso nombra los dos destinos.',
+        'El archivo de mapeo se escribe antes que el secreto. Si el push falla, Envilder restaura el archivo anterior, o borra el que ha creado, de modo que el archivo nunca lista un secreto que no se ha subido.',
+      ],
+      historyTitle: '--value acaba en el historial del shell.',
+      historyDesc:
+        'Es un argumento de la línea de comandos: el shell lo guarda, y es visible en la lista de procesos mientras el comando se ejecuta. Úsalo para valores de prueba. Para secretos reales, sube desde un archivo .env con --push y borra el archivo después.',
+      storeTitle: 'Cómo se guardan los valores',
+      storeAws:
+        'Cada valor se escribe con PutParameter como SecureString, con la sobrescritura activada: se crea un parámetro nuevo o el existente recibe una versión nueva. Envilder no pasa ninguna clave KMS, así que SSM usa la clave por defecto de la cuenta.',
+      storeAzure:
+        'Cada valor se escribe con Set Secret, que crea el secreto o le añade una versión nueva. El nombre del secreto es la ruta sin las barras iniciales y con el resto de barras convertidas en guiones: /my-app/dev/api-key pasa a ser my-app-dev-api-key. No cambia nada más, así que un nombre que Key Vault no acepta, por ejemplo uno con _ o ., falla con el error propio de Key Vault. Dos referencias que dan el mismo nombre en una misma ejecución son un error.',
+      errorsTitle: 'Errores habituales',
+      thMessage: 'Mensaje',
+      thFix: 'Solución',
+      errPartialFix:
+        'Pasa las tres opciones con un valor no vacío, o usa --push para subir un archivo .env.',
+      errConflictFix:
+        'Usa la ruta que el archivo de mapeo ya registra, edita el archivo a mano, o añade --no-map-update.',
+      errTargetFix:
+        'Es un aviso: el secreto se ha subido pero no se ha registrado. Pasa --map con un archivo de mapeo para ese destino, o haz coincidir --provider y --vault-url con el archivo.',
+      errValuesFix:
+        'Da el mismo valor a las dos variables en el archivo .env, o mapéalas a rutas diferentes. No se ha subido nada.',
+      errMissingVarFix:
+        'Es un aviso: añade la variable al archivo .env, o pasa --envfile con el archivo correcto.',
+      errMapDirFix:
+        'Crea el directorio, o pasa una ruta --map dentro de uno que exista. No se ha subido nada.',
+      errCollisionFix:
+        'Usa una sola referencia por secreto de Key Vault en el archivo de mapeo.',
+      errDeniedFix:
+        'Las credenciales funcionan pero no pueden escribir ese parámetro. Permite ssm:PutParameter sobre su ARN.',
+      errVaultFix:
+        'Con --no-map-update no se lee ningún archivo de mapeo: pasa --provider=azure junto con --vault-url.',
+      relatedTitle: 'Páginas relacionadas',
+      relatedMap:
+        'Referencia del archivo de mapeo: campos de $config y reglas de validación',
+      relatedPull: 'Modo pull: escribe los secretos subidos en un archivo .env',
+      relatedAzure:
+        'Configuración de Azure Key Vault: roles y directivas de acceso para leer y escribir secretos',
+    },
+    execReference: {
+      tabAws: 'AWS SSM',
+      tabAzure: 'Azure Key Vault',
+      prereqTitle: 'Requisitos previos',
+      prereqItems: [
+        'La CLI de envilder.',
+        'Un archivo de mapeo y acceso de lectura a todos los secretos mapeados, igual que en el modo pull.',
+        'El comando que quieres ejecutar, en el PATH o indicado con su ruta.',
+      ],
+      synopsisTitle: 'Sinopsis',
+      separatorTitle: 'Dónde empieza tu comando: la regla del --',
+      separatorDesc:
+        'Las opciones de Envilder van primero. Tu comando empieza en el primer argumento que no es una opción de Envilder, o justo después de --. Todo lo que viene después se pasa al comando tal cual, aunque parezca una opción de Envilder. Solo necesitas -- cuando el propio comando empieza por -.',
+      sepComment1: '# Todo es de npm',
+      sepComment2: '# --map es de Envilder, el resto es de npm',
+      sepComment3: '# --map=x es de npm: va después del comando',
+      sepComment4: '# Lo mismo que antes, con un separador explícito',
+      optionsTitle: 'Opciones',
+      thOption: 'Opción',
+      thDescription: 'Descripción',
+      thMessage: 'Mensaje',
+      optMap: 'Ruta al archivo de mapeo (por defecto: envilder.json)',
+      optProfile: 'Perfil de AWS CLI. Sustituye $config.profile',
+      optProvider: 'aws o azure. Sustituye $config.provider',
+      optVault: 'URL de Azure Key Vault. Sustituye $config.vaultUrl',
+      optionsOrderDesc:
+        'Las opciones de Envilder van después de exec, nunca antes. Una opción escrita antes de exec se rechaza con el código de salida 125, y Envilder muestra el comando corregido:',
+      rejectedDesc:
+        'El modo exec nunca lee ni escribe ningún archivo .env ni sube nada, así que estas opciones se rechazan con el código 125 antes de cualquier llamada al proveedor. Una opción desconocida antes del comando también es un error, para que una errata como --mapp nunca llegue al comando.',
+      exampleTitle: 'Ejemplo',
+      exampleDesc:
+        'El archivo de mapeo declara DB_PASSWORD y API_TOKEN, y el shell ya exporta una DB_PASSWORD propia. Arranca la aplicación a través de Envilder:',
+      outputDesc:
+        'Toda la salida de Envilder va a stderr, así que stdout es de tu comando: envilder exec -- node print.js > out.json solo escribe su salida. El resumen nombra el comando solo por el nombre del programa, porque los argumentos pueden contener secretos. Con un perfil dice (aws, profile=dev).',
+      exitTitle: 'Códigos de salida',
+      exitDesc:
+        'Los códigos de salida siguen GNU env y docker run, de modo que puedes distinguir un fallo de Envilder del código de salida de tu comando:',
+      thCode: 'Código',
+      thMeaning: 'Significado',
+      exitChild: 'Tu comando ha salido con el código n',
+      exitSignal:
+        'Tu comando ha sido detenido por la señal n (por ejemplo, 137 para SIGKILL)',
+      exit125:
+        'Envilder ha fallado antes de arrancar el comando: opciones incorrectas, comando que falta, ningún archivo de mapeo, secretos sin resolver o credenciales caducadas',
+      exit126:
+        'El comando existe pero el sistema operativo no ha dejado ejecutarlo (por ejemplo, Permission denied)',
+      exit127: 'No se ha encontrado el comando',
+      exitNote: 'Los modos pull y push salen con 1 cuando fallan.',
+      failTitle: 'Resolución fail-closed',
+      failDesc:
+        'Si algún secreto falta, está vacío o no se puede leer (por ejemplo, acceso denegado), el comando no arranca: Envilder lista las variables afectadas con las rutas enmascaradas y sale con 125. El modo pull, en cambio, omite un secreto que falta. Salida cuando un secreto no existe y otro está vacío:',
+      failRules: [
+        'Se rechaza un valor de secreto que contiene un byte NUL, porque una variable de entorno no puede contenerlo.',
+        'En Windows, se rechaza un archivo de mapeo que declara dos nombres que solo se diferencian en mayúsculas (API_KEY y api_key) antes de cualquier llamada al proveedor, porque Windows los trata como una sola variable. En Linux y macOS se mantienen los dos.',
+        'Un archivo de mapeo sin variables no es un error: Envilder muestra Map file declares no variables. y arranca el comando con el entorno heredado.',
+        'Los valores se resuelven una sola vez, antes de que arranque el comando. Un cambio posterior en el vault no llega a un comando en ejecución.',
+      ],
+      envTitle: 'Entorno',
+      envDesc:
+        'Tu comando hereda todo el entorno del shell que ejecuta Envilder, más todas las variables del archivo de mapeo. El archivo de mapeo gana: cuando una variable heredada tiene el mismo nombre que una mapeada, el comando ve el valor del proveedor, y Envilder muestra los nombres (nunca los valores) en stderr:',
+      envWindows:
+        'En Windows los nombres se comparan sin distinguir mayúsculas: un Path heredado y un PATH mapeado son la misma variable, gana el valor mapeado y el comando recibe una sola entrada. Los valores se pasan byte a byte, sin comillas, escapado ni expansión.',
+      noShellDesc:
+        'No interviene ningún shell: los argumentos llegan al comando como una lista. Tu propio shell sigue interpretando la línea primero, así que un $DB_PASSWORD sin comillas se expande al valor de tu shell, no al secreto, y un && sin comillas se ejecuta fuera de envilder exec. Para funciones del shell, arranca un shell explícitamente:',
+      ssoTitle: 'Sesiones SSO de AWS caducadas',
+      ssoDesc:
+        'Cuando la sesión SSO de AWS ha caducado y stdin y stderr son un terminal, Envilder se ofrece a ejecutar aws sso login y después vuelve a intentar solo la resolución de los secretos: el comando arranca como mucho una vez. Si lo rechazas, el inicio de sesión falla o no hay terminal (en CI, por ejemplo), el código de salida es 125. Un error después de que el comando haya arrancado no se reintenta nunca.',
+      signalsTitle: 'Señales',
+      signalsDesc:
+        'stdin, stdout y stderr se heredan y el TTY se conserva, así que los REPL y las preguntas interactivas funcionan. Ctrl+C en un terminal llega directamente al comando. SIGTERM y SIGHUP (de docker stop o Kubernetes, por ejemplo) se reenvían, y Envilder espera a que el comando termine sin ningún tiempo límite propio. Solo los recibe el hijo directo: un lanzador como npm debe detener a sus propios hijos.',
+      ciTitle: 'CI y GitHub Actions',
+      ciDesc:
+        'En CI, da primero credenciales de la nube al job (por ejemplo con OIDC) y después ejecuta la CLI en un paso run. Solo ese paso ve los secretos. La Action de Envilder ofrece el mismo comportamiento con su input command.',
+      ghaDesc:
+        'Cuando GITHUB_ACTIONS=true, Envilder registra cada valor resuelto con el enmascarado de logs de GitHub (::add-mask::) en stderr antes de arrancar el comando, así que los valores que imprima salen enmascarados en el log del job.',
+      ghaNote:
+        'No redirijas el stderr de envilder exec fuera del log del paso (2>/dev/null, por ejemplo): el runner lee de ahí las máscaras.',
+      scriptsTitle: 'Scripts de package.json',
+      scriptsDesc:
+        'Pon exec en tus scripts para que todo el mundo arranque el proyecto igual con npm run dev. Añade envilder como dependencia de desarrollo (npm install --save-dev envilder) para que el script lo encuentre en node_modules/.bin:',
+      usesTitle: 'Otros usos habituales',
+      usesDesc:
+        'Cualquier herramienta que lea su configuración del entorno funciona igual. Cada línea siguiente se ejecuta con los secretos de envilder.json:',
+      usesComment1: '# Contenedores: -e NOMBRE sin valor lo copia del entorno',
+      usesComment2: '# Tests de integración que leen tokens del entorno',
+      usesComment3:
+        '# Migraciones y scripts puntuales que necesitan DATABASE_URL',
+      usesComment4:
+        '# Terraform lee TF_VAR_<nombre> como la variable de entrada <nombre>',
+      usesComment5: '# Varios comandos con los mismos secretos',
+      usesNote:
+        'Docker Compose lee las referencias a variables de compose.yaml de su entorno, así que no hace falta ningún archivo .env; Docker conserva el entorno de un contenedor en sus metadatos hasta que se elimina. Marca como sensitive las variables de Terraform que contienen secretos.',
+      sandboxTitle: 'No es un sandbox.',
+      sandboxDesc:
+        'El modo exec deja intacto un archivo .env existente: bórralo tú mismo cuando dejes el modo pull. Tu comando y todos los procesos que arranca pueden leer los secretos, incluida cualquier herramienta o agente de IA que ejecute env a través de él. Ejecuta solo comandos de confianza.',
+      examplesDesc:
+        'Arranca LocalStack con el token de autenticación resuelto desde AWS SSM, o recorre push, pull y exec con npx envilder:',
+      errorsTitle: 'Errores habituales',
+      thFix: 'Solución',
+      errMissingFix: 'Añade el comando después de exec, o después de --.',
+      errUnknownFix:
+        'Corrige el nombre de la opción. Todo lo que hay antes del comando tiene que ser una opción de Envilder; pon tus propias opciones después del comando.',
+      errNoMapFix:
+        'Ejecuta envilder desde el directorio que contiene envilder.json, o pasa --map después de exec.',
+      errNotFoundFix:
+        'Código de salida 127. Comprueba el nombre del programa y el PATH. En Windows, cmd.exe muestra antes su propia línea de comando no reconocido.',
+      errPermissionFix:
+        'Código de salida 126. Haz el archivo ejecutable (chmod +x run.sh) o ejecútalo con su intérprete (sh ./run.sh).',
+      errCaseFix:
+        'Solo en Windows. Cambia el nombre de una de las dos variables.',
+      errNulFix:
+        'Quita el byte NUL del secreto, o léelo dentro del proceso con un SDK.',
+      relatedTitle: 'Páginas relacionadas',
+      relatedStart:
+        'Primeros pasos: sube un secreto y ejecuta una aplicación con envilder exec',
+      relatedMap:
+        'Referencia del archivo de mapeo: campos de $config y reglas de validación',
+      relatedPull:
+        'Modo pull: escribe los mismos secretos en un archivo .env cuando una herramienta lo necesita',
+      guideLink:
+        'Guía completa de exec en GitHub: detalles de Windows y todos los mensajes de error',
+    },
+    customProviderGuide: {
+      whenTitle: 'Cuándo usarlo',
+      whenDesc:
+        'Un proveedor propio sustituye el cliente de AWS o Azure que el SDK construiría a partir de $config. Dos motivos habituales:',
+      whenUnsupported:
+        'Tus secretos están en un almacén que Envilder aún no soporta (HashiCorp Vault, 1Password, una base de datos, una API interna).',
+      whenTests:
+        'Quieres probar el código de arranque con un fake en memoria: sin cuenta en la nube, sin emulador y sin variables de entorno.',
+      whenCliNote:
+        'Solo los SDKs (1.2+) aceptan un proveedor propio. El CLI y la GitHub Action soportan AWS SSM y Azure Key Vault.',
+      howTitle: 'Cómo funciona',
+      howDesc:
+        'Un proveedor implementa una interfaz y, opcionalmente, una segunda para la validación del contrato:',
+      howInterface: 'Interfaz',
+      howMethod: 'Método (Node.js · Python · .NET)',
+      howUsedFor: 'Para qué sirve',
+      howResolve:
+        'Resolver los valores que se inyectan. Los secretos que faltan se omiten, no lanzan ningún error.',
+      howCheck:
+        'Opcional. Validación del contrato: responder exists o missing para cada clave sin leer ningún valor.',
+      howMapFile:
+        'Pasa la instancia con withSecretProvider() (with_secret_provider() en Python, WithSecretProvider() en .NET). El SDK ya no construye ningún proveedor a partir de $config, pero sigue validando el fichero de mapeo, así que un error en el fichero que la app usa en producción también falla en los tests que usan un fake.',
+      codeTitle: 'Ejemplo',
+      codeDesc:
+        'Un proveedor en memoria que implementa las dos interfaces, conectado a una carga con validación del contrato:',
+      validationTitle: 'Validación del contrato con un proveedor propio',
+      validationWith:
+        'Si el proveedor implementa ISecretExistenceChecker, validateContract() y withContractValidation() comprueban cada clave con él, como con los proveedores incluidos.',
+      validationWithout:
+        'Si no, todas las claves salen como provider_error ("The provider cannot check whether a secret exists."), y una carga con validación del contrato falla en lugar de pasar en silencio.',
+      validationProviderField:
+        'El campo provider de cada clave mantiene el tipo configurado: el override de withProvider(), luego $config.provider y, si no, aws.',
+      validationLink:
+        'Consulta la referencia de envilder validate para todos los estados →',
+      examplesTitle: 'Ejemplos ejecutables',
+      examplesDesc:
+        'envilder-examples tiene un ejemplo por SDK: un proveedor sobre un fichero local cifrado con AES-256-GCM, con tests de carga, de fallo en el arranque cuando falta un secreto y de validación del contrato sin descifrar nada.',
+    },
+    validateReference: {
+      tabAws: 'AWS SSM',
+      tabAzure: 'Azure Key Vault',
+      tabRbac: 'Azure RBAC',
+      tabPolicy: 'Directivas de acceso',
+      prereqTitle: 'Requisitos previos',
+      prereqItems: [
+        'La CLI de envilder. --offline está disponible desde la versión 0.18 y la comprobación de existencia de los secretos desde la 0.20. --envfile, --compare-values y --format json llegan con la próxima versión.',
+        'Un archivo de mapeo. Sin --offline, credenciales del proveedor y los permisos que se detallan en el apartado Permisos.',
+      ],
+      synopsisTitle: 'Sinopsis',
+      synopsisDesc:
+        'Por defecto, validate comprueba el archivo de mapeo y después pregunta al proveedor si existe cada secreto declarado. Con --envfile también compara las claves de un archivo env local con el archivo de mapeo, y con --compare-values compara sus valores con los remotos. Con --offline solo se leen archivos locales: no se llama a ningún proveedor y no hacen falta credenciales de la nube. Nunca muestra ningún valor de secreto.',
+      optionsTitle: 'Opciones',
+      thOption: 'Opción',
+      thDescription: 'Descripción',
+      optOffline: 'Valida el archivo de mapeo en local sin llamar al proveedor',
+      optEnvfile:
+        'Compara las claves de este archivo env con el archivo de mapeo. No se lee si no se indica',
+      optCompareValues:
+        'Compara también cada valor declarado en el archivo env con su valor remoto. Requiere --envfile; no se puede combinar con --offline',
+      optFormat:
+        'text (por defecto) para una salida legible, o json para un único documento JSON en stdout',
+      optMap: 'Archivo de mapeo a comprobar (por defecto: envilder.json)',
+      optProvider: 'aws o azure. Sustituye $config.provider',
+      optProfile: 'Perfil de AWS CLI. Sustituye $config.profile',
+      optVault: 'URL de Azure Key Vault. Sustituye $config.vaultUrl',
+      optionsNote:
+        'Las opciones tienen los mismos nombres, valores por defecto y precedencia que pull y exec: las opciones ganan a $config, y una opción vacía se ignora. Ponlas después de validate; las que se escriben antes se rechazan. Como en push, un valor vacío de --envfile es un error.',
+      optionsRejected:
+        '--compare-values sin --envfile o con --offline, y un --format que no sea text ni json, se rechazan antes de leer ningún archivo o llamar a ningún proveedor.',
+      checksTitle: 'Qué se comprueba',
+      mapTitle: 'El archivo de mapeo (siempre)',
+      mapDesc:
+        'El archivo de mapeo se comprueba primero, con los mismos mensajes que usan pull, push y exec. Se informa de cada problema, no solo del primero, con la clave que lo causa ($config.profile, --vault-url, DB_URL...). Los mensajes nombran claves y tipos, nunca valores mapeados.',
+      mapRules: [
+        'El archivo se analiza como JSON. Un error de análisis indica la ruta y, cuando el analizador la da, la línea y la columna, pero nunca cita el texto de alrededor, porque puede ser un secreto pegado en el archivo.',
+        'El documento cumple el esquema publicado del archivo de mapeo (map-file.v1.json): campos de $config conocidos, nombres de variable válidos y mapeos de tipo string.',
+        'La configuración del proveedor es coherente una vez aplicadas las opciones: aws o azure, profile solo con aws, vaultUrl solo con azure, y azure tiene un vaultUrl.',
+      ],
+      mapNote:
+        'Cuando el archivo de mapeo no es válido, validate se detiene ahí: no se llama a ningún proveedor, con --offline o sin él.',
+      remoteTitle: 'Las claves remotas (sin --offline)',
+      remoteDesc:
+        'Cada ruta de secreto declarada en el archivo de mapeo se comprueba en el proveedor. Envilder nunca usa ni muestra ningún valor: en AWS, los parámetros String pueden llegar en la respuesta, y se descartan. Una ruta a la que apuntan varias variables se comprueba una sola vez. Cada variable recibe un estado:',
+      thStatus: 'Estado',
+      thMeaning: 'Significado',
+      statusExists: 'El secreto existe y la identidad puede verlo',
+      statusMissing: 'El proveedor ha respondido que ese secreto no existe',
+      statusDenied:
+        'La identidad no tiene permiso para comprobar el secreto, así que no se sabe si existe. Nunca se informa como missing',
+      statusAuth:
+        'El proveedor ha rechazado las credenciales, o no se ha encontrado ninguna',
+      statusError:
+        'Cualquier otra cosa, por ejemplo un proveedor inaccesible o un nombre de secreto no válido',
+      remoteSsoNote:
+        'Las credenciales de AWS y las sesiones SSO caducadas se informan con el mismo mensaje que pull y exec. En un terminal interactivo, una sesión SSO caducada ofrece ejecutar aws sso login y después vuelve a intentarlo.',
+      envfileTitle: 'Las claves del archivo env (con --envfile)',
+      envfileDesc:
+        'Disponible a partir de la próxima versión. El archivo env se lee con el mismo analizador que usan pull y push, así que los comentarios, export, las comillas y los valores multilínea se comportan igual. Sus claves se comparan con las variables que declara el archivo de mapeo, por el nombre exacto, distinguiendo mayúsculas y minúsculas:',
+      thFinding: 'Hallazgo',
+      thEffect: 'Efecto',
+      envMissing: 'Una variable declarada no está en el archivo env. Falla',
+      envDuplicated: 'Una clave se asigna más de una vez. Falla',
+      envUndeclared:
+        'Una clave solo está en el archivo env. Un aviso que no cambia el código de salida',
+      envfileNote:
+        'KEY= con un valor vacío cuenta como presente, y un archivo env inexistente falla con Env file not found. Esta comprobación solo lee archivos locales, así que se ejecuta antes de cualquier llamada al proveedor y también con --offline. Los valores no se comparan ni se muestran.',
+      valuesTitle: 'Los valores del archivo env (con --compare-values)',
+      valuesDesc:
+        'Para cada variable declarada que está en el archivo env y existe en el proveedor, el valor remoto se lee como lo hace pull y se compara con el local. Cuando una clave se repite, se compara la última asignación, tal como la carga dotenv:',
+      valMatches: 'Los dos valores son idénticos',
+      valDiffers: 'Los dos valores no son idénticos. Falla',
+      valUnreadable:
+        'El secreto existe pero su valor no se ha podido leer, con el motivo del proveedor. Falla',
+      valuesNote:
+        'Ninguno de los dos valores se muestra nunca, y cada valor remoto se descarta justo después de la comparación. Las variables ya informadas como ausentes no se leen. Sin --compare-values no se lee ningún valor.',
+      permTitle: 'Permisos',
+      permDesc:
+        'La comprobación de existencia usa una llamada al proveedor que pull no hace, así que la identidad necesita un permiso más que para un pull. --offline no necesita ninguna credencial.',
+      permAwsDesc:
+        'Las rutas se comprueban con GetParameters, diez por llamada, con WithDecryption: false: los parámetros SecureString nunca se descifran. Es una acción de IAM distinta de la ssm:GetParameter que usa pull, así que añádela a la política, limitada a las mismas rutas:',
+      permAwsNote:
+        'La comprobación de existencia no necesita el permiso kms:Decrypt. --compare-values lee los valores como pull, así que necesita el mismo acceso a KMS que pull: kms:Decrypt sobre la clave de cada parámetro SecureString cifrado con una clave administrada por el cliente. Con kms:Decrypt, ssm:GetParameters también puede leer valores descifrados, así que limítalo a las mismas rutas que ssm:GetParameter. Cuando se deniega una llamada, cada ruta se comprueba por separado, así que access denied solo se informa para las rutas que la identidad no puede leer.',
+      permAzureDesc:
+        'Los nombres de los secretos del vault se listan una vez (solo metadatos) y cada nombre declarado, tras la conversión habitual de / a -, se compara con esa lista sin distinguir mayúsculas. Un secreto deshabilitado se informa como missing, porque pull no puede leerlo. Listar requiere:',
+      permAzureItems: [
+        'Azure RBAC: Microsoft.KeyVault/vaults/secrets/readMetadata/action sobre el vault, incluido en los roles integrados Key Vault Secrets User y Key Vault Reader.',
+        'Directivas de acceso: el permiso de secreto List, además de Get.',
+      ],
+      permAzureNote:
+        'La lista cubre todo el vault, así que una identidad sin este permiso recibe access denied para cada clave, con el motivo que devuelve Key Vault.',
+      permValuesNote:
+        '--compare-values también lee valores, así que necesita los mismos permisos que un pull además de estos.',
+      outputTitle: 'Salida',
+      outputOkDesc: 'Todos los secretos existen (código de salida 0):',
+      outputFailDesc:
+        'Algunos secretos faltan o no se pueden comprobar (código de salida 1; el resumen va a stderr):',
+      outputOfflineDesc: 'Con --offline:',
+      outputEnvfileDesc:
+        'Con --envfile=.env --compare-values (código de salida 1):',
+      outputEnvfileNote:
+        'Cuando todas las variables declaradas están en el archivo env, su bloque termina con ✓ All 3 declared variables are in .env, y cuando todos los valores comparados coinciden, el bloque de valores termina con ✓ All 2 values match.',
+      outputInvalidDesc: 'Un archivo de mapeo no válido, en stderr:',
+      jsonTitle: 'Salida JSON (--format json)',
+      jsonDesc:
+        'Disponible a partir de la próxima versión. Con --format=json, validate escribe exactamente un documento JSON en stdout y nada más, sea cual sea el resultado. Los logs, el banner de identidad de AWS, los avisos, los errores y la solicitud de inicio de sesión SSO van a stderr, así que stdout se puede pasar a jq o guardar como artefacto de CI. Los códigos de salida son los mismos que con la salida de texto. Los errores de opciones como --format=yaml se informan en stderr antes de ejecutar nada, sin documento.',
+      thField: 'Campo',
+      fieldValid: 'true exactamente cuando el código de salida es 0',
+      fieldOffline: 'true con --offline',
+      fieldMapFile:
+        'path, valid y errors (un { key, message } por problema, con los mismos mensajes que la salida de texto). Se omite cuando el archivo de mapeo no se ha podido leer',
+      fieldKeys:
+        'Una entrada por variable declarada, en el orden del archivo de mapeo: name, provider, path, status y, cuando el proveedor da uno, reason. status es exists, missing, access_denied, authentication_failed o provider_error. Se omite cuando no se han comprobado los secretos',
+      fieldEnvFile:
+        'Se omite sin --envfile. Si no, path, valid, keys (cada variable declarada con status present o missing, y value matches, differs o unreadable con --compare-values), duplicates ({ name, count }) y undeclared',
+      fieldError:
+        '{ message }, solo cuando la ejecución se ha detenido antes de terminar todas las comprobaciones (credenciales caducadas, un archivo env inexistente, un inicio de sesión SSO rechazado). Las secciones completadas antes siguen llenas',
+      jsonNote:
+        'El documento nunca contiene ningún valor de secreto, ni local ni remoto, y ningún campo es nunca null: una sección que no aplica se omite. Una sección puede ganar campos en versiones futuras; los campos existentes mantienen su significado.',
+      exitTitle: 'Códigos de salida',
+      thCode: 'Código',
+      exit0:
+        'El archivo de mapeo es válido; sin --offline, cada secreto declarado existe; con --envfile, cada variable declarada está en el archivo env exactamente una vez; con --compare-values, cada valor comparado coincide. Las claves que solo están en el archivo env no lo cambian',
+      exit1:
+        'Cualquier otra cosa: archivo de mapeo ausente o no válido, opciones no válidas, un secreto que falta o no se puede comprobar, credenciales ausentes o caducadas, o un archivo env que no existe, no tiene una variable declarada, repite una clave o tiene un valor que difiere o no se puede comparar',
+      ciTitle: 'En CI',
+      ciDesc:
+        'Ejecuta la comprobación offline en cada pull request, también desde forks, porque no necesita credenciales de la nube. Ejecuta la comprobación de existencia donde el job tenga las mismas credenciales que un pull, más los permisos de esta página:',
+      ciEnvExample:
+        'A partir de la próxima versión, para comprobar sin credenciales que un .env.example versionado declara cada variable, añade --offline --envfile=.env.example al primer paso.',
+      ciJsonDesc:
+        'A partir de la próxima versión, para conservar el resultado para pasos posteriores u otras herramientas, usa la salida JSON. El paso sigue fallando cuando la validación falla:',
+      ciNote:
+        'validate sale con 1 ante cualquier error, así que puede bloquear un paso de despliegue antes de que se ejecute pull o envilder exec.',
+      sdkTitle: 'Desde los SDK',
+      sdkDesc:
+        'Los SDK de .NET, Python y Node.js (versión 1.1 o posterior) ejecutan la misma comprobación del archivo de mapeo y de existencia de claves desde el código de la aplicación, con los mismos estados, sin la comparación del archivo env:',
+      thSdk: 'SDK',
+      thCheck: 'Comprobación que devuelve un resultado',
+      thLoad: 'Hacer fallar la carga si no pasa',
+      sdkNote:
+        'La validación del contrato es distinta de la validación de secretos: comprueba el archivo de mapeo y que cada secreto existe antes de cargar, mientras que la validación de secretos comprueba que los valores ya resueltos no estén vacíos.',
+      limitsTitle: 'Qué no hace validate',
+      limitsItems: [
+        'Nunca muestra valores de secretos, y solo los lee con --compare-values.',
+        'Con --offline no comprueba que los secretos existan ni que las credenciales puedan leerlos.',
+        'No corrige el archivo env: informa de lo que hay que cambiar.',
+        'No comprueba la forma de los valores (tipos, URL, longitud).',
+      ],
+      relatedTitle: 'Páginas relacionadas',
+      relatedMap:
+        'Referencia del archivo de mapeo: campos de $config y reglas de validación',
+      relatedPull: 'Modo pull: escribe los secretos en un archivo .env',
+      relatedExec:
+        'Modo exec: ejecuta un comando con los secretos en su entorno',
+      relatedGha: 'GitHub Action: carga los secretos en un workflow con OIDC',
+      guideLink:
+        'Guía completa de validate en GitHub: cada comprobación, mensaje y campo JSON',
     },
     title: 'Docs Envilder: secretos con AWS SSM y Azure Key Vault',
     description:
@@ -674,6 +1308,20 @@ export const es: Translations = {
         cardSummary:
           'Instala la CLI, mapea un secreto y ejecuta tu app con envilder exec, para AWS SSM o Azure Key Vault.',
       },
+      'guide-ssm-to-env': {
+        title: 'Carga parámetros de AWS SSM Parameter Store en un archivo .env',
+        description:
+          'Exporta parámetros de AWS SSM Parameter Store a un .env con la CLI de Envilder: política IAM, mapa envilder.json, varios entornos, modo exec, CI y errores.',
+        heading:
+          'Carga parámetros de AWS SSM Parameter Store en un archivo .env',
+        intro:
+          '¿Cómo llevas los parámetros de AWS SSM Parameter Store a un archivo .env local sin escribir ningún script a mano? Lista una sola vez cada variable y la ruta de su parámetro en envilder.json y ejecuta envilder: lee cada parámetro, descifra los valores SecureString y escribe un .env que, al leerlo de nuevo, da los mismos valores.',
+        breadcrumb: 'SSM a .env',
+        navLabel: 'SSM a .env',
+        cardTitle: 'Carga parámetros SSM en un .env',
+        cardSummary:
+          'Relaciona rutas de SSM Parameter Store con variables y escribe un .env, o prescinde del archivo con envilder exec.',
+      },
       'aws-ssm': {
         title: 'Usa Envilder con AWS SSM Parameter Store',
         description:
@@ -700,6 +1348,20 @@ export const es: Translations = {
         cardSummary:
           'Configura la autenticación de Azure y los permisos de Key Vault.',
       },
+      'custom-provider': {
+        title:
+          'Proveedor de secretos propio: conecta cualquier almacén o un fake de tests a los SDKs de Envilder',
+        description:
+          'Usa withSecretProvider en los SDKs de Envilder para .NET, Python y Node.js para resolver un fichero de mapeo desde tu propio almacén de secretos o un fake en memoria, con validación del fichero y del contrato.',
+        heading: 'Proveedor de secretos propio',
+        intro:
+          '¿Cómo usas Envilder con un almacén de secretos que no soporta, o pruebas el código de arranque sin cuenta en la nube? En los SDKs, pasa tu propio proveedor al builder. El fichero de mapeo, la validación del contrato y la inyección funcionan igual que con AWS SSM o Azure Key Vault.',
+        breadcrumb: 'Proveedor propio',
+        navLabel: 'Proveedor propio',
+        cardTitle: 'Proveedor propio (SDKs)',
+        cardSummary:
+          'Conecta tu almacén de secretos o un fake en memoria a los SDKs.',
+      },
       'map-file': {
         title:
           'Referencia de envilder.json: variables de entorno y secretos en la nube',
@@ -715,12 +1377,13 @@ export const es: Translations = {
           'Todos los campos del archivo, reglas por proveedor, precedencia de las opciones y validación de nombres.',
       },
       'cli-pull': {
-        title: 'Descarga secretos con la CLI de Envilder',
+        title:
+          'Modo pull: escribe secretos de AWS SSM o Azure Key Vault en un .env',
         description:
-          'Descarga secretos en la nube y genera un archivo .env local con Envilder.',
-        heading: 'CLI pull',
+          'Referencia del modo pull: opciones y valores por defecto, precedencia de $config, salida, secretos que faltan, actualización de un .env y errores habituales.',
+        heading: 'Referencia del modo pull',
         intro:
-          'Descarga secretos del proveedor y escríbelos en un archivo .env local.',
+          '¿Qué hace envilder cuando lo ejecutas sin --push ni exec? Lee envilder.json, obtiene cada secreto mapeado de AWS SSM Parameter Store o Azure Key Vault y escribe los valores en .env. Un archivo existente se actualiza en su sitio, las claves que el archivo de mapeo no declara se quedan como están, y un secreto que no existe se omite con un aviso.',
         breadcrumb: 'CLI pull',
         navLabel: 'CLI pull',
         cardTitle: 'Comando CLI pull',
@@ -728,38 +1391,54 @@ export const es: Translations = {
           'Genera un archivo .env con los secretos definidos en el archivo de mapeo.',
       },
       'cli-push': {
-        title: 'Sube secretos con la CLI de Envilder',
+        title:
+          'Modo push: sube valores de un .env o un secreto a AWS SSM o Key Vault',
         description:
-          'Sube variables de entorno locales o un secreto con el modo push de Envilder.',
-        heading: 'CLI push',
+          'Referencia del modo push: sube un .env o un solo secreto con --key, cómo se actualiza envilder.json, SecureString, nombres en Key Vault y errores habituales.',
+        heading: 'Referencia del modo push',
         intro:
-          'Sube variables de entorno desde un archivo .env o envía un secreto directamente.',
+          '¿Cómo guardas secretos en AWS SSM Parameter Store o Azure Key Vault con Envilder? envilder --push sube el valor del .env de cada variable que declara el archivo de mapeo, y --key, --value y --secret-path suben un solo secreto sin archivo .env. El push de un solo secreto también registra el mapeo en envilder.json, para que envilder y envilder exec lo puedan leer enseguida.',
         breadcrumb: 'CLI push',
         navLabel: 'CLI push',
         cardTitle: 'Comando CLI push',
         cardSummary: 'Sube un archivo .env mapeado o un secreto al proveedor.',
       },
       'cli-exec': {
-        title: 'Ejecuta un comando con secretos de AWS SSM o Azure Key Vault',
+        title:
+          'envilder exec: ejecuta un comando con secretos de AWS SSM o Key Vault',
         description:
-          'Referencia de envilder exec: resuelve secretos de AWS SSM o Azure Key Vault en memoria y arranca tu comando con ellos, sin escribir ningún archivo .env.',
-        heading: 'CLI exec',
+          'Referencia de envilder exec: el separador --, opciones rechazadas, código de salida 125, entorno y Windows, recuperación de SSO, señales y uso en CI.',
+        heading: 'Referencia de envilder exec',
         intro:
-          'Ejecuta un comando con los secretos en su entorno, sin escribir ningún archivo .env.',
+          '¿Cómo ejecutas un comando con secretos de AWS SSM o Azure Key Vault sin escribir ningún archivo .env? envilder exec resuelve todos los secretos del archivo de mapeo y arranca el comando con esos valores añadidos a su entorno. Si algún secreto no se puede resolver, el comando no arranca y Envilder sale con 125; si no, sale con el código de tu comando.',
         breadcrumb: 'CLI exec',
         navLabel: 'CLI exec',
         cardTitle: 'Comando CLI exec',
         cardSummary:
           'Arranca un comando con los secretos mapeados en memoria, sin archivo .env.',
       },
+      'cli-validate': {
+        title:
+          'envilder validate: comprueba un archivo de mapeo y sus secretos de AWS SSM o Azure Key Vault',
+        description:
+          'Referencia de envilder validate: comprobaciones del archivo de mapeo, --offline, estados de las claves remotas, --envfile y --compare-values, salida JSON, códigos de salida y los permisos de IAM y Key Vault que necesita.',
+        heading: 'Referencia de envilder validate',
+        intro:
+          '¿Cómo sabes que un archivo de mapeo funcionará antes de un pull, un despliegue o envilder exec? envilder validate comprueba que el archivo de mapeo es válido y que cada secreto declarado existe en AWS SSM o Azure Key Vault, y puede compararlo con un archivo .env local. Nunca muestra ningún valor de secreto y sale con 1 cuando algo falla, así que encaja como paso de CI.',
+        breadcrumb: 'CLI validate',
+        navLabel: 'CLI validate',
+        cardTitle: 'Comando validate de la CLI',
+        cardSummary:
+          'Comprueba el archivo de mapeo y que cada secreto existe, sin mostrar valores.',
+      },
       'github-action': {
         title: 'Carga secretos de AWS SSM y Azure Key Vault en GitHub Actions',
         description:
-          'Carga secretos de AWS SSM Parameter Store o Azure Key Vault en un archivo .env en GitHub Actions con OIDC: permisos IAM y RBAC mínimos, workflows completos y errores de credenciales.',
+          'Carga secretos de AWS SSM Parameter Store o Azure Key Vault en los jobs de GitHub Actions con OIDC, sin archivo .env: permisos IAM y RBAC mínimos, workflows completos y errores de credenciales.',
         heading:
           'Carga secretos de AWS SSM y Azure Key Vault en GitHub Actions',
         intro:
-          '¿Cómo usas secretos de AWS SSM Parameter Store o Azure Key Vault en un job de GitHub Actions sin copiarlos a GitHub Secrets? Autentica el job con OIDC y deja que la Action de Envilder lea tu envilder.json versionado y escriba un archivo .env para los pasos siguientes.',
+          '¿Cómo usas secretos de AWS SSM Parameter Store o Azure Key Vault en un job de GitHub Actions sin copiarlos a GitHub Secrets? Autentica el job con OIDC y deja que la Action de Envilder lea tu envilder.json versionado y exporte los secretos a los pasos siguientes.',
         breadcrumb: 'GitHub Action',
         navLabel: 'GitHub Action',
         cardTitle: 'Guía de GitHub Action',
@@ -807,7 +1486,9 @@ export const es: Translations = {
     breadcrumbDocs: 'Documentación',
     navigationLabel: 'Navegación de documentación',
     mobileNavigation: 'Elige una página de documentación',
+    anchorLabel: 'Enlace a esta sección',
     navGettingStarted: 'Primeros pasos',
+    navGuides: 'Guías',
     navProviders: 'Proveedores',
     hubCardsLabel: 'Guías de documentación',
     openPage: 'Abrir guía',
@@ -912,174 +1593,10 @@ export const es: Translations = {
     mapContentsExpansionTitle: 'Expansión de variables:',
     mapContentsExpansionDesc:
       'Envilder escribe referencias como $HOME literalmente y dotenv no las expande, pero otros cargadores sí. Docker Compose, por ejemplo, expande un KEY=$HOME sin comillas al leer el archivo. Tenlo en cuenta cuando un secreto contenga $.',
-    pullTitle: 'Comando pull',
-    pullDesc:
-      'Descarga secretos de tu proveedor en la nube y genera un archivo .env local.',
-    pullOptions: 'Opciones',
-    pullExamples: 'Ejemplos',
-    pullOutput: 'Salida',
-    optionHeader: 'Opción',
-    pullOptMap: 'Ruta al archivo JSON de mapeo',
-    pullOptEnv: 'Ruta donde escribir el .env',
-    pullOptProvider: 'aws (por defecto) o azure',
-    pullOptVault: 'URL de Azure Key Vault',
-    pullOptProfile: 'Perfil AWS CLI a usar',
-    pullCommentDefault: '# Por defecto (AWS SSM)',
-    pullCommentProfile: '# Con perfil AWS',
-    pullCommentAzureConfig: '# Azure vía $config en archivo de mapeo',
-    pullCommentAzureFlags: '# Azure vía flags CLI',
-    pullOutputTitle: 'Salida',
-    pullExecTitle: '¿No quieres un archivo .env?',
-    pullExecDesc:
-      'Usa envilder exec: resuelve el mismo map file y arranca tu comando con los secretos en su entorno, sin escribir nada en disco.',
-    pullExecGuideLink: 'Consulta la guía de CLI exec',
-    execTitle: 'Comando exec',
-    execDesc:
-      'envilder exec resuelve todos los secretos del map file y arranca un comando con esos valores en su entorno. No se escribe nada en disco: no hay ningún archivo .env que añadir al .gitignore, mantener sincronizado o borrar. El map file y su $config funcionan exactamente igual que en el modo pull.',
-    execUsageTitle: 'Uso',
-    execSeparatorTitle: 'Dónde empieza tu comando: la regla del --',
-    execSeparatorDesc:
-      'Primero van las opciones de Envilder. Tu comando empieza en el primer argumento que no es una opción de Envilder, o justo después del -- si lo hay. Todo lo que viene a continuación llega tal cual a tu comando, aunque parezca una opción de Envilder. El -- es opcional: solo lo necesitas cuando el propio comando empieza por -.',
-    execSepComment1: '# Todo es de npm',
-    execSepComment2: '# --map es de Envilder, el resto es de npm',
-    execSepComment3: '# --map=x es de npm: va después del comando',
-    execSepComment4: '# Lo mismo, con un separador explícito',
-    execOptions: 'Opciones',
-    execOptMap: 'Ruta al map file (por defecto: envilder.json)',
-    execOptProfile: 'Perfil AWS CLI. Tiene prioridad sobre $config.profile',
-    execOptProvider: 'aws o azure. Tiene prioridad sobre $config.provider',
-    execOptVault:
-      'URL del Azure Key Vault. Tiene prioridad sobre $config.vaultUrl',
-    execOptionsOrderDesc:
-      'Las opciones de Envilder van después de exec, nunca antes. Una opción escrita antes de exec se rechaza con el código de salida 125, y Envilder te muestra el comando corregido:',
-    execRejectedDesc:
-      'El modo exec nunca lee ni escribe ningún archivo .env y nunca sube secretos, así que --envfile, --push, --key, --value y --secret-path se rechazan con el código de salida 125 antes de cualquier llamada al proveedor. Una opción desconocida antes del comando también es un error: una errata como --mapp nunca llega a tu comando por accidente.',
-    execExamples: 'Ejemplos',
-    execCommentNpx:
-      '# Arranca el servidor de desarrollo con los secretos de envilder.json',
-    execCommentMap: '# Usa un map file concreto',
-    execCommentAzure: '# Azure Key Vault con flags de la CLI',
-    execCommentDocker:
-      '# Docker Compose puede interpolar los secretos en compose.yaml',
-    execPackageJsonDesc: 'O intégralo en los scripts de tu package.json:',
-    execOutputTitle: 'Salida',
-    execOutputDesc:
-      'El stdout es de tu comando. Toda la salida de Envilder va a stderr, así que envilder exec -- node print.js > out.json solo escribe en out.json la salida de tu comando. Si todo va bien, Envilder muestra una única línea de resumen que solo nombra el programa, porque los argumentos pueden contener secretos:',
-    execUseCasesTitle: 'Casos de uso habituales',
-    execUseCasesDesc:
-      'En todos los casos los valores solo existen en el entorno de tu comando y de los procesos que arranque, Envilder nunca crea un archivo .env, y el código de salida de tu comando pasa a ser el código de salida de Envilder. Lo que el comando haga después con los valores depende de él: Docker, por ejemplo, guarda el entorno de un contenedor en sus metadatos en disco (visibles con docker inspect) hasta que se elimina el contenedor.',
-    execUcLocalstackTitle: 'Arranca LocalStack con su token de autenticación',
-    execUcLocalstackDesc:
-      'Cuándo lo necesitas: LocalStack necesita LOCALSTACK_AUTH_TOKEN y no quieres el token en un archivo .env ni en el historial de tu shell.',
-    execUcLocalstackComposeDesc:
-      'Con Docker Compose, haz referencia a la variable en compose.yaml. Compose toma su valor del entorno en el que se ejecuta, así que no hace falta ningún archivo .env:',
-    execUcLocalstackDockerDesc:
-      'Con Docker a secas, -e NOMBRE sin valor copia la variable del entorno del cliente docker, así que el token nunca aparece en la línea de comandos:',
-    execUcLocalstackExamplesDesc:
-      'Tienes la misma configuración con Testcontainers (TypeScript, Python, .NET) y Aspire en',
-    execUcTestsTitle: 'Tests de integración que arrancan contenedores',
-    execUcTestsDesc:
-      'Cuándo lo necesitas: tus tests arrancan contenedores (por ejemplo, con Testcontainers) y leen un token o unas credenciales del entorno (process.env, os.environ, Environment.GetEnvironmentVariable) para pasárselos.',
-    execUcTestsNote:
-      'Si los tests fallan, se conserva su código de salida y la CI sigue fallando. Si un secreto no se puede resolver, los tests no arrancan y el código de salida es 125.',
-    execUcMigrationsTitle: 'Migraciones de base de datos y scripts puntuales',
-    execUcMigrationsDesc:
-      'Cuándo lo necesitas: una herramienta de migraciones o un script necesita DATABASE_URL una sola vez, y no quieres la cadena de conexión en disco. Usa --map para ejecutar el mismo comando contra otro entorno.',
-    execUcTerraformTitle: 'Terraform y otras herramientas IaC',
-    execUcTerraformDesc:
-      'Cuándo lo necesitas: una variable de entrada de Terraform contiene un secreto. Terraform lee las variables de entorno TF_VAR_<nombre> como valores de la variable de entrada <nombre>.',
-    execUcTerraformNote:
-      'Declara la variable con sensitive = true para que Terraform la oculte en la salida del plan. Terraform sigue guardando en el estado los valores que escribe en los recursos, así que protege el estado como siempre.',
-    execUcDevTitle: 'Servidor de desarrollo local con scripts de package.json',
-    execUcDevDesc:
-      'Cuándo lo necesitas: todo el equipo debe arrancar la aplicación con los mismos secretos ejecutando npm run dev.',
-    execUcDevNote:
-      'Añade envilder como dependencia de desarrollo (npm install --save-dev envilder) para que el script lo encuentre en node_modules/.bin.',
-    execUcGhaTitle: 'Un paso de GitHub Actions',
-    execUcGhaDesc:
-      'Cuándo lo necesitas: un paso de un workflow necesita los secretos, y solo ese paso. Configura las credenciales de AWS con OIDC y ejecuta tu comando con npx envilder exec:',
-    execUcGhaNote:
-      'Los valores resueltos se registran en el enmascarado de logs de GitHub antes de que arranque el comando, y los pasos siguientes no los ven.',
-    execUcChainTitle: 'Varios comandos con los mismos secretos',
-    execUcChainDesc:
-      'Cuándo lo necesitas: quieres encadenar comandos o seguir trabajando en una shell que tenga los secretos.',
-    execUcChainNote:
-      'Pon todo el script de sh -c entre comillas simples para que tu shell no ejecute el && fuera de envilder exec. El exec delante del último comando sustituye la shell por ese comando, así que las señales que reenvía Envilder llegan directamente a npm start. En la shell interactiva, todos los comandos que ejecutes ven los secretos; escribe exit para salir.',
-    execBehaviorTitle: 'Comportamiento',
-    execExitTitle: 'Códigos de salida',
-    execExitDesc:
-      'Los códigos de salida siguen los de GNU env y docker run, así puedes distinguir un fallo de Envilder del código de salida de tu comando:',
-    execThCode: 'Código',
-    execThMeaning: 'Significado',
-    execThMessage: 'Mensaje',
-    execExitChild: 'Tu comando terminó con el código n',
-    execExitSignal:
-      'Tu comando fue detenido por la señal n (por ejemplo, 137 para SIGKILL)',
-    execExit125:
-      'Envilder falló antes de arrancar el comando: opciones incorrectas, comando ausente, ningún map file, secretos sin resolver o credenciales caducadas',
-    execExit126:
-      'El comando existe pero el sistema operativo impidió ejecutarlo (por ejemplo, Permission denied)',
-    execExit127: 'No se encontró el comando',
-    execExitNote: 'Los modos pull y push siguen saliendo con 1 cuando fallan.',
-    execFailClosedTitle: 'Fail-closed',
-    execFailClosedDesc:
-      'El modo pull avisa y se salta un secreto que falta. El modo exec nunca arranca tu comando con un conjunto de secretos incompleto: si algún secreto falta, está vacío o no se puede leer (por ejemplo, por acceso denegado), el comando no arranca, Envilder lista las variables afectadas con sus rutas enmascaradas y sale con 125. Los valores se resuelven una sola vez, al arrancar el comando.',
-    execEnvTitle: 'Entorno',
-    execEnvDesc:
-      'Tu comando hereda todo el entorno de la shell que ejecuta Envilder, más todas las variables del map file. Manda el map file: cuando una variable heredada tiene el mismo nombre que una mapeada, el comando recibe el valor del proveedor, y Envilder muestra los nombres (nunca los valores) en stderr:',
-    execNoShellDesc:
-      "Envilder no arranca ninguna shell adicional: los argumentos llegan a tu comando como una lista. Pero tu propia shell interpreta la línea antes, así que pon entre comillas lo que no deba interpretar: '$DB_URL' o '&&' entre comillas simples llegan literalmente al comando, mientras que un $DB_URL sin comillas se expande con el valor de tu shell (no con el secreto resuelto) y un && sin comillas ejecuta un segundo comando fuera de envilder exec. Si necesitas funciones de la shell con los secretos, arranca una explícitamente:",
-    execGhaTitle: 'Enmascarado en GitHub Actions',
-    execGhaDesc:
-      'Cuando GITHUB_ACTIONS=true, Envilder registra cada valor resuelto en el enmascarado de logs de GitHub (::add-mask::), de modo que los valores que imprima tu comando aparecen enmascarados en el log del job. Todos los registros se escriben en stderr antes de que arranque el comando; si alguno no se puede escribir, el comando no arranca (código de salida 125). La GitHub Action de Envilder no ofrece el modo exec: ejecuta la CLI desde un paso run.',
-    execGhaNote:
-      'No redirijas el stderr de envilder exec fuera del log del paso (por ejemplo, con 2> fichero o 2>/dev/null): es de ahí de donde el runner lee las máscaras. El runner lee stdout y stderr por canales separados, así que un valor que tu comando imprima enseguida puede llegar al log, en casos raros, antes de que se haya procesado su máscara.',
-    execSignalsTitle: 'Señales',
-    execSignalsDesc:
-      'stdin, stdout y stderr se heredan y se conserva el TTY, así que los REPL, las shells y las preguntas interactivas funcionan como siempre. El Ctrl+C de un terminal llega directamente a tu comando. SIGTERM y SIGHUP (por ejemplo, de docker stop o Kubernetes) se reenvían al comando, y Envilder espera a que termine, sin ningún tiempo límite propio, antes de devolver su código de salida. Las señales solo llegan al hijo directo: un lanzador como npm debe encargarse de detener a sus propios hijos.',
-    execSandboxTitle: 'No es un sandbox.',
-    execSandboxDesc:
-      'El modo exec nunca crea un archivo .env y no toca los que ya existen: si vienes del modo pull, borra tú mismo tu .env antiguo. No aísla el proceso. Tu comando y todos los procesos que arranque pueden leer los secretos de su entorno, incluida cualquier herramienta o agente de IA de programación que ejecute env o printenv a través de él. En Linux, otros procesos del mismo usuario pueden leer /proc/<pid>/environ. Ejecuta solo comandos de confianza con los secretos que mapeas.',
-    execGuideLink:
-      'Guía completa del comando exec en GitHub: detalles de Windows, recuperación SSO y todos los mensajes de error',
     examplesTitle: 'Ejemplos ejecutables.',
-    execExamplesDesc:
-      'Arranca LocalStack con envilder exec docker run, con el token de autenticación resuelto desde AWS SSM sin ningún archivo .env (Docker lo guarda en los metadatos del contenedor hasta que se elimina), o sigue paso a paso push, pull y exec con npx envilder:',
-    pushTitle: 'Comando push',
-    pushDesc:
-      'Sube variables de entorno de un archivo .env local a tu proveedor en la nube usando un archivo de mapeo.',
-    pushOptions: 'Opciones',
-    pushExamples: 'Ejemplos',
-    pushOptPush: 'Activa el modo push (requerido)',
-    pushOptEnv: 'Ruta a tu archivo .env local (por defecto: .env)',
-    pushOptMap:
-      'Ruta al JSON de mapeo de parámetros (por defecto: envilder.json)',
-    pushOptProvider: 'aws (por defecto) o azure',
-    pushOptVault: 'URL de Azure Key Vault',
-    pushOptProfile: 'Perfil AWS CLI (solo AWS)',
-    pushCommentAws: '# Subir a AWS SSM (por defecto envilder.json y .env)',
-    pushCommentProfile: '# Con perfil AWS',
-    pushCommentAzureConfig: '# Azure vía $config en archivo de mapeo',
-    pushCommentAzureFlags: '# Azure vía flags CLI',
-    pushSingleTitle: 'Subir variable individual',
-    pushSingleDesc:
-      'Sube una variable de entorno individual directamente a tu proveedor en la nube sin usar ningún archivo .env. Envilder también guarda el mapeo en envilder.json (y lo crea si no existe), para que envilder exec lo pueda resolver enseguida. El valor nunca se escribe en el archivo.',
-    pushSingleOptions: 'Opciones',
-    pushSingleOptPush:
-      'Opcional: --key, --value y --secret-path ya activan el modo push',
-    pushSingleOptKey: 'Nombre de la variable de entorno',
-    pushSingleOptValue: 'Valor a almacenar',
-    pushSingleOptPath: 'Ruta completa del secreto en tu proveedor en la nube',
-    pushSingleOptMap:
-      'Opcional: archivo de mapeo que se crea o actualiza con la entrada y del que se lee $config (por defecto: envilder.json)',
-    pushSingleOptNoMapUpdate:
-      'Opcional: sube el secreto sin leer, crear ni actualizar ningún archivo de mapeo; el proveedor y el vault solo vienen de los flags',
-    pushSingleOptProvider: 'aws (por defecto) o azure',
-    pushSingleOptVault: 'URL de Azure Key Vault',
-    pushSingleOptProfile: 'Perfil AWS CLI (solo AWS)',
     ghaSetupTitle: 'Cómo funciona la Action',
     ghaSetupDesc:
-      'La Action es un paso compuesto: instala Node.js 22, lee el archivo de mapeo, obtiene cada secreto con las credenciales de nube que ya tiene el job, enmascara cada valor en el log y escribe el archivo .env. No inicia sesión en AWS ni en Azure por sí misma, así que debe hacerlo un paso anterior (aws-actions/configure-aws-credentials o azure/login). Usa la etiqueta publicada macalbert/envilder/github-action@v0; no hace falta ningún paso de compilación.',
+      'La Action es un paso compuesto: instala Node.js 22, lee el archivo de mapeo, obtiene cada secreto con las credenciales de nube que ya tiene el job y enmascara cada valor en el log. Por defecto, después exporta los secretos al entorno de todos los pasos posteriores del job; con command o env-file, en cambio, ejecuta un comando o escribe un archivo .env. No inicia sesión en AWS ni en Azure por sí misma, así que debe hacerlo un paso anterior (aws-actions/configure-aws-credentials o azure/login). Usa la etiqueta publicada macalbert/envilder/github-action@v0; no hace falta ningún paso de compilación.',
     ghaPrerequisites: 'Prerrequisitos',
     ghaPrereqAws:
       'AWS: un rol IAM que GitHub pueda asumir, usado a través de aws-actions/configure-aws-credentials.',
@@ -1089,11 +1606,11 @@ export const es: Translations = {
     ghaPullOnly: 'La GitHub Action solo soporta el modo pull (sin push).',
     ghaBasicTitle: 'AWS SSM Parameter Store con OIDC',
     ghaMultiEnvTitle: 'Workflow multi-entorno',
-    ghaExecTitle: 'Ejecutar un comando sin escribir un archivo .env',
+    ghaExecTitle: 'Ejecutar un comando con los secretos',
     ghaExecDesc:
-      'La acción siempre escribe un archivo .env. Si prefieres que los secretos no toquen el disco del runner, no uses la acción y ejecuta envilder exec en un paso run, después del mismo paso de credenciales. Las opciones de Envilder van antes de --, y tu comando, después. Envilder enmascara todos los valores resueltos en el log del job, y el comando no arranca si falta algún secreto.',
+      'Con el input command, la Action ejecuta ese comando con bash, desde la raíz del repositorio, con los secretos en su entorno, y termina el paso con el código de salida del comando. Los secretos no se exportan, así que los pasos posteriores, incluidas las actions de terceros, nunca los ven. Úsalo cuando solo un paso necesita los secretos y quieres la mínima exposición.',
     ghaExecNote:
-      'La CLI necesita Node.js 22.12 o posterior, así que configúralo con actions/setup-node antes del paso. No redirijas el stderr de envilder exec fuera del log del paso: es de ahí de donde GitHub lee las máscaras.',
+      'También puedes ejecutar la CLI tú mismo con npx envilder exec --map=envilder.json -- <comando> en un paso run. Necesita Node.js 22.12 o posterior (actions/setup-node), y su stderr debe quedarse en el log del paso, porque es de ahí de donde GitHub lee las máscaras.',
     ghaExecLink: 'Lee la guía completa de exec →',
     ghaAzureTitle: 'Azure Key Vault con OIDC',
     ghaInputsTitle: 'Inputs y outputs de la Action',
@@ -1102,16 +1619,44 @@ export const es: Translations = {
     ghaInputRequired: 'Requerido',
     ghaInputDefault: 'Por defecto',
     ghaInputDesc: 'Descripción',
-    ghaOutputEnvPath: 'Ruta al archivo .env generado',
+    ghaOutputEnvPath:
+      'Ruta al archivo .env generado (vacía si no se define env-file)',
     ghaThInput: 'Input',
     ghaThRequired: 'Requerido',
     ghaThOutput: 'Output',
     ghaYes: 'Sí',
     ghaNo: 'No',
     ghaInputMap: 'Ruta al archivo JSON de mapeo',
-    ghaInputEnv: 'Ruta al archivo .env a generar',
+    ghaInputEnv:
+      'Opcional. Ruta a un archivo .env que escribir, para herramientas que necesitan un archivo. Sin env-file ni command, los secretos van al entorno del job',
     ghaInputProvider: 'aws o azure',
     ghaInputVault: 'URL de Azure Key Vault',
+    ghaInputCommand:
+      'Opcional. Comando que se ejecuta (con bash) con los secretos solo en su entorno. No se puede combinar con env-file',
+    ghaModesTitle: 'Elegir un modo',
+    ghaModesDesc:
+      'La Action tiene tres modos, y los inputs que defines eligen uno. El modo por defecto solo necesita map-file:',
+    ghaModesThMode: 'Modo',
+    ghaModesThSelect: 'Cómo se elige',
+    ghaModesThScope: 'Quién puede leer los secretos',
+    ghaModesThFile: 'Archivos escritos',
+    ghaModeJob: 'Entorno del job (por defecto)',
+    ghaModeJobSelect: 'Solo map-file',
+    ghaModeJobScope: 'Todos los pasos posteriores del job',
+    ghaModeCommand: 'Comando',
+    ghaModeCommandScope: 'Solo ese comando y los procesos que inicia',
+    ghaModeEnvFile: 'Archivo .env',
+    ghaModeEnvFileScope: 'Cualquier paso o herramienta que lea el archivo',
+    ghaModeJobFiles:
+      'El archivo GITHUB_ENV del runner, en su directorio temporal (ningún .env)',
+    ghaModeCommandFiles: 'Ninguno',
+    ghaModeEnvFileFiles: 'El archivo .env',
+    ghaModesJobNote:
+      'En el modo por defecto, la Action añade los secretos al archivo GITHUB_ENV del runner, y el runner los pone en el entorno de cada paso que se ejecuta después dentro del mismo job, incluidas las actions de terceros, las actions de contenedor Docker y los pasos que se ejecutan dentro de un container del job. Los pasos los leen como cualquier otra variable: process.env.DB_PASSWORD, os.environ["DB_PASSWORD"] o $DB_PASSWORD. Los demás jobs no los reciben, así que cada job que necesita secretos vuelve a ejecutar la Action. Un contenedor que inicias tú mismo con docker run no los hereda: pásalos explícitamente, por ejemplo con docker run -e DB_PASSWORD.',
+    ghaModesEnvFileNote:
+      'Usa env-file solo cuando una herramienta no puede leer los secretos de otra forma que de un archivo, por ejemplo docker compose --env-file. Mejor una ruta dentro de runner.temp, para que el archivo quede fuera del espacio de trabajo del repositorio. env-file y command no se pueden combinar.',
+    ghaModesSafetyNote:
+      'No escribir ningún archivo .env elimina la vía más habitual por la que se filtran secretos en CI: un archivo que acaba en upload-artifact, en una caché, en un COPY . . de un Dockerfile o en un git add -A. Las herramientas posteriores todavía pueden escribir las variables en archivos, así que trata los resultados de build y de tests como lo harías sin Envilder. Tampoco protege contra código malicioso dentro del job, que puede leer las variables de entorno tan fácilmente como un archivo. Todos los modos enmascaran los valores en el log. Los modos de entorno del job y de comando fallan de forma segura: si falta algún secreto o está vacío, el paso falla y no se exporta ni se inicia nada.',
     ghaPrereqCheckout:
       'actions/checkout antes de la Action, para que el archivo de mapeo exista en el runner.',
     ghaPrereqPermissions:
@@ -1131,9 +1676,9 @@ export const es: Translations = {
       'El archivo de mapeo es el mismo que usas con la CLI: cada variable de entorno apunta al nombre de un parámetro.',
     ghaOutputTitle: 'Salida esperada',
     ghaOutputDesc:
-      'El log del paso muestra la identidad de AWS en uso, cada variable resuelta con el valor enmascarado y un resumen:',
+      'El log del paso muestra el modo, la identidad de AWS en uso, cada variable resuelta con el valor enmascarado y un resumen:',
     ghaOutputMaskNote:
-      'Cada valor se registra también con el comando add-mask de GitHub, de modo que un paso posterior que lo imprima muestra ***. El archivo .env se queda en el runner; no lo subas como artefacto.',
+      'Cada valor se registra también con el comando add-mask de GitHub, de modo que un paso posterior que lo imprima muestra ***. Si usas env-file, el archivo .env se queda en el runner; no lo subas como artefacto.',
     ghaAzureFedTitle: '1. Crea una credencial federada',
     ghaAzureFedDesc:
       'Crea un registro de aplicación y su service principal, y añade una credencial federada que confíe en los tokens de un repositorio y una rama. No se crea ningún secreto de cliente. El sujeto usa el mismo formato que el sub de AWS, incluida la variante inmutable cuando tu repositorio la emite.',
@@ -1185,10 +1730,10 @@ export const es: Translations = {
       'La sesión del rol terminó antes de que se ejecutara el paso (una hora por defecto). Ejecuta Envilder justo después del paso de credenciales, o aumenta role-duration-seconds junto con la duración máxima de sesión del rol.',
     ghaErrNotFoundTitle: 'Parámetro o secreto inexistente',
     ghaErrNotFoundFix:
-      'Es un aviso, no un error: el paso termina bien, con menos secretos en el resumen que en el mapeo. En un archivo .env nuevo la variable queda fuera. Si el archivo ya existía (en el repositorio, en caché o escrito por un paso anterior), se conserva el valor antiguo, así que borra el archivo antes de la Action cuando un valor obsoleto no deba sobrevivir. Revisa el nombre, la región y, en Azure, el nombre convertido. Si un valor que falta debe detener el despliegue, compruébalo en un paso posterior.',
+      'Revisa el nombre, la región y, en Azure, el nombre convertido. En el modo por defecto y con command, un secreto que falta o está vacío hace fallar el paso: no se exporta nada y el comando no se inicia. Con env-file es un aviso, no un error: el paso termina bien, con menos secretos en el resumen que en el mapeo. En un archivo .env nuevo la variable queda fuera. Si el archivo ya existía (en el repositorio, en caché o escrito por un paso anterior), se conserva el valor antiguo, así que borra el archivo antes de la Action cuando un valor obsoleto no deba sobrevivir. Si un valor que falta debe detener el despliegue, usa el modo por defecto o command en lugar de env-file.',
     ghaErrVaultUrlTitle: 'Falta la URL del vault de Azure',
     ghaErrVaultUrlFix:
-      'Informa el input vault-url o $config.vaultUrl en el archivo de mapeo. Debe ser una URL https que termine en .vault.azure.net, o el dominio equivalente de una nube soberana.',
+      'Informa el input vault-url o $config.vaultUrl en el archivo de mapeo. Usa el URI del vault que muestra el portal de Azure, por ejemplo https://my-vault.vault.azure.net.',
     ghaErrAzureDeniedTitle: 'Acceso denegado en Azure Key Vault',
     ghaErrAzureDeniedFix:
       'azure/login ha funcionado pero la identidad no tiene ningún rol de plano de datos sobre el vault. Asigna Key Vault Secrets User sobre el vault y espera unos minutos, porque las asignaciones de rol tardan en propagarse. Los vaults con directivas de acceso indican en cambio que la identidad no tiene el permiso get de secretos.',
@@ -1232,7 +1777,7 @@ export const es: Translations = {
       'Analiza el archivo de mapeo, resuelve secretos e inyéctalos en las variables de entorno:',
     sdkDotnetFullDocs: 'Documentación completa →',
     sdkDotnetExamplesDesc:
-      'Proyectos de pruebas xUnit con Testcontainers y Aspire que resuelven un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack y Lowkey Vault) y pasan los valores a los contenedores, sin ningún archivo .env:',
+      'Proyectos de pruebas xUnit con Testcontainers y Aspire que resuelven un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack for AWS y LocalStack for Azure) y pasan los valores a los contenedores, sin ningún archivo .env:',
     sdkDotnetPrereqTitle: 'Requisitos previos',
     sdkDotnetPrereqDesc:
       'El paquete apunta a .NET Standard 2.0, así que funciona con cualquier versión de .NET con soporte (las pruebas del SDK se ejecutan en .NET 10, la LTS actual). Cada proveedor usa su cadena de credenciales por defecto:',
@@ -1356,7 +1901,7 @@ export const es: Translations = {
       'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
     sdkPythonFullDocs: 'Documentación completa →',
     sdkPythonExamplesDesc:
-      'Un proyecto pytest con Testcontainers que resuelve un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack y Lowkey Vault) y pasa los valores a los contenedores, sin ningún archivo .env:',
+      'Un proyecto pytest con Testcontainers que resuelve un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack for AWS y LocalStack for Azure) y pasa los valores a los contenedores, sin ningún archivo .env:',
     sdkNodejsTitle: 'Node.js SDK',
     sdkNodejsDesc:
       'Carga secretos directamente en tu aplicación Node.js al inicio. API asíncrona con fachada de una línea o constructor fluido para control total.',
@@ -1376,9 +1921,20 @@ export const es: Translations = {
     sdkNodejsValidation: 'Validación de secretos',
     sdkNodejsValidationDesc:
       'Validación opcional que asegura que todos los secretos resueltos tienen valores no vacíos:',
+    sdkContractValidation: 'Validación del contrato del fichero de mapeo',
+    sdkContractValidationDesc:
+      'Comprueba, sin cargar nada y sin usar ni mostrar ningún valor, que el fichero de mapeo es válido y que cada secreto declarado existe con las credenciales actuales: la misma comprobación que envilder validate. Los errores de validación esperados se devuelven en el resultado en lugar de lanzarse; un fichero de mapeo inexistente sí lanza un error. Cada clave informa exists, missing, access_denied, authentication_failed o provider_error:',
+    sdkContractValidationLoadDesc:
+      'Para que la carga falle, activa la validación del contrato en el builder. La comprobación se ejecuta una vez antes de resolver y el error nombra las claves que fallan, nunca sus valores. Está desactivada por defecto, así que una carga normal no hace ninguna llamada extra al proveedor. A diferencia de la validación de secretos, que revisa los valores resueltos, revisa el fichero de mapeo y las claves antes de resolver:',
+    sdkContractValidationCliLink:
+      'Consulta la referencia de envilder validate para los estados y los permisos que necesita la comprobación →',
+    sdkCustomProvider: 'Proveedor propio y fakes para tests',
+    sdkCustomProviderDesc:
+      'Pasa al builder tu propia instancia de proveedor en lugar de la que construye a partir de $config. El fichero de mapeo se sigue validando igual, así que puedes probar el código de arranque con un fake en memoria, sin cuenta en la nube, emulador ni variables de entorno. Implementa también el comprobador de existencia para que la validación del contrato pueda revisar cada clave; sin él, todas las claves salen como provider_error:',
+    sdkCustomProviderGuideLink: 'Guía completa: proveedor de secretos propio →',
     sdkNodejsFullDocs: 'Documentación completa →',
     sdkNodejsExamplesDesc:
-      'Un proyecto Vitest con Testcontainers y un AppHost de Aspire en TypeScript que resuelven un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack y Lowkey Vault) y pasan los valores a los contenedores, sin ningún archivo .env:',
+      'Un proyecto Vitest con Testcontainers y un AppHost de Aspire en TypeScript que resuelven un archivo de mapeo contra AWS SSM y Azure Key Vault (emulados con LocalStack for AWS y LocalStack for Azure) y pasan los valores a los contenedores, sin ningún archivo .env:',
     pagerPrev: 'Anterior',
     pagerNext: 'Siguiente',
   },

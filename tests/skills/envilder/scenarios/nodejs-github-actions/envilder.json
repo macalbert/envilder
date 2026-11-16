@@ -1,0 +1,9 @@
+{
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
+  "$config": {
+    "provider": "aws",
+    "environment": "ci"
+  },
+  "DATABASE_URL": "/storefront/ci/database-url",
+  "SESSION_SECRET": "/storefront/ci/session-secret"
+}

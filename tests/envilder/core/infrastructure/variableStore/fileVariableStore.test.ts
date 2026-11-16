@@ -1322,6 +1322,44 @@ describe('FileVariableStore', () => {
         'Failed to read environment file: Permission denied',
       );
     });
+
+    // The blank runs sit between comments, not right after an assignment, whose
+    // trailing blanks would swallow the run before it could be rescanned. The
+    // result is compared as text: dotenv itself is quadratic on these files.
+    it.each([
+      [
+        'LF blank lines',
+        `# a${'\n'.repeat(200_000)}# b\nA=old\nB=kept\n`,
+        `# a${'\n'.repeat(200_000)}# b\nA=new\nB=kept\n`,
+      ],
+      [
+        'CRLF blank lines',
+        `# a${'\r\n'.repeat(100_000)}# b\r\nA=old\r\nB=kept\r\n`,
+        `# a${'\r\n'.repeat(100_000)}# b\r\nA=new\r\nB=kept\r\n`,
+      ],
+      [
+        'blanks inside a value',
+        `A=old${' '.repeat(200_000)}x\nB=kept\n`,
+        'A=new\nB=kept\n',
+      ],
+    ])(
+      'Should_RewriteInLinearTime_When_FileHoldsLongWhitespaceRuns (%s)',
+      async (_name, existing, expected) => {
+        // Arrange
+        mockInMemoryFiles.set(mockEnvFilePath, existing);
+        const startedAt = performance.now();
+
+        // Act
+        await sut.saveEnvironment(mockEnvFilePath, { A: 'new' });
+        const elapsed = performance.now() - startedAt;
+
+        // Assert
+        expect({
+          content: mockInMemoryFiles.get(mockEnvFilePath),
+          fast: elapsed < 1000,
+        }).toEqual({ content: expected, fast: true });
+      },
+    );
   });
 
   describe('loadMapFile', () => {
@@ -1399,6 +1437,27 @@ describe('FileVariableStore', () => {
       expect(result).toEqual(expectedVars);
     });
 
+    it('Should_ParseInLinearTime_When_FileHoldsLongRunsOfBlankLines', async () => {
+      // Arrange
+      // Between comments, not right after an assignment: an assignment's
+      // trailing blanks would swallow the run before it could be rescanned.
+      const blankLines = '\n'.repeat(200_000);
+      mockInMemoryFiles.set(
+        mockEnvFilePath,
+        `# top${blankLines}# middle\nA=1\n# after A${blankLines}B=2\n`,
+      );
+      const startedAt = performance.now();
+
+      // Act
+      const result = await sut.getEnvironment(mockEnvFilePath);
+
+      // Assert
+      expect({ result, fast: performance.now() - startedAt < 1000 }).toEqual({
+        result: { A: '1', B: '2' },
+        fast: true,
+      });
+    });
+
     it('Should_ReturnEmptyObject_When_EnvFileDoesNotExist', async () => {
       // Arrange
       const nonExistentPath = './tests/non-existent.env';
@@ -1433,6 +1492,44 @@ describe('FileVariableStore', () => {
 
       // Assert
       await expect(action()).rejects.toThrow();
+    });
+  });
+
+  describe('readEnvironmentEntries', () => {
+    it('Should_ReturnEveryAssignment_When_EnvFileExists', async () => {
+      // Arrange
+      mockInMemoryFiles.set(mockEnvFilePath, '# comment\nA=1\nB=\nA="2"\n');
+
+      // Act
+      const actual = await sut.readEnvironmentEntries(mockEnvFilePath);
+
+      // Assert
+      expect(actual).toEqual([
+        { key: 'A', value: '1' },
+        { key: 'B', value: '' },
+        { key: 'A', value: '2' },
+      ]);
+    });
+
+    it('Should_ReturnNull_When_EnvFileDoesNotExist', async () => {
+      // Act
+      const actual = await sut.readEnvironmentEntries('./tests/missing.env');
+
+      // Assert
+      expect(actual).toBeNull();
+    });
+
+    it('Should_ThrowEnvironmentFileError_When_EnvFileCannotBeRead', async () => {
+      // Arrange
+      vi.mocked(fs.readFile).mockRejectedValueOnce(new Error('EACCES'));
+
+      // Act
+      const action = sut.readEnvironmentEntries(mockEnvFilePath);
+
+      // Assert
+      await expect(action).rejects.toThrow(
+        new EnvironmentFileError(`Failed to read env file: ${mockEnvFilePath}`),
+      );
     });
   });
 

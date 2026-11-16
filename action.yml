@@ -1,5 +1,5 @@
 name: "Envilder GitHub Action"
-description: "Pull secrets from AWS SSM or Azure Key Vault into .env files for your CI/CD workflows"
+description: "Load secrets from AWS SSM or Azure Key Vault into your CI/CD job environment, a single command, or a .env file"
 author: "macalbert"
 
 branding:
@@ -11,8 +11,11 @@ inputs:
     description: "Path to the JSON file mapping environment variables to secret paths"
     required: true
   env-file:
-    description: "Path to the .env file to generate"
-    required: true
+    description: "Optional. Path to a .env file to write the secrets to, for tools that need a file. Without env-file or command, secrets are exported to the environment of the later steps of the job."
+    required: false
+  command:
+    description: "Optional. Command to run (with bash) with the secrets in its environment. The secrets exist only for this command, not for the later steps of the job. Cannot be combined with env-file."
+    required: false
   provider:
     description: "Cloud provider to use: aws or azure (default: aws). Can also be set via $config.provider in the map file."
     required: false
@@ -22,7 +25,7 @@ inputs:
 
 outputs:
   env-file-path:
-    description: "Path to the generated .env file"
+    description: "Path to the generated .env file (empty unless env-file is set)"
     value: ${{ inputs.env-file }}
 
 runs:
@@ -33,12 +36,13 @@ runs:
       with:
         node-version: "22.x"
 
-    - name: 🔐 Pull secrets into .env
+    - name: 🔐 Load secrets
       shell: bash
       working-directory: ${{ github.workspace }}
       env:
         INPUT_MAP_FILE: ${{ inputs.map-file }}
         INPUT_ENV_FILE: ${{ inputs.env-file }}
+        INPUT_COMMAND: ${{ inputs.command }}
         INPUT_PROVIDER: ${{ inputs.provider }}
         INPUT_VAULT_URL: ${{ inputs.vault-url }}
       run: |

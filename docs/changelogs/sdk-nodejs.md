@@ -1,3 +1,46 @@
+## [1.2.0] - 2026-11-08
+
+### Added
+
+* **Use your own provider in the fluent builder**:
+  `Envilder.fromMapFile(path).withSecretProvider(provider)` resolves secrets
+  and runs contract validation with any `ISecretProvider` instance instead of
+  the one built from `$config`. The map file is still validated as usual, so
+  startup code can be tested against an in-memory fake with no cloud account,
+  emulator or environment variables. `ISecretExistenceChecker` is now
+  exported: a custom provider that implements it takes part in
+  `validateContract()` and `withContractValidation()`; one that does not has
+  every key reported as `provider_error`, so a load with contract validation
+  fails ([#669](https://github.com/macalbert/envilder/issues/669))
+
+---
+
+## [1.1.0] - 2026-11-02
+
+### Added
+
+* **Check the map file contract from the SDK**:
+  `Envilder.fromMapFile(path).validateContract()` runs the same check as
+  `envilder validate` without loading anything: the map file must match the
+  published schema and a coherent provider configuration, and every declared
+  secret must exist. It returns a `ContractValidationResult` with the map
+  file errors and one entry per variable with its path, provider and status
+  (`exists`, `missing`, `access_denied`, `authentication_failed` or
+  `provider_error`), and never throws for those failures. No secret value is
+  read or returned. An invalid map file makes no provider call. The new
+  `.withContractValidation()` builder option runs the check once before
+  `resolve()` or `inject()` and fails the load with a
+  `ContractValidationError` that names the failing keys and paths. It is off
+  by default, so a load without it makes no extra provider call. AWS SSM is
+  checked with `GetParameters` in batches of ten and
+  `WithDecryption: false` (`ssm:GetParameters`); Azure Key Vault lists the
+  secret metadata once (`List` secret permission, or `secrets/readMetadata`
+  with Azure RBAC). `validateSecrets()` is unchanged and still checks
+  resolved values for emptiness
+  ([#533](https://github.com/macalbert/envilder/issues/533))
+
+---
+
 ## [1.0.0] - 2026-10-27
 
 ### Changed

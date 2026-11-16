@@ -1,0 +1,6 @@
+{
+  "$config": {
+    "provider": "azure"
+  },
+  "DB_PASSWORD": "billing-db-password"
+}

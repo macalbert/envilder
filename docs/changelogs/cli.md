@@ -5,6 +5,133 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [Unreleased]
+
+### Added
+
+* **`envilder validate --envfile` compares a local env file with the map
+  file**: the env file is read with the parser pull and push use, and its keys
+  are compared with the declared variables. A declared variable absent from
+  the file is reported as `missing from .env` and a key assigned twice as
+  `duplicated in .env`; both fail. A key only in the env file is a
+  `not declared in map file` warning that does not change the exit code.
+  `KEY=` counts as present, and a missing file fails with
+  `Env file not found: <path>`. The check runs before any provider call and
+  also with `--offline`
+  ([#559](https://github.com/macalbert/envilder/issues/559)).
+  [Guide](../validate-command.md)
+* **`envilder validate --compare-values`**: with `--envfile`, each declared
+  variable that is in the env file and exists remotely is reported as
+  `matches` or `differs` (or `unreadable` when its value cannot be read),
+  and any `differs` exits with `1`. Remote values are read through the same
+  resolution path as a pull and dropped right after the comparison; neither
+  value is ever printed. Without `--compare-values` no value is read.
+  `--compare-values` without `--envfile`, or with `--offline`, is rejected
+  before any provider call
+  ([#559](https://github.com/macalbert/envilder/issues/559))
+* **`envilder validate --format json`**: prints the result as exactly one
+  JSON document on stdout, with `valid`, `mapFile`, `keys` (name, provider,
+  path and status: `exists`, `missing`, `access_denied`,
+  `authentication_failed` or `provider_error`), `envFile` and `error`. A
+  section that did not run is left out rather than `null`. Logs,
+  warnings, error messages and the SSO login prompt go to stderr, so stdout
+  stays valid JSON. Exit codes do not change, and the document never holds a
+  secret value: value comparison only reports `matches`, `differs` or
+  `unreadable`. `--format text` (the default) keeps the current output; any
+  other format is rejected before any provider call
+  ([#560](https://github.com/macalbert/envilder/issues/560)).
+  [Guide](../validate-command.md#json-output)
+
+### Changed
+
+* **`envilder validate` text output**: a blank line now separates the
+  secrets block from the AWS identity banner above it, and the
+  `✓ All N secrets exist` summary from the list of secrets.
+
+---
+
+## [0.20.0] - 2026-11-01
+
+### Added
+
+* **`envilder validate` checks that every declared secret exists**: without
+  `--offline`, `validate` now asks the provider whether each secret path in
+  the map file exists, without reading any value, and lists every variable
+  with its path and status: `exists`, `missing`, `access denied` (never
+  reported as `missing`), `authentication failed` or `provider error`. A path
+  shared by several variables is checked once. It ends with
+  `✓ All N secrets exist` and exit code `0`, or with a summary such as
+  `✗ Validation failed: 2 missing, 1 access denied` and exit code `1`. An
+  invalid map file fails with the offline result and no provider is called.
+  Expired credentials and SSO sessions show the same message as a pull,
+  including the `aws sso login` recovery on a terminal. AWS SSM is checked
+  with `GetParameters` in batches of ten and `WithDecryption: false`, which
+  needs `ssm:GetParameters`; Azure Key Vault lists the vault's secret
+  metadata once, which needs the `List` secret permission (access policies)
+  or `secrets/readMetadata` (Azure RBAC, included in Key Vault Secrets User)
+  ([#558](https://github.com/macalbert/envilder/issues/558)).
+  [Guide](../validate-command.md)
+
+---
+
+## [0.19.0] - 2026-10-30
+
+### Changed
+
+* **Azure Key Vault URLs are no longer checked by host**: The CLI rejected a
+  `vaultUrl` that did not use `https://` or whose host did not end in an
+  Azure Key Vault domain, and read `ENVILDER_ALLOWED_VAULT_HOSTS` to widen
+  that list. The check and the variable are gone: the URL goes to the Azure
+  Key Vault client as written, with the client's default challenge resource
+  verification, as in the Node.js, Python and .NET SDKs. A malformed or
+  `http://` URL now fails with the Azure client's own error
+
+### Security
+
+* **Accepted risk: credentials follow the vault URL in the map file**:
+  `DefaultAzureCredential` requests a Key Vault token for whatever host
+  `vaultUrl` names, so a map file that points at another host sends that
+  token there. The map file is versioned with the code it configures, and
+  whoever can change it can already change the application, so a host
+  allowlist adds configuration without a matching security gain. Review
+  changes to `$config.vaultUrl` and `--vault-url` like any other code change
+
+---
+
+## [0.18.0] - 2026-10-29
+
+### Added
+
+* **`envilder validate --offline`**: a new subcommand that checks the map file
+  without calling any provider and without credentials. It reports invalid
+  JSON with the file path, every schema violation with the key that causes it
+  (unknown `$config` field, unsupported provider, non-string mapping, invalid
+  variable name, reserved `$` key), and an incoherent provider configuration
+  (`profile` with Azure, `vaultUrl` with AWS, Azure without `vaultUrl`), from
+  the map file or from `--provider`, `--profile` and `--vault-url`, which take
+  precedence over `$config` as on a pull. It prints `✓ Map file valid` and
+  exits `0` when the file is usable, and exits `1` otherwise. Secret values
+  are never printed. Checking that each secret exists in the provider is not
+  available yet, so `validate` without `--offline` is rejected
+  ([#557](https://github.com/macalbert/envilder/issues/557)).
+  [Guide](../validate-command.md)
+
+---
+
+## [0.17.2] - 2026-10-28
+
+### Fixed
+
+* **Read and update large `.env` files in linear time**: Reading an
+  existing `.env` file before merging pulled secrets, and rewriting it
+  afterwards, took quadratic time on long runs of blank lines, so a 200 KB
+  file of blank lines took about 100 s. A single line with a long run of
+  spaces inside a value had the same problem when the file was rewritten.
+  Both now take milliseconds, and every file reads and updates exactly as
+  before
+
+---
+
 ## [0.17.1] - 2026-10-27
 
 ### Fixed

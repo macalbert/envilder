@@ -2,12 +2,29 @@ from __future__ import annotations
 
 from typing import overload
 
+from envilder.application.contract_validation import (
+    ContractValidationError,
+    check_remote_keys,
+    every_key_result,
+    invalid_map_file_result,
+    not_checkable_result,
+)
 from envilder.application.envilder_client import EnvilderClient
 from envilder.application.map_file_parser import MapFileParser
+from envilder.application.map_file_validator import validate_map_file_content
+from envilder.domain.contract_validation_result import (
+    ContractValidationResult,
+    SecretExistenceStatus,
+)
 from envilder.domain.envilder_options import EnvilderOptions
 from envilder.domain.parsed_map_file import ParsedMapFile
+from envilder.domain.ports.secret_existence_checker import (
+    ISecretExistenceChecker,
+)
+from envilder.domain.ports.secret_provider import ISecretProvider
 from envilder.domain.secret_provider_type import SecretProviderType
 from envilder.infrastructure.secret_provider_factory import (
+    _AwsProfileError,
     _SecretProviderFactory,
 )
 
@@ -41,6 +58,20 @@ class Envilder:
             .with_vault_url("https://my-vault.vault.azure.net")
             .inject()
         )
+
+        # Check the map file contract without loading anything:
+        result = Envilder.from_map_file("envilder.json").validate_contract()
+
+        # Fail the load when the contract does not hold:
+        Envilder.from_map_file("envilder.json").with_contract_validation().inject()
+
+        # Use your own provider instance (for example, a fake in tests):
+        (
+            Envilder.from_map_file("envilder.json")
+            .with_secret_provider(fake_provider)
+            .with_contract_validation()
+            .inject()
+        )
     """
 
     def __init__(self, file_path: str) -> None:
@@ -48,6 +79,8 @@ class Envilder:
             raise ValueError("file_path cannot be empty.")
         self._file_path = file_path
         self._options = EnvilderOptions()
+        self._contract_validation = False
+        self._secret_provider: ISecretProvider | None = None
 
     @staticmethod
     def from_map_file(file_path: str) -> Envilder:
@@ -212,13 +245,85 @@ class Envilder:
         self._options.profile = profile
         return self
 
+    def with_secret_provider(self, provider: ISecretProvider) -> Envilder:
+        """Use *provider* instead of building one from the map file ``$config``.
+
+        The map file is still validated as usual, and the provider overrides
+        still set the provider type reported by :meth:`validate_contract`. To
+        take part in contract validation, *provider* must also implement
+        :class:`~envilder.ISecretExistenceChecker`; otherwise every key is
+        reported as ``provider_error``.
+
+        Raises:
+            ValueError: If *provider* is ``None``.
+        """
+        if provider is None:
+            raise ValueError("provider cannot be None.")
+        self._secret_provider = provider
+        return self
+
+    def with_contract_validation(self) -> Envilder:
+        """Run :meth:`validate_contract` once before resolving.
+
+        The load then fails with :class:`~envilder.ContractValidationError`
+        when it does not pass. Off by default: without it, a load makes no
+        extra provider call.
+
+        Example::
+
+            from envilder import ContractValidationError, Envilder
+
+            try:
+                (
+                    Envilder.from_map_file("envilder.json")
+                    .with_contract_validation()
+                    .inject()
+                )
+            except ContractValidationError as e:
+                print(e)  # names the failing keys, never their values
+        """
+        self._contract_validation = True
+        return self
+
+    def validate_contract(self) -> ContractValidationResult:
+        """Check the map file contract without reading any secret value.
+
+        The map file matches ``spec/map-file.v1.json``, the provider
+        configuration it resolves to is coherent, and every declared secret
+        exists. Expected failures (invalid map file, missing secret, access
+        denied, rejected credentials, provider errors) are reported in the
+        result, not raised. When the map file is invalid, no provider is
+        created or called. A missing map file still raises
+        ``FileNotFoundError``.
+
+        Example::
+
+            from envilder import Envilder, SecretExistenceStatus
+
+            result = Envilder.from_map_file("envilder.json").validate_contract()
+            for error in result.map_file_errors:
+                print(f"{error.key}: {error.message}")
+            for key in result.keys:
+                if key.status is not SecretExistenceStatus.EXISTS:
+                    print(f"{key.variable} ({key.path}): {key.status.value}")
+        """
+        result, _, _ = self._check_contract(self._read_map_file())
+        return result
+
     def resolve(self) -> dict[str, str]:
         """Resolve secrets and return them as a dict."""
-        map_file = self._parse_file()
-        options = self._build_options()
-        provider = _SecretProviderFactory.create(
-            map_file.config, options=options
-        )
+        json_content = self._read_map_file()
+        if self._contract_validation:
+            result, map_file, provider = self._check_contract(json_content)
+            if not result.is_valid or map_file is None or provider is None:
+                raise ContractValidationError(result)
+            return EnvilderClient(provider).resolve_secrets(map_file)
+        map_file = MapFileParser().parse(json_content)
+        provider = self._secret_provider
+        if provider is None:
+            provider = _SecretProviderFactory.create(
+                map_file.config, options=self._build_options()
+            )
         client = EnvilderClient(provider)
         return client.resolve_secrets(map_file)
 
@@ -228,10 +333,64 @@ class Envilder:
         EnvilderClient.inject_into_environment(secrets)
         return secrets
 
-    def _parse_file(self) -> ParsedMapFile:
+    def _check_contract(self, json_content: str) -> tuple[
+        ContractValidationResult,
+        ParsedMapFile | None,
+        ISecretProvider | None,
+    ]:
+        """Validate the map file and, when valid, check every declared key.
+
+        The provider is the one a load would use, returned for that load.
+        """
+        map_file_errors = validate_map_file_content(
+            json_content, self._options
+        )
+        if map_file_errors:
+            return invalid_map_file_result(map_file_errors), None, None
+        map_file = MapFileParser().parse(json_content)
+        options = self._build_options()
+        provider_type = (
+            (options.provider if options else None)
+            or map_file.config.provider
+            or SecretProviderType.AWS
+        )
+        if self._secret_provider is not None:
+            return self._check_injected_provider(
+                map_file, self._secret_provider, provider_type
+            )
+        try:
+            provider = _SecretProviderFactory.create(
+                map_file.config, options=options
+            )
+        except _AwsProfileError as e:
+            return (
+                every_key_result(
+                    map_file,
+                    provider_type,
+                    SecretExistenceStatus.AUTHENTICATION_FAILED,
+                    str(e),
+                ),
+                None,
+                None,
+            )
+        result = check_remote_keys(map_file, provider, provider_type)
+        return result, map_file, provider
+
+    @staticmethod
+    def _check_injected_provider(
+        map_file: ParsedMapFile,
+        provider: ISecretProvider,
+        provider_type: SecretProviderType,
+    ) -> tuple[ContractValidationResult, ParsedMapFile, ISecretProvider]:
+        if isinstance(provider, ISecretExistenceChecker):
+            result = check_remote_keys(map_file, provider, provider_type)
+        else:
+            result = not_checkable_result(map_file, provider_type)
+        return result, map_file, provider
+
+    def _read_map_file(self) -> str:
         with open(self._file_path, encoding="utf-8") as f:
-            json_content = f.read()
-        return MapFileParser().parse(json_content)
+            return f.read()
 
     def _build_options(self) -> EnvilderOptions | None:
         has_overrides = (

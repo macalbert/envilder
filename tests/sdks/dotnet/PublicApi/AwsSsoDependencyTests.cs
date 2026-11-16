@@ -1,4 +1,4 @@
-// The AWS SDK loads the SSO and SSO OIDC assemblies by name, through
+// The AWS SDK loads the SSO, SSO OIDC and Signin (`aws login`) assemblies by name, through
 // reflection, when it builds credentials for an SSO or IAM Identity Center
 // profile. Nothing in Envilder references their types at compile time, so a
 // missing package reference only shows up for users as
@@ -15,6 +15,7 @@ public class AwsSsoDependencyTests
 	[Theory]
 	[InlineData("AWSSDK.SSO")]
 	[InlineData("AWSSDK.SSOOIDC")]
+	[InlineData("AWSSDK.Signin")]
 	public void Should_ShipAwsSsoAssembly_When_SdkIsReferenced(string assemblyName)
 	{
 		// Arrange

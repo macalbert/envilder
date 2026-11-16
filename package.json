@@ -1,6 +1,6 @@
 {
   "name": "envilder",
-  "version": "0.17.1",
+  "version": "0.20.0",
   "packageManager": "pnpm@12.3.4+sha512.961aa41fb077da3a04a441d9f8e15ebc0c96da8ef710b2eb67bf9ee7cb0610eabd48f1fd85f51cffe73846785fa0f87c56a3a872a1d893f8446741b5cce45457",
   "description": "Open-source CLI, GitHub Action, and runtime SDKs for AWS SSM Parameter Store and Azure Key Vault secrets. Run any command with secrets injected (envilder exec), generate .env files, or load them in-process.",
   "homepage": "https://envilder.com",
@@ -34,6 +34,7 @@
     "test:ci": "pnpm --filter @envilder/website build && vitest run --reporter=verbose --reporter=junit --coverage --outputFile=coverage/junit/test-results.xml",
     "test:update": "vitest run --reporter=verbose --update",
     "test:exec": "vitest run tests/envilder/core/infrastructure/process tests/envilder/apps/cli/entry/CliExec.test.ts tests/envilder/apps/cli/entry/CliExecSsoRecovery.test.ts tests/envilder/core/domain/ChildEnvironment.test.ts",
+    "docs:dates": "pnpm --filter @envilder/website docs:dates",
     "release:publish": "npm pack --dry-run && npm publish --provenance",
     "action-publish": "pnpm build:gha && pnpm verify:gha",
     "release-patch": "pnpm version patch",
@@ -92,6 +93,7 @@
     "docs/CHANGELOG.md",
     "docs/changelogs/**",
     "docs/exec-command.md",
+    "docs/validate-command.md",
     "docs/SECURITY.md"
   ],
   "type": "module",

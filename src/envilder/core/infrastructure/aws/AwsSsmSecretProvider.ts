@@ -1,5 +1,6 @@
 import {
   GetParameterCommand,
+  GetParametersCommand,
   PutParameterCommand,
   type SSM,
 } from '@aws-sdk/client-ssm';
@@ -14,9 +15,30 @@ import {
 } from '../../domain/errors/DomainErrors.js';
 import type { ILogger } from '../../domain/ports/ILogger.js';
 import type { ISecretProvider } from '../../domain/ports/ISecretProvider.js';
+import type { SecretExistence } from '../../domain/SecretExistence.js';
 import { describeError } from '../describeError.js';
 import { isExpiredCredentialsError } from './isExpiredCredentialsError.js';
 import { isSsoSessionExpiredError } from './isSsoSessionExpiredError.js';
+
+/** `GetParameters` accepts at most 10 names per call. */
+const GET_PARAMETERS_BATCH_SIZE = 10;
+
+const AUTHENTICATION_ERROR_NAMES = new Set([
+  'CredentialsProviderError',
+  'UnrecognizedClientException',
+  'InvalidClientTokenId',
+  'InvalidSignatureException',
+  'IncompleteSignatureException',
+]);
+
+/**
+ * Errors that fail a whole `GetParameters` call because of one of its names,
+ * so each name is checked on its own to tell which one.
+ */
+const PER_NAME_ERROR_NAMES = new Set([
+  'AccessDeniedException',
+  'ValidationException',
+]);
 
 @injectable()
 export class AwsSsmSecretProvider implements ISecretProvider {
@@ -82,6 +104,70 @@ export class AwsSsmSecretProvider implements ISecretProvider {
         `${EnvironmentVariable.maskSecretPath(name)}: ${describeError(error)}`,
       );
     }
+  }
+
+  /**
+   * Uses `GetParameters` in batches of 10 with `WithDecryption: false`: the
+   * names it cannot find come back in `InvalidParameters`, and the values it
+   * returns are never read. Needs `ssm:GetParameters` on the parameters.
+   */
+  async checkSecretsExist(
+    names: readonly string[],
+  ): Promise<ReadonlyMap<string, SecretExistence>> {
+    const results = new Map<string, SecretExistence>();
+    const distinct = [...new Set(names)];
+    for (let i = 0; i < distinct.length; i += GET_PARAMETERS_BATCH_SIZE) {
+      const batch = distinct.slice(i, i + GET_PARAMETERS_BATCH_SIZE);
+      for (const [name, existence] of await this.checkBatch(batch)) {
+        results.set(name, existence);
+      }
+    }
+    return results;
+  }
+
+  private async checkBatch(
+    batch: readonly string[],
+  ): Promise<Array<[string, SecretExistence]>> {
+    try {
+      const { InvalidParameters = [] } = await this.ssm.send(
+        new GetParametersCommand({
+          Names: [...batch],
+          WithDecryption: false,
+        }),
+      );
+      const missing = new Set(InvalidParameters);
+      return batch.map((name) => [
+        name,
+        { status: missing.has(name) ? 'missing' : 'exists' },
+      ]);
+    } catch (error) {
+      if (batch.length > 1 && PER_NAME_ERROR_NAMES.has(errorName(error))) {
+        const perName = await Promise.all(
+          batch.map((name) => this.checkBatch([name])),
+        );
+        return perName.flat();
+      }
+      const existence = this.toExistence(error);
+      return batch.map((name) => [name, existence]);
+    }
+  }
+
+  private toExistence(error: unknown): SecretExistence {
+    if (isSsoSessionExpiredError(error)) {
+      throw new SsoSessionExpiredError(this.profile, error);
+    }
+    if (isExpiredCredentialsError(error)) {
+      throw new ExpiredCredentialsError(error);
+    }
+    const reason = describeError(error);
+    const name = errorName(error);
+    if (name === 'AccessDeniedException') {
+      return { status: 'access_denied', reason };
+    }
+    if (AUTHENTICATION_ERROR_NAMES.has(name)) {
+      return { status: 'authentication_failed', reason };
+    }
+    return { status: 'provider_error', reason };
   }
 
   async logIdentity(): Promise<void> {
@@ -155,4 +241,10 @@ export class AwsSsmSecretProvider implements ISecretProvider {
       return 'unknown';
     }
   }
+}
+
+function errorName(error: unknown): string {
+  return typeof error === 'object' && error !== null && 'name' in error
+    ? String(error.name)
+    : '';
 }

@@ -12,6 +12,8 @@ export interface Props {
   description?: string;
   lang?: string;
   noindex?: boolean;
+  /** Marks the page as a technical article and sets its last-modified date (YYYY-MM-DD). */
+  article?: { dateModified?: string };
 }
 
 const {
@@ -19,6 +21,7 @@ const {
   description = 'A CLI tool and GitHub Action that securely centralizes environment variables from AWS SSM Parameter Store or Azure Key Vault as a single source of truth.',
   lang = 'en',
   noindex = false,
+  article,
 } = Astro.props;
 
 const skipLabel: Record<string, string> = {
@@ -84,6 +87,33 @@ const structuredData = JSON.stringify({
           },
         ]
       : []),
+    ...(article && !noindex
+      ? [
+          {
+            '@type': 'TechArticle',
+            '@id': `${canonicalUrl}#article`,
+            headline: title,
+            description,
+            inLanguage: lang,
+            url: canonicalUrl,
+            mainEntityOfPage: {
+              '@id': `${canonicalUrl}#webpage`,
+            },
+            isPartOf: {
+              '@id': `${siteRootUrl}#website`,
+            },
+            publisher: {
+              '@id': `${siteRootUrl}#organization`,
+            },
+            author: {
+              '@id': `${siteRootUrl}#organization`,
+            },
+            ...(article.dateModified
+              ? { dateModified: article.dateModified }
+              : {}),
+          },
+        ]
+      : []),
     ...(isHomePage && !noindex
       ? [
           {
@@ -128,7 +158,7 @@ const structuredData = JSON.stringify({
     <script type="application/ld+json" set:html={structuredData}></script>
 
     <!-- OG -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={article ? 'article' : 'website'} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
@@ -138,6 +168,9 @@ const structuredData = JSON.stringify({
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content={t.homeMeta.ogImageAlt} />
     <meta property="og:locale" content={ogLocale} />
+    {article?.dateModified && (
+      <meta property="article:modified_time" content={article.dateModified} />
+    )}
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />

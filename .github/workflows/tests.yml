@@ -31,6 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       core: ${{ steps.filter.outputs.core }}
+      skill: ${{ steps.filter.outputs.skill }}
     steps:
       - name: 🧱 Checkout
         uses: actions/checkout@v7
@@ -50,6 +51,48 @@ jobs:
               - "pnpm-lock.yaml"
               - "tsconfig.json"
               - "vite.config.ts"
+            skill:
+              - ".github/workflows/tests.yml"
+              - "skills/**"
+              - "tests/skills/**"
+              - "spec/**"
+              - "tests/spec/**"
+
+  # The skill and schema tests read only repository files, so they run
+  # without secrets: fork pull requests that only touch the skill or the
+  # schema get a real result instead of failing at the AWS credentials step.
+  # When core files change, powerup-test runs these suites as well.
+  skill-test:
+    needs: changes
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || (needs.changes.outputs.skill == 'true' && !github.event.pull_request.draft) }}
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    steps:
+      - name: 🧱 Enter the Pipe (Checkout)
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: 🍄 Grab a Mushroom (Setup Node.js with Cache)
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22.x"
+          cache: "pnpm"
+
+      - name: 📦 Open the ? Block (Install packages)
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔒 Check the Vault (Scan skill and schema files for secrets)
+        run: pnpm exec secretlint "skills/**/*" "tests/skills/**/*" "spec/**/*" "tests/spec/**/*"
+
+      - name: 📜 Read the Map (Run skill and schema tests)
+        run: pnpm exec vitest run tests/skills tests/spec
 
   powerup-test:
     needs: changes

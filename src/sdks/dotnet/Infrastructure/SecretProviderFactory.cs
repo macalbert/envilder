@@ -92,8 +92,7 @@ internal static class SecretProviderFactory
 				return new(new AmazonSimpleSystemsManagementClient(credentials, region), profile);
 			}
 
-			throw new InvalidOperationException(
-				$"AWS profile '{profile}' was not found in the credential store.");
+			throw new AwsProfileNotFoundException(profile!);
 		}
 
 		return new(new AmazonSimpleSystemsManagementClient(), profile);
@@ -121,5 +120,18 @@ internal static class SecretProviderFactory
 		return string.IsNullOrWhiteSpace(regionName)
 			? FallbackRegion
 			: RegionEndpoint.GetBySystemName(regionName);
+	}
+}
+
+/// <summary>
+/// Thrown when the AWS profile is not in the credential store. Still an
+/// <see cref="InvalidOperationException"/> for callers of a load; contract
+/// validation reports it as an authentication failure instead.
+/// </summary>
+internal sealed class AwsProfileNotFoundException : InvalidOperationException
+{
+	public AwsProfileNotFoundException(string profile)
+		: base($"AWS profile '{profile}' was not found in the credential store.")
+	{
 	}
 }

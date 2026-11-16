@@ -167,6 +167,95 @@ secrets.ValidateSecrets(); // throws SecretValidationException if any value is e
 - Throws `SecretValidationException` listing the keys whose values are null, empty, or whitespace
 - Passes silently when all values are present
 
+### Contract validation
+
+Check that the map file is valid and that every secret it declares exists in the provider, without using or printing any value:
+
+```csharp
+using Envilder;
+
+var result = await Env.FromMapFile("envilder.json").ValidateContractAsync();
+
+if (!result.IsValid)
+{
+    foreach (var error in result.MapFileErrors)
+    {
+        Console.WriteLine($"{error.Key}: {error.Message}");
+    }
+
+    foreach (var key in result.Keys.Where(k => k.Status != SecretExistenceStatus.Exists))
+    {
+        Console.WriteLine($"{key.Variable} ({key.Path}): {key.Status} {key.Reason}");
+    }
+}
+```
+
+To fail a load when the contract does not hold, opt in with `WithContractValidation()`. The check runs once before `Resolve`, `ResolveAsync`, `Inject` and `InjectAsync`, reuses the provider the load resolves with, and throws `ContractValidationException` (its `Result` carries the full outcome). It is off by default: without it a load makes no extra provider call.
+
+```csharp
+await Env.FromMapFile("envilder.json").WithContractValidation().InjectAsync();
+```
+
+`ValidateContractAsync` does not throw for expected failures. A map file that does not exist still throws `FileNotFoundException`, and cancellation propagates as `OperationCanceledException`. When the map file is invalid, no provider is created or called and `Keys` is empty.
+
+Each variable gets one status:
+
+| Status | Meaning |
+|--------|---------|
+| `Exists` | The secret is there and the identity can see it |
+| `Missing` | The provider answered that there is no such secret (a disabled Azure secret counts as missing) |
+| `AccessDenied` | The identity is not allowed to check the secret, so whether it exists is unknown. Never reported as `Missing` |
+| `AuthenticationFailed` | The provider rejected the credentials, or none could be found (for example an expired SSO session) |
+| `ProviderError` | Anything else, for example an unreachable provider. `Reason` has the provider's message |
+
+The exception message names the failing variables and paths, for example `Map file contract validation failed: DB_URL (/app/db): missing, API_KEY (/app/key): access_denied`. It never includes a secret value.
+
+Required permissions:
+
+- **AWS SSM**: `ssm:GetParameters` on the mapped parameters. Parameters are requested in batches of 10 without decryption, so no `kms:Decrypt` is needed for this check. Plain `String` values can still come back in the response; the SDK discards them. With `kms:Decrypt`, `ssm:GetParameters` can read decrypted values, so grant it only on paths the identity may already read with `ssm:GetParameter`.
+- **Azure Key Vault**: the `List` secret permission (access policies) or `Microsoft.KeyVault/vaults/secrets/readMetadata/action` (Azure RBAC, included in the Key Vault Secrets User role). Only secret metadata is listed.
+
+This differs from `ValidateSecrets()`: contract validation checks the map file and that each secret exists, before loading and without using any value. `ValidateSecrets()` runs after a load and checks that the resolved values are not empty.
+
+### Custom provider in the fluent builder
+
+`WithSecretProvider()` hands the builder your own `ISecretProvider` instance instead of the one it would build from `$config`. The map file is still validated as usual, so this is also the way to test your startup code against an in-memory fake, with no cloud account, emulator or environment variables:
+
+```csharp
+using Envilder;
+using Envilder.Domain.Ports;
+
+await Env.FromMapFile("envilder.json")
+    .WithSecretProvider(new InMemoryProvider())
+    .WithContractValidation()
+    .InjectAsync();
+
+public sealed class InMemoryProvider : ISecretProvider, ISecretExistenceChecker
+{
+    private readonly Dictionary<string, string> _secrets = new()
+    {
+        ["/app/db-url"] = "Server=localhost;Database=test",
+    };
+
+    public string? GetSecret(string name) => _secrets.GetValueOrDefault(name);
+
+    public Task<string?> GetSecretAsync(string name, CancellationToken cancellationToken = default)
+        => Task.FromResult(GetSecret(name));
+
+    public Task<IReadOnlyDictionary<string, SecretExistence>> CheckSecretsExistAsync(
+        IReadOnlyCollection<string> names,
+        CancellationToken cancellationToken)
+        => Task.FromResult<IReadOnlyDictionary<string, SecretExistence>>(names.ToDictionary(
+            name => name,
+            name => new SecretExistence(
+                _secrets.ContainsKey(name) ? SecretExistenceStatus.Exists : SecretExistenceStatus.Missing)));
+}
+```
+
+To take part in contract validation, the provider also implements `ISecretExistenceChecker`. A provider that only implements `ISecretProvider` still resolves secrets, but `ValidateContractAsync()` reports every key as `ProviderError`, so `WithContractValidation()` fails the load. The `Provider` of each key keeps the configured type (`WithProvider()`, then `$config.provider`, then `Aws`).
+
+For a complete, runnable walkthrough, see [`dotnet-custom-provider`](https://github.com/macalbert/envilder-examples/tree/main/dotnet-custom-provider) in envilder-examples: a custom provider over a local AES-256-GCM encrypted file, with tests for loading, failing at startup on a missing secret, and validating the contract without decrypting anything.
+
 ### Via IConfiguration (ASP.NET)
 
 ```csharp
@@ -240,10 +329,13 @@ var config = new ConfigurationBuilder()
 | `WithProvider(type)` | Override secret provider (AWS/Azure) |
 | `WithProfile(name)` | Override AWS named profile |
 | `WithVaultUrl(url)` | Override Azure Key Vault URL |
+| `WithSecretProvider(provider)` | Use your own `ISecretProvider` instance instead of building one from `$config` |
 | `Resolve()` | Resolve secrets, return as dictionary |
 | `ResolveAsync(ct?)` | Async version of `Resolve` |
 | `Inject()` | Resolve + inject into `Environment` |
 | `InjectAsync(ct?)` | Async version of `Inject` |
+| `ValidateContractAsync(ct?)` | Check the map file and that every secret exists, without using any value |
+| `WithContractValidation()` | Run the contract check before every load and throw `ContractValidationException` on failure |
 
 ### Validation (`SecretValidationExtensions`)
 
@@ -312,7 +404,7 @@ for the full reference and the reasoning behind the rules.
 ## Examples
 
 Runnable projects in [envilder-examples](https://github.com/macalbert/envilder-examples) resolve a map file
-against AWS SSM and Azure Key Vault (emulated with LocalStack and Lowkey Vault) and pass the values to
+against AWS SSM and Azure Key Vault (emulated with LocalStack for AWS and LocalStack for Azure) and pass the values to
 containers, with no `.env` file:
 
 - [dotnet-testcontainers](https://github.com/macalbert/envilder-examples/tree/main/dotnet-testcontainers): xUnit v3 + Testcontainers

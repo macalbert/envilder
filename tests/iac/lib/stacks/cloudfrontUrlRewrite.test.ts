@@ -108,6 +108,37 @@ describe("CloudFront URL Rewrite Function", () => {
 		});
 	});
 
+	test.each([
+		{ input: "//attacker.example", expected: "/attacker.example/" },
+		{ input: "///attacker.example", expected: "/attacker.example/" },
+		{ input: "/\\attacker.example", expected: "/attacker.example/" },
+		{ input: "/\\/attacker.example", expected: "/attacker.example/" },
+	])("Should_KeepRedirectOnSameOrigin_When_PathStartsWithSlashes_$input", ({
+		input,
+		expected,
+	}) => {
+		// Arrange
+		const event = {
+			request: {
+				uri: input,
+				querystring: "",
+			},
+		};
+
+		// Act
+		const actual = handlerFunc(event);
+
+		// Assert
+		expect(actual).toMatchObject({
+			statusCode: 301,
+			headers: {
+				location: {
+					value: expected,
+				},
+			},
+		});
+	});
+
 	test("Should_KeepStaticUrl_When_StaticFileHasQueryString", () => {
 		// Arrange
 		const event = {

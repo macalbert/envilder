@@ -1,3 +1,58 @@
+## [1.2.0] - 2026-11-08
+
+### Added
+
+* **Use your own provider in the fluent builder**:
+  `Env.FromMapFile(path).WithSecretProvider(provider)` resolves secrets and
+  runs contract validation with any `ISecretProvider` instance instead of the
+  one built from `$config`. The map file is still validated as usual, so
+  startup code can be tested against an in-memory fake with no cloud account,
+  emulator or environment variables. `ISecretExistenceChecker` is now public:
+  a custom provider that implements it takes part in `ValidateContractAsync()`
+  and `WithContractValidation()`; one that does not has every key reported as
+  `ProviderError`, so a load with contract validation fails ([#669](https://github.com/macalbert/envilder/issues/669))
+
+---
+
+## [1.1.0] - 2026-11-02
+
+### Added
+
+* **Map file contract validation**: `EnvilderBuilder.ValidateContractAsync`
+  checks that the map file matches the published schema and the provider
+  configuration it resolves to, and that every declared secret exists, without
+  reading any value. The result reports each variable as `Exists`, `Missing`,
+  `AccessDenied`, `AuthenticationFailed` or `ProviderError`; an identity that
+  cannot check a secret is never reported as missing. AWS SSM needs
+  `ssm:GetParameters` (parameters are requested without decryption); Azure Key
+  Vault needs the `List` secret permission or `secrets/readMetadata` RBAC, and
+  a disabled secret counts as missing
+  ([#533](https://github.com/macalbert/envilder/issues/533))
+* **Opt-in contract validation on load**: `WithContractValidation()` runs the
+  same check once before `Resolve`, `ResolveAsync`, `Inject` and `InjectAsync`
+  and throws `ContractValidationException` when it fails. The message names the
+  failing variables and paths, never a value. Off by default, so a load makes
+  no extra provider call
+  ([#533](https://github.com/macalbert/envilder/issues/533))
+
+---
+
+## [1.0.1] - 2026-11-03
+
+### Fixed
+
+* **Profiles created by `aws login` resolve credentials**: The SDK did not
+  ship `AWSSDK.Signin`, so a profile with a `login_session` failed with
+  `Assembly AWSSDK.Signin could not be found` even though the AWS CLI worked
+  with the same session. The package is now referenced, and tests fail the
+  build if it is missing or if a login profile cannot be built. The
+  transitive `BouncyCastle.Cryptography` that `AWSSDK.Signin` brings in is
+  raised to 2.7.0, which is the first version without the advisories Snyk
+  reports against 2.6.2
+  ([#652](https://github.com/macalbert/envilder/issues/652))
+
+---
+
 ## [1.0.0] - 2026-10-27
 
 ### Changed

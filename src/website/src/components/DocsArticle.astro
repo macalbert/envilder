@@ -34,91 +34,14 @@ const azVaultPolicy = `az keyvault set-policy \
   --object-id {YOUR_OBJECT_ID} \
   --secret-permissions get set list`;
 
-const pushSingleCmd =
-  'envilder --key=API_KEY --value={SECRET} --secret-path=/myapp/api/key';
-
-const execRootOptionError = `$ envilder --map=config/prod.json exec -- npm start
-error: Put envilder options after "exec": envilder exec --map=config/prod.json -- npm …`;
-
-const execRejectedOptions = [
-  {
-    option: '--envfile',
-    message:
-      '--envfile cannot be used with exec: exec mode never reads or writes a .env file.',
-  },
-  { option: '--push', message: '--push cannot be used with exec.' },
-  {
-    option: '--key, --value, --secret-path',
-    message: 'Single-secret push options cannot be used with exec.',
-  },
-];
-
-const execUcLocalstackMap = `{
-  "LOCALSTACK_AUTH_TOKEN": "/envilder/development/localstack/authToken"
-}`;
-
-const execUcLocalstackCompose = `services:
-  localstack:
-    image: localstack/localstack:stable
-    ports:
-      - "4566:4566"
-    environment:
-      LOCALSTACK_AUTH_TOKEN: \${LOCALSTACK_AUTH_TOKEN}`;
-
-const execUcLocalstackDocker =
-  'envilder exec -- docker run --rm -e LOCALSTACK_AUTH_TOKEN -p 4566:4566 localstack/localstack:stable';
-
-const execUcTests = `envilder exec -- npm test
-envilder exec -- dotnet test
-envilder exec -- pytest`;
-
-const execUcMigrationsMap = `{
-  "DATABASE_URL": "/my-app/development/database/url"
-}`;
-
-const execUcMigrations = `envilder exec -- npx prisma migrate deploy
-envilder exec -- python scripts/backfill.py`;
-
-const execUcTerraformMap = `{
-  "TF_VAR_db_password": "/my-app/development/database/password"
-}`;
-
-const execUcDevPackageJson = `{
-  "scripts": {
-    "dev": "envilder exec -- next dev"
-  }
-}`;
-
-const execUcGhaWorkflow = `permissions:
-  id-token: write # Required for OIDC
-  contents: read
-
-steps:
-  - uses: actions/checkout@v5
-  - uses: aws-actions/configure-aws-credentials@v5
-    with:
-      role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole
-      aws-region: us-east-1
-  - run: npx envilder exec -- npm test`;
-
-const execUcChain = `envilder exec -- sh -c 'npm run migrate && exec npm start'
-envilder exec -- bash`;
-
-const execPackageJson = `{
-  "scripts": {
-    "dev": "envilder exec -- vite",
-    "start": "envilder exec --map=config/prod.json -- node server.js"
-  }
-}`;
-
 const awsVerifyCmd = `# 1. Push a test secret; Envilder also writes aws-test-map.json
-envilder --provider=aws --map=aws-test-map.json --key=HELLO --value=world --secret-path=/test/hello
+envilder --push --provider=aws --map=aws-test-map.json --key=HELLO --value=world --secret-path=/test/hello
 
 # 2. Pull it back with Envilder
 envilder --map=aws-test-map.json --envfile=.env`;
 
 const azureVerifyCmd = `# 1. Push a test secret; Envilder also writes azure-test-map.json
-envilder --provider=azure --vault-url=https://{VAULT_NAME}.vault.azure.net \\
+envilder --push --provider=azure --vault-url=https://{VAULT_NAME}.vault.azure.net \\
   --map=azure-test-map.json --key=HELLO --value=world --secret-path=test-hello
 
 # 2. Pull it back with Envilder
@@ -150,9 +73,9 @@ const ghaAwsReadPolicy = `{
   }]
 }`;
 
-const ghaExpectedOutput = `🔑 Envilder GitHub Action - Starting secret pull...
+const ghaExpectedOutput = `🔑 Envilder GitHub Action - Starting...
 📋 Map file: envilder.json
-📄 Env file: .env
+🧠 Mode: job environment (secrets in every later step)
 
 ☁ AWS identity · account=123456789012 · region=eu-west-1 · profile=default
 
@@ -161,9 +84,8 @@ ${'━'.repeat(60)}
   ✓ DB_PASSWORD         → *****************x9Q
   ✓ STRIPE_KEY          → *****************************4Rt
 
-⭐ LEVEL CLEARED  —  2/2 secrets loaded · .env written
-
-✅ Secrets pulled successfully!`;
+envilder: 2 secrets exported to the job environment (DB_PASSWORD, STRIPE_KEY)
+✅ Secrets loaded successfully!`;
 
 const ghaAzureFederated = `az ad app create --display-name github-envilder
 az ad sp create --id {APP_ID}
@@ -314,7 +236,231 @@ const ghaAzureRole = `az role assignment create \\
   --assignee {APP_ID} \\
   --scope /subscriptions/{SUB}/resourceGroups/{RG}/providers/Microsoft.KeyVault/vaults/{VAULT}`;
 
+const g = t.docs.guideSsmToEnv;
+
+const guideIamPolicy = `{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "ssm:GetParameter",
+      "Resource": "arn:aws:ssm:eu-west-1:123456789012:parameter/my-app/dev/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "kms:Decrypt",
+      "Resource": "arn:aws:kms:eu-west-1:123456789012:key/<key-id>"
+    }
+  ]
+}`;
+
+const guideDevMap = `{
+  "DB_PASSWORD": "/my-app/dev/db-password",
+  "API_TOKEN": "/my-app/dev/api-token",
+  "DATABASE_URL": "/my-app/dev/database-url"
+}`;
+
+const guidePushCmd = `envilder --push --key=DB_PASSWORD --value=local-dev-password \\
+  --secret-path=/my-app/dev/db-password
+envilder --push --key=API_TOKEN --value=dev-token-7f3a9c21 \\
+  --secret-path=/my-app/dev/api-token
+envilder --push --key=DATABASE_URL \\
+  --value='postgres://app:p@ss w0rd#1@db.internal:5432/app' \\
+  --secret-path=/my-app/dev/database-url`;
+
+const guidePushOutput = `⭐ SECRET PUSHED  —  DB_PASSWORD=***************ord → ********************ord
+✓ Created envilder.json
+
+⭐ SECRET PUSHED  —  API_TOKEN=***************c21 → ******************ken
+✓ Added API_TOKEN to envilder.json
+
+⭐ SECRET PUSHED  —  DATABASE_URL=********************************************app → *********************url
+✓ Added DATABASE_URL to envilder.json`;
+
+const guideDevOutput = `☁ AWS identity · account=123456789012 · region=eu-west-1 · profile=default
+
+🪙  RESOLVING SECRETS
+${'━'.repeat(60)}
+  ✓ DB_PASSWORD         → ***************ord
+  ✓ API_TOKEN           → ***************c21
+  ✓ DATABASE_URL        → ********************************************app
+
+⭐ LEVEL CLEARED  —  3/3 secrets loaded · .env written`;
+
+const guideDevEnv = `DB_PASSWORD=local-dev-password
+API_TOKEN=dev-token-7f3a9c21
+DATABASE_URL='postgres://app:p@ss w0rd#1@db.internal:5432/app'`;
+
+const guideProdMap = `{
+  "DB_PASSWORD": "/my-app/prod/db-password",
+  "API_TOKEN": "/my-app/prod/api-token",
+  "DATABASE_URL": "/my-app/prod/database-url"
+}`;
+
+const guideProdCmd =
+  'envilder --map=envilder.prod.json --envfile=.env.prod --profile=prod-account';
+
+const guideProdOutput = `☁ AWS identity · account=123456789012 · region=eu-west-1 · profile=prod-account
+
+🪙  RESOLVING SECRETS
+${'━'.repeat(60)}
+  ✓ DB_PASSWORD         → *******************4aa
+  ✓ API_TOKEN           → ****************0e3
+  ✓ DATABASE_URL        → ***********************************app
+
+⭐ LEVEL CLEARED  —  3/3 secrets loaded · .env.prod written`;
+
+const guideExecOutput = 'envilder: 3 secrets resolved (aws) → node …';
+
+const guideScript = `aws ssm get-parameters-by-path --path /my-app/dev/ --recursive \\
+  --with-decryption --query 'Parameters[].[Name,Value]' --output text \\
+  | while IFS=$'\\t' read -r name value; do
+      echo "$(basename "$name" | tr 'a-z-' 'A-Z_')=$value"
+    done > .env`;
+
+const guideCi = `name: CI
+on: [push]
+
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole
+          aws-region: eu-west-1
+      - uses: macalbert/envilder/github-action@v0
+        with:
+          map-file: envilder.json
+          env-file: \${{ runner.temp }}/app.env
+      - run: docker compose --env-file "$RUNNER_TEMP/app.env" up -d`;
+
+const guideErrors = [
+  {
+    message: 'Could not load credentials from any providers',
+    fix: 'errCredsFix',
+  },
+  {
+    message:
+      'User: arn:aws:sts::123456789012:assumed-role/dev/session is not authorized to perform: ssm:GetParameter on resource: arn:aws:ssm:eu-west-1:123456789012:parameter/my-app/dev/api-token …',
+    fix: 'errDeniedFix',
+  },
+  {
+    message: 'secret not found (path: *******************dsn) — skipped',
+    fix: 'errNotFoundFix',
+  },
+  {
+    message:
+      'Invalid environment variable name "MY VAR": names may only contain letters, digits, underscore, dot, hyphen and slash, so that they can be read back from a .env file',
+    fix: 'errNameFix',
+  },
+  {
+    message:
+      'No map file found. Provide --map or create envilder.json in the current directory.',
+    fix: 'errNoMapFix',
+  },
+] as const;
+
+const cpDotnetCode = `using Envilder;
+using Envilder.Domain.Ports;
+
+await Env.FromMapFile("envilder.json")
+    .WithSecretProvider(new InMemoryProvider())
+    .WithContractValidation()
+    .InjectAsync();
+
+public sealed class InMemoryProvider : ISecretProvider, ISecretExistenceChecker
+{
+    private readonly Dictionary<string, string> _secrets = new()
+    {
+        ["/app/db-url"] = "Server=localhost;Database=test",
+    };
+
+    public string? GetSecret(string name) => _secrets.GetValueOrDefault(name);
+
+    public Task<string?> GetSecretAsync(string name, CancellationToken ct = default)
+        => Task.FromResult(GetSecret(name));
+
+    public Task<IReadOnlyDictionary<string, SecretExistence>> CheckSecretsExistAsync(
+        IReadOnlyCollection<string> names, CancellationToken ct)
+        => Task.FromResult<IReadOnlyDictionary<string, SecretExistence>>(names.ToDictionary(
+            name => name,
+            name => new SecretExistence(_secrets.ContainsKey(name)
+                ? SecretExistenceStatus.Exists
+                : SecretExistenceStatus.Missing)));
+}`;
+const cpPythonCode = `from envilder import (
+    Envilder,
+    ISecretExistenceChecker,
+    ISecretProvider,
+    SecretExistence,
+    SecretExistenceStatus,
+)
+
+FAKE_SECRETS = {'/app/db-url': 'postgres://localhost/test'}
+
+
+class InMemoryProvider(ISecretProvider, ISecretExistenceChecker):
+    def get_secret(self, name):
+        return FAKE_SECRETS.get(name)
+
+    def check_secrets_exist(self, names):
+        return {
+            name: SecretExistence(
+                SecretExistenceStatus.EXISTS
+                if name in FAKE_SECRETS
+                else SecretExistenceStatus.MISSING
+            )
+            for name in names
+        }
+
+
+(
+    Envilder.from_map_file('envilder.json')
+    .with_secret_provider(InMemoryProvider())
+    .with_contract_validation()
+    .inject()
+)`;
+const cpNodejsCode = `import {
+  Envilder,
+  type ISecretExistenceChecker,
+  type ISecretProvider,
+} from '@envilder/sdk';
+
+const fakeSecrets = new Map([['/app/db-url', 'postgres://localhost/test']]);
+
+class InMemoryProvider implements ISecretProvider, ISecretExistenceChecker {
+  async getSecrets(names: string[]) {
+    return new Map(
+      names.flatMap((name) => {
+        const value = fakeSecrets.get(name);
+        return value === undefined ? [] : [[name, value] as const];
+      }),
+    );
+  }
+
+  async checkSecretsExist(names: readonly string[]) {
+    return new Map(
+      names.map((name) => [
+        name,
+        { status: fakeSecrets.has(name) ? 'exists' : 'missing' } as const,
+      ]),
+    );
+  }
+}
+
+await Envilder.fromMapFile('envilder.json')
+  .withSecretProvider(new InMemoryProvider())
+  .withContractValidation()
+  .inject();`;
+
 const gs = t.docs.gettingStartedGuide;
+const cp = t.docs.customProviderGuide;
 const mf = t.docs.mapFileReference;
 
 const gsInstallTabs = [
@@ -323,11 +469,11 @@ const gsInstallTabs = [
   { label: 'npx', lang: 'bash', code: 'npx envilder --version' },
 ];
 
-const gsAwsSecret = `envilder --provider=aws --profile=default \\
+const gsAwsSecret = `envilder --push --provider=aws --profile=default \\
   --key=DB_PASSWORD --value=local-dev-password \\
   --secret-path=/my-app/dev/db-password`;
 
-const gsAzureSecret = `envilder --provider=azure --vault-url=https://my-vault.vault.azure.net \\
+const gsAzureSecret = `envilder --push --provider=azure --vault-url=https://my-vault.vault.azure.net \\
   --key=DB_PASSWORD --value=local-dev-password \\
   --secret-path=my-app-dev-db-password`;
 
@@ -493,15 +639,6 @@ const mfErrors = [
     fix: 'errVaultMissingFix',
   },
   {
-    message: 'vaultUrl must use https:// protocol',
-    fix: 'errVaultHttpsFix',
-  },
-  {
-    message:
-      'vaultUrl hostname must end with one of: .vault.azure.net, .vault.azure.cn, .vault.usgovcloudapi.net, .vault.microsoftazure.de',
-    fix: 'errVaultHostFix',
-  },
-  {
     message:
       '--profile is only supported with the aws provider and will be ignored (current provider: azure).',
     fix: 'errProfileAzureFix',
@@ -510,6 +647,463 @@ const mfErrors = [
     message:
       'Map file declares variables that differ only by case (API_KEY, api_key); Windows treats them as the same variable.',
     fix: 'errCaseFix',
+  },
+] as const;
+
+const pr = t.docs.pullReference;
+const pu = t.docs.pushReference;
+const ex = t.docs.execReference;
+
+const pullSynopsis = `envilder [--map=<file>] [--envfile=<file>] \\
+  [--provider=aws|azure] [--vault-url=<url>] [--profile=<name>]`;
+
+const pullConfigAwsMap = `{
+  "$config": { "provider": "aws", "profile": "prod-account" },
+  "DB_PASSWORD": "/my-app/prod/db-password"
+}`;
+
+const pullConfigAzureMap = `{
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-app-prod.vault.azure.net"
+  },
+  "DB_PASSWORD": "my-app-prod-db-password"
+}`;
+
+const pullConfigAwsCmd = `envilder --map=envilder.prod.json --envfile=.env.prod
+envilder --map=envilder.prod.json --envfile=.env.prod --profile=ci-readonly`;
+
+const pullConfigAzureCmd = `envilder --map=envilder.prod.json --envfile=.env.prod
+envilder --map=envilder.prod.json --envfile=.env.prod \\
+  --vault-url=https://my-app-dr.vault.azure.net`;
+
+const pullExampleMap = `{
+  "DB_PASSWORD": "/my-app/dev/db-password",
+  "API_TOKEN": "/my-app/dev/api-token",
+  "SENTRY_DSN": "/my-app/dev/sentry-dsn",
+  "FEATURE_FLAG": "/my-app/dev/feature-flag"
+}`;
+
+const pullExampleEnvBefore = `# Local settings
+LOG_LEVEL=debug
+DB_PASSWORD=old-password
+SENTRY_DSN=https://old-dsn.example.com/1`;
+
+const pullExampleOutput = `☁ AWS identity · account=123456789012 · region=eu-west-1 · profile=default
+
+🪙  RESOLVING SECRETS
+${'━'.repeat(60)}
+  ✓ DB_PASSWORD         → ***************ord
+  ✓ API_TOKEN           → ***************c21
+  ✗ SENTRY_DSN           secret not found (path: *******************dsn) — skipped
+  ⚠ FEATURE_FLAG         no value found (path: *********************lag) — skipped
+
+⭐ LEVEL CLEARED  —  2/4 secrets loaded · .env written`;
+
+const pullExampleEnvAfter = `# Local settings
+LOG_LEVEL=debug
+DB_PASSWORD=local-dev-password
+SENTRY_DSN=https://old-dsn.example.com/1
+API_TOKEN=dev-token-7f3a9c21`;
+
+const pullFailureOutput = `💥 GAME OVER — some secrets could not be fetched
+${'━'.repeat(60)}
+  ✗ API_TOKEN           → ******************ken
+
+  ⮕ WHY?
+     User: arn:aws:sts::123456789012:assumed-role/dev/session is not authorized to perform: ssm:GetParameter on resource: arn:aws:ssm:eu-west-1:123456789012:parameter/my-app/dev/api-token …`;
+
+const pullErrors = [
+  {
+    message:
+      'No map file found. Provide --map or create envilder.json in the current directory.',
+    fix: 'errNoMapFix',
+  },
+  {
+    message: 'Failed to read map file: config/envilder.json',
+    fix: 'errReadMapFix',
+  },
+  {
+    message: 'Invalid JSON in parameter map file: envilder.json',
+    fix: 'errJsonFix',
+  },
+  {
+    message: 'Could not load credentials from any providers',
+    fix: 'errCredsFix',
+  },
+  {
+    message:
+      'User: arn:aws:sts::123456789012:assumed-role/dev/session is not authorized to perform: ssm:GetParameter on resource: …',
+    fix: 'errDeniedFix',
+  },
+  {
+    message:
+      'vaultUrl is required when using Azure provider. Set it in $config.vaultUrl in your map file or via --vault-url flag.',
+    fix: 'errVaultFix',
+  },
+  {
+    message: 'Your AWS SSO session for profile "dev" ran out of lives.',
+    fix: 'errSsoFix',
+  },
+  {
+    message:
+      'Cannot represent the value for "API_TOKEN" in a dotenv-compatible format without data loss',
+    fix: 'errRepresentFix',
+  },
+] as const;
+
+const pushSynopsis = `envilder --push [--envfile=<file>] [--map=<file>] \\
+  [--provider=aws|azure] [--vault-url=<url>] [--profile=<name>]
+
+envilder [--push] --key=<NAME> --value=<value> --secret-path=<path> \\
+  [--map=<file>] [--no-map-update] \\
+  [--provider=aws|azure] [--vault-url=<url>] [--profile=<name>]`;
+
+const pushEnvMap = `{
+  "DB_PASSWORD": "/my-app/dev/db-password",
+  "API_TOKEN": "/my-app/dev/api-token"
+}`;
+
+const pushEnvFile = `DB_PASSWORD=rotated-password-2026
+API_TOKEN=prod-token-91c2e4
+LOG_LEVEL=debug`;
+
+const pushEnvOutput = `☁ AWS identity · account=123456789012 · region=eu-west-1 · profile=default
+Starting push operation from '.env' using map 'envilder.json'
+Loading parameter map from 'envilder.json'
+Loading environment variables from '.env'
+Found 2 parameter mappings in map file
+Found 3 environment variables in env file
+Validated 2 environment variables mapping to 2 unique secrets
+Processing 2 unique secrets
+Pushed DB_PASSWORD=******************026 to secret store at path ********************ord
+Pushed API_TOKEN=**************2e4 to secret store at path ******************ken
+Successfully pushed environment variables from '.env' to secret store.`;
+
+const pushSingleAwsCmd =
+  'envilder --push --key=API_KEY --value=dev-api-key-4821 --secret-path=/my-app/dev/api-key';
+
+const pushSingleAzureCmd = `envilder --push --provider=azure --vault-url=https://my-vault.vault.azure.net \\
+  --key=API_KEY --value=dev-api-key-4821 --secret-path=/my-app/dev/api-key`;
+
+const pushSingleOutputBody = `📤 PUSHING SECRET
+${'━'.repeat(60)}
+  → API_KEY → ****************key
+
+⭐ SECRET PUSHED  —  API_KEY=*************821 → ****************key
+
+✓ Created envilder.json`;
+
+const pushSingleAwsOutput = `Using configuration: provider=aws
+
+☁ AWS identity · account=123456789012 · region=eu-west-1 · profile=default
+
+${pushSingleOutputBody}`;
+
+const pushSingleAzureOutput = `Using configuration: provider=azure, vault=https://my-vault.vault.azure.net
+
+${pushSingleOutputBody}`;
+
+const pushSingleAwsMap = `{
+  "API_KEY": "/my-app/dev/api-key"
+}`;
+
+const pushSingleAzureMap = `{
+  "$config": {
+    "provider": "azure",
+    "vaultUrl": "https://my-vault.vault.azure.net"
+  },
+  "API_KEY": "/my-app/dev/api-key"
+}`;
+
+const pushErrors = [
+  {
+    message:
+      'Single-secret push requires non-empty --key, --value, and --secret-path.',
+    fix: 'errPartialFix',
+  },
+  {
+    message:
+      'API_KEY is already mapped to a different secret path in envilder.json. Nothing was pushed. Update the mapping manually, or use --no-map-update to push without recording it.',
+    fix: 'errConflictFix',
+  },
+  {
+    message:
+      '⚠ envilder.json targets azure (my-vault), but the secret was pushed to aws. The mapping was not added. Use --map=<file> to record it in a different map file.',
+    fix: 'errTargetFix',
+  },
+  {
+    message:
+      "Conflicting values for secret path '******************ken': 'API_TOKEN' has value '***********234' but 'LEGACY_TOKEN' has value '***********678'",
+    fix: 'errValuesFix',
+  },
+  {
+    message:
+      'Warning: Environment variable API_TOKEN not found in environment file',
+    fix: 'errMissingVarFix',
+  },
+  {
+    message:
+      'Cannot write map file config/envilder.json: its directory does not exist',
+    fix: 'errMapDirFix',
+  },
+  {
+    message:
+      "Secret name collision: '/my-app/api-key' and 'my-app-api-key' both resolve to 'my-app-api-key'. Use distinct Key Vault secret names in your map file when targeting Azure.",
+    fix: 'errCollisionFix',
+  },
+  {
+    message:
+      '****************key: User: arn:aws:sts::123456789012:assumed-role/dev/session is not authorized to perform: ssm:PutParameter on resource: …',
+    fix: 'errDeniedFix',
+  },
+  {
+    message:
+      'vaultUrl is required when using Azure provider. Set it in $config.vaultUrl in your map file or via --vault-url flag.',
+    fix: 'errVaultFix',
+  },
+] as const;
+
+const execSeparatorExamples = `${ex.sepComment1}
+envilder exec npm run dev
+
+${ex.sepComment2}
+envilder exec --map=cfg.json npm run dev
+
+${ex.sepComment3}
+envilder exec npm run dev --map=x
+
+${ex.sepComment4}
+envilder exec --map=cfg.json -- npm run dev`;
+
+const execRootOptionError = `$ envilder --map=config/prod.json exec -- npm start
+error: Put envilder options after "exec": envilder exec --map=config/prod.json -- npm …`;
+
+const execRejectedOptions = [
+  {
+    option: '--envfile',
+    message:
+      '--envfile cannot be used with exec: exec mode never reads or writes a .env file.',
+  },
+  { option: '--push', message: '--push cannot be used with exec.' },
+  {
+    option: '--key, --value, --secret-path',
+    message: 'Single-secret push options cannot be used with exec.',
+  },
+];
+
+const execOutputAws = `Overriding inherited variables: DB_PASSWORD
+envilder: 2 secrets resolved (aws) → node …`;
+
+const execOutputAzure = `Overriding inherited variables: DB_PASSWORD
+envilder: 2 secrets resolved (azure, vault=my-vault.vault.azure.net) → node …`;
+
+const execFailOutput = `🪙  RESOLVING SECRETS
+${'━'.repeat(60)}
+  ✓ DB_PASSWORD         → ***************ord
+  ✓ API_TOKEN           → ***************c21
+
+💥 GAME OVER — some secrets could not be fetched
+${'━'.repeat(60)}
+  ✗ SENTRY_DSN          → *******************dsn
+  ✗ FEATURE_FLAG        → *********************lag
+
+  ⮕ WHY?
+     not found
+     empty`;
+
+const execGhaWorkflow = `permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
+steps:
+  - uses: actions/checkout@v7
+  - uses: actions/setup-node@v7
+    with:
+      node-version: "22.x"
+  - uses: aws-actions/configure-aws-credentials@v6
+    with:
+      role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole
+      aws-region: us-east-1
+  - run: npx envilder exec -- npm test`;
+
+const execPackageJson = `{
+  "scripts": {
+    "dev": "envilder exec -- vite",
+    "start": "envilder exec --map=config/prod.json -- node server.js"
+  }
+}`;
+
+const execUses = `${ex.usesComment1}
+envilder exec -- docker run --rm -e LOCALSTACK_AUTH_TOKEN -p 4566:4566 localstack/localstack:stable
+envilder exec -- docker compose up
+
+${ex.usesComment2}
+envilder exec -- npm test
+
+${ex.usesComment3}
+envilder exec -- npx prisma migrate deploy
+
+${ex.usesComment4}
+envilder exec -- terraform plan
+
+${ex.usesComment5}
+envilder exec -- sh -c 'npm run migrate && exec npm start'`;
+
+const execErrors = [
+  {
+    message:
+      'error: Missing command. Usage: envilder exec [options] [--] <command> [args...]',
+    fix: 'errMissingFix',
+  },
+  {
+    message: "error: unknown option '--mapp' (Did you mean --map?)",
+    fix: 'errUnknownFix',
+  },
+  {
+    message:
+      'No map file found. Provide --map or create envilder.json in the current directory.',
+    fix: 'errNoMapFix',
+  },
+  { message: 'Command not found: vitee', fix: 'errNotFoundFix' },
+  { message: 'Permission denied: ./run.sh', fix: 'errPermissionFix' },
+  {
+    message:
+      'Map file declares variables that differ only by case (API_KEY, api_key); Windows treats them as the same variable.',
+    fix: 'errCaseFix',
+  },
+  {
+    message:
+      'Secret for API_TOKEN contains a NUL byte and cannot be passed as an environment variable.',
+    fix: 'errNulFix',
+  },
+] as const;
+
+const va = t.docs.validateReference;
+
+const validateSynopsis = `envilder validate [--offline] [--envfile <path> [--compare-values]] \\
+  [--format <text|json>] [--map <path>] [--provider <name>] \\
+  [--profile <name>] [--vault-url <url>]`;
+
+const validateExamples = `envilder validate
+envilder validate --map=config/envilder.json --profile=dev
+envilder validate --provider=azure --vault-url=https://my-vault.vault.azure.net
+envilder validate --offline
+envilder validate --envfile=.env --compare-values
+envilder validate --format=json`;
+
+const validateOkOutput = `✓ Map file valid: envilder.json
+
+☁ AWS identity · account=123456789012 · region=eu-west-1 · profile=dev
+
+Checking 3 secrets in aws, profile=dev
+  ✓ DB_URL        /myapp/db-url   exists
+  ✓ DATABASE_URL  /myapp/db-url   exists
+  ✓ API_KEY       /myapp/api-key  exists
+
+✓ All 3 secrets exist`;
+
+const validateFailOutput = `✓ Map file valid: envilder.json
+
+Checking 3 secrets in aws, profile=dev
+  ✓ DB_URL   /myapp/db-url   exists
+  ✗ API_KEY  /myapp/api-key  missing
+  ✗ TOKEN    /myapp/token    access denied (User: arn:aws:sts::123456789012:assumed-role/dev/ci is not authorized to perform: ssm:GetParameters ...)
+✗ Validation failed: 1 missing, 1 access denied`;
+
+const validateOfflineOutput = `✓ Map file valid: envilder.json
+  Remote validation skipped (--offline): no provider was called, so the secrets were not checked.`;
+
+const validateEnvfileOutput = `✓ Map file valid: envilder.json
+Checking env file .env
+  ✗ TOKEN  missing from .env
+  ⚠ DEBUG  not declared in map file
+
+Checking 3 secrets in aws, profile=dev
+  ✓ DB_URL   /myapp/db-url   exists
+  ✓ API_KEY  /myapp/api-key  exists
+  ✓ TOKEN    /myapp/token    exists
+Comparing 2 values with aws, profile=dev
+  ✓ DB_URL   matches
+  ✗ API_KEY  differs
+✗ Validation failed: 1 missing from .env, 1 differs`;
+
+const validateInvalidOutput = `✗ Map file invalid: envilder.json (3 problems)
+  • $config.region is not a known field. Allowed fields: provider, profile, vaultUrl, projectId, namespace, path, name, description, owner, environment.
+  • DB_PORT must map to a string secret path, not a number.
+  • $config.profile is only supported with the aws provider (current provider: azure).`;
+
+const validateJson = `{
+  "valid": false,
+  "offline": false,
+  "mapFile": { "path": "envilder.json", "valid": true, "errors": [] },
+  "keys": [
+    { "name": "DB_URL", "provider": "aws", "path": "/myapp/db-url", "status": "exists" },
+    { "name": "API_KEY", "provider": "aws", "path": "/myapp/api-key", "status": "exists" },
+    {
+      "name": "TOKEN",
+      "provider": "aws",
+      "path": "/myapp/token",
+      "status": "access_denied",
+      "reason": "User: arn:aws:sts::123456789012:assumed-role/dev/ci is not authorized to perform: ssm:GetParameters ..."
+    }
+  ],
+  "envFile": {
+    "path": ".env",
+    "valid": false,
+    "keys": [
+      { "name": "DB_URL", "status": "present", "value": "matches" },
+      { "name": "API_KEY", "status": "present", "value": "differs" },
+      { "name": "TOKEN", "status": "missing" }
+    ],
+    "duplicates": [],
+    "undeclared": ["DEBUG"]
+  }
+}`;
+
+const validateAwsPolicy = `{
+  "Effect": "Allow",
+  "Action": ["ssm:GetParameter", "ssm:GetParameters"],
+  "Resource": "arn:aws:ssm:*:*:parameter/myapp/*"
+}`;
+
+const validateAzureRbac = `az role assignment create \\
+  --role "Key Vault Secrets User" \\
+  --assignee {YOUR_OBJECT_ID} \\
+  --scope /subscriptions/{SUB}/resourceGroups/{RG}/providers/Microsoft.KeyVault/vaults/{VAULT}`;
+
+const validateAzurePolicy = `az keyvault set-policy \\
+  --name {VAULT_NAME} \\
+  --object-id {YOUR_OBJECT_ID} \\
+  --secret-permissions get list`;
+
+const validateCi = `- name: Check the map file
+  run: npx envilder validate --offline --map=envilder.json
+
+- name: Check that every secret exists
+  run: npx envilder validate --map=envilder.json`;
+
+const validateCiJson = `- name: Check that every secret exists
+  run: npx envilder validate --map=envilder.json --format=json > validate.json`;
+
+const validateSdkRows = [
+  {
+    sdk: 'Node.js',
+    check: 'await Envilder.fromMapFile(path).validateContract()',
+    load: '.withContractValidation()',
+    href: '/docs/sdks/nodejs/',
+  },
+  {
+    sdk: 'Python',
+    check: 'Envilder.from_map_file(path).validate_contract()',
+    load: '.with_contract_validation()',
+    href: '/docs/sdks/python/',
+  },
+  {
+    sdk: '.NET',
+    check: 'await Env.FromMapFile(path).ValidateContractAsync(ct)',
+    load: '.WithContractValidation()',
+    href: '/docs/sdks/dotnet/',
   },
 ] as const;
 ---
@@ -613,6 +1207,132 @@ const mfErrors = [
     </>
   )}
 
+  {routeKey === 'guide-ssm-to-env' && (
+    <>
+      <section id="guide-prerequisites" class="docs-section">
+        <h2>{g.prereqTitle}</h2>
+        <ul class="docs-list">
+          {g.prereqItems.map((item) => <li>{item}</li>)}
+        </ul>
+        <p>{g.prereqPolicyDesc}</p>
+        <CodeBlock lang="json" filename="policy.json" code={guideIamPolicy} />
+        <p class="note">{g.prereqPolicyNote}</p>
+        <p class="note">{g.prereqPushNote}</p>
+
+        <h3>{g.regionTitle}</h3>
+        <p>{g.regionDesc}</p>
+        <ol class="docs-list">
+          {g.regionItems.map((item) => <li>{item}</li>)}
+        </ol>
+        <p class="note">{g.regionNote}</p>
+      </section>
+
+      <section id="guide-example" class="docs-section">
+        <h2>{g.exampleTitle}</h2>
+        <p>{g.exampleParamsDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{g.thParameter}</th><th>{g.thVariable}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>/my-app/dev/db-password</code></td><td><code>DB_PASSWORD</code></td></tr>
+            <tr><td><code>/my-app/dev/api-token</code></td><td><code>API_TOKEN</code></td></tr>
+            <tr><td><code>/my-app/dev/database-url</code></td><td><code>DATABASE_URL</code></td></tr>
+          </tbody>
+        </table>
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>{g.pushWarn}</div>
+        </div>
+        <p>{g.pushNote} <a href={localizedPath(lang, '/docs/cli/push/')}>{g.pushLink}</a></p>
+        <p>{g.exampleMapDesc}</p>
+        <CodeBlock lang="bash" code={guidePushCmd} />
+        <p>{g.pushOutputDesc}</p>
+        <CodeBlock lang="text" code={guidePushOutput} />
+        <p>{g.pushResultDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={guideDevMap} />
+        <p>{g.exampleRunDesc}</p>
+        <CodeBlock lang="bash" code="envilder" />
+        <CodeBlock lang="text" code={guideDevOutput} />
+        <p>{g.exampleOutputDesc}</p>
+        <p>{g.exampleResultDesc}</p>
+        <CodeBlock lang="dotenv" filename=".env" code={guideDevEnv} />
+        <p>{g.exampleRerunDesc}</p>
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>{g.exampleGitignore}</div>
+        </div>
+      </section>
+
+      <section id="guide-environments" class="docs-section">
+        <h2>{g.envsTitle}</h2>
+        <p>{g.envsDesc}</p>
+        <CodeBlock lang="json" filename="envilder.prod.json" code={guideProdMap} />
+        <p>{g.envsRunDesc}</p>
+        <CodeBlock lang="bash" code={guideProdCmd} />
+        <CodeBlock lang="text" code={guideProdOutput} />
+        <p>{g.envsNote}</p>
+      </section>
+
+      <section id="guide-exec" class="docs-section">
+        <h2>{g.execTitle}</h2>
+        <p>{g.execDesc}</p>
+        <CodeBlock lang="bash" code="envilder exec -- node app.js" />
+        <CodeBlock lang="text" code={guideExecOutput} />
+        <p>{g.execOutputDesc}</p>
+
+        <h3>{g.whenTitle}</h3>
+        <ul class="docs-list">
+          {g.whenItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+
+      <section id="guide-by-hand" class="docs-section">
+        <h2>{g.handTitle}</h2>
+        <p>{g.handDesc}</p>
+        <CodeBlock lang="bash" code={guideScript} />
+        <p>{g.handIntro}</p>
+        <ul class="docs-list">
+          {g.handPoints.map((item) => <li>{item}</li>)}
+        </ul>
+        <p>{g.handFair}</p>
+      </section>
+
+      <section id="guide-errors" class="docs-section">
+        <h2>{g.errorsTitle}</h2>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{g.thMessage}</th><th>{g.thFix}</th></tr>
+          </thead>
+          <tbody>
+            {guideErrors.map((row) => (
+              <tr><td><code>{row.message}</code></td><td>{g[row.fix]}</td></tr>
+            ))}
+          </tbody>
+        </table>
+        <p><a href={localizedPath(lang, '/docs/cli/pull/#pull-errors')}>{g.errorsMore}</a></p>
+      </section>
+
+      <section id="guide-ci" class="docs-section">
+        <h2>{g.ciTitle}</h2>
+        <p>{g.ciDesc}</p>
+        <CodeBlock lang="yaml" filename=".github/workflows/ci.yml" code={guideCi} />
+        <p>{g.ciNote}</p>
+      </section>
+
+      <section id="guide-related" class="docs-section">
+        <h2>{g.relatedTitle}</h2>
+        <ul class="docs-list">
+          <li><a href={localizedPath(lang, '/docs/cli/pull/')}>{g.relatedPull}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/exec/')}>{g.relatedExec}</a></li>
+          <li><a href={localizedPath(lang, '/docs/map-file/')}>{g.relatedMap}</a></li>
+          <li><a href={localizedPath(lang, '/docs/providers/aws-ssm/')}>{g.relatedAws}</a></li>
+          <li><a href={localizedPath(lang, '/docs/github-action/')}>{g.relatedGha}</a></li>
+        </ul>
+      </section>
+    </>
+  )}
+
   {routeKey === 'aws-ssm' && (
     <>
       <section id="aws-setup" class="docs-section">
@@ -705,6 +1425,65 @@ print(secrets["HELLO"])  # world`} />
 
 secrets = Envilder.load("azure-test-map.json")
 print(secrets["HELLO"])  # world`} />
+      </section>
+    </>
+  )}
+
+  {routeKey === 'custom-provider' && (
+    <>
+      <section id="when" class="docs-section">
+        <h2>{cp.whenTitle}</h2>
+        <p>{cp.whenDesc}</p>
+        <ul class="docs-list">
+          <li>{cp.whenUnsupported}</li>
+          <li>{cp.whenTests}</li>
+        </ul>
+        <p class="note">{cp.whenCliNote}</p>
+      </section>
+
+      <section id="how" class="docs-section">
+        <h2>{cp.howTitle}</h2>
+        <p>{cp.howDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{cp.howInterface}</th><th>{cp.howMethod}</th><th>{cp.howUsedFor}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>ISecretProvider</code></td><td><code>getSecrets</code> · <code>get_secret</code> · <code>GetSecret</code></td><td>{cp.howResolve}</td></tr>
+            <tr><td><code>ISecretExistenceChecker</code></td><td><code>checkSecretsExist</code> · <code>check_secrets_exist</code> · <code>CheckSecretsExistAsync</code></td><td>{cp.howCheck}</td></tr>
+          </tbody>
+        </table>
+        <p>{cp.howMapFile}</p>
+      </section>
+
+      <section id="code" class="docs-section">
+        <h2>{cp.codeTitle}</h2>
+        <p>{cp.codeDesc}</p>
+        <TabbedCodeBlock tabs={[
+          { label: 'Node.js', lang: 'typescript', code: cpNodejsCode },
+          { label: 'Python', lang: 'python', code: cpPythonCode },
+          { label: '.NET', lang: 'csharp', code: cpDotnetCode },
+        ]} />
+      </section>
+
+      <section id="contract-validation" class="docs-section">
+        <h2>{cp.validationTitle}</h2>
+        <ul class="docs-list">
+          <li>{cp.validationWith}</li>
+          <li>{cp.validationWithout}</li>
+          <li>{cp.validationProviderField}</li>
+        </ul>
+        <p><a href={localizedPath(lang, '/docs/cli/validate/')}>{cp.validationLink}</a></p>
+      </section>
+
+      <section id="examples" class="docs-section">
+        <h2>{cp.examplesTitle}</h2>
+        <p>{cp.examplesDesc}</p>
+        <ul class="docs-list">
+          <li><a href="https://github.com/macalbert/envilder-examples/tree/main/typescript-custom-provider" target="_blank" rel="noopener noreferrer"><code>typescript-custom-provider</code></a></li>
+          <li><a href="https://github.com/macalbert/envilder-examples/tree/main/python-custom-provider" target="_blank" rel="noopener noreferrer"><code>python-custom-provider</code></a></li>
+          <li><a href="https://github.com/macalbert/envilder-examples/tree/main/dotnet-custom-provider" target="_blank" rel="noopener noreferrer"><code>dotnet-custom-provider</code></a></li>
+        </ul>
       </section>
     </>
   )}
@@ -886,164 +1665,263 @@ MULTILINE="first\\nsecond"`} />
 
   {routeKey === 'cli-pull' && (
     <>
+      <section id="pull-prerequisites" class="docs-section">
+        <h2>{pr.prereqTitle}</h2>
+        <ul class="docs-list">
+          {pr.prereqItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+
+      <section id="pull-synopsis" class="docs-section">
+        <h2>{pr.synopsisTitle}</h2>
+        <CodeBlock lang="bash" code={pullSynopsis} />
+        <p>{pr.synopsisDesc}</p>
+      </section>
+
       <section id="pull-command" class="docs-section">
-        <h2>{t.docs.pullTitle}</h2>
-        <p>{t.docs.pullDesc}</p>
-
-        <CodeBlock lang="bash" code="envilder" />
-
-        <h3>{t.docs.pullOptions}</h3>
+        <h2>{pr.optionsTitle}</h2>
         <table class="docs-table">
           <thead>
-            <tr><th>{t.docs.optionHeader}</th><th>{t.docs.mapThDescription}</th></tr>
+            <tr><th>{pr.thOption}</th><th>{pr.thDefault}</th><th>{pr.thDescription}</th></tr>
           </thead>
           <tbody>
-            <tr><td><code>--map</code></td><td>{t.docs.pullOptMap}</td></tr>
-            <tr><td><code>--envfile</code></td><td>{t.docs.pullOptEnv}</td></tr>
-            <tr><td><code>--provider</code></td><td>{t.docs.pullOptProvider}</td></tr>
-            <tr><td><code>--vault-url</code></td><td>{t.docs.pullOptVault}</td></tr>
-            <tr><td><code>--profile</code></td><td>{t.docs.pullOptProfile}</td></tr>
+            <tr><td><code>--map</code></td><td>{pr.optMapDefault}</td><td>{pr.optMap}</td></tr>
+            <tr><td><code>--envfile</code></td><td><code>.env</code></td><td>{pr.optEnvfile}</td></tr>
+            <tr><td><code>--provider</code></td><td>{pr.optProviderDefault}</td><td>{pr.optProvider}</td></tr>
+            <tr><td><code>--vault-url</code></td><td><code>$config.vaultUrl</code></td><td>{pr.optVault}</td></tr>
+            <tr><td><code>--profile</code></td><td>{pr.optProfileDefault}</td><td>{pr.optProfile}</td></tr>
           </tbody>
         </table>
+        <p class="note">{pr.optionsNote}</p>
+      </section>
 
-        <h3>{t.docs.pullExamples}</h3>
-        <CodeBlock lang="bash" code={`${t.docs.pullCommentDefault}
-envilder
+      <section id="pull-config" class="docs-section">
+        <h2>{pr.configTitle}</h2>
+        <p>{pr.configDesc}</p>
+        <TabbedCodeBlock tabs={[
+          { label: pr.tabAws, lang: 'json', filename: 'envilder.prod.json', code: pullConfigAwsMap },
+          { label: pr.tabAzure, lang: 'json', filename: 'envilder.prod.json', code: pullConfigAzureMap },
+        ]} />
+        <p>{pr.configRun}</p>
+        <TabbedCodeBlock tabs={[
+          { label: pr.tabAws, lang: 'bash', code: pullConfigAwsCmd, note: pr.configAwsNote },
+          { label: pr.tabAzure, lang: 'bash', code: pullConfigAzureCmd, note: pr.configAzureNote },
+        ]} />
+        <p><a href={localizedPath(lang, '/docs/map-file/#config-priority')}>{pr.configLink}</a></p>
+      </section>
 
-${t.docs.pullCommentProfile}
-envilder --map=envilder.json --envfile=.env --profile=prod-account
-
-${t.docs.pullCommentAzureConfig}
-envilder --map=envilder.azure.json --envfile=.env
-
-${t.docs.pullCommentAzureFlags}
-envilder --provider=azure \\
-  --vault-url=https://my-vault.vault.azure.net \\
-  --map=envilder.json --envfile=.env`} />
-
-        <h3>{t.docs.pullOutputTitle}</h3>
-        <CodeBlock lang="dotenv" filename=".env" code={`# Generated by Envilder
-API_KEY=abc123
-DB_PASSWORD=secret456`} />
-
-        <div class="callout">
-          <span class="callout-icon">💡</span>
-          <div>
-            <strong>{t.docs.pullExecTitle}</strong> {t.docs.pullExecDesc}{' '}
-            <a href={localizedPath(lang, '/docs/cli/exec/')}>{t.docs.pullExecGuideLink}</a>
-          </div>
+      <section id="pull-example" class="docs-section">
+        <h2>{pr.exampleTitle}</h2>
+        <p>{pr.exampleDesc}</p>
+        <div class="multi-env-grid">
+          <CodeBlock lang="json" filename="envilder.json" code={pullExampleMap} />
+          <CodeBlock lang="dotenv" filename=".env" code={pullExampleEnvBefore} />
         </div>
+        <p>{pr.exampleRun}</p>
+        <CodeBlock lang="bash" code="envilder" />
+        <CodeBlock lang="text" code={pullExampleOutput} />
+        <p>{pr.exampleOutputNote}</p>
+        <p>{pr.exampleResult}</p>
+        <CodeBlock lang="dotenv" filename=".env" code={pullExampleEnvAfter} />
+      </section>
+
+      <section id="pull-env-file" class="docs-section">
+        <h2>{pr.envTitle}</h2>
+        <ul class="docs-list">
+          {pr.envRules.map((rule) => <li>{rule}</li>)}
+        </ul>
+        <p>
+          {pr.envNote}{' '}
+          <a href={localizedPath(lang, '/docs/map-file/#secret-contents')}>{pr.envNoteLink}</a>
+        </p>
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>{pr.envWarn}</div>
+        </div>
+      </section>
+
+      <section id="pull-missing" class="docs-section">
+        <h2>{pr.missingTitle}</h2>
+        <p>{pr.missingDesc}</p>
+        <p>{pr.failDesc}</p>
+        <CodeBlock lang="text" code={pullFailureOutput} />
+        <p>{pr.ssoDesc}</p>
+      </section>
+
+      <section id="pull-errors" class="docs-section">
+        <h2>{pr.errorsTitle}</h2>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{pr.thMessage}</th><th>{pr.thFix}</th></tr>
+          </thead>
+          <tbody>
+            {pullErrors.map((row) => (
+              <tr><td><code>{row.message}</code></td><td>{pr[row.fix]}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section id="pull-related" class="docs-section">
+        <h2>{pr.relatedTitle}</h2>
+        <ul class="docs-list">
+          <li><a href={localizedPath(lang, '/docs/map-file/')}>{pr.relatedMap}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/exec/')}>{pr.relatedExec}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/push/')}>{pr.relatedPush}</a></li>
+          <li><a href={localizedPath(lang, '/docs/guides/ssm-to-env/')}>{pr.relatedGuide}</a></li>
+        </ul>
       </section>
     </>
   )}
 
   {routeKey === 'cli-push' && (
     <>
+      <section id="push-prerequisites" class="docs-section">
+        <h2>{pu.prereqTitle}</h2>
+        <ul class="docs-list">
+          {pu.prereqItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+
+      <section id="push-synopsis" class="docs-section">
+        <h2>{pu.synopsisTitle}</h2>
+        <CodeBlock lang="bash" code={pushSynopsis} />
+        <p>{pu.synopsisDesc}</p>
+      </section>
+
       <section id="push-command" class="docs-section">
-        <h2>{t.docs.pushTitle}</h2>
-        <p>{t.docs.pushDesc}</p>
-
-        <CodeBlock lang="bash" code="envilder --push" />
-
-        <h3>{t.docs.pushOptions}</h3>
+        <h2>{pu.envTitle}</h2>
+        <p>{pu.envDesc}</p>
         <table class="docs-table">
           <thead>
-            <tr><th>{t.docs.optionHeader}</th><th>{t.docs.mapThDescription}</th></tr>
+            <tr><th>{pu.thOption}</th><th>{pu.thDefault}</th><th>{pu.thDescription}</th></tr>
           </thead>
           <tbody>
-            <tr><td><code>--push</code></td><td>{t.docs.pushOptPush}</td></tr>
-            <tr><td><code>--envfile</code></td><td>{t.docs.pushOptEnv}</td></tr>
-            <tr><td><code>--map</code></td><td>{t.docs.pushOptMap}</td></tr>
-            <tr><td><code>--provider</code></td><td>{t.docs.pushOptProvider}</td></tr>
-            <tr><td><code>--vault-url</code></td><td>{t.docs.pushOptVault}</td></tr>
-            <tr><td><code>--profile</code></td><td>{t.docs.pushOptProfile}</td></tr>
+            <tr><td><code>--push</code></td><td>-</td><td>{pu.optPush}</td></tr>
+            <tr><td><code>--envfile</code></td><td><code>.env</code></td><td>{pu.optEnvfile}</td></tr>
+            <tr><td><code>--map</code></td><td><code>envilder.json</code></td><td>{pu.optMap}</td></tr>
+            <tr><td><code>--provider</code>, <code>--vault-url</code>, <code>--profile</code></td><td><code>$config</code></td><td>{pu.optShared}</td></tr>
           </tbody>
         </table>
-
-        <h3>{t.docs.pushExamples}</h3>
-        <CodeBlock lang="bash" code={`${t.docs.pushCommentAws}
-envilder --push
-
-${t.docs.pushCommentProfile}
-envilder --push --envfile=.env.prod --map=envilder.json --profile=prod-account
-
-${t.docs.pushCommentAzureConfig}
-envilder --push --envfile=.env --map=envilder.azure.json
-
-${t.docs.pushCommentAzureFlags}
-envilder --push --provider=azure \\
-  --vault-url=https://my-vault.vault.azure.net \\
-  --envfile=.env --map=envilder.json`} />
+        <p>{pu.envExample}</p>
+        <div class="multi-env-grid">
+          <CodeBlock lang="json" filename="envilder.json" code={pushEnvMap} />
+          <CodeBlock lang="dotenv" filename=".env" code={pushEnvFile} />
+        </div>
+        <CodeBlock lang="bash" code="envilder --push" />
+        <CodeBlock lang="text" code={pushEnvOutput} />
+        <ul class="docs-list">
+          {pu.envRules.map((rule) => <li>{rule}</li>)}
+        </ul>
       </section>
 
       <section id="push-single" class="docs-section">
-        <h2>{t.docs.pushSingleTitle}</h2>
-        <p>{t.docs.pushSingleDesc}</p>
-
-        <CodeBlock lang="bash" code={pushSingleCmd} />
-
-        <h3>{t.docs.pushSingleOptions}</h3>
+        <h2>{pu.singleTitle}</h2>
+        <p>{pu.singleDesc}</p>
         <table class="docs-table">
           <thead>
-            <tr><th>{t.docs.optionHeader}</th><th>{t.docs.mapThDescription}</th></tr>
+            <tr><th>{pu.thOption}</th><th>{pu.thDefault}</th><th>{pu.thDescription}</th></tr>
           </thead>
           <tbody>
-            <tr><td><code>--push</code></td><td>{t.docs.pushSingleOptPush}</td></tr>
-            <tr><td><code>--key</code></td><td>{t.docs.pushSingleOptKey}</td></tr>
-            <tr><td><code>--value</code></td><td>{t.docs.pushSingleOptValue}</td></tr>
-            <tr><td><code>--secret-path</code></td><td>{t.docs.pushSingleOptPath}</td></tr>
-            <tr><td><code>--map</code></td><td>{t.docs.pushSingleOptMap}</td></tr>
-            <tr><td><code>--no-map-update</code></td><td>{t.docs.pushSingleOptNoMapUpdate}</td></tr>
-            <tr><td><code>--provider</code></td><td>{t.docs.pushSingleOptProvider}</td></tr>
-            <tr><td><code>--vault-url</code></td><td>{t.docs.pushSingleOptVault}</td></tr>
-            <tr><td><code>--profile</code></td><td>{t.docs.pushSingleOptProfile}</td></tr>
+            <tr><td><code>--key</code></td><td>-</td><td>{pu.optKey}</td></tr>
+            <tr><td><code>--value</code></td><td>-</td><td>{pu.optValue}</td></tr>
+            <tr><td><code>--secret-path</code></td><td>-</td><td>{pu.optSecretPath}</td></tr>
+            <tr><td><code>--map</code></td><td><code>envilder.json</code></td><td>{pu.optMapSingle}</td></tr>
+            <tr><td><code>--no-map-update</code></td><td>-</td><td>{pu.optNoMapUpdate}</td></tr>
           </tbody>
         </table>
+        <p>{pu.singleExample}</p>
+        <TabbedCodeBlock tabs={[
+          { label: pu.tabAws, lang: 'bash', code: pushSingleAwsCmd },
+          { label: pu.tabAzure, lang: 'bash', code: pushSingleAzureCmd },
+        ]} />
+        <TabbedCodeBlock tabs={[
+          { label: pu.tabAws, lang: 'text', code: pushSingleAwsOutput },
+          { label: pu.tabAzure, lang: 'text', code: pushSingleAzureOutput },
+        ]} />
+        <TabbedCodeBlock tabs={[
+          { label: pu.tabAws, lang: 'json', filename: 'envilder.json', code: pushSingleAwsMap, note: pu.singleAwsNote },
+          { label: pu.tabAzure, lang: 'json', filename: 'envilder.json', code: pushSingleAzureMap, note: pu.singleAzureNote },
+        ]} />
+
+        <h3>{pu.mapRulesTitle}</h3>
+        <ul class="docs-list">
+          {pu.mapRules.map((rule) => <li>{rule}</li>)}
+        </ul>
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>
+            <strong>{pu.historyTitle}</strong> {pu.historyDesc}
+          </div>
+        </div>
+      </section>
+
+      <section id="push-storage" class="docs-section">
+        <h2>{pu.storeTitle}</h2>
+        <p><strong>AWS SSM.</strong> {pu.storeAws}</p>
+        <p><strong>Azure Key Vault.</strong> {pu.storeAzure}</p>
+      </section>
+
+      <section id="push-errors" class="docs-section">
+        <h2>{pu.errorsTitle}</h2>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{pu.thMessage}</th><th>{pu.thFix}</th></tr>
+          </thead>
+          <tbody>
+            {pushErrors.map((row) => (
+              <tr><td><code>{row.message}</code></td><td>{pu[row.fix]}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section id="push-related" class="docs-section">
+        <h2>{pu.relatedTitle}</h2>
+        <ul class="docs-list">
+          <li><a href={localizedPath(lang, '/docs/map-file/')}>{pu.relatedMap}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/pull/')}>{pu.relatedPull}</a></li>
+          <li><a href={localizedPath(lang, '/docs/providers/azure-key-vault/')}>{pu.relatedAzure}</a></li>
+        </ul>
       </section>
     </>
   )}
 
   {routeKey === 'cli-exec' && (
     <>
-      <section id="exec-command" class="docs-section">
-        <h2>{t.docs.execTitle}</h2>
-        <p>{t.docs.execDesc}</p>
+      <section id="exec-prerequisites" class="docs-section">
+        <h2>{ex.prereqTitle}</h2>
+        <ul class="docs-list">
+          {ex.prereqItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
 
-        <h3>{t.docs.execUsageTitle}</h3>
+      <section id="exec-command" class="docs-section">
+        <h2>{ex.synopsisTitle}</h2>
         <CodeBlock lang="bash" code="envilder exec [options] [--] <command> [args...]" />
 
-        <h3>{t.docs.execSeparatorTitle}</h3>
-        <p>{t.docs.execSeparatorDesc}</p>
-        <CodeBlock lang="bash" code={`${t.docs.execSepComment1}
-envilder exec npm run dev
+        <h3>{ex.separatorTitle}</h3>
+        <p>{ex.separatorDesc}</p>
+        <CodeBlock lang="bash" code={execSeparatorExamples} />
 
-${t.docs.execSepComment2}
-envilder exec --map=cfg.json npm run dev
-
-${t.docs.execSepComment3}
-envilder exec npm run dev --map=x
-
-${t.docs.execSepComment4}
-envilder exec --map=cfg.json -- npm run dev`} />
-
-        <h3>{t.docs.execOptions}</h3>
+        <h3>{ex.optionsTitle}</h3>
         <table class="docs-table">
           <thead>
-            <tr><th>{t.docs.optionHeader}</th><th>{t.docs.mapThDescription}</th></tr>
+            <tr><th>{ex.thOption}</th><th>{ex.thDescription}</th></tr>
           </thead>
           <tbody>
-            <tr><td><code>--map</code></td><td>{t.docs.execOptMap}</td></tr>
-            <tr><td><code>--profile</code></td><td>{t.docs.execOptProfile}</td></tr>
-            <tr><td><code>--provider</code></td><td>{t.docs.execOptProvider}</td></tr>
-            <tr><td><code>--vault-url</code></td><td>{t.docs.execOptVault}</td></tr>
+            <tr><td><code>--map</code></td><td>{ex.optMap}</td></tr>
+            <tr><td><code>--profile</code></td><td>{ex.optProfile}</td></tr>
+            <tr><td><code>--provider</code></td><td>{ex.optProvider}</td></tr>
+            <tr><td><code>--vault-url</code></td><td>{ex.optVault}</td></tr>
           </tbody>
         </table>
-        <p>{t.docs.execOptionsOrderDesc}</p>
+        <p>{ex.optionsOrderDesc}</p>
         <CodeBlock lang="text" code={execRootOptionError} />
-        <p>{t.docs.execRejectedDesc}</p>
+        <p>{ex.rejectedDesc}</p>
         <table class="docs-table">
           <thead>
-            <tr><th>{t.docs.optionHeader}</th><th>{t.docs.execThMessage}</th></tr>
+            <tr><th>{ex.thOption}</th><th>{ex.thMessage}</th></tr>
           </thead>
           <tbody>
             {execRejectedOptions.map((row) => (
@@ -1051,129 +1929,321 @@ envilder exec --map=cfg.json -- npm run dev`} />
             ))}
           </tbody>
         </table>
-
-        <h3>{t.docs.execExamples}</h3>
-        <CodeBlock lang="bash" code={`${t.docs.execCommentNpx}
-npx envilder exec -- npm run dev
-
-${t.docs.execCommentMap}
-envilder exec --map=config/envilder.json -- node server.js
-
-${t.docs.execCommentAzure}
-envilder exec --provider=azure \
-  --vault-url=https://my-vault.vault.azure.net -- dotnet run
-
-${t.docs.execCommentDocker}
-envilder exec -- docker compose up`} />
-        <p>{t.docs.execPackageJsonDesc}</p>
-        <CodeBlock lang="json" filename="package.json" code={execPackageJson} />
-
-        <h3>{t.docs.execOutputTitle}</h3>
-        <p>{t.docs.execOutputDesc}</p>
-        <CodeBlock lang="text" code="envilder: 2 secrets resolved (aws, profile=dev) → npm …" />
       </section>
 
-      <section id="exec-use-cases" class="docs-section">
-        <h2>{t.docs.execUseCasesTitle}</h2>
-        <p>{t.docs.execUseCasesDesc}</p>
-
-        <h3>{t.docs.execUcLocalstackTitle}</h3>
-        <p>{t.docs.execUcLocalstackDesc}</p>
-        <CodeBlock lang="json" filename="envilder.json" code={execUcLocalstackMap} />
-        <p>{t.docs.execUcLocalstackComposeDesc}</p>
-        <CodeBlock lang="yaml" filename="compose.yaml" code={execUcLocalstackCompose} />
-        <CodeBlock lang="bash" code="envilder exec -- docker compose up" />
-        <p>{t.docs.execUcLocalstackDockerDesc}</p>
-        <CodeBlock lang="bash" code={execUcLocalstackDocker} />
-        <p>
-          {t.docs.execUcLocalstackExamplesDesc}{' '}
-          <a href="https://github.com/macalbert/envilder-examples/tree/main/cli/aws" target="_blank" rel="noopener noreferrer"><code>envilder-examples</code></a>
-        </p>
-
-        <h3>{t.docs.execUcTestsTitle}</h3>
-        <p>{t.docs.execUcTestsDesc}</p>
-        <CodeBlock lang="bash" code={execUcTests} />
-        <p>{t.docs.execUcTestsNote}</p>
-
-        <h3>{t.docs.execUcMigrationsTitle}</h3>
-        <p>{t.docs.execUcMigrationsDesc}</p>
-        <CodeBlock lang="json" filename="envilder.json" code={execUcMigrationsMap} />
-        <CodeBlock lang="bash" code={execUcMigrations} />
-
-        <h3>{t.docs.execUcTerraformTitle}</h3>
-        <p>{t.docs.execUcTerraformDesc}</p>
-        <CodeBlock lang="json" filename="envilder.json" code={execUcTerraformMap} />
-        <CodeBlock lang="bash" code="envilder exec -- terraform plan" />
-        <p>{t.docs.execUcTerraformNote}</p>
-
-        <h3>{t.docs.execUcDevTitle}</h3>
-        <p>{t.docs.execUcDevDesc}</p>
-        <CodeBlock lang="json" filename="package.json" code={execUcDevPackageJson} />
-        <p>{t.docs.execUcDevNote}</p>
-
-        <h3>{t.docs.execUcGhaTitle}</h3>
-        <p>{t.docs.execUcGhaDesc}</p>
-        <CodeBlock lang="yaml" code={execUcGhaWorkflow} />
-        <p>{t.docs.execUcGhaNote}</p>
-
-        <h3>{t.docs.execUcChainTitle}</h3>
-        <p>{t.docs.execUcChainDesc}</p>
-        <CodeBlock lang="bash" code={execUcChain} />
-        <p>{t.docs.execUcChainNote}</p>
+      <section id="exec-example" class="docs-section">
+        <h2>{ex.exampleTitle}</h2>
+        <p>{ex.exampleDesc}</p>
+        <CodeBlock lang="bash" code="envilder exec -- node app.js" />
+        <TabbedCodeBlock tabs={[
+          { label: ex.tabAws, lang: 'text', code: execOutputAws },
+          { label: ex.tabAzure, lang: 'text', code: execOutputAzure },
+        ]} />
+        <p>{ex.outputDesc}</p>
       </section>
 
       <section id="exec-behavior" class="docs-section">
-        <h2>{t.docs.execBehaviorTitle}</h2>
-
-        <h3>{t.docs.execExitTitle}</h3>
-        <p>{t.docs.execExitDesc}</p>
+        <h2>{ex.exitTitle}</h2>
+        <p>{ex.exitDesc}</p>
         <table class="docs-table">
           <thead>
-            <tr><th>{t.docs.execThCode}</th><th>{t.docs.execThMeaning}</th></tr>
+            <tr><th>{ex.thCode}</th><th>{ex.thMeaning}</th></tr>
           </thead>
           <tbody>
-            <tr><td><code>n</code></td><td>{t.docs.execExitChild}</td></tr>
-            <tr><td><code>128 + n</code></td><td>{t.docs.execExitSignal}</td></tr>
-            <tr><td><code>125</code></td><td>{t.docs.execExit125}</td></tr>
-            <tr><td><code>126</code></td><td>{t.docs.execExit126}</td></tr>
-            <tr><td><code>127</code></td><td>{t.docs.execExit127}</td></tr>
+            <tr><td><code>n</code></td><td>{ex.exitChild}</td></tr>
+            <tr><td><code>128 + n</code></td><td>{ex.exitSignal}</td></tr>
+            <tr><td><code>125</code></td><td>{ex.exit125}</td></tr>
+            <tr><td><code>126</code></td><td>{ex.exit126}</td></tr>
+            <tr><td><code>127</code></td><td>{ex.exit127}</td></tr>
           </tbody>
         </table>
-        <p class="note">{t.docs.execExitNote}</p>
+        <p class="note">{ex.exitNote}</p>
 
-        <h3>{t.docs.execFailClosedTitle}</h3>
-        <p>{t.docs.execFailClosedDesc}</p>
+        <h3>{ex.failTitle}</h3>
+        <p>{ex.failDesc}</p>
+        <CodeBlock lang="text" code={execFailOutput} />
+        <ul class="docs-list">
+          {ex.failRules.map((rule) => <li>{rule}</li>)}
+        </ul>
 
-        <h3>{t.docs.execEnvTitle}</h3>
-        <p>{t.docs.execEnvDesc}</p>
-        <CodeBlock lang="text" code="Overriding inherited variables: API_KEY" />
-        <p>{t.docs.execNoShellDesc}</p>
-        <CodeBlock lang="bash" code="envilder exec -- sh -c 'echo $DB_URL'" />
+        <h3>{ex.envTitle}</h3>
+        <p>{ex.envDesc}</p>
+        <CodeBlock lang="text" code="Overriding inherited variables: DB_PASSWORD" />
+        <p>{ex.envWindows}</p>
+        <p>{ex.noShellDesc}</p>
+        <CodeBlock lang="bash" code="envilder exec -- sh -c 'echo $DB_PASSWORD'" />
 
-        <h3>{t.docs.execGhaTitle}</h3>
-        <p>{t.docs.execGhaDesc}</p>
-        <CodeBlock lang="yaml" code="- run: npx envilder exec -- npm test" />
-        <p class="note">{t.docs.execGhaNote}</p>
+        <h3>{ex.ssoTitle}</h3>
+        <p>{ex.ssoDesc}</p>
 
-        <h3>{t.docs.execSignalsTitle}</h3>
-        <p>{t.docs.execSignalsDesc}</p>
+        <h3>{ex.signalsTitle}</h3>
+        <p>{ex.signalsDesc}</p>
+      </section>
 
+      <section id="exec-ci" class="docs-section">
+        <h2>{ex.ciTitle}</h2>
+        <p>{ex.ciDesc}</p>
+        <CodeBlock lang="yaml" code={execGhaWorkflow} />
+        <p>{ex.ghaDesc}</p>
+        <p class="note">{ex.ghaNote}</p>
+      </section>
+
+      <section id="exec-scripts" class="docs-section">
+        <h2>{ex.scriptsTitle}</h2>
+        <p>{ex.scriptsDesc}</p>
+        <CodeBlock lang="json" filename="package.json" code={execPackageJson} />
+      </section>
+
+      <section id="exec-use-cases" class="docs-section">
+        <h2>{ex.usesTitle}</h2>
+        <p>{ex.usesDesc}</p>
+        <CodeBlock lang="bash" code={execUses} />
+        <p>{ex.usesNote}</p>
         <div class="callout callout-warning">
           <span class="callout-icon">⚠️</span>
           <div>
-            <strong>{t.docs.execSandboxTitle}</strong> {t.docs.execSandboxDesc}
+            <strong>{ex.sandboxTitle}</strong> {ex.sandboxDesc}
           </div>
         </div>
-
         <div class="callout">
           <span class="callout-icon">💡</span>
           <div>
-            <strong>{t.docs.examplesTitle}</strong> {t.docs.execExamplesDesc}{' '}
+            <strong>{t.docs.examplesTitle}</strong> {ex.examplesDesc}{' '}
             <a href="https://github.com/macalbert/envilder-examples" target="_blank" rel="noopener noreferrer"><code>envilder-examples</code></a> · <a href="https://github.com/macalbert/envilder-examples/tree/main/cli" target="_blank" rel="noopener noreferrer"><code>cli</code></a>
           </div>
         </div>
+      </section>
 
-        <p><a href="https://github.com/macalbert/envilder/blob/main/docs/exec-command.md" target="_blank" rel="noopener noreferrer">{t.docs.execGuideLink}</a></p>
+      <section id="exec-errors" class="docs-section">
+        <h2>{ex.errorsTitle}</h2>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{ex.thMessage}</th><th>{ex.thFix}</th></tr>
+          </thead>
+          <tbody>
+            {execErrors.map((row) => (
+              <tr><td><code>{row.message}</code></td><td>{ex[row.fix]}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section id="exec-related" class="docs-section">
+        <h2>{ex.relatedTitle}</h2>
+        <ul class="docs-list">
+          <li><a href={localizedPath(lang, '/docs/getting-started/')}>{ex.relatedStart}</a></li>
+          <li><a href={localizedPath(lang, '/docs/map-file/')}>{ex.relatedMap}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/pull/')}>{ex.relatedPull}</a></li>
+        </ul>
+        <p><a href="https://github.com/macalbert/envilder/blob/main/docs/exec-command.md" target="_blank" rel="noopener noreferrer">{ex.guideLink}</a></p>
+      </section>
+    </>
+  )}
+
+  {routeKey === 'cli-validate' && (
+    <>
+      <section id="validate-prerequisites" class="docs-section">
+        <h2>{va.prereqTitle}</h2>
+        <ul class="docs-list">
+          {va.prereqItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+
+      <section id="validate-command" class="docs-section">
+        <h2>{va.synopsisTitle}</h2>
+        <CodeBlock lang="bash" code={validateSynopsis} />
+        <p>{va.synopsisDesc}</p>
+        <CodeBlock lang="bash" code={validateExamples} />
+
+        <h3>{va.optionsTitle}</h3>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{va.thOption}</th><th>{va.thDescription}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>--offline</code></td><td>{va.optOffline}</td></tr>
+            <tr><td><code>--envfile</code></td><td>{va.optEnvfile}</td></tr>
+            <tr><td><code>--compare-values</code></td><td>{va.optCompareValues}</td></tr>
+            <tr><td><code>--format</code></td><td>{va.optFormat}</td></tr>
+            <tr><td><code>--map</code></td><td>{va.optMap}</td></tr>
+            <tr><td><code>--provider</code></td><td>{va.optProvider}</td></tr>
+            <tr><td><code>--profile</code></td><td>{va.optProfile}</td></tr>
+            <tr><td><code>--vault-url</code></td><td>{va.optVault}</td></tr>
+          </tbody>
+        </table>
+        <p>{va.optionsNote}</p>
+        <p>{va.optionsRejected}</p>
+      </section>
+
+      <section id="validate-checks" class="docs-section">
+        <h2>{va.checksTitle}</h2>
+
+        <h3>{va.mapTitle}</h3>
+        <p>{va.mapDesc}</p>
+        <ul class="docs-list">
+          {va.mapRules.map((rule) => <li>{rule}</li>)}
+        </ul>
+        <p>{va.mapNote}</p>
+
+        <h3>{va.remoteTitle}</h3>
+        <p>{va.remoteDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{va.thStatus}</th><th>{va.thMeaning}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>exists</code></td><td>{va.statusExists}</td></tr>
+            <tr><td><code>missing</code></td><td>{va.statusMissing}</td></tr>
+            <tr><td><code>access denied</code></td><td>{va.statusDenied}</td></tr>
+            <tr><td><code>authentication failed</code></td><td>{va.statusAuth}</td></tr>
+            <tr><td><code>provider error</code></td><td>{va.statusError}</td></tr>
+          </tbody>
+        </table>
+        <p>{va.remoteSsoNote}</p>
+
+        <h3>{va.envfileTitle}</h3>
+        <p>{va.envfileDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{va.thFinding}</th><th>{va.thEffect}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>missing from .env</code></td><td>{va.envMissing}</td></tr>
+            <tr><td><code>duplicated in .env</code></td><td>{va.envDuplicated}</td></tr>
+            <tr><td><code>not declared in map file</code></td><td>{va.envUndeclared}</td></tr>
+          </tbody>
+        </table>
+        <p>{va.envfileNote}</p>
+
+        <h3>{va.valuesTitle}</h3>
+        <p>{va.valuesDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{va.thStatus}</th><th>{va.thMeaning}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>matches</code></td><td>{va.valMatches}</td></tr>
+            <tr><td><code>differs</code></td><td>{va.valDiffers}</td></tr>
+            <tr><td><code>unreadable</code></td><td>{va.valUnreadable}</td></tr>
+          </tbody>
+        </table>
+        <p>{va.valuesNote}</p>
+      </section>
+
+      <section id="validate-permissions" class="docs-section">
+        <h2>{va.permTitle}</h2>
+        <p>{va.permDesc}</p>
+        <h3>{va.tabAws}</h3>
+        <p>{va.permAwsDesc}</p>
+        <CodeBlock lang="json" code={validateAwsPolicy} />
+        <p class="note">{va.permAwsNote}</p>
+        <h3>{va.tabAzure}</h3>
+        <p>{va.permAzureDesc}</p>
+        <ul class="docs-list">
+          {va.permAzureItems.map((item) => <li>{item}</li>)}
+        </ul>
+        <TabbedCodeBlock tabs={[
+          { label: va.tabRbac, lang: 'bash', code: validateAzureRbac },
+          { label: va.tabPolicy, lang: 'bash', code: validateAzurePolicy },
+        ]} />
+        <p class="note">{va.permAzureNote}</p>
+        <p>{va.permValuesNote}</p>
+      </section>
+
+      <section id="validate-output" class="docs-section">
+        <h2>{va.outputTitle}</h2>
+        <p>{va.outputOkDesc}</p>
+        <CodeBlock lang="text" code={validateOkOutput} />
+        <p>{va.outputFailDesc}</p>
+        <CodeBlock lang="text" code={validateFailOutput} />
+        <p>{va.outputOfflineDesc}</p>
+        <CodeBlock lang="text" code={validateOfflineOutput} />
+        <p>{va.outputEnvfileDesc}</p>
+        <CodeBlock lang="text" code={validateEnvfileOutput} />
+        <p>{va.outputEnvfileNote}</p>
+        <p>{va.outputInvalidDesc}</p>
+        <CodeBlock lang="text" code={validateInvalidOutput} />
+      </section>
+
+      <section id="validate-json" class="docs-section">
+        <h2>{va.jsonTitle}</h2>
+        <p>{va.jsonDesc}</p>
+        <CodeBlock lang="json" code={validateJson} />
+        <table class="docs-table">
+          <thead>
+            <tr><th>{va.thField}</th><th>{va.thDescription}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>valid</code></td><td>{va.fieldValid}</td></tr>
+            <tr><td><code>offline</code></td><td>{va.fieldOffline}</td></tr>
+            <tr><td><code>mapFile</code></td><td>{va.fieldMapFile}</td></tr>
+            <tr><td><code>keys</code></td><td>{va.fieldKeys}</td></tr>
+            <tr><td><code>envFile</code></td><td>{va.fieldEnvFile}</td></tr>
+            <tr><td><code>error</code></td><td>{va.fieldError}</td></tr>
+          </tbody>
+        </table>
+        <p class="note">{va.jsonNote}</p>
+      </section>
+
+      <section id="validate-exit-codes" class="docs-section">
+        <h2>{va.exitTitle}</h2>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{va.thCode}</th><th>{va.thMeaning}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>0</code></td><td>{va.exit0}</td></tr>
+            <tr><td><code>1</code></td><td>{va.exit1}</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="validate-ci" class="docs-section">
+        <h2>{va.ciTitle}</h2>
+        <p>{va.ciDesc}</p>
+        <CodeBlock lang="yaml" code={validateCi} />
+        <p>{va.ciEnvExample}</p>
+        <p>{va.ciJsonDesc}</p>
+        <CodeBlock lang="yaml" code={validateCiJson} />
+        <p class="note">{va.ciNote}</p>
+      </section>
+
+      <section id="validate-sdks" class="docs-section">
+        <h2>{va.sdkTitle}</h2>
+        <p>{va.sdkDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{va.thSdk}</th><th>{va.thCheck}</th><th>{va.thLoad}</th></tr>
+          </thead>
+          <tbody>
+            {validateSdkRows.map((row) => (
+              <tr>
+                <td><a href={localizedPath(lang, row.href)}>{row.sdk}</a></td>
+                <td><code>{row.check}</code></td>
+                <td><code>{row.load}</code></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>{va.sdkNote}</p>
+      </section>
+
+      <section id="validate-limits" class="docs-section">
+        <h2>{va.limitsTitle}</h2>
+        <ul class="docs-list">
+          {va.limitsItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+
+      <section id="validate-related" class="docs-section">
+        <h2>{va.relatedTitle}</h2>
+        <ul class="docs-list">
+          <li><a href={localizedPath(lang, '/docs/map-file/')}>{va.relatedMap}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/pull/')}>{va.relatedPull}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/exec/')}>{va.relatedExec}</a></li>
+          <li><a href={localizedPath(lang, '/docs/github-action/')}>{va.relatedGha}</a></li>
+        </ul>
+        <p><a href="https://github.com/macalbert/envilder/blob/main/docs/validate-command.md" target="_blank" rel="noopener noreferrer">{va.guideLink}</a></p>
       </section>
     </>
   )}
@@ -1264,6 +2334,34 @@ Env.Load(env, new Dictionary<string, string?>
 
 var secrets = Env.ResolveFile("envilder.json");
 secrets.ValidateSecrets(); // throws SecretValidationException if any value is empty`} />
+
+        <h3>{t.docs.sdkContractValidation}</h3>
+        <p>{t.docs.sdkContractValidationDesc}</p>
+        <p><a href={localizedPath(lang, '/docs/cli/validate/')}>{t.docs.sdkContractValidationCliLink}</a></p>
+        <CodeBlock lang="csharp" code={`using Envilder;
+
+var result = await Env.FromMapFile("envilder.json").ValidateContractAsync();
+if (!result.IsValid)
+{
+    foreach (var error in result.MapFileErrors)
+    {
+        Console.WriteLine($"{error.Key}: {error.Message}");
+    }
+
+    foreach (var key in result.Keys.Where(k => k.Status != SecretExistenceStatus.Exists))
+    {
+        Console.WriteLine($"{key.Variable} ({key.Path}): {key.Status}");
+    }
+}`} />
+        <p>{t.docs.sdkContractValidationLoadDesc}</p>
+        <CodeBlock lang="csharp" code={`var secrets = await Env.FromMapFile("envilder.json")
+    .WithContractValidation()
+    .InjectAsync(); // throws ContractValidationException`} />
+
+        <h3>{t.docs.sdkCustomProvider}</h3>
+        <p>{t.docs.sdkCustomProviderDesc}</p>
+        <CodeBlock lang="csharp" code={cpDotnetCode} />
+        <p><a href={localizedPath(lang, '/docs/providers/custom/')}>{t.docs.sdkCustomProviderGuideLink}</a></p>
 
         <h3>{t.docs.sdkDotnetQuickStartResolve}</h3>
         <p>{t.docs.sdkDotnetQuickStartResolveDesc}</p>
@@ -1442,6 +2540,27 @@ secrets = (
 secrets = Envilder.resolve_file('envilder.json')
 validate_secrets(secrets)  # raises SecretValidationError if any value is empty`} />
 
+        <h3>{t.docs.sdkContractValidation}</h3>
+        <p>{t.docs.sdkContractValidationDesc}</p>
+        <p><a href={localizedPath(lang, '/docs/cli/validate/')}>{t.docs.sdkContractValidationCliLink}</a></p>
+        <CodeBlock lang="python" code={`from envilder import Envilder, SecretExistenceStatus
+
+result = Envilder.from_map_file('envilder.json').validate_contract()
+if not result.is_valid:
+    for error in result.map_file_errors:
+        print(f'{error.key}: {error.message}')
+    for key in result.keys:
+        if key.status != SecretExistenceStatus.EXISTS:
+            print(f'{key.variable} ({key.path}): {key.status.value}')`} />
+        <p>{t.docs.sdkContractValidationLoadDesc}</p>
+        <CodeBlock lang="python" code={`Envilder.from_map_file('envilder.json').with_contract_validation().inject()
+# raises ContractValidationError`} />
+
+        <h3>{t.docs.sdkCustomProvider}</h3>
+        <p>{t.docs.sdkCustomProviderDesc}</p>
+        <CodeBlock lang="python" code={cpPythonCode} />
+        <p><a href={localizedPath(lang, '/docs/providers/custom/')}>{t.docs.sdkCustomProviderGuideLink}</a></p>
+
         <div class="callout">
           <span class="callout-icon">💡</span>
           <div>
@@ -1516,6 +2635,30 @@ await Envilder.load(env, {
 const secrets = await Envilder.resolveFile('envilder.json');
 validateSecrets(secrets); // throws SecretValidationError if any value is empty`} />
 
+        <h3>{t.docs.sdkContractValidation}</h3>
+        <p>{t.docs.sdkContractValidationDesc}</p>
+        <p><a href={localizedPath(lang, '/docs/cli/validate/')}>{t.docs.sdkContractValidationCliLink}</a></p>
+        <CodeBlock lang="typescript" code={`import { Envilder } from '@envilder/sdk';
+
+const result = await Envilder.fromMapFile('envilder.json').validateContract();
+if (!result.isValid) {
+  for (const error of result.mapFileErrors) {
+    console.log(\`\${error.key}: \${error.message}\`);
+  }
+  for (const key of result.keys.filter((k) => k.status !== 'exists')) {
+    console.log(\`\${key.variable} (\${key.path}): \${key.status}\`);
+  }
+}`} />
+        <p>{t.docs.sdkContractValidationLoadDesc}</p>
+        <CodeBlock lang="typescript" code={`await Envilder.fromMapFile('envilder.json')
+  .withContractValidation()
+  .inject(); // throws ContractValidationError`} />
+
+        <h3>{t.docs.sdkCustomProvider}</h3>
+        <p>{t.docs.sdkCustomProviderDesc}</p>
+        <CodeBlock lang="typescript" code={cpNodejsCode} />
+        <p><a href={localizedPath(lang, '/docs/providers/custom/')}>{t.docs.sdkCustomProviderGuideLink}</a></p>
+
         <div class="callout">
           <span class="callout-icon">💡</span>
           <div>
@@ -1545,6 +2688,30 @@ validateSecrets(secrets); // throws SecretValidationError if any value is empty`
         </ul>
 
         <p class="note">{t.docs.ghaPullOnly}</p>
+      </section>
+
+      <section id="gha-modes" class="docs-section">
+        <h2>{t.docs.ghaModesTitle}</h2>
+        <p>{t.docs.ghaModesDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{t.docs.ghaModesThMode}</th><th>{t.docs.ghaModesThSelect}</th><th>{t.docs.ghaModesThScope}</th><th>{t.docs.ghaModesThFile}</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>{t.docs.ghaModeJob}</td><td>{t.docs.ghaModeJobSelect}</td><td>{t.docs.ghaModeJobScope}</td><td>{t.docs.ghaModeJobFiles}</td></tr>
+            <tr><td>{t.docs.ghaModeCommand}</td><td><code>command</code></td><td>{t.docs.ghaModeCommandScope}</td><td>{t.docs.ghaModeCommandFiles}</td></tr>
+            <tr><td>{t.docs.ghaModeEnvFile}</td><td><code>env-file</code></td><td>{t.docs.ghaModeEnvFileScope}</td><td>{t.docs.ghaModeEnvFileFiles}</td></tr>
+          </tbody>
+        </table>
+        <p>{t.docs.ghaModesJobNote}</p>
+        <p>{t.docs.ghaModesEnvFileNote}</p>
+        <CodeBlock lang="yaml" filename=".github/workflows/compose.yml" code={`- uses: macalbert/envilder/github-action@v0
+  with:
+    map-file: envilder.json
+    env-file: \${{ runner.temp }}/envilder.env
+
+- run: docker compose --env-file "\${{ runner.temp }}/envilder.env" up -d`} />
+        <p class="note">{t.docs.ghaModesSafetyNote}</p>
       </section>
 
       <section id="gha-aws" class="docs-section">
@@ -1592,7 +2759,6 @@ jobs:
         uses: macalbert/envilder/github-action@v0
         with:
           map-file: envilder.json
-          env-file: .env
 
       - run: npm ci
       - run: npm run deploy`} />
@@ -1652,7 +2818,6 @@ jobs:
         uses: macalbert/envilder/github-action@v0
         with:
           map-file: envilder.json
-          env-file: .env
 
       - run: npm ci
       - run: npm run deploy`} />
@@ -1693,7 +2858,6 @@ jobs:
         uses: macalbert/envilder/github-action@v0
         with:
           map-file: config/\${{ inputs.environment }}/envilder.json
-          env-file: .env
 
       - run: npm ci
       - run: npm run deploy`} />
@@ -1702,33 +2866,19 @@ jobs:
       <section id="gha-exec" class="docs-section">
         <h2>{t.docs.ghaExecTitle}</h2>
         <p>{t.docs.ghaExecDesc}</p>
-        <CodeBlock lang="yaml" filename=".github/workflows/test.yml" code={`name: Test
+        <CodeBlock lang="yaml" filename=".github/workflows/deploy.yml" code={`- name: Configure AWS Credentials
+  uses: aws-actions/configure-aws-credentials@v6
+  with:
+    role-to-assume: arn:aws:iam::123456789012:role/github-envilder
+    aws-region: eu-west-1
 
-on: [push]
+- name: Deploy with secrets
+  uses: macalbert/envilder/github-action@v0
+  with:
+    map-file: envilder.json
+    command: ./deploy.sh --prod
 
-permissions:
-  id-token: write
-  contents: read
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 22
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          role-to-assume: arn:aws:iam::123456789012:role/github-envilder
-          aws-region: eu-west-1
-
-      - run: npm ci
-      - name: Run tests with secrets in memory
-        run: npx envilder exec --map=envilder.json -- npm test`} />
+- run: echo "$DB_PASSWORD"   # empty: the secrets stayed in the deploy step`} />
         <p class="note">{t.docs.ghaExecNote}</p>
         <p><a href={localizedPath(lang, '/docs/cli/exec/')}>{t.docs.ghaExecLink}</a></p>
       </section>
@@ -1799,7 +2949,8 @@ jobs:
           </thead>
           <tbody>
             <tr><td><code>map-file</code></td><td>{t.docs.ghaYes}</td><td>-</td><td>{t.docs.ghaInputMap}</td></tr>
-            <tr><td><code>env-file</code></td><td>{t.docs.ghaYes}</td><td>-</td><td>{t.docs.ghaInputEnv}</td></tr>
+            <tr><td><code>env-file</code></td><td>{t.docs.ghaNo}</td><td>-</td><td>{t.docs.ghaInputEnv}</td></tr>
+            <tr><td><code>command</code></td><td>{t.docs.ghaNo}</td><td>-</td><td>{t.docs.ghaInputCommand}</td></tr>
             <tr><td><code>provider</code></td><td>{t.docs.ghaNo}</td><td><code>aws</code></td><td>{t.docs.ghaInputProvider}</td></tr>
             <tr><td><code>vault-url</code></td><td>{t.docs.ghaNo}</td><td>-</td><td>{t.docs.ghaInputVault}</td></tr>
           </tbody>
@@ -2181,6 +3332,9 @@ jobs:
     .docs-table {
       display: block;
       overflow-x: auto;
+    }
+
+    .docs-table td:first-child {
       white-space: nowrap;
     }
 

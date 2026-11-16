@@ -1,0 +1,7 @@
+{
+  "$config": {
+    "provider": "gcp",
+    "projectId": "billing-dev"
+  },
+  "DB_PASSWORD": "billing-db-password"
+}

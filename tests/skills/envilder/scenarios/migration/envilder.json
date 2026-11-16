@@ -1,0 +1,5 @@
+{
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
+  "DB_PASSWORD": "/billing/dev/db-password",
+  "SMTP_PASSWORD": "/billing/dev/smtp-password"
+}

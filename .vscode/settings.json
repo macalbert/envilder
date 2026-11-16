@@ -19,6 +19,12 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.biome": "explicit"
   },
+  "files.watcherExclude": {
+    "**/.claude/worktrees/**": true
+  },
+  "search.exclude": {
+    "**/.claude/worktrees/**": true
+  },
   "chat.subagents.allowInvocationsFromSubagents": true,
   "github.copilot.chat.commitMessageGeneration.instructions": [
     {

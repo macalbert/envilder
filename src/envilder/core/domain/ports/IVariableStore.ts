@@ -1,9 +1,16 @@
+import type { EnvFileEntry } from '../EnvFileComparison.js';
 import type { ParsedMapFile } from '../MapFileConfig.js';
 
 export interface IVariableStore {
   getMapping(source: string): Promise<Record<string, string>>;
   getParsedMapping(source: string): Promise<ParsedMapFile>;
   getEnvironment(source: string): Promise<Record<string, string>>;
+  /**
+   * Every assignment of an env file in file order, repeated keys included,
+   * read with the parser `getEnvironment` uses. `null` when the file does not
+   * exist.
+   */
+  readEnvironmentEntries(source: string): Promise<EnvFileEntry[] | null>;
   saveEnvironment(
     destination: string,
     envVariables: Record<string, string>,
