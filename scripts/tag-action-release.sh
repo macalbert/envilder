@@ -29,9 +29,10 @@ pnpm build:gha
 
 bot=(-c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com")
 
-# Stage only the Action files: other steps may leave unrelated edits behind
+# Commit only the Action files: other steps may leave unrelated edits behind,
+# staged or not
 git add -f github-action/dist/index.js action.yml
-git "${bot[@]}" commit --quiet --allow-empty -m "build: GitHub Action bundle for $tag"
+git "${bot[@]}" commit --quiet --allow-empty -m "build: GitHub Action bundle for $tag" -- github-action/dist/index.js action.yml
 git ls-files --error-unmatch github-action/dist/index.js github-action/action.yml action.yml >/dev/null
 
 git "${bot[@]}" tag -a "$tag" -m "Release $tag"

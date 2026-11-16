@@ -389,7 +389,8 @@ The release workflows create that commit and the tag with
   (the CLI and the Action share the tag).
 - `publish-action.yml` (run manually with a `version` input) tags a version
   that does not exist yet, or verifies that an existing tag ships a fresh
-  bundle, then moves the floating `v0` tag and creates the release.
+  bundle, then moves the floating `v0` tag. A new version also creates the
+  GitHub release.
 
 Never build or push a release tag by hand: the bundle must come from the
 tagged source.
