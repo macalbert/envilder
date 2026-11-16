@@ -526,6 +526,63 @@ describe('findTryBlocksInTests', () => {
     ]);
   });
 
+  it('Should_FollowOuterHelper_When_TestDoesNotShadowIt', () => {
+    // Arrange
+    const source = [
+      'function run() { try { a(); } catch {} }',
+      "it('local', () => { const run = () => 1; expect(run()).toBe(1); });",
+      "it('local function', () => { function run() { return 1; } expect(run()).toBe(1); });",
+      "it('outer', () => { const result = run(); expect(result).toBe(1); });",
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.ts', source);
+
+    // Assert
+    expect(actual).toEqual([{ line: 1, test: 'outer', helper: 'run' }]);
+  });
+
+  it('Should_SkipOuterHelper_When_PythonOrCSharpTestDeclaresSameName', () => {
+    // Arrange
+    const python = [
+      'def run():',
+      '    try:',
+      '        act()',
+      '    finally:',
+      '        clean_up()',
+      '',
+      'def Should_UseLocal_When_Called():',
+      '    def run():',
+      '        return 1',
+      '    assert run() == 1',
+    ].join('\n');
+    const cSharp = [
+      'public class ClientTests',
+      '{',
+      '\tprivate static int Run()',
+      '\t{',
+      '\t\ttry { return Act(); } finally { CleanUp(); }',
+      '\t}',
+      '',
+      '\t[Fact]',
+      '\tpublic void Should_UseLocal_When_Called()',
+      '\t{',
+      '\t\tint Run() => 1;',
+      '\t\tRun().Should().Be(1);',
+      '\t}',
+      '}',
+    ].join('\n');
+
+    // Act
+    const actual = [
+      ...findTryBlocksInTests('tests/test_client.py', python),
+      ...findTryBlocksInTests('tests/ClientTests.cs', cSharp),
+    ];
+
+    // Assert
+    expect(actual).toEqual([]);
+  });
+
   it('Should_ReportNothing_When_FileTypeIsNotSupported', () => {
     // Arrange
     const source = "it('x', () => { try { a(); } catch {} });";

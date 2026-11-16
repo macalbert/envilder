@@ -81,9 +81,11 @@ code in other files (such as `tests/support/` and the LocalStack fixtures) are
 not checked.
 
 The check reads source text, not a syntax tree, and follows helpers by name
-within the file. A test that calls a local function with the same name as
-another helper of the file is treated as calling both; rename one of them if
-that reports a `try` the test never runs.
+within the file. A name that a test or helper declares in its own body (a
+variable, or a nested or local function) shadows a helper of the same name,
+so it is not followed. Scopes inside that body, such as a block or another
+nested function, are not told apart: if that makes the check report a `try`
+the test never runs, rename one of the functions.
 
 It scans tracked files only and has no dependencies. `pnpm lint` runs it, and
 `test-try-blocks.yml` runs it on PRs that touch tests.

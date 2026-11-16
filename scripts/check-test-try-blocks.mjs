@@ -250,6 +250,8 @@ function lineAt(text, offset) {
 }
 
 const TS_IDENTIFIER = /(?<![\w$])(?<!\.\s*)[A-Za-z_$][\w$]*/g;
+const TS_LOCAL =
+  /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)|\bfunction\s*\*?\s*([A-Za-z_$][\w$]*)/g;
 const TS_FUNCTION =
   /\bfunction\s*\*?\s*([A-Za-z_$][\w$]*)\s*(?:<[^>(]*>)?\s*\(/g;
 const TS_INITIALIZER =
@@ -322,8 +324,21 @@ function typeScriptBlock(text, masked, name, start, end) {
     tries: [...range.matchAll(TRY_BLOCK)].map((match) =>
       lineAt(text, start + match.index),
     ),
-    refs: new Set(range.match(TS_IDENTIFIER)),
+    refs: outerReferences(range, TS_IDENTIFIER, TS_LOCAL),
   };
+}
+
+/**
+ * Returns the names a block uses that it does not declare itself: a local
+ * such as `const run = () => 1` shadows a helper of the file named `run`.
+ */
+function outerReferences(code, identifier, local) {
+  const locals = new Set(
+    [...code.matchAll(local)].map((match) => match.slice(1).find(Boolean)),
+  );
+  return new Set(
+    (code.match(identifier) ?? []).filter((name) => !locals.has(name)),
+  );
 }
 
 /** Returns the braced body of a function whose parameters open here. */
@@ -498,8 +513,19 @@ function interpolatedChar(scan, char) {
   scan.depth += BRACE_DEPTH_CHANGE[char] ?? 0;
   return inside ? char : ' ';
 }
-const PYTHON_COMMENTS = [/#.*/g];
-const CSHARP_COMMENTS = [/\/\*[\s\S]*?\*\//g, /\/\/.*/g];
+// How each language marks a try, a comment, and a name declared locally (a
+// nested function or a variable), which shadows a helper of the same name.
+const PYTHON = {
+  tryPattern: PYTHON_TRY,
+  comments: [/#.*/g],
+  local: /^\s*(?:async\s+)?def\s+(\w+)|^\s*(\w+)\s*(?::[^=\n]*)?=(?!=)/gm,
+};
+const CSHARP = {
+  tryPattern: CSHARP_TRY,
+  comments: [/\/\*[\s\S]*?\*\//g, /\/\/.*/g],
+  local:
+    /^\s*(?:(?:static|async)\s+)*(?!(?:return|await|throw|new)\b)[\w<>[\],.?]+\s+(\w+)\s*(?:\([^)\n]*\)\s*(?:=>|\{|$)|=(?!=))/gm,
+};
 
 /**
  * Keeps the code of a body: each string literal becomes the expressions it
@@ -516,15 +542,18 @@ function codeOf(body, comments) {
   );
 }
 
-function lineBlock(name, lines, tryPattern, comments) {
-  const code = codeOf(lines.map(({ line }) => line).join('\n'), comments);
+function lineBlock(name, lines, language) {
+  const code = codeOf(
+    lines.map(({ line }) => line).join('\n'),
+    language.comments,
+  );
   const codeByLine = code.split('\n');
   return {
     name,
     tries: lines
-      .filter((_, index) => tryPattern.test(codeByLine[index]))
+      .filter((_, index) => language.tryPattern.test(codeByLine[index]))
       .map(({ number }) => number),
-    refs: new Set(code.match(IDENTIFIER)),
+    refs: outerReferences(code, IDENTIFIER, language.local),
   };
 }
 
@@ -566,7 +595,7 @@ function parsePython(text) {
     }
     const name = declaration[2];
     const body = pythonBody(lines, start, declaration[1].length);
-    const block = lineBlock(name, body, PYTHON_TRY, PYTHON_COMMENTS);
+    const block = lineBlock(name, body, PYTHON);
     (PYTHON_TEST_NAME.test(name) ? tests : helpers).push(block);
   });
   return { tests, helpers };
@@ -605,12 +634,7 @@ function parseCSharp(text) {
     const declaration = line.match(CSHARP_METHOD);
     if (declaration) {
       const body = cSharpBody(lines, start, declaration[1].length);
-      const block = lineBlock(
-        declaration[2],
-        body,
-        CSHARP_TRY,
-        CSHARP_COMMENTS,
-      );
+      const block = lineBlock(declaration[2], body, CSHARP);
       (isTest ? tests : helpers).push(block);
     }
     isTest = false;
