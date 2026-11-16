@@ -13,8 +13,15 @@ set -euo pipefail
 : "${VERSION:?VERSION is required (MAJOR.MINOR.PATCH, without the v prefix)}"
 tag="v$VERSION"
 
+# A retry of the same run finds its own tag. A later commit with the same
+# version (e.g. after a failed npm publish) must not publish other code under
+# that tag, so the tagged source has to match this commit, bundle aside.
 if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
-  echo "ℹ️ Tag $tag already exists; leaving it as it is."
+  if ! git diff --quiet "refs/tags/$tag^{commit}" HEAD -- . ':(exclude)github-action/dist/index.js'; then
+    echo "❌ Tag $tag already exists on different source. Bump the version instead of reusing it." >&2
+    exit 1
+  fi
+  echo "ℹ️ Tag $tag already exists on this source; leaving it as it is."
   exit 0
 fi
 
