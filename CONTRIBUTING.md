@@ -86,8 +86,8 @@ Non-JS SDKs use the **Makefile**:
 pnpm build                    # Compile TypeScript
 pnpm test                     # Unit tests + coverage
 pnpm test:ci                  # Tests with JUnit reporter
-pnpm build:gha                # Bundle GHA with esbuild
-pnpm verify:gha               # Verify GHA bundle is fresh
+pnpm build:gha                # Bundle GHA with esbuild (not tracked on main)
+pnpm verify:gha               # Verify the root action.yml is fresh
 pnpm local:install             # Build + pack + install globally
 pnpm local:test-run            # Run CLI against sample map
 pnpm dev:run                   # Run CLI via tsx (dev mode)
@@ -191,7 +191,10 @@ needs no new entry.
 - Reference actions in this repository as `$/path` (for example
   `uses: $/github-action`), not `./path`: the lockfile cannot follow `./`
   actions and the run fails once it is enforced. `$/` runs the action as
-  committed at the run's commit, not the workspace.
+  committed at the run's commit, not the workspace. `test-action.yml` is
+  the exception: `main` does not track the Action bundle, so it builds it
+  and runs `node github-action/dist/index.js` the way
+  `github-action/action.yml` does.
 - `--no-narrow` keeps refs as written (`@v7`) instead of rewriting them to
   a full tag.
 - The SHA pins inside `action.yml` and `github-action/action.yml` are what

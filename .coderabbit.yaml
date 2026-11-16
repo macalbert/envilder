@@ -52,9 +52,9 @@ reviews:
         Provider SDK errors map to typed domain errors (ADR-0010).
     - path: "src/envilder/apps/**"
       instructions: |
-        Code here is bundled into the GitHub Action. A behaviour change must
-        come with an updated github-action/dist/index.js (pnpm build:gha);
-        CI rejects stale bundles via pnpm verify:gha.
+        Code here is bundled into the GitHub Action at release time
+        (ADR-0015). main does not track github-action/dist/index.js, so a
+        pull request must not add it.
 
     - path: "src/sdks/dotnet/**"
       instructions: |

@@ -69,7 +69,6 @@ workflows:
         - 'pnpm/action-setup@v6'
     '.github/workflows/test-action.yml':
         - 'actions/checkout@v7'
-        - 'actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1'
         - 'actions/setup-node@v7'
         - 'aws-actions/configure-aws-credentials@v6.3.0'
         - 'pnpm/action-setup@v6'
@@ -110,10 +109,6 @@ workflows:
         - 'dorny/paths-filter@v4'
         - 'dorny/test-reporter@v3'
         - 'pnpm/action-setup@v6'
-    '.github/workflows/verify-action-build.yml':
-        - 'actions/checkout@v7'
-        - 'actions/setup-node@v7'
-        - 'pnpm/action-setup@v6'
     '.github/workflows/verify-actions-lock.yml':
         - 'actions/checkout@v7'
 dependencies:
@@ -152,11 +147,6 @@ dependencies:
         commit: 'sha1-0f4a354dd5547a28c70b7853dbd95d5b67886e73'
         owner_id: 44036562
         repo_id: 192625306
-    'actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1':
-        ref: 'v7.1.0'
-        commit: 'sha1-949feb2413d6458794dcd2491c4babbbce0c15c1'
-        owner_id: 44036562
-        repo_id: 189476904
     'actions/setup-node@v7':
         ref: 'v7'
         commit: 'sha1-949feb2413d6458794dcd2491c4babbbce0c15c1'

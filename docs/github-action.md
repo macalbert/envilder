@@ -377,38 +377,22 @@ Verify that:
 
 For maintainers releasing new versions:
 
-1. **Build the project:**
+`main` does not track `github-action/dist/index.js`. A release tag points to
+a commit, outside `main`, that adds the bundle built from the tagged source,
+so users can reference `macalbert/envilder/github-action@v0` without building
+the action themselves. Referencing `@main` does not work.
 
-   ```bash
-   pnpm install --frozen-lockfile
-   pnpm build:gha
-   ```
+The release workflows create that commit and the tag with
+`scripts/tag-action-release.sh`:
 
-2. **Commit the action bundle referenced by `action.yml`:**
+- `publish-npm.yml` tags `v<version>` when a CLI version bump reaches `main`
+  (the CLI and the Action share the tag).
+- `publish-action.yml` (run manually with a `version` input) tags a version
+  that does not exist yet, or verifies that an existing tag ships a fresh
+  bundle, then moves the floating `v0` tag and creates the release.
 
-   ```bash
-   git add action.yml github-action/dist/index.js
-   git commit -m "chore: build GitHub Action release"
-   ```
-
-3. **Verify the committed bundle is current:**
-
-   ```bash
-   pnpm verify:gha
-   ```
-
-4. **Create the release tag and update the floating `v0` tag to the same commit:**
-
-   ```bash
-   release_tag=v0.x.y
-   git tag -a "$release_tag" -m "Release $release_tag"
-   git tag -fa v0 -m "Update v0 to $release_tag"
-   git push origin "$release_tag"
-   git push origin v0 --force
-   ```
-
-`github-action/dist/index.js` **must be committed** before tagging so users can reference
-`macalbert/envilder/github-action@v0` without building the action themselves.
+Never build or push a release tag by hand: the bundle must come from the
+tagged source.
 
 ## Examples
 

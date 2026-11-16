@@ -16,8 +16,8 @@ pnpm build              # TypeScript compilation
 pnpm test               # Vitest with coverage
 pnpm lint               # Secretlint + Biome check + tsc --noEmit (read-only)
 pnpm format:check       # Biome format check (read-only)
-pnpm build:gha          # Bundle GitHub Action into github-action/dist/index.js
-pnpm verify:gha         # Fails if GHA bundle is stale
+pnpm build:gha          # Bundle GitHub Action into github-action/dist/index.js (not tracked on main)
+pnpm verify:gha         # Fails if the root action.yml (or a release tag's bundle) is stale
 ```
 
 Always run before committing: `pnpm lint && pnpm test && pnpm verify:gha`
@@ -48,8 +48,11 @@ e2e/                         End-to-end tests (TestContainers)
 
 ## Gotchas
 
-- After any code change touching CLI or GHA, run `pnpm build:gha`: CI will
-  reject stale bundles via `pnpm verify:gha`.
+- `main` does not track `github-action/dist/index.js`: the release workflows
+  build it and tag a commit that ships it (`scripts/tag-action-release.sh`,
+  ADR-0015). Never commit the bundle. Run `pnpm build:gha` to try the Action
+  locally, and commit the regenerated root `action.yml` after changing
+  `github-action/action.yml`.
 - `pnpm format` **writes** files (Biome --write). Use `pnpm format:check` for
   validation only.
 - SDKs are independent: they share the map-file format but have zero code

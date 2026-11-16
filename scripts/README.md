@@ -79,15 +79,15 @@ The workflow is started manually (`workflow_dispatch`) with a `version` input
 1. Uses esbuild to bundle compiled JavaScript + all dependencies → single minified `github-action/dist/index.js`
 2. Validates the `version` input and checks whether tag `v<version>` already exists
 3. **New version** (no tag yet):
-   1. Builds bundle with `pnpm build:gha`, with minification configured in the
-      esbuild script
-   2. Commits the generated `github-action/dist/index.js` and root `action.yml`
-      to current branch
-   3. Creates and pushes the version tag (e.g., `v0.7.0`)
-   4. Moves the major tag (e.g., `v0`) to the new version
-   5. Creates the GitHub release
+   1. Runs `scripts/tag-action-release.sh`: builds the bundle with
+      `pnpm build:gha`, commits `github-action/dist/index.js` and the root
+      `action.yml` on top of the checked-out commit, and pushes only the
+      version tag (e.g., `v0.7.0`). `main` never tracks the bundle; the
+      release commit is reachable from the tag only
+   2. Moves the major tag (e.g., `v0`) to the new version
+   3. Creates the GitHub release
 4. **Existing version** (tag already created, e.g. by `publish-npm.yml` when the
-   CLI and the Action share a version):
+   CLI and the Action share a version; it tags with the same script):
    1. Checks out the existing tag, asserts that `github-action/dist/index.js`,
       `github-action/action.yml` and `action.yml` are tracked in it, and runs
       `pnpm verify:gha` against it (fails if any file is missing or stale)
@@ -101,7 +101,8 @@ This approach ensures:
 - ✅ Fast startup time (no node_modules resolution)
 - ✅ Re-running for an existing version is safe: it never re-creates the version tag, and only moves the major tag after the bundle is verified
   - ⚠️ The major tag always follows the dispatched version, so dispatching a version older than the one `v0` points to moves `v0` backwards. Always dispatch the latest published version.
-- ✅ Repository stays ultra-clean (only the minified bundle and the action manifests are tracked, no source maps or type definitions)
+- ✅ Repository stays ultra-clean (`main` tracks only the action manifests; the minified bundle lives in release tags, with no source maps or type definitions)
+- ✅ Dependency updates never leave a stale bundle on `main` (ADR-0015)
 
 **Key workflow steps:**
 
@@ -137,7 +138,7 @@ steps:
       git ls-files --error-unmatch github-action/dist/index.js github-action/action.yml action.yml >/dev/null
       pnpm verify:gha
 
-  # ... new versions only: build, commit bundle, create version tag ...
+  # ... new versions only: bash scripts/tag-action-release.sh ...
 
   - name: ⭐ Collect the Star (Update major tag)
     run: |
@@ -151,3 +152,7 @@ steps:
 
 Standard npm publishing workflow - compiled files are included in the package tarball via `package.json`
 `files` field.
+
+Before publishing, it runs `scripts/tag-action-release.sh` to create the
+`v<version>` tag (shared by the CLI and the GitHub Action) on a commit that
+ships the Action bundle, then creates the GitHub release on that tag.

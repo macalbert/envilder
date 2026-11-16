@@ -176,9 +176,8 @@ dit/
 /package/
 envilder-*.tgz
 
-# GitHub Action compiled files - only track the bundle
+# GitHub Action bundle: built at release time and tracked only by release tags
 github-action/dist/
-!github-action/dist/index.js
 
 # Publish Web Output
 *.[Pp]ublish.xml

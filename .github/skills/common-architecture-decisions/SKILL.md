@@ -38,6 +38,7 @@ behind tooling choices and architectural patterns before proposing changes.
 | [ADR-0009](../../../docs/adr/0009-sdk-dependency-compatibility-policy.md) | SDK Dependency Compatibility Policy | All SDKs | Minimum viable engine + dep versions in published SDKs; devDeps unconstrained; acceptance tests verify minimum |
 | [ADR-0013](../../../docs/adr/0013-verification-first-agent-workflow.md) | Verification-First Agent Workflow | AI workflow | Independent verification contracts, intent-specific oracles, isolated implementation, review, and final evaluation |
 | [ADR-0014](../../../docs/adr/0014-localstack-azure-key-vault-emulator.md) | Azure Key Vault Emulator | All test suites | LocalStack for Azure replaces Lowkey Vault; vault created through ARM; local managed identity token endpoint for `DefaultAzureCredential` |
+| [ADR-0015](../../../docs/adr/0015-github-action-bundle-in-release-tags.md) | GitHub Action Bundle in Release Tags | GitHub Action | `main` does not track `github-action/dist/index.js`; `scripts/tag-action-release.sh` tags a commit outside `main` that ships it; CI builds the bundle from source |
 
 ## Quick Reference: Test Doubles per Stack
 

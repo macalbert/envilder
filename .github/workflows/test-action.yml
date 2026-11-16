@@ -19,7 +19,6 @@ on:
       - ".github/workflows/test-action.yml"
       - "action.yml"
       - "github-action/action.yml"
-      - "github-action/dist/**"
       - "src/envilder/apps/gha/**"
       - "src/envilder/apps/shared/**"
       - "src/envilder/core/**"
@@ -59,16 +58,19 @@ jobs:
       - name: 📦 Open the ? Block (Install packages)
         run: pnpm install --frozen-lockfile
 
-      # `$/github-action` runs the action committed at this run's commit,
-      # not the workspace, so the committed bundle must match the source
-      - name: 🏗️ Build the Castle (verify the committed bundle)
-        run: pnpm verify:gha
+      # main does not track the bundle, so `$/github-action` (the action as
+      # committed) has none, and `./github-action` cannot be covered by
+      # actions.lock. Build the bundle from this commit's source and run it
+      # the way github-action/action.yml does: from the workspace, with the
+      # inputs as INPUT_* variables (Node.js 22 is set up above).
+      - name: 🏗️ Build the Castle (Build the Action bundle)
+        run: pnpm build:gha
 
       - name: 🔐 Test Action - Pull Secrets
-        uses: $/github-action
-        with:
-          map-file: e2e/sample/envilder.json
-          env-file: .env.test
+        env:
+          INPUT_MAP_FILE: e2e/sample/envilder.json
+          INPUT_ENV_FILE: .env.test
+        run: node github-action/dist/index.js
 
       - name: ✅ Verify .env file was created
         run: |
@@ -85,10 +87,10 @@ jobs:
         run: rm -f .env.test
 
       - name: 🔐 Test Action - Command (secrets only in this step)
-        uses: $/github-action
-        with:
-          map-file: e2e/sample/envilder.json
-          command: test -n "$TOKEN_SECRET" && echo "✅ The command sees TOKEN_SECRET"
+        env:
+          INPUT_MAP_FILE: e2e/sample/envilder.json
+          INPUT_COMMAND: test -n "$TOKEN_SECRET" && echo "✅ The command sees TOKEN_SECRET"
+        run: node github-action/dist/index.js
 
       - name: ✅ Verify the command did not export secrets
         run: |
@@ -99,9 +101,9 @@ jobs:
           echo "✅ TOKEN_SECRET is not visible after the command step"
 
       - name: 🔐 Test Action - Export to the job environment
-        uses: $/github-action
-        with:
-          map-file: e2e/sample/envilder.json
+        env:
+          INPUT_MAP_FILE: e2e/sample/envilder.json
+        run: node github-action/dist/index.js
 
       - name: ✅ Verify secrets reached later steps
         run: |

@@ -33,6 +33,10 @@
   ([#559](https://github.com/macalbert/envilder/issues/559))
 * **`env-file` is optional**: When set, the Action writes the `.env` file as
   before, so existing workflows (which always set it) keep their behavior
+* **The bundle ships only in release tags**: `main` no longer tracks
+  `github-action/dist/index.js`. Each release tag points to a commit that adds
+  the bundle built from the tagged source, so `@v0` and `@v<version>` work as
+  before, but referencing the Action at `@main` (or any branch) no longer does
 
 ---
 

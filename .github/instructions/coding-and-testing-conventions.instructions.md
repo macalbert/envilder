@@ -17,5 +17,5 @@ Apply these conventions as required defaults for source and test changes.
 - Structure tests with explicit AAA markers: `// Arrange`, `// Act`, `// Assert`: each at most once per test.
 If you need two Acts or Asserts, write two tests.
 - Mock application-layer dependencies at port boundaries using `vi.fn()`.
-- For GitHub Action behavior changes, regenerate and verify the bundle with `pnpm build:gha` and `pnpm verify:gha`.
+- For GitHub Action behavior changes, build the bundle with `pnpm build:gha` to run the Action locally, but do not commit it: release tags ship it (ADR-0015).
 - Prefer `pnpm` commands and keep changes compatible with existing scripts and workspace layout.

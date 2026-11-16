@@ -88,8 +88,8 @@ object passed to `configureInfrastructureServices()`. CLI flags override
 **Development**:
 
 - `pnpm build`: TypeScript compilation
-- `pnpm build:gha`: Bundle GitHub Action with esbuild into `github-action/dist/index.js`
-- `pnpm verify:gha`: Verify GHA bundle is up-to-date (fails if dist is stale)
+- `pnpm build:gha`: Bundle GitHub Action with esbuild into `github-action/dist/index.js` (not tracked on main)
+- `pnpm verify:gha`: Verify the root `action.yml` (and, at a release tag, the bundle) is up to date
 - `pnpm local:install`: Build + pack + install globally for local testing
 - `pnpm local:test-run`: Run CLI against `e2e/sample/envilder.json`
 
@@ -133,7 +133,7 @@ Example (PushSingle):
 
 - **Pull-only**: GHA only supports pull mode (no push): see `Gha.ts` line 20
 - **Input convention**: GitHub passes inputs as `INPUT_<UPPERCASE_NAME>` env vars
-- **Bundle requirement**: After any code change, run `pnpm build:gha` to update `dist/index.js`
+- **Bundle**: `dist/index.js` is not tracked on main; the release workflows build it into the release tag (ADR-0015). Run `pnpm build:gha` to try the Action locally
 
 ### Test Conventions
 
