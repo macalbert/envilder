@@ -1046,7 +1046,7 @@ export const en: Translations = {
       altTitle: 'Compared with other ways to read SSM in a workflow',
       altDesc:
         'The plain alternative is a run step with the AWS CLI, which is preinstalled on GitHub-hosted Ubuntu runners, after the credentials step. For one or two parameters it works:',
-      altComment: 'Register the value for masking before anything can print it',
+      altComment: 'Mask every line of the value before anything can print it',
       altPoints: [
         'Each parameter needs its own command, and the names live in the workflow instead of in a map file that developers also use locally with the CLI.',
         'You must mask the value before you write it, and a value with a newline cannot use the NAME=value form: GITHUB_ENV needs its multiline delimiter syntax.',

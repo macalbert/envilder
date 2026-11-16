@@ -404,8 +404,12 @@ const gaFileStep = `- id: envilder
 const gaAwsCliStep = `- run: |
     value=$(aws ssm get-parameter --name /my-app/prod/db-password \\
       --with-decryption --query Parameter.Value --output text)
-    echo "::add-mask::$value"   # ${ga.altComment}
-    echo "DB_PASSWORD=$value" >> "$GITHUB_ENV"`;
+    # ${ga.altComment}
+    while IFS= read -r line; do
+      [ -n "$line" ] && echo "::add-mask::\${line//%/%25}"
+    done <<< "$value"
+    delim="EOF_$(openssl rand -hex 8)"
+    { echo "DB_PASSWORD<<$delim"; echo "$value"; echo "$delim"; } >> "$GITHUB_ENV"`;
 
 const gaErrors = [
   {

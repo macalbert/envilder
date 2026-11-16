@@ -1058,7 +1058,7 @@ export const es: Translations = {
       altDesc:
         'La alternativa simple es un paso run con la AWS CLI, que viene preinstalada en los runners Ubuntu alojados por GitHub, después del paso de credenciales. Para uno o dos parámetros funciona:',
       altComment:
-        'Registra el valor para enmascararlo antes de que nada pueda imprimirlo',
+        'Enmascara cada línea del valor antes de que nada pueda imprimirla',
       altPoints: [
         'Cada parámetro necesita su comando, y los nombres viven en el workflow en lugar de en un archivo de mapa que los desarrolladores también usan en local con la CLI.',
         'Tienes que enmascarar el valor antes de escribirlo, y un valor con salto de línea no puede usar la forma NAME=value: GITHUB_ENV necesita su sintaxis de delimitador multilínea.',
