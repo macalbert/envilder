@@ -2,6 +2,7 @@ export const docsRouteKeys = [
   'hub',
   'getting-started',
   'guide-ssm-to-env',
+  'guide-azure-key-vault-to-env',
   'aws-ssm',
   'azure-key-vault',
   'custom-provider',
@@ -48,6 +49,12 @@ export const docsRouteManifest = [
   {
     key: 'guide-ssm-to-env',
     path: '/docs/guides/ssm-to-env/',
+    navGroup: 'guides',
+    legacyHashes: [],
+  },
+  {
+    key: 'guide-azure-key-vault-to-env',
+    path: '/docs/guides/azure-key-vault-to-env/',
     navGroup: 'guides',
     legacyHashes: [],
   },
