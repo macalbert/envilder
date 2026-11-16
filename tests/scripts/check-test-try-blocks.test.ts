@@ -542,6 +542,62 @@ describe('findTryBlocksInTests', () => {
     expect(actual).toEqual([{ line: 1, test: 'outer', helper: 'run' }]);
   });
 
+  it('Should_FollowOuterHelper_When_SameNameIsDeclaredOnlyInNestedScope', () => {
+    // Arrange
+    const typeScript = [
+      'function run() { try { return 1; } finally {} }',
+      "it('outer', () => {",
+      '  { const run = () => 2; expect(run()).toBe(2); }',
+      '  expect(run()).toBe(1);',
+      '});',
+    ].join('\n');
+    const python = [
+      'def run():',
+      '    try:',
+      '        act()',
+      '    finally:',
+      '        clean_up()',
+      '',
+      'def Should_UseOuter_When_Called():',
+      '    def inner():',
+      '        run = 2',
+      '        return run',
+      '    assert run() == inner()',
+    ].join('\n');
+    const cSharp = [
+      'public class ClientTests',
+      '{',
+      '\tprivate static int Run()',
+      '\t{',
+      '\t\ttry { return Act(); } finally { CleanUp(); }',
+      '\t}',
+      '',
+      '\t[Fact]',
+      '\tpublic void Should_UseOuter_When_Called()',
+      '\t{',
+      '\t\t{',
+      '\t\t\tint Run() => 2;',
+      '\t\t}',
+      '\t\tRun().Should().Be(1);',
+      '\t}',
+      '}',
+    ].join('\n');
+
+    // Act
+    const actual = [
+      ...findTryBlocksInTests('tests/a.test.ts', typeScript),
+      ...findTryBlocksInTests('tests/test_client.py', python),
+      ...findTryBlocksInTests('tests/ClientTests.cs', cSharp),
+    ];
+
+    // Assert
+    expect(actual).toEqual([
+      { line: 1, test: 'outer', helper: 'run' },
+      { line: 2, test: 'Should_UseOuter_When_Called', helper: 'run' },
+      { line: 5, test: 'Should_UseOuter_When_Called', helper: 'Run' },
+    ]);
+  });
+
   it('Should_SkipOuterHelper_When_PythonOrCSharpTestDeclaresSameName', () => {
     // Arrange
     const python = [

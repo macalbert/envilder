@@ -324,7 +324,7 @@ function typeScriptBlock(text, masked, name, start, end) {
     tries: [...range.matchAll(TRY_BLOCK)].map((match) =>
       lineAt(text, start + match.index),
     ),
-    refs: outerReferences(range, TS_IDENTIFIER, TS_LOCAL),
+    refs: outerReferences(range, TS_IDENTIFIER, typeScriptLocals(range)),
   };
 }
 
@@ -332,13 +332,48 @@ function typeScriptBlock(text, masked, name, start, end) {
  * Returns the names a block uses that it does not declare itself: a local
  * such as `const run = () => 1` shadows a helper of the file named `run`.
  */
-function outerReferences(code, identifier, local) {
-  const locals = new Set(
-    [...code.matchAll(local)].map((match) => match.slice(1).find(Boolean)),
-  );
+function outerReferences(code, identifier, locals) {
   return new Set(
     (code.match(identifier) ?? []).filter((name) => !locals.has(name)),
   );
+}
+
+function declaredName(match) {
+  return match.slice(1).find(Boolean);
+}
+
+/**
+ * Names declared at the top level of a TypeScript body (brace depth 1). A
+ * declaration in a nested block does not hide the name from the rest of it.
+ */
+function typeScriptLocals(range) {
+  const depths = braceDepths(range);
+  return new Set(
+    [...range.matchAll(TS_LOCAL)]
+      .filter((match) => depths[match.index] === 1)
+      .map(declaredName),
+  );
+}
+
+/** Returns the brace depth at every offset of `code`. */
+function braceDepths(code) {
+  let depth = 0;
+  // split('') keeps UTF-16 offsets, the ones matchAll reports.
+  return code.split('').map((char) => {
+    depth += BRACE_DEPTH_CHANGE[char] ?? 0;
+    return depth;
+  });
+}
+
+/**
+ * Names declared on the body's least indented lines. Deeper declarations
+ * belong to a nested block or function and do not hide the name.
+ */
+function topLevelLocals(codeByLine, local) {
+  const lines = codeByLine.filter((line) => line.trim() !== '');
+  const indent = Math.min(...lines.map(indentationOf));
+  const topLevel = lines.filter((line) => indentationOf(line) === indent);
+  return new Set([...topLevel.join('\n').matchAll(local)].map(declaredName));
 }
 
 /** Returns the braced body of a function whose parameters open here. */
@@ -553,7 +588,11 @@ function lineBlock(name, lines, language) {
     tries: lines
       .filter((_, index) => language.tryPattern.test(codeByLine[index]))
       .map(({ number }) => number),
-    refs: outerReferences(code, IDENTIFIER, language.local),
+    refs: outerReferences(
+      code,
+      IDENTIFIER,
+      topLevelLocals(codeByLine, language.local),
+    ),
   };
 }
 
