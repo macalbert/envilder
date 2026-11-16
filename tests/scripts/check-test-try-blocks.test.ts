@@ -435,6 +435,7 @@ describe('findTryBlocksInTests', () => {
       "it('teardown', () => {",
       '  onTestFinished(cleanUp);',
       '  onTestFailed(() => { try { a(); } catch {} });',
+      '  onTestFinished(async (): Promise<void> => { try { a(); } finally {} });',
       '  expect(release()).toBe(1);',
       '});',
     ].join('\n');
@@ -444,6 +445,37 @@ describe('findTryBlocksInTests', () => {
 
     // Assert
     expect(actual).toEqual([{ line: 2, test: 'teardown', helper: 'release' }]);
+  });
+
+  it('Should_ReportTryBlock_When_CSharpHelperHasNoModifiers', () => {
+    // Arrange
+    const source = [
+      'public class ClientTests',
+      '{',
+      '\tvoid Run()',
+      '\t{',
+      '\t\ttry { Act(); } finally { CleanUp(); }',
+      '\t}',
+      '',
+      '\tTask<int> ReadAsync() { try { return Act(); } finally { CleanUp(); } }',
+      '',
+      '\t[Fact]',
+      '\tpublic async Task Should_Run_When_Called()',
+      '\t{',
+      '\t\tif (Ready()) { Run(); }',
+      '\t\t(await ReadAsync()).Should().Be(1);',
+      '\t}',
+      '}',
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/ClientTests.cs', source);
+
+    // Assert
+    expect(actual).toEqual([
+      { line: 5, test: 'Should_Run_When_Called', helper: 'Run' },
+      { line: 8, test: 'Should_Run_When_Called', helper: 'ReadAsync' },
+    ]);
   });
 
   it('Should_KeepReadingPythonTests_When_CommentHasTripleQuotesOrNoIndent', () => {

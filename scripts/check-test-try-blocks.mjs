@@ -4,8 +4,10 @@ import { extname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const CSHARP_TEST_ATTRIBUTE = /^\s*\[(?:Fact|Theory|SkippableFact)\b/;
+// Optional modifiers (a method without them is private), a return type that
+// is not a statement keyword, then the method name and its parameters.
 const CSHARP_METHOD =
-  /^(\s*)(?:(?:public|private|protected|internal|static|async|override|virtual|sealed|unsafe|extern)\s+)+[^=;(]*?\b(\w+)\s*(?:<[^>]*>)?\s*\(/;
+  /^(\s*)(?:(?:public|private|protected|internal|static|async|override|virtual|sealed|unsafe|extern|partial)\s+)*(?!(?:return|await|throw|new|else|case|yield|goto|using|lock|if|while|for|foreach|switch|catch)\b)[\w.]+(?:<[^()=;]*>)?[?[\]]*\s+(\w+)\s*(?:<[^>]*>)?\s*\(/;
 // A `try` that starts a statement: at the start of a line or after another.
 const CSHARP_TRY = /(?:^|[;{}])\s*try\b\s*(?:\{|$)/;
 // A signature ends where its body opens, or with `;` when it has none.
@@ -429,7 +431,7 @@ function typeScriptHelpers(text, masked) {
 const TEARDOWN_CALL = /\bonTest(?:Finished|Failed)\s*\(/g;
 // A function literal or a reference: it runs later, not while registering.
 const DEFERRED_CALLBACK =
-  /^\s*(?:async\s+)?(?:function\b|\([^)]*\)\s*=>|[\w$]+\s*=>|[\w$.]+\s*$)/;
+  /^\s*(?:async\s+)?(?:function\b|\([^)]*\)\s*(?::[^;=]*?)?=>|[\w$]+\s*=>|[\w$.]+\s*$)/;
 
 /**
  * Blanks the callbacks a test registers with `onTestFinished` or
