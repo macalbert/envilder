@@ -1627,9 +1627,13 @@ const tabRows = [
     const hoverTarget = screen.closest('.terminal') ?? screen;
     hoverTarget.addEventListener('mouseenter', () => pause.pointerEnter());
     hoverTarget.addEventListener('mouseleave', () => pause.pointerLeave());
-    hoverTarget.addEventListener('focusin', (event) => {
+    // A key pressed after a click makes the focused element match
+    // :focus-visible without a new focusin, so sample it again on keyup.
+    const sampleFocus = (event: Event) => {
       pause.focusIn((event.target as Element).matches(':focus-visible'));
-    });
+    };
+    hoverTarget.addEventListener('focusin', sampleFocus);
+    hoverTarget.addEventListener('keyup', sampleFocus);
     hoverTarget.addEventListener('focusout', () => pause.focusOut());
 
     const pauseBtn = wrapper.querySelector<HTMLButtonElement>(
