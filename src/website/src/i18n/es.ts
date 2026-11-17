@@ -1455,20 +1455,18 @@ export const es: Translations = {
       tabPolicy: 'Directivas de acceso',
       prereqTitle: 'Requisitos previos',
       prereqItems: [
-        'La CLI de envilder. --offline está disponible desde la versión 0.18 y la comprobación de existencia de los secretos desde la 0.20. --envfile, --compare-values y --format json están disponibles desde la 0.21.',
+        'La CLI de envilder. --offline está disponible desde la versión 0.18 y la comprobación de existencia de los secretos desde la 0.20. --envfile y --format json están disponibles desde la 0.21, y --envfile compara los valores sin ningún flag adicional desde la 0.22.',
         'Un archivo de mapeo. Sin --offline, credenciales del proveedor y los permisos que se detallan en el apartado Permisos.',
       ],
       synopsisTitle: 'Sinopsis',
       synopsisDesc:
-        'Por defecto, validate comprueba el archivo de mapeo y después pregunta al proveedor si existe cada secreto declarado. Con --envfile también compara las claves de un archivo env local con el archivo de mapeo, y con --compare-values compara sus valores con los remotos. Con --offline solo se leen archivos locales: no se llama a ningún proveedor y no hacen falta credenciales de la nube. Nunca muestra ningún valor de secreto.',
+        'Por defecto, validate comprueba el archivo de mapeo y después pregunta al proveedor si existe cada secreto declarado. Con --envfile también compara las claves de un archivo env local con el archivo de mapeo, y sus valores con los remotos. Con --offline solo se leen archivos locales: no se llama a ningún proveedor y no hacen falta credenciales de la nube. Nunca muestra ningún valor de secreto.',
       optionsTitle: 'Opciones',
       thOption: 'Opción',
       thDescription: 'Descripción',
       optOffline: 'Valida el archivo de mapeo en local sin llamar al proveedor',
       optEnvfile:
-        'Compara las claves de este archivo env con el archivo de mapeo. No se lee si no se indica',
-      optCompareValues:
-        'Compara también cada valor declarado en el archivo env con su valor remoto. Requiere --envfile; no se puede combinar con --offline',
+        'Compara las claves de este archivo env con el archivo de mapeo y, sin --offline, cada valor declarado con su valor remoto. No se lee si no se indica',
       optFormat:
         'text (por defecto) para una salida legible, o json para un único documento JSON en stdout',
       optMap: 'Archivo de mapeo a comprobar (por defecto: envilder.json)',
@@ -1478,7 +1476,7 @@ export const es: Translations = {
       optionsNote:
         'Las opciones tienen los mismos nombres, valores por defecto y precedencia que pull y exec: las opciones ganan a $config, y una opción vacía se ignora. Ponlas después de validate; las que se escriben antes se rechazan. Como en push, un valor vacío de --envfile es un error.',
       optionsRejected:
-        '--compare-values sin --envfile o con --offline, y un --format que no sea text ni json, se rechazan antes de leer ningún archivo o llamar a ningún proveedor.',
+        'Un --format que no sea text ni json se rechaza antes de leer ningún archivo o llamar a ningún proveedor.',
       checksTitle: 'Qué se comprueba',
       mapTitle: 'El archivo de mapeo (siempre)',
       mapDesc:
@@ -1516,7 +1514,7 @@ export const es: Translations = {
         'Una clave solo está en el archivo env. Un aviso que no cambia el código de salida',
       envfileNote:
         'KEY= con un valor vacío cuenta como presente, y un archivo env inexistente falla con Env file not found. Esta comprobación solo lee archivos locales, así que se ejecuta antes de cualquier llamada al proveedor y también con --offline. Los valores no se comparan ni se muestran.',
-      valuesTitle: 'Los valores del archivo env (con --compare-values)',
+      valuesTitle: 'Los valores del archivo env (con --envfile, sin --offline)',
       valuesDesc:
         'Para cada variable declarada que está en el archivo env y existe en el proveedor, el valor remoto se lee como lo hace pull y se compara con el local. Cuando una clave se repite, se compara la última asignación, tal como la carga dotenv:',
       valMatches: 'Los dos valores son idénticos',
@@ -1524,14 +1522,14 @@ export const es: Translations = {
       valUnreadable:
         'El secreto existe pero su valor no se ha podido leer, con el motivo del proveedor. Falla',
       valuesNote:
-        'Ninguno de los dos valores se muestra nunca, y cada valor remoto se descarta justo después de la comparación. Las variables ya informadas como ausentes no se leen. Sin --compare-values no se lee ningún valor.',
+        'Ninguno de los dos valores se muestra nunca, y cada valor remoto se descarta justo después de la comparación. Las variables ya informadas como ausentes no se leen. Sin --envfile, o con --offline, no se lee ningún valor.',
       permTitle: 'Permisos',
       permDesc:
         'La comprobación de existencia usa una llamada al proveedor que pull no hace, así que la identidad necesita un permiso más que para un pull. --offline no necesita ninguna credencial.',
       permAwsDesc:
         'Las rutas se comprueban con GetParameters, diez por llamada, con WithDecryption: false: los parámetros SecureString nunca se descifran. Es una acción de IAM distinta de la ssm:GetParameter que usa pull, así que añádela a la política, limitada a las mismas rutas:',
       permAwsNote:
-        'La comprobación de existencia no necesita el permiso kms:Decrypt. --compare-values lee los valores como pull, así que necesita el mismo acceso a KMS que pull: kms:Decrypt sobre la clave de cada parámetro SecureString cifrado con una clave administrada por el cliente. Con kms:Decrypt, ssm:GetParameters también puede leer valores descifrados, así que limítalo a las mismas rutas que ssm:GetParameter. Cuando se deniega una llamada, cada ruta se comprueba por separado, así que access denied solo se informa para las rutas que la identidad no puede leer.',
+        'La comprobación de existencia no necesita el permiso kms:Decrypt. --envfile lee los valores como pull, así que necesita el mismo acceso a KMS que pull: kms:Decrypt sobre la clave de cada parámetro SecureString cifrado con una clave administrada por el cliente. Con kms:Decrypt, ssm:GetParameters también puede leer valores descifrados, así que limítalo a las mismas rutas que ssm:GetParameter. Cuando se deniega una llamada, cada ruta se comprueba por separado, así que access denied solo se informa para las rutas que la identidad no puede leer.',
       permAzureDesc:
         'Los nombres de los secretos del vault se listan una vez (solo metadatos) y cada nombre declarado, tras la conversión habitual de / a -, se compara con esa lista sin distinguir mayúsculas. Un secreto deshabilitado se informa como missing, porque pull no puede leerlo. Listar requiere:',
       permAzureItems: [
@@ -1541,14 +1539,13 @@ export const es: Translations = {
       permAzureNote:
         'La lista cubre todo el vault, así que una identidad sin este permiso recibe access denied para cada clave, con el motivo que devuelve Key Vault.',
       permValuesNote:
-        '--compare-values también lee valores, así que necesita los mismos permisos que un pull además de estos.',
+        '--envfile también lee valores, así que necesita los mismos permisos que un pull además de estos.',
       outputTitle: 'Salida',
       outputOkDesc: 'Todos los secretos existen (código de salida 0):',
       outputFailDesc:
         'Algunos secretos faltan o no se pueden comprobar (código de salida 1; el resumen va a stderr):',
       outputOfflineDesc: 'Con --offline:',
-      outputEnvfileDesc:
-        'Con --envfile=.env --compare-values (código de salida 1):',
+      outputEnvfileDesc: 'Con --envfile=.env (código de salida 1):',
       outputEnvfileNote:
         'Cuando todas las variables declaradas están en el archivo env, su bloque termina con ✓ All 3 declared variables are in .env, y cuando todos los valores comparados coinciden, el bloque de valores termina con ✓ All 2 values match.',
       outputInvalidDesc: 'Un archivo de mapeo no válido, en stderr:',
@@ -1563,7 +1560,7 @@ export const es: Translations = {
       fieldKeys:
         'Una entrada por variable declarada, en el orden del archivo de mapeo: name, provider, path, status y, cuando el proveedor da uno, reason. status es exists, missing, access_denied, authentication_failed o provider_error. Se omite cuando no se han comprobado los secretos',
       fieldEnvFile:
-        'Se omite sin --envfile. Si no, path, valid, keys (cada variable declarada con status present o missing, y value matches, differs o unreadable con --compare-values), duplicates ({ name, count }) y undeclared',
+        'Se omite sin --envfile. Si no, path, valid, keys (cada variable declarada con status present o missing, y value matches, differs o unreadable sin --offline), duplicates ({ name, count }) y undeclared',
       fieldError:
         '{ message }, solo cuando la ejecución se ha detenido antes de terminar todas las comprobaciones (credenciales caducadas, un archivo env inexistente, un inicio de sesión SSO rechazado). Las secciones completadas antes siguen llenas',
       jsonNote:
@@ -1571,7 +1568,7 @@ export const es: Translations = {
       exitTitle: 'Códigos de salida',
       thCode: 'Código',
       exit0:
-        'El archivo de mapeo es válido; sin --offline, cada secreto declarado existe; con --envfile, cada variable declarada está en el archivo env exactamente una vez; con --compare-values, cada valor comparado coincide. Las claves que solo están en el archivo env no lo cambian',
+        'El archivo de mapeo es válido; sin --offline, cada secreto declarado existe; con --envfile, cada variable declarada está en el archivo env exactamente una vez y, sin --offline, coincide con su valor remoto. Las claves que solo están en el archivo env no lo cambian',
       exit1:
         'Cualquier otra cosa: archivo de mapeo ausente o no válido, opciones no válidas, un secreto que falta o no se puede comprobar, credenciales ausentes o caducadas, o un archivo env que no existe, no tiene una variable declarada, repite una clave o tiene un valor que difiere o no se puede comparar',
       ciTitle: 'En CI',
@@ -1593,7 +1590,7 @@ export const es: Translations = {
         'La validación del contrato es distinta de la validación de secretos: comprueba el archivo de mapeo y que cada secreto existe antes de cargar, mientras que la validación de secretos comprueba que los valores ya resueltos no estén vacíos.',
       limitsTitle: 'Qué no hace validate',
       limitsItems: [
-        'Nunca muestra valores de secretos, y solo los lee con --compare-values.',
+        'Nunca muestra valores de secretos, y solo los lee con --envfile, sin --offline.',
         'Con --offline no comprueba que los secretos existan ni que las credenciales puedan leerlos.',
         'No corrige el archivo env: informa de lo que hay que cambiar.',
         'No comprueba la forma de los valores (tipos, URL, longitud).',
@@ -1801,7 +1798,7 @@ export const es: Translations = {
         title:
           'envilder validate: comprueba un archivo de mapeo y sus secretos de AWS SSM o Azure Key Vault',
         description:
-          'Referencia de envilder validate: comprobaciones del archivo de mapeo, --offline, estados de las claves remotas, --envfile y --compare-values, salida JSON, códigos de salida y los permisos de IAM y Key Vault que necesita.',
+          'Referencia de envilder validate: comprobaciones del archivo de mapeo, --offline, estados de las claves remotas, --envfile, salida JSON, códigos de salida y los permisos de IAM y Key Vault que necesita.',
         heading: 'Referencia de envilder validate',
         intro:
           '¿Cómo sabes que un archivo de mapeo funcionará antes de un pull, un despliegue o envilder exec? envilder validate comprueba que el archivo de mapeo es válido y que cada secreto declarado existe en AWS SSM o Azure Key Vault, y puede compararlo con un archivo .env local. Nunca muestra ningún valor de secreto y sale con 1 cuando algo falla, así que encaja como paso de CI.',

@@ -863,7 +863,6 @@ export interface ValidateReferenceTranslations {
   thDescription: string;
   optOffline: string;
   optEnvfile: string;
-  optCompareValues: string;
   optFormat: string;
   optMap: string;
   optProvider: string;

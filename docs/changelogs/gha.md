@@ -1,3 +1,13 @@
+## [0.22.0] - 2026-11-17
+
+### Changed
+
+* **Released with CLI 0.22.0**: the CLI's `envilder validate --envfile`
+  now also compares values and `--compare-values` is removed. The Action
+  does not use `validate`, and its behavior is unchanged
+
+---
+
 ## [0.21.0] - 2026-11-16
 
 ### Added

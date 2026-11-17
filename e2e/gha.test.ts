@@ -10,7 +10,7 @@ import {
 } from 'node:fs';
 import { unlink } from 'node:fs/promises';
 import { EOL, tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { delimiter, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   DeleteParameterCommand,
@@ -428,7 +428,7 @@ function runGitHubAction(inputs: {
     cwd: rootDir,
     encoding: 'utf8',
     env: {
-      ...process.env,
+      ...withGitBashFirstOnPath(process.env),
       // GitHub Actions sets these automatically from action inputs
       INPUT_MAP_FILE: inputs.mapFile,
       INPUT_ENV_FILE: inputs.envFile ?? '',
@@ -449,6 +449,31 @@ function runGitHubAction(inputs: {
 }
 
 // Helper functions
+/**
+ * The action runs `command` with `bash`. On Windows the first `bash` on PATH
+ * is often the WSL launcher, which fails when the default distro has no bash
+ * or is broken. GitHub's Windows runners resolve Git Bash instead, so the
+ * tests put Git for Windows' bash first to match them.
+ */
+function withGitBashFirstOnPath(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  if (process.platform !== 'win32') {
+    return env;
+  }
+  const gitExecPath = execSync('git --exec-path', { encoding: 'utf8' }).trim();
+  const gitBashDir = join(resolve(gitExecPath, '..', '..', '..'), 'bin');
+  if (!existsSync(join(gitBashDir, 'bash.exe'))) {
+    throw new Error(
+      `Git Bash not found in ${gitBashDir}. Install Git for Windows.`,
+    );
+  }
+  const pathKey =
+    Object.keys(env).find((key) => key.toUpperCase() === 'PATH') ?? 'PATH';
+  return {
+    ...env,
+    [pathKey]: `${gitBashDir}${delimiter}${env[pathKey] ?? ''}`,
+  };
+}
+
 /**
  * Parses the `NAME<<DELIMITER` blocks the action appends to GITHUB_ENV.
  */

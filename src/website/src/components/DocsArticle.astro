@@ -1304,7 +1304,7 @@ const execErrors = [
 
 const va = t.docs.validateReference;
 
-const validateSynopsis = `envilder validate [--offline] [--envfile <path> [--compare-values]] \\
+const validateSynopsis = `envilder validate [--offline] [--envfile <path>] \\
   [--format <text|json>] [--map <path>] [--provider <name>] \\
   [--profile <name>] [--vault-url <url>]`;
 
@@ -1312,7 +1312,7 @@ const validateExamples = `envilder validate
 envilder validate --map=config/envilder.json --profile=dev
 envilder validate --provider=azure --vault-url=https://my-vault.vault.azure.net
 envilder validate --offline
-envilder validate --envfile=.env --compare-values
+envilder validate --envfile=.env
 envilder validate --format=json`;
 
 const validateOkOutput = `✓ Map file valid: envilder.json
@@ -2766,7 +2766,6 @@ MULTILINE="first\\nsecond"`} />
           <tbody>
             <tr><td><code>--offline</code></td><td>{va.optOffline}</td></tr>
             <tr><td><code>--envfile</code></td><td>{va.optEnvfile}</td></tr>
-            <tr><td><code>--compare-values</code></td><td>{va.optCompareValues}</td></tr>
             <tr><td><code>--format</code></td><td>{va.optFormat}</td></tr>
             <tr><td><code>--map</code></td><td>{va.optMap}</td></tr>
             <tr><td><code>--provider</code></td><td>{va.optProvider}</td></tr>
