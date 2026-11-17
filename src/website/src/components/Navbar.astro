@@ -204,6 +204,7 @@ const docsDropdown = docsNavGroups.map((group) => ({
     background: var(--color-nav-mobile);
     border: 2px solid var(--color-border);
     padding: var(--space-sm) 0;
+    width: max-content;
     min-width: 160px;
     z-index: 110;
     list-style: none;
@@ -283,6 +284,7 @@ const docsDropdown = docsNavGroups.map((group) => ({
   .nav-open .nav-dropdown-menu {
     position: static;
     transform: none;
+    width: auto;
     border: none;
     box-shadow: none;
     padding-left: var(--space-md);
