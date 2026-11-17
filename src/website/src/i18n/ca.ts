@@ -1333,7 +1333,7 @@ export const ca: Translations = {
       tabPolicy: "Polítiques d'accés",
       prereqTitle: 'Requisits previs',
       prereqItems: [
-        "La CLI d'envilder. --offline està disponible des de la versió 0.18 i la comprovació d'existència dels secrets des de la 0.20. --envfile i --format json estan disponibles des de la 0.21.",
+        "La CLI d'envilder. --offline està disponible des de la versió 0.18 i la comprovació d'existència dels secrets des de la 0.20. --envfile i --format json estan disponibles des de la 0.21, i --envfile compara els valors sense cap flag addicional des de la 0.22.",
         "Un fitxer de mapatge. Sense --offline, credencials del proveïdor i els permisos que es detallen a l'apartat Permisos.",
       ],
       synopsisTitle: 'Sinopsi',

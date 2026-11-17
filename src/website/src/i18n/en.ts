@@ -1319,7 +1319,7 @@ export const en: Translations = {
       tabPolicy: 'Access policies',
       prereqTitle: 'Prerequisites',
       prereqItems: [
-        'The envilder CLI. --offline is available since version 0.18 and the secret existence check since 0.20. --envfile and --format json are available since 0.21.',
+        'The envilder CLI. --offline is available since version 0.18 and the secret existence check since 0.20. --envfile and --format json are available since 0.21, and --envfile compares values without a separate flag since 0.22.',
         'A map file. Without --offline, credentials for the provider and the permissions listed under Permissions.',
       ],
       synopsisTitle: 'Synopsis',

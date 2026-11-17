@@ -1336,7 +1336,7 @@ export const es: Translations = {
       tabPolicy: 'Directivas de acceso',
       prereqTitle: 'Requisitos previos',
       prereqItems: [
-        'La CLI de envilder. --offline está disponible desde la versión 0.18 y la comprobación de existencia de los secretos desde la 0.20. --envfile y --format json están disponibles desde la 0.21.',
+        'La CLI de envilder. --offline está disponible desde la versión 0.18 y la comprobación de existencia de los secretos desde la 0.20. --envfile y --format json están disponibles desde la 0.21, y --envfile compara los valores sin ningún flag adicional desde la 0.22.',
         'Un archivo de mapeo. Sin --offline, credenciales del proveedor y los permisos que se detallan en el apartado Permisos.',
       ],
       synopsisTitle: 'Sinopsis',
