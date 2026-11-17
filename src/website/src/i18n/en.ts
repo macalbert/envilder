@@ -1064,6 +1064,124 @@ export const en: Translations = {
       relatedExec: 'envilder exec reference',
       relatedMap: 'Map file reference',
     },
+    guideLocalstackIntegrationTests: {
+      flowTitle: 'How it works',
+      flowItems: [
+        'LocalStack runs an emulator of AWS Systems Manager Parameter Store (SSM) in a Docker container, with its gateway on port 4566.',
+        'Envilder reads a map file and calls ssm:GetParameter, with decryption, once per variable. The AWS SDK inside Envilder sends those calls to LocalStack because AWS_ENDPOINT_URL points there.',
+        'Envilder starts your test command with the values in its environment. If any parameter is missing, empty or unreadable, the command does not start and Envilder exits with 125.',
+        'In this mode Envilder reads and writes no .env file.',
+      ],
+      prereqTitle: 'Prerequisites',
+      prereqItems: [
+        'Docker, to run LocalStack.',
+        'Node.js 22.12 or later, because the Envilder CLI is a Node.js package. This applies to .NET and Python projects too: only the test command is yours.',
+        'A test command that reads its configuration from environment variables, such as npm test, dotnet test or pytest.',
+      ],
+      startTitle: 'Start LocalStack',
+      startDesc:
+        'Start the container and publish the gateway port. The auth token is passed from your shell without being written in the command:',
+      startComposeDesc: 'The same with Docker Compose:',
+      startTokenNote:
+        'Recent LocalStack images do not start without an auth token. When this guide was written, localstack/localstack and localstack/localstack:stable (version 2026.10.7) exited at startup with License activation failed. LocalStack announced the change with the 2026.03.0 release, and CI runs need a CI auth token. Check the LocalStack pricing page for the plan that fits your use.',
+      startOldNote:
+        'Releases published before that change still start without a token. The output on this page was produced with localstack/localstack:4.14.0, started with docker run and no token. It predates the change, so treat it as a stopgap rather than a default.',
+      startHealthNote:
+        'LocalStack answers on http://localhost:4566/_localstack/health when it is ready.',
+      pointTitle: 'Point Envilder at LocalStack',
+      pointDesc:
+        'Envilder has no LocalStack option, and the map file has no endpoint field: $config accepts only provider, vaultUrl and profile. Envilder passes no endpoint to its AWS client, so the AWS SDK for JavaScript that the CLI uses applies its own resolution, and that reads AWS_ENDPOINT_URL from the environment. Set four variables in the shell that runs Envilder:',
+      pointItems: [
+        'AWS_ENDPOINT_URL: the LocalStack gateway, http://localhost:4566.',
+        'AWS_REGION: any region. Seeding and reading must use the same one, because parameters are stored per region. Envilder reads AWS_REGION first, then AWS_DEFAULT_REGION, and ends at us-east-1 when it finds neither.',
+        'AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY: dummy values such as test. LocalStack accepts any credentials, but the SDK still needs some.',
+      ],
+      pointBashDesc: 'In bash or zsh:',
+      pointPowershellDesc: 'In PowerShell:',
+      pointRealAwsWarn:
+        'Set all four in the same shell. Without AWS_ENDPOINT_URL, Envilder calls real AWS with the dummy credentials and fails with The security token included in the request is invalid. Keep the dummy credentials anyway: a typo in the endpoint can then never reach a real account.',
+      pointGitBashNote:
+        'In Git Bash on Windows, an argument that starts with / such as --secret-path=/my-app/test/db-password is rewritten into a Windows path before Envilder sees it, and the map file ends up with a C:/Program Files/Git/... path. Set MSYS_NO_PATHCONV=1 first, or use PowerShell.',
+      seedTitle: 'Seed the test parameters',
+      seedDesc:
+        'Write the values Envilder will read. One push per variable creates the parameter in LocalStack and records the mapping in the map file, so you do not write it by hand. --push is written out although a push with --key, --value and --secret-path does not need it:',
+      seedOutputDesc:
+        'Each push prints the value and the path with asterisks and keeps only their last three characters:',
+      seedMapDesc: 'The map file now holds the two mappings:',
+      seedMapNote:
+        '--map=envilder.test.json and --provider=aws are written out on purpose. With an explicit --map, a push creates this file and never touches an envilder.json your project already has. Pushing a variable that is already mapped leaves the file as it is.',
+      seedCommitNote:
+        'The map file holds parameter names, not values: commit it, so your team and CI use the same one. The values exist only inside the container, so they are gone when you remove it. Seed again at the start of each run.',
+      runTitle: 'Run the tests with envilder exec',
+      runDesc:
+        'Put envilder exec in front of the test command, with the same --map and --provider. Everything after -- is your command:',
+      runCheckDesc:
+        'To see what a command receives, run one that prints which variables are set, never their values:',
+      runCheckOutputDesc:
+        'The first line is Envilder on stderr, the rest is your command. Run the same script without Envilder and both variables are reported as missing: the shell never had them.',
+      runInheritNote:
+        'Your command inherits the whole environment of the shell, including AWS_ENDPOINT_URL and the dummy credentials. A test that creates its own AWS client in the same process also talks to LocalStack, as long as its SDK reads AWS_ENDPOINT_URL. The .NET and Python SDK acceptance tests of this repository use the same variable.',
+      runProviderNote:
+        '--provider=aws overrides $config.provider and --map picks the file, so a leftover envilder.json in the folder, or a map file that names Azure, cannot change what this command reads.',
+      runExitDesc:
+        'Envilder exits with the exit code of your command, so a failing test fails the step or the script that called it. Exit code 125 is Envilder itself: it could not start your command.',
+      runMissingTitle: 'A missing secret stops the run',
+      runMissingDesc:
+        'Exec mode is fail-closed. If the map file lists a parameter that was never seeded, here STRIPE_KEY, the command does not start:',
+      runMissingOutputDesc:
+        'The exit code is 125. Your tests never run with a half-configured environment, which is the failure that otherwise shows up as a confusing null reference or a missing key deep inside a test.',
+      runDiskNote:
+        'In exec mode Envilder reads and writes no .env file: the values are resolved once, in memory, and handed to your command through its environment. That covers Envilder only. Your tests, or a tool they start, can still write the values wherever they want.',
+      ciTitle: 'Run it in GitHub Actions',
+      ciDesc:
+        'A service container starts LocalStack next to the job. The variables are set at job level, so every step, including the tests, sees them. The AWS credentials are dummy values: no OIDC role is involved, because nothing reaches a real account:',
+      commentWait: 'Wait until LocalStack answers',
+      commentSeed: 'Seed the test parameters',
+      commentRun: 'Run the tests with the secrets in their environment',
+      ciNotes: [
+        'The service reads LOCALSTACK_AUTH_TOKEN from a repository secret. Use a CI auth token, and pin the image tag in your own workflow so a new LocalStack release cannot change your pipeline.',
+        'This workflow was written from the GitHub Actions and LocalStack documentation and the commands above. Unlike the local flow, it was not run on a hosted runner while writing this guide.',
+        'npx envilder downloads the latest published CLI unless you pin one with npx envilder@<version>.',
+      ],
+      ciMore:
+        'For tests that read real SSM parameters in a pipeline, with OIDC instead of dummy credentials, see the',
+      ciMoreLink: 'GitHub Actions guide',
+      altTitle: 'The in-process alternative: Testcontainers and the SDKs',
+      altDesc:
+        'If your code calls the Envilder SDK instead of reading environment variables, start LocalStack from the tests themselves. The macalbert/envilder-examples repository has one example per runtime, each with tests for AWS SSM against LocalStack and for Azure Key Vault against LocalStack for Azure:',
+      altDotnet: '.NET: xUnit v3 and Testcontainers',
+      altPython: 'Python: pytest, Testcontainers and uv',
+      altTypescript: 'TypeScript: Vitest and Testcontainers',
+      altPoints: [
+        'Testcontainers starts and stops the emulators from the test run, so there is no docker run step and no seed command.',
+        'The tests build the cloud client themselves, aimed at the emulator, and hand it to the Envilder client. Everything after that line is the code your app runs.',
+        'The examples fetch the LocalStack auth token with Envilder from your own AWS account and pass it to the containers, so no token sits in a .env file or in the pipeline.',
+      ],
+      altChoose:
+        'Use envilder exec when your application reads environment variables and you want no change in test code. Use the SDK and Testcontainers when the application itself resolves a map file and you want the tests to own the emulator lifecycle.',
+      errorsTitle: 'Common errors',
+      thMessage: 'Message',
+      thFix: 'Fix',
+      errTokenFix:
+        'The request reached real AWS. AWS_ENDPOINT_URL is not set in the shell that runs Envilder, or it is set in another terminal.',
+      errRefusedFix:
+        'Nothing listens on that address. LocalStack is not running, is still starting, or publishes another port. Check docker ps and the health URL.',
+      errCredsFix:
+        'No credentials reached Envilder. Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY, even to dummy values.',
+      errNotFoundFix:
+        'The parameter was not seeded in this LocalStack, or was seeded in another region. Seed it again, and compare the path and AWS_REGION with the push.',
+      errorsMore: 'The full list of exit codes and messages is in the',
+      errorsMoreLink: 'envilder exec reference',
+      relatedTitle: 'Related pages',
+      relatedExec:
+        'envilder exec reference: options, exit codes and environment',
+      relatedGha:
+        'GitHub Actions guide: OIDC and real SSM parameters in a workflow',
+      relatedSsm: 'SSM to .env guide: create parameters and the map file',
+      relatedPush: 'envilder push reference: single-secret push',
+      relatedAws: 'AWS SSM provider setup',
+      relatedMap: 'Map file reference',
+    },
     pushReference: {
       tabAws: 'AWS SSM',
       tabAzure: 'Azure Key Vault',
@@ -1545,6 +1663,19 @@ export const en: Translations = {
         cardTitle: 'Load SSM parameters in GitHub Actions',
         cardSummary:
           'Sign in to AWS with OIDC and export SSM parameters as environment variables to the steps of a workflow job.',
+      },
+      'guide-localstack-integration-tests': {
+        title: 'Run integration tests against LocalStack without a .env file',
+        description:
+          'Load AWS SSM parameters in integration tests without a .env file: start LocalStack, seed parameters with Envilder, and run npm test, dotnet test or pytest through envilder exec, in CI too.',
+        heading: 'Run integration tests against LocalStack without a .env file',
+        intro:
+          'How can I load secrets from AWS Parameter Store in integration tests without a .env file? Run the test command through envilder exec against LocalStack. Start LocalStack, seed the parameters with envilder --push, point the AWS SDK at it with AWS_ENDPOINT_URL and dummy credentials, then run envilder exec -- followed by npm test, dotnet test or pytest. Envilder reads every parameter listed in a map file from the Parameter Store emulated by LocalStack and starts your tests with them as environment variables. It writes no .env file, and if a parameter is missing it exits with 125 without running a single test.',
+        breadcrumb: 'LocalStack integration tests',
+        navLabel: 'LocalStack integration tests',
+        cardTitle: 'Test against LocalStack without a .env',
+        cardSummary:
+          'Seed SSM parameters in LocalStack and run your integration tests through envilder exec, locally and in GitHub Actions.',
       },
       'aws-ssm': {
         title: 'Use Envilder with AWS SSM Parameter Store',

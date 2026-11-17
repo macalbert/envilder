@@ -31,6 +31,10 @@
     "hash": "6fa7701804396d3960272eacf1ca5b27d4693115de3857b1c722159fd2089669",
     "dateModified": "2026-11-16"
   },
+  "/docs/guides/localstack-integration-tests/": {
+    "hash": "ff73b08060ce8d46ae849e649b6cc67051d3a959df503f622d87b3fb4c225873",
+    "dateModified": "2026-11-17"
+  },
   "/docs/guides/ssm-to-env/": {
     "hash": "6866f0e828239762f615cb6f1d700725226fc41c078ed7dafd4d6b3442ed2fd2",
     "dateModified": "2026-11-05"

@@ -444,6 +444,118 @@ const gaErrors = [
   },
 ] as const;
 
+const lt = t.docs.guideLocalstackIntegrationTests;
+
+const ltRun =
+  'docker run -d --name localstack -p 4566:4566 -e LOCALSTACK_AUTH_TOKEN localstack/localstack';
+
+const ltCompose = `services:
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      LOCALSTACK_AUTH_TOKEN: \${LOCALSTACK_AUTH_TOKEN}`;
+
+const ltEnvBash = `export AWS_ENDPOINT_URL=http://localhost:4566
+export AWS_REGION=us-east-1
+export AWS_ACCESS_KEY_ID=test
+export AWS_SECRET_ACCESS_KEY=test`;
+
+const ltEnvPowershell = `$env:AWS_ENDPOINT_URL = 'http://localhost:4566'
+$env:AWS_REGION = 'us-east-1'
+$env:AWS_ACCESS_KEY_ID = 'test'
+$env:AWS_SECRET_ACCESS_KEY = 'test'`;
+
+const ltPushCmd = `envilder --push --provider=aws --map=envilder.test.json --key=DB_PASSWORD --value=local-db-password-1234 --secret-path=/my-app/test/db-password
+envilder --push --provider=aws --map=envilder.test.json --key=API_TOKEN --value=local-api-token-5678 --secret-path=/my-app/test/api-token`;
+
+const ltPushOutput = `⭐ SECRET PUSHED  —  DB_PASSWORD=*******************234 → *********************ord
+✓ Created envilder.test.json
+
+⭐ SECRET PUSHED  —  API_TOKEN=*****************678 → *******************ken
+✓ Added API_TOKEN to envilder.test.json`;
+
+const ltMap = `{
+  "DB_PASSWORD": "/my-app/test/db-password",
+  "API_TOKEN": "/my-app/test/api-token"
+}`;
+
+const ltRunCmd = `envilder exec --provider=aws --map=envilder.test.json -- npm test
+envilder exec --provider=aws --map=envilder.test.json -- dotnet test
+envilder exec --provider=aws --map=envilder.test.json -- pytest`;
+
+const ltCheckCmd = `envilder exec --provider=aws --map=envilder.test.json -- node -e "for (const n of ['DB_PASSWORD','API_TOKEN']) console.log(n, process.env[n] ? 'is set' : 'is missing')"`;
+
+const ltCheckOutput = `envilder: 2 secrets resolved (aws) → node …
+DB_PASSWORD is set
+API_TOKEN is set`;
+
+const ltMissingOutput = `🪙  RESOLVING SECRETS
+${'━'.repeat(60)}
+  ✓ DB_PASSWORD         → *******************234
+
+💥 GAME OVER — some secrets could not be fetched
+${'━'.repeat(60)}
+  ✗ STRIPE_KEY          → ********************key
+
+  ⮕ WHY?
+     not found`;
+
+const ltWorkflow = `name: Integration tests
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      localstack:
+        image: localstack/localstack
+        ports:
+          - 4566:4566
+        env:
+          LOCALSTACK_AUTH_TOKEN: \${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+    env:
+      AWS_ENDPOINT_URL: http://localhost:4566
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22.x
+
+      # ${lt.commentWait}
+      - run: curl --silent --fail --retry 30 --retry-delay 2 --retry-connrefused $AWS_ENDPOINT_URL/_localstack/health
+
+      # ${lt.commentSeed}
+      - run: |
+          npx envilder --push --provider=aws --map=envilder.test.json --key=DB_PASSWORD --value=local-db-password-1234 --secret-path=/my-app/test/db-password
+          npx envilder --push --provider=aws --map=envilder.test.json --key=API_TOKEN --value=local-api-token-5678 --secret-path=/my-app/test/api-token
+
+      # ${lt.commentRun}
+      - run: npx envilder exec --provider=aws --map=envilder.test.json -- npm test`;
+
+const ltErrors = [
+  {
+    message: 'The security token included in the request is invalid.',
+    fix: 'errTokenFix',
+  },
+  {
+    message:
+      'connect ECONNREFUSED ::1:4566; connect ECONNREFUSED 127.0.0.1:4566',
+    fix: 'errRefusedFix',
+  },
+  {
+    message: 'Could not load credentials from any providers',
+    fix: 'errCredsFix',
+  },
+  { message: 'not found', fix: 'errNotFoundFix' },
+] as const;
+
 const guideIamPolicy = `{
   "Version": "2012-10-17",
   "Statement": [
@@ -1780,6 +1892,140 @@ const validateSdkRows = [
           <li><a href={localizedPath(lang, '/docs/guides/ssm-to-env/')}>{ga.relatedSsm}</a></li>
           <li><a href={localizedPath(lang, '/docs/cli/exec/')}>{ga.relatedExec}</a></li>
           <li><a href={localizedPath(lang, '/docs/map-file/')}>{ga.relatedMap}</a></li>
+        </ul>
+      </section>
+    </>
+  )}
+
+  {routeKey === 'guide-localstack-integration-tests' && (
+    <>
+      <section id="guide-flow" class="docs-section">
+        <h2>{lt.flowTitle}</h2>
+        <ol class="docs-list">
+          {lt.flowItems.map((item) => <li>{item}</li>)}
+        </ol>
+      </section>
+
+      <section id="guide-prerequisites" class="docs-section">
+        <h2>{lt.prereqTitle}</h2>
+        <ul class="docs-list">
+          {lt.prereqItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+
+      <section id="guide-localstack" class="docs-section">
+        <h2>{lt.startTitle}</h2>
+        <p>{lt.startDesc}</p>
+        <CodeBlock lang="bash" code={ltRun} />
+        <p>{lt.startComposeDesc}</p>
+        <CodeBlock lang="yaml" filename="compose.yaml" code={ltCompose} />
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>{lt.startTokenNote}</div>
+        </div>
+        <p class="note">{lt.startOldNote}</p>
+        <p class="note">{lt.startHealthNote}</p>
+      </section>
+
+      <section id="guide-endpoint" class="docs-section">
+        <h2>{lt.pointTitle}</h2>
+        <p>{lt.pointDesc}</p>
+        <ul class="docs-list">
+          {lt.pointItems.map((item) => <li>{item}</li>)}
+        </ul>
+        <p>{lt.pointBashDesc}</p>
+        <CodeBlock lang="bash" code={ltEnvBash} />
+        <p>{lt.pointPowershellDesc}</p>
+        <CodeBlock lang="powershell" code={ltEnvPowershell} />
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>{lt.pointRealAwsWarn}</div>
+        </div>
+        <p class="note">{lt.pointGitBashNote}</p>
+      </section>
+
+      <section id="guide-seed" class="docs-section">
+        <h2>{lt.seedTitle}</h2>
+        <p>{lt.seedDesc}</p>
+        <CodeBlock lang="bash" code={ltPushCmd} />
+        <p>{lt.seedOutputDesc}</p>
+        <CodeBlock lang="text" code={ltPushOutput} />
+        <p>{lt.seedMapDesc}</p>
+        <CodeBlock lang="json" filename="envilder.test.json" code={ltMap} />
+        <p class="note">{lt.seedMapNote}</p>
+        <p class="note">{lt.seedCommitNote} <a href={localizedPath(lang, '/docs/cli/push/')}>{lt.relatedPush}</a></p>
+      </section>
+
+      <section id="guide-run" class="docs-section">
+        <h2>{lt.runTitle}</h2>
+        <p>{lt.runDesc}</p>
+        <CodeBlock lang="bash" code={ltRunCmd} />
+        <p>{lt.runCheckDesc}</p>
+        <CodeBlock lang="bash" code={ltCheckCmd} />
+        <CodeBlock lang="text" code={ltCheckOutput} />
+        <p>{lt.runCheckOutputDesc}</p>
+        <p class="note">{lt.runInheritNote}</p>
+        <p class="note">{lt.runProviderNote}</p>
+        <p>{lt.runExitDesc}</p>
+
+        <h3>{lt.runMissingTitle}</h3>
+        <p>{lt.runMissingDesc}</p>
+        <CodeBlock lang="text" code={ltMissingOutput} />
+        <p>{lt.runMissingOutputDesc}</p>
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>{lt.runDiskNote}</div>
+        </div>
+      </section>
+
+      <section id="guide-ci" class="docs-section">
+        <h2>{lt.ciTitle}</h2>
+        <p>{lt.ciDesc}</p>
+        <CodeBlock lang="yaml" filename=".github/workflows/integration-tests.yml" code={ltWorkflow} />
+        <ul class="docs-list">
+          {lt.ciNotes.map((item) => <li>{item}</li>)}
+        </ul>
+        <p>{lt.ciMore} <a href={localizedPath(lang, '/docs/guides/github-actions-ssm/')}>{lt.ciMoreLink}</a>.</p>
+      </section>
+
+      <section id="guide-sdk" class="docs-section">
+        <h2>{lt.altTitle}</h2>
+        <p>{lt.altDesc}</p>
+        <ul class="docs-list">
+          <li><a href="https://github.com/macalbert/envilder-examples/tree/main/dotnet-testcontainers">{lt.altDotnet}</a></li>
+          <li><a href="https://github.com/macalbert/envilder-examples/tree/main/python-testcontainers">{lt.altPython}</a></li>
+          <li><a href="https://github.com/macalbert/envilder-examples/tree/main/typescript-testcontainers">{lt.altTypescript}</a></li>
+        </ul>
+        <ul class="docs-list">
+          {lt.altPoints.map((item) => <li>{item}</li>)}
+        </ul>
+        <p>{lt.altChoose}</p>
+      </section>
+
+      <section id="guide-errors" class="docs-section">
+        <h2>{lt.errorsTitle}</h2>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{lt.thMessage}</th><th>{lt.thFix}</th></tr>
+          </thead>
+          <tbody>
+            {ltErrors.map((row) => (
+              <tr><td><code>{row.message}</code></td><td>{lt[row.fix]}</td></tr>
+            ))}
+          </tbody>
+        </table>
+        <p>{lt.errorsMore} <a href={localizedPath(lang, '/docs/cli/exec/#exec-errors')}>{lt.errorsMoreLink}</a>.</p>
+      </section>
+
+      <section id="guide-related" class="docs-section">
+        <h2>{lt.relatedTitle}</h2>
+        <ul class="docs-list">
+          <li><a href={localizedPath(lang, '/docs/cli/exec/')}>{lt.relatedExec}</a></li>
+          <li><a href={localizedPath(lang, '/docs/guides/github-actions-ssm/')}>{lt.relatedGha}</a></li>
+          <li><a href={localizedPath(lang, '/docs/guides/ssm-to-env/')}>{lt.relatedSsm}</a></li>
+          <li><a href={localizedPath(lang, '/docs/cli/push/')}>{lt.relatedPush}</a></li>
+          <li><a href={localizedPath(lang, '/docs/providers/aws-ssm/')}>{lt.relatedAws}</a></li>
+          <li><a href={localizedPath(lang, '/docs/map-file/')}>{lt.relatedMap}</a></li>
         </ul>
       </section>
     </>
