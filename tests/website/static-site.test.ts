@@ -291,6 +291,39 @@ describe('Static website SEO', () => {
     expect(llms).toContain('## Docs: Guides');
     expect(llms).toContain(`(${siteUrl}/docs/guides/ssm-to-env/)`);
     expect(llms).toContain(`(${siteUrl}/docs/guides/azure-key-vault-to-env/)`);
+    expect(llms).toContain(`(${siteUrl}/docs/guides/github-actions-ssm/)`);
+  });
+
+  it('Should_AnswerTheQuestionFirst_When_GitHubActionsSsmGuideIsBuilt', () => {
+    // Arrange
+    const html = readDistFile('docs/guides/github-actions-ssm/index.html');
+
+    // Act
+    const firstParagraph = html.match(
+      /<p class="docs-intro"[^>]*>([\s\S]*?)<\/p>/,
+    );
+
+    // Assert
+    expect(firstParagraph?.[1]).toContain('Envilder');
+    expect(firstParagraph?.[1]).toContain('GitHub Actions');
+    expect(firstParagraph?.[1]).toContain('SSM');
+  });
+
+  it('Should_LocalizeWorkflowComments_When_CatalanGitHubActionsSsmGuideIsBuilt', () => {
+    // Arrange
+    const html = readDistFile('ca/docs/guides/github-actions-ssm/index.html');
+
+    // Act
+    const hasCatalanComment = html.includes(
+      'Permet que el job demani un token OIDC',
+    );
+    const hasEnglishComment = html.includes(
+      'Lets the job request an OIDC token',
+    );
+
+    // Assert
+    expect(hasCatalanComment).toBe(true);
+    expect(hasEnglishComment).toBe(false);
   });
 
   it('Should_AnswerTheQuestionFirst_When_AzureKeyVaultGuideIsBuilt', () => {
