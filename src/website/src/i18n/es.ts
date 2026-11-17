@@ -860,6 +860,222 @@ export const es: Translations = {
       relatedAws: 'Configuración del proveedor AWS SSM',
       relatedGha: 'Guía de la GitHub Action',
     },
+    guideAzureKeyVaultToEnv: {
+      whyTitle: 'Por qué leer Key Vault directamente',
+      whyItems: [
+        'Los secretos se quedan en tu Key Vault. No hay un segundo almacén que mantener sincronizado ni ningún servicio adicional que guarde tus valores.',
+        'Azure RBAC y los registros de diagnóstico de Key Vault siguen funcionando como hasta ahora: Envilder inicia sesión como desarrollador, así que el acceso se concede por persona.',
+        'Nadie pega un archivo .env en un chat o en un correo. Una persona nueva en el equipo recibe un rol en el vault y ejecuta un solo comando.',
+        'envilder.json solo contiene nombres de variable y nombres de secreto, así que se puede versionar sin riesgo y el contrato se revisa en una pull request.',
+      ],
+      prereqTitle: 'Requisitos previos',
+      prereqItems: [
+        'Node.js 22.12 o superior. Ejecuta la CLI con npx envilder o instálala con npm install -g envilder.',
+        'Un Key Vault existente y su URL, con la forma https://<nombre-del-vault>.vault.azure.net.',
+        'La Azure CLI con la sesión iniciada con az login. Envilder se autentica con DefaultAzureCredential del SDK de Azure, que prueba varias fuentes por orden (variables de entorno, workload identity, managed identity, la Azure CLI, Azure PowerShell y la Azure Developer CLI). En una máquina de desarrollo, la sesión iniciada de la Azure CLI es la habitual.',
+        'Un rol en el vault que te permita leer secretos y, si también haces push, uno que te permita escribirlos.',
+      ],
+      rolesDesc:
+        'Pull y exec solo leen secretos. Push los escribe. Esto es lo mínimo que necesitas para cada operación:',
+      thOperation: 'Operación',
+      thRbacRole: 'Rol de Azure RBAC',
+      thAccessPolicy: 'Permiso de política de acceso',
+      rolePull: 'Pull y exec',
+      rolePush: 'Push',
+      roleCommandDesc:
+        'Con Azure RBAC, asigna el rol sobre el vault. Da el rol de lectura a todos los que ejecutan la aplicación y el de escritura solo a quien crea secretos:',
+      roleReadComment: 'Pull y exec: leer secretos',
+      roleWriteComment: 'Push: escribir secretos',
+      roleNote:
+        'Cuál de los dos modelos usa tu vault y los comandos de la política de acceso se explican en la página del proveedor Azure Key Vault. Una asignación de rol puede tardar unos minutos en aplicarse.',
+      namingTitle:
+        'Cómo una entrada del archivo de mapa se convierte en un nombre de secreto',
+      namingDesc:
+        'Envilder aplica una sola regla a cada referencia del archivo de mapa: se elimina la barra inicial y cada una de las demás / pasa a ser un guion. No se cambia nada más:',
+      thReference: 'Referencia en envilder.json',
+      thSecretName: 'Secreto leído del vault',
+      namingNote:
+        'Key Vault solo acepta letras, dígitos y guiones en el nombre de un secreto, y compara los nombres sin distinguir mayúsculas. Una referencia que Key Vault rechaza, por ejemplo una con _ o ., falla con el error del propio Key Vault. Dos referencias que resuelven al mismo nombre en una ejecución se detienen con un error de colisión. El nombre de variable a la izquierda de la entrada es libre: DB_PASSWORD es válido aunque el secreto no pueda contener un guion bajo.',
+      exampleTitle: 'Ejemplo: de secretos de Key Vault a un archivo .env',
+      exampleDesc:
+        'Partimos de una carpeta sin envilder.json y de un vault vacío, y creamos tres secretos. Cada uno se lee en una variable. Si el proyecto ya tiene un envilder.json para otro almacén, pasa --map con un archivo separado a cada comando de push, pull y exec:',
+      thVaultSecret: 'Secreto en Key Vault',
+      thVariable: 'Variable en .env',
+      pushDesc:
+        'Haz push de cada valor una sola vez. Un push de un solo secreto escribe el valor en el vault y, en el mismo paso, crea envilder.json o le añade la entrada (CLI 0.16 o superior). Cada push indica el proveedor y el vault, así que el secreto va a Key Vault diga lo que diga el archivo de mapeo. El primero crea envilder.json con esos valores en $config, así que pull y exec no necesitan ninguna opción:',
+      pushOutputDesc:
+        'Líneas de resultado de cada comando (se omiten las líneas de cabecera). Los valores y las rutas están enmascarados:',
+      pushResultDesc:
+        'envilder.json ya mapea las tres variables. Solo contiene nombres y referencias de secreto, nunca valores:',
+      pushWarn:
+        'El push siempre escribe el valor: un secreto existente recibe una versión nueva. --value se queda en el historial del shell, así que úsalo para valores de prueba. Para hacer push de secretos reales, ponlos en un archivo .env y ejecuta envilder --push.',
+      pushNote:
+        'Si los secretos ya existen en el vault, no los vuelvas a subir: escribe envilder.json a mano con la misma forma, un nombre de variable por cada secreto. Si una variable ya apunta a otra referencia, el push sale con 1 y no sube nada.',
+      pushLink:
+        'Referencia del modo push: todas las opciones y las reglas del archivo de mapa',
+      pullDesc:
+        'Ejecuta envilder sin opciones. El pull es el modo por defecto: lee envilder.json y escribe .env en el directorio actual. La URL del vault viene de $config, así que no hace falta ninguna opción:',
+      pullOutputDesc:
+        'Azure no muestra ninguna línea de identidad. Los valores están enmascarados: de un valor de más de 10 caracteres solo se ven los tres últimos.',
+      pullResultDesc:
+        'El .env resultante. Envilder entrecomilla DATABASE_URL porque contiene un espacio y un #, y lee el resultado como lo hace dotenv antes de escribir:',
+      pullGitignore:
+        'El archivo .env contiene los valores reales. Añádelo a .gitignore. envilder.json solo contiene nombres, así que se puede versionar. Si vuelves a ejecutar envilder y los valores no han cambiado, no cambia nada.',
+      execTitle: 'O prescinde del archivo con envilder exec',
+      execDesc:
+        'Si solo necesitas los valores para iniciar un proceso, envilder exec resuelve el mismo archivo de mapa e inicia tu comando con los secretos añadidos a su entorno, sin escribir nada en disco:',
+      execOutputDesc:
+        'El resumen va a stderr, así que nunca se mezcla con la salida de tu comando, que lee los valores como variables de entorno normales.',
+      whenTitle: 'Cuál usar',
+      whenItems: [
+        'Usa envilder exec cuando inicias tú el proceso: scripts npm, tests, migraciones. No escribe ningún archivo; si ya hiciste pull de un .env, bórralo al cambiar. Un secreto que falta o no se puede leer detiene el comando antes de que empiece (código de salida 125).',
+        'Usa un archivo .env cuando una herramienta lee el archivo por ruta o no puedes envolver su comando de inicio: env_file de Docker Compose, una configuración de ejecución del IDE, un framework que carga .env él mismo. Un secreto que falta es solo un aviso en este modo, así que mira el resumen (2/3 en lugar de 3/3).',
+      ],
+      errorsTitle: 'Errores habituales',
+      thMessage: 'Mensaje',
+      thFix: 'Solución',
+      errVaultFix:
+        'Añade "vaultUrl": "https://<nombre-del-vault>.vault.azure.net" a $config en envilder.json, o pasa --vault-url. Con --no-map-update en el push, pasa también --provider=azure.',
+      errCollisionFix:
+        'Dos referencias del archivo de mapa resuelven al mismo secreto de Key Vault. Usa una referencia por secreto.',
+      errNotFoundFix:
+        'El secreto no existe en ese vault. Revisa el nombre con la regla de arriba. El pull lo omite y sale igualmente con 0, así que mira el 2/3 del resumen; exec se detiene con 125.',
+      errNoMapFix:
+        'Ejecuta envilder desde el directorio que contiene envilder.json, o pasa --map=ruta/al/archivo.json.',
+      errorsOther:
+        'Cualquier otro fallo, como unas credenciales de Azure que faltan o un acceso denegado al vault, detiene la ejecución. El pull lista cada variable afectada con su referencia enmascarada y el motivo, deja intacto el archivo .env y sale con 1. Exec sale con 125 sin iniciar tu comando. Vuelve a ejecutar az login o revisa tu rol en el vault.',
+      errorsMore:
+        'Todos los mensajes del modo pull están en la referencia del modo pull.',
+      saasTitle: 'Cuándo encaja mejor un gestor de secretos SaaS',
+      saasDesc:
+        'Esta guía encaja con un equipo que ya guarda los secretos en Azure Key Vault y los quiere en desarrollo local sin añadir ningún producto. La CLI de Envilder lee y escribe Key Vault y AWS SSM, nada más, y no tiene panel ni rotación propia. Un gestor alojado como Doppler o Infisical puede ir mejor cuando:',
+      saasItems: [
+        'Tus secretos todavía no están en Key Vault y quieres un solo lugar para gestionarlos, con una interfaz web para quien no usa la terminal.',
+        'Necesitas flujos alrededor de los secretos mismos, como aprobaciones, sincronización por entorno con muchas plataformas o rotación, y prefieres un producto que los ofrezca.',
+        'No quieres gestionar el control de acceso de Azure para cada desarrollador que necesita un .env local.',
+      ],
+      saasFair:
+        'Esos productos son buenas herramientas para esas tareas. Si Key Vault ya es tu fuente de verdad, Envilder la mantiene así.',
+      relatedTitle: 'Páginas relacionadas',
+      relatedAzure:
+        'Configuración del proveedor Azure Key Vault: modelos de acceso y roles',
+      relatedPull: 'Referencia del modo pull',
+      relatedPush: 'Referencia del modo push',
+      relatedExec: 'Referencia de envilder exec',
+      relatedMap: 'Referencia del archivo de mapa',
+    },
+    guideGithubActionsSsm: {
+      flowTitle: 'Cómo funciona',
+      flowItems: [
+        'El job pide un token OIDC a GitHub. aws-actions/configure-aws-credentials lo cambia por credenciales de corta duración de un rol IAM que solo confía en tu repositorio y rama. No se guarda ninguna clave de acceso de AWS en GitHub.',
+        'La Envilder Action lee envilder.json y llama a ssm:GetParameter, con descifrado, una vez por variable, con esas credenciales. No inicia sesión en AWS por sí misma.',
+        'Cada valor se registra para el enmascarado de logs de GitHub y después se exporta al entorno de todos los pasos siguientes del mismo job.',
+      ],
+      prereqTitle: 'Requisitos previos',
+      prereqItems: [
+        'Parámetros en SSM Parameter Store, en una sola cuenta y región. Los parámetros SecureString funcionan: la acción los lee con descifrado.',
+        'Un proveedor de identidad OpenID Connect de IAM para token.actions.githubusercontent.com en esa cuenta, con audience sts.amazonaws.com. Se crea una sola vez por cuenta.',
+      ],
+      prereqMapDesc:
+        'Un envilder.json en el repositorio, con una entrada por variable, cada una apuntando al nombre de un parámetro:',
+      prereqMapNote:
+        'Para crear los parámetros y este archivo desde cero, sigue la',
+      prereqMapLink: 'guía SSM a .env',
+      iamTitle: 'Crea el rol IAM',
+      iamTrustDesc:
+        'La política de confianza deja que GitHub asuma el rol para la audience sts.amazonaws.com y para un solo subject: la rama main de este repositorio. Sustituye el ID de la cuenta, la organización y el repositorio:',
+      iamTrustNote:
+        'Un job que apunta a un entorno de GitHub, una etiqueta o una pull request envía un sub distinto, igual que los repositorios que usan subject claims inmutables. La referencia de GitHub Action lista cada forma.',
+      iamTrustLink: 'Referencia de GitHub Action: entornos y subjects OIDC',
+      iamPolicyDesc:
+        'Adjunta una política de permisos que permita solo lo que llama Envilder: ssm:GetParameter, una vez por variable, sobre los parámetros de esta aplicación. Nunca lista, escribe ni elimina parámetros.',
+      iamPolicyNote:
+        'Los parámetros cifrados con la clave por defecto aws/ssm no necesitan nada más. Añade kms:Decrypt sobre la clave solo si usan una clave KMS gestionada por el cliente. El ARN debe llevar la región de los parámetros.',
+      workflowTitle: 'Añade Envilder al workflow',
+      workflowDesc:
+        'Inicia sesión primero con configure-aws-credentials y después ejecuta la acción. El job necesita id-token: write para pedir el token OIDC. Todos los pasos siguientes leen DB_PASSWORD y API_TOKEN como variables de entorno normales:',
+      commentOidc: 'Permite que el job pida un token OIDC',
+      commentUse: 'DB_PASSWORD y API_TOKEN están definidas en este paso',
+      workflowOutputDesc:
+        'El log del paso lista cada variable con el valor enmascarado y termina con esta línea:',
+      workflowProviderNote:
+        'provider: aws se escribe a propósito. Sin eso, el proveedor sale de $config.provider en el archivo de mapa y por defecto es aws. El input prevalece sobre el archivo de mapa, así que este job lee SSM aunque el archivo nombre otro proveedor.',
+      workflowRegionNote:
+        'La región viene de aws-region en el paso de credenciales, que exporta AWS_REGION y AWS_DEFAULT_REGION. Envilder lee primero AWS_REGION, luego AWS_DEFAULT_REGION, y termina en us-east-1 si no encuentra ninguna. Un parámetro guardado en otra región se reporta como no encontrado.',
+      workflowScopeNote:
+        'Los valores llegan a los pasos siguientes a través del archivo GITHUB_ENV del runner, así que todos los pasos siguientes de este job pueden leerlos, incluidas las acciones de terceros. Los otros jobs no reciben nada: ejecuta la acción en cada job que necesite los valores.',
+      inputsNote:
+        'Este workflow solo define map-file y provider. Los demás inputs y la salida están descritos en la',
+      inputsLink: 'referencia de GitHub Action',
+      modesTitle: 'Cuando solo un paso necesita los secretos',
+      modesDesc:
+        'El modo por defecto comparte los valores con el resto del job. Dos inputs lo reducen.',
+      modeCommandTitle: 'Ejecuta un solo comando',
+      modeCommandDesc:
+        'Con command, la acción lo ejecuta con bash, y los secretos solo existen para ese comando y los procesos que inicia. Los pasos siguientes no los ven, y el paso termina con el código de salida del comando. Si falta un parámetro o está vacío, el comando no se inicia.',
+      modeCliDesc:
+        'Lo mismo con la CLI en un paso run necesita Node.js 22.12 o superior, así que configúralo antes:',
+      modeCliNote:
+        'La CLI resuelve el mismo archivo de mapa y sale con 125, sin iniciar tu comando, cuando no se puede leer un parámetro. Deja su stderr en el log del paso: lleva los registros de máscaras. La Action no necesita ningún paso previo y ejecuta la versión empaquetada con su etiqueta, mientras que npx envilder descarga la última CLI publicada salvo que fijes una con npx envilder@<version>.',
+      modeFileTitle: 'Escribe un archivo para una herramienta que lo necesita',
+      modeFileDesc:
+        'Algunas herramientas leen un archivo en lugar del entorno, por ejemplo docker compose --env-file. Usa env-file y ponlo bajo runner.temp, fuera del espacio de trabajo. La salida env-file-path devuelve la ruta que has pasado:',
+      modeFileNote:
+        'Este modo escribe los valores en texto plano en el runner: no subas nunca ese archivo como artifact ni lo metas en una caché. Un parámetro que falta es solo un aviso aquí, así que comprueba que el resumen cuente todas las variables. env-file y command no se pueden combinar.',
+      modesMore: 'Referencia de GitHub Action: elegir un modo',
+      maskTitle: 'Qué se enmascara en los logs',
+      maskDesc:
+        'GitHub oculta un valor en el log solo después de que algo lo registre. Esto es lo que hacen la acción y la CLI:',
+      maskItems: [
+        'La Action registra cada valor que lee con una orden de workflow ::add-mask::, en los tres modos. En los modos por defecto y command espera a que los registros se hayan escrito antes de exportar los valores o iniciar el comando, y se detiene sin exportar nada si un registro falla.',
+        'Envilder imprime cada variable con el valor con asteriscos: un valor de más de 10 caracteres conserva los tres últimos, uno más corto va todo con asteriscos. Las rutas de parámetro también conservan los tres últimos caracteres.',
+        'El enmascarado compara el texto exacto. Una copia transformada de un valor, por ejemplo codificada en base64, no se reconoce y se imprime en claro. El enmascarado solo afecta al log: no protege un archivo, un artifact ni una caché.',
+        'Los errores que vienen de AWS se imprimen tal como los devuelve AWS y pueden contener el ARN completo del parámetro.',
+      ],
+      maskCliNote:
+        'Si ejecutas la CLI tú mismo en lugar de la Action, envilder exec registra las máscaras cuando GITHUB_ACTIONS es true. Envilder sin subcomando, que escribe un archivo .env, no registra ninguna máscara en un workflow e imprime los tres últimos caracteres de los valores largos. En CI, prefiere la Action o envilder exec.',
+      errorsTitle: 'Errores habituales',
+      thMessage: 'Mensaje',
+      thFix: 'Solución',
+      errAssumeFix:
+        'Lo muestra configure-aws-credentials, antes de que se ejecute Envilder. El sub o el aud de la política de confianza no coincide con el token, o falta el proveedor de identidad en esta cuenta. El sub cambia con la rama, etiqueta, pull request o entorno de la ejecución.',
+      errIdTokenLabel: 'El paso de credenciales falla al obtener un ID token',
+      errIdTokenFix:
+        'Al job le falta id-token: write, así que GitHub no le da ningún token OIDC. Añádelo a nivel de workflow o de job, junto con contents: read. El texto exacto depende de la versión de la acción, así que busca un mensaje sobre el ID token.',
+      errRegionFix:
+        'configure-aws-credentials siempre requiere aws-region. Defínela en ese paso: también fija la región que usa Envilder.',
+      errNoCredsFix:
+        'Se muestra bajo WHY? en el log de Envilder. Ninguna credencial ha llegado a Envilder: falta el paso de credenciales, va después del paso de Envilder o está en otro job. Las credenciales no pasan de un job a otro.',
+      errDeniedFix:
+        'El rol se ha asumido pero su política no cubre ese parámetro. Compara el ARN de Resource, región incluida, con el parámetro del mensaje. Un mensaje parecido sobre kms:Decrypt significa que al rol o a la política de la clave le falta ese permiso.',
+      errNotFoundFix:
+        'El motivo que se muestra bajo WHY? cuando GetParameter no encuentra el parámetro. Revisa el nombre y compara la región de la línea de identidad con la región del parámetro. El paso falla en los modos por defecto y command, y solo avisa con env-file.',
+      errBothFix: 'Define solo uno de los dos inputs.',
+      errBlockedFix:
+        'Una variable del mapa es uno de los nombres que el runner no deja definir en GITHUB_ENV. Cámbiale el nombre, o usa command o env-file.',
+      errorsMore: 'Hay más casos, como credenciales caducadas y Azure, en la',
+      altTitle: 'Comparado con otras formas de leer SSM en un workflow',
+      altDesc:
+        'La alternativa simple es un paso run con la AWS CLI, que viene preinstalada en los runners Ubuntu alojados por GitHub, después del paso de credenciales. Para uno o dos parámetros funciona:',
+      altComment:
+        'Enmascara cada línea del valor antes de que nada pueda imprimirla',
+      altPoints: [
+        'Cada parámetro necesita su comando, y los nombres viven en el workflow en lugar de en un archivo de mapa que los desarrolladores también usan en local con la CLI.',
+        'Tienes que enmascarar el valor antes de escribirlo, y un valor con salto de línea no puede usar la forma NAME=value: GITHUB_ENV necesita su sintaxis de delimitador multilínea.',
+        '--with-decryption es fácil de olvidar: sin eso un SecureString vuelve como texto cifrado.',
+      ],
+      altFair:
+        'Para uno o dos parámetros el script es más corto y no necesita ninguna acción adicional. Envilder empieza a compensar con varias variables, un archivo de mapa compartido con el desarrollo local y un paso que falla si falta cualquier parámetro.',
+      altMarketplace:
+        'Otras acciones del GitHub Marketplace también leen parámetros SSM. Antes de elegir una, comprueba qué enmascara, qué acciones IAM necesita (GetParameter o GetParametersByPath), si un parámetro que falta hace fallar el paso, y cómo se versiona y se mantiene. Para Envilder las respuestas son cada valor, solo ssm:GetParameter, y sí en los modos por defecto y command. Esta guía no compara otras acciones una por una.',
+      relatedTitle: 'Páginas relacionadas',
+      relatedGha:
+        'Referencia de GitHub Action: cada input, los tres modos y Azure',
+      relatedAws: 'Configuración del proveedor AWS SSM',
+      relatedSsm: 'Guía SSM a .env: crea los parámetros y el archivo de mapa',
+      relatedExec: 'Referencia de envilder exec',
+      relatedMap: 'Referencia del archivo de mapa',
+    },
     pushReference: {
       tabAws: 'AWS SSM',
       tabAzure: 'Azure Key Vault',
@@ -1321,6 +1537,36 @@ export const es: Translations = {
         cardTitle: 'Carga parámetros SSM en un .env',
         cardSummary:
           'Relaciona rutas de SSM Parameter Store con variables y escribe un .env, o prescinde del archivo con envilder exec.',
+      },
+      'guide-azure-key-vault-to-env': {
+        title:
+          'Sincroniza secretos de Azure Key Vault con un archivo .env local',
+        description:
+          'Envilder sincroniza secretos de Azure Key Vault con un archivo .env local para desarrollo, o con un comando mediante envilder exec: az login, roles RBAC, nombres de secreto y envilder.json.',
+        heading:
+          'Sincroniza secretos de Azure Key Vault con un archivo .env local',
+        intro:
+          '¿Qué herramienta puede sincronizar secretos de Azure Key Vault con un archivo .env local para desarrollo? Envilder, una CLI de código abierto: lista una sola vez cada variable y el nombre de su secreto de Key Vault en envilder.json, inicia sesión con az login y ejecuta envilder. Lee cada secreto y escribe un .env que, al leerlo de nuevo, da los mismos valores; o, con envilder exec, inicia tu comando con los secretos en su entorno sin escribir ningún archivo. Los secretos se quedan en tu vault: ningún SaaS adicional, y Azure RBAC sigue decidiendo quién puede leerlos.',
+        breadcrumb: 'Key Vault a .env',
+        navLabel: 'Key Vault a .env',
+        cardTitle: 'Carga secretos de Key Vault en un .env',
+        cardSummary:
+          'Relaciona secretos de Azure Key Vault con variables y escribe un .env, o prescinde del archivo con envilder exec.',
+      },
+      'guide-github-actions-ssm': {
+        title:
+          'Carga parámetros de AWS SSM como variables de entorno en GitHub Actions',
+        description:
+          'Inyecta parámetros de AWS SSM Parameter Store como variables de entorno en GitHub Actions con OIDC y la Envilder Action: rol IAM, workflow, enmascarado en los logs y errores habituales.',
+        heading:
+          'Carga parámetros de AWS SSM como variables de entorno en GitHub Actions',
+        intro:
+          '¿Cómo inyecto parámetros de AWS SSM como variables de entorno en GitHub Actions? Inicia la sesión del job en AWS con OIDC de GitHub y ejecuta la Envilder Action después de ese paso con la ruta de tu archivo de mapa: lee cada parámetro de AWS SSM Parameter Store listado en envilder.json, registra cada valor para que se enmascare en los logs y los define como variables de entorno para todos los pasos siguientes del job. No hace falta guardar ninguna clave de acceso de AWS en GitHub, y Envilder no escribe ningún archivo .env en este modo.',
+        breadcrumb: 'SSM en GitHub Actions',
+        navLabel: 'SSM en GitHub Actions',
+        cardTitle: 'Carga parámetros SSM en GitHub Actions',
+        cardSummary:
+          'Inicia sesión en AWS con OIDC y exporta parámetros SSM como variables de entorno a los pasos de un job de un workflow.',
       },
       'aws-ssm': {
         title: 'Usa Envilder con AWS SSM Parameter Store',
