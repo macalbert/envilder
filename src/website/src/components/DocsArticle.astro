@@ -531,6 +531,8 @@ jobs:
         with:
           node-version: 22.x
 
+      - run: npm ci
+
       # ${lt.commentWait}
       - run: curl --silent --fail --retry 30 --retry-delay 2 --retry-connrefused $AWS_ENDPOINT_URL/_localstack/health
 

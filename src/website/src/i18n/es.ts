@@ -1087,7 +1087,7 @@ export const es: Translations = {
       prereqTitle: 'Requisitos previos',
       prereqItems: [
         'Docker, para ejecutar LocalStack.',
-        'Node.js 22.12 o superior, porque la CLI de Envilder es un paquete de Node.js. Vale también para proyectos .NET y Python: solo el comando de tests es tuyo.',
+        'Node.js 22.12 o superior, porque la CLI de Envilder es un paquete de Node.js. Vale también para proyectos .NET y Python: solo el comando de tests es tuyo. Instala la CLI con npm install -g envilder, o antepón npx a los comandos envilder de esta guía.',
         'Un comando de tests que lea su configuración de variables de entorno, como npm test, dotnet test o pytest.',
       ],
       startTitle: 'Inicia LocalStack',
