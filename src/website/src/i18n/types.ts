@@ -584,6 +584,71 @@ export interface GuideAzureKeyVaultToEnvTranslations {
   relatedMap: string;
 }
 
+export interface GuideGithubActionsSsmTranslations {
+  flowTitle: string;
+  prereqTitle: string;
+  prereqMapDesc: string;
+  prereqMapNote: string;
+  prereqMapLink: string;
+  iamTitle: string;
+  iamTrustDesc: string;
+  iamTrustNote: string;
+  iamTrustLink: string;
+  iamPolicyDesc: string;
+  iamPolicyNote: string;
+  workflowTitle: string;
+  workflowDesc: string;
+  commentOidc: string;
+  commentUse: string;
+  workflowOutputDesc: string;
+  workflowProviderNote: string;
+  workflowRegionNote: string;
+  workflowScopeNote: string;
+  inputsNote: string;
+  inputsLink: string;
+  modesTitle: string;
+  modesDesc: string;
+  modeCommandTitle: string;
+  modeCommandDesc: string;
+  modeCliDesc: string;
+  modeCliNote: string;
+  modeFileTitle: string;
+  modeFileDesc: string;
+  modeFileNote: string;
+  modesMore: string;
+  maskTitle: string;
+  maskDesc: string;
+  maskCliNote: string;
+  errorsTitle: string;
+  thMessage: string;
+  thFix: string;
+  errAssumeFix: string;
+  errIdTokenLabel: string;
+  errIdTokenFix: string;
+  errRegionFix: string;
+  errNoCredsFix: string;
+  errDeniedFix: string;
+  errNotFoundFix: string;
+  errBothFix: string;
+  errBlockedFix: string;
+  errorsMore: string;
+  altTitle: string;
+  altDesc: string;
+  altComment: string;
+  altFair: string;
+  altMarketplace: string;
+  relatedTitle: string;
+  relatedGha: string;
+  relatedAws: string;
+  relatedSsm: string;
+  relatedExec: string;
+  relatedMap: string;
+  flowItems: string[];
+  prereqItems: string[];
+  maskItems: string[];
+  altPoints: string[];
+}
+
 export interface PushReferenceTranslations {
   tabAws: string;
   tabAzure: string;
@@ -848,6 +913,7 @@ export interface DocsTranslations {
   pullReference: PullReferenceTranslations;
   guideSsmToEnv: GuideSsmToEnvTranslations;
   guideAzureKeyVaultToEnv: GuideAzureKeyVaultToEnvTranslations;
+  guideGithubActionsSsm: GuideGithubActionsSsmTranslations;
   pushReference: PushReferenceTranslations;
   execReference: ExecReferenceTranslations;
   validateReference: ValidateReferenceTranslations;
@@ -862,6 +928,7 @@ export interface DocsTranslations {
     | 'getting-started'
     | 'guide-ssm-to-env'
     | 'guide-azure-key-vault-to-env'
+    | 'guide-github-actions-ssm'
     | 'aws-ssm'
     | 'azure-key-vault'
     | 'custom-provider'
