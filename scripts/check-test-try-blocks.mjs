@@ -1,0 +1,846 @@
+import { execFileSync } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
+import { extname, join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+const CSHARP_TEST_ATTRIBUTE = /^\s*\[(?:Fact|Theory|SkippableFact)\b/;
+// Optional modifiers (a method without them is private), a return type that
+// is not a statement keyword, then the method name and its parameters.
+const CSHARP_METHOD =
+  /^(\s*)(?:(?:public|private|protected|internal|static|async|override|virtual|sealed|unsafe|extern|partial)\s+)*(?!(?:return|await|throw|new|else|case|yield|goto|using|lock|if|while|for|foreach|switch|catch)\b)[\w.]+(?:<[^()=;]*>)?[?[\]]*\s+(\w+)\s*(?:<[^>]*>)?\s*\(/;
+// A `try` that starts a statement: at the start of a line or after another.
+const CSHARP_TRY = /(?:^|[;{}])\s*try\b\s*(?:\{|$)/;
+// A signature ends where its body opens, or with `;` when it has none.
+const CSHARP_SIGNATURE_END = /[{;]\s*$/;
+// A body written on the signature line: a block that opens and closes there,
+// or an expression body (`=> Inner();`), whose calls still count.
+const CSHARP_INLINE_BODY = /\{(.*\})\s*$|=>(.*)$/;
+
+const PYTHON_FUNCTION = /^(\s*)(?:async\s+)?def\s+(\w+)\s*\(/;
+// tests/sdks/python/pyproject.toml sets python_functions = ["Should_*"].
+const PYTHON_TEST_NAME = /^Should_/;
+const PYTHON_SIGNATURE_END = /:\s*(?:#.*)?$/;
+// A body on the signature line: `def safe(): return 1`.
+const PYTHON_INLINE_SUITE = /\)\s*(?:->[^:]*)?:\s*((?!#)\S.*)$/;
+const PYTHON_TRY = /^\s*try\s*:/;
+const PYTHON_COMMENT_LINE = /^\s*#/;
+
+function indentationOf(line) {
+  return line.match(/^\s*/)[0].length;
+}
+
+/** Blanks a range of characters, keeping its line breaks. */
+function blankChars(chars, from, to) {
+  for (let index = from; index < Math.min(to, chars.length); index++) {
+    if (!LINE_BREAK.test(chars[index])) chars[index] = ' ';
+  }
+}
+
+function blank(scan, from, to) {
+  blankChars(scan.masked, from, to);
+}
+
+function charAt(scan) {
+  return scan.text[scan.index];
+}
+
+/** Masks up to `closer` (or the end of the text), then moves past it. */
+function skipComment(scan, closer, closerWidth) {
+  const end = scan.text.indexOf(closer, scan.index + 2);
+  const stop = end === -1 ? scan.text.length : end + closerWidth;
+  blank(scan, scan.index, stop);
+  scan.index = stop;
+  return true;
+}
+
+/** Masks a literal's contents and moves past its closing delimiter. */
+function skipLiteral(scan, end) {
+  blank(scan, scan.index + 1, end);
+  scan.previous = 'value';
+  scan.index = end + 1;
+  return true;
+}
+
+function quotedEnd(text, start, quote) {
+  let end = start + 1;
+  while (end < text.length && text[end] !== quote && text[end] !== '\n') {
+    end += text[end] === '\\' ? 2 : 1;
+  }
+  return end;
+}
+
+function regexContinues(text, end, inClass) {
+  return (
+    end < text.length && text[end] !== '\n' && (inClass || text[end] !== '/')
+  );
+}
+
+function regexEnd(text, start) {
+  let inClass = false;
+  let end = start + 1;
+  while (regexContinues(text, end, inClass)) {
+    inClass = CHARACTER_CLASS_STATE[text[end]] ?? inClass;
+    end += text[end] === '\\' ? 2 : 1;
+  }
+  return end;
+}
+
+function closesTemplateExpression(scan) {
+  return (
+    charAt(scan) === '}' &&
+    scan.stack.at(-1).depth === 0 &&
+    scan.stack.length > 1
+  );
+}
+
+const TEMPLATE_STEPS = [
+  function templateEnd(scan) {
+    if (charAt(scan) !== '`') return false;
+    scan.stack.pop();
+    scan.previous = 'value';
+    scan.index++;
+    return true;
+  },
+  function templateExpressionStart(scan) {
+    if (!scan.text.startsWith('${', scan.index)) return false;
+    scan.stack.push({ inTemplate: false, depth: 0 });
+    scan.previous = '{';
+    scan.index += 2;
+    return true;
+  },
+  function templateText(scan) {
+    const width = charAt(scan) === '\\' ? 2 : 1;
+    blank(scan, scan.index, scan.index + width);
+    scan.index += width;
+    return true;
+  },
+];
+
+const CODE_STEPS = [
+  (scan) =>
+    scan.text.startsWith('//', scan.index) && skipComment(scan, '\n', 0),
+  (scan) =>
+    scan.text.startsWith('/*', scan.index) && skipComment(scan, '*/', 2),
+  (scan) =>
+    QUOTE.test(charAt(scan)) &&
+    skipLiteral(scan, quotedEnd(scan.text, scan.index, charAt(scan))),
+  function templateStart(scan) {
+    if (charAt(scan) !== '`') return false;
+    scan.stack.push({ inTemplate: true });
+    scan.index++;
+    return true;
+  },
+  (scan) =>
+    charAt(scan) === '/' &&
+    REGEX_MAY_FOLLOW.test(scan.previous) &&
+    skipLiteral(scan, regexEnd(scan.text, scan.index)),
+  function templateExpressionEnd(scan) {
+    if (!closesTemplateExpression(scan)) return false;
+    scan.stack.pop();
+    scan.previous = 'value';
+    scan.index++;
+    return true;
+  },
+  function brace(scan) {
+    const change = BRACE_DEPTH_CHANGE[charAt(scan)];
+    if (change === undefined) return false;
+    scan.stack.at(-1).depth += change;
+    scan.previous = charAt(scan);
+    scan.index++;
+    return true;
+  },
+  function identifier(scan) {
+    WORD.lastIndex = scan.index;
+    const word = WORD.exec(scan.text);
+    if (!word) return false;
+    scan.previous = tokenAfterWord(scan.previous, word[0]);
+    scan.index += word[0].length;
+    return true;
+  },
+  function openParenthesis(scan) {
+    if (charAt(scan) !== '(') return false;
+    scan.parentheses.push(CONTROL_KEYWORD.test(scan.previous));
+    scan.previous = '(';
+    scan.index++;
+    return true;
+  },
+  // After the condition of `if (...)` or `while (...)` a statement starts,
+  // so a `/` there opens a regex; after a call it is a division.
+  function closeParenthesis(scan) {
+    if (charAt(scan) !== ')') return false;
+    scan.previous = scan.parentheses.pop() ? ';' : ')';
+    scan.index++;
+    return true;
+  },
+  function other(scan) {
+    if (!/\s/.test(charAt(scan))) scan.previous = charAt(scan);
+    scan.index++;
+    return true;
+  },
+];
+
+const CONTROL_KEYWORD = /^(?:if|while|for|with)$/;
+
+/**
+ * Replaces the contents of strings, template literals, comments and regex
+ * literals with spaces, keeping every offset and line break, so the code
+ * that is left can be searched for calls and keywords.
+ */
+function maskNonCode(text) {
+  const scan = {
+    text,
+    masked: text.split(''),
+    index: 0,
+    previous: '',
+    stack: [{ inTemplate: false, depth: 0 }],
+    parentheses: [],
+  };
+  while (scan.index < text.length) {
+    const steps = scan.stack.at(-1).inTemplate ? TEMPLATE_STEPS : CODE_STEPS;
+    steps.find((step) => step(scan));
+  }
+  return scan.masked.join('');
+}
+
+const LINE_BREAK = /[\r\n]/;
+const QUOTE = /['"]/;
+const WORD = /[\w$]+/y;
+const BRACE_DEPTH_CHANGE = { '{': 1, '}': -1 };
+const CHARACTER_CLASS_STATE = { '[': true, ']': false };
+
+const REGEX_MAY_FOLLOW =
+  /^(?:|[(,=:[!&|?{};+\-*%<>~^]|return|typeof|case|do|else|in|of|void|yield|await)$/;
+const KEYWORD_BEFORE_REGEX =
+  /^(?:return|typeof|case|do|else|in|of|void|yield|await)$/;
+const LOOP_VARIABLE_END = /^(?:[\w$]+|[\]}])$/;
+
+/**
+ * Returns the token a word leaves for the regex check. A property such as
+ * `stats.in` is a value. `of` is a keyword only right after a loop variable,
+ * as in `for (const ch of /re/)`; elsewhere it is a variable name.
+ */
+function tokenAfterWord(previous, word) {
+  if (previous === '.') return 'value';
+  return word === 'of' && !endsLoopVariable(previous) ? 'value' : word;
+}
+
+/** A loop variable is a name or a destructuring, never a keyword like `await`. */
+function endsLoopVariable(previous) {
+  return (
+    LOOP_VARIABLE_END.test(previous) && !KEYWORD_BEFORE_REGEX.test(previous)
+  );
+}
+
+const TEST_CALL = /(?<![\w$.]\s*)\b(?:it|test)(?![\w$])/g;
+const TRY_BLOCK = /\btry\s*\{/g;
+
+function closingOf(masked, start) {
+  let depth = 0;
+  for (let index = start; index < masked.length; index++) {
+    if (masked[index] === '(') depth++;
+    else if (masked[index] === ')' && --depth === 0) return index;
+  }
+  return masked.length;
+}
+
+/** Returns the argument list of the call that runs the test body. */
+function testArguments(masked, from) {
+  const chainPart = /\s*(?:\.\s*[\w$]+|`[^`]*`|\()/y;
+  let args;
+  let index = from;
+  for (;;) {
+    chainPart.lastIndex = index;
+    const part = chainPart.exec(masked);
+    if (!part) return args;
+    if (part[0].endsWith('(')) {
+      const open = index + part[0].length - 1;
+      const close = closingOf(masked, open);
+      args = { open, close };
+      index = close + 1;
+    } else {
+      index += part[0].length;
+    }
+  }
+}
+
+function testName(text, open) {
+  const name = text.slice(open + 1).match(/^\s*(['"`])((?:\\.|(?!\1).)*)\1/);
+  return name ? name[2] : '<dynamic name>';
+}
+
+function lineAt(text, offset) {
+  return text.slice(0, offset).split('\n').length;
+}
+
+const TS_IDENTIFIER = /(?<![\w$])(?<!\.\s*)[A-Za-z_$][\w$]*/g;
+const TS_LOCAL =
+  /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)|\bfunction\s*\*?\s*([A-Za-z_$][\w$]*)/g;
+const TS_FUNCTION =
+  /\bfunction\s*\*?\s*([A-Za-z_$][\w$]*)\s*(?:<[^>(]*>)?\s*\(/g;
+// A declarator starts after `const`, `let` or `var`, or after a comma in the
+// same list (`const safe = () => 1, run = () => {}`).
+const TS_INITIALIZER =
+  /(?:\b(?:const|let|var)\s+|,\s*)([A-Za-z_$][\w$]*)\s*(?::[^=]*)?=\s*(?:async\s+)?(?=\(|function\b|[A-Za-z_$][\w$]*\s*=>)/g;
+// The arrow must follow the parameters, after an optional return type.
+const ARROW_AFTER_PARAMETERS = /\s*(?::[^;=]*?)?=>/y;
+const ARROW_AFTER_PARAMETER = /[A-Za-z_$][\w$]*\s*=>/y;
+
+function closingBraceOf(masked, start) {
+  let depth = 0;
+  for (let index = start; index < masked.length; index++) {
+    if (masked[index] === '{') depth++;
+    else if (masked[index] === '}' && --depth === 0) return index;
+  }
+  return masked.length;
+}
+
+/**
+ * Finds the `{` that opens a function body after its parameter list,
+ * skipping a return type annotation such as `: { code: number }`.
+ */
+function bodyOpenAfter(masked, from) {
+  const token = /\s*(=>|\S)/y;
+  token.lastIndex = from;
+  let previous = ')';
+  for (let match = token.exec(masked); match && match[1] !== ';'; ) {
+    if (opensBody(match[1], previous)) return token.lastIndex - 1;
+    token.lastIndex = indexAfterToken(masked, match[1], token.lastIndex);
+    previous = match[1];
+    match = token.exec(masked);
+  }
+  return undefined;
+}
+
+/** A `{` opens the body unless it follows `:` or `|`, where it is a type. */
+function opensBody(token, previous) {
+  return token === '{' && !TYPE_POSITION.test(previous);
+}
+
+/** Skips an object type such as `{ code: number }` as a single token. */
+function indexAfterToken(masked, token, next) {
+  return token === '{' ? closingBraceOf(masked, next - 1) + 1 : next;
+}
+
+/** Returns where an arrow function's expression body ends. */
+function expressionEnd(masked, from) {
+  let depth = 0;
+  for (let index = from; index < masked.length; index++) {
+    if (depth === 0 && EXPRESSION_END.test(masked[index])) return index;
+    depth += NESTING_DEPTH_CHANGE[masked[index]] ?? 0;
+  }
+  return masked.length;
+}
+
+const TYPE_POSITION = /^[:|&<,(]$/;
+// A comma ends it too: `const a = () => 1, b = ...` declares another name.
+const EXPRESSION_END = /^[)\]};,\n]$/;
+const NESTING_DEPTH_CHANGE = {
+  '(': 1,
+  '[': 1,
+  '{': 1,
+  ')': -1,
+  ']': -1,
+  '}': -1,
+};
+
+function typeScriptBlock(text, masked, name, start, end) {
+  const range = masked.slice(start, end);
+  return {
+    name,
+    tries: [...range.matchAll(TRY_BLOCK)].map((match) =>
+      lineAt(text, start + match.index),
+    ),
+    refs: outerReferences(range, TS_IDENTIFIER, typeScriptLocals(range)),
+  };
+}
+
+/**
+ * Returns the names a block uses that it does not declare itself: a local
+ * such as `const run = () => 1` shadows a helper of the file named `run`.
+ */
+function outerReferences(code, identifier, locals) {
+  return new Set(
+    (code.match(identifier) ?? []).filter((name) => !locals.has(name)),
+  );
+}
+
+function declaredName(match) {
+  return match.slice(1).find(Boolean);
+}
+
+/**
+ * Names declared at the top level of a TypeScript body (brace depth 1). A
+ * declaration in a nested block does not hide the name from the rest of it.
+ */
+function typeScriptLocals(range) {
+  const depths = braceDepths(range);
+  return new Set(
+    [...range.matchAll(TS_LOCAL)]
+      .filter((match) => depths[match.index] === 1)
+      .map(declaredName),
+  );
+}
+
+/** Returns the brace depth at every offset of `code`. */
+function braceDepths(code) {
+  let depth = 0;
+  // split('') keeps UTF-16 offsets, the ones matchAll reports.
+  return code.split('').map((char) => {
+    depth += BRACE_DEPTH_CHANGE[char] ?? 0;
+    return depth;
+  });
+}
+
+/**
+ * Names declared on the body's least indented lines. Deeper declarations
+ * belong to a nested block or function and do not hide the name.
+ */
+function topLevelLocals(codeByLine, local) {
+  const lines = codeByLine.filter((line) => line.trim() !== '');
+  const indent = Math.min(...lines.map(indentationOf));
+  const topLevel = lines.filter((line) => indentationOf(line) === indent);
+  return new Set([...topLevel.join('\n').matchAll(local)].map(declaredName));
+}
+
+/** Returns the braced body of a function whose parameters open here. */
+function functionBody(masked, parametersOpen) {
+  const open = bodyOpenAfter(masked, closingOf(masked, parametersOpen) + 1);
+  return open === undefined
+    ? undefined
+    : { start: open, end: closingBraceOf(masked, open) };
+}
+
+/** Returns where the `=>` of an arrow whose parameters start here ends. */
+function arrowEndAt(masked, from) {
+  const arrow =
+    masked[from] === '(' ? ARROW_AFTER_PARAMETERS : ARROW_AFTER_PARAMETER;
+  arrow.lastIndex = masked[from] === '(' ? closingOf(masked, from) + 1 : from;
+  return arrow.exec(masked) ? arrow.lastIndex : undefined;
+}
+
+function arrowBody(masked, arrowEnd) {
+  const start = arrowEnd + masked.slice(arrowEnd).search(/\S/);
+  const end =
+    masked[start] === '{'
+      ? closingBraceOf(masked, start)
+      : expressionEnd(masked, start);
+  return { start, end };
+}
+
+/** Returns the body of a function assigned to a variable, if it is one. */
+function initializerBody(masked, from) {
+  if (masked.startsWith('function', from)) {
+    return functionBody(masked, masked.indexOf('(', from));
+  }
+  const arrowEnd = arrowEndAt(masked, from);
+  return arrowEnd === undefined ? undefined : arrowBody(masked, arrowEnd);
+}
+
+function typeScriptHelpers(text, masked) {
+  const declared = [...masked.matchAll(TS_FUNCTION)].map((match) => ({
+    name: match[1],
+    body: functionBody(masked, match.index + match[0].length - 1),
+  }));
+  const assigned = [...masked.matchAll(TS_INITIALIZER)].map((match) => ({
+    name: match[1],
+    body: initializerBody(masked, match.index + match[0].length),
+  }));
+  return [...declared, ...assigned]
+    .filter(({ body }) => body !== undefined)
+    .map(({ name, body }) =>
+      typeScriptBlock(text, masked, name, body.start, body.end),
+    );
+}
+
+const TEARDOWN_CALL = /\bonTest(?:Finished|Failed)\s*\(/g;
+// A function literal or a reference: it runs later, not while registering.
+const DEFERRED_CALLBACK =
+  /^\s*(?:async\s+)?(?:function\b|\([^)]*\)\s*(?::[^;=]*?)?=>|[\w$]+\s*=>|[\w$.]+\s*$)/;
+
+/**
+ * Blanks the callbacks a test registers with `onTestFinished` or
+ * `onTestFailed`: they run as teardown, like hooks. An argument that calls
+ * a function, such as `onTestFinished(makeCleanup())`, runs now and stays.
+ */
+function withoutTeardown(masked) {
+  const chars = masked.split('');
+  for (const call of masked.matchAll(TEARDOWN_CALL)) {
+    const open = call.index + call[0].length - 1;
+    const close = closingOf(masked, open);
+    if (DEFERRED_CALLBACK.test(masked.slice(open + 1, close))) {
+      blankChars(chars, open + 1, close);
+    }
+  }
+  return chars.join('');
+}
+
+function parseTypeScript(text) {
+  const masked = withoutTeardown(maskNonCode(text));
+  const tests = [];
+  for (const call of masked.matchAll(TEST_CALL)) {
+    const args = testArguments(masked, call.index + call[0].length);
+    if (args) {
+      const name = testName(text, args.open);
+      tests.push(typeScriptBlock(text, masked, name, args.open, args.close));
+    }
+  }
+  return { tests, helpers: typeScriptHelpers(text, masked) };
+}
+
+// The code of a line before its comment: strings, closed or not, are kept
+// whole so a comment marker or quote inside them is not read as one. Triple
+// quoted strings come first, as their contents may hold single quotes.
+const TRIPLE_QUOTED = `"""(?:(?!""").)*(?:"""|$)|'''(?:(?!''').)*(?:'''|$)`;
+const QUOTED = `"[^"]*"?|'[^']*'?`;
+const PYTHON_CODE_BEFORE_COMMENT = new RegExp(
+  `^(?:${TRIPLE_QUOTED}|${QUOTED}|[^"'#])*`,
+);
+const CSHARP_CODE_BEFORE_COMMENT = new RegExp(
+  String.raw`^(?:${TRIPLE_QUOTED}|${QUOTED}|[^"'/]|\/(?!\/))*`,
+);
+
+/**
+ * Returns the lines that hold code, with every triple quoted string reduced
+ * to `""` so the code beside it on the same line stays. Lines entirely inside
+ * such a string are dropped.
+ */
+function codeLines(text, codeBeforeComment) {
+  let openQuote = '';
+  return text.split(/\r?\n/).flatMap((line, index) => {
+    const scan = { quote: openQuote, rest: line, code: '' };
+    while (scan.rest !== undefined) {
+      if (scan.quote) closeQuote(scan);
+      else openNextQuote(scan, codeBeforeComment);
+    }
+    openQuote = scan.quote;
+    return scan.code.trim() === ''
+      ? []
+      : [{ line: scan.code, number: index + 1 }];
+  });
+}
+
+/**
+ * Inside a string, only its own delimiter closes it and everything before is
+ * plain text.
+ */
+function closeQuote(scan) {
+  const close = scan.rest.indexOf(scan.quote);
+  scan.rest = close === -1 ? undefined : scan.rest.slice(close + 3);
+  scan.quote = close === -1 ? scan.quote : '';
+}
+
+/** Outside a string, keeps the code up to the next triple quote, if any. */
+function openNextQuote(scan, codeBeforeComment) {
+  const open = scan.rest.match(codeBeforeComment)[0].search(TRIPLE_QUOTE);
+  scan.code += open === -1 ? scan.rest : `${scan.rest.slice(0, open)}""`;
+  scan.quote = open === -1 ? '' : scan.rest.slice(open, open + 3);
+  scan.rest = open === -1 ? undefined : scan.rest.slice(open + 3);
+}
+
+const TRIPLE_QUOTE = /"""|'''/;
+
+const IDENTIFIER = /[A-Za-z_]\w*/g;
+// An optional prefix (f"", $"", $@"") marks a string that interpolates code.
+const STRING_LITERAL =
+  /(?<![\w$@])([A-Za-z$@]{0,3})("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/g;
+const INTERPOLATING_PREFIX = /[fF$]/;
+const ESCAPED_BRACE = /^(?:\{\{|\}\})$/;
+
+/**
+ * Keeps the code a string interpolates: the text inside `{...}`, nested
+ * braces included. `{{` and `}}` are escapes only outside an interpolation.
+ */
+function interpolationsOf(literal) {
+  const scan = { literal, code: '', depth: 0 };
+  for (let index = 0; index < literal.length; ) {
+    index += interpolate(scan, index);
+  }
+  return scan.code;
+}
+
+/** Copies the piece at `index` when it is code; returns how far it reaches. */
+function interpolate(scan, index) {
+  const pair = scan.literal.slice(index, index + 2);
+  if (scan.depth === 0 && ESCAPED_BRACE.test(pair)) {
+    scan.code += '  ';
+    return 2;
+  }
+  scan.code += interpolatedChar(scan, scan.literal[index]);
+  return 1;
+}
+
+function interpolatedChar(scan, char) {
+  const inside = scan.depth > 0 || char === '{';
+  scan.depth += BRACE_DEPTH_CHANGE[char] ?? 0;
+  return inside ? char : ' ';
+}
+// How each language marks a try, a comment, and a name declared locally (a
+// nested function or a variable), which shadows a helper of the same name.
+const PYTHON = {
+  tryPattern: PYTHON_TRY,
+  comments: [/#.*/g],
+  local: /^\s*(?:async\s+)?def\s+(\w+)|^\s*(\w+)\s*(?::[^=\n]*)?=(?!=)/gm,
+};
+const CSHARP = {
+  tryPattern: CSHARP_TRY,
+  comments: [/\/\*[\s\S]*?\*\//g, /\/\/.*/g],
+  local:
+    /^\s*(?:(?:static|async)\s+)*(?!(?:return|await|throw|new)\b)[\w<>[\],.?]+\s+(\w+)\s*(?:\([^)\n]*\)\s*(?:=>|\{|$)|=(?!=))/gm,
+};
+
+/**
+ * Keeps the code of a body: each string literal becomes the expressions it
+ * interpolates, then comments are blanked. Line breaks stay in place.
+ */
+function codeOf(body, comments) {
+  const withoutStrings = body.replace(STRING_LITERAL, (_, prefix, literal) =>
+    INTERPOLATING_PREFIX.test(prefix) ? ` ${interpolationsOf(literal)} ` : ' ',
+  );
+  return comments.reduce(
+    (code, comment) =>
+      code.replace(comment, (text) => text.replace(/[^\n]/g, ' ')),
+    withoutStrings,
+  );
+}
+
+function lineBlock(name, lines, language) {
+  const code = codeOf(
+    lines.map(({ line }) => line).join('\n'),
+    language.comments,
+  );
+  const codeByLine = code.split('\n');
+  return {
+    name,
+    tries: lines
+      .filter((_, index) => language.tryPattern.test(codeByLine[index]))
+      .map(({ number }) => number),
+    refs: outerReferences(
+      code,
+      IDENTIFIER,
+      topLevelLocals(codeByLine, language.local),
+    ),
+  };
+}
+
+/** Returns the lines from `from` up to, not including, the first that ends. */
+function linesUntil(lines, from, isEnd) {
+  const end = lines.findIndex(
+    ({ line }, index) => index >= from && isEnd(line),
+  );
+  return lines.slice(from, end === -1 ? lines.length : end);
+}
+
+/** Returns the index of the first line at or after `from` that matches. */
+function firstLineMatching(lines, from, pattern) {
+  return lines.findIndex(
+    ({ line }, index) => index >= from && pattern.test(line),
+  );
+}
+
+/** Collects a Python function body: the lines indented under its signature. */
+function pythonBody(lines, start, indent) {
+  const { line, number } = lines[start];
+  const inline = line.match(PYTHON_INLINE_SUITE);
+  if (inline) {
+    return [{ line: inline[1], number }];
+  }
+  const signatureEnd = pythonSignatureEnd(lines, start);
+  const from = signatureEnd === -1 ? lines.length : signatureEnd + 1;
+  return linesUntil(lines, from, (line) => endsPythonBody(line, indent));
+}
+
+/**
+ * Returns the line that ends a multi-line signature, or -1 when another
+ * definition starts first: that body belongs to the other function.
+ */
+function pythonSignatureEnd(lines, start) {
+  const end = lines.findIndex(
+    ({ line }, index) =>
+      index >= start &&
+      (PYTHON_SIGNATURE_END.test(line) ||
+        (index > start && PYTHON_FUNCTION.test(line))),
+  );
+  return end > start && PYTHON_FUNCTION.test(lines[end].line) ? -1 : end;
+}
+
+/** A line back at the signature's indentation ends the body; a comment never does. */
+function endsPythonBody(line, indent) {
+  return indentationOf(line) <= indent && !PYTHON_COMMENT_LINE.test(line);
+}
+
+function parsePython(text) {
+  const lines = codeLines(text, PYTHON_CODE_BEFORE_COMMENT);
+  const tests = [];
+  const helpers = [];
+  lines.forEach(({ line }, start) => {
+    const declaration = line.match(PYTHON_FUNCTION);
+    if (!declaration) {
+      return;
+    }
+    const name = declaration[2];
+    const body = pythonBody(lines, start, declaration[1].length);
+    const block = lineBlock(name, body, PYTHON);
+    (PYTHON_TEST_NAME.test(name) ? tests : helpers).push(block);
+  });
+  return { tests, helpers };
+}
+
+/** Collects a C# method body: the lines between its braces. */
+function cSharpBody(lines, start, indent) {
+  const { line, number } = lines[start];
+  const inline = line.match(CSHARP_INLINE_BODY);
+  if (inline) {
+    return [{ line: inline[1] ?? inline[2], number }];
+  }
+  const open = firstLineMatching(lines, start, CSHARP_SIGNATURE_END);
+  if (open === -1 || lines[open].line.trimEnd().endsWith(';')) {
+    return [];
+  }
+  return linesUntil(
+    lines,
+    open + 1,
+    (line) => indentationOf(line) <= indent && line.trim().startsWith('}'),
+  );
+}
+
+function parseCSharp(text) {
+  const lines = codeLines(text, CSHARP_CODE_BEFORE_COMMENT);
+  const tests = [];
+  const helpers = [];
+  let isTest = false;
+  lines.forEach(({ line }, start) => {
+    if (CSHARP_TEST_ATTRIBUTE.test(line)) {
+      isTest = true;
+      return;
+    }
+    if (line.trim().startsWith('[')) {
+      return;
+    }
+    const declaration = line.match(CSHARP_METHOD);
+    if (declaration) {
+      const body = cSharpBody(lines, start, declaration[1].length);
+      const block = lineBlock(declaration[2], body, CSHARP);
+      (isTest ? tests : helpers).push(block);
+    }
+    isTest = false;
+  });
+  return { tests, helpers };
+}
+
+/**
+ * Follows every helper a test references, directly or through other
+ * helpers of the same file, and reports each `try` reached on the way.
+ * Helpers that only hooks reference are never reached.
+ */
+function triesReachedFromTests({ tests, helpers }) {
+  const helpersByName = Map.groupBy(helpers, (helper) => helper.name);
+  const findings = new Map();
+  for (const finding of tests.flatMap((test) => triesOf(test, helpersByName))) {
+    if (!findings.has(finding.line)) findings.set(finding.line, finding);
+  }
+  return [...findings.values()].sort((a, b) => a.line - b.line);
+}
+
+/** Lists the tries a test runs: its own first, then its helpers' tries. */
+function triesOf(test, helpersByName) {
+  const own = test.tries.map((line) => ({ line, test: test.name }));
+  const reached = reachedHelpers(test, helpersByName).flatMap((helper) =>
+    helper.tries.map((line) => ({
+      line,
+      test: test.name,
+      helper: helper.name,
+    })),
+  );
+  return [...own, ...reached];
+}
+
+/** Walks the names a test references, through helpers, breadth first. */
+function reachedHelpers(test, helpersByName) {
+  const visited = new Set();
+  const reached = [];
+  const pending = [...test.refs];
+  while (pending.length > 0) {
+    const name = pending.shift();
+    if (visited.has(name)) continue;
+    visited.add(name);
+    const found = helpersByName.get(name) ?? [];
+    reached.push(...found);
+    pending.push(...found.flatMap((helper) => [...helper.refs]));
+  }
+  return reached;
+}
+
+const PARSERS = new Map([
+  ['.ts', parseTypeScript],
+  ['.tsx', parseTypeScript],
+  ['.mts', parseTypeScript],
+  ['.cts', parseTypeScript],
+  ['.js', parseTypeScript],
+  ['.mjs', parseTypeScript],
+  ['.py', parsePython],
+  ['.cs', parseCSharp],
+]);
+
+/**
+ * Lists the `try` statements a test runs: in its body or in a helper of the
+ * same file it calls, directly or through other helpers. Tests clean up with
+ * framework teardown and check errors with the framework's throw assertions,
+ * so a `try` there hides a failure or skips an assertion. Hooks, and helpers
+ * only hooks call, are not checked.
+ */
+export function findTryBlocksInTests(path, text) {
+  const parse = PARSERS.get(extname(path));
+  return parse ? triesReachedFromTests(parse(text)) : [];
+}
+
+function isTestFile(path) {
+  return (
+    /\.(?:test|spec)\.(?:ts|tsx|mts|cts|js|mjs)$/.test(path) ||
+    /(?:^|\/)test_[^/]*\.py$/.test(path) ||
+    /(?:^|\/)tests?\/.*\.cs$/.test(path)
+  );
+}
+
+function errorAnnotation(path, { line, test, helper }) {
+  const location = helper
+    ? `in helper "${helper}", called from test "${test}"`
+    : `inside test "${test}"`;
+  return `::error file=${path},line=${line}::try block ${location}. Use framework teardown (afterEach, onTestFinished, IAsyncLifetime, pytest yield fixtures) for cleanup and the framework's throw assertions for errors.`;
+}
+
+/**
+ * Checks the tracked test files of the repository at `cwd`, skipping files
+ * deleted from the working tree, and returns the exit code and message.
+ */
+export function checkRepository(cwd) {
+  const files = execFileSync('git', ['ls-files', '-z'], {
+    cwd,
+    encoding: 'utf-8',
+  })
+    .split('\0')
+    .filter((path) => isTestFile(path) && existsSync(join(cwd, path)));
+  const findings = files.flatMap((path) =>
+    findTryBlocksInTests(path, readFileSync(join(cwd, path), 'utf-8')).map(
+      (finding) => errorAnnotation(path, finding),
+    ),
+  );
+  return findings.length > 0
+    ? { exitCode: 1, message: findings.join('\n') }
+    : {
+        exitCode: 0,
+        message: `No try blocks inside tests in ${files.length} test files.`,
+      };
+}
+
+function main() {
+  const { exitCode, message } = checkRepository(process.cwd());
+  console.log(message);
+  process.exitCode = exitCode;
+}
+
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  main();
+}

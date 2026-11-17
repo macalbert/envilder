@@ -808,19 +808,14 @@ async function DeleteParameterSsm(ssmPath: string): Promise<void> {
 }
 
 async function SetParameterSsm(ssmPath: string, value: string): Promise<void> {
-  try {
-    const command = new PutParameterCommand({
-      Name: ssmPath,
-      Value: value,
-      Type: 'SecureString',
-      Overwrite: true,
-    });
-    await ssmClient.send(command);
-    console.log(`Set SSM parameter at path ${ssmPath} with value: ${value}`);
-  } catch (error) {
-    console.error(`Error setting SSM parameter at path ${ssmPath}:`, error);
-    throw error;
-  }
+  const command = new PutParameterCommand({
+    Name: ssmPath,
+    Value: value,
+    Type: 'SecureString',
+    Overwrite: true,
+  });
+  await ssmClient.send(command);
+  console.log(`Set SSM parameter at path ${ssmPath} with value: ${value}`);
 }
 
 function isNodeError(error: unknown): error is NodeJS.ErrnoException {

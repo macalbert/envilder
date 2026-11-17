@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { execSync } from 'node:child_process';
+import { execSync, spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import {
   existsSync,
@@ -424,33 +424,28 @@ function runGitHubAction(inputs: {
 } {
   const actionScript = join(rootDir, 'github-action', 'dist', 'index.js');
 
-  try {
-    const output = execSync(`node "${actionScript}"`, {
-      cwd: rootDir,
-      encoding: 'utf8',
-      env: {
-        ...process.env,
-        // GitHub Actions sets these automatically from action inputs
-        INPUT_MAP_FILE: inputs.mapFile,
-        INPUT_ENV_FILE: inputs.envFile ?? '',
-        INPUT_COMMAND: inputs.command ?? '',
-        GITHUB_ENV: inputs.githubEnv ?? '',
-        // Point AWS SDK to LocalStack
-        AWS_ENDPOINT_URL: localstackEndpoint,
-        AWS_REGION: 'us-east-1',
-        AWS_ACCESS_KEY_ID: 'test',
-        AWS_SECRET_ACCESS_KEY: 'test',
-      },
-    });
-    return { code: 0, output, error: '' };
-  } catch (error: unknown) {
-    const err = error as { status?: number; stdout?: string; stderr?: string };
-    return {
-      code: err.status || 1,
-      output: err.stdout?.toString() || '',
-      error: err.stderr?.toString() || '',
-    };
-  }
+  const result = spawnSync(process.execPath, [actionScript], {
+    cwd: rootDir,
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      // GitHub Actions sets these automatically from action inputs
+      INPUT_MAP_FILE: inputs.mapFile,
+      INPUT_ENV_FILE: inputs.envFile ?? '',
+      INPUT_COMMAND: inputs.command ?? '',
+      GITHUB_ENV: inputs.githubEnv ?? '',
+      // Point AWS SDK to LocalStack
+      AWS_ENDPOINT_URL: localstackEndpoint,
+      AWS_REGION: 'us-east-1',
+      AWS_ACCESS_KEY_ID: 'test',
+      AWS_SECRET_ACCESS_KEY: 'test',
+    },
+  });
+  return {
+    code: result.status ?? 1,
+    output: result.stdout,
+    error: result.stderr,
+  };
 }
 
 // Helper functions
@@ -498,14 +493,10 @@ async function SetParameterSsm(name: string, value: string): Promise<void> {
 }
 
 async function GetParameterSsm(name: string): Promise<string | undefined> {
-  try {
-    const response = await ssmClient.send(
-      new GetParameterCommand({ Name: name, WithDecryption: true }),
-    );
-    return response.Parameter?.Value;
-  } catch {
-    return undefined;
-  }
+  const response = await ssmClient.send(
+    new GetParameterCommand({ Name: name, WithDecryption: true }),
+  );
+  return response.Parameter?.Value;
 }
 
 async function DeleteParameterSsm(name: string): Promise<void> {
