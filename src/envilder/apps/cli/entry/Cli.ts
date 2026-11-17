@@ -82,7 +82,6 @@ const EXEC_USAGE = 'envilder exec [options] [--] <command> [args...]';
 type ValidateOptions = {
   offline?: boolean;
   envfile?: string;
-  compareValues?: boolean;
   format?: string;
   map?: string;
   profile?: string;
@@ -465,13 +464,14 @@ function registerValidateCommand(program: Command): void {
         'precedence over $config), then check that every secret it declares ' +
         'exists in the provider with the current credentials. Every problem ' +
         'is reported with the key that causes it. Secret values are never ' +
-        'read or printed.\n\n' +
+        'printed.\n\n' +
         'With --envfile the keys of a local env file are compared with the ' +
-        'variables the map file declares. With --compare-values each ' +
-        'declared value is also compared with its remote value, and only ' +
-        '"matches" or "differs" is printed.\n\n' +
+        'variables the map file declares, and each declared value is ' +
+        'compared with its remote value; only "matches" or "differs" is ' +
+        'printed.\n\n' +
         'With --offline nothing but local files is read: no provider is ' +
-        'called and no credentials are needed.\n\n' +
+        'called and no credentials are needed. With --envfile, only the ' +
+        'keys are compared.\n\n' +
         'With --format json one JSON document is printed to stdout and ' +
         'everything else goes to stderr.',
     )
@@ -481,11 +481,7 @@ function registerValidateCommand(program: Command): void {
     )
     .option(
       '--envfile <path>',
-      'Compare the keys of this env file with the map file',
-    )
-    .option(
-      '--compare-values',
-      'Also compare env file values with remote values (requires --envfile)',
+      'Compare the keys and the values of this env file with the map file',
     )
     .option('--format <format>', 'Output format: text or json (default: text)')
     .option(
@@ -528,14 +524,13 @@ Examples:
   envilder validate --provider=azure --vault-url=https://my-vault.vault.azure.net
   envilder validate --offline
   envilder validate --envfile=.env
-  envilder validate --envfile=.env --compare-values
   envilder validate --offline --envfile=.env
   envilder validate --format=json
 
 Exit codes:
   0  the map file is valid, every declared secret exists and, with
-     --envfile, every declared variable is in the env file once (with
-     --compare-values, with the remote value)
+     --envfile, every declared variable is in the env file once (without
+     --offline, with the remote value)
   1  the map file or the options are not valid, a secret is missing or
      cannot be checked, the credentials are missing or expired, or the env
      file is missing, lacks a declared variable, repeats a key or holds a
@@ -586,18 +581,6 @@ function findInvalidValidateOption(
   ) {
     // The value is not echoed: it can be anything the user typed.
     return `--format must be ${VALIDATE_FORMATS.join(' or ')}.`;
-  }
-  if (!options.compareValues) {
-    return undefined;
-  }
-  if (options.envfile === undefined) {
-    return '--compare-values requires --envfile.';
-  }
-  if (options.offline) {
-    return (
-      '--compare-values cannot be used with --offline: comparing values ' +
-      'reads them from the provider.'
-    );
   }
   return undefined;
 }
@@ -907,7 +890,7 @@ async function runRemoteValidation(
   output.keysChecked(checks, config.provider?.toLowerCase() || 'aws', source);
 
   let valueFailures = '';
-  if (options.compareValues && envFile !== undefined) {
+  if (envFile !== undefined) {
     valueFailures = await compareEnvFileValues(
       container,
       mapPath,

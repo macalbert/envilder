@@ -43,7 +43,7 @@ secret-loading code, and do not add Envilder features to the user's project.
    | Offline | `envilder --version`, `--help`, `envilder validate --offline` with the CLI the project already installs (`npx --no envilder ...`, `pnpm exec envilder ...`) | Yes |
    | Downloads and runs the CLI | Any `npx envilder ...` when the project does not install `envilder` (npx fetches the package and runs it with access to the workspace and environment) | Ask first, or propose adding `envilder` as a dev dependency |
    | Checks existence (calls the provider, reads no value) | `npx envilder validate` | Ask first: it uses the user's credentials and prints the cloud identity |
-   | Reads values | `npx envilder` (pull to `.env`), `envilder exec`, `validate --compare-values`, running code that calls an SDK `load`/`resolve` | Only when the user explicitly asks for that run |
+   | Reads values | `npx envilder` (pull to `.env`), `envilder exec`, `validate --envfile` (without `--offline`), running code that calls an SDK `load`/`resolve` | Only when the user explicitly asks for that run |
    | Writes secrets | `envilder --push`, single-secret push (`--key`/`--value`/`--secret-path`) | Never run it yourself. Give the user the command to run |
 
 3. Never put a secret value on a command line you run or suggest with a real
@@ -57,7 +57,7 @@ Envilder evolves quickly. Before using an option, confirm it exists in the
 version the project will run:
 
 - CLI: `npx envilder --version` and `npx envilder <command> --help`
-  (`validate --envfile`, `--compare-values` and `--format json` are newer
+  (`validate --envfile` and `--format json` are newer
   than `validate` itself).
 - GitHub Action: read `github-action/action.yml` at the ref you pin (for
   example `gh api 'repos/macalbert/envilder/contents/github-action/action.yml?ref=v0' -H 'Accept: application/vnd.github.raw'`).

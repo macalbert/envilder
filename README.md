@@ -82,7 +82,7 @@ No SaaS middleman. One versioned mapping contract. Secrets stay in your cloud.
 | 📋 **Declarative Mapping** | One JSON file defines how application variables map to cloud secrets. Git-versioned, PR-reviewable, and diff-able |
 | ☁️ **Cloud-native Providers** | AWS SSM and Azure Key Vault today |
 | ⚡ **Exec Mode** | `envilder exec -- <command>` runs any command with the secrets in its environment. Nothing written to disk, fail-closed, exit codes propagated. [Guide](docs/exec-command.md) |
-| ✅ **Validate** | `envilder validate` checks the map file against the schema and the provider rules, then checks that every declared secret exists, without printing values. `--envfile` compares a local `.env` with the map file by keys, and by values with `--compare-values`. `--offline` checks local files only, without credentials, and `--format json` prints one JSON document for CI. [Guide](docs/validate-command.md) |
+| ✅ **Validate** | `envilder validate` checks the map file against the schema and the provider rules, then checks that every declared secret exists, without printing values. `--envfile` compares a local `.env` with the map file by keys and values. `--offline` checks local files only, without credentials, and `--format json` prints one JSON document for CI. [Guide](docs/validate-command.md) |
 | 🔌 **Runtime SDKs** | Load secrets into memory at app startup: [.NET](./src/sdks/dotnet/README.md), [Python](./src/sdks/python/README.md), [Node.js](./src/sdks/nodejs/README.md). No `.env` on disk |
 | ⚙️ **GitHub Action** | Pull secrets in CI/CD. Same mapping, zero manual config |
 | 🔄 **Pull & Controlled Push** | Pull secrets to `.env`, or intentionally push local values to your cloud provider when bootstrapping or rotating |
@@ -143,8 +143,8 @@ npx envilder validate
 
 `envilder validate` checks the map file against the schema and the provider rules, then asks the provider whether
 each declared secret exists. It never prints a value. Use `--offline` to check only the local files, without
-credentials. Add `--envfile=.env` to compare a local env file with the map file (`--compare-values` also compares
-the values, without printing them), and `--format json` for one JSON document on stdout. It exits with `1` when
+credentials. Add `--envfile=.env` to compare a local env file with the map file, keys and values (values are never
+printed), and `--format json` for one JSON document on stdout. It exits with `1` when
 something is wrong, so it works as a CI step.
 
 📖 See the [Validate Command Guide](docs/validate-command.md) for every check, status and exit code.

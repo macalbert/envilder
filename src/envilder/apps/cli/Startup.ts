@@ -89,8 +89,8 @@ export class Startup {
 
   /**
    * Wires the remote part of `envilder validate`, which checks that each
-   * declared secret exists and, with `--compare-values`, compares remote
-   * values with the env file. Call `configureInfrastructure` afterwards to bind
+   * declared secret exists and, with `--envfile`, compares remote values
+   * with the env file. Call `configureInfrastructure` afterwards to bind
    * the secret provider and the variable store; the given logger is kept.
    */
   configureRemoteValidation(logger: ILogger = new ConsoleLogger()): this {
