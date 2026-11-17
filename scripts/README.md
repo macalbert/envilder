@@ -64,6 +64,37 @@ node scripts/check-released-changelogs.mjs --base=origin/main
 To correct an already released section on purpose, label the PR
 `changelog-correction` and the check is skipped.
 
+## `check-test-try-blocks.mjs`
+
+Fails when a test runs a `try` block. Tests are Vitest `it`/`test` callbacks
+(including `.only`, `.skip`, `.each`), xUnit `[Fact]`/`[Theory]` methods and
+pytest `Should_*` functions (the `python_functions` rule in
+`tests/sdks/python/pyproject.toml`). A `try` counts when it is in the test
+body or in a function or method of the same file that the test calls,
+directly or through other helpers: a helper is just a way to share or tidy
+the test's own code. Tests clean up with framework teardown (`afterEach`,
+`onTestFinished`, `IAsyncLifetime`, pytest `yield` fixtures) and check errors
+with throw assertions, so a `try` there hides a failure or skips an assertion
+(see the `common-testing-conventions` skill). Hooks, callbacks registered
+with `onTestFinished` or `onTestFailed`, helpers that only those call, and
+code in other files (such as `tests/support/` and the LocalStack fixtures) are
+not checked.
+
+The check reads source text, not a syntax tree, and follows helpers by name
+within the file. A name that a test or helper declares at the top level of
+its own body (a variable, or a nested or local function) shadows a helper of
+the same name, so it is not followed. A declaration inside a nested block or
+function does not shadow it, so the helper is still followed: the check may
+then report a `try` the test never runs (rename one of the functions), but it
+never misses one.
+
+It scans tracked files only and has no dependencies. `pnpm lint` runs it, and
+`test-try-blocks.yml` runs it on PRs that touch tests.
+
+```bash
+node scripts/check-test-try-blocks.mjs
+```
+
 ## Publishing Workflows
 
 ### GitHub Action Publishing (`.github/workflows/publish-action.yml`)
