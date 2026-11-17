@@ -5,7 +5,7 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
-## [Unreleased]
+## [0.21.0] - 2026-11-16
 
 ### Added
 

@@ -1319,7 +1319,7 @@ export const en: Translations = {
       tabPolicy: 'Access policies',
       prereqTitle: 'Prerequisites',
       prereqItems: [
-        'The envilder CLI. --offline is available since version 0.18 and the secret existence check since 0.20. --envfile, --compare-values and --format json come with the next release.',
+        'The envilder CLI. --offline is available since version 0.18 and the secret existence check since 0.20. --envfile, --compare-values and --format json are available since 0.21.',
         'A map file. Without --offline, credentials for the provider and the permissions listed under Permissions.',
       ],
       synopsisTitle: 'Synopsis',
@@ -1371,7 +1371,7 @@ export const en: Translations = {
         'Expired AWS credentials and SSO sessions are reported with the same message as pull and exec. On an interactive terminal, an expired SSO session offers to run aws sso login and then retries.',
       envfileTitle: 'The env file keys (with --envfile)',
       envfileDesc:
-        'Available from the next release. The env file is read with the parser pull and push use, so comments, export, quotes and multiline values behave the same. Its keys are compared with the variables the map file declares, by exact, case-sensitive name:',
+        'Available since version 0.21. The env file is read with the parser pull and push use, so comments, export, quotes and multiline values behave the same. Its keys are compared with the variables the map file declares, by exact, case-sensitive name:',
       thFinding: 'Finding',
       thEffect: 'Effect',
       envMissing: 'A declared variable is absent from the env file. Fails',
@@ -1417,7 +1417,7 @@ export const en: Translations = {
       outputInvalidDesc: 'An invalid map file, on stderr:',
       jsonTitle: 'JSON output (--format json)',
       jsonDesc:
-        'Available from the next release. With --format=json, validate prints exactly one JSON document to stdout and nothing else, whatever the outcome. Logs, the AWS identity banner, warnings, errors and the SSO login prompt go to stderr, so stdout can be piped to jq or saved as a CI artifact. Exit codes are the same as with text output. Option errors such as --format=yaml are reported on stderr before anything runs, without a document.',
+        'Available since version 0.21. With --format=json, validate prints exactly one JSON document to stdout and nothing else, whatever the outcome. Logs, the AWS identity banner, warnings, errors and the SSO login prompt go to stderr, so stdout can be piped to jq or saved as a CI artifact. Exit codes are the same as with text output. Option errors such as --format=yaml are reported on stderr before anything runs, without a document.',
       thField: 'Field',
       fieldValid: 'true exactly when the exit code is 0',
       fieldOffline: 'true with --offline',
@@ -1441,9 +1441,9 @@ export const en: Translations = {
       ciDesc:
         'Run the offline check on every pull request, including from forks, since it needs no cloud credentials. Run the existence check where the job has the same credentials as a pull, plus the permissions above:',
       ciEnvExample:
-        'From the next release, to check that a committed .env.example declares every variable without credentials, add --offline --envfile=.env.example to the first step.',
+        'Since version 0.21, to check that a committed .env.example declares every variable without credentials, add --offline --envfile=.env.example to the first step.',
       ciJsonDesc:
-        'From the next release, to keep the result for later steps or other tools, use JSON output. The step still fails when validation fails:',
+        'Since version 0.21, to keep the result for later steps or other tools, use JSON output. The step still fails when validation fails:',
       ciNote:
         'validate exits with 1 on any failure, so it can gate a deploy step before pull or envilder exec runs.',
       sdkTitle: 'From the SDKs',
