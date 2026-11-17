@@ -5,6 +5,24 @@ For SDK-specific changes, see `sdk-dotnet.md`, `sdk-python.md`, or `sdk-nodejs.m
 
 ---
 
+## [0.22.0] - 2026-11-17
+
+### Changed
+
+* **`envilder validate --envfile` also compares values**: without
+  `--offline`, each declared variable that is in the env file and exists
+  remotely is reported as `matches`, `differs` or `unreadable`, with no extra
+  flag. `--offline --envfile` still compares only the keys, without
+  credentials. Values are never printed.
+
+### Removed
+
+* **`envilder validate --compare-values`**: value comparison is now part of
+  `--envfile`. Passing the flag fails as an unknown option, so drop it from
+  any script or CI step that uses it.
+
+---
+
 ## [0.21.0] - 2026-11-16
 
 ### Added

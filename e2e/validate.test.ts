@@ -205,12 +205,7 @@ describe('envilder validate (E2E)', () => {
       );
 
       // Act
-      const action = validate(
-        mapPath,
-        '--envfile',
-        envPath,
-        '--compare-values',
-      );
+      const action = validate(mapPath, '--envfile', envPath);
 
       // Assert
       await expect(action).rejects.toEqual(new SilentExitError(1));
@@ -281,7 +276,7 @@ describe('envilder validate (E2E)', () => {
       const envPath = await givenEnvFile(`DB_URL="${secretValue}"\n`);
 
       // Act
-      await validate(mapPath, '--envfile', envPath, '--compare-values');
+      await validate(mapPath, '--envfile', envPath);
 
       // Assert
       expect(output()).toMatch(/✓ DB_URL\s+matches/);
