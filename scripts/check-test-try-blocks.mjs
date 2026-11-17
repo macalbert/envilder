@@ -20,6 +20,8 @@ const PYTHON_FUNCTION = /^(\s*)(?:async\s+)?def\s+(\w+)\s*\(/;
 // tests/sdks/python/pyproject.toml sets python_functions = ["Should_*"].
 const PYTHON_TEST_NAME = /^Should_/;
 const PYTHON_SIGNATURE_END = /:\s*(?:#.*)?$/;
+// A body on the signature line: `def safe(): return 1`.
+const PYTHON_INLINE_SUITE = /\)\s*(?:->[^:]*)?:\s*((?!#)\S.*)$/;
 const PYTHON_TRY = /^\s*try\s*:/;
 const PYTHON_COMMENT_LINE = /^\s*#/;
 
@@ -275,8 +277,10 @@ const TS_LOCAL =
   /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)|\bfunction\s*\*?\s*([A-Za-z_$][\w$]*)/g;
 const TS_FUNCTION =
   /\bfunction\s*\*?\s*([A-Za-z_$][\w$]*)\s*(?:<[^>(]*>)?\s*\(/g;
+// A declarator starts after `const`, `let` or `var`, or after a comma in the
+// same list (`const safe = () => 1, run = () => {}`).
 const TS_INITIALIZER =
-  /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*(?::[^=]*)?=\s*(?:async\s+)?(?=\(|function\b|[A-Za-z_$][\w$]*\s*=>)/g;
+  /(?:\b(?:const|let|var)\s+|,\s*)([A-Za-z_$][\w$]*)\s*(?::[^=]*)?=\s*(?:async\s+)?(?=\(|function\b|[A-Za-z_$][\w$]*\s*=>)/g;
 // The arrow must follow the parameters, after an optional return type.
 const ARROW_AFTER_PARAMETERS = /\s*(?::[^;=]*?)?=>/y;
 const ARROW_AFTER_PARAMETER = /[A-Za-z_$][\w$]*\s*=>/y;
@@ -635,9 +639,28 @@ function firstLineMatching(lines, from, pattern) {
 
 /** Collects a Python function body: the lines indented under its signature. */
 function pythonBody(lines, start, indent) {
-  const signatureEnd = firstLineMatching(lines, start, PYTHON_SIGNATURE_END);
+  const { line, number } = lines[start];
+  const inline = line.match(PYTHON_INLINE_SUITE);
+  if (inline) {
+    return [{ line: inline[1], number }];
+  }
+  const signatureEnd = pythonSignatureEnd(lines, start);
   const from = signatureEnd === -1 ? lines.length : signatureEnd + 1;
   return linesUntil(lines, from, (line) => endsPythonBody(line, indent));
+}
+
+/**
+ * Returns the line that ends a multi-line signature, or -1 when another
+ * definition starts first: that body belongs to the other function.
+ */
+function pythonSignatureEnd(lines, start) {
+  const end = lines.findIndex(
+    ({ line }, index) =>
+      index >= start &&
+      (PYTHON_SIGNATURE_END.test(line) ||
+        (index > start && PYTHON_FUNCTION.test(line))),
+  );
+  return end > start && PYTHON_FUNCTION.test(lines[end].line) ? -1 : end;
 }
 
 /** A line back at the signature's indentation ends the body; a comment never does. */

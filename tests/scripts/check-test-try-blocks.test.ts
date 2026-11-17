@@ -465,6 +465,22 @@ describe('findTryBlocksInTests', () => {
     expect(actual).toEqual([]);
   });
 
+  it('Should_ReportTryBlock_When_HelperIsLaterDeclaratorInList', () => {
+    // Arrange
+    const source = [
+      'const safe = () => 1, run = () => {',
+      '  try { act(); } finally {}',
+      '};',
+      "it('runs', () => run());",
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/a.test.ts', source);
+
+    // Assert
+    expect(actual).toEqual([{ line: 2, test: 'runs', helper: 'run' }]);
+  });
+
   it('Should_ReportTryBlock_When_TeardownArgumentCallsHelperDuringTest', () => {
     // Arrange
     const source = [
@@ -550,6 +566,37 @@ describe('findTryBlocksInTests', () => {
 
     // Assert
     expect(actual).toEqual([{ line: 5, test: 'Should_Read_When_Called' }]);
+  });
+
+  it('Should_ReadInlineSuite_When_PythonHelperBodySharesSignatureLine', () => {
+    // Arrange
+    const source = [
+      'def safe(): return 1',
+      'def typed(x: int) -> int: return check(x)',
+      '',
+      'def check(x):',
+      '    try:',
+      '        return x',
+      '    finally:',
+      '        finish()',
+      '',
+      'def cleanup():  # not inline',
+      '    try:',
+      '        release()',
+      '    finally:',
+      '        finish()',
+      '',
+      'def Should_ReturnOne_When_Called():',
+      '    assert safe() == typed(1)',
+    ].join('\n');
+
+    // Act
+    const actual = findTryBlocksInTests('tests/test_client.py', source);
+
+    // Assert
+    expect(actual).toEqual([
+      { line: 5, test: 'Should_ReturnOne_When_Called', helper: 'check' },
+    ]);
   });
 
   it('Should_FollowHelper_When_CallSharesLineWithTripleQuotedString', () => {
