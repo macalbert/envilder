@@ -22,7 +22,7 @@ or prints secret values.
 | Runtime | Uses the .NET, Python or Node.js SDK only when deployment-time injection is not enough |
 | Migration | Maps an existing `.env` by key names only and hands the push command to the user |
 
-Commands that read secret values (pull, `exec`, `validate --compare-values`)
+Commands that read secret values (pull, `exec`, `validate --envfile`)
 or write them (`--push`) are never run without the user's explicit request.
 
 ## Install

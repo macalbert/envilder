@@ -654,23 +654,6 @@ describe('Cli validate', () => {
       );
     });
 
-    it('Should_NotReadRemoteValues_When_CompareValuesIsNotSet', async () => {
-      // Arrange
-      const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
-      const envPath = await givenEnvFile(`DB_URL=${LOCAL_VALUE}\n`);
-      const provider = givenAwsProvider({
-        '/app/db-url': { status: 'exists' },
-      });
-      givenArgs('validate', '--map', mapPath, '--envfile', envPath);
-
-      // Act
-      await main();
-
-      // Assert
-      expect(provider.getSecret).not.toHaveBeenCalled();
-      expect(allOutput()).not.toContain('matches');
-    });
-
     it('Should_ReportDiffersWithoutValues_When_LocalAndRemoteValuesDiffer', async () => {
       // Arrange
       const mapPath = await givenMapFile({
@@ -684,14 +667,7 @@ describe('Cli validate', () => {
         '/app/db-url': { status: 'exists' },
         '/app/api-key': { status: 'exists' },
       });
-      givenArgs(
-        'validate',
-        '--map',
-        mapPath,
-        '--envfile',
-        envPath,
-        '--compare-values',
-      );
+      givenArgs('validate', '--map', mapPath, '--envfile', envPath);
 
       // Act
       const action = main();
@@ -710,14 +686,7 @@ describe('Cli validate', () => {
       const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
       const envPath = await givenEnvFile(`DB_URL=${SECRET_LOOKING_VALUE}\n`);
       givenAwsProvider({ '/app/db-url': { status: 'exists' } });
-      givenArgs(
-        'validate',
-        '--map',
-        mapPath,
-        '--envfile',
-        envPath,
-        '--compare-values',
-      );
+      givenArgs('validate', '--map', mapPath, '--envfile', envPath);
 
       // Act
       await main();
@@ -739,14 +708,7 @@ describe('Cli validate', () => {
         '/app/db-url': { status: 'exists' },
         '/app/api-key': { status: 'missing' },
       });
-      givenArgs(
-        'validate',
-        '--map',
-        mapPath,
-        '--envfile',
-        envPath,
-        '--compare-values',
-      );
+      givenArgs('validate', '--map', mapPath, '--envfile', envPath);
 
       // Act
       const action = main();
@@ -756,35 +718,6 @@ describe('Cli validate', () => {
       expect(provider.getSecret).toHaveBeenCalledTimes(1);
       expect(provider.getSecret).toHaveBeenCalledWith('/app/db-url');
     });
-
-    it.each([
-      [
-        'without --envfile',
-        ['--compare-values'],
-        '--compare-values requires --envfile',
-      ],
-      [
-        'with --offline',
-        ['--compare-values', '--offline', '--envfile', '.env'],
-        '--compare-values cannot be used with --offline',
-      ],
-    ])(
-      'Should_RejectCompareValues_When_EnvFileIsMissingOrOffline (%s)',
-      async (_, flags, expected) => {
-        // Arrange
-        const mapPath = await givenMapFile({ DB_URL: '/app/db-url' });
-        givenAwsProvider({ '/app/db-url': { status: 'exists' } });
-        givenArgs('validate', '--map', mapPath, ...flags);
-
-        // Act
-        const action = main();
-
-        // Assert
-        await expect(action).rejects.toEqual(new SilentExitError(1));
-        expect(outputOf(errorSpy)).toContain(expected);
-        expect(createAwsSecretProvider).not.toHaveBeenCalled();
-      },
-    );
   });
   describe('with --format json', () => {
     const LOCAL_VALUE = 'fake-local-value-8Kd2Lp4Zy';
@@ -891,7 +824,6 @@ describe('Cli validate', () => {
         mapPath,
         '--envfile',
         envPath,
-        '--compare-values',
         '--format',
         'json',
       );

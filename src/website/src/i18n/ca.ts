@@ -1333,21 +1333,19 @@ export const ca: Translations = {
       tabPolicy: "Polítiques d'accés",
       prereqTitle: 'Requisits previs',
       prereqItems: [
-        "La CLI d'envilder. --offline està disponible des de la versió 0.18 i la comprovació d'existència dels secrets des de la 0.20. --envfile, --compare-values i --format json estan disponibles des de la 0.21.",
+        "La CLI d'envilder. --offline està disponible des de la versió 0.18 i la comprovació d'existència dels secrets des de la 0.20. --envfile i --format json estan disponibles des de la 0.21.",
         "Un fitxer de mapatge. Sense --offline, credencials del proveïdor i els permisos que es detallen a l'apartat Permisos.",
       ],
       synopsisTitle: 'Sinopsi',
       synopsisDesc:
-        "Per defecte, validate comprova el fitxer de mapatge i després pregunta al proveïdor si existeix cada secret declarat. Amb --envfile també compara les claus d'un fitxer env local amb el fitxer de mapatge, i amb --compare-values en compara els valors amb els remots. Amb --offline només es llegeixen fitxers locals: no es crida cap proveïdor i no calen credencials del núvol. No mostra mai cap valor de secret.",
+        "Per defecte, validate comprova el fitxer de mapatge i després pregunta al proveïdor si existeix cada secret declarat. Amb --envfile també compara les claus d'un fitxer env local amb el fitxer de mapatge, i els seus valors amb els remots. Amb --offline només es llegeixen fitxers locals: no es crida cap proveïdor i no calen credencials del núvol. No mostra mai cap valor de secret.",
       optionsTitle: 'Opcions',
       thOption: 'Opció',
       thDescription: 'Descripció',
       optOffline:
         'Valida el fitxer de mapatge en local sense cridar el proveïdor',
       optEnvfile:
-        "Compara les claus d'aquest fitxer env amb el fitxer de mapatge. No es llegeix si no s'indica",
-      optCompareValues:
-        'Compara també cada valor declarat al fitxer env amb el seu valor remot. Requereix --envfile; no es pot combinar amb --offline',
+        "Compara les claus d'aquest fitxer env amb el fitxer de mapatge i, sense --offline, cada valor declarat amb el seu valor remot. No es llegeix si no s'indica",
       optFormat:
         'text (per defecte) per a una sortida llegible, o json per a un únic document JSON a stdout',
       optMap: 'Fitxer de mapatge a comprovar (per defecte: envilder.json)',
@@ -1357,7 +1355,7 @@ export const ca: Translations = {
       optionsNote:
         "Les opcions tenen els mateixos noms, valors per defecte i precedència que pull i exec: les opcions guanyen a $config, i una opció buida s'ignora. Posa-les després de validate; les que s'escriuen abans es rebutgen. Com a push, un valor buit de --envfile és un error.",
       optionsRejected:
-        '--compare-values sense --envfile o amb --offline, i un --format que no sigui text ni json, es rebutgen abans de llegir cap fitxer o cridar cap proveïdor.',
+        'Un --format que no sigui text ni json es rebutja abans de llegir cap fitxer o cridar cap proveïdor.',
       checksTitle: 'Què es comprova',
       mapTitle: 'El fitxer de mapatge (sempre)',
       mapDesc:
@@ -1395,7 +1393,7 @@ export const ca: Translations = {
         'Una clau només és al fitxer env. Un avís que no canvia el codi de sortida',
       envfileNote:
         "KEY= amb un valor buit compta com a present, i un fitxer env inexistent falla amb Env file not found. Aquesta comprovació només llegeix fitxers locals, així que s'executa abans de cap crida al proveïdor i també amb --offline. Els valors no es comparen ni es mostren.",
-      valuesTitle: 'Els valors del fitxer env (amb --compare-values)',
+      valuesTitle: 'Els valors del fitxer env (amb --envfile, sense --offline)',
       valuesDesc:
         "Per a cada variable declarada que és al fitxer env i existeix al proveïdor, el valor remot es llegeix com ho fa pull i es compara amb el local. Quan una clau es repeteix, es compara l'última assignació, tal com la carrega dotenv:",
       valMatches: 'Els dos valors són idèntics',
@@ -1403,14 +1401,14 @@ export const ca: Translations = {
       valUnreadable:
         "El secret existeix però el seu valor no s'ha pogut llegir, amb el motiu del proveïdor. Falla",
       valuesNote:
-        "Cap dels dos valors es mostra mai, i cada valor remot es descarta just després de la comparació. Les variables que ja s'han informat com a absents no es llegeixen. Sense --compare-values no es llegeix cap valor.",
+        "Cap dels dos valors es mostra mai, i cada valor remot es descarta just després de la comparació. Les variables que ja s'han informat com a absents no es llegeixen. Sense --envfile, o amb --offline, no es llegeix cap valor.",
       permTitle: 'Permisos',
       permDesc:
         "La comprovació d'existència fa servir una crida al proveïdor que pull no fa, així que la identitat necessita un permís més que per a un pull. --offline no necessita cap credencial.",
       permAwsDesc:
         "Les rutes es comproven amb GetParameters, deu per crida, amb WithDecryption: false: els paràmetres SecureString no es desxifren mai. És una acció d'IAM diferent de la ssm:GetParameter que fa servir pull, així que afegeix-la a la política, limitada a les mateixes rutes:",
       permAwsNote:
-        "La comprovació d'existència no necessita el permís kms:Decrypt. --compare-values llegeix els valors com pull, així que necessita el mateix accés a KMS que pull: kms:Decrypt sobre la clau de cada paràmetre SecureString xifrat amb una clau gestionada pel client. Amb kms:Decrypt, ssm:GetParameters també pot llegir valors desxifrats, així que limita'l a les mateixes rutes que ssm:GetParameter. Quan es denega una crida, cada ruta s'hi comprova per separat, així que access denied només s'informa per a les rutes que la identitat no pot llegir.",
+        "La comprovació d'existència no necessita el permís kms:Decrypt. --envfile llegeix els valors com pull, així que necessita el mateix accés a KMS que pull: kms:Decrypt sobre la clau de cada paràmetre SecureString xifrat amb una clau gestionada pel client. Amb kms:Decrypt, ssm:GetParameters també pot llegir valors desxifrats, així que limita'l a les mateixes rutes que ssm:GetParameter. Quan es denega una crida, cada ruta s'hi comprova per separat, així que access denied només s'informa per a les rutes que la identitat no pot llegir.",
       permAzureDesc:
         "Els noms dels secrets del vault es llisten una vegada (només metadades) i cada nom declarat, després de la conversió habitual de / a -, es compara amb aquesta llista sense distingir majúscules. Un secret desactivat s'informa com a missing, perquè pull no el pot llegir. Llistar requereix:",
       permAzureItems: [
@@ -1420,14 +1418,13 @@ export const ca: Translations = {
       permAzureNote:
         'La llista cobreix tot el vault, així que una identitat sense aquest permís rep access denied per a cada clau, amb el motiu que retorna Key Vault.',
       permValuesNote:
-        "--compare-values també llegeix valors, així que necessita els mateixos permisos que un pull a més d'aquests.",
+        "--envfile també llegeix valors, així que necessita els mateixos permisos que un pull a més d'aquests.",
       outputTitle: 'Sortida',
       outputOkDesc: 'Tots els secrets existeixen (codi de sortida 0):',
       outputFailDesc:
         'Alguns secrets falten o no es poden comprovar (codi de sortida 1; el resum va a stderr):',
       outputOfflineDesc: 'Amb --offline:',
-      outputEnvfileDesc:
-        'Amb --envfile=.env --compare-values (codi de sortida 1):',
+      outputEnvfileDesc: 'Amb --envfile=.env (codi de sortida 1):',
       outputEnvfileNote:
         'Quan totes les variables declarades són al fitxer env, el seu bloc acaba amb ✓ All 3 declared variables are in .env, i quan tots els valors comparats coincideixen, el bloc de valors acaba amb ✓ All 2 values match.',
       outputInvalidDesc: 'Un fitxer de mapatge no vàlid, a stderr:',
@@ -1442,7 +1439,7 @@ export const ca: Translations = {
       fieldKeys:
         "Una entrada per variable declarada, en l'ordre del fitxer de mapatge: name, provider, path, status i, quan el proveïdor en dona un, reason. status és exists, missing, access_denied, authentication_failed o provider_error. S'omet quan no s'han comprovat els secrets",
       fieldEnvFile:
-        "S'omet sense --envfile. Si no, path, valid, keys (cada variable declarada amb status present o missing, i value matches, differs o unreadable amb --compare-values), duplicates ({ name, count }) i undeclared",
+        "S'omet sense --envfile. Si no, path, valid, keys (cada variable declarada amb status present o missing, i value matches, differs o unreadable sense --offline), duplicates ({ name, count }) i undeclared",
       fieldError:
         "{ message }, només quan l'execució s'ha aturat abans d'acabar totes les comprovacions (credencials caducades, un fitxer env inexistent, un inici de sessió SSO rebutjat). Les seccions completades abans continuen plenes",
       jsonNote:
@@ -1450,7 +1447,7 @@ export const ca: Translations = {
       exitTitle: 'Codis de sortida',
       thCode: 'Codi',
       exit0:
-        'El fitxer de mapatge és vàlid; sense --offline, cada secret declarat existeix; amb --envfile, cada variable declarada és al fitxer env exactament una vegada; amb --compare-values, cada valor comparat coincideix. Les claus que només són al fitxer env no el canvien',
+        'El fitxer de mapatge és vàlid; sense --offline, cada secret declarat existeix; amb --envfile, cada variable declarada és al fitxer env exactament una vegada i, sense --offline, coincideix amb el seu valor remot. Les claus que només són al fitxer env no el canvien',
       exit1:
         'Qualsevol altra cosa: fitxer de mapatge absent o no vàlid, opcions no vàlides, un secret que falta o no es pot comprovar, credencials absents o caducades, o un fitxer env que no existeix, no té una variable declarada, repeteix una clau o té un valor que difereix o no es pot comparar',
       ciTitle: 'A CI',
@@ -1472,7 +1469,7 @@ export const ca: Translations = {
         'La validació del contracte és diferent de la validació de secrets: comprova el fitxer de mapatge i que cada secret existeix abans de carregar, mentre que la validació de secrets comprova que els valors ja resolts no siguin buits.',
       limitsTitle: 'Què no fa validate',
       limitsItems: [
-        'No mostra mai valors de secrets, i només els llegeix amb --compare-values.',
+        'No mostra mai valors de secrets, i només els llegeix amb --envfile, sense --offline.',
         'Amb --offline no comprova que els secrets existeixin ni que les credencials els puguin llegir.',
         'No corregeix el fitxer env: informa del que cal canviar.',
         'No comprova la forma dels valors (tipus, URL, longitud).',
@@ -1664,7 +1661,7 @@ export const ca: Translations = {
         title:
           "envilder validate: comprova un fitxer de mapatge i els seus secrets d'AWS SSM o Azure Key Vault",
         description:
-          "Referència d'envilder validate: comprovacions del fitxer de mapatge, --offline, estats de les claus remotes, --envfile i --compare-values, sortida JSON, codis de sortida i els permisos d'IAM i Key Vault que necessita.",
+          "Referència d'envilder validate: comprovacions del fitxer de mapatge, --offline, estats de les claus remotes, --envfile, sortida JSON, codis de sortida i els permisos d'IAM i Key Vault que necessita.",
         heading: "Referència d'envilder validate",
         intro:
           "Com saps que un fitxer de mapatge funcionarà abans d'un pull, un desplegament o envilder exec? envilder validate comprova que el fitxer de mapatge és vàlid i que cada secret declarat existeix a AWS SSM o Azure Key Vault, i pot comparar-hi un fitxer .env local. No mostra mai cap valor de secret i surt amb 1 quan alguna cosa falla, així que encaixa com a pas de CI.",
