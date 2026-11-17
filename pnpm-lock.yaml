@@ -163,7 +163,7 @@ importers:
         specifier: ^1.23.0
         version: 1.25.1(supports-color@10.2.2)
       '@azure/identity':
-        specifier: ^4.13.1
+        specifier: ^4.14.1
         version: 4.14.1(supports-color@10.2.2)
       '@azure/keyvault-secrets':
         specifier: ^4.11.2
@@ -270,7 +270,7 @@ importers:
         specifier: ^3.1149.0
         version: 3.1164.0
       '@azure/identity':
-        specifier: ^4.5.0
+        specifier: ^4.14.1
         version: 4.14.1(supports-color@10.2.2)
       '@azure/keyvault-secrets':
         specifier: ^4.9.0
@@ -320,7 +320,7 @@ importers:
         specifier: ^3.1149.0
         version: 3.1164.0
       '@azure/identity':
-        specifier: ^4.13.2
+        specifier: ^4.14.1
         version: 4.14.1(supports-color@10.2.2)
       '@azure/keyvault-secrets':
         specifier: ^4.11.2

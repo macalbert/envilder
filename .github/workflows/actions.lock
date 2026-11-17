@@ -74,6 +74,9 @@ workflows:
         - 'aws-actions/configure-aws-credentials@v6.3.0'
         - 'dorny/paths-filter@v4'
         - 'pnpm/action-setup@v6'
+    '.github/workflows/test-try-blocks.yml':
+        - 'actions/checkout@v7'
+        - 'actions/setup-node@v7'
     '.github/workflows/tests-dotnet-sdk.yml':
         - 'actions/cache@v6'
         - 'actions/checkout@v7'
