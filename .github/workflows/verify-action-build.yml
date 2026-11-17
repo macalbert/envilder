@@ -1,20 +1,45 @@
 name: 🔍 Verify Action Build
 
+permissions:
+  contents: read
+
 on:
   pull_request:
-    paths:
-      - "src/envilder/apps/gha/**"
-      - "github-action/**"
-      - "scripts/build-github-action.mjs"
-      - ".github/workflows/verify-action-build.yml"
-      # Dependency bumps change the bundle too
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
 
 jobs:
-  verify-build:
+  # No `paths:` filter here on purpose: a required check gated by a
+  # workflow-level `paths:` filter never posts a status when skipped and
+  # blocks merging forever. A job-level `if:` skip reports "success"
+  # instead, so the path check moves here and gates verify-build below.
+  changes:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      action: ${{ steps.filter.outputs.action }}
+    steps:
+      - name: 🧱 Checkout
+        uses: actions/checkout@v7
+      - name: 🔍 Detect relevant changes
+        uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            action:
+              - "src/envilder/apps/gha/**"
+              - "github-action/**"
+              - "scripts/build-github-action.mjs"
+              - ".github/workflows/verify-action-build.yml"
+              # Dependency bumps change the bundle too
+              - "package.json"
+              - "pnpm-lock.yaml"
+              - "pnpm-workspace.yaml"
+
+  verify-build:
+    needs: changes
+    runs-on: ubuntu-latest
+    if: ${{ needs.changes.outputs.action == 'true' }}
     timeout-minutes: 10
 
     steps:

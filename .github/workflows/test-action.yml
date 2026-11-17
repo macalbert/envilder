@@ -15,26 +15,48 @@ on:
       - reopened
       - synchronize
       - ready_for_review
-    paths:
-      - ".github/workflows/test-action.yml"
-      - "action.yml"
-      - "github-action/action.yml"
-      - "github-action/dist/**"
-      - "src/envilder/apps/gha/**"
-      - "src/envilder/apps/shared/**"
-      - "src/envilder/core/**"
-      - "scripts/build-github-action.mjs"
-      - "tests/envilder/apps/gha/**"
-      - "e2e/gha.test.ts"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
   cancel-in-progress: true
 
 jobs:
-  test-action:
+  # No `paths:` filter here on purpose: a required check gated by a
+  # workflow-level `paths:` filter never posts a status when skipped and
+  # blocks merging forever. A job-level `if:` skip reports "success"
+  # instead, so the path check moves here and gates test-action below.
+  changes:
     runs-on: ubuntu-latest
-    if: ${{ !github.event.pull_request.draft }}
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      action: ${{ steps.filter.outputs.action }}
+    steps:
+      - name: 🧱 Checkout
+        uses: actions/checkout@v7
+      - name: 🔍 Detect relevant changes
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            action:
+              - ".github/workflows/test-action.yml"
+              - "action.yml"
+              - "github-action/action.yml"
+              - "github-action/dist/**"
+              - "src/envilder/apps/gha/**"
+              - "src/envilder/apps/shared/**"
+              - "src/envilder/core/**"
+              - "scripts/build-github-action.mjs"
+              - "tests/envilder/apps/gha/**"
+              - "e2e/gha.test.ts"
+
+  test-action:
+    needs: changes
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || (needs.changes.outputs.action == 'true' && !github.event.pull_request.draft) }}
     timeout-minutes: 15
 
     steps:
