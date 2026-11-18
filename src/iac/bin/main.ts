@@ -6,6 +6,7 @@ import type { Environment, Stack } from "aws-cdk-lib";
  */
 import { App, DefaultStackSynthesizer } from "aws-cdk-lib";
 import { AppEnvironment } from "../lib/core/types";
+import type { WebsiteCloudFrontResourceIds } from "../lib/stacks/websiteDeploymentPolicies";
 import {
 	GitHubOidcRolesStack,
 	type TestParameterPaths,
@@ -35,6 +36,8 @@ interface WebsiteBootstrapConfig {
 	executionPolicyName: string;
 	lambdaBoundaryName: string;
 	bootstrapBoundaryName: string;
+	/** Deployed CloudFront resources of the website stacks. */
+	cloudFront: WebsiteCloudFrontResourceIds;
 }
 
 interface GitHubOidcRolesConfig {
@@ -112,6 +115,17 @@ const config: DeploymentConfig = {
 				executionPolicyName: "envilder-website-cfn-execution",
 				lambdaBoundaryName: "envilder-website-lambda-boundary",
 				bootstrapBoundaryName: "envilder-website-bootstrap-boundary",
+				// IDs of the deployed CloudFront resources (envilder-Website and
+				// envilder-Files). Add the new ID when a deploy replaces one.
+				cloudFront: {
+					distributionIds: ["E17IZFHM9V93LK", "E1AA9DO1YH8CQO"],
+					originAccessIdentityIds: ["E1U6JJZ6SCU11P"],
+					originAccessControlIds: ["E2XCBHX4RC5BRY"],
+					responseHeadersPolicyIds: [
+						"acbd0815-ea09-4e81-8e00-74d30f539e01",
+						"961ee9ee-d0ed-45dc-90f4-3c80c5fb3a17",
+					],
+				},
 			},
 		},
 	},
@@ -299,6 +313,7 @@ export function deploy(configOverride?: DeploymentConfig): Stack[] {
 				: {};
 		const websiteStackNames: string[] = [];
 		const websiteBucketNames: string[] = [];
+		const websiteRecordNames: string[] = [];
 		const websiteCertificateIds: string[] = [
 			effectiveConfig.domain.certificateId,
 		];
@@ -337,6 +352,7 @@ export function deploy(configOverride?: DeploymentConfig): Stack[] {
 				`${effectiveConfig.repoName}-${websiteConfig.name}`,
 			);
 			websiteBucketNames.push(websiteDomain, `${websiteDomain}-logs`);
+			websiteRecordNames.push(websiteDomain);
 			stacks.push(stack);
 		}
 
@@ -357,9 +373,10 @@ export function deploy(configOverride?: DeploymentConfig): Stack[] {
 				}),
 			);
 			websiteStackNames.push(`${effectiveConfig.repoName}-${publicFiles.name}`);
-			websiteBucketNames.push(
-				`${publicFiles.subdomain}.${effectiveConfig.domain.name}`.toLowerCase(),
-			);
+			const filesDomain =
+				`${publicFiles.subdomain}.${effectiveConfig.domain.name}`.toLowerCase();
+			websiteBucketNames.push(filesDomain);
+			websiteRecordNames.push(filesDomain);
 			websiteCertificateIds.push(publicFiles.certificateId);
 		}
 
@@ -379,6 +396,7 @@ export function deploy(configOverride?: DeploymentConfig): Stack[] {
 						stackNames: websiteStackNames,
 						bucketNames: websiteBucketNames,
 						hostedZoneId: effectiveConfig.domain.hostedZoneId,
+						recordNames: websiteRecordNames,
 						certificateIds: [...new Set(websiteCertificateIds)],
 					},
 					envName: effectiveConfig.environment,

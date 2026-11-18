@@ -50,6 +50,12 @@ describe("main", () => {
 			executionPolicyName: "cfn-execution",
 			lambdaBoundaryName: "lambda-boundary",
 			bootstrapBoundaryName: "bootstrap-boundary",
+			cloudFront: {
+				distributionIds: ["EDIST"],
+				originAccessIdentityIds: [],
+				originAccessControlIds: [],
+				responseHeadersPolicyIds: [],
+			},
 		};
 	}
 
@@ -212,7 +218,14 @@ describe("main", () => {
 							"files.example.com",
 						],
 						hostedZoneId: "Z123",
+						recordNames: ["example.com", "files.example.com"],
 						certificateIds: ["cert-123", "files-cert"],
+						cloudFront: {
+							distributionIds: ["EDIST"],
+							originAccessIdentityIds: [],
+							originAccessControlIds: [],
+							responseHeadersPolicyIds: [],
+						},
 					},
 				}),
 			);

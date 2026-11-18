@@ -161,8 +161,27 @@ describe("GitHub OIDC roles Stack", () => {
 					],
 				}),
 				expect.objectContaining({
-					Sid: "ManageDnsRecords",
+					Sid: "ChangeWebsiteRecords",
+					Action: "route53:ChangeResourceRecordSets",
 					Resource: "arn:aws:route53:::hostedzone/Z123",
+					Condition: {
+						"ForAllValues:StringEquals": {
+							"route53:ChangeResourceRecordSetsNormalizedRecordNames": [
+								"envilder.com",
+							],
+							"route53:ChangeResourceRecordSetsRecordTypes": ["A", "AAAA"],
+						},
+					},
+				}),
+				expect.objectContaining({
+					Sid: "ManageWebsiteCloudFrontResources",
+					Action: "cloudfront:*",
+					Resource: [
+						`arn:aws:cloudfront::${ACCOUNT}:distribution/EDIST`,
+						`arn:aws:cloudfront::${ACCOUNT}:origin-access-identity/EOAI`,
+						`arn:aws:cloudfront::${ACCOUNT}:response-headers-policy/rhp-1`,
+						`arn:aws:cloudfront::${ACCOUNT}:function/*envilder-Website*`,
+					],
 				}),
 				expect.objectContaining({
 					Sid: "ManageStackFunctions",
@@ -171,6 +190,35 @@ describe("GitHub OIDC roles Stack", () => {
 				}),
 			]),
 		);
+	});
+
+	test("Should_OnlyCreateCloudFrontResources_When_TheyAreNotTheWebsites", () => {
+		// Arrange
+		const sut = createGitHubOidcRolesStack();
+
+		// Act
+		const actual = managedPolicyStatements(
+			sut,
+			"envilder-website-cfn-execution",
+		).filter(
+			(statement) =>
+				[statement.Action]
+					.flat()
+					.some((action) => action.startsWith("cloudfront:")) &&
+				[statement.Resource]
+					.flat()
+					.some((resource) => String(resource).endsWith("/*")),
+		);
+
+		// Assert
+		for (const statement of actual) {
+			for (const action of [statement.Action].flat()) {
+				expect(action).toMatch(
+					/^cloudfront:(Create|Get|List|Describe|TagResource)/,
+				);
+			}
+			expect(action(statement)).not.toContain("cloudfront:*");
+		}
 	});
 
 	test("Should_RequireLambdaBoundary_When_ExecutionPolicyWritesRoles", () => {
@@ -295,6 +343,23 @@ describe("GitHub OIDC roles Stack", () => {
 		}
 	});
 
+	test("Should_StayUnderIamSizeLimit_When_ManagedPoliciesAreCreated", () => {
+		// Arrange
+		const sut = createGitHubOidcRolesStack();
+		const iamManagedPolicyMaxChars = 6144;
+
+		// Act
+		const actual = Object.values(
+			Template.fromStack(sut).findResources("AWS::IAM::ManagedPolicy"),
+		).map((policy) => JSON.stringify(policy.Properties.PolicyDocument).length);
+
+		// Assert
+		expect(actual).toHaveLength(3);
+		for (const length of actual) {
+			expect(length).toBeLessThan(iamManagedPolicyMaxChars);
+		}
+	});
+
 	test("Should_NotUseWildcardSubjects_When_RolesAreCreated", () => {
 		// Arrange
 		const sut = createGitHubOidcRolesStack();
@@ -335,6 +400,10 @@ interface PolicyStatementJson {
 	Condition?: unknown;
 }
 
+function action(statement: PolicyStatementJson): string[] {
+	return [statement.Action].flat();
+}
+
 function managedPolicyStatements(
 	stack: GitHubOidcRolesStack,
 	name: string,
@@ -372,7 +441,14 @@ function createGitHubOidcRolesStack(
 			stackNames: ["envilder-Website"],
 			bucketNames: ["envilder.com", "envilder.com-logs"],
 			hostedZoneId: "Z123",
+			recordNames: ["envilder.com"],
 			certificateIds: ["cert-a"],
+			cloudFront: {
+				distributionIds: ["EDIST"],
+				originAccessIdentityIds: ["EOAI"],
+				originAccessControlIds: [],
+				responseHeadersPolicyIds: ["rhp-1"],
+			},
 		},
 		...overrides,
 	});

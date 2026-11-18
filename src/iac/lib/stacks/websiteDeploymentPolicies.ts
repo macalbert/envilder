@@ -15,8 +15,23 @@ export interface WebsiteDeploymentConfig {
 	stackNames: readonly string[];
 	bucketNames: readonly string[];
 	hostedZoneId: string;
+	/** DNS records the website stacks own, as Route 53 normalizes them. */
+	recordNames: readonly string[];
+	/**
+	 * IDs of the deployed CloudFront resources the website stacks own. These
+	 * resource types support no tag conditions, so a replaced resource must
+	 * have its new ID added here before the stacks can change it again.
+	 */
+	cloudFront: WebsiteCloudFrontResourceIds;
 	/** ACM certificate IDs in us-east-1, as CloudFront requires. */
 	certificateIds: readonly string[];
+}
+
+export interface WebsiteCloudFrontResourceIds {
+	distributionIds: readonly string[];
+	originAccessIdentityIds: readonly string[];
+	originAccessControlIds: readonly string[];
+	responseHeadersPolicyIds: readonly string[];
 }
 
 /**
@@ -40,6 +55,27 @@ export class WebsiteDeploymentPolicies extends Construct {
 			`arn:aws:s3:::${name}/*`,
 		]);
 		const assetsBucket = `cdk-${config.qualifier}-assets-${account}-${region}`;
+		const cloudFrontArn = (type: string, id: string) =>
+			`arn:aws:cloudfront::${account}:${type}/${id}`;
+		const distributionArns = config.cloudFront.distributionIds.map((id) =>
+			cloudFrontArn("distribution", id),
+		);
+		const websiteCloudFrontArns = [
+			...distributionArns,
+			...config.cloudFront.originAccessIdentityIds.map((id) =>
+				cloudFrontArn("origin-access-identity", id),
+			),
+			...config.cloudFront.originAccessControlIds.map((id) =>
+				cloudFrontArn("origin-access-control", id),
+			),
+			...config.cloudFront.responseHeadersPolicyIds.map((id) =>
+				cloudFrontArn("response-headers-policy", id),
+			),
+			// CloudFront function names start with the region and stack name.
+			...config.stackNames.map((name) =>
+				cloudFrontArn("function", `*${name}*`),
+			),
+		];
 		const stackRoleArns = config.stackNames.map(
 			(name) => `arn:aws:iam::${account}:role/${name}-*`,
 		);
@@ -75,7 +111,7 @@ export class WebsiteDeploymentPolicies extends Construct {
 						"cloudfront:CreateInvalidation",
 						"cloudfront:GetInvalidation",
 					],
-					resources: [`arn:aws:cloudfront::${account}:distribution/*`],
+					resources: distributionArns,
 				}),
 				new PolicyStatement({
 					sid: "WriteFunctionLogs",
@@ -109,18 +145,40 @@ export class WebsiteDeploymentPolicies extends Construct {
 				],
 			}),
 			new PolicyStatement({
-				sid: "ManageCloudFront",
+				sid: "ManageWebsiteCloudFrontResources",
 				effect: Effect.ALLOW,
 				actions: ["cloudfront:*"],
+				resources: websiteCloudFrontArns,
+			}),
+			new PolicyStatement({
+				sid: "CreateCloudFrontResources",
+				effect: Effect.ALLOW,
+				actions: [
+					"cloudfront:CreateCloudFrontOriginAccessIdentity",
+					"cloudfront:CreateDistribution",
+					"cloudfront:CreateDistributionWithTags",
+					"cloudfront:CreateFunction",
+					"cloudfront:CreateOriginAccessControl",
+					"cloudfront:CreateResponseHeadersPolicy",
+					"cloudfront:TagResource",
+				],
 				resources: [
 					"distribution",
 					"function",
 					"origin-access-identity",
 					"origin-access-control",
 					"response-headers-policy",
-					"cache-policy",
-					"origin-request-policy",
-				].map((type) => `arn:aws:cloudfront::${account}:${type}/*`),
+				].map((type) => cloudFrontArn(type, "*")),
+			}),
+			new PolicyStatement({
+				sid: "ReadCloudFront",
+				effect: Effect.ALLOW,
+				actions: [
+					"cloudfront:Describe*",
+					"cloudfront:Get*",
+					"cloudfront:List*",
+				],
+				resources: ["*"],
 			}),
 			new PolicyStatement({
 				sid: "UseCertificates",
@@ -131,13 +189,23 @@ export class WebsiteDeploymentPolicies extends Construct {
 				),
 			}),
 			new PolicyStatement({
-				sid: "ManageDnsRecords",
+				sid: "ChangeWebsiteRecords",
 				effect: Effect.ALLOW,
-				actions: [
-					"route53:ChangeResourceRecordSets",
-					"route53:GetHostedZone",
-					"route53:ListResourceRecordSets",
-				],
+				actions: ["route53:ChangeResourceRecordSets"],
+				resources: [`arn:aws:route53:::hostedzone/${config.hostedZoneId}`],
+				conditions: {
+					"ForAllValues:StringEquals": {
+						"route53:ChangeResourceRecordSetsNormalizedRecordNames": [
+							...config.recordNames,
+						],
+						"route53:ChangeResourceRecordSetsRecordTypes": ["A", "AAAA"],
+					},
+				},
+			}),
+			new PolicyStatement({
+				sid: "ReadHostedZone",
+				effect: Effect.ALLOW,
+				actions: ["route53:GetHostedZone", "route53:ListResourceRecordSets"],
 				resources: [`arn:aws:route53:::hostedzone/${config.hostedZoneId}`],
 			}),
 			new PolicyStatement({
