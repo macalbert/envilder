@@ -1477,10 +1477,11 @@ export const en: Translations = {
     intro: 'Everything you need to get started with Envilder.',
     pages: {
       hub: {
-        title: 'Envilder documentation',
+        title: 'Envilder docs: AWS SSM and Key Vault secrets to .env',
         description:
           'Guides for using Envilder with AWS SSM Parameter Store, Azure Key Vault, the CLI, GitHub Action, and runtime SDKs.',
-        heading: 'Envilder documentation',
+        heading:
+          'Envilder docs: load AWS SSM and Azure Key Vault secrets into .env, CI and apps',
         intro:
           'Choose a guide to configure Envilder, resolve secrets, or load them at runtime.',
         breadcrumb: 'Documentation',
@@ -1506,7 +1507,7 @@ export const en: Translations = {
       'guide-ssm-to-env': {
         title: 'Load AWS SSM Parameter Store secrets into a .env file',
         description:
-          'Export AWS SSM Parameter Store parameters to a .env file with the Envilder CLI: IAM policy, envilder.json map, several environments, exec mode, CI and errors.',
+          'Use AWS SSM Parameter Store as your secrets vault and load it into a .env file with the Envilder CLI: IAM policy, envilder.json map, environments, exec mode and CI.',
         heading: 'Load AWS SSM Parameter Store secrets into a .env file',
         intro:
           'How do you get AWS SSM Parameter Store parameters into a local .env file without a hand-written script? List each variable and its parameter path once in envilder.json, then run envilder: it reads every parameter, decrypts SecureString values and writes a .env file that parses back to the same values.',
@@ -1547,7 +1548,7 @@ export const en: Translations = {
       'aws-ssm': {
         title: 'Use Envilder with AWS SSM Parameter Store',
         description:
-          'Configure AWS credentials and IAM permissions for Envilder with AWS SSM Parameter Store.',
+          'AWS SSM Parameter Store can act as your secrets vault, and Envilder loads from it. Configure AWS credentials and IAM permissions for the CLI, Action and SDKs.',
         heading: 'AWS SSM',
         intro:
           'Configure credentials, IAM permissions, and a test parameter for AWS SSM Parameter Store.',
