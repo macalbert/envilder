@@ -4,8 +4,13 @@ import type { Environment, Stack } from "aws-cdk-lib";
 /**
  * CDK Infrastructure Deployment Entry Point
  */
-import { App } from "aws-cdk-lib";
+import { App, DefaultStackSynthesizer } from "aws-cdk-lib";
 import { AppEnvironment } from "../lib/core/types";
+import type { WebsiteCloudFrontResourceIds } from "../lib/stacks/websiteDeploymentPolicies";
+import {
+	GitHubOidcRolesStack,
+	type TestParameterPaths,
+} from "../lib/stacks/githubOidcRolesStack";
 import { PublicFilesStack } from "../lib/stacks/publicFilesStack";
 import { StaticWebsiteStack } from "../lib/stacks/staticWebsiteStack";
 
@@ -25,6 +30,24 @@ interface PublicFilesConfig {
 	certificateId: string;
 }
 
+interface WebsiteBootstrapConfig {
+	/** CDK bootstrap qualifier reserved for the website stacks. */
+	qualifier: string;
+	executionPolicyName: string;
+	lambdaBoundaryName: string;
+	bootstrapBoundaryName: string;
+	/** Deployed CloudFront resources of the website stacks. */
+	cloudFront: WebsiteCloudFrontResourceIds;
+}
+
+interface GitHubOidcRolesConfig {
+	name: string;
+	githubOwner: string;
+	deployEnvironment: string;
+	testParameters: TestParameterPaths;
+	websiteDeployment: WebsiteBootstrapConfig;
+}
+
 interface DeploymentConfig {
 	repoName: string;
 	branch: string;
@@ -39,6 +62,7 @@ interface DeploymentConfig {
 			staticWebsites: readonly StaticWebsiteConfig[];
 		};
 		publicFiles?: PublicFilesConfig;
+		githubOidcRoles?: GitHubOidcRolesConfig;
 	};
 	rootPath?: string;
 }
@@ -70,6 +94,39 @@ const config: DeploymentConfig = {
 			subdomain: "files",
 			// *.envilder.com
 			certificateId: "b5de0685-2e52-4ceb-9cb2-d66b164a791e",
+		},
+		githubOidcRoles: {
+			name: "GitHubOidcRoles",
+			githubOwner: "macalbert",
+			deployEnvironment: "production",
+			testParameters: {
+				// e2e/cli.test.ts writes, reads and deletes /Test/<runId>/*.
+				// One level deeper than /Test, so shared fixtures stay read-only.
+				readWrite: ["/Test/*/*"],
+				// The GitHub Action test reads /Test/Token; the SDK test
+				// fixtures resolve the LocalStack token from the root
+				// envilder.json.
+				readOnly: ["/Test/Token", "/envilder/development/localstack/authToken"],
+			},
+			// The website stacks deploy through their own CDK bootstrap,
+			// whose execution role can only change website resources.
+			websiteDeployment: {
+				qualifier: "envweb",
+				executionPolicyName: "envilder-website-cfn-execution",
+				lambdaBoundaryName: "envilder-website-lambda-boundary",
+				bootstrapBoundaryName: "envilder-website-bootstrap-boundary",
+				// IDs of the deployed CloudFront resources (envilder-Website and
+				// envilder-Files). Add the new ID when a deploy replaces one.
+				cloudFront: {
+					distributionIds: ["E17IZFHM9V93LK", "E1AA9DO1YH8CQO"],
+					originAccessIdentityIds: ["E1U6JJZ6SCU11P"],
+					originAccessControlIds: ["E2XCBHX4RC5BRY"],
+					responseHeadersPolicyIds: [
+						"acbd0815-ea09-4e81-8e00-74d30f539e01",
+						"961ee9ee-d0ed-45dc-90f4-3c80c5fb3a17",
+					],
+				},
+			},
 		},
 	},
 };
@@ -243,6 +300,24 @@ export function deploy(configOverride?: DeploymentConfig): Stack[] {
 
 		const stacks: Stack[] = [];
 
+		const websiteBootstrap =
+			effectiveConfig.stacks.githubOidcRoles?.websiteDeployment;
+		const websiteStackOptions = () =>
+			websiteBootstrap
+				? {
+						synthesizer: new DefaultStackSynthesizer({
+							qualifier: websiteBootstrap.qualifier,
+						}),
+						permissionsBoundaryName: websiteBootstrap.lambdaBoundaryName,
+					}
+				: {};
+		const websiteStackNames: string[] = [];
+		const websiteBucketNames: string[] = [];
+		const websiteRecordNames: string[] = [];
+		const websiteCertificateIds: string[] = [
+			effectiveConfig.domain.certificateId,
+		];
+
 		for (const websiteConfig of effectiveConfig.stacks.frontend
 			.staticWebsites) {
 			const distFolderPath = resolveFullPath(
@@ -265,8 +340,19 @@ export function deploy(configOverride?: DeploymentConfig): Stack[] {
 				envName: effectiveConfig.environment,
 				githubRepo: effectiveConfig.repoName,
 				stackName: `${effectiveConfig.repoName}-${websiteConfig.name}`,
+				...websiteStackOptions(),
 			});
 
+			const websiteDomain = (
+				websiteConfig.subdomain
+					? `${websiteConfig.subdomain}.${effectiveConfig.domain.name}`
+					: effectiveConfig.domain.name
+			).toLowerCase();
+			websiteStackNames.push(
+				`${effectiveConfig.repoName}-${websiteConfig.name}`,
+			);
+			websiteBucketNames.push(websiteDomain, `${websiteDomain}-logs`);
+			websiteRecordNames.push(websiteDomain);
 			stacks.push(stack);
 		}
 
@@ -283,6 +369,38 @@ export function deploy(configOverride?: DeploymentConfig): Stack[] {
 					envName: effectiveConfig.environment,
 					githubRepo: effectiveConfig.repoName,
 					stackName: `${effectiveConfig.repoName}-${publicFiles.name}`,
+					...websiteStackOptions(),
+				}),
+			);
+			websiteStackNames.push(`${effectiveConfig.repoName}-${publicFiles.name}`);
+			const filesDomain =
+				`${publicFiles.subdomain}.${effectiveConfig.domain.name}`.toLowerCase();
+			websiteBucketNames.push(filesDomain);
+			websiteRecordNames.push(filesDomain);
+			websiteCertificateIds.push(publicFiles.certificateId);
+		}
+
+		const { githubOidcRoles } = effectiveConfig.stacks;
+		if (githubOidcRoles) {
+			stacks.push(
+				new GitHubOidcRolesStack(app, {
+					env: envFromCli,
+					name: githubOidcRoles.name,
+					githubOwner: githubOidcRoles.githubOwner,
+					githubRepo: effectiveConfig.repoName,
+					mainBranch: effectiveConfig.branch,
+					deployEnvironment: githubOidcRoles.deployEnvironment,
+					testParameters: githubOidcRoles.testParameters,
+					websiteDeployment: {
+						...githubOidcRoles.websiteDeployment,
+						stackNames: websiteStackNames,
+						bucketNames: websiteBucketNames,
+						hostedZoneId: effectiveConfig.domain.hostedZoneId,
+						recordNames: websiteRecordNames,
+						certificateIds: [...new Set(websiteCertificateIds)],
+					},
+					envName: effectiveConfig.environment,
+					stackName: `${effectiveConfig.repoName}-${githubOidcRoles.name}`,
 				}),
 			);
 		}

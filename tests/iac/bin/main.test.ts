@@ -1,11 +1,14 @@
 import path from "node:path";
+import { DefaultStackSynthesizer } from "aws-cdk-lib";
 import { deploy, validateConfig } from "../../../src/iac/bin/main";
 import { AppEnvironment } from "../../../src/iac/lib/core/types";
+import { GitHubOidcRolesStack } from "../../../src/iac/lib/stacks/githubOidcRolesStack";
 import { PublicFilesStack } from "../../../src/iac/lib/stacks/publicFilesStack";
 import { StaticWebsiteStack } from "../../../src/iac/lib/stacks/staticWebsiteStack";
 
 vi.mock("../../../src/iac/lib/stacks/staticWebsiteStack");
 vi.mock("../../../src/iac/lib/stacks/publicFilesStack");
+vi.mock("../../../src/iac/lib/stacks/githubOidcRolesStack");
 
 describe("main", () => {
 	beforeEach(() => {
@@ -37,6 +40,21 @@ describe("main", () => {
 						subdomain?: string;
 					}[],
 				},
+			},
+		};
+	}
+
+	function createWebsiteDeploymentConfig() {
+		return {
+			qualifier: "webq",
+			executionPolicyName: "cfn-execution",
+			lambdaBoundaryName: "lambda-boundary",
+			bootstrapBoundaryName: "bootstrap-boundary",
+			cloudFront: {
+				distributionIds: ["EDIST"],
+				originAccessIdentityIds: [],
+				originAccessControlIds: [],
+				responseHeadersPolicyIds: [],
 			},
 		};
 	}
@@ -103,6 +121,112 @@ describe("main", () => {
 					certificateId: "files-cert",
 					domainName: "example.com",
 					hostedZoneId: "Z123",
+				}),
+			);
+		});
+
+		it("Should_CreateGitHubOidcRolesStack_When_GitHubOidcRolesIsConfigured", () => {
+			// Arrange
+			const config = {
+				...createValidConfig(),
+				stacks: {
+					...createValidConfig().stacks,
+					githubOidcRoles: {
+						name: "GitHubOidcRoles",
+						githubOwner: "owner",
+						deployEnvironment: "production",
+						testParameters: {
+							readWrite: ["/Test/*"],
+							readOnly: ["/fixture/token"],
+						},
+						websiteDeployment: createWebsiteDeploymentConfig(),
+					},
+				},
+			};
+
+			// Act
+			const result = deploy(config);
+
+			// Assert
+			expect(result).toHaveLength(1);
+			expect(GitHubOidcRolesStack).toHaveBeenCalledWith(
+				expect.anything(),
+				expect.objectContaining({
+					githubOwner: "owner",
+					githubRepo: "test-repo",
+					mainBranch: "main",
+					deployEnvironment: "production",
+					testParameters: {
+						readWrite: ["/Test/*"],
+						readOnly: ["/fixture/token"],
+					},
+				}),
+			);
+		});
+
+		it("Should_DeployWebsiteStacksThroughTheirOwnBootstrap_When_GitHubOidcRolesIsConfigured", () => {
+			// Arrange
+			const config = {
+				...createValidConfig(),
+				stacks: {
+					frontend: {
+						staticWebsites: [{ name: "Website", projectPath: "dist" }],
+					},
+					publicFiles: {
+						name: "Files",
+						subdomain: "files",
+						certificateId: "files-cert",
+					},
+					githubOidcRoles: {
+						name: "GitHubOidcRoles",
+						githubOwner: "owner",
+						deployEnvironment: "production",
+						testParameters: { readWrite: [], readOnly: [] },
+						websiteDeployment: createWebsiteDeploymentConfig(),
+					},
+				},
+			};
+
+			// Act
+			deploy(config);
+
+			// Assert
+			const websiteOptions = expect.objectContaining({
+				permissionsBoundaryName: "lambda-boundary",
+				synthesizer: expect.any(DefaultStackSynthesizer),
+			});
+			expect(StaticWebsiteStack).toHaveBeenCalledWith(
+				expect.anything(),
+				websiteOptions,
+			);
+			expect(PublicFilesStack).toHaveBeenCalledWith(
+				expect.anything(),
+				websiteOptions,
+			);
+			expect(GitHubOidcRolesStack).toHaveBeenCalledWith(
+				expect.anything(),
+				expect.objectContaining({
+					websiteDeployment: {
+						qualifier: "webq",
+						executionPolicyName: "cfn-execution",
+						lambdaBoundaryName: "lambda-boundary",
+						bootstrapBoundaryName: "bootstrap-boundary",
+						stackNames: ["test-repo-Website", "test-repo-Files"],
+						bucketNames: [
+							"example.com",
+							"example.com-logs",
+							"files.example.com",
+						],
+						hostedZoneId: "Z123",
+						recordNames: ["example.com", "files.example.com"],
+						certificateIds: ["cert-123", "files-cert"],
+						cloudFront: {
+							distributionIds: ["EDIST"],
+							originAccessIdentityIds: [],
+							originAccessControlIds: [],
+							responseHeadersPolicyIds: [],
+						},
+					},
 				}),
 			);
 		});
