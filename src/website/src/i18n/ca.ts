@@ -961,6 +961,250 @@ export const ca: Translations = {
       relatedExec: "Referència d'envilder exec",
       relatedMap: 'Referència del fitxer de mapa',
     },
+    alternatives: {
+      whatTitle: 'Què és Envilder i què no és',
+      whatItems: [
+        "Un fitxer de mapatge, envilder.json, que llista cada variable i el paràmetre d'AWS SSM o el secret d'Azure Key Vault del qual surt. Es versiona a Git sense cap valor.",
+        'Una CLI, una GitHub Action i uns SDK per a .NET, Python i Node.js que llegeixen aquests valors de la teva caixa forta i els passen a la teva comanda, al teu job o al teu procés.',
+        'No és una caixa forta. Els valors es queden a AWS SSM Parameter Store o a Azure Key Vault, i AWS o Azure continuen decidint qui els pot llegir.',
+        'No és un servei allotjat, un tauler, un motor de rotació ni un operador de Kubernetes.',
+      ],
+      tableTitle: "D'un cop d'ull",
+      tableDesc:
+        'On guarda cada eina els valors dels secrets, i com es relaciona amb AWS SSM Parameter Store i Azure Key Vault.',
+      thTool: 'Eina',
+      thKind: 'Què és',
+      thValues: 'On viuen els valors',
+      thSsm: 'AWS SSM Parameter Store',
+      thKeyVault: 'Azure Key Vault',
+      rows: [
+        {
+          tool: 'Envilder',
+          kind: 'Capa de mapatge i resolució: CLI, GitHub Action i SDK',
+          values: 'Al teu AWS SSM o Azure Key Vault',
+          ssm: 'Llegeix i escriu directament',
+          keyVault: 'Llegeix i escriu directament',
+        },
+        {
+          tool: 'Doppler',
+          kind: 'Gestor de secrets allotjat, amb tauler i CLI',
+          values: 'A Doppler',
+          ssm: 'Destinació de sincronització: Doppler hi escriu una còpia',
+          keyVault: 'Destinació de sincronització: Doppler hi escriu una còpia',
+        },
+        {
+          tool: 'Infisical',
+          kind: 'Plataforma de codi obert, a Infisical Cloud o autoallotjada',
+          values: 'A Infisical',
+          ssm: 'Destinació de sincronització: Infisical hi escriu una còpia',
+          keyVault:
+            'Destinació de sincronització: Infisical hi escriu una còpia',
+        },
+        {
+          tool: 'chamber',
+          kind: 'CLI per a AWS',
+          values: 'A AWS SSM Parameter Store per defecte',
+          ssm: 'Llegeix i escriu directament (backend per defecte)',
+          keyVault: 'No apareix com a backend',
+        },
+        {
+          tool: 'SOPS',
+          kind: 'Editor de fitxers xifrats',
+          values: 'Als fitxers xifrats',
+          ssm: 'No aplica',
+          keyVault: 'Un dels backends de xifratge compatibles',
+        },
+        {
+          tool: 'dotenvx',
+          kind: 'Xifra fitxers .env',
+          values: 'Al fitxer .env xifrat, amb la clau a part',
+          ssm: 'No aplica',
+          keyVault: 'No aplica',
+        },
+      ],
+      tableNote:
+        "Una destinació de sincronització és un magatzem que rep una còpia de valors guardats a l'eina. No aplica vol dir que l'eina no treballa amb aquest tipus de magatzem.",
+      toolsTitle: 'Quan triar una altra eina',
+      tools: [
+        {
+          title: 'Doppler',
+          desc: "Doppler és un gestor de secrets allotjat. Els secrets viuen a projectes i configuracions de Doppler, i la seva CLI els injecta amb doppler run. Les seves integracions els poden sincronitzar a AWS Parameter Store i Azure Key Vault, de manera que aquests magatzems en reben una còpia mentre Doppler continua sent el lloc on s'editen. Envilder no té magatzem propi: llegeix directament el d'AWS o Azure.",
+          chooseTitle: "Tria Doppler en comptes d'Envilder quan:",
+          choose: [
+            'Vols un tauler web on la gent gestioni els secrets per projecte i entorn.',
+            "Necessites rotació de secrets. Doppler documenta secrets rotats per a serveis com usuaris IAM d'AWS i bases de dades.",
+            "Vols peticions de canvi, registres d'activitat, inici de sessió únic SAML o aprovisionament SCIM dins del producte.",
+            'Vols un sol lloc que alimenti moltes plataformes, no només AWS i Azure.',
+          ],
+        },
+        {
+          title: 'Infisical',
+          desc: "Infisical es descriu com una plataforma de codi obert d'infraestructura de seguretat. El seu repositori té llicència MIT excepte els directoris ee, que contenen funcions que requereixen una llicència d'Infisical. Guarda ell mateix els secrets, a Infisical Cloud o autoallotjat, i les seves Secret Syncs els envien a destinacions com AWS Parameter Store i Azure Key Vault.",
+          chooseTitle: "Tria Infisical en comptes d'Envilder quan:",
+          choose: [
+            'Vols una caixa forta de codi obert amb tauler que puguis allotjar tu mateix.',
+            "Necessites rotació de secrets, secrets dinàmics, versions de secrets amb recuperació en un punt del temps o fluxos d'aprovació.",
+            'Vols un operador de Kubernetes, o un agent que injecti secrets sense canviar el codi.',
+            'Vols escaneig de secrets, certificats o accés privilegiat a la mateixa plataforma.',
+          ],
+        },
+        {
+          title: 'chamber',
+          desc: "chamber, de Segment, és una CLI que guarda secrets a AWS SSM Parameter Store, amb AWS Secrets Manager i S3 com a altres backends (el seu README marca S3 com a experimental). chamber exec carrega tots els secrets d'un o més serveis a l'entorn d'una comanda. És l'eina més propera a Envilder per a AWS: cap magatzem addicional. Només funciona amb AWS i tria els secrets per nom de servei, mentre que Envilder llista cada variable i la seva ruta en un fitxer de mapatge revisable i també admet Azure Key Vault.",
+          chooseTitle: "Tria chamber en comptes d'Envilder quan:",
+          choose: [
+            "Només uses AWS i vols carregar tots els secrets d'un servei sense llistar-los un per un.",
+            'Vols AWS Secrets Manager com a backend. Envilder no el suporta.',
+            'Vols les seves ordres list, history, tag i find per inspeccionar el magatzem des del terminal.',
+          ],
+        },
+        {
+          title: 'SOPS',
+          desc: "SOPS és un editor de fitxers xifrats en formats YAML, JSON, ENV, INI i binari. Xifra amb AWS KMS, GCP KMS, Azure Key Vault, HuaweiCloud KMS, age o PGP, i és un projecte sandbox de la CNCF amb llicència Mozilla Public License 2.0. Els valors viuen al mateix fitxer xifrat, així que no hi ha cap magatzem de secrets a part d'on llegir. Amb Envilder el repositori guarda noms i rutes, mai valors, ni tan sols xifrats.",
+          chooseTitle: "Tria SOPS en comptes d'Envilder quan:",
+          choose: [
+            'Vols secrets versionats a Git en forma xifrada, junt amb el codi.',
+            'Necessites xifrar fitxers de configuració sencers en formats com YAML o JSON, no només variables.',
+            'Ja treballes amb claus age o PGP, o amb un servei de claus com AWS KMS o Azure Key Vault, i no vols cap magatzem de secrets.',
+          ],
+        },
+        {
+          title: 'dotenvx',
+          desc: "dotenvx xifra els valors dels fitxers .env perquè el fitxer xifrat es pugui versionar a Git. Una clau privada, guardada a .env.keys o a la variable d'entorn DOTENV_PRIVATE_KEY, els desxifra quan dotenvx run arrenca la teva comanda. El seu README no llista AWS SSM ni Azure Key Vault com a fonts.",
+          chooseTitle: "Tria dotenvx en comptes d'Envilder quan:",
+          choose: [
+            "Vols que els secrets viatgin amb el codi a Git i els desbloquegi una sola clau privada en temps d'execució.",
+            "No tens, o no vols fer servir, un compte d'AWS o Azure per als secrets.",
+            'Vols mantenir un flux de treball amb .env que funcioni amb qualsevol llenguatge.',
+          ],
+        },
+      ],
+      notTitle: 'Quan no triar Envilder',
+      notDesc:
+        "Envilder encaixa quan AWS SSM Parameter Store o Azure Key Vault ja guarden els teus secrets i vols un únic mapa revisable per damunt. No és l'eina adequada quan:",
+      notItems: [
+        "Necessites un tauler on la gent que no fa servir un terminal gestioni els secrets. Envilder no té interfície: els valors es canvien a la consola d'AWS o Azure, o amb envilder --push.",
+        'Necessites rotació de secrets o secrets dinàmics. Envilder llegeix i escriu valors; no els rota.',
+        "Necessites una caixa forta allotjada, o no tens compte d'AWS ni d'Azure. Envilder només llegeix caixes fortes que ja tens.",
+        'Vols secrets versionats a Git en forma xifrada. Envilder només versiona noms i rutes, així que SOPS o dotenvx hi encaixen millor.',
+        'Necessites un controlador que sincronitzi secrets a objectes Secret natius de Kubernetes. Envilder resol els valors en un job o un procés i no inclou cap operador.',
+        "Necessites un backend diferent d'AWS SSM Parameter Store o Azure Key Vault. AWS Secrets Manager i Google Cloud Secret Manager no estan disponibles.",
+        "Necessites fluxos d'aprovació, historial de canvis o registres d'auditoria dins de l'eina. Envilder no n'afegeix cap: fes servir el que ofereixen AWS o Azure.",
+      ],
+      modesTitle: "Tria el mode: on s'han de resoldre els secrets?",
+      modesDesc:
+        "El mateix envilder.json funciona en tots els modes, així que l'elecció depèn d'on calen els valors, no del fitxer de mapatge.",
+      thScenario: 'Escenari',
+      thUse: 'Usa',
+      thWhy: 'Per què',
+      modeRows: [
+        {
+          scenario: 'Desenvolupament local',
+          use: 'envilder exec',
+          why: "Arrenca la teva comanda amb els valors a l'entorn i no escriu cap fitxer .env. Baixa els valors a un fitxer .env només quan una eina el necessiti.",
+        },
+        {
+          scenario: 'CI/CD a GitHub',
+          use: 'La GitHub Action',
+          why: "Després d'un pas d'inici de sessió OIDC separat (configure-aws-credentials o azure/login), exporta els valors, amb emmascarament als logs, als passos següents del job.",
+        },
+        {
+          scenario:
+            'AWS Lambda, Azure Functions, Container Apps, ECS/Fargate i App Service',
+          use: 'Els SDK per a .NET, Python i Node.js',
+          why: "Resolen els valors dins de l'aplicació en arrencar, amb la identitat que li dona la plataforma, com un rol IAM o una identitat gestionada. Sense fitxer ni procés addicional.",
+        },
+      ],
+      modesNote:
+        'Els equips que despleguen a funcions serverless o contenidors gestionats sense equip de plataforma poden fer servir els SDK tal com són: no cal instal·lar res al host.',
+      commentLocal:
+        "# Desenvolupament local: valors només a l'entorn de la comanda",
+      commentFile: '# Quan una eina necessita un fitxer .env',
+      sourcesTitle: 'Fonts',
+      sourcesDesc:
+        "Les afirmacions sobre altres eines surten de la seva documentació oficial, llegida el novembre de 2026. Els productes canvien, així que consulta les seves pàgines per veure'n l'estat actual.",
+      sources: [
+        {
+          label: 'Doppler: guia de la CLI',
+          href: 'https://docs.doppler.com/docs/cli',
+        },
+        {
+          label: 'Doppler: AWS Parameter Store',
+          href: 'https://docs.doppler.com/docs/aws-parameter-store',
+        },
+        {
+          label: 'Doppler: Azure Key Vault',
+          href: 'https://docs.doppler.com/docs/azure-key-vault',
+        },
+        {
+          label: 'Doppler: índex de la documentació',
+          href: 'https://docs.doppler.com/llms.txt',
+        },
+        {
+          label: 'Infisical: README',
+          href: 'https://github.com/Infisical/infisical#readme',
+        },
+        {
+          label: 'Infisical: sincronització amb AWS Parameter Store',
+          href: 'https://infisical.com/docs/integrations/secret-syncs/aws-parameter-store',
+        },
+        {
+          label: 'Infisical: sincronització amb Azure Key Vault',
+          href: 'https://infisical.com/docs/integrations/secret-syncs/azure-key-vault',
+        },
+        {
+          label: 'chamber: README',
+          href: 'https://github.com/segmentio/chamber#readme',
+        },
+        {
+          label: 'SOPS: documentació',
+          href: 'https://getsops.io/docs/',
+        },
+        {
+          label: 'dotenvx: README',
+          href: 'https://github.com/dotenvx/dotenvx#readme',
+        },
+      ],
+      relatedTitle: 'Relacionat',
+      related: [
+        {
+          path: '/docs/getting-started/',
+          label: 'Comença amb Envilder',
+        },
+        {
+          path: '/docs/guides/ssm-to-env/',
+          label: "Carrega paràmetres d'AWS SSM en un fitxer .env",
+        },
+        {
+          path: '/docs/guides/azure-key-vault-to-env/',
+          label: "Sincronitza secrets d'Azure Key Vault en un fitxer .env",
+        },
+        {
+          path: '/docs/guides/github-actions-ssm/',
+          label: "Carrega paràmetres d'AWS SSM a GitHub Actions",
+        },
+        {
+          path: '/docs/cli/exec/',
+          label: 'Referència de envilder exec',
+        },
+        {
+          path: '/docs/github-action/',
+          label: 'Referència de la GitHub Action',
+        },
+        {
+          path: '/docs/sdks/dotnet/',
+          label: 'SDK de .NET',
+        },
+        {
+          path: '/docs/sdks/python/',
+          label: 'SDK de Python',
+        },
+        {
+          path: '/docs/sdks/nodejs/',
+          label: 'SDK de Node.js',
+        },
+      ],
+    },
     guideGithubActionsSsm: {
       flowTitle: 'Com funciona',
       flowItems: [
@@ -1518,6 +1762,20 @@ export const ca: Translations = {
         cardTitle: 'Comença amb Envilder',
         cardSummary:
           'Instal·la la CLI, mapeja un secret i executa la teva app amb envilder exec, per a AWS SSM o Azure Key Vault.',
+      },
+      alternatives: {
+        title: 'Envilder vs Doppler, Infisical, chamber, SOPS i dotenvx',
+        description:
+          "Compara Envilder amb Doppler, Infisical, chamber, SOPS i dotenvx: on viuen els valors dels secrets, el suport d'AWS SSM i Azure Key Vault, i quan encaixa cada eina.",
+        heading:
+          'Envilder comparat amb Doppler, Infisical, chamber, SOPS i dotenvx',
+        intro:
+          "Hi ha una alternativa de codi obert a Doppler o Infisical que usi AWS SSM o Azure Key Vault directament? Envilder és una CLI, una GitHub Action i uns SDK amb llicència MIT que llegeixen els secrets directament d'AWS SSM Parameter Store o d'Azure Key Vault, amb un fitxer de mapatge a Git que guarda noms i rutes, no valors. No és una caixa forta: Doppler i Infisical guarden ells mateixos els secrets i hi afegeixen un tauler, rotació i sincronitzacions, mentre que Envilder mapeja i resol els secrets que ja tens a la caixa forta que fas servir. Aquesta pàgina el compara amb ells i amb chamber, SOPS i dotenvx, i diu quan no triar Envilder.",
+        breadcrumb: 'Alternatives',
+        navLabel: 'Alternatives',
+        cardTitle: 'Envilder i les seves alternatives',
+        cardSummary:
+          'Una comparació honesta amb Doppler, Infisical, chamber, SOPS i dotenvx, i quan no triar Envilder.',
       },
       'guide-ssm-to-env': {
         title: "Carrega paràmetres d'AWS SSM Parameter Store en un fitxer .env",

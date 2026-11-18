@@ -584,6 +584,50 @@ export interface GuideAzureKeyVaultToEnvTranslations {
   relatedMap: string;
 }
 
+export interface AlternativesTranslations {
+  whatTitle: string;
+  whatItems: string[];
+  tableTitle: string;
+  tableDesc: string;
+  thTool: string;
+  thKind: string;
+  thValues: string;
+  thSsm: string;
+  thKeyVault: string;
+  rows: {
+    tool: string;
+    kind: string;
+    values: string;
+    ssm: string;
+    keyVault: string;
+  }[];
+  tableNote: string;
+  toolsTitle: string;
+  tools: {
+    title: string;
+    desc: string;
+    chooseTitle: string;
+    choose: string[];
+  }[];
+  notTitle: string;
+  notDesc: string;
+  notItems: string[];
+  modesTitle: string;
+  modesDesc: string;
+  thScenario: string;
+  thUse: string;
+  thWhy: string;
+  modeRows: { scenario: string; use: string; why: string }[];
+  modesNote: string;
+  commentLocal: string;
+  commentFile: string;
+  sourcesTitle: string;
+  sourcesDesc: string;
+  sources: { label: string; href: string }[];
+  relatedTitle: string;
+  related: { path: string; label: string }[];
+}
+
 export interface GuideGithubActionsSsmTranslations {
   flowTitle: string;
   prereqTitle: string;
@@ -912,6 +956,7 @@ export interface DocsTranslations {
   pullReference: PullReferenceTranslations;
   guideSsmToEnv: GuideSsmToEnvTranslations;
   guideAzureKeyVaultToEnv: GuideAzureKeyVaultToEnvTranslations;
+  alternatives: AlternativesTranslations;
   guideGithubActionsSsm: GuideGithubActionsSsmTranslations;
   pushReference: PushReferenceTranslations;
   execReference: ExecReferenceTranslations;
@@ -925,6 +970,7 @@ export interface DocsTranslations {
   pages: Record<
     | 'hub'
     | 'getting-started'
+    | 'alternatives'
     | 'guide-ssm-to-env'
     | 'guide-azure-key-vault-to-env'
     | 'guide-github-actions-ssm'

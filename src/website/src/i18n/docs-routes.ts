@@ -1,6 +1,7 @@
 export const docsRouteKeys = [
   'hub',
   'getting-started',
+  'alternatives',
   'guide-ssm-to-env',
   'guide-azure-key-vault-to-env',
   'guide-github-actions-ssm',
@@ -46,6 +47,12 @@ export const docsRouteManifest = [
     path: '/docs/getting-started/',
     navGroup: 'gettingStarted',
     legacyHashes: ['overview', 'requirements', 'installation'],
+  },
+  {
+    key: 'alternatives',
+    path: '/docs/alternatives/',
+    navGroup: 'gettingStarted',
+    legacyHashes: [],
   },
   {
     key: 'guide-ssm-to-env',
