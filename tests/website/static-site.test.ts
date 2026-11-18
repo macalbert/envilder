@@ -292,6 +292,41 @@ describe('Static website SEO', () => {
     expect(llms).toContain(`(${siteUrl}/docs/guides/ssm-to-env/)`);
     expect(llms).toContain(`(${siteUrl}/docs/guides/azure-key-vault-to-env/)`);
     expect(llms).toContain(`(${siteUrl}/docs/guides/github-actions-ssm/)`);
+    expect(llms).toContain(
+      `(${siteUrl}/docs/guides/localstack-integration-tests/)`,
+    );
+  });
+
+  it('Should_AnswerTheQuestionFirst_When_LocalStackIntegrationTestsGuideIsBuilt', () => {
+    // Arrange
+    const html = readDistFile(
+      'docs/guides/localstack-integration-tests/index.html',
+    );
+
+    // Act
+    const firstParagraph = html.match(
+      /<p class="docs-intro"[^>]*>([\s\S]*?)<\/p>/,
+    );
+
+    // Assert
+    expect(firstParagraph?.[1]).toContain('Envilder');
+    expect(firstParagraph?.[1]).toContain('LocalStack');
+    expect(firstParagraph?.[1]).toContain('.env');
+  });
+
+  it('Should_LocalizeWorkflowComments_When_CatalanLocalStackIntegrationTestsGuideIsBuilt', () => {
+    // Arrange
+    const html = readDistFile(
+      'ca/docs/guides/localstack-integration-tests/index.html',
+    );
+
+    // Act
+    const hasCatalanComment = html.includes('Espera que LocalStack respongui');
+    const hasEnglishComment = html.includes('Wait until LocalStack answers');
+
+    // Assert
+    expect(hasCatalanComment).toBe(true);
+    expect(hasEnglishComment).toBe(false);
   });
 
   it('Should_AnswerTheQuestionFirst_When_GitHubActionsSsmGuideIsBuilt', () => {

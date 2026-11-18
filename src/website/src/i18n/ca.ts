@@ -1073,6 +1073,124 @@ export const ca: Translations = {
       relatedExec: 'Referència de envilder exec',
       relatedMap: 'Referència del fitxer de mapa',
     },
+    guideLocalstackIntegrationTests: {
+      flowTitle: 'Com funciona',
+      flowItems: [
+        "LocalStack executa un emulador d'AWS Systems Manager Parameter Store (SSM) en un contenidor Docker, amb la passarel·la al port 4566.",
+        "Envilder llegeix un fitxer de mapa i crida ssm:GetParameter, amb desxifrat, un cop per variable. L'SDK d'AWS dins d'Envilder envia aquestes crides a LocalStack perquè AWS_ENDPOINT_URL hi apunta.",
+        "Envilder inicia l'ordre dels tests amb els valors a l'entorn. Si falta un paràmetre, és buit o no es pot llegir, l'ordre no s'inicia i Envilder surt amb 125.",
+        'En aquest mode Envilder no llegeix ni escriu cap fitxer .env.',
+      ],
+      prereqTitle: 'Requisits previs',
+      prereqItems: [
+        'Docker, per executar LocalStack.',
+        "Node.js 22.12 o superior, perquè la CLI d'Envilder és un paquet de Node.js. Val també per a projectes .NET i Python: només l'ordre dels tests és teva. Instal·la la CLI amb npm install -g envilder, o posa npx davant de les ordres envilder d'aquesta guia.",
+        "Una ordre de tests que llegeixi la configuració de variables d'entorn, com npm test, dotnet test o pytest.",
+      ],
+      startTitle: 'Inicia LocalStack',
+      startDesc:
+        "Inicia el contenidor i publica el port de la passarel·la. El token d'autenticació passa des del teu shell sense escriure'l a l'ordre:",
+      startComposeDesc: 'El mateix amb Docker Compose:',
+      startTokenNote:
+        "Les imatges recents de LocalStack no arrenquen sense un token d'autenticació. Quan es va escriure aquesta guia, localstack/localstack i localstack/localstack:stable (versió 2026.10.7) sortien en arrencar amb License activation failed. LocalStack va anunciar el canvi amb la versió 2026.03.0, i les execucions de CI necessiten un token d'autenticació de CI. Consulta la pàgina de preus de LocalStack per veure quin pla s'adapta al teu ús.",
+      startOldNote:
+        "Les versions publicades abans d'aquest canvi encara arrenquen sense token. La sortida d'aquesta pàgina s'ha obtingut amb localstack/localstack:4.14.0, iniciada amb docker run i sense token. És anterior al canvi, així que considera-la una solució provisional i no una opció per defecte.",
+      startHealthNote:
+        'LocalStack respon a http://127.0.0.1:4566/_localstack/health quan està a punt.',
+      pointTitle: 'Apunta Envilder a LocalStack',
+      pointDesc:
+        "Envilder no té cap opció per a LocalStack, i el fitxer de mapa no té cap camp d'endpoint: $config només accepta provider, vaultUrl i profile. Envilder no passa cap endpoint al seu client d'AWS, així que l'SDK d'AWS per a JavaScript que usa la CLI aplica la seva pròpia resolució, i aquesta llegeix AWS_ENDPOINT_URL de l'entorn. Defineix quatre variables al shell que executa Envilder:",
+      pointItems: [
+        'AWS_ENDPOINT_URL: la passarel·la de LocalStack, http://127.0.0.1:4566.',
+        'AWS_REGION: qualsevol regió. Cal sembrar i llegir amb la mateixa, perquè els paràmetres es desen per regió. Envilder llegeix primer AWS_REGION, després AWS_DEFAULT_REGION, i acaba a us-east-1 si no troba cap.',
+        "AWS_ACCESS_KEY_ID i AWS_SECRET_ACCESS_KEY: valors fictis com test. LocalStack accepta qualsevol credencial, però l'SDK en necessita alguna.",
+      ],
+      pointBashDesc: 'A bash o zsh:',
+      pointPowershellDesc: 'A PowerShell:',
+      pointRealAwsWarn:
+        "Defineix les quatre al mateix shell. Sense AWS_ENDPOINT_URL, Envilder crida l'AWS real amb les credencials fictícies i falla amb The security token included in the request is invalid. Mantén igualment les credencials fictícies: així una errada a l'endpoint mai no pot arribar a un compte real.",
+      pointGitBashNote:
+        'A Git Bash a Windows, un argument que comença per / com --secret-path=/my-app/test/db-password es reescriu com una ruta de Windows abans que Envilder el vegi, i el fitxer de mapa acaba amb una ruta C:/Program Files/Git/.... Defineix abans MSYS_NO_PATHCONV=1, o usa PowerShell.',
+      seedTitle: 'Sembra els paràmetres de prova',
+      seedDesc:
+        "Escriu els valors que llegirà Envilder. Un push per variable crea el paràmetre a LocalStack i desa la relació al fitxer de mapa, així que no l'has d'escriure a mà. --push s'escriu expressament tot i que un push amb --key, --value i --secret-path no el necessita:",
+      seedOutputDesc:
+        'Cada push imprimeix el valor i la ruta amb asteriscs i només en conserva els tres últims caràcters:',
+      seedMapDesc: 'El fitxer de mapa ara conté les dues relacions:',
+      seedMapNote:
+        "--map=envilder.test.json i --provider=aws s'escriuen expressament. Amb un --map explícit, un push crea aquest fitxer i mai no toca un envilder.json que el teu projecte ja tingui. Fer push d'una variable que ja és al mapa deixa el fitxer tal com està.",
+      seedCommitNote:
+        "El fitxer de mapa conté noms de paràmetres, no valors: fes-ne commit, perquè el teu equip i el CI usin el mateix. Els valors només existeixen dins del contenidor, així que desapareixen quan l'elimines. Torna a sembrar a l'inici de cada execució.",
+      runTitle: 'Executa els tests amb envilder exec',
+      runDesc:
+        "Posa envilder exec davant de l'ordre dels tests, amb el mateix --map i --provider. Tot el que ve després de -- és la teva ordre:",
+      runCheckDesc:
+        "Per veure què rep una ordre, executa'n una que imprimeixi quines variables estan definides, mai els valors:",
+      runCheckOutputDesc:
+        'La primera línia és Envilder a stderr, la resta és la teva ordre. Executa el mateix script sense Envilder i les dues variables surten com a absents: el shell mai no les ha tingut.',
+      runInheritNote:
+        "La teva ordre hereta tot l'entorn del shell, incloent AWS_ENDPOINT_URL i les credencials fictícies. Un test que crea el seu propi client d'AWS al mateix procés també parla amb LocalStack, sempre que el seu SDK llegeixi AWS_ENDPOINT_URL. Els tests d'acceptació dels SDK de .NET i Python d'aquest repositori usen la mateixa variable.",
+      runProviderNote:
+        '--provider=aws té prioritat sobre $config.provider i --map tria el fitxer, així que un envilder.json oblidat a la carpeta, o un fitxer de mapa que anomeni Azure, no poden canviar què llegeix aquesta ordre.',
+      runExitDesc:
+        "Envilder surt amb el codi de sortida de la teva ordre, així que un test que falla fa fallar el pas o l'script que l'ha cridat. El codi 125 és d'Envilder mateix: no ha pogut iniciar la teva ordre.",
+      runMissingTitle: 'Un secret que falta atura l’execució',
+      runMissingDesc:
+        "El mode exec falla en tancat. Si el fitxer de mapa llista un paràmetre que mai no s'ha sembrat, aquí STRIPE_KEY, l'ordre no s'inicia:",
+      runMissingOutputDesc:
+        "El codi de sortida és 125. Els teus tests mai no s'executen amb un entorn a mig configurar, que és l'error que altrament apareix com una referència nul·la o una clau absent confusa dins d'un test.",
+      runDiskNote:
+        "En mode exec Envilder no llegeix ni escriu cap fitxer .env: els valors es resolen un cop, a memòria, i es lliuren a la teva ordre a través de l'entorn. Això només cobreix Envilder. Els teus tests, o una eina que iniciïn, poden escriure els valors allà on vulguin.",
+      ciTitle: 'Executa-ho a GitHub Actions',
+      ciDesc:
+        "Un contenidor de servei inicia LocalStack al costat del job. Les variables es defineixen a nivell de job, així que tots els passos, tests inclosos, les veuen. Les credencials d'AWS són valors fictis: no hi intervé cap rol OIDC, perquè res no arriba a un compte real:",
+      commentWait: 'Espera que LocalStack respongui',
+      commentSeed: 'Sembra els paràmetres de prova',
+      commentRun: "Executa els tests amb els secrets a l'entorn",
+      ciNotes: [
+        "El servei llegeix LOCALSTACK_AUTH_TOKEN d'un secret del repositori. Usa un token d'autenticació de CI, i fixa l'etiqueta de la imatge al teu workflow perquè una nova versió de LocalStack no pugui canviar el teu pipeline.",
+        "Aquest workflow s'ha escrit a partir de la documentació de GitHub Actions i de LocalStack i de les ordres anteriors. A diferència del flux local, no s'ha executat en un runner allotjat mentre s'escrivia aquesta guia.",
+        'npx envilder baixa l’última CLI publicada tret que n’ancoris una amb npx envilder@<version>.',
+      ],
+      ciMore:
+        'Per a tests que llegeixin paràmetres SSM reals en un pipeline, amb OIDC en lloc de credencials fictícies, consulta la',
+      ciMoreLink: 'guia de GitHub Actions',
+      altTitle: "L'alternativa al mateix procés: Testcontainers i els SDK",
+      altDesc:
+        "Si el teu codi crida l'SDK d'Envilder en lloc de llegir variables d'entorn, inicia LocalStack des dels mateixos tests. El repositori macalbert/envilder-examples té un exemple per a cada runtime, cadascun amb tests d'AWS SSM contra LocalStack i d'Azure Key Vault contra LocalStack for Azure:",
+      altDotnet: '.NET: xUnit v3 i Testcontainers',
+      altPython: 'Python: pytest, Testcontainers i uv',
+      altTypescript: 'TypeScript: Vitest i Testcontainers',
+      altPoints: [
+        "Testcontainers inicia i atura els emuladors des de l'execució dels tests, així que no hi ha cap pas docker run ni cap ordre de sembra.",
+        "Els tests construeixen ells mateixos el client del núvol, apuntat a l'emulador, i el lliuren al client d'Envilder. Tot el que ve després d'aquesta línia és el codi que executa la teva aplicació.",
+        "Els exemples obtenen el token d'autenticació de LocalStack amb Envilder del teu propi compte d'AWS i el passen als contenidors, així que cap token no queda en un fitxer .env ni al pipeline.",
+      ],
+      altChoose:
+        "Usa envilder exec quan la teva aplicació llegeix variables d'entorn i no vols cap canvi al codi dels tests. Usa l'SDK i Testcontainers quan l'aplicació mateixa resol un fitxer de mapa i vols que els tests siguin propietaris del cicle de vida de l'emulador.",
+      errorsTitle: 'Errors habituals',
+      thMessage: 'Missatge',
+      thFix: 'Solució',
+      errTokenFix:
+        "La petició ha arribat a l'AWS real. AWS_ENDPOINT_URL no està definida al shell que executa Envilder, o està definida en un altre terminal.",
+      errRefusedFix:
+        "Res no escolta en aquesta adreça. LocalStack no s'executa, encara està arrencant o publica un altre port. Revisa docker ps i la URL d'estat.",
+      errCredsFix:
+        'Cap credencial no ha arribat a Envilder. Defineix AWS_ACCESS_KEY_ID i AWS_SECRET_ACCESS_KEY, encara que siguin valors fictis.',
+      errNotFoundFix:
+        "El paràmetre no s'ha sembrat en aquest LocalStack, o s'ha sembrat en una altra regió. Torna a sembrar-lo i compara la ruta i AWS_REGION amb el push.",
+      errorsMore: 'La llista completa de codis de sortida i missatges és a la',
+      errorsMoreLink: 'referència de envilder exec',
+      relatedTitle: 'Pàgines relacionades',
+      relatedExec:
+        'Referència de envilder exec: opcions, codis de sortida i entorn',
+      relatedGha:
+        'Guia de GitHub Actions: OIDC i paràmetres SSM reals en un workflow',
+      relatedSsm: 'Guia SSM a .env: crea els paràmetres i el fitxer de mapa',
+      relatedPush: 'Referència de envilder push: push d’un sol secret',
+      relatedAws: 'Configuració del proveïdor AWS SSM',
+      relatedMap: 'Referència del fitxer de mapa',
+    },
     pushReference: {
       tabAws: 'AWS SSM',
       tabAzure: 'Azure Key Vault',
@@ -1561,6 +1679,20 @@ export const ca: Translations = {
         cardTitle: 'Carrega paràmetres SSM a GitHub Actions',
         cardSummary:
           "Inicia sessió a AWS amb OIDC i exporta paràmetres SSM com a variables d'entorn als passos d'un job d'un workflow.",
+      },
+      'guide-localstack-integration-tests': {
+        title: 'Executa tests d’integració contra LocalStack sense fitxer .env',
+        description:
+          "Carrega paràmetres d'AWS SSM en tests d'integració sense fitxer .env: inicia LocalStack, sembra els paràmetres amb Envilder i executa npm test, dotnet test o pytest amb envilder exec, també al CI.",
+        heading:
+          'Executa tests d’integració contra LocalStack sense fitxer .env',
+        intro:
+          "Com puc carregar secrets d'AWS Parameter Store en tests d'integració sense fitxer .env? Executa l'ordre dels tests amb envilder exec contra LocalStack. Inicia LocalStack, sembra els paràmetres amb envilder --push, apunta-hi l'SDK d'AWS amb AWS_ENDPOINT_URL i credencials fictícies, i executa envilder exec -- seguit de npm test, dotnet test o pytest. Envilder llegeix cada paràmetre llistat en un fitxer de mapa del Parameter Store emulat per LocalStack i inicia els teus tests amb aquests valors com a variables d'entorn. No escriu cap fitxer .env, i si falta un paràmetre surt amb 125 sense executar ni un sol test.",
+        breadcrumb: 'Tests amb LocalStack',
+        navLabel: 'Tests amb LocalStack',
+        cardTitle: 'Prova contra LocalStack sense .env',
+        cardSummary:
+          "Sembra paràmetres SSM a LocalStack i executa els tests d'integració amb envilder exec, en local i a GitHub Actions.",
       },
       'aws-ssm': {
         title: 'Utilitza Envilder amb AWS SSM Parameter Store',

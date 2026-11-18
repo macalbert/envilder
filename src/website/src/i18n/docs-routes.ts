@@ -4,6 +4,7 @@ export const docsRouteKeys = [
   'guide-ssm-to-env',
   'guide-azure-key-vault-to-env',
   'guide-github-actions-ssm',
+  'guide-localstack-integration-tests',
   'aws-ssm',
   'azure-key-vault',
   'custom-provider',
@@ -62,6 +63,12 @@ export const docsRouteManifest = [
   {
     key: 'guide-github-actions-ssm',
     path: '/docs/guides/github-actions-ssm/',
+    navGroup: 'guides',
+    legacyHashes: [],
+  },
+  {
+    key: 'guide-localstack-integration-tests',
+    path: '/docs/guides/localstack-integration-tests/',
     navGroup: 'guides',
     legacyHashes: [],
   },
