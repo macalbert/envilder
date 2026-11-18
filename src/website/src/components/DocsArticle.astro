@@ -318,6 +318,14 @@ const azGuideErrors = [
 
 const ga = t.docs.guideGithubActionsSsm;
 
+const alt = t.docs.alternatives;
+
+const altModesCode = `${alt.commentLocal}
+envilder exec --map=envilder.json -- npm start
+
+${alt.commentFile}
+envilder --map=envilder.json --envfile=.env`;
+
 const gaMap = `{
   "DB_PASSWORD": "/my-app/prod/db-password",
   "API_TOKEN": "/my-app/prod/api-token"
@@ -1667,6 +1675,121 @@ const validateSdkRows = [
           <li><a href={localizedPath(lang, '/docs/cli/push/')}>{az.relatedPush}</a></li>
           <li><a href={localizedPath(lang, '/docs/cli/exec/')}>{az.relatedExec}</a></li>
           <li><a href={localizedPath(lang, '/docs/map-file/')}>{az.relatedMap}</a></li>
+        </ul>
+      </section>
+    </>
+  )}
+
+  {routeKey === 'alternatives' && (
+    <>
+      {/*
+        Statements about other tools come from their official documentation,
+        read in November 2026 (the same URLs are listed on the page):
+        - Doppler: https://docs.doppler.com/docs/cli
+          https://docs.doppler.com/docs/aws-parameter-store
+          https://docs.doppler.com/docs/azure-key-vault
+          https://docs.doppler.com/llms.txt (rotation, change requests, SSO)
+        - Infisical: https://github.com/Infisical/infisical#readme
+          https://infisical.com/docs/integrations/secret-syncs/aws-parameter-store
+          https://infisical.com/docs/integrations/secret-syncs/azure-key-vault
+        - chamber: https://github.com/segmentio/chamber#readme
+        - SOPS: https://getsops.io/docs/
+        - dotenvx: https://github.com/dotenvx/dotenvx#readme
+      */}
+      <section id="what-envilder-is" class="docs-section">
+        <h2>{alt.whatTitle}</h2>
+        <ul class="docs-list">
+          {alt.whatItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+
+      <section id="comparison" class="docs-section">
+        <h2>{alt.tableTitle}</h2>
+        <p>{alt.tableDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr>
+              <th>{alt.thTool}</th>
+              <th>{alt.thKind}</th>
+              <th>{alt.thValues}</th>
+              <th>{alt.thSsm}</th>
+              <th>{alt.thKeyVault}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {alt.rows.map((row) => (
+              <tr>
+                <td><strong>{row.tool}</strong></td>
+                <td>{row.kind}</td>
+                <td>{row.values}</td>
+                <td>{row.ssm}</td>
+                <td>{row.keyVault}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="note">{alt.tableNote}</p>
+      </section>
+
+      <section id="when-to-choose-another-tool" class="docs-section">
+        <h2>{alt.toolsTitle}</h2>
+        {alt.tools.map((tool) => (
+          <>
+            <h3>{tool.title}</h3>
+            <p>{tool.desc}</p>
+            <p><strong>{tool.chooseTitle}</strong></p>
+            <ul class="docs-list">
+              {tool.choose.map((item) => <li>{item}</li>)}
+            </ul>
+          </>
+        ))}
+      </section>
+
+      <section id="when-not-to-choose-envilder" class="docs-section">
+        <h2>{alt.notTitle}</h2>
+        <p>{alt.notDesc}</p>
+        <ul class="docs-list">
+          {alt.notItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+
+      <section id="choose-the-mode" class="docs-section">
+        <h2>{alt.modesTitle}</h2>
+        <p>{alt.modesDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{alt.thScenario}</th><th>{alt.thUse}</th><th>{alt.thWhy}</th></tr>
+          </thead>
+          <tbody>
+            {alt.modeRows.map((row) => (
+              <tr>
+                <td>{row.scenario}</td>
+                <td>{row.use}</td>
+                <td>{row.why}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <CodeBlock lang="bash" code={altModesCode} />
+        <p class="note">{alt.modesNote}</p>
+      </section>
+
+      <section id="sources" class="docs-section">
+        <h2>{alt.sourcesTitle}</h2>
+        <p>{alt.sourcesDesc}</p>
+        <ul class="docs-list">
+          {alt.sources.map((source) => (
+            <li><a href={source.href} rel="noopener">{source.label}</a></li>
+          ))}
+        </ul>
+      </section>
+
+      <section id="related" class="docs-section">
+        <h2>{alt.relatedTitle}</h2>
+        <ul class="docs-list">
+          {alt.related.map((link) => (
+            <li><a href={localizedPath(lang, link.path)}>{link.label}</a></li>
+          ))}
         </ul>
       </section>
     </>

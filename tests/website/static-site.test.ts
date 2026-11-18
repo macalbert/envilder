@@ -292,6 +292,69 @@ describe('Static website SEO', () => {
     expect(llms).toContain(`(${siteUrl}/docs/guides/ssm-to-env/)`);
     expect(llms).toContain(`(${siteUrl}/docs/guides/azure-key-vault-to-env/)`);
     expect(llms).toContain(`(${siteUrl}/docs/guides/github-actions-ssm/)`);
+    expect(llms).toContain(`(${siteUrl}/docs/alternatives/)`);
+  });
+
+  it('Should_AnswerTheQuestionFirst_When_AlternativesPageIsBuilt', () => {
+    // Arrange
+    const html = readDistFile('docs/alternatives/index.html');
+
+    // Act
+    const firstParagraph = html.match(
+      /<p class="docs-intro"[^>]*>([\s\S]*?)<\/p>/,
+    );
+
+    // Assert
+    expect(firstParagraph?.[1]).toContain('Envilder');
+    expect(firstParagraph?.[1]).toContain('Doppler');
+    expect(firstParagraph?.[1]).toContain('AWS SSM');
+  });
+
+  it('Should_NameEveryComparedTool_When_AlternativesPageIsBuilt', () => {
+    // Arrange
+    const html = readDistFile('docs/alternatives/index.html');
+    const expected = ['Doppler', 'Infisical', 'chamber', 'SOPS', 'dotenvx'];
+
+    // Act
+    const missing = expected.filter((tool) => !html.includes(tool));
+
+    // Assert
+    expect(missing).toEqual([]);
+  });
+
+  it('Should_NotPublishUnreleasedComparisons_When_AlternativesPageIsBuilt', () => {
+    // Arrange
+    const html = readDistFile('docs/alternatives/index.html');
+
+    // Act
+    const mentionsUnreleased = /helmfile|\bvals\b/i.test(html);
+
+    // Assert
+    expect(mentionsUnreleased).toBe(false);
+  });
+
+  it('Should_NotEmitFaqMarkup_When_AlternativesPageIsBuilt', () => {
+    // Arrange
+    const html = readDistFile('docs/alternatives/index.html');
+
+    // Act
+    const hasFaqMarkup = html.includes('"FAQPage"');
+
+    // Assert
+    expect(hasFaqMarkup).toBe(false);
+  });
+
+  it('Should_LocalizeCodeComments_When_CatalanAlternativesPageIsBuilt', () => {
+    // Arrange
+    const html = readDistFile('ca/docs/alternatives/index.html');
+
+    // Act
+    const hasCatalanComment = html.includes('# Desenvolupament local');
+    const hasEnglishComment = html.includes('# Local development');
+
+    // Assert
+    expect(hasCatalanComment).toBe(true);
+    expect(hasEnglishComment).toBe(false);
   });
 
   it('Should_AnswerTheQuestionFirst_When_GitHubActionsSsmGuideIsBuilt', () => {
