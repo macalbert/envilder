@@ -613,10 +613,9 @@ describe('Static website discoverability metadata', () => {
     expect(heading).toContain('Azure Key Vault');
   });
 
-  it('Should_ListRegistryPagesInSameAs_When_PagesAreBuilt', () => {
+  it('Should_ListRegistryPagesOnSoftwareNode_When_HomePageIsBuilt', () => {
     // Arrange
     const expected = [
-      'https://github.com/macalbert/envilder',
       'https://www.npmjs.com/package/envilder',
       'https://www.npmjs.com/package/@envilder/sdk',
       'https://pypi.org/project/envilder/',
@@ -625,11 +624,21 @@ describe('Static website discoverability metadata', () => {
     ];
 
     // Act
+    const graph = JSON.parse(readJsonLd(readDistFile('index.html')) ?? '{}')[
+      '@graph'
+    ] as Record<string, unknown>[];
+    const software = graph.find(
+      (node) => node['@type'] === 'SoftwareApplication',
+    );
     const organization = readOrganization('index.html');
 
     // Assert
-    expect(organization?.sameAs).toEqual(expected);
-    expect(String(organization?.description).length).toBeGreaterThan(20);
+    expect(software?.sameAs).toEqual(expected);
+    expect(organization?.sameAs).toEqual([
+      'https://github.com/macalbert/envilder',
+    ]);
+    expect(typeof organization?.description).toBe('string');
+    expect(String(organization?.description).trim().length).toBeGreaterThan(20);
   });
 
   it('Should_EmitLastmodFromManifest_When_EnglishDocsArticleIsInSitemap', () => {
@@ -659,18 +668,28 @@ describe('Static website discoverability metadata', () => {
     expect(actual).toEqual(expected);
   });
 
-  it('Should_OmitLastmod_When_UrlIsNotAnEnglishDocsArticle', () => {
+  it('Should_DateOnlyManifestUrls_When_SitemapIsBuilt', () => {
     // Arrange
     const entries = readSitemapEntries();
+    const manifestUrls = Object.keys(
+      JSON.parse(
+        readFileSync(
+          resolve(__dirname, '../../src/website/src/i18n/docs-dates.json'),
+          'utf-8',
+        ),
+      ),
+    )
+      .map((route) => `${siteUrl}${route}`)
+      .sort();
 
     // Act
     const actual = entries
       .filter((entry) => entry.lastmod !== undefined)
-      .filter((entry) => !entry.loc.startsWith(`${siteUrl}/docs/`))
-      .map((entry) => entry.loc);
+      .map((entry) => entry.loc)
+      .sort();
 
     // Assert
-    expect(actual).toEqual([]);
+    expect(actual).toEqual(manifestUrls);
     expect(entries.length).toBeGreaterThan(0);
   });
 
