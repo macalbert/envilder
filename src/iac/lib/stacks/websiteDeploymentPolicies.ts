@@ -160,7 +160,6 @@ export class WebsiteDeploymentPolicies extends Construct {
 					"cloudfront:CreateFunction",
 					"cloudfront:CreateOriginAccessControl",
 					"cloudfront:CreateResponseHeadersPolicy",
-					"cloudfront:TagResource",
 				],
 				resources: [
 					"distribution",

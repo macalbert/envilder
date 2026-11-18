@@ -80,8 +80,9 @@ own, with the `envweb` qualifier. Its CloudFormation execution role gets the
 CloudFront distributions, origin access identities and controls, and response
 headers policies support no tag conditions, so the policy names the deployed
 ones by ID (`websiteDeployment.cloudFront` in `bin/main.ts`). A deploy can
-still create new ones, but if it replaces one, add the new ID and deploy the
-roles stack before the website stacks can change it again. DNS changes are
+still create new ones but cannot tag or change any other: if it replaces one,
+add the new ID and deploy the roles stack before the website stacks can change
+or tag it again. DNS changes are
 limited to the website records (`A` and `AAAA`).
 
 It can only create or change those roles when they carry the

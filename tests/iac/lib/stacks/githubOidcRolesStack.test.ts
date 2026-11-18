@@ -213,9 +213,7 @@ describe("GitHub OIDC roles Stack", () => {
 		// Assert
 		for (const statement of actual) {
 			for (const action of [statement.Action].flat()) {
-				expect(action).toMatch(
-					/^cloudfront:(Create|Get|List|Describe|TagResource)/,
-				);
+				expect(action).toMatch(/^cloudfront:(Create|Get|List|Describe)/);
 			}
 			expect(action(statement)).not.toContain("cloudfront:*");
 		}
