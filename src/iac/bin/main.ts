@@ -6,6 +6,10 @@ import type { Environment, Stack } from "aws-cdk-lib";
  */
 import { App } from "aws-cdk-lib";
 import { AppEnvironment } from "../lib/core/types";
+import {
+	GitHubOidcRolesStack,
+	type TestParameterPaths,
+} from "../lib/stacks/githubOidcRolesStack";
 import { PublicFilesStack } from "../lib/stacks/publicFilesStack";
 import { StaticWebsiteStack } from "../lib/stacks/staticWebsiteStack";
 
@@ -25,6 +29,13 @@ interface PublicFilesConfig {
 	certificateId: string;
 }
 
+interface GitHubOidcRolesConfig {
+	name: string;
+	githubOwner: string;
+	deployEnvironment: string;
+	testParameters: TestParameterPaths;
+}
+
 interface DeploymentConfig {
 	repoName: string;
 	branch: string;
@@ -39,6 +50,7 @@ interface DeploymentConfig {
 			staticWebsites: readonly StaticWebsiteConfig[];
 		};
 		publicFiles?: PublicFilesConfig;
+		githubOidcRoles?: GitHubOidcRolesConfig;
 	};
 	rootPath?: string;
 }
@@ -70,6 +82,19 @@ const config: DeploymentConfig = {
 			subdomain: "files",
 			// *.envilder.com
 			certificateId: "b5de0685-2e52-4ceb-9cb2-d66b164a791e",
+		},
+		githubOidcRoles: {
+			name: "GitHubOidcRoles",
+			githubOwner: "macalbert",
+			deployEnvironment: "production",
+			testParameters: {
+				// e2e/cli.test.ts writes, reads and deletes /Test/<runId>/*;
+				// the GitHub Action test reads /Test/Token.
+				readWrite: ["/Test/*"],
+				// The SDK test fixtures resolve the LocalStack token from the
+				// root envilder.json.
+				readOnly: ["/envilder/development/localstack/authToken"],
+			},
 		},
 	},
 };
@@ -283,6 +308,23 @@ export function deploy(configOverride?: DeploymentConfig): Stack[] {
 					envName: effectiveConfig.environment,
 					githubRepo: effectiveConfig.repoName,
 					stackName: `${effectiveConfig.repoName}-${publicFiles.name}`,
+				}),
+			);
+		}
+
+		const { githubOidcRoles } = effectiveConfig.stacks;
+		if (githubOidcRoles) {
+			stacks.push(
+				new GitHubOidcRolesStack(app, {
+					env: envFromCli,
+					name: githubOidcRoles.name,
+					githubOwner: githubOidcRoles.githubOwner,
+					githubRepo: effectiveConfig.repoName,
+					mainBranch: effectiveConfig.branch,
+					deployEnvironment: githubOidcRoles.deployEnvironment,
+					testParameters: githubOidcRoles.testParameters,
+					envName: effectiveConfig.environment,
+					stackName: `${effectiveConfig.repoName}-${githubOidcRoles.name}`,
 				}),
 			);
 		}

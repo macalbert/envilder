@@ -1,11 +1,13 @@
 import path from "node:path";
 import { deploy, validateConfig } from "../../../src/iac/bin/main";
 import { AppEnvironment } from "../../../src/iac/lib/core/types";
+import { GitHubOidcRolesStack } from "../../../src/iac/lib/stacks/githubOidcRolesStack";
 import { PublicFilesStack } from "../../../src/iac/lib/stacks/publicFilesStack";
 import { StaticWebsiteStack } from "../../../src/iac/lib/stacks/staticWebsiteStack";
 
 vi.mock("../../../src/iac/lib/stacks/staticWebsiteStack");
 vi.mock("../../../src/iac/lib/stacks/publicFilesStack");
+vi.mock("../../../src/iac/lib/stacks/githubOidcRolesStack");
 
 describe("main", () => {
 	beforeEach(() => {
@@ -103,6 +105,44 @@ describe("main", () => {
 					certificateId: "files-cert",
 					domainName: "example.com",
 					hostedZoneId: "Z123",
+				}),
+			);
+		});
+
+		it("Should_CreateGitHubOidcRolesStack_When_GitHubOidcRolesIsConfigured", () => {
+			// Arrange
+			const config = {
+				...createValidConfig(),
+				stacks: {
+					...createValidConfig().stacks,
+					githubOidcRoles: {
+						name: "GitHubOidcRoles",
+						githubOwner: "owner",
+						deployEnvironment: "production",
+						testParameters: {
+							readWrite: ["/Test/*"],
+							readOnly: ["/fixture/token"],
+						},
+					},
+				},
+			};
+
+			// Act
+			const result = deploy(config);
+
+			// Assert
+			expect(result).toHaveLength(1);
+			expect(GitHubOidcRolesStack).toHaveBeenCalledWith(
+				expect.anything(),
+				expect.objectContaining({
+					githubOwner: "owner",
+					githubRepo: "test-repo",
+					mainBranch: "main",
+					deployEnvironment: "production",
+					testParameters: {
+						readWrite: ["/Test/*"],
+						readOnly: ["/fixture/token"],
+					},
 				}),
 			);
 		});
