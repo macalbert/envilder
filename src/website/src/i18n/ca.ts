@@ -1493,10 +1493,11 @@ export const ca: Translations = {
     intro: 'Tot el que necessites per començar amb Envilder.',
     pages: {
       hub: {
-        title: "Documentació d'Envilder",
+        title: "Envilder docs: secrets d'AWS SSM i Key Vault a .env",
         description:
           "Guies per utilitzar Envilder amb AWS SSM Parameter Store, Azure Key Vault, la CLI, GitHub Action i SDKs de temps d'execució.",
-        heading: "Documentació d'Envilder",
+        heading:
+          "Envilder docs: carrega secrets d'AWS SSM i Azure Key Vault a .env, CI i apps",
         intro:
           "Tria una guia per configurar Envilder, resoldre secrets o carregar-los en temps d'execució.",
         breadcrumb: 'Documentació',
@@ -1522,7 +1523,7 @@ export const ca: Translations = {
       'guide-ssm-to-env': {
         title: "Carrega paràmetres d'AWS SSM Parameter Store en un fitxer .env",
         description:
-          "Exporta paràmetres d'AWS SSM Parameter Store a un fitxer .env amb la CLI d'Envilder: política IAM, mapa envilder.json, diversos entorns, mode exec, CI i errors.",
+          "Utilitza AWS SSM Parameter Store com a cambra forta de secrets i carrega'l en un fitxer .env amb la CLI d'Envilder: política IAM, mapa envilder.json, entorns, mode exec i CI.",
         heading:
           "Carrega paràmetres d'AWS SSM Parameter Store en un fitxer .env",
         intro:
@@ -1565,7 +1566,7 @@ export const ca: Translations = {
       'aws-ssm': {
         title: 'Utilitza Envilder amb AWS SSM Parameter Store',
         description:
-          'Configura les credencials AWS i els permisos IAM per a Envilder amb AWS SSM Parameter Store.',
+          "AWS SSM Parameter Store pot fer de cambra forta de secrets i Envilder hi carrega. Configura les credencials AWS i els permisos IAM per a la CLI, l'Action i els SDKs.",
         heading: 'AWS SSM',
         intro:
           'Configura credencials, permisos IAM i un paràmetre de prova per a AWS SSM Parameter Store.',

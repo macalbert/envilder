@@ -570,3 +570,144 @@ describe('Static website SEO', () => {
     expect(actual).toEqual(expected);
   });
 });
+
+describe('Static website discoverability metadata', () => {
+  const readOrganization = (file: string) => {
+    const graph = JSON.parse(readJsonLd(readDistFile(file)) ?? '{}')[
+      '@graph'
+    ] as Record<string, unknown>[];
+
+    return graph.find((node) => node['@type'] === 'Organization');
+  };
+
+  const readSitemapEntries = () => {
+    const sitemapIndex = readDistFile('sitemap-index.xml');
+    const sitemapFiles = [
+      ...sitemapIndex.matchAll(/<loc>.*?\/([^/]+)<\/loc>/g),
+    ].map((match) => match[1]);
+
+    return sitemapFiles.flatMap((file) =>
+      [...readDistFile(file).matchAll(/<url>([\s\S]*?)<\/url>/g)].map(
+        (match) => ({
+          loc: match[1].match(/<loc>(.*?)<\/loc>/)?.[1] ?? '',
+          lastmod: match[1].match(/<lastmod>(.*?)<\/lastmod>/)?.[1],
+        }),
+      ),
+    );
+  };
+
+  it('Should_UseDescriptiveFrontLoadedTitle_When_DocsHubIsBuilt', () => {
+    // Arrange
+    const html = readDistFile('docs/index.html');
+
+    // Act
+    const title = html.match(/<title>(.*?)<\/title>/)?.[1] ?? '';
+    const heading = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? '';
+
+    // Assert
+    expect(title.startsWith('Envilder docs:')).toBe(true);
+    expect(title.length).toBeLessThanOrEqual(60);
+    expect(title).toContain('SSM');
+    expect(title).toContain('Key Vault');
+    expect(heading).toContain('AWS SSM');
+    expect(heading).toContain('Azure Key Vault');
+  });
+
+  it('Should_ListRegistryPagesOnSoftwareNode_When_HomePageIsBuilt', () => {
+    // Arrange
+    const expected = [
+      'https://www.npmjs.com/package/envilder',
+      'https://www.npmjs.com/package/@envilder/sdk',
+      'https://pypi.org/project/envilder/',
+      'https://www.nuget.org/packages/Envilder',
+      'https://github.com/marketplace/actions/envilder-github-action',
+    ];
+
+    // Act
+    const graph = JSON.parse(readJsonLd(readDistFile('index.html')) ?? '{}')[
+      '@graph'
+    ] as Record<string, unknown>[];
+    const software = graph.find(
+      (node) => node['@type'] === 'SoftwareApplication',
+    );
+    const organization = readOrganization('index.html');
+
+    // Assert
+    expect(software?.sameAs).toEqual(expected);
+    expect(organization?.sameAs).toEqual([
+      'https://github.com/macalbert/envilder',
+    ]);
+    expect(typeof organization?.description).toBe('string');
+    expect(String(organization?.description).trim().length).toBeGreaterThan(20);
+  });
+
+  it('Should_EmitLastmodFromManifest_When_EnglishDocsArticleIsInSitemap', () => {
+    // Arrange
+    const manifest = JSON.parse(
+      readFileSync(
+        resolve(__dirname, '../../src/website/src/i18n/docs-dates.json'),
+        'utf-8',
+      ),
+    ) as Record<string, { dateModified: string }>;
+    const entries = readSitemapEntries();
+
+    // Act
+    const actual = Object.keys(manifest).map((route) => ({
+      route,
+      lastmod: entries
+        .find((entry) => entry.loc === `${siteUrl}${route}`)
+        ?.lastmod?.slice(0, 10),
+    }));
+    const expected = Object.entries(manifest).map(([route, value]) => ({
+      route,
+      lastmod: value.dateModified,
+    }));
+
+    // Assert
+    expect(actual.length).toBeGreaterThan(0);
+    expect(actual).toEqual(expected);
+  });
+
+  it('Should_DateOnlyManifestUrls_When_SitemapIsBuilt', () => {
+    // Arrange
+    const entries = readSitemapEntries();
+    const manifestUrls = Object.keys(
+      JSON.parse(
+        readFileSync(
+          resolve(__dirname, '../../src/website/src/i18n/docs-dates.json'),
+          'utf-8',
+        ),
+      ),
+    )
+      .map((route) => `${siteUrl}${route}`)
+      .sort();
+
+    // Act
+    const actual = entries
+      .filter((entry) => entry.lastmod !== undefined)
+      .map((entry) => entry.loc)
+      .sort();
+
+    // Assert
+    expect(actual).toEqual(manifestUrls);
+    expect(entries.length).toBeGreaterThan(0);
+  });
+
+  it.each([
+    'docs/providers/aws-ssm/index.html',
+    'docs/guides/ssm-to-env/index.html',
+  ])('Should_DescribeSsmAsSecretsVault_When_%s_IsBuilt', (file) => {
+    // Arrange
+    const html = readDistFile(file);
+
+    // Act
+    const description = (
+      html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? ''
+    ).toLowerCase();
+
+    // Assert
+    expect(description).toContain('vault');
+    expect(description).toContain('parameter store');
+    expect(description).toContain('envilder');
+  });
+});

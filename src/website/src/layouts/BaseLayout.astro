@@ -61,6 +61,8 @@ const structuredData = JSON.stringify({
       '@id': `${siteRootUrl}#organization`,
       name: 'Envilder',
       url: siteRootUrl,
+      description:
+        'Open-source CLI, GitHub Action and runtime SDKs that load secrets from AWS SSM Parameter Store and Azure Key Vault.',
       sameAs: ['https://github.com/macalbert/envilder'],
     },
     {
@@ -127,6 +129,14 @@ const structuredData = JSON.stringify({
             codeRepository: 'https://github.com/macalbert/envilder',
             license: 'https://github.com/macalbert/envilder/blob/main/LICENSE',
             screenshot: ogImageUrl,
+            // The CLI, SDKs and Action are published as one product.
+            sameAs: [
+              'https://www.npmjs.com/package/envilder',
+              'https://www.npmjs.com/package/@envilder/sdk',
+              'https://pypi.org/project/envilder/',
+              'https://www.nuget.org/packages/Envilder',
+              'https://github.com/marketplace/actions/envilder-github-action',
+            ],
           },
         ]
       : []),

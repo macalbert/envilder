@@ -1,6 +1,10 @@
 import { readFileSync } from 'node:fs';
 import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
+import {
+  createSitemapSerializer,
+  readDocsDatesManifest,
+} from './scripts/sitemap-lastmod.mjs';
 
 const rootPkg = JSON.parse(
   readFileSync(new URL('../../package.json', import.meta.url), 'utf-8'),
@@ -65,6 +69,13 @@ export default defineConfig({
         ].includes(page) &&
         !page.startsWith('https://envilder.com/ca/docs/') &&
         !page.startsWith('https://envilder.com/es/docs/'),
+      // Only English docs articles have a known modification date.
+      serialize: createSitemapSerializer(
+        readDocsDatesManifest(
+          new URL('./src/i18n/docs-dates.json', import.meta.url),
+        ),
+        'https://envilder.com',
+      ),
     }),
   ],
   trailingSlash: 'always',
