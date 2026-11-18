@@ -1106,7 +1106,7 @@ export const ca: Translations = {
         {
           scenario: 'CI/CD a GitHub',
           use: 'La GitHub Action',
-          why: 'Inicia sessió amb OIDC i exporta els valors, amb emmascarament als logs, als passos següents del job.',
+          why: "Després d'un pas d'inici de sessió OIDC separat (configure-aws-credentials o azure/login), exporta els valors, amb emmascarament als logs, als passos següents del job.",
         },
         {
           scenario:
