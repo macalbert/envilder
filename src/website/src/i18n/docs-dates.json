@@ -27,6 +27,10 @@
     "hash": "1ec2c2ecfdead17cd9a7c869681560c0bb159d4f1876904f4cae7e523b641838",
     "dateModified": "2026-11-14"
   },
+  "/docs/guides/dotnet-parameter-store/": {
+    "hash": "709e4e73529f2cbdab02b97d7035104430a2fad55502070b179c89d305fc2647",
+    "dateModified": "2026-11-18"
+  },
   "/docs/guides/github-actions-ssm/": {
     "hash": "6fa7701804396d3960272eacf1ca5b27d4693115de3857b1c722159fd2089669",
     "dateModified": "2026-11-16"
