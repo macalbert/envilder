@@ -31,6 +31,8 @@ export const es: Translations = {
     getStarted: 'Empezar',
     ariaGithub: 'GitHub',
     ariaSponsor: 'Patrocinar',
+    starOnGithub: 'Dale una estrella en GitHub',
+    starFallback: 'Estrella',
     ariaToggleMenu: 'Abrir menú',
   },
   theme: {
@@ -545,6 +547,9 @@ export const es: Translations = {
       errEnvfileFix:
         'exec nunca escribe un archivo. Quita --envfile, o usa pull (envilder --envfile=.env) cuando necesites el archivo.',
       nextTitle: 'Siguientes pasos',
+      starNote: '¿Ha funcionado?',
+      starLink:
+        'Una estrella en GitHub ayuda a otras personas a encontrar Envilder.',
       nextMap:
         'Referencia del archivo de mapeo: $config, perfiles, reglas de validación y varios entornos',
       nextExec: 'envilder exec: códigos de salida, señales y uso en CI',
