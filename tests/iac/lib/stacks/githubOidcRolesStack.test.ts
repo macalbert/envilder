@@ -192,7 +192,7 @@ describe("GitHub OIDC roles Stack", () => {
 		);
 	});
 
-	test("Should_OnlyCreateCloudFrontResources_When_TheyAreNotTheWebsites", () => {
+	test("Should_OnlyCreateOrTagCloudFrontResources_When_TheyAreNotTheWebsites", () => {
 		// Arrange
 		const sut = createGitHubOidcRolesStack();
 
@@ -202,21 +202,61 @@ describe("GitHub OIDC roles Stack", () => {
 			"envilder-website-cfn-execution",
 		).filter(
 			(statement) =>
-				[statement.Action]
-					.flat()
-					.some((action) => action.startsWith("cloudfront:")) &&
+				action(statement).some((name) => name.startsWith("cloudfront:")) &&
 				[statement.Resource]
 					.flat()
-					.some((resource) => String(resource).endsWith("/*")),
+					.some(
+						(resource) => resource === "*" || String(resource).endsWith("/*"),
+					),
 		);
 
 		// Assert
+		expect(actual.length).toBeGreaterThan(0);
 		for (const statement of actual) {
-			for (const action of [statement.Action].flat()) {
-				expect(action).toMatch(/^cloudfront:(Create|Get|List|Describe)/);
+			for (const name of action(statement)) {
+				expect(name).toMatch(
+					/^cloudfront:(Create(?!Invalidation)|TagResource$|Get|List|Describe)/,
+				);
 			}
-			expect(action(statement)).not.toContain("cloudfront:*");
 		}
+	});
+
+	test("Should_RequireProjectTags_When_ExecutionPolicyCreatesOrTagsDistributions", () => {
+		// Arrange
+		const sut = createGitHubOidcRolesStack();
+
+		// Act
+		const actual = managedPolicyStatements(
+			sut,
+			"envilder-website-cfn-execution",
+		).filter(
+			(statement) =>
+				action(statement).some((name) =>
+					["cloudfront:CreateDistribution", "cloudfront:TagResource"].includes(
+						name,
+					),
+				) && statement.Resource !== undefined,
+		);
+
+		// Assert
+		const wildcardGrants = actual.filter((statement) =>
+			[statement.Resource]
+				.flat()
+				.some((resource) => String(resource).endsWith("*")),
+		);
+		expect(wildcardGrants).toEqual([
+			expect.objectContaining({
+				Sid: "CreateTaggedDistributions",
+				Action: ["cloudfront:CreateDistribution", "cloudfront:TagResource"],
+				Resource: "*",
+				Condition: {
+					StringEquals: { "aws:RequestTag/Project": "envilder" },
+					"ForAllValues:StringEquals": {
+						"aws:TagKeys": ["Environment", "Project", "StackId"],
+					},
+				},
+			}),
+		]);
 	});
 
 	test("Should_RequireLambdaBoundary_When_ExecutionPolicyWritesRoles", () => {

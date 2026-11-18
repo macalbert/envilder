@@ -45,7 +45,16 @@ export class WebsiteDeploymentPolicies extends Construct {
 	readonly lambdaBoundary: ManagedPolicy;
 	readonly bootstrapBoundary: ManagedPolicy;
 
-	constructor(scope: Construct, id: string, config: WebsiteDeploymentConfig) {
+	/**
+	 * @param projectTag value of the `Project` tag the website stacks put on
+	 *   the CloudFront distributions they create.
+	 */
+	constructor(
+		scope: Construct,
+		id: string,
+		config: WebsiteDeploymentConfig,
+		projectTag: string,
+	) {
 		super(scope, id);
 
 		const { account, region } = Stack.of(this);
@@ -151,23 +160,30 @@ export class WebsiteDeploymentPolicies extends Construct {
 				resources: websiteCloudFrontArns,
 			}),
 			new PolicyStatement({
-				sid: "CreateCloudFrontResources",
+				// Neither action has a resource type for a new distribution, so
+				// the request tags carry the scope.
+				sid: "CreateTaggedDistributions",
+				effect: Effect.ALLOW,
+				actions: ["cloudfront:CreateDistribution", "cloudfront:TagResource"],
+				resources: ["*"],
+				conditions: {
+					StringEquals: { "aws:RequestTag/Project": projectTag },
+					"ForAllValues:StringEquals": {
+						"aws:TagKeys": ["Environment", "Project", "StackId"],
+					},
+				},
+			}),
+			new PolicyStatement({
+				// These create actions have no resource type and take no tags.
+				sid: "CreateUntaggedCloudFrontResources",
 				effect: Effect.ALLOW,
 				actions: [
 					"cloudfront:CreateCloudFrontOriginAccessIdentity",
-					"cloudfront:CreateDistribution",
-					"cloudfront:CreateDistributionWithTags",
 					"cloudfront:CreateFunction",
 					"cloudfront:CreateOriginAccessControl",
 					"cloudfront:CreateResponseHeadersPolicy",
 				],
-				resources: [
-					"distribution",
-					"function",
-					"origin-access-identity",
-					"origin-access-control",
-					"response-headers-policy",
-				].map((type) => cloudFrontArn(type, "*")),
+				resources: ["*"],
 			}),
 			new PolicyStatement({
 				sid: "ReadCloudFront",

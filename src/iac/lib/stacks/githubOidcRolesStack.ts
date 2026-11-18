@@ -100,6 +100,7 @@ export class GitHubOidcRolesStack extends CustomStack {
 			this,
 			"WebsiteDeploymentPolicies",
 			props.websiteDeployment,
+			props.githubRepo,
 		);
 
 		new CfnOutput(this, "TestsRoleArn", { value: testsRole.roleArn });
