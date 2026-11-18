@@ -157,8 +157,16 @@ describe("GitHub OIDC roles Stack", () => {
 		const actual = Template.fromStack(sut);
 
 		// Assert
-		actual.hasOutput("TestsRoleArn", {});
-		actual.hasOutput("WebsiteDeployRoleArn", {});
+		actual.hasOutput("TestsRoleArn", {
+			Value: {
+				"Fn::GetAtt": [Match.stringLikeRegexp("^TestsRole"), "Arn"],
+			},
+		});
+		actual.hasOutput("WebsiteDeployRoleArn", {
+			Value: {
+				"Fn::GetAtt": [Match.stringLikeRegexp("^WebsiteDeployRole"), "Arn"],
+			},
+		});
 	});
 });
 

@@ -70,20 +70,30 @@ configure it before the workflow change reaches `main`.
 ### Deploying the roles
 
 The website workflow only deploys the website stack. Deploy this stack from a
-maintainer machine:
+maintainer machine. The CDK app also builds the website stack, which needs the
+built site:
 
 ```bash
-pnpm build && cdk deploy macalbert-envilder-githuboidcroles-production-stack
+pnpm --filter @envilder/website build
+cd src/iac && pnpm build && cdk deploy macalbert-envilder-githuboidcroles-production-stack
 ```
 
-The CDK bootstrap roles only trust the principals in the `TrustedAccounts`
-parameter of the `CDKToolkit` stack. After the deploy role exists, set that
-parameter to its ARN, keeping the current bootstrap template and the other
-parameter values:
+No bootstrap change is needed: the standard CDK bootstrap roles trust their
+own account, and the website deploy role's identity policy allows it to
+assume them.
 
-```bash
-aws cloudformation update-stack --stack-name CDKToolkit --use-previous-template --capabilities CAPABILITY_NAMED_IAM --parameters ParameterKey=TrustedAccounts,ParameterValue=<WebsiteDeployRoleArn> ...
-```
+Then, before the workflow change reaches `main`:
 
-The new value replaces the previous list, so include every principal that
-must keep deploying.
+1. Create the `production` environment and allow only the `main` branch.
+2. Set its `AWS_DEPLOY_ROLE_TO_ASSUME` secret to the `WebsiteDeployRoleArn`
+   stack output.
+3. Set the `AWS_ROLE_TO_ASSUME` repository secret to the `TestsRoleArn` stack
+   output.
+
+### Known limit
+
+The CDK bootstrap deploy role runs CloudFormation with the bootstrap execution
+role. With the default `AdministratorAccess` execution policy, a session of
+the website deploy role can still change any stack in the account. The
+`production` environment limits that session to `main`; restricting the
+execution policy is a bootstrap change outside this stack.
