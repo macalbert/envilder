@@ -1073,6 +1073,172 @@ export const ca: Translations = {
       relatedExec: 'Referència de envilder exec',
       relatedMap: 'Referència del fitxer de mapa',
     },
+    guideDotnetParameterStore: {
+      paramsTitle: 'Crea els paràmetres',
+      paramsDesc:
+        "Tots dos enfocaments llegeixen els mateixos dos paràmetres. Crea'ls amb la CLI d'AWS a la regió que farà servir l'aplicació (els valors són de prova; Api/Token és un String simple i Database/Password un SecureString):",
+      paramsNote:
+        "Els noms estan triats perquè tots dos enfocaments donin les mateixes claus de configuració: /my-app/dev/Database/Password esdevé Database:Password en qualsevol dels dos, així que el codi que llegeix els valors no canvia quan canvies d'enfocament.",
+      officialTitle: "Opció 1: el proveïdor d'AWS",
+      officialInstallDesc:
+        "Amazon.Extensions.Configuration.SystemsManager és el proveïdor de Systems Manager que AWS publica al repositori aws/aws-dotnet-extensions-configuration. També cobreix AppConfig. Els fragments d'aquesta secció compilen amb la versió 7.1.1, que té com a destinació netstandard2.0 i net8.0.",
+      officialProgramDesc:
+        'Passa el prefix de ruta a AddSystemsManager. El proveïdor carrega tots els paràmetres que hi ha per sota:',
+      officialProgramComment:
+        'Carrega tots els paràmetres sota el prefix i el treu de les claus',
+      officialKeysDesc:
+        'El prefix se suprimeix del nom del paràmetre i cada / passa a ser un : a la clau de configuració:',
+      thParameter: 'Nom del paràmetre',
+      thKey: 'Clau de configuració',
+      officialKeysNote:
+        'Com que les claus no porten el prefix, passar de /my-app/dev/ a /my-app/prod/ canvia una sola cadena i res més.',
+      officialOptionsDesc:
+        "Els altres paràmetres es passen amb altres sobrecàrregues d'AddSystemsManager. Aquest bloc fixa el perfil i la regió d'AWS al codi i recarrega cada cinc minuts, i després carrega només una llista de noms:",
+      officialOptionsCommentReload:
+        'Perfil i regió al codi, recàrrega cada cinc minuts',
+      officialOptionsCommentNames:
+        'Només aquests paràmetres, llegits amb GetParameters en lloc de GetParametersByPath',
+      officialOptionsItems: [
+        'reloadAfter és un TimeSpan passat el qual el proveïdor recarrega en una tasca en segon pla. Sense aquest paràmetre el proveïdor no recarrega.',
+        'La sobrecàrrega que rep una llista de noms crida GetParameters, en lots de deu, en lloc de GetParametersByPath. El README diu que això pot reduir el throttling.',
+        "La configuració del client d'AWS també pot venir d'AWSOptions a la secció AWS de la configuració (Profile, Region), tal com descriu el README.",
+        "L'objecte d'opcions, SystemsManagerConfigurationSource, té també un indicador Optional i una callback OnLoadException. Decideixen què passa quan una càrrega falla, així que llegeix el repositori abans de dependre'n.",
+      ],
+      officialIamDesc:
+        "El README concedeix ssm:GetParametersByPath sobre l'ARN del paràmetre amb el prefix seguit d'un *. El proveïdor demana els valors amb desxifrat, així que un SecureString també necessita kms:Decrypt sobre la seva clau:",
+      officialIamNotes: [
+        "Si carregues per nom amb la sobrecàrrega de dalt, la crida és GetParameters, que l'exemple de política del README no inclou. Concedeix-hi ssm:GetParameters sobre el mateix ARN.",
+        "Adapta la regió, l'ID del compte i l'ID de la clau als teus.",
+      ],
+      envilderTitle: "Opció 2: l'SDK .NET d'Envilder",
+      envilderInstallDesc:
+        "Envilder és un paquet NuGet que llegeix un fitxer de mapa JSON i n'exposa els valors com a claus d'IConfiguration. Té com a destinació netstandard2.0, així que funciona amb .NET 6 i posteriors i amb .NET Framework 4.6.1 i posteriors.",
+      envilderMapDesc:
+        'Llista cada variable amb el nom complet del seu paràmetre. Una / en una clau passa a ser un : a la clau de configuració, i el proveïdor és aws tret que el fitxer digui el contrari:',
+      envilderProgramDesc:
+        'Després afegeix el fitxer de mapa al constructor de configuració:',
+      envilderProgramComment: 'Carrega les variables llistades a envilder.json',
+      envilderBehaviourTitle: 'Com es comporta',
+      envilderBehaviourItems: [
+        'El fitxer de mapa es llegeix quan crides AddEnvilder: si no existeix llança FileNotFoundException, i una clau amb caràcters fora de lletres, dígits, _ . - i / llança FormatException.',
+        'Els valors es llegeixen una sola vegada, quan es construeix la configuració, amb una crida GetParameter per variable i amb desxifrat, així que els SecureString arriben en text pla. No hi ha recàrrega.',
+        "Un paràmetre que no existeix s'omet sense error. La clau no apareix a IConfiguration, i un valor d'appsettings per a la mateixa clau continua vigent, així que comprova les claus de les quals depens.",
+        'Qualsevol altre error atura la construcció amb una excepció: un endpoint inaccessible, accés denegat, una sessió SSO caducada (SsoSessionExpiredException) o credencials caducades (ExpiredCredentialsException).',
+        "El mateix envilder.json funciona amb la CLI d'Envilder, amb envilder exec i amb la GitHub Action, així que els scripts i els pipelines llegeixen la mateixa llista de variables.",
+      ],
+      envilderProviderNote:
+        'El fitxer de mapa tria el proveïdor. Amb "provider": "azure" i un "vaultUrl" a $config, el mateix C# llegeix secrets d\'Azure Key Vault i s\'autentica amb DefaultAzureCredential. "profile" tria un perfil amb nom d\'AWS. Un vaultUrl amb el proveïdor AWS, o un profile amb Azure, llança InvalidOperationException.',
+      envilderRegionNote:
+        'Defineix tu mateix AWS_REGION en lloc de confiar en un valor per defecte. Amb un perfil, Envilder fa servir primer la regió del perfil, després AWS_REGION o AWS_DEFAULT_REGION, i acaba a us-east-1 si no en troba cap.',
+      envilderIamDesc:
+        "Envilder crida ssm:GetParameter amb desxifrat una vegada per paràmetre del mapa, així que necessita la política de sota, la mateixa que a la guia d'SSM a .env:",
+      envilderIamNote:
+        'No necessita cap permís de llistat, i només concedeix els paràmetres que pots anomenar.',
+      layerTitle: 'Deixa els paràmetres no secrets a appsettings.json',
+      layerDesc:
+        "Tots dos proveïdors són fonts de configuració normals, així que l'ordre decideix qui guanya. Afegeix els secrets després d'appsettings.json i deixa al fitxer només valors per defecte que no siguin secrets:",
+      layerComment:
+        'Primer els valors per defecte no secrets, a sobre els paràmetres',
+      layerNote:
+        "Una font afegida més tard sobreescriu les anteriors. Amb Envilder, una clau el paràmetre de la qual no existeix no afegeix res, així que es manté el valor d'appsettings.",
+      compareTitle: 'Comparativa',
+      compareDesc:
+        "El que fa cadascun, segons el README i el codi font del proveïdor oficial i segons el codi font de l'SDK d'Envilder:",
+      thAspect: 'Aspecte',
+      thOfficial: 'AddSystemsManager',
+      thEnvilder: 'AddEnvilder',
+      compareRows: [
+        {
+          label: 'Paquet',
+          official:
+            'Amazon.Extensions.Configuration.SystemsManager (Apache 2.0)',
+          envilder: 'Envilder (MIT)',
+        },
+        {
+          label: 'Què llistes',
+          official: 'Un prefix de ruta, opcionalment amb noms per sota',
+          envilder: 'Una entrada per variable amb el nom complet del paràmetre',
+        },
+        {
+          label: 'Noms de les claus',
+          official: 'El nom del paràmetre sense el prefix, amb : per /',
+          envilder: 'La clau del fitxer de mapa, amb : per /',
+        },
+        {
+          label: 'Crides a AWS',
+          official:
+            'GetParametersByPath (recursiva, paginada) o GetParameters en lots de deu',
+          envilder: 'GetParameter una vegada per variable',
+        },
+        {
+          label: 'Accions IAM',
+          official:
+            'ssm:GetParametersByPath (ssm:GetParameters per noms), kms:Decrypt per a SecureString',
+          envilder: 'ssm:GetParameter, kms:Decrypt per a SecureString',
+        },
+        {
+          label: 'SecureString',
+          official: 'Desxifrat en carregar',
+          envilder: 'Desxifrat en carregar',
+        },
+        {
+          label: "Recàrrega mentre s'executa",
+          official: 'Sí, amb reloadAfter',
+          envilder: 'No, es llegeix una vegada en construir',
+        },
+        {
+          label: 'Paràmetre nou sota el prefix',
+          official: 'Es recull sense canviar el codi',
+          envilder: 'Cal una línia nova al fitxer de mapa',
+        },
+        {
+          label: "Altres fonts d'AWS",
+          official: 'AppConfig, i Secrets Manager mitjançant rutes reservades',
+          envilder: 'Cap',
+        },
+        {
+          label: 'Azure Key Vault',
+          official: 'No',
+          envilder: 'Sí, amb provider azure al fitxer de mapa',
+        },
+        {
+          label: 'Mateix fitxer per a la CLI i la GitHub Action',
+          official: 'No',
+          envilder: 'Sí',
+        },
+      ],
+      chooseTitle: 'Quan triar cadascun',
+      chooseOfficialTitle: "El proveïdor d'AWS encaixa quan",
+      chooseOfficialItems: [
+        "L'aplicació només s'executa a AWS i carrega tot un prefix de ruta. El prefix és el contracte, i un paràmetre nou a sota apareix sense tocar el codi.",
+        "Els valors han de canviar mentre l'aplicació s'executa i vols que reloadAfter els reculli.",
+        'Ja fas servir AppConfig, o Secrets Manager mitjançant les rutes reservades de Parameter Store, i vols un sol paquet per a tot.',
+        "Prefereixes un paquet d'AWS i cap eina addicional.",
+      ],
+      chooseEnvilderTitle: 'Envilder encaixa quan',
+      chooseEnvilderItems: [
+        "El mateix fitxer de mapa ha de dirigir també el desenvolupament local (envilder exec o un fitxer .env) i el CI (la GitHub Action), de manera que l'aplicació, els scripts i els pipelines llegeixin una sola llista.",
+        'Mapes variable per variable, amb noms que no comparteixen un prefix, i vols aquesta llista a Git.',
+        'També fas servir Azure Key Vault i vols canviar el proveïdor al fitxer de mapa en lloc del C#.',
+      ],
+      chooseNote:
+        "Si només treballes a AWS i només necessites la configuració dins del procés .NET, el proveïdor oficial és menys per adoptar. Envilder compensa quan el fitxer de mapa es comparteix més enllà de l'aplicació.",
+      localTitle: 'Prova-ho en local amb LocalStack',
+      localDesc:
+        "Pots executar tots dos programes sense compte d'AWS. LocalStack emula Parameter Store, i AWS_ENDPOINT_URL fa que l'SDK d'AWS per a .NET hi enviï les crides. La sortida de sota es va produir amb localstack/localstack:4.14.0, que arrenca sense token d'autenticació. Les imatges més noves necessiten LOCALSTACK_AUTH_TOKEN.",
+      localWarn:
+        "Defineix les quatre variables al mateix shell, i executa-hi les ordres aws ssm put-parameter de la primera secció. Sense AWS_ENDPOINT_URL, tots dos proveïdors criden l'AWS real amb les credencials fictícies i fallen.",
+      localOutputDesc:
+        'Cada programa imprimeix només si un valor està definit, així cap secret arriba a la consola. Tots dos imprimeixen el mateix:',
+      localMissingNote:
+        'Es diferencien quan falta un paràmetre. Amb l\'entrada del fitxer de mapa "Stripe/Key": "/my-app/dev/Stripe/Key" per a un paràmetre que no existeix, Envilder l\'omet i la clau es llegeix com a absent, mentre que l\'enfocament del prefix senzillament no té aquesta clau. En tots dos casos, si no es pot arribar a AWS es llança una excepció.',
+      relatedTitle: 'Pàgines relacionades',
+      relatedSdk: "Referència de l'SDK .NET",
+      relatedSsm: 'Carrega paràmetres SSM en un fitxer .env',
+      relatedGha: 'Carrega paràmetres SSM a GitHub Actions',
+      relatedAws: 'Configuració del proveïdor AWS SSM',
+      relatedMap: 'Referència del fitxer de mapa',
+    },
     pushReference: {
       tabAws: 'AWS SSM',
       tabAzure: 'Azure Key Vault',
@@ -1561,6 +1727,21 @@ export const ca: Translations = {
         cardTitle: 'Carrega paràmetres SSM a GitHub Actions',
         cardSummary:
           "Inicia sessió a AWS amb OIDC i exporta paràmetres SSM com a variables d'entorn als passos d'un job d'un workflow.",
+      },
+      'guide-dotnet-parameter-store': {
+        title:
+          "Carrega valors d'AWS SSM Parameter Store a la configuració de .NET",
+        description:
+          "Carrega valors d'AWS SSM Parameter Store a IConfiguration de .NET amb AddSystemsManager o l'SDK d'Envilder: configuració, política IAM, claus, recàrrega i quan triar cadascun.",
+        heading:
+          "Carrega valors d'AWS SSM Parameter Store a la configuració de .NET",
+        intro:
+          'Com carrego valors d\'AWS SSM Parameter Store a la configuració de .NET (IConfiguration)? Crida AddSystemsManager("/my-app/dev/") del paquet Amazon.Extensions.Configuration.SystemsManager per carregar tots els paràmetres sota un prefix de ruta, o llista cada variable i el nom del seu paràmetre a envilder.json i crida AddEnvilder del paquet NuGet Envilder. Tots dos posen els valors a IConfiguration, així que els llegeixes com config["Database:Password"]. Aquesta guia mostra tots dos i quan triar cadascun.',
+        breadcrumb: '.NET i Parameter Store',
+        navLabel: '.NET i Parameter Store',
+        cardTitle: 'Carrega paràmetres SSM a la configuració de .NET',
+        cardSummary:
+          "Compara el proveïdor d'AWS (AddSystemsManager) amb l'SDK .NET d'Envilder per carregar valors de Parameter Store a IConfiguration.",
       },
       'aws-ssm': {
         title: 'Utilitza Envilder amb AWS SSM Parameter Store',

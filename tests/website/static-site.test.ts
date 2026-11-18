@@ -292,6 +292,7 @@ describe('Static website SEO', () => {
     expect(llms).toContain(`(${siteUrl}/docs/guides/ssm-to-env/)`);
     expect(llms).toContain(`(${siteUrl}/docs/guides/azure-key-vault-to-env/)`);
     expect(llms).toContain(`(${siteUrl}/docs/guides/github-actions-ssm/)`);
+    expect(llms).toContain(`(${siteUrl}/docs/guides/dotnet-parameter-store/)`);
   });
 
   it('Should_AnswerTheQuestionFirst_When_GitHubActionsSsmGuideIsBuilt', () => {
@@ -319,6 +320,40 @@ describe('Static website SEO', () => {
     );
     const hasEnglishComment = html.includes(
       'Lets the job request an OIDC token',
+    );
+
+    // Assert
+    expect(hasCatalanComment).toBe(true);
+    expect(hasEnglishComment).toBe(false);
+  });
+
+  it('Should_AnswerTheQuestionFirst_When_DotnetParameterStoreGuideIsBuilt', () => {
+    // Arrange
+    const html = readDistFile('docs/guides/dotnet-parameter-store/index.html');
+
+    // Act
+    const firstParagraph = html.match(
+      /<p class="docs-intro"[^>]*>([\s\S]*?)<\/p>/,
+    );
+
+    // Assert
+    expect(firstParagraph?.[1]).toContain('Envilder');
+    expect(firstParagraph?.[1]).toContain('.NET');
+    expect(firstParagraph?.[1]).toContain('Parameter Store');
+  });
+
+  it('Should_LocalizeCodeComments_When_CatalanDotnetParameterStoreGuideIsBuilt', () => {
+    // Arrange
+    const html = readDistFile(
+      'ca/docs/guides/dotnet-parameter-store/index.html',
+    );
+
+    // Act
+    const hasCatalanComment = html.includes(
+      'Carrega tots els paràmetres sota el prefix',
+    );
+    const hasEnglishComment = html.includes(
+      'Loads every parameter under the prefix',
     );
 
     // Assert

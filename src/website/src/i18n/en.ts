@@ -1064,6 +1064,171 @@ export const en: Translations = {
       relatedExec: 'envilder exec reference',
       relatedMap: 'Map file reference',
     },
+    guideDotnetParameterStore: {
+      paramsTitle: 'Create the parameters',
+      paramsDesc:
+        'Both approaches read the same two parameters. Create them with the AWS CLI in the region your app will use (the values are test values; Api/Token is a plain String and Database/Password a SecureString):',
+      paramsNote:
+        'The names are chosen so that both approaches produce the same configuration keys: /my-app/dev/Database/Password becomes Database:Password either way, so the code that reads the values does not change when you switch.',
+      officialTitle: 'Option 1: the AWS provider',
+      officialInstallDesc:
+        'Amazon.Extensions.Configuration.SystemsManager is the Systems Manager provider that AWS publishes in the aws/aws-dotnet-extensions-configuration repository. It also covers AppConfig. The snippets in this section compile against version 7.1.1, which targets netstandard2.0 and net8.0.',
+      officialProgramDesc:
+        'Pass the path prefix to AddSystemsManager. The provider loads every parameter below it:',
+      officialProgramComment:
+        'Loads every parameter under the prefix and drops the prefix from the keys',
+      officialKeysDesc:
+        'The prefix is stripped from the parameter name and each / becomes a : in the configuration key:',
+      thParameter: 'Parameter name',
+      thKey: 'Configuration key',
+      officialKeysNote:
+        'Because the keys do not contain the prefix, moving from /my-app/dev/ to /my-app/prod/ changes one string and nothing else.',
+      officialOptionsDesc:
+        'Other settings go through other overloads of AddSystemsManager. This block sets the AWS profile and region in code and reloads every five minutes, then loads only a list of names:',
+      officialOptionsCommentReload:
+        'Profile and region in code, reload every five minutes',
+      officialOptionsCommentNames:
+        'Only these parameters, read with GetParameters instead of GetParametersByPath',
+      officialOptionsItems: [
+        'reloadAfter is a TimeSpan after which the provider reloads in a background task. Without it the provider does not reload.',
+        'The overload that takes a list of names calls GetParameters, in batches of ten, instead of GetParametersByPath. The README says this can reduce throttling.',
+        'The AWS client settings can also come from AWSOptions in the AWS section of the configuration (Profile, Region), as the README describes.',
+        'The options object, SystemsManagerConfigurationSource, also has an Optional flag and an OnLoadException callback. They decide what a failed load does, so read the repository before you rely on them.',
+      ],
+      officialIamDesc:
+        'The README grants ssm:GetParametersByPath on the parameter ARN of the prefix followed by *. The provider requests values with decryption, so a SecureString also needs kms:Decrypt on its key:',
+      officialIamNotes: [
+        'If you load by name with the overload above, the call is GetParameters, which the README policy example does not list. Grant ssm:GetParameters on the same ARN for that case.',
+        'Adjust the region, the account ID and the key ID to your own.',
+      ],
+      envilderTitle: 'Option 2: the Envilder .NET SDK',
+      envilderInstallDesc:
+        'Envilder is a NuGet package that reads a JSON map file and exposes the values as IConfiguration keys. It targets netstandard2.0, so it runs on .NET 6 and later and on .NET Framework 4.6.1 and later.',
+      envilderMapDesc:
+        'List each variable with the full name of its parameter. A / in a key becomes a : in the configuration key, and the provider is aws unless the file says otherwise:',
+      envilderProgramDesc:
+        'Then add the map file to the configuration builder:',
+      envilderProgramComment: 'Loads the variables listed in envilder.json',
+      envilderBehaviourTitle: 'How it behaves',
+      envilderBehaviourItems: [
+        'The map file is read when you call AddEnvilder: a missing file throws FileNotFoundException and a key with characters outside letters, digits, _ . - and / throws FormatException.',
+        'Values are read once, when the configuration is built, with one GetParameter call per variable and decryption on, so SecureString values come back in plain text. There is no reload.',
+        'A parameter that does not exist is skipped without an error. The key is absent from IConfiguration, and an appsettings value for the same key stays in effect, so check the keys you depend on.',
+        'Any other failure stops the build with an exception: an unreachable endpoint, access denied, an expired SSO session (SsoSessionExpiredException) or expired credentials (ExpiredCredentialsException).',
+        'The same envilder.json works with the Envilder CLI, with envilder exec and with the GitHub Action, so scripts and pipelines read the same list of variables.',
+      ],
+      envilderProviderNote:
+        'The map file picks the provider. With "provider": "azure" and a "vaultUrl" in $config, the same C# reads Azure Key Vault secrets and authenticates with DefaultAzureCredential. "profile" selects an AWS named profile. A vaultUrl with the AWS provider, or a profile with Azure, throws InvalidOperationException.',
+      envilderRegionNote:
+        'Set AWS_REGION yourself rather than relying on a default. With a profile, Envilder uses the profile region first, then AWS_REGION or AWS_DEFAULT_REGION, and ends at us-east-1 when it finds none of them.',
+      envilderIamDesc:
+        'Envilder calls ssm:GetParameter with decryption once per mapped parameter, so it needs the policy below, the same one as in the SSM to .env guide:',
+      envilderIamNote:
+        'It needs no list permission, and it grants only the parameters you can name.',
+      layerTitle: 'Keep non-secret settings in appsettings.json',
+      layerDesc:
+        'Both providers are ordinary configuration sources, so the order decides who wins. Add the secrets after appsettings.json and keep only non-secret defaults in the file:',
+      layerComment: 'Non-secret defaults first, the parameters on top',
+      layerNote:
+        'A source added later overrides the ones before it. With Envilder, a key whose parameter does not exist adds nothing, so the appsettings value stays.',
+      compareTitle: 'Comparison',
+      compareDesc:
+        'What each one does, from the official README and source and from the Envilder SDK source:',
+      thAspect: 'Aspect',
+      thOfficial: 'AddSystemsManager',
+      thEnvilder: 'AddEnvilder',
+      compareRows: [
+        {
+          label: 'Package',
+          official:
+            'Amazon.Extensions.Configuration.SystemsManager (Apache 2.0)',
+          envilder: 'Envilder (MIT)',
+        },
+        {
+          label: 'What you list',
+          official: 'A path prefix, optionally with names under it',
+          envilder: 'One entry per variable with the full parameter name',
+        },
+        {
+          label: 'Key names',
+          official: 'The parameter name without the prefix, with : for /',
+          envilder: 'The key in the map file, with : for /',
+        },
+        {
+          label: 'AWS calls',
+          official:
+            'GetParametersByPath (recursive, paged) or GetParameters in batches of ten',
+          envilder: 'GetParameter once per variable',
+        },
+        {
+          label: 'IAM actions',
+          official:
+            'ssm:GetParametersByPath (ssm:GetParameters for names), kms:Decrypt for SecureString',
+          envilder: 'ssm:GetParameter, kms:Decrypt for SecureString',
+        },
+        {
+          label: 'SecureString',
+          official: 'Decrypted when loaded',
+          envilder: 'Decrypted when loaded',
+        },
+        {
+          label: 'Reload while running',
+          official: 'Yes, with reloadAfter',
+          envilder: 'No, read once when built',
+        },
+        {
+          label: 'New parameter under the prefix',
+          official: 'Picked up without a code change',
+          envilder: 'Needs a new line in the map file',
+        },
+        {
+          label: 'Other AWS sources',
+          official: 'AppConfig, and Secrets Manager through reserved paths',
+          envilder: 'None',
+        },
+        {
+          label: 'Azure Key Vault',
+          official: 'No',
+          envilder: 'Yes, with provider azure in the map file',
+        },
+        {
+          label: 'Same file for CLI and GitHub Action',
+          official: 'No',
+          envilder: 'Yes',
+        },
+      ],
+      chooseTitle: 'When to choose which',
+      chooseOfficialTitle: 'The AWS provider fits when',
+      chooseOfficialItems: [
+        'Your app runs only on AWS and loads a whole path prefix. The prefix is the contract, and a new parameter under it appears without touching code.',
+        'Values must change while the app runs and you want reloadAfter to pick them up.',
+        'You already use AppConfig, or Secrets Manager through Parameter Store reserved paths, and want one package for them.',
+        'You prefer a package from AWS and no extra tooling.',
+      ],
+      chooseEnvilderTitle: 'Envilder fits when',
+      chooseEnvilderItems: [
+        'The same map file must also drive local development (envilder exec or a .env file) and CI (the GitHub Action), so the app, the scripts and the pipelines read one list.',
+        'You map variable by variable, with names that do not share one prefix, and want that list in Git.',
+        'Azure Key Vault is also in use and you want to switch the provider in the map file instead of the C#.',
+      ],
+      chooseNote:
+        'If you only run on AWS and only need configuration inside the .NET process, the official provider is less to adopt. Envilder pays off when the map file is shared beyond the app.',
+      localTitle: 'Try it locally with LocalStack',
+      localDesc:
+        'You can run both programs without an AWS account. LocalStack emulates Parameter Store, and AWS_ENDPOINT_URL makes the AWS SDK for .NET send its calls there. The output below was produced with localstack/localstack:4.14.0, which starts without an auth token. Newer images need LOCALSTACK_AUTH_TOKEN.',
+      localWarn:
+        'Set all four variables in the same shell, and run the aws ssm put-parameter commands from the first section in it. Without AWS_ENDPOINT_URL, both providers call real AWS with the dummy credentials and fail.',
+      localOutputDesc:
+        'Each program prints only whether a value is set, so no secret reaches the console. Both print the same:',
+      localMissingNote:
+        'The two differ when a parameter is missing. With the map file entry "Stripe/Key": "/my-app/dev/Stripe/Key" for a parameter that does not exist, Envilder skips it and the key reads as missing, while the prefix approach simply has no such key. In both cases a failure to reach AWS throws.',
+      relatedTitle: 'Related pages',
+      relatedSdk: '.NET SDK reference',
+      relatedSsm: 'Load SSM parameters into a .env file',
+      relatedGha: 'Load SSM parameters in GitHub Actions',
+      relatedAws: 'AWS SSM provider setup',
+      relatedMap: 'Map file reference',
+    },
     pushReference: {
       tabAws: 'AWS SSM',
       tabAzure: 'Azure Key Vault',
@@ -1543,6 +1708,19 @@ export const en: Translations = {
         cardTitle: 'Load SSM parameters in GitHub Actions',
         cardSummary:
           'Sign in to AWS with OIDC and export SSM parameters as environment variables to the steps of a workflow job.',
+      },
+      'guide-dotnet-parameter-store': {
+        title: 'Load AWS SSM Parameter Store values into .NET configuration',
+        description:
+          'Load AWS SSM Parameter Store values into .NET IConfiguration with AddSystemsManager or the Envilder SDK: setup, IAM policy, key mapping, reload and when to choose which.',
+        heading: 'Load AWS SSM Parameter Store values into .NET configuration',
+        intro:
+          'How do I load AWS SSM Parameter Store values into .NET configuration (IConfiguration)? Call AddSystemsManager("/my-app/dev/") from the Amazon.Extensions.Configuration.SystemsManager package to load every parameter under a path prefix, or list each variable and its parameter name in envilder.json and call AddEnvilder from the Envilder NuGet package. Both put the values in IConfiguration, so you read them as config["Database:Password"]. This guide shows both and when to pick each.',
+        breadcrumb: '.NET and Parameter Store',
+        navLabel: '.NET and Parameter Store',
+        cardTitle: 'Load SSM parameters into .NET configuration',
+        cardSummary:
+          'Compare the AWS provider (AddSystemsManager) with the Envilder .NET SDK for loading Parameter Store values into IConfiguration.',
       },
       'aws-ssm': {
         title: 'Use Envilder with AWS SSM Parameter Store',

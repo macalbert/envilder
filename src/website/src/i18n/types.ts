@@ -649,6 +649,64 @@ export interface GuideGithubActionsSsmTranslations {
   altPoints: string[];
 }
 
+export interface GuideDotnetParameterStoreTranslations {
+  paramsTitle: string;
+  paramsDesc: string;
+  paramsNote: string;
+  officialTitle: string;
+  officialInstallDesc: string;
+  officialProgramDesc: string;
+  officialProgramComment: string;
+  officialKeysDesc: string;
+  thParameter: string;
+  thKey: string;
+  officialKeysNote: string;
+  officialOptionsDesc: string;
+  officialOptionsCommentReload: string;
+  officialOptionsCommentNames: string;
+  officialOptionsItems: string[];
+  officialIamDesc: string;
+  officialIamNotes: string[];
+  envilderTitle: string;
+  envilderInstallDesc: string;
+  envilderMapDesc: string;
+  envilderProgramDesc: string;
+  envilderProgramComment: string;
+  envilderBehaviourTitle: string;
+  envilderBehaviourItems: string[];
+  envilderProviderNote: string;
+  envilderRegionNote: string;
+  envilderIamDesc: string;
+  envilderIamNote: string;
+  layerTitle: string;
+  layerDesc: string;
+  layerComment: string;
+  layerNote: string;
+  compareTitle: string;
+  compareDesc: string;
+  thAspect: string;
+  thOfficial: string;
+  thEnvilder: string;
+  compareRows: { label: string; official: string; envilder: string }[];
+  chooseTitle: string;
+  chooseOfficialTitle: string;
+  chooseOfficialItems: string[];
+  chooseEnvilderTitle: string;
+  chooseEnvilderItems: string[];
+  chooseNote: string;
+  localTitle: string;
+  localDesc: string;
+  localWarn: string;
+  localOutputDesc: string;
+  localMissingNote: string;
+  relatedTitle: string;
+  relatedSdk: string;
+  relatedSsm: string;
+  relatedGha: string;
+  relatedAws: string;
+  relatedMap: string;
+}
+
 export interface PushReferenceTranslations {
   tabAws: string;
   tabAzure: string;
@@ -913,6 +971,7 @@ export interface DocsTranslations {
   guideSsmToEnv: GuideSsmToEnvTranslations;
   guideAzureKeyVaultToEnv: GuideAzureKeyVaultToEnvTranslations;
   guideGithubActionsSsm: GuideGithubActionsSsmTranslations;
+  guideDotnetParameterStore: GuideDotnetParameterStoreTranslations;
   pushReference: PushReferenceTranslations;
   execReference: ExecReferenceTranslations;
   validateReference: ValidateReferenceTranslations;
@@ -928,6 +987,7 @@ export interface DocsTranslations {
     | 'guide-ssm-to-env'
     | 'guide-azure-key-vault-to-env'
     | 'guide-github-actions-ssm'
+    | 'guide-dotnet-parameter-store'
     | 'aws-ssm'
     | 'azure-key-vault'
     | 'custom-provider'
