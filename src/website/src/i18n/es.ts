@@ -1099,12 +1099,12 @@ export const es: Translations = {
       startOldNote:
         'Las versiones publicadas antes de ese cambio todavía arrancan sin token. La salida de esta página se obtuvo con localstack/localstack:4.14.0, iniciada con docker run y sin token. Es anterior al cambio, así que considérala una solución provisional y no una opción por defecto.',
       startHealthNote:
-        'LocalStack responde en http://localhost:4566/_localstack/health cuando está listo.',
+        'LocalStack responde en http://127.0.0.1:4566/_localstack/health cuando está listo.',
       pointTitle: 'Apunta Envilder a LocalStack',
       pointDesc:
         'Envilder no tiene ninguna opción para LocalStack, y el archivo de mapa no tiene ningún campo de endpoint: $config solo acepta provider, vaultUrl y profile. Envilder no pasa ningún endpoint a su cliente de AWS, así que el SDK de AWS para JavaScript que usa la CLI aplica su propia resolución, y esa lee AWS_ENDPOINT_URL del entorno. Define cuatro variables en el shell que ejecuta Envilder:',
       pointItems: [
-        'AWS_ENDPOINT_URL: la pasarela de LocalStack, http://localhost:4566.',
+        'AWS_ENDPOINT_URL: la pasarela de LocalStack, http://127.0.0.1:4566.',
         'AWS_REGION: cualquier región. Hay que sembrar y leer con la misma, porque los parámetros se guardan por región. Envilder lee primero AWS_REGION, luego AWS_DEFAULT_REGION, y termina en us-east-1 si no encuentra ninguna.',
         'AWS_ACCESS_KEY_ID y AWS_SECRET_ACCESS_KEY: valores ficticios como test. LocalStack acepta cualquier credencial, pero el SDK necesita alguna.',
       ],

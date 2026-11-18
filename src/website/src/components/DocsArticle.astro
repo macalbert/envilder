@@ -447,22 +447,22 @@ const gaErrors = [
 const lt = t.docs.guideLocalstackIntegrationTests;
 
 const ltRun =
-  'docker run -d --name localstack -p 4566:4566 -e LOCALSTACK_AUTH_TOKEN localstack/localstack';
+  'docker run -d --name localstack -p 127.0.0.1:4566:4566 -e LOCALSTACK_AUTH_TOKEN localstack/localstack';
 
 const ltCompose = `services:
   localstack:
     image: localstack/localstack
     ports:
-      - "4566:4566"
+      - "127.0.0.1:4566:4566"
     environment:
       LOCALSTACK_AUTH_TOKEN: \${LOCALSTACK_AUTH_TOKEN}`;
 
-const ltEnvBash = `export AWS_ENDPOINT_URL=http://localhost:4566
+const ltEnvBash = `export AWS_ENDPOINT_URL=http://127.0.0.1:4566
 export AWS_REGION=us-east-1
 export AWS_ACCESS_KEY_ID=test
 export AWS_SECRET_ACCESS_KEY=test`;
 
-const ltEnvPowershell = `$env:AWS_ENDPOINT_URL = 'http://localhost:4566'
+const ltEnvPowershell = `$env:AWS_ENDPOINT_URL = 'http://127.0.0.1:4566'
 $env:AWS_REGION = 'us-east-1'
 $env:AWS_ACCESS_KEY_ID = 'test'
 $env:AWS_SECRET_ACCESS_KEY = 'test'`;
@@ -550,8 +550,7 @@ const ltErrors = [
     fix: 'errTokenFix',
   },
   {
-    message:
-      'connect ECONNREFUSED ::1:4566; connect ECONNREFUSED 127.0.0.1:4566',
+    message: 'connect ECONNREFUSED 127.0.0.1:4566',
     fix: 'errRefusedFix',
   },
   {
