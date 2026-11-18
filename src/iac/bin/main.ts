@@ -88,12 +88,16 @@ const config: DeploymentConfig = {
 			githubOwner: "macalbert",
 			deployEnvironment: "production",
 			testParameters: {
-				// e2e/cli.test.ts writes, reads and deletes /Test/<runId>/*;
-				// the GitHub Action test reads /Test/Token.
-				readWrite: ["/Test/*"],
-				// The SDK test fixtures resolve the LocalStack token from the
-				// root envilder.json.
-				readOnly: ["/envilder/development/localstack/authToken"],
+				// e2e/cli.test.ts writes, reads and deletes /Test/<runId>/*.
+				// One level deeper than /Test, so shared fixtures stay read-only.
+				readWrite: ["/Test/*/*"],
+				// The GitHub Action test reads /Test/Token; the SDK test
+				// fixtures resolve the LocalStack token from the root
+				// envilder.json.
+				readOnly: [
+					"/Test/Token",
+					"/envilder/development/localstack/authToken",
+				],
 			},
 		},
 	},

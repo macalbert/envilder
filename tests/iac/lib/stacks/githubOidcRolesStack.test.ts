@@ -63,13 +63,16 @@ describe("GitHub OIDC roles Stack", () => {
 							"ssm:GetParameters",
 							"ssm:PutParameter",
 						],
-						Resource: `arn:aws:ssm:${REGION}:${ACCOUNT}:parameter/Test/*`,
+						Resource: `arn:aws:ssm:${REGION}:${ACCOUNT}:parameter/Test/*/*`,
 					},
 					{
 						Sid: "ReadTestFixtureParameters",
 						Effect: "Allow",
 						Action: ["ssm:GetParameter", "ssm:GetParameters"],
-						Resource: `arn:aws:ssm:${REGION}:${ACCOUNT}:parameter/envilder/development/localstack/authToken`,
+						Resource: [
+							`arn:aws:ssm:${REGION}:${ACCOUNT}:parameter/Test/Token`,
+							`arn:aws:ssm:${REGION}:${ACCOUNT}:parameter/envilder/development/localstack/authToken`,
+						],
 					},
 				],
 			},
@@ -173,8 +176,8 @@ function createGitHubOidcRolesStack(
 		mainBranch: "main",
 		deployEnvironment: "production",
 		testParameters: {
-			readWrite: ["/Test/*"],
-			readOnly: ["/envilder/development/localstack/authToken"],
+			readWrite: ["/Test/*/*"],
+			readOnly: ["/Test/Token", "/envilder/development/localstack/authToken"],
 		},
 		...overrides,
 	});

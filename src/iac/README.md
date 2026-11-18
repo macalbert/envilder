@@ -56,7 +56,7 @@ repositories, so the stack references it and does not create it.
 
 | Role | Trusted subjects | Permissions | Used by |
 | ---- | ---------------- | ----------- | ------- |
-| `envilder-github-tests` | `repo:macalbert/envilder:pull_request`, `repo:macalbert/envilder:ref:refs/heads/main` | Read, write and delete `/Test/*`; read `/envilder/development/localstack/authToken` | Test, coverage and package publish workflows (`AWS_ROLE_TO_ASSUME` repository secret) |
+| `envilder-github-tests` | `repo:macalbert/envilder:pull_request`, `repo:macalbert/envilder:ref:refs/heads/main` | Read, write and delete per-run parameters under `/Test/*/*`; read `/Test/Token` and `/envilder/development/localstack/authToken` | Test, coverage and package publish workflows (`AWS_ROLE_TO_ASSUME` repository secret) |
 | `envilder-github-website-deploy` | `repo:macalbert/envilder:environment:production` | Assume the CDK bootstrap deploy, file publishing and lookup roles | `publish-website.yml` (`AWS_DEPLOY_ROLE_TO_ASSUME` secret of the `production` environment) |
 
 Pull requests from forks get no OIDC token, so they cannot assume either
