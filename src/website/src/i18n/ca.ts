@@ -31,6 +31,8 @@ export const ca: Translations = {
     getStarted: 'Comença',
     ariaGithub: 'GitHub',
     ariaSponsor: 'Patrocina',
+    starOnGithub: 'Dona una estrella a GitHub',
+    starFallback: 'Estrella',
     ariaToggleMenu: 'Obre el menú',
   },
   theme: {
@@ -544,6 +546,9 @@ export const ca: Translations = {
       errEnvfileFix:
         'exec mai escriu cap fitxer. Treu --envfile, o fes servir pull (envilder --envfile=.env) quan necessitis el fitxer.',
       nextTitle: 'Següents passos',
+      starNote: 'Ha funcionat?',
+      starLink:
+        'Una estrella a GitHub ajuda altres persones a trobar Envilder.',
       nextMap:
         'Referència del fitxer de mapatge: $config, perfils, regles de validació i diversos entorns',
       nextExec: 'envilder exec: codis de sortida, senyals i ús a CI',

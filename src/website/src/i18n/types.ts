@@ -14,6 +14,8 @@ export interface NavLinks {
   getStarted: string;
   ariaGithub: string;
   ariaSponsor: string;
+  starOnGithub: string;
+  starFallback: string;
   ariaToggleMenu: string;
 }
 
@@ -343,6 +345,8 @@ export interface GettingStartedGuideTranslations {
   errEnvfileTitle: string;
   errEnvfileFix: string;
   nextTitle: string;
+  starNote: string;
+  starLink: string;
   nextMap: string;
   nextExec: string;
   nextPull: string;

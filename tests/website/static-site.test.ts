@@ -570,3 +570,43 @@ describe('Static website SEO', () => {
     expect(actual).toEqual(expected);
   });
 });
+
+describe('Static website star calls to action', () => {
+  const repositoryUrl = 'https://github.com/macalbert/envilder';
+  const readStarLink = (file: string) =>
+    readDistFile(file).match(
+      /<a\b[^>]*class="nav-star"[^>]*>[\s\S]*?<\/a>/,
+    )?.[0];
+
+  it.each([
+    ['index.html', 'Star on GitHub'],
+    ['ca/index.html', 'Dona una estrella a GitHub'],
+    ['es/index.html', 'Dale una estrella en GitHub'],
+    ['docs/index.html', 'Star on GitHub'],
+  ])('Should_ShowStarLinkInHeader_When_%s_IsBuilt', (file, label) => {
+    // Arrange
+    const link = readStarLink(file) ?? '';
+
+    // Act
+    const text = link.replace(/<[^>]*>/g, '').trim();
+
+    // Assert
+    expect(link).toContain(`href="${repositoryUrl}"`);
+    expect(getAttribute(link, 'aria-label')).toContain(label);
+    expect(text).toMatch(/^★ \S+$/);
+  });
+
+  it('Should_AddClosingStarNote_When_GettingStartedPageIsBuilt', () => {
+    // Arrange
+    const html = readDistFile('docs/getting-started/index.html');
+
+    // Act
+    const note = html.match(
+      /<p class="note"[^>]*>Did it work\?[\s\S]*?<\/p>/,
+    )?.[0];
+
+    // Assert
+    expect(note).toContain(`href="${repositoryUrl}"`);
+    expect(note).toContain('A GitHub star helps others find Envilder.');
+  });
+});
