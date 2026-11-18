@@ -1,4 +1,5 @@
 import { Stack, type StackProps, Tags } from "aws-cdk-lib";
+import { ManagedPolicy, PermissionsBoundary } from "aws-cdk-lib/aws-iam";
 import type { Construct } from "constructs";
 import type { AppEnvironment } from "../core/types";
 import { formatRepoNameForCloudFormation } from "./utils";
@@ -15,6 +16,8 @@ export interface CustomStackProps extends StackProps {
 	envName: AppEnvironment;
 	name: string;
 	stackName: string;
+	/** Managed policy name applied as permissions boundary to every role. */
+	permissionsBoundaryName?: string;
 }
 
 export class CustomStack extends Stack {
@@ -26,6 +29,16 @@ export class CustomStack extends Stack {
 		this.props = props;
 
 		this.addProjectTags();
+
+		if (props.permissionsBoundaryName) {
+			PermissionsBoundary.of(this).apply(
+				ManagedPolicy.fromManagedPolicyName(
+					this,
+					"PermissionsBoundary",
+					props.permissionsBoundaryName,
+				),
+			);
+		}
 	}
 
 	getStackId(): string {

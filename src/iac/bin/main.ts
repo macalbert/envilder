@@ -4,7 +4,7 @@ import type { Environment, Stack } from "aws-cdk-lib";
 /**
  * CDK Infrastructure Deployment Entry Point
  */
-import { App } from "aws-cdk-lib";
+import { App, DefaultStackSynthesizer } from "aws-cdk-lib";
 import { AppEnvironment } from "../lib/core/types";
 import {
 	GitHubOidcRolesStack,
@@ -29,11 +29,20 @@ interface PublicFilesConfig {
 	certificateId: string;
 }
 
+interface WebsiteBootstrapConfig {
+	/** CDK bootstrap qualifier reserved for the website stacks. */
+	qualifier: string;
+	executionPolicyName: string;
+	lambdaBoundaryName: string;
+	bootstrapBoundaryName: string;
+}
+
 interface GitHubOidcRolesConfig {
 	name: string;
 	githubOwner: string;
 	deployEnvironment: string;
 	testParameters: TestParameterPaths;
+	websiteDeployment: WebsiteBootstrapConfig;
 }
 
 interface DeploymentConfig {
@@ -94,10 +103,15 @@ const config: DeploymentConfig = {
 				// The GitHub Action test reads /Test/Token; the SDK test
 				// fixtures resolve the LocalStack token from the root
 				// envilder.json.
-				readOnly: [
-					"/Test/Token",
-					"/envilder/development/localstack/authToken",
-				],
+				readOnly: ["/Test/Token", "/envilder/development/localstack/authToken"],
+			},
+			// The website stacks deploy through their own CDK bootstrap,
+			// whose execution role can only change website resources.
+			websiteDeployment: {
+				qualifier: "envweb",
+				executionPolicyName: "envilder-website-cfn-execution",
+				lambdaBoundaryName: "envilder-website-lambda-boundary",
+				bootstrapBoundaryName: "envilder-website-bootstrap-boundary",
 			},
 		},
 	},
@@ -272,6 +286,23 @@ export function deploy(configOverride?: DeploymentConfig): Stack[] {
 
 		const stacks: Stack[] = [];
 
+		const websiteBootstrap =
+			effectiveConfig.stacks.githubOidcRoles?.websiteDeployment;
+		const websiteStackOptions = () =>
+			websiteBootstrap
+				? {
+						synthesizer: new DefaultStackSynthesizer({
+							qualifier: websiteBootstrap.qualifier,
+						}),
+						permissionsBoundaryName: websiteBootstrap.lambdaBoundaryName,
+					}
+				: {};
+		const websiteStackNames: string[] = [];
+		const websiteBucketNames: string[] = [];
+		const websiteCertificateIds: string[] = [
+			effectiveConfig.domain.certificateId,
+		];
+
 		for (const websiteConfig of effectiveConfig.stacks.frontend
 			.staticWebsites) {
 			const distFolderPath = resolveFullPath(
@@ -294,8 +325,18 @@ export function deploy(configOverride?: DeploymentConfig): Stack[] {
 				envName: effectiveConfig.environment,
 				githubRepo: effectiveConfig.repoName,
 				stackName: `${effectiveConfig.repoName}-${websiteConfig.name}`,
+				...websiteStackOptions(),
 			});
 
+			const websiteDomain = (
+				websiteConfig.subdomain
+					? `${websiteConfig.subdomain}.${effectiveConfig.domain.name}`
+					: effectiveConfig.domain.name
+			).toLowerCase();
+			websiteStackNames.push(
+				`${effectiveConfig.repoName}-${websiteConfig.name}`,
+			);
+			websiteBucketNames.push(websiteDomain, `${websiteDomain}-logs`);
 			stacks.push(stack);
 		}
 
@@ -312,8 +353,14 @@ export function deploy(configOverride?: DeploymentConfig): Stack[] {
 					envName: effectiveConfig.environment,
 					githubRepo: effectiveConfig.repoName,
 					stackName: `${effectiveConfig.repoName}-${publicFiles.name}`,
+					...websiteStackOptions(),
 				}),
 			);
+			websiteStackNames.push(`${effectiveConfig.repoName}-${publicFiles.name}`);
+			websiteBucketNames.push(
+				`${publicFiles.subdomain}.${effectiveConfig.domain.name}`.toLowerCase(),
+			);
+			websiteCertificateIds.push(publicFiles.certificateId);
 		}
 
 		const { githubOidcRoles } = effectiveConfig.stacks;
@@ -327,6 +374,13 @@ export function deploy(configOverride?: DeploymentConfig): Stack[] {
 					mainBranch: effectiveConfig.branch,
 					deployEnvironment: githubOidcRoles.deployEnvironment,
 					testParameters: githubOidcRoles.testParameters,
+					websiteDeployment: {
+						...githubOidcRoles.websiteDeployment,
+						stackNames: websiteStackNames,
+						bucketNames: websiteBucketNames,
+						hostedZoneId: effectiveConfig.domain.hostedZoneId,
+						certificateIds: [...new Set(websiteCertificateIds)],
+					},
 					envName: effectiveConfig.environment,
 					stackName: `${effectiveConfig.repoName}-${githubOidcRoles.name}`,
 				}),

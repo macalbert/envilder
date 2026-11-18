@@ -108,7 +108,7 @@ describe("GitHub OIDC roles Stack", () => {
 		});
 	});
 
-	test("Should_OnlyAllowAssumingCdkBootstrapRoles_When_DeployRoleIsCreated", () => {
+	test("Should_OnlyAllowAssumingWebsiteBootstrapRoles_When_DeployRoleIsCreated", () => {
 		// Arrange
 		const sut = createGitHubOidcRolesStack();
 
@@ -117,7 +117,7 @@ describe("GitHub OIDC roles Stack", () => {
 
 		// Assert
 		const bootstrapRole = (name: string) =>
-			`arn:aws:iam::${ACCOUNT}:role/cdk-hnb659fds-${name}-role-${ACCOUNT}-${REGION}`;
+			`arn:aws:iam::${ACCOUNT}:role/cdk-envweb-${name}-role-${ACCOUNT}-${REGION}`;
 		actual.hasResourceProperties("AWS::IAM::Policy", {
 			Roles: [{ Ref: Match.stringLikeRegexp("WebsiteDeployRole") }],
 			PolicyDocument: {
@@ -135,6 +135,164 @@ describe("GitHub OIDC roles Stack", () => {
 				],
 			},
 		});
+	});
+
+	test("Should_ScopeExecutionPolicyToWebsiteResources_When_StackIsCreated", () => {
+		// Arrange
+		const sut = createGitHubOidcRolesStack();
+
+		// Act
+		const actual = managedPolicyStatements(
+			sut,
+			"envilder-website-cfn-execution",
+		);
+
+		// Assert
+		expect(actual).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					Sid: "ManageWebsiteBuckets",
+					Action: "s3:*",
+					Resource: [
+						"arn:aws:s3:::envilder.com",
+						"arn:aws:s3:::envilder.com/*",
+						"arn:aws:s3:::envilder.com-logs",
+						"arn:aws:s3:::envilder.com-logs/*",
+					],
+				}),
+				expect.objectContaining({
+					Sid: "ManageDnsRecords",
+					Resource: "arn:aws:route53:::hostedzone/Z123",
+				}),
+				expect.objectContaining({
+					Sid: "ManageStackFunctions",
+					Action: "lambda:*",
+					Resource: `arn:aws:lambda:${REGION}:${ACCOUNT}:function:envilder-Website-*`,
+				}),
+			]),
+		);
+	});
+
+	test("Should_RequireLambdaBoundary_When_ExecutionPolicyWritesRoles", () => {
+		// Arrange
+		const sut = createGitHubOidcRolesStack();
+
+		// Act
+		const actual = managedPolicyStatements(
+			sut,
+			"envilder-website-cfn-execution",
+		);
+
+		// Assert
+		expect(actual).toContainEqual(
+			expect.objectContaining({
+				Sid: "WriteBoundedStackRoles",
+				Action: [
+					"iam:AttachRolePolicy",
+					"iam:CreateRole",
+					"iam:DeleteRolePolicy",
+					"iam:DetachRolePolicy",
+					"iam:PutRolePermissionsBoundary",
+					"iam:PutRolePolicy",
+				],
+				Resource: `arn:aws:iam::${ACCOUNT}:role/envilder-Website-*`,
+				Condition: {
+					StringEquals: {
+						"iam:PermissionsBoundary": `arn:aws:iam::${ACCOUNT}:policy/envilder-website-lambda-boundary`,
+					},
+				},
+			}),
+		);
+		expect(actual).toContainEqual(
+			expect.objectContaining({
+				Sid: "PassStackRolesToLambda",
+				Action: "iam:PassRole",
+				Condition: {
+					StringEquals: { "iam:PassedToService": "lambda.amazonaws.com" },
+				},
+			}),
+		);
+	});
+
+	test("Should_OnlyTouchStackRoles_When_ExecutionPolicyGrantsIam", () => {
+		// Arrange
+		const sut = createGitHubOidcRolesStack();
+
+		// Act
+		const actual = managedPolicyStatements(
+			sut,
+			"envilder-website-cfn-execution",
+		)
+			.flatMap((statement) => [statement.Resource].flat())
+			.filter((resource) => String(resource).includes(":iam::"));
+
+		// Assert
+		expect(actual.length).toBeGreaterThan(0);
+		for (const resource of actual) {
+			expect(resource).toBe(`arn:aws:iam::${ACCOUNT}:role/envilder-Website-*`);
+		}
+	});
+
+	test("Should_GrantNoIdentityActions_When_LambdaBoundaryIsCreated", () => {
+		// Arrange
+		const sut = createGitHubOidcRolesStack();
+
+		// Act
+		const actual = managedPolicyStatements(
+			sut,
+			"envilder-website-lambda-boundary",
+		).flatMap((statement) => [statement.Action].flat());
+
+		// Assert
+		expect(actual.length).toBeGreaterThan(0);
+		for (const action of actual) {
+			expect(action).not.toMatch(/^(iam|sts|organizations):|^\*$/);
+		}
+	});
+
+	test("Should_OnlyWriteWebsiteStacks_When_BootstrapBoundaryIsCreated", () => {
+		// Arrange
+		const sut = createGitHubOidcRolesStack();
+
+		// Act
+		const actual = managedPolicyStatements(
+			sut,
+			"envilder-website-bootstrap-boundary",
+		);
+
+		// Assert
+		const cloudFormationWrites = actual.filter((statement) =>
+			[statement.Action]
+				.flat()
+				.some((action) =>
+					/^cloudformation:(Create|Update|Delete|Execute)/.test(action),
+				),
+		);
+		expect(cloudFormationWrites).toEqual([
+			expect.objectContaining({
+				Sid: "WriteWebsiteStacks",
+				Resource: `arn:aws:cloudformation:${REGION}:${ACCOUNT}:stack/envilder-Website/*`,
+			}),
+		]);
+	});
+
+	test("Should_CoverExecutionPolicy_When_BootstrapBoundaryIsCreated", () => {
+		// Arrange
+		const sut = createGitHubOidcRolesStack();
+
+		// Act
+		const actual = managedPolicyStatements(
+			sut,
+			"envilder-website-bootstrap-boundary",
+		);
+
+		// Assert
+		for (const statement of managedPolicyStatements(
+			sut,
+			"envilder-website-cfn-execution",
+		)) {
+			expect(actual).toContainEqual(statement);
+		}
 	});
 
 	test("Should_NotUseWildcardSubjects_When_RolesAreCreated", () => {
@@ -170,6 +328,25 @@ describe("GitHub OIDC roles Stack", () => {
 	});
 });
 
+interface PolicyStatementJson {
+	Sid?: string;
+	Action: string | string[];
+	Resource: unknown;
+	Condition?: unknown;
+}
+
+function managedPolicyStatements(
+	stack: GitHubOidcRolesStack,
+	name: string,
+): PolicyStatementJson[] {
+	const policies = Template.fromStack(stack).findResources(
+		"AWS::IAM::ManagedPolicy",
+		{ Properties: { ManagedPolicyName: name } },
+	);
+	const [policy] = Object.values(policies);
+	return policy.Properties.PolicyDocument.Statement;
+}
+
 function createGitHubOidcRolesStack(
 	overrides: Partial<GitHubOidcRolesStackProps> = {},
 ): GitHubOidcRolesStack {
@@ -186,6 +363,16 @@ function createGitHubOidcRolesStack(
 		testParameters: {
 			readWrite: ["/Test/*/*"],
 			readOnly: ["/Test/Token", "/envilder/development/localstack/authToken"],
+		},
+		websiteDeployment: {
+			qualifier: "envweb",
+			executionPolicyName: "envilder-website-cfn-execution",
+			lambdaBoundaryName: "envilder-website-lambda-boundary",
+			bootstrapBoundaryName: "envilder-website-bootstrap-boundary",
+			stackNames: ["envilder-Website"],
+			bucketNames: ["envilder.com", "envilder.com-logs"],
+			hostedZoneId: "Z123",
+			certificateIds: ["cert-a"],
 		},
 		...overrides,
 	});

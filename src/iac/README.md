@@ -57,7 +57,7 @@ repositories, so the stack references it and does not create it.
 | Role | Trusted subjects | Permissions | Used by |
 | ---- | ---------------- | ----------- | ------- |
 | `envilder-github-tests` | `repo:macalbert/envilder:pull_request`, `repo:macalbert/envilder:ref:refs/heads/main` | Read, write and delete per-run parameters under `/Test/*/*`; read `/Test/Token` and `/envilder/development/localstack/authToken` | Test, coverage and package publish workflows (`AWS_ROLE_TO_ASSUME` repository secret) |
-| `envilder-github-website-deploy` | `repo:macalbert/envilder:environment:production` | Assume the CDK bootstrap deploy, file publishing and lookup roles | `publish-website.yml` (`AWS_DEPLOY_ROLE_TO_ASSUME` secret of the `production` environment) |
+| `envilder-github-website-deploy` | `repo:macalbert/envilder:environment:production` | Assume the deploy, file publishing and lookup roles of the `envweb` CDK bootstrap | `publish-website.yml` (`AWS_DEPLOY_ROLE_TO_ASSUME` secret of the `production` environment) |
 
 Pull requests from forks get no OIDC token, so they cannot assume either
 role. Running a test workflow by hand from a branch other than `main` cannot
@@ -67,20 +67,46 @@ The `production` environment must only allow the `main` branch. GitHub
 creates an environment without protection the first time a job uses it, so
 configure it before the workflow change reaches `main`.
 
-### Deploying the roles
+## Website Bootstrap
 
-The website workflow only deploys the website stack. Deploy this stack from a
-maintainer machine. The CDK app also builds the website stack, which needs the
-built site:
+The website and public files stacks deploy through a CDK bootstrap of their
+own, with the `envweb` qualifier. Its CloudFormation execution role gets the
+`envilder-website-cfn-execution` managed policy instead of
+`AdministratorAccess`, so a website deploy can only change:
+
+- the website buckets, CloudFront resources and the hosted zone records;
+- Lambda functions and roles whose names start with the website stack names.
+
+It can only create or change those roles when they carry the
+`envilder-website-lambda-boundary` permissions boundary, which grants no IAM
+or STS actions.
+
+Every role of the `envweb` bootstrap also carries the
+`envilder-website-bootstrap-boundary` permissions boundary. It only allows
+CloudFormation writes on the website stacks, so the bootstrap deploy role
+cannot update or delete other stacks, which keep their own execution role.
+All three policies are defined in `GitHubOidcRolesStack`.
+
+The default CDK bootstrap keeps `AdministratorAccess` for stacks that
+maintainers deploy, such as `GitHubOidcRolesStack`. The website deploy role
+cannot assume its roles.
+
+## Deploying the Roles and the Website Bootstrap
+
+Run these from a maintainer machine. The CDK app also builds the website
+stack, which needs the built site:
 
 ```bash
 pnpm --filter @envilder/website build
-cd src/iac && pnpm build && cdk deploy macalbert-envilder-githuboidcroles-production-stack
+cd src/iac && pnpm build
+cdk deploy macalbert-envilder-githuboidcroles-production-stack
+cdk bootstrap aws://<account>/<region> --qualifier envweb --toolkit-stack-name CDKToolkit-envweb --cloudformation-execution-policies <WebsiteExecutionPolicyArn> --custom-permissions-boundary envilder-website-bootstrap-boundary --apply-permissions-boundary-to-all-roles
+cdk deploy macalbert-envilder-website-production-stack macalbert-envilder-files-production-stack
 ```
 
-No bootstrap change is needed: the standard CDK bootstrap roles trust their
-own account, and the website deploy role's identity policy allows it to
-assume them.
+`<WebsiteExecutionPolicyArn>` is an output of the roles stack. The last
+command moves both website stacks to the `envweb` bootstrap, which proves
+the execution policy before CI relies on it.
 
 Then, before the workflow change reaches `main`:
 
@@ -89,11 +115,3 @@ Then, before the workflow change reaches `main`:
    stack output.
 3. Set the `AWS_ROLE_TO_ASSUME` repository secret to the `TestsRoleArn` stack
    output.
-
-### Known limit
-
-The CDK bootstrap deploy role runs CloudFormation with the bootstrap execution
-role. With the default `AdministratorAccess` execution policy, a session of
-the website deploy role can still change any stack in the account. The
-`production` environment limits that session to `main`; restricting the
-execution policy is a bootstrap change outside this stack.

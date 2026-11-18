@@ -7,9 +7,12 @@ import {
 } from "aws-cdk-lib/aws-iam";
 import type { Construct } from "constructs";
 import { CustomStack, type CustomStackProps } from "./customStack";
+import {
+	type WebsiteDeploymentConfig,
+	WebsiteDeploymentPolicies,
+} from "./websiteDeploymentPolicies";
 
 const GITHUB_OIDC_HOST = "token.actions.githubusercontent.com";
-const CDK_BOOTSTRAP_QUALIFIER = "hnb659fds";
 
 export interface TestParameterPaths {
 	/** Paths the tests create, read and delete (e.g. `/Test/*`). */
@@ -24,6 +27,7 @@ export interface GitHubOidcRolesStackProps extends CustomStackProps {
 	/** GitHub environment that gates the deploy job. */
 	deployEnvironment: string;
 	testParameters: TestParameterPaths;
+	websiteDeployment: WebsiteDeploymentConfig;
 }
 
 /**
@@ -31,7 +35,8 @@ export interface GitHubOidcRolesStackProps extends CustomStackProps {
  * assume through the account's GitHub OIDC provider.
  *
  * The OIDC provider itself is shared with other repositories and is not
- * managed here.
+ * managed here. The website deploy role only reaches a CDK bootstrap
+ * reserved for the website stacks, whose execution policy is defined here.
  */
 export class GitHubOidcRolesStack extends CustomStack {
 	constructor(scope: Construct, props: GitHubOidcRolesStackProps) {
@@ -75,7 +80,7 @@ export class GitHubOidcRolesStack extends CustomStack {
 
 		const websiteDeployRole = new Role(this, "WebsiteDeployRole", {
 			roleName: `${props.githubRepo}-github-website-deploy`,
-			description: `Website deploy from ${repo} (${props.deployEnvironment} environment): CDK bootstrap roles only`,
+			description: `Website deploy from ${repo} (${props.deployEnvironment} environment): ${props.websiteDeployment.qualifier} CDK bootstrap roles only`,
 			assumedBy: this.githubPrincipal(
 				`repo:${repo}:environment:${props.deployEnvironment}`,
 			),
@@ -86,14 +91,23 @@ export class GitHubOidcRolesStack extends CustomStack {
 				effect: Effect.ALLOW,
 				actions: ["sts:AssumeRole", "sts:TagSession"],
 				resources: ["deploy", "file-publishing", "lookup"].map((name) =>
-					this.cdkBootstrapRoleArn(name),
+					this.cdkBootstrapRoleArn(props.websiteDeployment.qualifier, name),
 				),
 			}),
+		);
+
+		const websitePolicies = new WebsiteDeploymentPolicies(
+			this,
+			"WebsiteDeploymentPolicies",
+			props.websiteDeployment,
 		);
 
 		new CfnOutput(this, "TestsRoleArn", { value: testsRole.roleArn });
 		new CfnOutput(this, "WebsiteDeployRoleArn", {
 			value: websiteDeployRole.roleArn,
+		});
+		new CfnOutput(this, "WebsiteExecutionPolicyArn", {
+			value: websitePolicies.executionPolicy.managedPolicyArn,
 		});
 	}
 
@@ -115,8 +129,8 @@ export class GitHubOidcRolesStack extends CustomStack {
 		return `arn:aws:ssm:${region}:${account}:parameter${path}`;
 	}
 
-	private cdkBootstrapRoleArn(name: string): string {
+	private cdkBootstrapRoleArn(qualifier: string, name: string): string {
 		const { account, region } = Stack.of(this);
-		return `arn:aws:iam::${account}:role/cdk-${CDK_BOOTSTRAP_QUALIFIER}-${name}-role-${account}-${region}`;
+		return `arn:aws:iam::${account}:role/cdk-${qualifier}-${name}-role-${account}-${region}`;
 	}
 }
