@@ -44,6 +44,26 @@ describe("Static website Stack", () => {
 		expect(template).toMatchSnapshot("staticWebsiteStackTest");
 	}, 30_000);
 
+	test("Should_BoundEveryRole_When_PermissionsBoundaryNameIsSet", () => {
+		// Arrange
+		const props = {
+			...createStaticWebsiteStackProps(),
+			permissionsBoundaryName: "website-boundary",
+		};
+
+		// Act
+		const actual = Template.fromStack(new StaticWebsiteStack(new App(), props));
+
+		// Assert
+		const roles = Object.values(actual.findResources("AWS::IAM::Role"));
+		expect(roles.length).toBeGreaterThan(0);
+		for (const role of roles) {
+			expect(JSON.stringify(role.Properties.PermissionsBoundary)).toContain(
+				":policy/website-boundary",
+			);
+		}
+	}, 30_000);
+
 	test("Should_ReturnNotFoundPage_When_OriginReturnsMissingObject", () => {
 		// Arrange
 		const stack = new Stack(new App(), "staticWebsiteStackTest", {

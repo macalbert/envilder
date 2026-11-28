@@ -41,9 +41,42 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  publish:
+  # Pull requests only build the site: they never get AWS credentials.
+  build:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+
+    steps:
+      - name: 🧱 Enter the Pipe (Checkout)
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: 🍄 Grab a Mushroom (Setup Node.js)
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: 📦 Open the ? Block (Install packages)
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗️ Build the Castle (Build website)
+        working-directory: src/website
+        run: pnpm build
+
+  # The deploy role only trusts this environment, which only main can use.
+  publish:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
 
     steps:
       - name: 🧱 Enter the Pipe (Checkout)
@@ -59,10 +92,9 @@ jobs:
           cache: "pnpm"
 
       - name: 🪙 Collect Coins (Configure AWS credentials)
-        if: github.event_name != 'pull_request'
         uses: aws-actions/configure-aws-credentials@v6.3.0
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: 📦 Open the ? Block (Install packages)
@@ -73,21 +105,19 @@ jobs:
         run: pnpm build
 
       - name: 🔭 Scout the Changes (List changed pages for IndexNow)
-        if: github.event_name != 'pull_request'
         continue-on-error: true
         timeout-minutes: 3
         working-directory: src/website
         run: node scripts/indexnow.mjs --out "$RUNNER_TEMP/indexnow-changed.json"
 
       - name: 🌟 Warp to the Cloud (Deploy infrastructure)
-        if: github.event_name != 'pull_request'
         working-directory: src/iac
         run: |
           node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('cdk.json','utf8'));delete c.profile;fs.writeFileSync('cdk.json',JSON.stringify(c,null,2));"
           npx cdk deploy macalbert-envilder-website-production-stack --require-approval never
 
       - name: 📯 Blow the Horn (Notify search engines of changed pages)
-        if: github.event_name != 'pull_request' && success()
+        if: success()
         continue-on-error: true
         timeout-minutes: 2
         working-directory: src/website
