@@ -952,6 +952,249 @@ export const en: Translations = {
       relatedExec: 'envilder exec reference',
       relatedMap: 'Map file reference',
     },
+    alternatives: {
+      whatTitle: 'What Envilder is, and what it is not',
+      whatItems: [
+        'A map file, envilder.json, that lists each variable and the AWS SSM parameter or Azure Key Vault secret it comes from. It is committed to Git without any value.',
+        'A CLI, a GitHub Action and .NET, Python and Node.js SDKs that read those values from your own vault and hand them to your command, your job or your process.',
+        'Not a vault. The values stay in AWS SSM Parameter Store or Azure Key Vault, and AWS or Azure keep deciding who can read them.',
+        'Not a hosted service, a dashboard, a rotation engine or a Kubernetes operator.',
+      ],
+      tableTitle: 'At a glance',
+      tableDesc:
+        'Where each tool keeps secret values, and how it relates to AWS SSM Parameter Store and Azure Key Vault.',
+      thTool: 'Tool',
+      thKind: 'What it is',
+      thValues: 'Where the values live',
+      thSsm: 'AWS SSM Parameter Store',
+      thKeyVault: 'Azure Key Vault',
+      rows: [
+        {
+          tool: 'Envilder',
+          kind: 'Mapping and resolution layer: CLI, GitHub Action and SDKs',
+          values: 'In your AWS SSM or Azure Key Vault',
+          ssm: 'Reads and writes directly',
+          keyVault: 'Reads and writes directly',
+        },
+        {
+          tool: 'Doppler',
+          kind: 'Hosted secrets manager with a dashboard and a CLI',
+          values: 'In Doppler',
+          ssm: 'Sync target: Doppler writes a copy',
+          keyVault: 'Sync target: Doppler writes a copy',
+        },
+        {
+          tool: 'Infisical',
+          kind: 'Open source platform, on Infisical Cloud or self-hosted',
+          values: 'In Infisical',
+          ssm: 'Sync target: Infisical writes a copy',
+          keyVault: 'Sync target: Infisical writes a copy',
+        },
+        {
+          tool: 'chamber',
+          kind: 'CLI for AWS',
+          values: 'In AWS SSM Parameter Store by default',
+          ssm: 'Reads and writes directly (default backend)',
+          keyVault: 'Not listed as a backend',
+        },
+        {
+          tool: 'SOPS',
+          kind: 'Editor of encrypted files',
+          values: 'In the encrypted files',
+          ssm: 'Not applicable',
+          keyVault: 'One of the supported encryption backends',
+        },
+        {
+          tool: 'dotenvx',
+          kind: 'Encrypts .env files',
+          values: 'In the encrypted .env file, with the key kept apart',
+          ssm: 'Not applicable',
+          keyVault: 'Not applicable',
+        },
+      ],
+      tableNote:
+        'A sync target is a store that receives a copy of values kept in the tool. Not applicable means the tool does not work with that kind of store.',
+      toolsTitle: 'When to choose another tool',
+      tools: [
+        {
+          title: 'Doppler',
+          desc: 'Doppler is a hosted secrets manager. Secrets live in Doppler projects and configs, and its CLI injects them with doppler run. Its integrations can sync them into AWS Parameter Store and Azure Key Vault, so those stores receive a copy while Doppler stays the place where people edit. Envilder has no store of its own: it reads the AWS or Azure store directly.',
+          chooseTitle: 'Choose Doppler instead when:',
+          choose: [
+            'You want a web dashboard where people manage secrets per project and environment.',
+            'You need secret rotation. Doppler documents rotated secrets for services such as AWS IAM users and databases.',
+            'You want change requests, activity logs, SAML single sign-on or SCIM provisioning built into the product.',
+            'You want one place that feeds many platforms, not only AWS and Azure.',
+          ],
+        },
+        {
+          title: 'Infisical',
+          desc: 'Infisical describes itself as an open source security infrastructure platform. Its repository is MIT licensed except for the ee directories, which hold features that need an Infisical license. It stores secrets itself, on Infisical Cloud or self-hosted, and its Secret Syncs push them to destinations such as AWS Parameter Store and Azure Key Vault.',
+          chooseTitle: 'Choose Infisical instead when:',
+          choose: [
+            'You want an open source vault with a dashboard that you can host yourself.',
+            'You need secret rotation, dynamic secrets, secret versioning with point-in-time recovery or approval workflows.',
+            'You want a Kubernetes operator, or an agent that injects secrets without code changes.',
+            'You want secret scanning, certificates or privileged access in the same platform.',
+          ],
+        },
+        {
+          title: 'chamber',
+          desc: 'chamber, from Segment, is a CLI that stores secrets in AWS SSM Parameter Store, with AWS Secrets Manager and S3 as other backends (its README marks S3 as experimental). chamber exec loads every secret under one or more services into the environment of a command. It is the closest tool to Envilder for AWS: no extra store. It works with AWS only and picks secrets by service name, where Envilder lists each variable and its path in a reviewable map file and also supports Azure Key Vault.',
+          chooseTitle: 'Choose chamber instead when:',
+          choose: [
+            'You only use AWS and want every secret under a service loaded without listing them one by one.',
+            'You want AWS Secrets Manager as the backend. Envilder does not support it.',
+            'You want its list, history, tag and find commands to inspect the store from a terminal.',
+          ],
+        },
+        {
+          title: 'SOPS',
+          desc: 'SOPS is an editor of encrypted files in YAML, JSON, ENV, INI and binary formats. It encrypts with AWS KMS, GCP KMS, Azure Key Vault, HuaweiCloud KMS, age or PGP, and is a CNCF sandbox project under the Mozilla Public License 2.0. The values live in the encrypted file itself, so there is no separate secret store to read from. With Envilder the repository holds names and paths, never values, not even encrypted ones.',
+          chooseTitle: 'Choose SOPS instead when:',
+          choose: [
+            'You want secrets committed to Git in encrypted form and versioned together with the code.',
+            'You need to encrypt whole configuration files in formats such as YAML or JSON, not only variables.',
+            'You already work with age or PGP keys, or with a key service such as AWS KMS or Azure Key Vault, and want no secret store.',
+          ],
+        },
+        {
+          title: 'dotenvx',
+          desc: 'dotenvx encrypts the values of .env files so that the encrypted file can be committed to Git. A private key, kept in .env.keys or in the DOTENV_PRIVATE_KEY environment variable, decrypts them when dotenvx run starts your command. Its README does not list AWS SSM or Azure Key Vault as sources.',
+          chooseTitle: 'Choose dotenvx instead when:',
+          choose: [
+            'You want secrets to travel with the code in Git and be unlocked by one private key at run time.',
+            'You do not have, or do not want to use, an AWS or Azure account for secrets.',
+            'You want to keep a .env workflow that works with any language.',
+          ],
+        },
+      ],
+      notTitle: 'When not to choose Envilder',
+      notDesc:
+        'Envilder is a good fit when AWS SSM Parameter Store or Azure Key Vault already holds your secrets and you want one reviewable map over them. It is the wrong tool when:',
+      notItems: [
+        'You need a dashboard where people who do not use a terminal manage secrets. Envilder has no UI: values change in the AWS or Azure console, or with envilder --push.',
+        'You need secret rotation or dynamic secrets. Envilder reads and writes values; it does not rotate them.',
+        'You need a hosted vault, or you have no AWS or Azure account. Envilder only reads vaults you already run.',
+        'You want secrets committed to Git in encrypted form. Envilder commits names and paths only, so SOPS or dotenvx fit better.',
+        'You need a controller that syncs secrets into native Kubernetes Secret objects. Envilder resolves values in a job or a process and ships no operator.',
+        'You need a backend other than AWS SSM Parameter Store or Azure Key Vault. AWS Secrets Manager and Google Cloud Secret Manager are not available.',
+        'You need approval workflows, change history or audit logs inside the tool. Envilder adds none of its own: use what AWS or Azure provide.',
+      ],
+      modesTitle: 'Choose the mode: where should secrets be resolved?',
+      modesDesc:
+        'The same envilder.json works in every mode, so the choice is about where the values are needed, not about the map file.',
+      thScenario: 'Scenario',
+      thUse: 'Use',
+      thWhy: 'Why',
+      modeRows: [
+        {
+          scenario: 'Local development',
+          use: 'envilder exec',
+          why: 'Starts your command with the values in its environment and writes no .env file. Pull to a .env file only when a tool needs one.',
+        },
+        {
+          scenario: 'CI/CD on GitHub',
+          use: 'The GitHub Action',
+          why: 'After a separate OIDC sign-in step (configure-aws-credentials or azure/login), exports the values, with log masking, to the later steps of the job.',
+        },
+        {
+          scenario:
+            'AWS Lambda, Azure Functions, Container Apps, ECS/Fargate and App Service',
+          use: 'The SDKs for .NET, Python and Node.js',
+          why: 'Resolve the values inside the application at start-up, with the identity the platform gives it, such as an IAM role or a managed identity. No file and no extra process.',
+        },
+      ],
+      modesNote:
+        'Teams that deploy to serverless functions or managed containers without a platform team can use the SDKs as they are: there is nothing to install on the host.',
+      commentLocal:
+        '# Local development: values only in the command environment',
+      commentFile: '# When a tool needs a .env file',
+      sourcesTitle: 'Sources',
+      sourcesDesc:
+        'Statements about other tools come from their official documentation, read in November 2026. Products change, so check their pages for the current state.',
+      sources: [
+        {
+          label: 'Doppler: CLI guide',
+          href: 'https://docs.doppler.com/docs/cli',
+        },
+        {
+          label: 'Doppler: AWS Parameter Store',
+          href: 'https://docs.doppler.com/docs/aws-parameter-store',
+        },
+        {
+          label: 'Doppler: Azure Key Vault',
+          href: 'https://docs.doppler.com/docs/azure-key-vault',
+        },
+        {
+          label: 'Doppler: documentation index',
+          href: 'https://docs.doppler.com/llms.txt',
+        },
+        {
+          label: 'Infisical: README',
+          href: 'https://github.com/Infisical/infisical#readme',
+        },
+        {
+          label: 'Infisical: AWS Parameter Store sync',
+          href: 'https://infisical.com/docs/integrations/secret-syncs/aws-parameter-store',
+        },
+        {
+          label: 'Infisical: Azure Key Vault sync',
+          href: 'https://infisical.com/docs/integrations/secret-syncs/azure-key-vault',
+        },
+        {
+          label: 'chamber: README',
+          href: 'https://github.com/segmentio/chamber#readme',
+        },
+        {
+          label: 'SOPS: documentation',
+          href: 'https://getsops.io/docs/',
+        },
+        {
+          label: 'dotenvx: README',
+          href: 'https://github.com/dotenvx/dotenvx#readme',
+        },
+      ],
+      relatedTitle: 'Related',
+      related: [
+        {
+          path: '/docs/getting-started/',
+          label: 'Get started with Envilder',
+        },
+        {
+          path: '/docs/guides/ssm-to-env/',
+          label: 'Load AWS SSM parameters into a .env file',
+        },
+        {
+          path: '/docs/guides/azure-key-vault-to-env/',
+          label: 'Sync Azure Key Vault secrets into a .env file',
+        },
+        {
+          path: '/docs/guides/github-actions-ssm/',
+          label: 'Load AWS SSM parameters in GitHub Actions',
+        },
+        {
+          path: '/docs/cli/exec/',
+          label: 'envilder exec reference',
+        },
+        {
+          path: '/docs/github-action/',
+          label: 'GitHub Action reference',
+        },
+        {
+          path: '/docs/sdks/dotnet/',
+          label: '.NET SDK',
+        },
+        {
+          path: '/docs/sdks/python/',
+          label: 'Python SDK',
+        },
+        {
+          path: '/docs/sdks/nodejs/',
+          label: 'Node.js SDK',
+        },
+      ],
+    },
     guideGithubActionsSsm: {
       flowTitle: 'How it works',
       flowItems: [
@@ -1502,6 +1745,20 @@ export const en: Translations = {
         cardTitle: 'Get started with Envilder',
         cardSummary:
           'Install the CLI, map one secret and run your app with envilder exec, for AWS SSM or Azure Key Vault.',
+      },
+      alternatives: {
+        title: 'Envilder vs Doppler, Infisical, chamber, SOPS and dotenvx',
+        description:
+          'Compare Envilder with Doppler, Infisical, chamber, SOPS and dotenvx: where secret values live, AWS SSM and Azure Key Vault support, and when each tool fits.',
+        heading:
+          'Envilder compared with Doppler, Infisical, chamber, SOPS and dotenvx',
+        intro:
+          'Is there an open source alternative to Doppler or Infisical that uses AWS SSM or Azure Key Vault directly? Envilder is an MIT-licensed CLI, GitHub Action and set of SDKs that reads secrets straight from AWS SSM Parameter Store or Azure Key Vault, using a map file in Git that holds names and paths, not values. It is not a vault: Doppler and Infisical store the secrets themselves and add a dashboard, rotation and syncs, while Envilder maps and resolves the secrets already in the vault you run. This page compares it with them and with chamber, SOPS and dotenvx, and says when not to choose Envilder.',
+        breadcrumb: 'Alternatives',
+        navLabel: 'Alternatives',
+        cardTitle: 'Envilder and its alternatives',
+        cardSummary:
+          'An honest comparison with Doppler, Infisical, chamber, SOPS and dotenvx, and when not to choose Envilder.',
       },
       'guide-ssm-to-env': {
         title: 'Load AWS SSM Parameter Store secrets into a .env file',

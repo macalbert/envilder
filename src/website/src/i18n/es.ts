@@ -964,6 +964,249 @@ export const es: Translations = {
       relatedExec: 'Referencia de envilder exec',
       relatedMap: 'Referencia del archivo de mapa',
     },
+    alternatives: {
+      whatTitle: 'Qué es Envilder y qué no es',
+      whatItems: [
+        'Un archivo de mapeo, envilder.json, que lista cada variable y el parámetro de AWS SSM o el secreto de Azure Key Vault del que sale. Se versiona en Git sin ningún valor.',
+        'Una CLI, una GitHub Action y unos SDK para .NET, Python y Node.js que leen esos valores de tu caja fuerte y se los pasan a tu comando, a tu job o a tu proceso.',
+        'No es una caja fuerte. Los valores se quedan en AWS SSM Parameter Store o en Azure Key Vault, y AWS o Azure siguen decidiendo quién puede leerlos.',
+        'No es un servicio alojado, un panel, un motor de rotación ni un operador de Kubernetes.',
+      ],
+      tableTitle: 'De un vistazo',
+      tableDesc:
+        'Dónde guarda cada herramienta los valores de los secretos, y cómo se relaciona con AWS SSM Parameter Store y Azure Key Vault.',
+      thTool: 'Herramienta',
+      thKind: 'Qué es',
+      thValues: 'Dónde viven los valores',
+      thSsm: 'AWS SSM Parameter Store',
+      thKeyVault: 'Azure Key Vault',
+      rows: [
+        {
+          tool: 'Envilder',
+          kind: 'Capa de mapeo y resolución: CLI, GitHub Action y SDK',
+          values: 'En tu AWS SSM o Azure Key Vault',
+          ssm: 'Lee y escribe directamente',
+          keyVault: 'Lee y escribe directamente',
+        },
+        {
+          tool: 'Doppler',
+          kind: 'Gestor de secretos alojado, con panel y CLI',
+          values: 'En Doppler',
+          ssm: 'Destino de sincronización: Doppler escribe una copia',
+          keyVault: 'Destino de sincronización: Doppler escribe una copia',
+        },
+        {
+          tool: 'Infisical',
+          kind: 'Plataforma de código abierto, en Infisical Cloud o autoalojada',
+          values: 'En Infisical',
+          ssm: 'Destino de sincronización: Infisical escribe una copia',
+          keyVault: 'Destino de sincronización: Infisical escribe una copia',
+        },
+        {
+          tool: 'chamber',
+          kind: 'CLI para AWS',
+          values: 'En AWS SSM Parameter Store por defecto',
+          ssm: 'Lee y escribe directamente (backend por defecto)',
+          keyVault: 'No figura como backend',
+        },
+        {
+          tool: 'SOPS',
+          kind: 'Editor de archivos cifrados',
+          values: 'En los archivos cifrados',
+          ssm: 'No aplica',
+          keyVault: 'Uno de los backends de cifrado compatibles',
+        },
+        {
+          tool: 'dotenvx',
+          kind: 'Cifra archivos .env',
+          values: 'En el archivo .env cifrado, con la clave aparte',
+          ssm: 'No aplica',
+          keyVault: 'No aplica',
+        },
+      ],
+      tableNote:
+        'Un destino de sincronización es un almacén que recibe una copia de valores guardados en la herramienta. No aplica significa que la herramienta no trabaja con ese tipo de almacén.',
+      toolsTitle: 'Cuándo elegir otra herramienta',
+      tools: [
+        {
+          title: 'Doppler',
+          desc: 'Doppler es un gestor de secretos alojado. Los secretos viven en proyectos y configuraciones de Doppler, y su CLI los inyecta con doppler run. Sus integraciones pueden sincronizarlos a AWS Parameter Store y Azure Key Vault, de modo que esos almacenes reciben una copia mientras Doppler sigue siendo el lugar donde se edita. Envilder no tiene almacén propio: lee directamente el de AWS o Azure.',
+          chooseTitle: 'Elige Doppler en lugar de Envilder cuando:',
+          choose: [
+            'Quieres un panel web donde la gente gestione los secretos por proyecto y entorno.',
+            'Necesitas rotación de secretos. Doppler documenta secretos rotados para servicios como usuarios IAM de AWS y bases de datos.',
+            'Quieres solicitudes de cambio, registros de actividad, inicio de sesión único SAML o aprovisionamiento SCIM dentro del producto.',
+            'Quieres un solo lugar que alimente muchas plataformas, no solo AWS y Azure.',
+          ],
+        },
+        {
+          title: 'Infisical',
+          desc: 'Infisical se describe como una plataforma de código abierto de infraestructura de seguridad. Su repositorio tiene licencia MIT salvo los directorios ee, que contienen funciones que requieren una licencia de Infisical. Guarda él mismo los secretos, en Infisical Cloud o autoalojado, y sus Secret Syncs los envían a destinos como AWS Parameter Store y Azure Key Vault.',
+          chooseTitle: 'Elige Infisical en lugar de Envilder cuando:',
+          choose: [
+            'Quieres una caja fuerte de código abierto con panel que puedas alojar tú mismo.',
+            'Necesitas rotación de secretos, secretos dinámicos, versiones de secretos con recuperación a un punto en el tiempo o flujos de aprobación.',
+            'Quieres un operador de Kubernetes, o un agente que inyecte secretos sin cambiar el código.',
+            'Quieres escaneo de secretos, certificados o acceso privilegiado en la misma plataforma.',
+          ],
+        },
+        {
+          title: 'chamber',
+          desc: 'chamber, de Segment, es una CLI que guarda secretos en AWS SSM Parameter Store, con AWS Secrets Manager y S3 como otros backends (su README marca S3 como experimental). chamber exec carga todos los secretos de uno o más servicios en el entorno de un comando. Es la herramienta más cercana a Envilder para AWS: ningún almacén adicional. Solo funciona con AWS y elige los secretos por nombre de servicio, mientras que Envilder lista cada variable y su ruta en un archivo de mapeo revisable y también admite Azure Key Vault.',
+          chooseTitle: 'Elige chamber en lugar de Envilder cuando:',
+          choose: [
+            'Solo usas AWS y quieres cargar todos los secretos de un servicio sin listarlos uno a uno.',
+            'Quieres AWS Secrets Manager como backend. Envilder no lo soporta.',
+            'Quieres sus comandos list, history, tag y find para inspeccionar el almacén desde un terminal.',
+          ],
+        },
+        {
+          title: 'SOPS',
+          desc: 'SOPS es un editor de archivos cifrados en formatos YAML, JSON, ENV, INI y binario. Cifra con AWS KMS, GCP KMS, Azure Key Vault, HuaweiCloud KMS, age o PGP, y es un proyecto sandbox de la CNCF con licencia Mozilla Public License 2.0. Los valores viven en el propio archivo cifrado, así que no hay un almacén de secretos aparte del que leer. Con Envilder el repositorio guarda nombres y rutas, nunca valores, ni siquiera cifrados.',
+          chooseTitle: 'Elige SOPS en lugar de Envilder cuando:',
+          choose: [
+            'Quieres secretos versionados en Git de forma cifrada, junto con el código.',
+            'Necesitas cifrar archivos de configuración enteros en formatos como YAML o JSON, no solo variables.',
+            'Ya trabajas con claves age o PGP, o con un servicio de claves como AWS KMS o Azure Key Vault, y no quieres un almacén de secretos.',
+          ],
+        },
+        {
+          title: 'dotenvx',
+          desc: 'dotenvx cifra los valores de los archivos .env para que el archivo cifrado se pueda versionar en Git. Una clave privada, guardada en .env.keys o en la variable de entorno DOTENV_PRIVATE_KEY, los descifra cuando dotenvx run arranca tu comando. Su README no lista AWS SSM ni Azure Key Vault como fuentes.',
+          chooseTitle: 'Elige dotenvx en lugar de Envilder cuando:',
+          choose: [
+            'Quieres que los secretos viajen con el código en Git y los desbloquee una sola clave privada en tiempo de ejecución.',
+            'No tienes, o no quieres usar, una cuenta de AWS o Azure para los secretos.',
+            'Quieres mantener un flujo de trabajo con .env que funcione con cualquier lenguaje.',
+          ],
+        },
+      ],
+      notTitle: 'Cuándo no elegir Envilder',
+      notDesc:
+        'Envilder encaja cuando AWS SSM Parameter Store o Azure Key Vault ya guardan tus secretos y quieres un único mapa revisable por encima. No es la herramienta adecuada cuando:',
+      notItems: [
+        'Necesitas un panel donde gente que no usa un terminal gestione los secretos. Envilder no tiene interfaz: los valores se cambian en la consola de AWS o Azure, o con envilder --push.',
+        'Necesitas rotación de secretos o secretos dinámicos. Envilder lee y escribe valores; no los rota.',
+        'Necesitas una caja fuerte alojada, o no tienes cuenta de AWS ni de Azure. Envilder solo lee cajas fuertes que ya tienes.',
+        'Quieres secretos versionados en Git de forma cifrada. Envilder solo versiona nombres y rutas, así que SOPS o dotenvx encajan mejor.',
+        'Necesitas un controlador que sincronice secretos a objetos Secret nativos de Kubernetes. Envilder resuelve los valores en un job o un proceso y no incluye ningún operador.',
+        'Necesitas un backend distinto de AWS SSM Parameter Store o Azure Key Vault. AWS Secrets Manager y Google Cloud Secret Manager no están disponibles.',
+        'Necesitas flujos de aprobación, historial de cambios o registros de auditoría dentro de la herramienta. Envilder no añade ninguno: usa lo que ofrecen AWS o Azure.',
+      ],
+      modesTitle: 'Elige el modo: ¿dónde deben resolverse los secretos?',
+      modesDesc:
+        'El mismo envilder.json funciona en todos los modos, así que la elección depende de dónde hacen falta los valores, no del archivo de mapeo.',
+      thScenario: 'Escenario',
+      thUse: 'Usa',
+      thWhy: 'Por qué',
+      modeRows: [
+        {
+          scenario: 'Desarrollo local',
+          use: 'envilder exec',
+          why: 'Arranca tu comando con los valores en su entorno y no escribe ningún archivo .env. Descarga a un archivo .env solo cuando una herramienta lo necesite.',
+        },
+        {
+          scenario: 'CI/CD en GitHub',
+          use: 'La GitHub Action',
+          why: 'Tras un paso de inicio de sesión OIDC separado (configure-aws-credentials o azure/login), exporta los valores, con enmascarado en los logs, a los pasos siguientes del job.',
+        },
+        {
+          scenario:
+            'AWS Lambda, Azure Functions, Container Apps, ECS/Fargate y App Service',
+          use: 'Los SDK para .NET, Python y Node.js',
+          why: 'Resuelven los valores dentro de la aplicación al arrancar, con la identidad que le da la plataforma, como un rol IAM o una identidad administrada. Sin archivo ni proceso adicional.',
+        },
+      ],
+      modesNote:
+        'Los equipos que despliegan en funciones serverless o contenedores gestionados sin equipo de plataforma pueden usar los SDK tal cual: no hay nada que instalar en el host.',
+      commentLocal:
+        '# Desarrollo local: valores solo en el entorno del comando',
+      commentFile: '# Cuando una herramienta necesita un archivo .env',
+      sourcesTitle: 'Fuentes',
+      sourcesDesc:
+        'Las afirmaciones sobre otras herramientas salen de su documentación oficial, leída en noviembre de 2026. Los productos cambian, así que consulta sus páginas para ver el estado actual.',
+      sources: [
+        {
+          label: 'Doppler: guía de la CLI',
+          href: 'https://docs.doppler.com/docs/cli',
+        },
+        {
+          label: 'Doppler: AWS Parameter Store',
+          href: 'https://docs.doppler.com/docs/aws-parameter-store',
+        },
+        {
+          label: 'Doppler: Azure Key Vault',
+          href: 'https://docs.doppler.com/docs/azure-key-vault',
+        },
+        {
+          label: 'Doppler: índice de la documentación',
+          href: 'https://docs.doppler.com/llms.txt',
+        },
+        {
+          label: 'Infisical: README',
+          href: 'https://github.com/Infisical/infisical#readme',
+        },
+        {
+          label: 'Infisical: sincronización con AWS Parameter Store',
+          href: 'https://infisical.com/docs/integrations/secret-syncs/aws-parameter-store',
+        },
+        {
+          label: 'Infisical: sincronización con Azure Key Vault',
+          href: 'https://infisical.com/docs/integrations/secret-syncs/azure-key-vault',
+        },
+        {
+          label: 'chamber: README',
+          href: 'https://github.com/segmentio/chamber#readme',
+        },
+        {
+          label: 'SOPS: documentación',
+          href: 'https://getsops.io/docs/',
+        },
+        {
+          label: 'dotenvx: README',
+          href: 'https://github.com/dotenvx/dotenvx#readme',
+        },
+      ],
+      relatedTitle: 'Relacionado',
+      related: [
+        {
+          path: '/docs/getting-started/',
+          label: 'Empieza con Envilder',
+        },
+        {
+          path: '/docs/guides/ssm-to-env/',
+          label: 'Carga parámetros de AWS SSM en un archivo .env',
+        },
+        {
+          path: '/docs/guides/azure-key-vault-to-env/',
+          label: 'Sincroniza secretos de Azure Key Vault en un archivo .env',
+        },
+        {
+          path: '/docs/guides/github-actions-ssm/',
+          label: 'Carga parámetros de AWS SSM en GitHub Actions',
+        },
+        {
+          path: '/docs/cli/exec/',
+          label: 'Referencia de envilder exec',
+        },
+        {
+          path: '/docs/github-action/',
+          label: 'Referencia de la GitHub Action',
+        },
+        {
+          path: '/docs/sdks/dotnet/',
+          label: 'SDK de .NET',
+        },
+        {
+          path: '/docs/sdks/python/',
+          label: 'SDK de Python',
+        },
+        {
+          path: '/docs/sdks/nodejs/',
+          label: 'SDK de Node.js',
+        },
+      ],
+    },
     guideGithubActionsSsm: {
       flowTitle: 'Cómo funciona',
       flowItems: [
@@ -1520,6 +1763,20 @@ export const es: Translations = {
         cardTitle: 'Primeros pasos con Envilder',
         cardSummary:
           'Instala la CLI, mapea un secreto y ejecuta tu app con envilder exec, para AWS SSM o Azure Key Vault.',
+      },
+      alternatives: {
+        title: 'Envilder vs Doppler, Infisical, chamber, SOPS y dotenvx',
+        description:
+          'Compara Envilder con Doppler, Infisical, chamber, SOPS y dotenvx: dónde viven los valores de los secretos, el soporte de AWS SSM y Azure Key Vault, y cuándo encaja cada herramienta.',
+        heading:
+          'Envilder comparado con Doppler, Infisical, chamber, SOPS y dotenvx',
+        intro:
+          '¿Hay una alternativa de código abierto a Doppler o Infisical que use AWS SSM o Azure Key Vault directamente? Envilder es una CLI, una GitHub Action y unos SDK con licencia MIT que leen los secretos directamente de AWS SSM Parameter Store o de Azure Key Vault, con un archivo de mapeo en Git que guarda nombres y rutas, no valores. No es una caja fuerte: Doppler e Infisical guardan ellos mismos los secretos y añaden un panel, rotación y sincronizaciones, mientras que Envilder mapea y resuelve los secretos que ya tienes en la caja fuerte que usas. Esta página lo compara con ellos y con chamber, SOPS y dotenvx, y dice cuándo no elegir Envilder.',
+        breadcrumb: 'Alternativas',
+        navLabel: 'Alternativas',
+        cardTitle: 'Envilder y sus alternativas',
+        cardSummary:
+          'Una comparación honesta con Doppler, Infisical, chamber, SOPS y dotenvx, y cuándo no elegir Envilder.',
       },
       'guide-ssm-to-env': {
         title: 'Carga parámetros de AWS SSM Parameter Store en un archivo .env',

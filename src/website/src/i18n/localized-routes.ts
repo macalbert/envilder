@@ -2,6 +2,7 @@ export const localizedRoutes = {
   '/': ['en', 'ca', 'es'],
   '/docs/': ['en', 'ca', 'es'],
   '/docs/getting-started/': ['en', 'ca', 'es'],
+  '/docs/alternatives/': ['en', 'ca', 'es'],
   '/docs/guides/ssm-to-env/': ['en', 'ca', 'es'],
   '/docs/guides/azure-key-vault-to-env/': ['en', 'ca', 'es'],
   '/docs/guides/github-actions-ssm/': ['en', 'ca', 'es'],
