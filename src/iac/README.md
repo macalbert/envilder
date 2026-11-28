@@ -110,12 +110,15 @@ pnpm --filter @envilder/website build
 cd src/iac && pnpm build
 cdk deploy macalbert-envilder-githuboidcroles-production-stack
 cdk bootstrap aws://<account>/<region> --qualifier envweb --toolkit-stack-name CDKToolkit-envweb --cloudformation-execution-policies <WebsiteExecutionPolicyArn> --custom-permissions-boundary envilder-website-bootstrap-boundary --apply-permissions-boundary-to-all-roles
-cdk deploy macalbert-envilder-website-production-stack macalbert-envilder-files-production-stack
+cdk deploy macalbert-envilder-website-production-stack macalbert-envilder-files-production-stack --no-previous-parameters
 ```
 
 `<WebsiteExecutionPolicyArn>` is an output of the roles stack. The last
 command moves both website stacks to the `envweb` bootstrap, which proves
-the execution policy before CI relies on it.
+the execution policy before CI relies on it. `--no-previous-parameters` is
+needed on that first move only: by default CDK keeps the stacks'
+`BootstrapVersion` parameter, which still points to the default bootstrap's
+version parameter, and the `envweb` execution role cannot read it.
 
 Then, before the workflow change reaches `main`:
 

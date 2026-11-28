@@ -319,6 +319,27 @@ describe("GitHub OIDC roles Stack", () => {
 		}
 	});
 
+	test("Should_ReadOnlyItsBootstrapVersion_When_ExecutionPolicyReadsParameters", () => {
+		// Arrange
+		const sut = createGitHubOidcRolesStack();
+
+		// Act
+		const actual = managedPolicyStatements(
+			sut,
+			"envilder-website-cfn-execution",
+		).filter((statement) =>
+			[statement.Action].flat().some((action) => action.startsWith("ssm:")),
+		);
+
+		// Assert
+		expect(actual).toEqual([
+			expect.objectContaining({
+				Sid: "ReadBootstrapVersion",
+				Resource: `arn:aws:ssm:${REGION}:${ACCOUNT}:parameter/cdk-bootstrap/envweb/version`,
+			}),
+		]);
+	});
+
 	test("Should_GrantNoIdentityActions_When_LambdaBoundaryIsCreated", () => {
 		// Arrange
 		const sut = createGitHubOidcRolesStack();

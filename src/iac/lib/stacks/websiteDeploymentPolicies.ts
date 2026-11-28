@@ -153,6 +153,16 @@ export class WebsiteDeploymentPolicies extends Construct {
 					`arn:aws:s3:::${assetsBucket}/*`,
 				],
 			}),
+			// CloudFormation resolves the BootstrapVersion SSM parameter with the
+			// execution role.
+			new PolicyStatement({
+				sid: "ReadBootstrapVersion",
+				effect: Effect.ALLOW,
+				actions: ["ssm:GetParameter", "ssm:GetParameters"],
+				resources: [
+					`arn:aws:ssm:${region}:${account}:parameter/cdk-bootstrap/${config.qualifier}/version`,
+				],
+			}),
 			new PolicyStatement({
 				sid: "ManageWebsiteCloudFrontResources",
 				effect: Effect.ALLOW,
@@ -345,14 +355,6 @@ export class WebsiteDeploymentPolicies extends Construct {
 					conditions: {
 						StringEquals: { "kms:ViaService": `s3.${region}.amazonaws.com` },
 					},
-				}),
-				new PolicyStatement({
-					sid: "ReadBootstrapVersion",
-					effect: Effect.ALLOW,
-					actions: ["ssm:GetParameter", "ssm:GetParameters"],
-					resources: [
-						`arn:aws:ssm:${region}:${account}:parameter/cdk-bootstrap/${config.qualifier}/version`,
-					],
 				}),
 				new PolicyStatement({
 					sid: "PassExecutionRole",
