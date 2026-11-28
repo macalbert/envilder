@@ -1102,7 +1102,7 @@ export const ca: Translations = {
         "Envilder no té cap opció per a LocalStack, i el fitxer de mapa no té cap camp d'endpoint: $config només accepta provider, vaultUrl i profile. Envilder no passa cap endpoint al seu client d'AWS, així que l'SDK d'AWS per a JavaScript que usa la CLI aplica la seva pròpia resolució, i aquesta llegeix AWS_ENDPOINT_URL de l'entorn. Defineix quatre variables al shell que executa Envilder:",
       pointItems: [
         'AWS_ENDPOINT_URL: la passarel·la de LocalStack, http://127.0.0.1:4566.',
-        'AWS_REGION: qualsevol regió. Cal sembrar i llegir amb la mateixa, perquè els paràmetres es desen per regió. Envilder llegeix primer AWS_REGION, després AWS_DEFAULT_REGION, i acaba a us-east-1 si no troba cap.',
+        'AWS_REGION: qualsevol regió. Cal sembrar i llegir amb la mateixa, perquè els paràmetres es desen per regió. Envilder llegeix primer AWS_REGION, després AWS_DEFAULT_REGION, i acaba a us-east-1 si no troba cap. Els exemples també fixen AWS_DEFAULT_REGION amb el mateix valor, perquè alguns SDK que fan servir els teus tests (com boto3) només llegeixen aquesta.',
         "AWS_ACCESS_KEY_ID i AWS_SECRET_ACCESS_KEY: valors fictis com test. LocalStack accepta qualsevol credencial, però l'SDK en necessita alguna.",
       ],
       pointBashDesc: 'A bash o zsh:',
