@@ -7,6 +7,8 @@ export const es: Translations = {
       'Mapea variables de entorno a AWS SSM o Azure Key Vault una vez y ejecuta cualquier comando con los secretos en su entorno. Sin .env en disco. CLI, Action y SDKs open source.',
     ogImageAlt:
       'Envilder - ejecuta apps con secretos de AWS SSM y Azure Key Vault, sin archivo .env',
+    organizationDescription:
+      'CLI, GitHub Action y SDKs de ejecución open source que cargan secretos de AWS SSM Parameter Store y Azure Key Vault.',
   },
   notFound: {
     title: 'Página no encontrada | Envilder',
@@ -1495,10 +1497,11 @@ export const es: Translations = {
     intro: 'Todo lo que necesitas para empezar con Envilder.',
     pages: {
       hub: {
-        title: 'Documentación de Envilder',
+        title: 'Envilder docs: secretos de AWS SSM y Key Vault a .env',
         description:
           'Guías para usar Envilder con AWS SSM Parameter Store, Azure Key Vault, la CLI, GitHub Action y SDKs de tiempo de ejecución.',
-        heading: 'Documentación de Envilder',
+        heading:
+          'Envilder docs: carga secretos de AWS SSM y Azure Key Vault en .env, CI y apps',
         intro:
           'Elige una guía para configurar Envilder, resolver secretos o cargarlos en tiempo de ejecución.',
         breadcrumb: 'Documentación',
@@ -1524,7 +1527,7 @@ export const es: Translations = {
       'guide-ssm-to-env': {
         title: 'Carga parámetros de AWS SSM Parameter Store en un archivo .env',
         description:
-          'Exporta parámetros de AWS SSM Parameter Store a un .env con la CLI de Envilder: política IAM, mapa envilder.json, varios entornos, modo exec, CI y errores.',
+          'Usa AWS SSM Parameter Store como caja fuerte de secretos y cárgalo en un .env con la CLI de Envilder: política IAM, mapa envilder.json, entornos, modo exec y CI.',
         heading:
           'Carga parámetros de AWS SSM Parameter Store en un archivo .env',
         intro:
@@ -1568,7 +1571,7 @@ export const es: Translations = {
       'aws-ssm': {
         title: 'Usa Envilder con AWS SSM Parameter Store',
         description:
-          'Configura las credenciales de AWS y los permisos IAM para Envilder con AWS SSM Parameter Store.',
+          'AWS SSM Parameter Store puede hacer de caja fuerte de secretos y Envilder carga desde él. Configura las credenciales de AWS y los permisos IAM para la CLI, la Action y los SDKs.',
         heading: 'AWS SSM',
         intro:
           'Configura credenciales, permisos IAM y un parámetro de prueba para AWS SSM Parameter Store.',
