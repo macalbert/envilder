@@ -649,6 +649,74 @@ export interface GuideGithubActionsSsmTranslations {
   altPoints: string[];
 }
 
+export interface GuideLocalstackIntegrationTestsTranslations {
+  flowTitle: string;
+  flowItems: string[];
+  prereqTitle: string;
+  prereqItems: string[];
+  startTitle: string;
+  startDesc: string;
+  startComposeDesc: string;
+  startTokenNote: string;
+  startOldNote: string;
+  startHealthNote: string;
+  pointTitle: string;
+  pointDesc: string;
+  pointItems: string[];
+  pointBashDesc: string;
+  pointPowershellDesc: string;
+  pointRealAwsWarn: string;
+  pointGitBashNote: string;
+  seedTitle: string;
+  seedDesc: string;
+  seedOutputDesc: string;
+  seedMapDesc: string;
+  seedMapNote: string;
+  seedCommitNote: string;
+  runTitle: string;
+  runDesc: string;
+  runCheckDesc: string;
+  runCheckOutputDesc: string;
+  runInheritNote: string;
+  runProviderNote: string;
+  runExitDesc: string;
+  runMissingTitle: string;
+  runMissingDesc: string;
+  runMissingOutputDesc: string;
+  runDiskNote: string;
+  ciTitle: string;
+  ciDesc: string;
+  commentWait: string;
+  commentSeed: string;
+  commentRun: string;
+  ciNotes: string[];
+  ciMore: string;
+  ciMoreLink: string;
+  altTitle: string;
+  altDesc: string;
+  altDotnet: string;
+  altPython: string;
+  altTypescript: string;
+  altPoints: string[];
+  altChoose: string;
+  errorsTitle: string;
+  thMessage: string;
+  thFix: string;
+  errTokenFix: string;
+  errRefusedFix: string;
+  errCredsFix: string;
+  errNotFoundFix: string;
+  errorsMore: string;
+  errorsMoreLink: string;
+  relatedTitle: string;
+  relatedExec: string;
+  relatedGha: string;
+  relatedSsm: string;
+  relatedPush: string;
+  relatedAws: string;
+  relatedMap: string;
+}
+
 export interface PushReferenceTranslations {
   tabAws: string;
   tabAzure: string;
@@ -913,6 +981,7 @@ export interface DocsTranslations {
   guideSsmToEnv: GuideSsmToEnvTranslations;
   guideAzureKeyVaultToEnv: GuideAzureKeyVaultToEnvTranslations;
   guideGithubActionsSsm: GuideGithubActionsSsmTranslations;
+  guideLocalstackIntegrationTests: GuideLocalstackIntegrationTestsTranslations;
   pushReference: PushReferenceTranslations;
   execReference: ExecReferenceTranslations;
   validateReference: ValidateReferenceTranslations;
@@ -928,6 +997,7 @@ export interface DocsTranslations {
     | 'guide-ssm-to-env'
     | 'guide-azure-key-vault-to-env'
     | 'guide-github-actions-ssm'
+    | 'guide-localstack-integration-tests'
     | 'aws-ssm'
     | 'azure-key-vault'
     | 'custom-provider'
