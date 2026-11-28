@@ -444,6 +444,135 @@ const gaErrors = [
   },
 ] as const;
 
+const dp = t.docs.guideDotnetParameterStore;
+
+const dpInstallOfficial =
+  'dotnet add package Amazon.Extensions.Configuration.SystemsManager';
+
+const dpInstallEnvilder = 'dotnet add package Envilder';
+
+const dpSeed = `aws ssm put-parameter --name /my-app/dev/Database/Password --type SecureString --value local-db-password-1234
+aws ssm put-parameter --name /my-app/dev/Api/Token --type String --value local-api-token-5678`;
+
+const dpOfficialProgram = `using Microsoft.Extensions.Configuration;
+
+var config = new ConfigurationBuilder()
+    // ${dp.officialProgramComment}
+    .AddSystemsManager("/my-app/dev/")
+    .Build();
+
+foreach (var key in new[] { "Database:Password", "Api:Token" })
+{
+    Console.WriteLine($"{key}: {(string.IsNullOrEmpty(config[key]) ? "missing" : "set")}");
+}`;
+
+const dpOfficialOptions = `using Amazon;
+using Amazon.Extensions.NETCore.Setup;
+using Microsoft.Extensions.Configuration;
+
+var awsOptions = new AWSOptions
+{
+    Profile = "dev",
+    Region = RegionEndpoint.EUWest1,
+};
+
+var config = new ConfigurationBuilder()
+    // ${dp.officialOptionsCommentReload}
+    .AddSystemsManager("/my-app/dev/", awsOptions, reloadAfter: TimeSpan.FromMinutes(5))
+    .Build();
+
+var namedConfig = new ConfigurationBuilder()
+    // ${dp.officialOptionsCommentNames}
+    .AddSystemsManager("/my-app/dev/", new[] { "Database/Password" })
+    .Build();`;
+
+const dpOfficialIam = `{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "ssm:GetParametersByPath",
+      "Resource": "arn:aws:ssm:eu-west-1:123456789012:parameter/my-app/dev/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "kms:Decrypt",
+      "Resource": "arn:aws:kms:eu-west-1:123456789012:key/<key-id>"
+    }
+  ]
+}`;
+
+const dpMap = `{
+  "$schema": "https://envilder.com/schema/map-file.v1.json",
+  "$config": {
+    "provider": "aws"
+  },
+  "Database/Password": "/my-app/dev/Database/Password",
+  "Api/Token": "/my-app/dev/Api/Token"
+}`;
+
+const dpEnvilderProgram = `using Microsoft.Extensions.Configuration;
+
+var config = new ConfigurationBuilder()
+    // ${dp.envilderProgramComment}
+    .AddEnvilder("envilder.json")
+    .Build();
+
+foreach (var key in new[] { "Database:Password", "Api:Token" })
+{
+    Console.WriteLine($"{key}: {(string.IsNullOrEmpty(config[key]) ? "missing" : "set")}");
+}`;
+
+const dpEnvilderIam = `{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "ssm:GetParameter",
+      "Resource": "arn:aws:ssm:eu-west-1:123456789012:parameter/my-app/dev/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "kms:Decrypt",
+      "Resource": "arn:aws:kms:eu-west-1:123456789012:key/<key-id>"
+    }
+  ]
+}`;
+
+const dpAppsettings = `{
+  "Database": {
+    "Host": "localhost"
+  }
+}`;
+
+const dpLayerOfficial = `var config = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    // ${dp.layerComment}
+    .AddSystemsManager("/my-app/dev/")
+    .Build();`;
+
+const dpLayerEnvilder = `var config = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    // ${dp.layerComment}
+    .AddEnvilder("envilder.json")
+    .Build();`;
+
+const dpLocalStart =
+  'docker run -d --name localstack -p 4566:4566 localstack/localstack:4.14.0';
+
+const dpLocalEnv = `$env:AWS_ENDPOINT_URL = 'http://localhost:4566'
+$env:AWS_REGION = 'us-east-1'
+$env:AWS_ACCESS_KEY_ID = 'test'
+$env:AWS_SECRET_ACCESS_KEY = 'test'`;
+
+const dpLocalOutput = `Database:Password: set
+Api:Token: set`;
+
+const dpKeyRows = [
+  { parameter: '/my-app/dev/Database/Password', key: 'Database:Password' },
+  { parameter: '/my-app/dev/Api/Token', key: 'Api:Token' },
+] as const;
+
 const guideIamPolicy = `{
   "Version": "2012-10-17",
   "Statement": [
@@ -1780,6 +1909,129 @@ const validateSdkRows = [
           <li><a href={localizedPath(lang, '/docs/guides/ssm-to-env/')}>{ga.relatedSsm}</a></li>
           <li><a href={localizedPath(lang, '/docs/cli/exec/')}>{ga.relatedExec}</a></li>
           <li><a href={localizedPath(lang, '/docs/map-file/')}>{ga.relatedMap}</a></li>
+        </ul>
+      </section>
+    </>
+  )}
+
+  {routeKey === 'guide-dotnet-parameter-store' && (
+    <>
+      <section id="guide-parameters" class="docs-section">
+        <h2>{dp.paramsTitle}</h2>
+        <p>{dp.paramsDesc}</p>
+        <CodeBlock lang="bash" code={dpSeed} />
+        <p class="note">{dp.paramsNote}</p>
+      </section>
+
+      <section id="guide-official" class="docs-section">
+        <h2>{dp.officialTitle}</h2>
+        <p>{dp.officialInstallDesc}</p>
+        <CodeBlock lang="bash" code={dpInstallOfficial} />
+        <p>{dp.officialProgramDesc}</p>
+        <CodeBlock lang="csharp" filename="Program.cs" code={dpOfficialProgram} />
+        <p>{dp.officialKeysDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{dp.thParameter}</th><th>{dp.thKey}</th></tr>
+          </thead>
+          <tbody>
+            {dpKeyRows.map((row) => (
+              <tr><td><code>{row.parameter}</code></td><td><code>{row.key}</code></td></tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="note">{dp.officialKeysNote}</p>
+        <p>{dp.officialOptionsDesc}</p>
+        <CodeBlock lang="csharp" filename="Program.cs" code={dpOfficialOptions} />
+        <ul class="docs-list">
+          {dp.officialOptionsItems.map((item) => <li>{item}</li>)}
+        </ul>
+        <p>{dp.officialIamDesc}</p>
+        <CodeBlock lang="json" filename="policy.json" code={dpOfficialIam} />
+        <ul class="docs-list">
+          {dp.officialIamNotes.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+
+      <section id="guide-envilder" class="docs-section">
+        <h2>{dp.envilderTitle}</h2>
+        <p>{dp.envilderInstallDesc}</p>
+        <CodeBlock lang="bash" code={dpInstallEnvilder} />
+        <p>{dp.envilderMapDesc}</p>
+        <CodeBlock lang="json" filename="envilder.json" code={dpMap} />
+        <p>{dp.envilderProgramDesc}</p>
+        <CodeBlock lang="csharp" filename="Program.cs" code={dpEnvilderProgram} />
+
+        <h3>{dp.envilderBehaviourTitle}</h3>
+        <ul class="docs-list">
+          {dp.envilderBehaviourItems.map((item) => <li>{item}</li>)}
+        </ul>
+        <p class="note">{dp.envilderProviderNote}</p>
+        <p class="note">{dp.envilderRegionNote}</p>
+        <p>{dp.envilderIamDesc}</p>
+        <CodeBlock lang="json" filename="policy.json" code={dpEnvilderIam} />
+        <p class="note">{dp.envilderIamNote}</p>
+      </section>
+
+      <section id="guide-appsettings" class="docs-section">
+        <h2>{dp.layerTitle}</h2>
+        <p>{dp.layerDesc}</p>
+        <CodeBlock lang="json" filename="appsettings.json" code={dpAppsettings} />
+        <CodeBlock lang="csharp" filename="AddSystemsManager" code={dpLayerOfficial} />
+        <CodeBlock lang="csharp" filename="AddEnvilder" code={dpLayerEnvilder} />
+        <p class="note">{dp.layerNote}</p>
+      </section>
+
+      <section id="guide-comparison" class="docs-section">
+        <h2>{dp.compareTitle}</h2>
+        <p>{dp.compareDesc}</p>
+        <table class="docs-table">
+          <thead>
+            <tr><th>{dp.thAspect}</th><th>{dp.thOfficial}</th><th>{dp.thEnvilder}</th></tr>
+          </thead>
+          <tbody>
+            {dp.compareRows.map((row) => (
+              <tr><td>{row.label}</td><td>{row.official}</td><td>{row.envilder}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section id="guide-choose" class="docs-section">
+        <h2>{dp.chooseTitle}</h2>
+        <h3>{dp.chooseOfficialTitle}</h3>
+        <ul class="docs-list">
+          {dp.chooseOfficialItems.map((item) => <li>{item}</li>)}
+        </ul>
+        <h3>{dp.chooseEnvilderTitle}</h3>
+        <ul class="docs-list">
+          {dp.chooseEnvilderItems.map((item) => <li>{item}</li>)}
+        </ul>
+        <p>{dp.chooseNote} <a href={localizedPath(lang, '/docs/sdks/dotnet/')}>{dp.relatedSdk}</a>.</p>
+      </section>
+
+      <section id="guide-localstack" class="docs-section">
+        <h2>{dp.localTitle}</h2>
+        <p>{dp.localDesc}</p>
+        <CodeBlock lang="bash" code={dpLocalStart} />
+        <CodeBlock lang="powershell" code={dpLocalEnv} />
+        <div class="callout callout-warning">
+          <span class="callout-icon">⚠️</span>
+          <div>{dp.localWarn}</div>
+        </div>
+        <p>{dp.localOutputDesc}</p>
+        <CodeBlock lang="text" code={dpLocalOutput} />
+        <p class="note">{dp.localMissingNote}</p>
+      </section>
+
+      <section id="guide-related" class="docs-section">
+        <h2>{dp.relatedTitle}</h2>
+        <ul class="docs-list">
+          <li><a href={localizedPath(lang, '/docs/sdks/dotnet/')}>{dp.relatedSdk}</a></li>
+          <li><a href={localizedPath(lang, '/docs/guides/ssm-to-env/')}>{dp.relatedSsm}</a></li>
+          <li><a href={localizedPath(lang, '/docs/guides/github-actions-ssm/')}>{dp.relatedGha}</a></li>
+          <li><a href={localizedPath(lang, '/docs/providers/aws-ssm/')}>{dp.relatedAws}</a></li>
+          <li><a href={localizedPath(lang, '/docs/map-file/')}>{dp.relatedMap}</a></li>
         </ul>
       </section>
     </>
