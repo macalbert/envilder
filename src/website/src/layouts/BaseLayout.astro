@@ -53,6 +53,34 @@ const alternateLanguageUrls = availableLanguages.map((language) => ({
 }));
 const isHomePage = pathWithoutLocale === '/';
 const ogImageUrl = new URL('/og-image.png', siteUrl).href;
+const softwarePackages = [
+  {
+    slug: 'cli',
+    name: 'Envilder CLI',
+    registryUrl: 'https://www.npmjs.com/package/envilder',
+  },
+  {
+    slug: 'github-action',
+    name: 'Envilder GitHub Action',
+    registryUrl:
+      'https://github.com/marketplace/actions/envilder-github-action',
+  },
+  {
+    slug: 'sdk-nodejs',
+    name: 'Envilder SDK for Node.js',
+    registryUrl: 'https://www.npmjs.com/package/@envilder/sdk',
+  },
+  {
+    slug: 'sdk-python',
+    name: 'Envilder SDK for Python',
+    registryUrl: 'https://pypi.org/project/envilder/',
+  },
+  {
+    slug: 'sdk-dotnet',
+    name: 'Envilder SDK for .NET',
+    registryUrl: 'https://www.nuget.org/packages/Envilder',
+  },
+];
 const structuredData = JSON.stringify({
   '@context': 'https://schema.org',
   '@graph': [
@@ -61,8 +89,7 @@ const structuredData = JSON.stringify({
       '@id': `${siteRootUrl}#organization`,
       name: 'Envilder',
       url: siteRootUrl,
-      description:
-        'Open-source CLI, GitHub Action and runtime SDKs that load secrets from AWS SSM Parameter Store and Azure Key Vault.',
+      description: t.homeMeta.organizationDescription,
       sameAs: ['https://github.com/macalbert/envilder'],
     },
     {
@@ -129,15 +156,23 @@ const structuredData = JSON.stringify({
             codeRepository: 'https://github.com/macalbert/envilder',
             license: 'https://github.com/macalbert/envilder/blob/main/LICENSE',
             screenshot: ogImageUrl,
-            // The CLI, SDKs and Action are published as one product.
-            sameAs: [
-              'https://www.npmjs.com/package/envilder',
-              'https://www.npmjs.com/package/@envilder/sdk',
-              'https://pypi.org/project/envilder/',
-              'https://www.nuget.org/packages/Envilder',
-              'https://github.com/marketplace/actions/envilder-github-action',
-            ],
+            hasPart: softwarePackages.map((pkg) => ({
+              '@id': `${siteRootUrl}#software-${pkg.slug}`,
+            })),
           },
+          // Each published package is its own component of the product.
+          ...softwarePackages.map((pkg) => ({
+            '@type': 'SoftwareApplication',
+            '@id': `${siteRootUrl}#software-${pkg.slug}`,
+            name: pkg.name,
+            applicationCategory: 'DeveloperApplication',
+            operatingSystem: 'Windows, macOS, Linux',
+            isAccessibleForFree: true,
+            sameAs: [pkg.registryUrl],
+            isPartOf: {
+              '@id': `${siteRootUrl}#software`,
+            },
+          })),
         ]
       : []),
   ],

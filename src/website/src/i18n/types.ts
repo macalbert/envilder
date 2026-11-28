@@ -1279,6 +1279,8 @@ export interface HomeMetaTranslations {
   title: string;
   description: string;
   ogImageAlt: string;
+  /** Describes Envilder as an organization in the structured data. */
+  organizationDescription: string;
 }
 
 export interface NotFoundTranslations {

@@ -613,32 +613,60 @@ describe('Static website discoverability metadata', () => {
     expect(heading).toContain('Azure Key Vault');
   });
 
-  it('Should_ListRegistryPagesOnSoftwareNode_When_HomePageIsBuilt', () => {
+  it('Should_GiveEachPackageItsOwnSoftwareNode_When_HomePageIsBuilt', () => {
     // Arrange
     const expected = [
       'https://www.npmjs.com/package/envilder',
+      'https://github.com/marketplace/actions/envilder-github-action',
       'https://www.npmjs.com/package/@envilder/sdk',
       'https://pypi.org/project/envilder/',
       'https://www.nuget.org/packages/Envilder',
-      'https://github.com/marketplace/actions/envilder-github-action',
     ];
 
     // Act
     const graph = JSON.parse(readJsonLd(readDistFile('index.html')) ?? '{}')[
       '@graph'
     ] as Record<string, unknown>[];
-    const software = graph.find(
-      (node) => node['@type'] === 'SoftwareApplication',
+    const product = graph.find(
+      (node) => node['@id'] === `${siteUrl}/#software`,
+    );
+    const packages = graph.filter(
+      (node) => node['@type'] === 'SoftwareApplication' && node !== product,
     );
     const organization = readOrganization('index.html');
 
     // Assert
-    expect(software?.sameAs).toEqual(expected);
+    expect(product?.sameAs).toBeUndefined();
+    expect(packages.map((node) => node.sameAs)).toEqual(
+      expected.map((url) => [url]),
+    );
+    expect(product?.hasPart).toEqual(
+      packages.map((node) => ({ '@id': node['@id'] })),
+    );
+    for (const node of packages) {
+      expect(node.isPartOf).toEqual({ '@id': `${siteUrl}/#software` });
+      expect(typeof node.name).toBe('string');
+    }
     expect(organization?.sameAs).toEqual([
       'https://github.com/macalbert/envilder',
     ]);
-    expect(typeof organization?.description).toBe('string');
-    expect(String(organization?.description).trim().length).toBeGreaterThan(20);
+  });
+
+  it('Should_LocalizeOrganizationDescription_When_EachHomePageIsBuilt', () => {
+    // Arrange
+    const files = ['index.html', 'ca/index.html', 'es/index.html'];
+
+    // Act
+    const descriptions = files.map(
+      (file) => readOrganization(file)?.description,
+    );
+
+    // Assert
+    for (const description of descriptions) {
+      expect(typeof description).toBe('string');
+      expect(String(description).trim().length).toBeGreaterThan(20);
+    }
+    expect(new Set(descriptions).size).toBe(files.length);
   });
 
   it('Should_EmitLastmodFromManifest_When_EnglishDocsArticleIsInSitemap', () => {

@@ -7,6 +7,8 @@ export const ca: Translations = {
       "Mapeja variables d'entorn a AWS SSM o Azure Key Vault un cop i executa qualsevol ordre amb els secrets al seu entorn. Sense .env al disc. CLI, Action i SDKs open source.",
     ogImageAlt:
       'Envilder - executa apps amb secrets d’AWS SSM i Azure Key Vault, sense fitxer .env',
+    organizationDescription:
+      "CLI, GitHub Action i SDKs d'execució open source que carreguen secrets d'AWS SSM Parameter Store i Azure Key Vault.",
   },
   notFound: {
     title: 'Pàgina no trobada | Envilder',

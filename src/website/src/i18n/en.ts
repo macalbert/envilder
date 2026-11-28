@@ -7,6 +7,8 @@ export const en: Translations = {
       'Map env vars to AWS SSM or Azure Key Vault once, then run any command with the secrets in its environment. No .env on disk. Open-source CLI, Action and SDKs.',
     ogImageAlt:
       'Envilder - run apps with AWS SSM and Azure Key Vault secrets, no .env file',
+    organizationDescription:
+      'Open-source CLI, GitHub Action and runtime SDKs that load secrets from AWS SSM Parameter Store and Azure Key Vault.',
   },
   notFound: {
     title: 'Page not found | Envilder',
