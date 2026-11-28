@@ -31,6 +31,8 @@ export const en: Translations = {
     getStarted: 'Get Started',
     ariaGithub: 'GitHub',
     ariaSponsor: 'Sponsor',
+    starOnGithub: 'Star on GitHub',
+    starFallback: 'Star',
     ariaToggleMenu: 'Toggle menu',
   },
   theme: {
@@ -540,6 +542,8 @@ export const en: Translations = {
       errEnvfileFix:
         'exec never writes a file. Remove --envfile, or use pull (envilder --envfile=.env) when you need the file.',
       nextTitle: 'Next steps',
+      starNote: 'Did it work?',
+      starLink: 'A GitHub star helps others find Envilder.',
       nextMap:
         'Map file reference: $config, profiles, validation rules and multi-environment layouts',
       nextExec: 'envilder exec: exit codes, signals and CI usage',

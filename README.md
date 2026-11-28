@@ -18,6 +18,8 @@
 [![Context7](https://img.shields.io/badge/Context7-docs_for_AI_agents-blue.svg)](https://context7.com/macalbert/envilder)
 [![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/macalbert/envilder?utm_source=oss&utm_medium=github&utm_campaign=macalbert%2Fenvilder&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)](https://coderabbit.ai)
 
+If Envilder helps you, a [star on GitHub](https://github.com/macalbert/envilder) helps other people find it.
+
 ## Why Envilder?
 
 Your new developer joins the team. They need environment variables to run the app locally.

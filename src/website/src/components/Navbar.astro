@@ -1,6 +1,7 @@
 ---
 import { docsArticleRoutes, docsNavGroups } from '../i18n/docs-routes';
 import { localizedPath, useTranslations } from '../i18n/utils';
+import { formatStarCount, getStarCount } from '../utils/github-stars';
 
 interface Props {
   lang?: string;
@@ -8,6 +9,12 @@ interface Props {
 
 const { lang = 'en' } = Astro.props;
 const t = useTranslations(lang);
+
+// Null when the GitHub API is unreachable: the link then renders without a count.
+const stars = await getStarCount();
+const starText = stars === null ? t.nav.starFallback : formatStarCount(stars);
+const starLabel =
+  stars === null ? t.nav.starOnGithub : `${t.nav.starOnGithub} (${stars})`;
 
 const navLinks = [
   { label: t.nav.howItWorks, href: localizedPath(lang, '/#how-it-works') },
@@ -64,6 +71,18 @@ const docsDropdown = docsNavGroups.map((group) => ({
       </ul>
 
       <div class="nav-actions">
+        <a
+          href="https://github.com/macalbert/envilder"
+          class="nav-star"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={starLabel}
+          title={t.nav.starOnGithub}
+          data-analytics-event="click_github"
+          data-analytics-placement="navigation-star"
+        >
+          <span aria-hidden="true">★</span> {starText}
+        </a>
         <a
           href="https://github.com/macalbert/envilder"
           class="nav-github"
@@ -313,6 +332,24 @@ const docsDropdown = docsNavGroups.map((group) => ({
   .btn-sm {
     font-size: 0.55rem;
     padding: var(--space-sm) var(--space-md);
+  }
+
+  .nav-star {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    border: 2px solid var(--color-border);
+    padding: 2px var(--space-sm);
+    transition:
+      color var(--transition-fast),
+      border-color var(--transition-fast);
+  }
+
+  .nav-star:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
   }
 
   .nav-sponsor {
